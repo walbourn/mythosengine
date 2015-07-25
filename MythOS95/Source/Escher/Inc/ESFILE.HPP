@@ -48,9 +48,9 @@
 #endif
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-//             
+//
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include <portable.h>
@@ -68,21 +68,40 @@
 // Cameras                                                                  ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
-//ÄÄÄ 'ECAM' - Camera data
+//ÄÄÄ 'ECA1' (floating-point)
 struct EschFileCamera
 {
     char    name[ESCH_MAX_NAME];
     dword   flags;
-    Flx16   x;
-    Flx16   y;
-    Flx16   z;
-    Flx16   diri;
-    Flx16   dirj;
-    Flx16   dirk;
-    Flx16   topi;
-    Flx16   topj;
-    Flx16   topk;
-    Flx16   fov;
+    float   x;
+    float   y;
+    float   z;
+    float   diri;
+    float   dirj;
+    float   dirk;
+    float   topi;
+    float   topj;
+    float   topk;
+    float   fov;
+    char    na[4];
+};
+
+
+//ÄÄÄ 'ECAM' (16.16 fixed-point)
+struct EschFileCameraV1
+{
+    char    name[ESCH_MAX_NAME];
+    dword   flags;
+    long    x;
+    long    y;
+    long    z;
+    long    diri;
+    long    dirj;
+    long    dirk;
+    long    topi;
+    long    topj;
+    long    topk;
+    long    fov;
     char    na[4];
 };
 
@@ -91,7 +110,8 @@ struct EschFileCamera
 // Lights                                                                   ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
-//ÄÄÄ 'EAMB' - Ambient light source
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Ambient light source
+//ÄÄÄ 'EAMB'
 struct EschFileLightAmbi
 {
     char    name[ESCH_MAX_NAME];
@@ -100,63 +120,128 @@ struct EschFileLightAmbi
     char    na[8];
 };
 
-//ÄÄÄ 'EVEC' - Vector light source
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Vector light source
+//ÄÄÄ 'EVE1' (floating-point)
 struct EschFileLightVect
 {
     char    name[ESCH_MAX_NAME];
     dword   flags;
-    Flx16   i;
-    Flx16   j;
-    Flx16   k;
+    float   i;
+    float   j;
+    float   k;
     dword   color;
     char    na[12];
 };
 
-//ÄÄÄ 'EFPT' - Fast point light source
-//ÄÄÄ 'EPNT' - Point light source
+//ÄÄÄ 'EVEC' (fixed-point)
+struct EschFileLightVectV1
+{
+    char    name[ESCH_MAX_NAME];
+    dword   flags;
+    long    i;
+    long    j;
+    long    k;
+    dword   color;
+    char    na[12];
+};
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Fast/normal point light source
+//ÄÄÄ 'EFP1' (floating-point)
+//ÄÄÄ 'EPN1' (floating-point)
 struct EschFileLightPoint
 {
     char    name[ESCH_MAX_NAME];
     dword   flags;
-    Flx16   x;
-    Flx16   y;
-    Flx16   z;
+    float   x;
+    float   y;
+    float   z;
     dword   color;
     char    na[12];
 };
 
-//ÄÄÄ 'EFAT' - Fast Attenuated point light source
-//ÄÄÄ 'EATN' - Attenuated point light source
+//ÄÄÄ 'EFPT' (fixed-point)
+//ÄÄÄ 'EPNT' (fixed-point)
+struct EschFileLightPointV1
+{
+    char    name[ESCH_MAX_NAME];
+    dword   flags;
+    long    x;
+    long    y;
+    long    z;
+    dword   color;
+    char    na[12];
+};
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Fast/normal attenuated point light source
+//ÄÄÄ 'EFA1' (floating-point)
+//ÄÄÄ 'EAT1' (floating-point)
 struct EschFileLightAtten
 {
     char    name[ESCH_MAX_NAME];
     dword   flags;
-    Flx16   x;
-    Flx16   y;
-    Flx16   z;
+    float   x;
+    float   y;
+    float   z;
     dword   color;
-    Flx16   inner;
-    Flx16   outer;
+    float   inner;
+    float   outer;
     char    na[4];
 };
 
-//ÄÄÄ 'EFSP' - Spot light source
-//ÄÄÄ 'ESPT' - Spot light source
+//ÄÄÄ 'EFAT' (fixed-point)
+//ÄÄÄ 'EATN' (fixed-point)
+struct EschFileLightAttenV1
+{
+    char    name[ESCH_MAX_NAME];
+    dword   flags;
+    long    x;
+    long    y;
+    long    z;
+    dword   color;
+    long    inner;
+    long    outer;
+    char    na[4];
+};
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Fast/normal spot light source
+//ÄÄÄ 'EFS1' (floating-point)
+//ÄÄÄ 'ESP1' (floating-point)
 struct EschFileLightSpot
 {
     char    name[ESCH_MAX_NAME];
     dword   flags;
-    Flx16   x;
-    Flx16   y;
-    Flx16   z;
-    Flx16   i;
-    Flx16   j;
-    Flx16   k;
+    float   x;
+    float   y;
+    float   z;
+    float   i;
+    float   j;
+    float   k;
     dword   color;
-    Flx16   inner;
-    Flx16   outer;
-    Flx16   hotspot;
-    Flx16   falloff;
+    float   inner;
+    float   outer;
+    float   hotspot;
+    float   falloff;
+};
+
+//ÄÄÄ 'EFSP' (fixed-point)
+//ÄÄÄ 'ESPT' (fixed-point)
+struct EschFileLightSpotV1
+{
+    char    name[ESCH_MAX_NAME];
+    dword   flags;
+    long    x;
+    long    y;
+    long    z;
+    long    i;
+    long    j;
+    long    k;
+    dword   color;
+    long    inner;
+    long    outer;
+    long    hotspot;
+    long    falloff;
 };
 
 
@@ -164,8 +249,9 @@ struct EschFileLightSpot
 // FORM 'EMSH' - Mesh data IFF form.                                        ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
-//ÄÄÄ 'HDR ' - Header
-struct EschFileMeshHDR 
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Header
+//ÄÄÄ 'HDR '
+struct EschFileMeshHDR
 {
     char    name[ESCH_MAX_NAME];
     dword   flags;
@@ -175,38 +261,102 @@ struct EschFileMeshHDR
     char    na[32];
 };
 
-//ÄÄÄ 'MTRX' - Matrix
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Matrix
+//ÄÄÄ 'MTR1' (floating-point)
 // Contains a single EschMatrix structure.
 
-//ÄÄÄ 'EXNT' - Extents
+//ÄÄÄ 'MTRX' (fixed-point)
+struct EschMatrixV1
+{
+    long    mtx[3*4];
+};
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Extents
+//ÄÄÄ 'EXN1' (floating-point)
 struct EschFileMeshEXNT
 {
-    Flx16   cenx;
-    Flx16   ceny;
-    Flx16   cenz;
-    Flx16   extent_radius;
-    Flx16   minx;
-    Flx16   miny;
-    Flx16   minz;
-    Flx16   maxx;
-    Flx16   maxy;
-    Flx16   maxz;
+    float   cenx;
+    float   ceny;
+    float   cenz;
+    float   extent_radius;
+    float   minx;
+    float   miny;
+    float   minz;
+    float   maxx;
+    float   maxy;
+    float   maxz;
     char    na[8];
 };
 
-//ÄÄÄ 'HIER' - Hierarchy
+//ÄÄÄ 'EXNT' (fixed-point)
+struct EschFileMeshEXNTV1
+{
+    long    cenx;
+    long    ceny;
+    long    cenz;
+    long    extent_radius;
+    long    minx;
+    long    miny;
+    long    minz;
+    long    maxx;
+    long    maxy;
+    long    maxz;
+    char    na[8];
+};
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Hierarchy
+//ÄÄÄ 'HIER'
 struct EschFileMeshHIER
 {
     char    parent[ESCH_MAX_NAME];
 };
 
-//ÄÄÄ 'VERT' - Vertex
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Vertex
+//ÄÄÄ 'VER1' (floating-point)
 // Consists of an array of EschVertex structures
 
-//ÄÄÄ 'FACE' - Face
+//ÄÄÄ 'VERT' (fixed-point)
+struct EschVertexV1
+{
+    long        x;
+    long        y;
+    long        z;
+    dword       na;
+    struct
+    {
+        long    i;
+        long    j;
+        long    k;
+        dword   na;
+    }       normal;
+};
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Face
+//ÄÄÄ 'FAC1' (floating-point)
 // Consists of an array of EschFace structures
 
-//ÄÄÄ 'MTL ' - Material description
+//ÄÄÄ 'FACE' (fixed-point)
+struct EschFaceV1
+{
+    dword           flags;
+    word            a;
+    word            b;
+    word            c;
+    word            txt;
+    long            u[3];
+    long            v[3];
+    dword           color;
+    struct
+    {
+        long        i;
+        long        j;
+        long        k;
+        dword       na;
+    }       normal;
+};
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Material description
+//ÄÄÄ 'MTL '
 struct EschFileMeshMTL
 {
     char    name[ESCH_MAX_NAME];
@@ -217,7 +367,8 @@ struct EschFileMeshMTL
 // FORM 'EMTL', 'EMT1' - Material Data Form.                                ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
-//ÄÄÄ 'HDR ' - Material Header
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Material Header
+//ÄÄÄ 'HDR '
 struct EschFileMtlMHDR
 {
     char    name[ESCH_MAX_NAME];
@@ -239,8 +390,41 @@ struct EschFileMtlMHDR
 #define ESCH_MTL_COMPRESS_NONE      0
 #define ESCH_MTL_COMPRESS_RLE       1
 
-//ÄÄÄ 'BODY' - Material Body
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Material Body
+//ÄÄÄ 'BODY'
 // Raw data for the bitmap (use type in header to decode)
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// FORM 'KEYF' - Keyframing data IFF form.                                  ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Header
+//ÄÄÄ 'HDR '
+struct EschFileKeyframeHeader
+{
+    char    m_type[M_TYPE_LEN];
+    ulong   flags;
+    long   key_depth;
+    char    chain[M_TYPE_LEN];
+};
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Keyframes
+//ÄÄÄ 'KEY1' (floating-point)
+struct EschFileKeyframe
+{
+    ulong   k_type;
+    int     frame_num;
+    float   rotation[3];
+};
+
+//ÄÄÄ 'KEY ' (fixed-point)
+struct EschFileKeyframeV1
+{
+    ulong   k_type;
+    int     frame_num;
+    long    rotation[3];
+};
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
@@ -251,7 +435,8 @@ struct EschFileMtlMHDR
 //               a ESEN form for their data.                                ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
-//ÄÄÄ 'HDR ' - Header
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Header
+//ÄÄÄ 'HDR '
 struct EschFileSceneHDR
 {
     char    name[ESCH_MAX_NAME];
@@ -261,10 +446,10 @@ struct EschFileSceneHDR
     ulong   nvectorlights;
     ulong   npointlights;
     ushort  nfpointlights;
-    ushort  nattenlights; 
-    ushort  nfattenlights; 
-    ushort  nspotlights; 
-    ushort  nfspotlights; 
+    ushort  nattenlights;
+    ushort  nfattenlights;
+    ushort  nspotlights;
+    ushort  nfspotlights;
     char    na[18];
 };
 
@@ -273,7 +458,8 @@ struct EschFileSceneHDR
 // FORM 'ETER' - Terrain Data Form.                                         ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
-//ÄÄÄ 'HDR ' - Header
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Header
+//ÄÄÄ 'HDR1' (floating-point)
 struct EschFileTerrHDR
 {
     char    name[ESCH_MAX_NAME];
@@ -283,31 +469,77 @@ struct EschFileTerrHDR
     ushort  surfratio;                  // Height:Surface points ratio
     byte    compression;                // Compression flag for data (0=none)
     byte    ntxts;                      // Number of textures
-    Flx16   wscale;                     // World space per unit in width (obs)
-    Flx16   dscale;                     // World space per unit in depth (obs)
-    Flx16   hscale;                     // World space per unit in height
-    Flx16   scale;                      // World space per unit in width & depth
-    Flx16   origin_x;                   // Origin location
-    Flx16   origin_y;
-    Flx16   origin_z;
+    float   wscale;                     // World space per unit in width (obs)
+    float   dscale;                     // World space per unit in depth (obs)
+    float   hscale;                     // World space per unit in height
+    float   scale;                      // World space per unit in width & depth
+    float   origin_x;                   // Origin location
+    float   origin_y;
+    float   origin_z;
     char    na[56];
     char    palname[16];                // Van Gogh palette used to color
                                         // terrain data
 };
 
-//ÄÄÄ 'HGTS' - Height data
+//ÄÄÄ 'HDR ' (fixed-point)
+struct EschFileTerrHDRV1
+{
+    char    name[ESCH_MAX_NAME];
+    dword   flags;
+    ushort  width;                      // Width of the height field
+    ushort  depth;                      // Depth of the height field
+    ushort  surfratio;                  // Height:Surface points ratio
+    byte    compression;                // Compression flag for data (0=none)
+    byte    ntxts;                      // Number of textures
+    long    wscale;                     // World space per unit in width (obs)
+    long    dscale;                     // World space per unit in depth (obs)
+    long    hscale;                     // World space per unit in height
+    long    scale;                      // World space per unit in width & depth
+    long    origin_x;                   // Origin location
+    long    origin_y;
+    long    origin_z;
+    char    na[56];
+    char    palname[16];                // Van Gogh palette used to color
+                                        // terrain data
+};
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Height data
+//ÄÄÄ 'HGTS'
 // 2D array of bytes width*height in size, one row at a time.
 
-//ÄÄÄ 'SURF' - Surface data
+//ÄÄÄ 256 entry array of height index to elevation mappings
+//ÄÄÄ 'HTB1' (floating-point)
+//ÄÄÄ 'HTBL' (fixed-point)
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Surface data
+//ÄÄÄ 'SURF'
 // 2D array of dwords (width*height)/(surfratio*2) in size, one row at a time.
 
-//ÄÄÄ 'NRML' - Normals data
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Normals data
+//ÄÄÄ 'NRM2' (floating-point)
 // 2D array of EschVectors (width*height)/(surfratio*2) in size, one row at a time.
 
-//ÄÄÄ 'COLR' - Texture color data 
+//ÄÄÄ 'NRM1' (compressed fixed-point)
+// 2D array of ushorts 4*(width*height)/(surfratio*2) in size, one row at a time
+// where each 4 ushort set lower 16-bits of a 16.16 number for i,j,k and
+// the 1 and sign bits encoded into the 4th ushort.
+
+//ÄÄÄ 'NRML' (fixed-point)
+// 2D array of EschVectorV1s (width*height)/(surfratio*2) in size, one row at a time.
+struct EschVectorV1
+{
+    long        i;
+    long        j;
+    long        k;
+    dword       na;
+};
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Texture color data
+//ÄÄÄ 'COLR'
 // Byte array for texture colors.
 
-//ÄÄÄ 'HCLR' - Height color bands
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Height color bands
+//ÄÄÄ 'HCLR'
 struct EschFileTerrHCLR
 {
     ushort  blue;

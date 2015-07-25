@@ -84,6 +84,8 @@ protected:
 	afx_msg void OnUpdateFileCompress(CCmdUI* pCmdUI);
 	afx_msg void OnFileTruecolor();
 	afx_msg void OnUpdateFileTruecolor(CCmdUI* pCmdUI);
+	afx_msg void OnFileFloating();
+	afx_msg void OnUpdateFileFloating(CCmdUI* pCmdUI);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

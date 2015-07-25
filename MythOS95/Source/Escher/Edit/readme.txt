@@ -38,15 +38,17 @@
 
  Notes by: Chuck Walbourn
 
- Last Updated: September 16, 1996
+ Last Updated: May 21, 1997
 
  Escher Terrain Editor - MFC Application
 
  Changes for this release --------------------------------------------------
 
- Version 1.41
+ Version 2.00
 
- o Added support for compressed texture export.
+ o Updated for new floating point data formats.
+
+ o Fixed import bug with smoothed vs. flat normal computation
 
 
 

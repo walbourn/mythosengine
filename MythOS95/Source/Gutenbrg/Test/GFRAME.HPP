@@ -1,16 +1,16 @@
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // MaxC -- Event and Trigger Definition System                              ³
-// (C) 1995 by Charybdis Enterprises, Inc.  All Rights Reserved.            ³
+// (C) 1995-1997 by Charybdis Enterprises, Inc.  All Rights Reserved.       ³
 //                                                                          ³
 // Event Constants header file for C++                                      ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-const MaxEvent DONE(0);
-const MaxEvent SELECT_3X6(1);
-const MaxEvent SELECT_5X8(2);
-const MaxEvent SELECT_7X12(3);
-const MaxEvent SELECT_8X13(4);
-const MaxEvent SELECT_9X15(5);
-const MaxEvent SELECT_12X24(6);
-const MaxEvent PAGEUP(7);
-const MaxEvent PAGEDN(8);
+#define DONE MaxEvent (0)
+#define SELECT_3X6 MaxEvent (1)
+#define SELECT_5X8 MaxEvent (2)
+#define SELECT_7X12 MaxEvent (3)
+#define SELECT_8X13 MaxEvent (4)
+#define SELECT_9X15 MaxEvent (5)
+#define SELECT_12X24 MaxEvent (6)
+#define PAGEUP MaxEvent (7)
+#define PAGEDN MaxEvent (8)
 // EOF

@@ -40,6 +40,10 @@
 DEBUG = NO
 !endif
 
+!if "$(THREAD)" == ""
+THREAD = YES
+!endif
+
 !if "$(MYTH95ROOT)" == ""
 MYTH95ROOT = \MythOS95
 !endif
@@ -80,6 +84,7 @@ LIBS=\
     user32.lib\
     ddraw.lib\
     dplayx.lib\
+    dinput.lib\
     uuid.lib\
     dxguid.lib\
     turner.lib

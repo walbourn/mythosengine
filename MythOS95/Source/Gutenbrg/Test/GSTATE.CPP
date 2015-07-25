@@ -58,7 +58,7 @@ const int COLORS = 256;
 
 const int MAXPAGES = 3;
 
-extern MaxDevices Devs;
+extern MaxDevices *Devs;
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
@@ -70,7 +70,7 @@ extern MaxDevices Devs;
 //  GameState Constructor
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-GameState::GameState (MaxDevices &d):
+GameState::GameState (MaxDevices *d):
     devs (d), evt (0), active (FALSE), page(0)
 {
     bmi = (LPBITMAPINFO)ivory_alloc (sizeof (BITMAPINFOHEADER) + COLORS*sizeof (RGBQUAD));
@@ -145,7 +145,7 @@ void GameState::LoadEvents (LPCSTR lpszFile)
     }
 
     // Create a new system
-    evt = new MaxEventUser (devs, szFileName, "gframe");
+    evt = new MaxEventUser (*devs, szFileName, "gframe");
 
     // Verify the event system matches our set of events?
 
@@ -186,7 +186,7 @@ BOOL GameState::PumpWindows ()
 {
     MSG msg;
 
-    Devs.wm_clear();
+    Devs->wm_clear();
     while (PeekMessage (&msg, NULL, 0, 0, PM_NOREMOVE))
     {
     	if (GetMessage (&msg, 0, 0, 0) == 0)
@@ -275,7 +275,14 @@ void GameState::Render()
                 for(y=0; y < MAP_YSIZE-info.height-1; y += info.height+1)
                 {
                     gberg_outc(gvp, x, y, (char)c++);
-                    if (c >= 128)
+
+                    if (info.type == GBERG_FNT_MONOFIXEDEX
+                        || info.type == GBERG_FNT_MONOVARIABLEEX)
+                    {
+                        if (c >= 256)
+                            goto stop;
+                    }
+                    else if (c >= 128)
                         goto stop;
                 }
             }

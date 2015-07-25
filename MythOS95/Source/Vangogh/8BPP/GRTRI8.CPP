@@ -264,21 +264,27 @@ extern "C" void draw_grhlines(VngoTriangle *tri)
         for (int x = tx;x <= dx; x++)
         {
             int ltx = x & 3;
-#if 0 
-            int t1=((tB + dmatrixR[ltx]) >> 9);
-            t1 &= (0x1f << 10);
+            int val = 0;
+            int tval = tB + dmatrixB[ltx];
+            if (tval > 0xff0000)
+                val = word(0x1f << 10);
+            else if (tval >= 0)
+                val = word(tval >> 9) & (0x1f << 10);
 
-            int t2 = ((tG + dmatrixG[ltx]) >> 14);
-            t2 &= (0x1f << 5);
-            int idx = ((tR + dmatrixB[ltx]) >> 19);
+            tval = tG + dmatrixG[ltx];
+            if (tval > 0xff0000)
+                val |= word(0x1f << 5);
+            else if (tval >= 0)
+                val |= word(tval >> 14) & (0x1f << 5);
 
-            idx |= t1 | t2;
-#else
-            int idx = ((tB + dmatrixR[ltx]) >> 9) & (0x1f << 10);
-            idx |= ((tG + dmatrixG[ltx]) >> 14) & (0x1f << 5);
-            idx |= ((tR + dmatrixB[ltx]) >> 19);
-#endif
-            *ptr = lut[idx];
+
+            tval = tR + dmatrixR[ltx];
+            if (tval > 0xff0000)
+                val |= word(0x1f);
+            else if (tval >= 0)
+                val |= word((tval >> 19) & 0x1f);
+
+            *ptr = lut[val];
             ptr++;
             tR += Rstep_dx1;
             tG += Gstep_dx1;

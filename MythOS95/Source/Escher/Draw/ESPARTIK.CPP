@@ -69,7 +69,7 @@ extern VngoPoint EschTempVPoint;
 //                                                                          ³
 // Initializes the particle.                                                ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-EschParticle::EschParticle(Flx16 ix, Flx16 iy, Flx16 iz,
+EschParticle::EschParticle(float ix, float iy, float iz,
                            dword c, ulong l) :
     EschDrawable(ESCH_DRWT_PARTICLE),
     pos(ix,iy,iz),
@@ -80,8 +80,8 @@ EschParticle::EschParticle(Flx16 ix, Flx16 iy, Flx16 iz,
 {
 }
 
-EschParticle::EschParticle(Flx16 ix, Flx16 iy, Flx16 iz,
-                           Flx16 ii, Flx16 ij, Flx16 ik,
+EschParticle::EschParticle(float ix, float iy, float iz,
+                           float ii, float ij, float ik,
                            dword c, ulong l) :
     EschDrawable(ESCH_DRWT_PARTICLE),
     pos(ix,iy,iz),
@@ -135,32 +135,29 @@ void EschParticle::draw()
 //ÄÄÄ Clip against view volume
 
     // Near/far clipping
-    if (EschTempPoint.z.flx > cam->yon.flx
-        || EschTempPoint.z.flx < cam->hither.flx)
+    if (EschTempPoint.z > cam->yon
+        || EschTempPoint.z < cam->hither)
         return;
 
     // Left/right/top/bottom plane clipping
-    Flx16 zx = flx_16mul16(EschTempPoint.z,cam->xsize);
-    Flx16 zy = flx_16mul16(EschTempPoint.z,cam->ysize);
+    float zx = EschTempPoint.z * cam->xsize;
+    float zy = EschTempPoint.z * cam->ysize;
 
-    if (EschTempPoint.x.flx < -zx.flx 
-        || EschTempPoint.x.flx > zx.flx
-        || EschTempPoint.y.flx < -zy.flx
-        || EschTempPoint.y.flx > zy.flx)
+    if (EschTempPoint.x < -zx 
+        || EschTempPoint.x > zx
+        || EschTempPoint.y < -zy
+        || EschTempPoint.y > zy)
         return;
 
     flags |= ESCH_DRW_VISIBLE;
 
 //ÄÄÄ Project pixel
-    EschTempVPoint.x = (flx_muldiv(EschTempPoint.x,
-                                   cam->xscalar,
-                                   EschTempPoint.z).flx
-                        + (cam->vport->vbuff.width<<15)) >> 16;
-    EschTempVPoint.y = ((cam->vport->vbuff.height<<15)
-                        - flx_muldiv(EschTempPoint.y,
-                                     cam->yscalar,
-                                     EschTempPoint.z).flx) >> 16;
-    EschTempVPoint.z = flx_16mul16(EschTempPoint.z,cam->z_factor).flx << 1;
+    EschTempVPoint.x = long((EschTempPoint.x * cam->xscalar) / EschTempPoint.z)
+                       + (cam->vport->vbuff.width >> 1);
+
+    EschTempVPoint.y = (cam->vport->vbuff.height >> 1)
+                       - long((EschTempPoint.y * cam->yscalar) / EschTempPoint.z);
+    EschTempVPoint.z = ulong(EschTempPoint.z * cam->z_factor);
     EschTempVPoint.clr = color;
 
     VngoVport *vport = cam->vport;

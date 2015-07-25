@@ -1,0 +1,54 @@
+--------------------Configuration: Paltool - Win32 Debug--------------------
+Begining build with project "E:\CHARYBDS\MythOS95\VanGogh\PALTOOL\Paltool.dsp", at root.
+Active configuration is Win32 (x86) Application (based on Win32 (x86) Application)
+
+Project's tools are:
+			"32-bit C/C++ Compiler for 80x86" with flags "/nologo /MDd /W3 /Gm /GX /Zi /Od /I "..\..\inc" /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /Fp".\WinDebug/Paltool.pch" /Yu"stdafx.h" /Fo".\WinDebug/" /Fd".\WinDebug/" /FD /c "
+			"OLE Type Library Maker" with flags "/mktyplib203 "
+			"Win32 Resource Compiler" with flags "/l 0x409 /fo".\WinDebug/paltool.res" /d "_DEBUG" /d "_AFXDLL" "
+			"Browser Database Maker" with flags "/nologo /o".\WinDebug/Paltool.bsc" "
+			"COFF Linker for 80x86" with flags "winmm.lib ..\..\lib\mythos.lib ..\..\lib\ivorymfc.lib ..\..\lib\bozo.lib ..\..\lib\xfile.lib ..\..\lib\chronos.lib ..\..\lib\escher.lib ..\..\lib\gutenbrg.lib ..\..\lib\felix.lib ..\..\lib\vangogh.lib /nologo /version:4 /subsystem:windows /incremental:yes /pdb:".\WinDebug/Paltool.pdb" /debug /machine:I386 /nodefaultlib:"libc" /out:".\WinDebug/Paltool.exe" /VERSION:4,0 "
+			"Custom Build" with flags ""
+			"<Component 0xa>" with flags ""
+
+Creating command line "rc.exe /l 0x409 /fo".\WinDebug/paltool.res" /d "_DEBUG" /d "_AFXDLL" "E:\CHARYBDS\MythOS95\VanGogh\PALTOOL\paltool.rc"" 
+Creating temp file "C:\WIN95\TEMP\RSPE210.TMP" with contents </nologo /MDd /W3 /Gm /GX /Zi /Od /I "..\..\inc" /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /Fp".\WinDebug/Paltool.pch" /Yu"stdafx.h" /Fo".\WinDebug/" /Fd".\WinDebug/" /FD /c 
+"E:\CHARYBDS\MythOS95\VanGogh\PALTOOL\bezier.cpp"
+"E:\CHARYBDS\MythOS95\VanGogh\PALTOOL\dialog.cpp"
+"E:\CHARYBDS\MythOS95\VanGogh\PALTOOL\mainfrm.cpp"
+"E:\CHARYBDS\MythOS95\VanGogh\PALTOOL\paltodoc.cpp"
+"E:\CHARYBDS\MythOS95\VanGogh\PALTOOL\paltool.cpp"
+"E:\CHARYBDS\MythOS95\VanGogh\PALTOOL\paltovw.cpp"
+>
+Creating command line "cl.exe @C:\WIN95\TEMP\RSPE210.TMP" 
+Creating temp file "C:\WIN95\TEMP\RSPE211.TMP" with contents </nologo /MDd /W3 /Gm /GX /Zi /Od /I "..\..\inc" /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /Fp".\WinDebug/Paltool.pch" /Yc"stdafx.h" /Fo".\WinDebug/" /Fd".\WinDebug/" /FD /c 
+"E:\CHARYBDS\MythOS95\VanGogh\PALTOOL\stdafx.cpp"
+>
+Creating command line "cl.exe @C:\WIN95\TEMP\RSPE211.TMP" 
+Creating temp file "C:\WIN95\TEMP\RSPE212.TMP" with contents <winmm.lib ..\..\lib\mythos.lib ..\..\lib\ivorymfc.lib ..\..\lib\bozo.lib ..\..\lib\xfile.lib ..\..\lib\chronos.lib ..\..\lib\escher.lib ..\..\lib\gutenbrg.lib ..\..\lib\felix.lib ..\..\lib\vangogh.lib /nologo /version:4 /subsystem:windows /incremental:yes /pdb:".\WinDebug/Paltool.pdb" /debug /machine:I386 /nodefaultlib:"libc" /out:".\WinDebug/Paltool.exe" /VERSION:4,0 
+.\WinDebug\bezier.obj
+.\WinDebug\dialog.obj
+.\WinDebug\mainfrm.obj
+.\WinDebug\paltodoc.obj
+.\WinDebug\paltool.obj
+.\WinDebug\paltovw.obj
+.\WinDebug\stdafx.obj
+.\WinDebug\paltool.res>
+Creating command line "link.exe @C:\WIN95\TEMP\RSPE212.TMP" 
+Compiling resources...
+Compiling...
+stdafx.cpp
+Compiling...
+bezier.cpp
+dialog.cpp
+mainfrm.cpp
+paltodoc.cpp
+paltool.cpp
+paltovw.cpp
+Generating Code...
+Linking...
+LINK : warning LNK4098: defaultlib "LIBCMT" conflicts with use of other libs; use /NODEFAULTLIB:library
+
+
+
+Paltool.exe - 0 error(s), 1 warning(s)

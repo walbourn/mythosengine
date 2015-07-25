@@ -89,7 +89,7 @@ EschAttenLight::EschAttenLight(const char *fname, const char *lname) :
     }
 };
 
-EschAttenLight::EschAttenLight(const EschPoint *pnt, Flx16 i, Flx16 o) :
+EschAttenLight::EschAttenLight(const EschPoint *pnt, float i, float o) :
     EschPointLight(pnt),
     inner(i),
     outer(o)
@@ -98,7 +98,7 @@ EschAttenLight::EschAttenLight(const EschPoint *pnt, Flx16 i, Flx16 o) :
     flags |= ESCH_LGT_ATTEN;
 };
 
-EschAttenLight::EschAttenLight(Flx16 ix, Flx16 iy, Flx16 iz, Flx16 i, Flx16 o) : 
+EschAttenLight::EschAttenLight(float ix, float iy, float iz, float i, float o) : 
     EschPointLight(ix,iy,iz),
     inner(i),
     outer(o)
@@ -141,7 +141,7 @@ void EschAttenLight::setup(const EschFrameRef *fr)
     EschLight::setup(fr);
 
     arate=harate=0;
-    if ((outer-inner).flx > 0)
+    if ((outer-inner) > 0)
     {
         arate = _intensity / (outer - inner);
         harate = _hintensity / (outer - inner);
@@ -168,14 +168,14 @@ void EschAttenLight::shine(const EschVertex *v, VngoPoint *vpt, int revnrml) con
                        tpos.y - v->y,
                        tpos.z - v->z);
 
-        Flx16 mag = vtx.magnitude();
+        float mag = vtx.magnitude();
 
         // Check for point beyond outer range before
         // continuing
-        if (mag.flx < outer.flx)
+        if (mag < outer)
         {
             // Complete normalization
-            if (mag.flx > 0)
+            if (mag > 0)
             {
                 vtx.i /= mag;
                 vtx.j /= mag;
@@ -183,34 +183,39 @@ void EschAttenLight::shine(const EschVertex *v, VngoPoint *vpt, int revnrml) con
             }
 
             // Compute dot product
-            Flx16 dot = v->normal DOT vtx;
+            float dot = v->normal DOT vtx;
 
-            if (dot.flx < 0)
+            if (dot < 0)
             {
-                dot.flx = (revnrml) ? -dot.flx : 0;
+                dot = (revnrml) ? -dot : 0;
             }
         
-            if (dot.flx > (1<<16))
-                dot.flx = (1<<16);
-
             // Compute intensity output (including attenuation)
-            Flx16 inten = _intensity;
+            float inten = _intensity;
 
-            if ((flags & ESCH_LGT_ATTEN) && (mag.flx > inner.flx))
+            if ((flags & ESCH_LGT_ATTEN) && (mag > inner))
             {
                 inten -= (mag - inner) * arate;
             }
 
             // Compute final shade value
-            long i = (dot.flx * (inten.flx >> 16)) >> 16;
-            if (vpt->shade < i)
-                vpt->shade = i;
+            vpt->shade += long(dot * inten);
         }
     }
 
 //ÄÄÄ Chain for true multiple lights
     if (inext)
+    {
         inext->shine(v,vpt,revnrml);
+    }
+//ÄÄÄ Clamp shade value
+    else
+    {
+        if (vpt->shade > mp)
+            vpt->shade = mp;
+        else if (vpt->shade < 0)
+            vpt->shade = 0;
+    }
 }
 
 
@@ -233,14 +238,14 @@ void EschAttenLight::hishine(const EschVertex *v, VngoPoint *vpt, int revnrml) c
                        tpos.y - v->y,
                        tpos.z - v->z);
 
-        Flx16 mag = vtx.magnitude();
+        float mag = vtx.magnitude();
 
         // Check for point beyond outer range before
         // continuing
-        if (mag.flx < outer.flx)
+        if (mag < outer)
         {
             // Complete normalization
-            if (mag.flx > 0)
+            if (mag > 0)
             {
                 vtx.i /= mag;
                 vtx.j /= mag;
@@ -248,34 +253,39 @@ void EschAttenLight::hishine(const EschVertex *v, VngoPoint *vpt, int revnrml) c
             }
 
             // Compute dot product
-            Flx16 dot = v->normal DOT vtx;
+            float dot = v->normal DOT vtx;
 
-            if (dot.flx < 0)
+            if (dot < 0)
             {
-                dot.flx = (revnrml) ? -dot.flx : 0;
+                dot = (revnrml) ? -dot : 0;
             }
         
-            if (dot.flx > (1<<16))
-                dot.flx = (1<<16);
-
             // Compute intensity output (including attenuation)
-            Flx16 inten = _hintensity;
+            float inten = _hintensity;
 
-            if ((flags & ESCH_LGT_ATTEN) && (mag.flx > inner.flx))
+            if ((flags & ESCH_LGT_ATTEN) && (mag > inner))
             {
                 inten -= (mag - inner) * harate;
             }
 
             // Compute final shade value
-            long i = (dot.flx * (inten.flx >> 16)) >> 16;
-            if (vpt->shade < i)
-                vpt->shade = i;
+            vpt->shade += long(dot * inten);
         }
     }
 
 //ÄÄÄ Chain for true multiple lights
     if (inext)
+    {
         inext->hishine(v,vpt,revnrml);
+    }
+//ÄÄÄ Clamp shade value
+    else
+    {
+        if (vpt->shade > VNGO_SHADE_FULL)
+            vpt->shade = VNGO_SHADE_FULL;
+        else if (vpt->shade < 0)
+            vpt->shade = 0;
+    }
 }
 
 
@@ -315,7 +325,8 @@ esch_error_codes EschAttenLight::load(const char *fname, const char *lname)
             iff.leaveform();
         }
 
-        if (iff.chunkid == iff.makeid('E','A','T','N'))
+        if (iff.chunkid == iff.makeid('E','A','T','N')
+            || iff.chunkid == iff.makeid('E','A','T','1'))
         {
             err=load(&iff,lname);
             if (!err
@@ -338,37 +349,67 @@ esch_error_codes EschAttenLight::load(const char *fname, const char *lname)
 
 esch_error_codes EschAttenLight::load(XFParseIFF *iff, const char *lname)
 {
-    EschFileLightAtten  atn;
-
     assertMyth("EschAttenLight::load requries iff pointer",
                iff);
 
-//ÄÄ Verify correct chunk name and size
-    if (iff->chunkid != iff->makeid('E','A','T','N'))
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Floating-point format
+    if (iff->chunkid == iff->makeid('E','A','T','1'))
+    {
+        EschFileLightAtten  atn;
+
+        if (iff->chunkSize != sizeof(atn))
+            return ESCH_ERR_INVALIDDATA;
+
+        //ÄÄ Read chunk and verify name, if given.
+        if (iff->read(&atn))
+            return ESCH_ERR_FILEERROR;
+
+        if (lname && strcmp(lname,atn.name))
+            return ESCH_ERR_NOTFOUND;
+
+        //ÄÄ Found, so setup Atten Light
+        strcpy(name,atn.name);
+        flags = atn.flags;
+
+        VngoColor24bit  c(atn.color);
+        set_intensity( max( max(c.r, c.g), c.b ) );
+
+        set_position( atn.x, atn.y, atn.z );
+
+        set_inner( atn.inner );
+        set_outer( atn.outer );
+    }
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Fixed-point format
+    else if (iff->chunkid == iff->makeid('E','A','T','N'))
+    {
+        EschFileLightAttenV1  atn;
+
+        if (iff->chunkSize != sizeof(atn))
+            return ESCH_ERR_INVALIDDATA;
+
+        //ÄÄ Read chunk and verify name, if given.
+        if (iff->read(&atn))
+            return ESCH_ERR_FILEERROR;
+
+        if (lname && strcmp(lname,atn.name))
+            return ESCH_ERR_NOTFOUND;
+
+        //ÄÄ Found, so setup Atten Light
+        strcpy(name,atn.name);
+        flags = atn.flags;
+
+        VngoColor24bit  c(atn.color);
+        set_intensity( max( max(c.r, c.g), c.b ) );
+
+        set_position(atn.x / 65536.0f, atn.y / 65536.0f, atn.z / 65536.0f);
+
+        set_inner( atn.inner / 65536.0f );
+        set_outer( atn.outer / 65536.0f );
+    }
+    else
+    {
         return ESCH_ERR_NOTFOUND;
-
-    if (iff->chunkSize != sizeof(EschFileLightAtten))
-        return ESCH_ERR_INVALIDDATA;
-
-//ÄÄ Read chunk and verify name, if given.
-    if (iff->read(&atn))
-        return ESCH_ERR_FILEERROR;
-
-    if (lname && strcmp(lname,atn.name))
-        return ESCH_ERR_NOTFOUND;
-
-//ÄÄ Found, so setup Atten Light
-
-    strcpy(name,atn.name);
-    flags = atn.flags;
-
-    VngoColor24bit  c(atn.color);
-    set_intensity( max( max(c.r, c.g), c.b ) );
-
-    set_position( atn.x, atn.y, atn.z );
-
-    set_inner( atn.inner );
-    set_outer( atn.outer );
+    }
 
 //ÄÄ Return ok
     return ESCH_ERR_NONE;

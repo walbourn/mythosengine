@@ -65,9 +65,10 @@ extern "C" GBergIData   *GBergInstance;
 // gberg_outc                                                               ³
 //                                                                          ³
 // Outputs a single character to the given x,y location using the currently ³
-// active font.                                                             ³
+// active font.  It returns the character width unless vert is set which    ³
+// then causes the height to be returned.                                   ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-long gberg_outc(VngoVport *vp, long x, long y, char c)
+long gberg_outc(VngoVport *vp, long x, long y, char c, BOOL vert)
 {
     GBergFontInfo   *fnt;
     VngoRect        r;
@@ -85,17 +86,14 @@ long gberg_outc(VngoVport *vp, long x, long y, char c)
 //ÄÄ Draw character
     r.x = x;
     r.y = y;
-    r.dx = txt.width = fnt->width;
     r.dy = txt.height = fnt->height;
 
     switch (fnt->type)
     {
-        case GBERG_FNT_MONOFIXED:
-
-            //ÄÄ Monochrome fixed
-
+        case GBERG_FNT_MONOFIXED:               //ÄÄ Monochrome fixed
             if (c >= 0)
             {
+                r.dx = txt.width = fnt->width;
                 txt.flags = VNGO_TEXTURE_MONO;
                 txt.tex = (byte *)((byte *)fnt->ptr + (c*fnt->bpc));
 
@@ -106,21 +104,55 @@ long gberg_outc(VngoVport *vp, long x, long y, char c)
             }
             break;
 
-        case GBERG_FNT_MONOFIXEDEX:
+        case GBERG_FNT_MONOFIXEDEX:             //ÄÄ Monochrome fixed extended
+            {
+                r.dx = txt.width = fnt->width;
 
-            //ÄÄ Monochrome fixed extended
+                txt.flags = VNGO_TEXTURE_MONO;
+                txt.tex = (byte *)((byte *)fnt->ptr + ((byte)c*fnt->bpc));
 
-            txt.flags = VNGO_TEXTURE_MONO;
-            txt.tex = (byte *)((byte *)fnt->ptr + ((byte)c*fnt->bpc));
+                int waslocked = vp->lock();
+                vp->image_trans_mono(&r,&txt,GBergInstance->fcol,GBergInstance->bcol);
+                if (!waslocked)
+                    vp->unlock();
+            }
+            break;
 
-            int waslocked = vp->lock();
-            vp->image_trans_mono(&r,&txt,GBergInstance->fcol,GBergInstance->bcol);
-            if (!waslocked)
-                vp->unlock();
+        case GBERG_FNT_MONOVARIABLE:            //ÄÄ Monochrome variable
+            if (c >= 0)
+            {
+                // First byte is character width
+                byte *ptr = (byte *)((byte *)fnt->ptr + (c*fnt->bpc));
+
+                r.dx = txt.width = *(ptr++);
+                txt.flags = VNGO_TEXTURE_MONO;
+                txt.tex = ptr;
+
+                int waslocked = vp->lock();
+                vp->image_trans_mono(&r,&txt,GBergInstance->fcol,GBergInstance->bcol);
+                if (!waslocked)
+                    vp->unlock();
+            }
+            break;
+
+        case GBERG_FNT_MONOVARIABLEEX:          //ÄÄ Monochrome variable extended
+            {
+                // First byte is character width
+                byte *ptr = (byte *)((byte *)fnt->ptr + ((byte)c*fnt->bpc));
+
+                r.dx = txt.width = *(ptr++);
+                txt.flags = VNGO_TEXTURE_MONO;
+                txt.tex = ptr;
+
+                int waslocked = vp->lock();
+                vp->image_trans_mono(&r,&txt,GBergInstance->fcol,GBergInstance->bcol);
+                if (!waslocked)
+                    vp->unlock();
+            }
             break;
     }
 
-    return r.dx;
+    return (vert) ? r.dy : r.dx;
 }
 
 //°±² End of module - gbrgoutc.cpp ²±°

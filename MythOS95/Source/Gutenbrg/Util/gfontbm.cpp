@@ -94,7 +94,7 @@ void bitmap(char *name, XFBitmap *bm,
             ushort width, ushort height,
             ushort startx, ushort starty,
             ushort spacer,
-            byte startc, byte numc, byte cpr)
+            byte startc, ushort numc, byte cpr)
 {
     int                 i, j, k, t;
     byte                *font, *fptr;

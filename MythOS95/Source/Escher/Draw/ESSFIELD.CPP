@@ -146,30 +146,26 @@ void EschStarfield::draw()
         //ÄÄÄ Clip against view volume
 
         // Near clipping (stars should ignore far plane)
-        if (EschTempPoint.z.flx < cam->hither.flx)
+        if (EschTempPoint.z < cam->hither)
             continue;
 
         // Left/right/top/bottom plane clipping
-        Flx16 zx = flx_16mul16(EschTempPoint.z,cam->xsize);
-        Flx16 zy = flx_16mul16(EschTempPoint.z,cam->ysize);
+        float zx = EschTempPoint.z * cam->xsize;
+        float zy = EschTempPoint.z * cam->ysize;
 
-        if (EschTempPoint.x.flx < -zx.flx 
-            || EschTempPoint.x.flx > zx.flx
-            || EschTempPoint.y.flx < -zy.flx
-            || EschTempPoint.y.flx > zy.flx)
+        if (EschTempPoint.x < -zx
+            || EschTempPoint.x > zx
+            || EschTempPoint.y < -zy
+            || EschTempPoint.y > zy)
             continue;
 
         flags |= ESCH_DRW_VISIBLE;
 
         //ÄÄÄ Project pixel
-        EschTempVPoint.x = (flx_muldiv(EschTempPoint.x,
-                                    cam->xscalar,
-                                    EschTempPoint.z).flx
-                            + (cam->vport->vbuff.width<<15)) >> 16;
-        EschTempVPoint.y = ((cam->vport->vbuff.height<<15)
-                            - flx_muldiv(EschTempPoint.y,
-                                        cam->yscalar,
-                                        EschTempPoint.z).flx) >> 16;
+        EschTempVPoint.x = long((EschTempPoint.x * cam->xscalar) / EschTempPoint.z)
+                           + (cam->vport->vbuff.width >> 1);
+        EschTempVPoint.y = (cam->vport->vbuff.height >> 1)
+                           - long((EschTempPoint.y * cam->yscalar) / EschTempPoint.z);
         EschTempVPoint.z = 0xfffeffff;
 
         if (brightness)
@@ -242,9 +238,9 @@ esch_error_codes EschStarfield::create_stars(ulong c, int dobrights)
 
     for(ulong i=0; i < c; i++)
     {
-        stars[i].x = flx_rand() * Flx16(0.7);
-        stars[i].y = flx_rand() * Flx16(0.7);
-        stars[i].z = flx_rand() * Flx16(0.7);
+        stars[i].x = flx_rand();
+        stars[i].y = flx_rand();
+        stars[i].z = flx_rand();
 
         if (brightness)
         {

@@ -105,7 +105,7 @@ int APIENTRY WinMain (HINSTANCE hInstance,
                       LPSTR     lpCmdLine,
                       int       nCmdShow)
 {
-    CmdFlags = CMDFLAGS_JOYSTICK | CMDFLAGS_DIBSWITCH;
+    CmdFlags = CMDFLAGS_JOYSTICK | CMDFLAGS_DIBSWITCH | CMDFLAGS_DIRECTINPUT;
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Process INI
     {
@@ -122,6 +122,13 @@ int APIENTRY WinMain (HINSTANCE hInstance,
                     strlwr(buff);
                     if (strstr(buff,"yes") || strstr(buff,"on"))
                         CmdFlags |= CMDFLAGS_DIRECTDRAW;
+                }
+
+                if (!ini.read("DirectInput",buff))
+                {
+                    strlwr(buff);
+                    if (strstr(buff,"no") || strstr(buff,"off"))
+                        CmdFlags &= ~CMDFLAGS_DIRECTDRAW;
                 }
 
                 if (!ini.read("DIBModeSwitch",buff))
@@ -160,6 +167,15 @@ int APIENTRY WinMain (HINSTANCE hInstance,
             {
                 CmdFlags &= ~CMDFLAGS_DIRECTDRAW;
             }
+            //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Direct Draw
+            if (!strncmp(c,"di",sizeof("di")-1))
+            {
+                CmdFlags |= CMDFLAGS_DIRECTINPUT;
+            }
+            else if (!strncmp(c,"nodi",sizeof("nodi")-1))
+            {
+                CmdFlags &= ~CMDFLAGS_DIRECTINPUT;
+            }
             //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ DIB Mode Switch
             if (!strncmp(c,"dibswitch",sizeof("dibswitch")-1))
             {
@@ -195,14 +211,19 @@ int APIENTRY WinMain (HINSTANCE hInstance,
 
     //ÄÄÄ If we are already running, this routine will reactivate the older
     //ÄÄÄ application and return failure.
-        if (!InitApplication (hInstance, nCmdShow, width, height))
-                return 1;
+    if (!InitApplication (hInstance, nCmdShow, width, height))
+            return 1;
 
     //ÄÄÄ Initialize the MythOS system
     MythOS = new MythosSystem (MYTHOS_MEM_SIZE);
 
     //ÄÄÄ Create the devices, etc.
-    Devs   = new MaxDevices;
+    if (CmdFlags & CMDFLAGS_DIRECTINPUT)
+        Devs = new MaxDevicesDirectX (hWndClient);
+    else
+        Devs = new MaxDevicesWin32 (hWndClient);
+
+
     if (MythOS == 0 || Devs == 0)
     {
         fatal_error(IDS_ERR_NOMEMORY, __FILE__, __LINE__);

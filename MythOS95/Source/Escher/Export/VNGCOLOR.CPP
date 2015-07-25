@@ -44,9 +44,9 @@
 #include "xfile.hpp"
 #include "ivory.h"
 
-#define __VNGVPDD8_HPP
-#define __VNGSCRN_HPP
-#include "vangogh.hpp"
+#include "vngdefs.h"
+#include "vngcolor.hpp"
+#include "vngpal.hpp"
 
 //같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같�
 //

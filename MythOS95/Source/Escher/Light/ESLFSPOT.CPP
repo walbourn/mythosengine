@@ -78,9 +78,9 @@
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 EschFastSpotLight::EschFastSpotLight(const char *fname, const char *lname) :
     EschFastAttenLight(),
-    dir(0,0,1),
-    hotspot(44),
-    falloff(45)
+    dir(0.0,0.0,1.0),
+    hotspot(44.0),
+    falloff(45.0)
 {
     ltyp = ESCH_LGTT_FSPOT;
 
@@ -92,7 +92,7 @@ EschFastSpotLight::EschFastSpotLight(const char *fname, const char *lname) :
 
 EschFastSpotLight::EschFastSpotLight(const EschPoint *pnt,
                                      const EschVector *d,
-                                     Flx16 h, Flx16 f, Flx16 i, Flx16 o) :
+                                     float h, float f, float i, float o) :
     EschFastAttenLight(pnt,i,o),
     dir(*d),
     hotspot(h),
@@ -101,9 +101,9 @@ EschFastSpotLight::EschFastSpotLight(const EschPoint *pnt,
     ltyp = ESCH_LGTT_FSPOT;
 };
 
-EschFastSpotLight::EschFastSpotLight(Flx16 ix, Flx16 iy, Flx16 iz,
-                                     Flx16 ii, Flx16 ij, Flx16 ik,
-                                     Flx16 h, Flx16 f, Flx16 i, Flx16 o) : 
+EschFastSpotLight::EschFastSpotLight(float ix, float iy, float iz,
+                                     float ii, float ij, float ik,
+                                     float h, float f, float i, float o) : 
     EschFastAttenLight(ix,iy,iz,i,o),
     dir(ii,ij,ik),
     hotspot(h),
@@ -167,8 +167,8 @@ void EschFastSpotLight::setup(const EschFrameRef *fr)
 
     EschLight::setup(fr);
 
-    Flx16 mag = tdir.magnitude();
-    if (mag.flx >= outer.flx)
+    float mag = tdir.magnitude();
+    if (mag >= outer)
     {
         _intensity = 0;
         _hintensity = 0;
@@ -176,7 +176,7 @@ void EschFastSpotLight::setup(const EschFrameRef *fr)
     else
     {
         // Complete normalization
-        if (mag.flx > 0)
+        if (mag > 0)
         {
             tdir.i /= mag;
             tdir.j /= mag;
@@ -184,40 +184,38 @@ void EschFastSpotLight::setup(const EschFrameRef *fr)
         }
 
         // Use dot product with light to determine fall-off
-        Flx16 dotcone = tdir DOT ldir;
+        float dotcone = tdir DOT ldir;
 
         // Check to see if we are inside fall-off cone
-        Flx16 fallcos = falloff.cos();
+        float fallcos = esch_cos(falloff);
 
-        if (dotcone.flx <= fallcos.flx)
+        if (dotcone <= fallcos)
         {
             _intensity = 0;
             _hintensity = 0;
         }
         else
         {
-            Flx16 orig_inten = _intensity;
-            Flx16 orig_hinten = _hintensity;
+            float orig_inten = _intensity;
+            float orig_hinten = _hintensity;
 
             // Compute intensity output (including attenuation)
-            Flx16 hotcos = hotspot.cos();
+            float hotcos = esch_cos(hotspot);
 
-            if (dotcone.flx < hotcos.flx)
+            if (dotcone < hotcos)
             {
-                _intensity -= flx_muldiv( (hotcos - dotcone), orig_inten,
-                                          (hotcos - fallcos) );
-                _hintensity -= flx_muldiv( (hotcos - dotcone), orig_hinten,
-                                           (hotcos - fallcos) );
+                _intensity -= ((hotcos - dotcone) * orig_inten)
+                                            / (hotcos - fallcos);
+                _hintensity -= ((hotcos - dotcone) * orig_hinten)
+                                            / (hotcos - fallcos);
             }
 
             if ((flags & ESCH_LGT_ATTEN)
-                && (outer-inner).flx > 0
-                && (mag.flx > inner.flx))
+                && (outer-inner) > 0
+                && (mag > inner))
             {
-                _intensity -= flx_muldiv( (mag - inner), orig_inten,
-                                          (outer - inner) );
-                _hintensity -= flx_muldiv( (mag - inner), orig_hinten,
-                                           (outer - inner) );
+                _intensity -= ((mag - inner) * orig_inten) / (outer - inner);
+                _hintensity -= ((mag - inner) * orig_hinten) / (outer - inner);
             }
         }
     }
@@ -260,7 +258,8 @@ esch_error_codes EschFastSpotLight::load(const char *fname, const char *lname)
             iff.leaveform();
         }
 
-        if (iff.chunkid == iff.makeid('E','F','S','P'))
+        if (iff.chunkid == iff.makeid('E','F','S','P')
+            || iff.chunkid == iff.makeid('E','F','S','1'))
         {
             err=load(&iff,lname);
             if (!err
@@ -283,41 +282,75 @@ esch_error_codes EschFastSpotLight::load(const char *fname, const char *lname)
 
 esch_error_codes EschFastSpotLight::load(XFParseIFF *iff, const char *lname)
 {
-    EschFileLightSpot fspot;
-
     assertMyth("EschFastSpotLight::load requries iff pointer",
                iff);
 
-//ÄÄ Verify correct chunk name and size
-    if (iff->chunkid != iff->makeid('E','F','S','P'))
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Floating-point format
+    if (iff->chunkid == iff->makeid('E','F','S','1'))
+    {
+        EschFileLightSpot fspot;
+
+        if (iff->chunkSize != sizeof(fspot))
+            return ESCH_ERR_INVALIDDATA;
+
+        //ÄÄ Read chunk and verify name, if given.
+        if (iff->read(&fspot))
+            return ESCH_ERR_FILEERROR;
+
+        if (lname && strcmp(lname,fspot.name))
+            return ESCH_ERR_NOTFOUND;
+
+        //ÄÄ Found, so setup Fast Spot Light
+        strcpy(name,fspot.name);
+        flags = fspot.flags;
+
+        VngoColor24bit  c(fspot.color);
+        set_intensity( max( max(c.r, c.g), c.b ) );
+
+        set_position( fspot.x, fspot.y, fspot.z );
+        set_direction( fspot.i, fspot.j, fspot.k );
+
+        set_inner( fspot.inner );
+        set_outer( fspot.outer );
+
+        set_hotspot( fspot.hotspot );
+        set_falloff( fspot.falloff );
+    }
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Fixed-point format
+    else if (iff->chunkid == iff->makeid('E','F','S','P'))
+    {
+        EschFileLightSpotV1 fspot;
+
+        if (iff->chunkSize != sizeof(fspot))
+            return ESCH_ERR_INVALIDDATA;
+
+        //ÄÄ Read chunk and verify name, if given.
+        if (iff->read(&fspot))
+            return ESCH_ERR_FILEERROR;
+
+        if (lname && strcmp(lname,fspot.name))
+            return ESCH_ERR_NOTFOUND;
+
+        //ÄÄ Found, so setup Fast Spot Light
+        strcpy(name,fspot.name);
+        flags = fspot.flags;
+
+        VngoColor24bit  c(fspot.color);
+        set_intensity( max( max(c.r, c.g), c.b ) );
+
+        set_position(fspot.x / 65536.0f, fspot.y / 65536.0f, fspot.z / 65536.0f);
+        set_direction(fspot.i / 65536.0f, fspot.j / 65536.0f, fspot.k / 65536.0f);
+
+        set_inner( fspot.inner / 65536.0f );
+        set_outer( fspot.outer / 65536.0f );
+
+        set_hotspot( fspot.hotspot / 65536.0f );
+        set_falloff( fspot.falloff / 65536.0f );
+    }
+    else
+    {
         return ESCH_ERR_NOTFOUND;
-
-    if (iff->chunkSize != sizeof(EschFileLightSpot))
-        return ESCH_ERR_INVALIDDATA;
-
-//ÄÄ Read chunk and verify name, if given.
-    if (iff->read(&fspot))
-        return ESCH_ERR_FILEERROR;
-
-    if (lname && strcmp(lname,fspot.name))
-        return ESCH_ERR_NOTFOUND;
-
-//ÄÄ Found, so setup Fast Spot Light
-
-    strcpy(name,fspot.name);
-    flags = fspot.flags;
-
-    VngoColor24bit  c(fspot.color);
-    set_intensity( max( max(c.r, c.g), c.b ) );
-
-    set_position( fspot.x, fspot.y, fspot.z );
-    set_direction( fspot.i, fspot.j, fspot.k );
-
-    set_inner( fspot.inner );
-    set_outer( fspot.outer );
-
-    set_hotspot( fspot.hotspot );
-    set_falloff( fspot.falloff );
+    }
 
 //ÄÄ Return ok
     return ESCH_ERR_NONE;

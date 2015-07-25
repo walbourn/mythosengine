@@ -102,6 +102,10 @@ protected:
 	afx_msg void OnTerrSetBaseElevation();
 	afx_msg void OnSurfRemoveUnusedTxts();
 	afx_msg void OnUpdateSurfRemoveUnusedTxts(CCmdUI* pCmdUI);
+	afx_msg void OnFileFloating();
+	afx_msg void OnUpdateFileFloating(CCmdUI* pCmdUI);
+	afx_msg void OnFileCompress();
+	afx_msg void OnUpdateFileCompress(CCmdUI* pCmdUI);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

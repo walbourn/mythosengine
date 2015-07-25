@@ -72,7 +72,7 @@
 class EschParticle : public EschDrawable {
 
 protected:
-    Flx16       interval;
+    float       interval;
 
 public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
@@ -88,9 +88,9 @@ public:
     // Constructor/Destructors                                              ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
     EschParticle() : EschDrawable(ESCH_DRWT_PARTICLE) {}
-    EschParticle(Flx16 ix, Flx16 iy, Flx16 iz, dword c, ulong l=0);
-    EschParticle(Flx16 ix, Flx16 iy, Flx16 iz,
-                 Flx16 ii, Flx16 ij, Flx16 ik, dword c, ulong l=0);
+    EschParticle(float ix, float iy, float iz, dword c, ulong l=0);
+    EschParticle(float ix, float iy, float iz,
+                 float ii, float ij, float ik, dword c, ulong l=0);
     EschParticle(const EschPoint *p, const EschVector *v, dword c, ulong l=0);
 
     virtual ~EschParticle() {}
@@ -104,9 +104,9 @@ public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Utility routines.                                                    ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-    void set_interval(Flx16 i) { interval = i; }
+    void set_interval(float i) { interval = i; }
 
-    void set_position(Flx16 ix, Flx16 iy, Flx16 iz)
+    void set_position(float ix, float iy, float iz)
     {
         pos.x = ix;  pos.y = iy;  pos.z = iz;
     }
@@ -119,7 +119,7 @@ public:
 
     void set_lifetime(dword l) { life = l; }
 
-    void set_velocity(Flx16 ii, Flx16 ij, Flx16 ik)
+    void set_velocity(float ii, float ij, float ik)
     {
         velocity.i = ii;  velocity.j = ij;  velocity.k = ik;
     }
@@ -128,7 +128,7 @@ public:
         velocity.i = v->i;  velocity.j = v->j;  velocity.k = v->k;
     }
 
-    void set_acceleration(Flx16 ii, Flx16 ij, Flx16 ik)
+    void set_acceleration(float ii, float ij, float ik)
     {
         acceleration.i = ii;  acceleration.j = ij;  acceleration.k = ik;
     }
@@ -153,19 +153,19 @@ public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Public data members                                                  ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-    Flx16   size;
-    Flx16   rotate_i;
-    Flx16   rotate_j;
-    Flx16   rotate_k;
+    float   size;
+    float   rotate_i;
+    float   rotate_j;
+    float   rotate_k;
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Constructor/Destructors                                              ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
     EschParticlePyramid() : EschParticle() { dtyp=ESCH_DRWT_PRTPYRAMID; }
-    EschParticlePyramid(Flx16 s, Flx16 ix, Flx16 iy, Flx16 iz, dword c, ulong l=0);
-    EschParticlePyramid(Flx16 s, Flx16 ix, Flx16 iy, Flx16 iz,
-                 Flx16 ii, Flx16 ij, Flx16 ik, dword c, ulong l=0);
-    EschParticlePyramid(Flx16 s, const EschPoint *p, const EschVector *v, dword c, ulong l=0);
+    EschParticlePyramid(float s, float ix, float iy, float iz, dword c, ulong l=0);
+    EschParticlePyramid(float s, float ix, float iy, float iz,
+                 float ii, float ij, float ik, dword c, ulong l=0);
+    EschParticlePyramid(float s, const EschPoint *p, const EschVector *v, dword c, ulong l=0);
 
     virtual ~EschParticlePyramid() {}
     
@@ -178,7 +178,7 @@ public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Utility routines.                                                    ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-    void set_position(Flx16 ix, Flx16 iy, Flx16 iz)
+    void set_position(float ix, float iy, float iz)
     {
         pos.x = ix;  pos.y = iy;  pos.z = iz;
         world.set_position(ix, iy, iz);
@@ -189,11 +189,11 @@ public:
         world.set_position(pnt->x, pnt->y, pnt->z);
     }
 
-    void set_size(Flx16 s) { size=s; }
+    void set_size(float s) { size=s; }
 
-    void set_rotate_i(Flx16 r) { rotate_i=r; }
-    void set_rotate_j(Flx16 r) { rotate_j=r; }
-    void set_rotate_k(Flx16 r) { rotate_k=r; }
+    void set_rotate_i(float r) { rotate_i=r; }
+    void set_rotate_j(float r) { rotate_j=r; }
+    void set_rotate_k(float r) { rotate_k=r; }
 
     void reset() { world.reset(); world.set_position(&pos); }
 };
@@ -211,15 +211,15 @@ public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Public data members                                                  ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-    Flx16       alpha;
-    Flx16       alpha_rate;
+    float       alpha;
+    float       alpha_rate;
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Constructor/Destructors                                              ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
     EschParticleSprite() : EschParticle(), sprite(0) { dtyp=ESCH_DRWT_PRTSPRITE; }
     EschParticleSprite(EschSprite *s, ulong l=0);
-    EschParticleSprite(EschSprite *s, Flx16 ii, Flx16 ij, Flx16 ik, ulong l=0);
+    EschParticleSprite(EschSprite *s, float ii, float ij, float ik, ulong l=0);
     EschParticleSprite(EschSprite *s, const EschVector *v, ulong l=0);
 
     virtual ~EschParticleSprite();
@@ -237,7 +237,7 @@ public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Utility routines.                                                    ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-    void set_position(Flx16 ix, Flx16 iy, Flx16 iz);
+    void set_position(float ix, float iy, float iz);
     void set_position(EschPoint *pnt)
     {
         set_position(pnt->x, pnt->y, pnt->z);
@@ -246,7 +246,7 @@ public:
     void set_lifetime(dword l)
     {
         life = l;
-        alpha_rate = Flx16(255) / Flx16((long)l);
+        alpha_rate = float(255) / float((long)l);
     }
 };
 
@@ -265,16 +265,16 @@ public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Public data members                                                  ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-    Flx16   rotate_i;
-    Flx16   rotate_j;
-    Flx16   rotate_k;
+    float   rotate_i;
+    float   rotate_j;
+    float   rotate_k;
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Constructor/Destructors                                              ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
     EschParticleGeometry() : EschParticle(), geom(0) { dtyp=ESCH_DRWT_PRTGEOMETRY; }
     EschParticleGeometry(EschGeometry *g, ulong l=0);
-    EschParticleGeometry(EschGeometry *g, Flx16 ii, Flx16 ij, Flx16 ik, ulong l=0);
+    EschParticleGeometry(EschGeometry *g, float ii, float ij, float ik, ulong l=0);
     EschParticleGeometry(EschGeometry *g, const EschVector *v, ulong l=0);
 
     virtual ~EschParticleGeometry();
@@ -292,15 +292,15 @@ public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Utility routines.                                                    ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-    void set_position(Flx16 ix, Flx16 iy, Flx16 iz);
+    void set_position(float ix, float iy, float iz);
     void set_position(EschPoint *pnt)
     {
         set_position(pnt->x, pnt->y, pnt->z);
     }
 
-    void set_rotate_i(Flx16 r) { rotate_i=r; }
-    void set_rotate_j(Flx16 r) { rotate_j=r; }
-    void set_rotate_k(Flx16 r) { rotate_k=r; }
+    void set_rotate_i(float r) { rotate_i=r; }
+    void set_rotate_j(float r) { rotate_j=r; }
+    void set_rotate_k(float r) { rotate_k=r; }
 
     void reset();
 };
@@ -312,7 +312,7 @@ public:
 class EschParticleSystem : public EschDrawable
 {
 protected:
-    Flx16       interval;
+    float       interval;
 
 public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
@@ -356,9 +356,9 @@ public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
     void add(EschParticle *p);
 
-    void set_interval(Flx16 i);
+    void set_interval(float i);
 
-    void set_acceleration(Flx16 ii, Flx16 ij, Flx16 ik)
+    void set_acceleration(float ii, float ij, float ik)
     {
         acceleration.i = ii;  acceleration.j = ij;  acceleration.k = ik;
     }

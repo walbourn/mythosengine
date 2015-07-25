@@ -129,7 +129,7 @@ xf_error_codes XFParseLBM::read(XFBitmap *b)
 
 xf_error_codes XFParseLBM::read(XFParseIFF *iff, XFBitmap *b)
 {
-    int             i, j, k, t, t2;
+    int             i, j, k, t, t2, w;
     ulong           size;
     ulong           rowsize, prsize;
     byte            *ptr, *src, *org;
@@ -147,8 +147,7 @@ xf_error_codes XFParseLBM::read(XFParseIFF *iff, XFBitmap *b)
          && iff->chunkid != iff->makeid('R','I','F','F'))
         || iff->formid != iff->makeid('I','L','B','M'))
     {
-        errorn=XF_ERR_NOTSUPPORTED;
-        return errorn;
+        return (errorn=XF_ERR_NOTSUPPORTED);
     }
 
 //ÄÄ Enter form
@@ -207,64 +206,65 @@ xf_error_codes XFParseLBM::read(XFParseIFF *iff, XFBitmap *b)
     b->clrinuse=0;
     b->width = (ushort) ((header.w & 0xff) << 8) | (ushort) ((header.w & 0xff00) >> 8);
     b->height = (ushort) ((header.h & 0xff) << 8) | (ushort) ((header.h & 0xff00) >> 8);
-    b->bpp = 1;
+    b->bpp = (header.nPlanes == 1) ? XFBM_BPP_MONO : XFBM_BPP_8BIT;
 
 //ÄÄÄ Palette data ÄÄÄ
-    if (iff->seekchunk(iff->makeid('C','M','A','P')))
+    if (header.nPlanes == 4 || header.nPlanes == 8)
     {
-        err=XF_ERR_INVALIDPALETTE;
-        goto error_exit;
-    }
+        if (iff->seekchunk(iff->makeid('C','M','A','P')))
+        {
+            err=XF_ERR_INVALIDPALETTE;
+            goto error_exit;
+        }
 
-    if (iff->chunkSize > 256*3)
-    {
-        err=XF_ERR_INVALIDPALETTE;
-        goto error_exit;
-    }
+        if (iff->chunkSize > 256*3)
+        {
+            err=XF_ERR_INVALIDPALETTE;
+            goto error_exit;
+        }
 
-    // Allocate memory
-    b->palhandle = ivory_halloc(sizeof(dword)*256);
-    if (!b->palhandle)
-    {
-        err=XF_ERR_NOMEMORY;
-        goto error_exit;
-    }
+        // Allocate memory
+        b->palhandle = ivory_halloc(sizeof(dword)*256);
+        if (!b->palhandle)
+        {
+            err=XF_ERR_NOMEMORY;
+            goto error_exit;
+        }
 
-    b->pal = (dword *)ivory_hlock(b->palhandle);
-    if (!b->pal)
-    {
-        b->release();
-        err=XF_ERR_LOCKFAILED;
-        goto error_exit;
-    }
+        b->pal = (dword *)ivory_hlock(b->palhandle);
+        if (!b->pal)
+        {
+            b->release();
+            err=XF_ERR_LOCKFAILED;
+            goto error_exit;
+        }
 
-    memset(b->pal,0,sizeof(dword)*256);
+        memset(b->pal,0,sizeof(dword)*256);
 
-    err=iff->read(tpal);
-    if (err)
-    {
-        err=XF_ERR_INVALIDPALETTE;
-        goto error_exit;
-    }
+        err=iff->read(tpal);
+        if (err)
+        {
+            err=XF_ERR_INVALIDPALETTE;
+            goto error_exit;
+        }
     
-    for(i=0, ptr=(byte *)b->pal; i < int (iff->chunkSize / 3); i++)
-    {
-        *(ptr++) = tpal[i*3];       // red
-        *(ptr++) = tpal[i*3+1];     // green
-        *(ptr++) = tpal[i*3+2];     // blue
-        *(ptr++) = 0;               // na to make dword
-    }
+        for(i=0, ptr=(byte *)b->pal; i < int (iff->chunkSize / 3); i++)
+        {
+            *(ptr++) = tpal[i*3];       // red
+            *(ptr++) = tpal[i*3+1];     // green
+            *(ptr++) = tpal[i*3+2];     // blue
+            *(ptr++) = 0;               // na to make dword
+        }
 
-    b->clrinuse=int (iff->chunkSize / 3) - 1;
+        b->clrinuse=int (iff->chunkSize / 3) - 1;
+    }
 
 //ÄÄÄ Image data ÄÄÄ
-    //
     // Compute size of bitpacked rows
-    //
-
     rowsize = (b->width + 7) >> 3;
     prsize = rowsize + ((rowsize & 0x1) ? 1 : 0);
 
+    // Seek BODY chunk
     if (iff->seekchunk(iff->makeid('B','O','D','Y')) || !iff->chunkSize)
     {
         err=XF_ERR_INVALIDIMAGE;
@@ -272,7 +272,9 @@ xf_error_codes XFParseLBM::read(XFParseIFF *iff, XFBitmap *b)
     }
 
     // Allocate memory
-    b->handle = ivory_halloc(b->width * b->height * b->bpp);
+    w = (header.nPlanes == 1) ? ((b->width + 7) >> 3) : b->width;
+
+    b->handle = ivory_halloc(w * b->height);
     if (!b->handle)
     {
         b->release();
@@ -306,7 +308,6 @@ xf_error_codes XFParseLBM::read(XFParseIFF *iff, XFBitmap *b)
     }
 
     // Convert from interlaced, bitpacked format
-
     for(j=0, org=work + prsize, size=0; j < b->height; j++)
     {
         for(k=0, pmsk=0x1; k < header.nPlanes; k++, pmsk <<= 1)
@@ -368,30 +369,37 @@ xf_error_codes XFParseLBM::read(XFParseIFF *iff, XFBitmap *b)
                 src = work + prsize + t;
             }
 
-            ptr = (byte *)b->data + (b->width * j);
-            for(i=0, msk=0x80; i < b->width; i++)
+            ptr = (byte *)b->data + (w * j);
+            if (header.nPlanes == 1)
             {
-                if (*src & msk)
-                    *ptr |= pmsk;
-                else
-                    *ptr &= ~pmsk;
-                ptr++;
-
-                if (msk == 0x1)
+                memcpy(ptr,src,rowsize);
+            }
+            else
+            {
+                for(i=0, msk=0x80; i < b->width; i++)
                 {
-                    msk = 0x80;
+                    if (*src & msk)
+                        *ptr |= pmsk;
+                    else
+                        *ptr &= ~pmsk;
+                    ptr++;
+
+                    if (msk == 0x1)
+                    {
+                        msk = 0x80;
+                        src++;
+                    }
+                    else msk >>= 1;
+                }
+
+                if (msk != 0x80)
+                {
                     src++;
                 }
-                else msk >>= 1;
-            }
 
-            if (msk != 0x80)
-            {
-                src++;
+                if (rowsize & 0x1)
+                    src++;
             }
-
-            if (rowsize & 0x1)
-                src++;
         }
     }
 
@@ -447,7 +455,7 @@ xf_error_codes XFParseLBM::write(XFBitmap *b)
 
 xf_error_codes XFParseLBM::write(XFParseIFF *iff, XFBitmap *b)
 {
-    int             i, j, k;
+    int             i, j, k, w;
     ulong           size;
     ulong           rowsize;
     byte            *ptr, *src;
@@ -461,8 +469,17 @@ xf_error_codes XFParseLBM::write(XFParseIFF *iff, XFBitmap *b)
     if (!b)
         b = bm;
 
-    if (b->bpp != 1 || !b->width || !b->height)
-        return XF_ERR_NOTSUPPORTED;
+    if (!b->width || !b->height)
+        return (errorn=XF_ERR_NOTSUPPORTED);
+
+    switch (b->bpp)
+    {
+        case XFBM_BPP_MONO:
+        case XFBM_BPP_8BIT:
+            break;
+        default:
+            return (errorn=XF_ERR_NOTSUPPORTED);
+    }
 
 //ÄÄ Enter form
     if (iff->newform(iff->makeid('I','L','B','M')))
@@ -476,7 +493,7 @@ xf_error_codes XFParseLBM::write(XFParseIFF *iff, XFBitmap *b)
 
     header.w =  (ushort) ((b->width & 0xff) << 8) | (ushort) ((b->width & 0xff00) >> 8);
     header.h =  (ushort) ((b->height & 0xff) << 8) | (ushort) ((b->height & 0xff00) >> 8);
-    header.nPlanes = 8;
+    header.nPlanes = (b->bpp == XFBM_BPP_8BIT) ? 8 : 1;
     header.masking = MASKING_NONE;
     header.compression = COMP_NONE;
 
@@ -502,27 +519,45 @@ xf_error_codes XFParseLBM::write(XFParseIFF *iff, XFBitmap *b)
     }
  
 //ÄÄÄ Color map ÄÄÄ
-    if (!b->pal)
+    if (b->bpp == XFBM_BPP_8BIT)
     {
-        if (!locked)
-            b->unlock();
-        return (errorn=XF_ERR_INVALIDPALETTE);
-    }
+        if (!b->pal)
+        {
+            if (!locked)
+                b->unlock();
+            return (errorn=XF_ERR_INVALIDPALETTE);
+        }
     
-    for(i=0, ptr=(byte *)b->pal; i < 256; i++)
-    {
-        tpal[i*3] = *(ptr++);       // red
-        tpal[i*3+1] = *(ptr++);     // green
-        tpal[i*3+2] = *(ptr++);     // blue
-        ptr++;                      // na to make dword
-    }
+        for(i=0, ptr=(byte *)b->pal; i < 256; i++)
+        {
+            tpal[i*3] = *(ptr++);       // red
+            tpal[i*3+1] = *(ptr++);     // green
+            tpal[i*3+2] = *(ptr++);     // blue
+            ptr++;                      // na to make dword
+        }
 
-    err=iff->write(iff->makeid('C','M','A','P'),tpal,256*3);
-    if (err)
+        err=iff->write(iff->makeid('C','M','A','P'),tpal,256*3);
+        if (err)
+        {
+            if (!locked)
+                b->unlock();
+            goto error_exit;
+        }
+    }
+    else
     {
-        if (!locked)
-            b->unlock();
-        goto error_exit;
+        memset(tpal,0,6);
+        tpal[3] = 255;
+        tpal[4] = 255;
+        tpal[5] = 255;
+
+        err=iff->write(iff->makeid('C','M','A','P'),tpal,2*3);
+        if (err)
+        {
+            if (!locked)
+                b->unlock();
+            goto error_exit;
+        }
     }
     
 //ÄÄÄ Body ÄÄÄ
@@ -540,8 +575,9 @@ xf_error_codes XFParseLBM::write(XFParseIFF *iff, XFBitmap *b)
     //
 
     rowsize = (b->width + 7) >> 3;
-
     size = (rowsize + ( (rowsize & 0x1) ? 1 : 0 )) * header.nPlanes * b->height;
+
+    w = (header.nPlanes == 1) ? rowsize : b->width;
 
     // Allocate work space
     assertMyth("XFParseLBM::write expected positive result of workspace computation",
@@ -567,24 +603,31 @@ xf_error_codes XFParseLBM::write(XFParseIFF *iff, XFBitmap *b)
         {
             assert(ptr < work+size);
 
-            for(i=0, msk=0x80, src=(byte*)b->data + (b->width*j);
-                i < b->width; 
-                i++)
+            src=(byte*)b->data + (w*j);
+            if (header.nPlanes == 1)
             {
-                assert(ptr < work+size);
-                if (*(src++) & pmsk)
-                    *ptr |= msk;
-
-                if (msk == 0x1)
+                memcpy(ptr,src,rowsize);
+                ptr += rowsize;
+            }
+            else
+            {
+                for(i=0, msk=0x80; i < b->width; i++)
                 {
-                    msk = 0x80;
+                    assert(ptr < work+size);
+                    if (*(src++) & pmsk)
+                        *ptr |= msk;
+
+                    if (msk == 0x1)
+                    {
+                        msk = 0x80;
+                        ptr++;
+                    }
+                    else msk >>= 1;
+                }
+                if (msk != 0x80)
+                {
                     ptr++;
                 }
-                else msk >>= 1;
-            }
-            if (msk != 0x80)
-            {
-                ptr++;
             }
 
             if (rowsize & 0x1)

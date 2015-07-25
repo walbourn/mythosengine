@@ -2,9 +2,9 @@
 //
 //                                                           %__________%
 //                                                          %/ . .  .   \%
-//           Van Gogh 2D-Display Library                     |  . .  o. | 
+//           Van Gogh 2D-Display Library                     |  . .  o. |
 //                                                           |. _  .   .|
-//          Microsoft Windows '95 Version                    | / \   .  | 
+//          Microsoft Windows '95 Version                    | / \   .  |
 //                                                           |_|_|_._._.|
 // Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
 //              All rights reserved.                        %\__________/%
@@ -35,7 +35,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 #include <assert.h>
 
@@ -60,14 +60,22 @@
 //                               Routines
 //
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-extern "C" void vngo_ttriangle8_persp (VngoVbuffer *vb,VngoPoint2 *pts, 
-                                       VngoTextureInfo *ttex);
-extern "C" void vngo_zttriangle8_persp (VngoVbuffer *vb,VngoPoint2 *pts, 
-                                        VngoTextureInfo *ttex);
-extern "C" void vngo_tgtriangle8_persp (VngoVbuffer *vb,VngoPoint2 *pts, 
-                                        VngoTextureInfo *ttex);
-extern "C" void vngo_ztgtriangle8_persp (VngoVbuffer *vb,VngoPoint2 *pts, 
-                                         VngoTextureInfo *ttex);
+extern "C" void vngo_ttriangle8_persp (VngoVbuffer *vb,VngoPoint2 *pts,
+                                       VngoTexture3D *ttex);
+extern "C" void vngo_attriangle8_persp (VngoVbuffer *vb,VngoPoint2 *pts,
+                                        VngoTexture3D *ttex,long alpha);
+extern "C" void vngo_zttriangle8_persp (VngoVbuffer *vb,VngoPoint2 *pts,
+                                        VngoTexture3D *ttex);
+extern "C" void vngo_azttriangle8_persp (VngoVbuffer *vb,VngoPoint2 *pts,
+                                         VngoTexture3D *ttex,long alpha);
+extern "C" void vngo_tgtriangle8_persp (VngoVbuffer *vb,VngoPoint2 *pts,
+                                        VngoTexture3D *ttex);
+extern "C" void vngo_atgtriangle8_persp (VngoVbuffer *vb,VngoPoint2 *pts,
+                                         VngoTexture3D *ttex,long alpha);
+extern "C" void vngo_ztgtriangle8_persp (VngoVbuffer *vb,VngoPoint2 *pts,
+                                         VngoTexture3D *ttex);
+extern "C" void vngo_aztgtriangle8_persp (VngoVbuffer *vb,VngoPoint2 *pts,
+                                          VngoTexture3D *ttex,long alpha);
 
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
@@ -92,8 +100,8 @@ extern "C" void vngo_ztgtriangle8_persp (VngoVbuffer *vb,VngoPoint2 *pts,
 //      if it is not already a triangle.  This will also degenerate lines   ³
 //      and pixels appropriately.  It draws with Gouraud shading.           ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void vngo_tpoly_persp8 (VngoVport *vp,int count,VngoPoint2 *pts, 
-                        VngoTextureInfo *tex)
+void vngo_tpoly_persp8 (VngoVport *vp,int count,VngoPoint2 *pts,
+                        VngoTexture3D *tex)
 {
     if (count != 3)
     {
@@ -145,6 +153,64 @@ void vngo_tpoly_persp8 (VngoVport *vp,int count,VngoPoint2 *pts,
 }
 
 
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//  vngo_tpoly_persp (VngoVbuffer *vb, int count, VngoPoint2 *pts,          ³
+//              VngoTexture *tex);                                          ³
+//      Draws an N sided convex polygon, by breaking it down into triangles ³
+//      if it is not already a triangle.  This will also degenerate lines   ³
+//      and pixels appropriately.  It draws with Gouraud shading.           ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+void vngo_atpoly_persp8 (VngoVport *vp,int count,VngoPoint2 *pts,
+                         VngoTexture3D *tex,long alpha)
+{
+    if (count != 3)
+    {
+        if (count > 3)
+        {
+            // if there are more than three vertices, break it into a series
+            // of triangles.
+            VngoPoint2 tpts[3];
+
+            tpts[0].x     = pts[0].x;
+            tpts[0].y     = pts[0].y;
+            tpts[0].z     = pts[0].z;
+            tpts[0].u     = pts[0].u;
+            tpts[0].v     = pts[0].v;
+            tpts[0].w     = pts[0].w;
+            tpts[0].shade = pts[0].shade;
+            for (int i=1;i < count-1;i++)
+            {
+                tpts[1].x     = pts[i].x;
+                tpts[1].y     = pts[i].y;
+                tpts[1].z     = pts[i].z;
+                tpts[1].u     = pts[i].u;
+                tpts[1].v     = pts[i].v;
+                tpts[1].w     = pts[i].w;
+                tpts[1].shade = pts[i].shade;
+
+                tpts[2].x     = pts[i+1].x;
+                tpts[2].y     = pts[i+1].y;
+                tpts[2].z     = pts[i+1].z;
+                tpts[2].u     = pts[i+1].u;
+                tpts[2].v     = pts[i+1].v;
+                tpts[2].w     = pts[i+1].w;
+                tpts[2].shade = pts[i+1].shade;
+
+                if (vp->vflags & VNGO_ZBUFFER_ACTIVE)
+                    vngo_azttriangle8_persp (&vp->vbuff,tpts,tex,alpha);
+                else
+                    vngo_attriangle8_persp (&vp->vbuff,tpts,tex,alpha);
+            }
+        }
+    }
+    else
+    {
+        if (vp->vflags & VNGO_ZBUFFER_ACTIVE)
+            vngo_azttriangle8_persp (&vp->vbuff,pts,tex,alpha);
+        else
+            vngo_attriangle8_persp (&vp->vbuff,pts,tex,alpha);
+    }
+}
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 //  vngo_tgpoly_persp (VngoVbuffer *vb, int count, VngoPoint2 *pts,         ³
@@ -153,8 +219,8 @@ void vngo_tpoly_persp8 (VngoVport *vp,int count,VngoPoint2 *pts,
 //      if it is not already a triangle.  This will also degenerate lines   ³
 //      and pixels appropriately.  It draws with Gouraud shading.           ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void vngo_tgpoly_persp8 (VngoVport *vp,int count,VngoPoint2 *pts, 
-                         VngoTextureInfo *tex)
+void vngo_tgpoly_persp8 (VngoVport *vp,int count,VngoPoint2 *pts,
+                         VngoTexture3D *tex)
 {
     if (count != 3)
     {
@@ -203,6 +269,67 @@ void vngo_tgpoly_persp8 (VngoVport *vp,int count,VngoPoint2 *pts,
             vngo_ztgtriangle8_persp (&vp->vbuff,pts,tex);
         else
             vngo_tgtriangle8_persp (&vp->vbuff,pts,tex);
+    }
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//  vngo_tgpoly_persp (VngoVbuffer *vb, int count, VngoPoint2 *pts,         ³
+//              VngoTexture *tex);                                          ³
+//      Draws an N sided convex polygon, by breaking it down into triangles ³
+//      if it is not already a triangle.  This will also degenerate lines   ³
+//      and pixels appropriately.  It draws with Gouraud shading.           ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+void vngo_atgpoly_persp8 (VngoVport *vp,int count,VngoPoint2 *pts,
+                          VngoTexture3D *tex,long alpha)
+{
+    if (count != 3)
+    {
+        if (count > 3)
+        {
+            // if there are more than three vertices, break it into a series
+            // of triangles.
+            VngoPoint2 tpts[3];
+
+            tpts[0].x = pts[0].x;
+            tpts[0].y = pts[0].y;
+            tpts[0].z = pts[0].z;
+            tpts[0].u = pts[0].u;
+            tpts[0].v = pts[0].v;
+            tpts[0].w = pts[0].w;
+            tpts[0].shade = pts[0].shade;
+
+            for (int i=1;i < count-1;i++)
+            {
+                tpts[1].x     = pts[i].x;
+                tpts[1].y     = pts[i].y;
+                tpts[1].z     = pts[i].z;
+                tpts[1].u     = pts[i].u;
+                tpts[1].v     = pts[i].v;
+                tpts[1].w     = pts[i].w;
+                tpts[1].shade = pts[i].shade;
+
+                tpts[2].x     = pts[i+1].x;
+                tpts[2].y     = pts[i+1].y;
+                tpts[2].z     = pts[i+1].z;
+                tpts[2].u     = pts[i+1].u;
+                tpts[2].v     = pts[i+1].v;
+                tpts[2].w     = pts[i+1].w;
+                tpts[2].shade = pts[i+1].shade;
+
+                if (vp->vflags & VNGO_ZBUFFER_ACTIVE)
+                    vngo_aztgtriangle8_persp (&vp->vbuff,tpts,tex,alpha);
+                else
+                    vngo_atgtriangle8_persp (&vp->vbuff,tpts,tex,alpha);
+            }
+        }
+    }
+    else
+    {
+        if (vp->vflags & VNGO_ZBUFFER_ACTIVE)
+            vngo_aztgtriangle8_persp (&vp->vbuff,pts,tex,alpha);
+        else
+            vngo_atgtriangle8_persp (&vp->vbuff,pts,tex,alpha);
     }
 }
 

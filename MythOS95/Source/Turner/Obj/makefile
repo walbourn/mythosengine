@@ -34,6 +34,10 @@
 DEBUG = NO
 !endif
 
+!if "$(THREAD)" == ""
+THREAD=YES
+!endif
+
 !if "$(MYTH95ROOT)" == ""
 MYTH95ROOT = \MythOS95
 !endif

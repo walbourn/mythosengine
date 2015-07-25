@@ -411,7 +411,7 @@ int VngoVportDD8::lock()
     {
         int locked=0;
         HRESULT hr;
-        while (!locked && (fail_safe < 10000))
+        while (!locked && (fail_safe < 1000))
         {
             fail_safe++;    // just so we can't loop infinately.
             if ((hr = pddsurf->Lock (NULL, &ddsd,
@@ -458,14 +458,12 @@ int VngoVportDD8::unlock()
 
 VNGError VngoVportDD8::clip_frect(VngoRect *rect,VngoColor24bit *rgb_val, VngoRect *clip)
 {
-    assert (lock_status);
     return clip_frect(rect,vbuff.pal->get_index(*rgb_val),clip);
 }
 
 
 VNGError VngoVportDD8::clip_frect(VngoRect *rect,dword color, VngoRect *clip)
 {
-    assert (lock_status);
 
     VngoRect trect = *rect;
     VngoRect vprect(0,0,vbuff.width,vbuff.height);
@@ -501,14 +499,12 @@ VNGError VngoVportDD8::clip_frect(VngoRect *rect,dword color, VngoRect *clip)
 
 VNGError VngoVportDD8::frect(VngoRect *rect,VngoColor24bit *rgb_val)
 {
-    assert (lock_status);
     return frect(rect,vbuff.pal->get_index(*rgb_val));
 }
 
 
 VNGError VngoVportDD8::frect(VngoRect *rect,dword color)
 {
-    assert (lock_status);
     assert (rect->x >= 0);
     assert ((rect->x + rect->dx) <= vbuff.width);
     assert (rect->y >= 0);
@@ -535,7 +531,6 @@ VNGError VngoVportDD8::frect(VngoRect *rect,dword color)
 
 void VngoVportDD8::reset(dword c,dword farz)
 {
-    assert (lock_status);
     dword           t;
     VngoRect        trect;
 
@@ -584,7 +579,6 @@ void VngoVportDD8::reset(dword c,dword farz)
 
 VngoVportDD8::~VngoVportDD8()
 {
-//    unlock();
     vbuff.scrn_ptr = NULL;
     if ((vflags & VNGO_ZBUFFER_DEV) && (vflags & VNGO_MYMEM_ZBUFF))
     {
@@ -614,5 +608,621 @@ VngoVportDD8::~VngoVportDD8()
 }
 
 
+VNGError VngoVportDD8::pixel (VngoPoint *pt, VngoColor24bit *rgb_val)
+{
+    int was_locked = lock();
+    VNGError retval = VNGO_INTERNAL_ERROR;
+    if (was_locked != -1)
+    {
+        retval = VngoVVport8::pixel(pt,rgb_val);
+        if (!was_locked)
+            unlock();
+    }
+    return retval;
+}
+
+VNGError VngoVportDD8::pixel (VngoPointF *pt, VngoColor24bit *rgb_val)
+{
+    int was_locked = lock();
+    VNGError retval = VNGO_INTERNAL_ERROR;
+    if (was_locked != -1)
+    {
+        retval = VngoVVport8::pixel(pt,rgb_val);
+        if (!was_locked)
+            unlock();
+    }
+    return retval;
+}
+
+VNGError VngoVportDD8::clip_pixel (VngoPoint *pt, VngoColor24bit *rgb_val,
+                                  VngoRect *clip_rect)
+{
+    int was_locked = lock();
+    VNGError retval = VNGO_INTERNAL_ERROR;
+    if (was_locked != -1)
+    {
+        retval = VngoVVport8::clip_pixel(pt,rgb_val,clip_rect);
+        if (!was_locked)
+            unlock();
+    }
+    return retval;
+}
+
+VNGError VngoVportDD8::clip_pixel (VngoPointF *pt, VngoColor24bit *rgb_val,
+                                  VngoRect *clip_rect)
+{
+    int was_locked = lock();
+    VNGError retval = VNGO_INTERNAL_ERROR;
+    if (was_locked != -1)
+    {
+        retval = VngoVVport8::clip_pixel(pt,rgb_val,clip_rect);
+        if (!was_locked)
+            unlock();
+    }
+    return retval;
+}
+
+dword VngoVportDD8::read_pixel (VngoPoint *pt, VngoPoint *dest)
+{
+    int was_locked = lock();
+    dword retval = VNGO_INTERNAL_ERROR;
+    if (was_locked != -1)
+    {
+        retval = VngoVVport8::read_pixel(pt,dest);
+        if (!was_locked)
+            unlock();
+    }
+    return retval;
+}
+
+dword VngoVportDD8::read_pixel (int x, int y, VngoPoint *dest)
+{
+    int was_locked = lock();
+    dword retval = VNGO_INTERNAL_ERROR;
+    if (was_locked != -1)
+    {
+        retval = VngoVVport8::read_pixel(x,y,dest);
+        if (!was_locked)
+            unlock();
+    }
+    return retval;
+}
+
+VNGError VngoVportDD8::line (VngoPoint *p1, VngoPoint *p2,
+                             VngoColor24bit *rgb_val)
+{
+    int was_locked = lock();
+    VNGError retval = VNGO_INTERNAL_ERROR;
+    if (was_locked != -1)
+    {
+        retval = VngoVVport8::line(p1,p2,rgb_val);
+        if (!was_locked)
+            unlock();
+    }
+    return retval;
+}
+
+VNGError VngoVportDD8::line (VngoPointF *p1, VngoPointF *p2,
+                             VngoColor24bit *rgb_val)
+{
+    int was_locked = lock();
+    VNGError retval = VNGO_INTERNAL_ERROR;
+    if (was_locked != -1)
+    {
+        retval = VngoVVport8::line(p1,p2,rgb_val);
+        if (!was_locked)
+            unlock();
+    }
+    return retval;
+}
+
+VNGError VngoVportDD8::gline (VngoPoint *p1, VngoPoint *p2)
+{
+    int was_locked = lock();
+    VNGError retval = VNGO_INTERNAL_ERROR;
+    if (was_locked != -1)
+    {
+        retval = VngoVVport8::gline(p1,p2);
+        if (!was_locked)
+            unlock();
+    }
+    return retval;
+}
+VNGError VngoVportDD8::gline (VngoPointF *p1, VngoPointF *p2)
+{
+    int was_locked = lock();
+    VNGError retval = VNGO_INTERNAL_ERROR;
+    if (was_locked != -1)
+    {
+        retval = VngoVVport8::gline(p1,p2);
+        if (!was_locked)
+            unlock();
+    }
+    return retval;
+}
+VNGError VngoVportDD8::clip_line (VngoPoint *p1, VngoPoint *p2,
+                                  VngoColor24bit *rgb_val,
+                                  VngoRect *clip_rect)
+{
+    int was_locked = lock();
+    VNGError retval = VNGO_INTERNAL_ERROR;
+    if (was_locked != -1)
+    {
+        retval = VngoVVport8::clip_line(p1,p2,rgb_val,clip_rect);
+        if (!was_locked)
+            unlock();
+    }
+    return retval;
+}
+
+VNGError VngoVportDD8::clip_line (VngoPointF *p1, VngoPointF *p2,
+                                  VngoColor24bit *rgb_val,
+                                  VngoRect *clip_rect)
+{
+    int was_locked = lock();
+    VNGError retval = VNGO_INTERNAL_ERROR;
+    if (was_locked != -1)
+    {
+        retval = VngoVVport8::clip_line(p1,p2,rgb_val,clip_rect);
+        if (!was_locked)
+            unlock();
+    }
+    return retval;
+}
+VNGError VngoVportDD8::clip_gline (VngoPoint *p1, VngoPoint *p2,
+                                  VngoRect *clip_rect)
+{
+    int was_locked = lock();
+    VNGError retval = VNGO_INTERNAL_ERROR;
+    if (was_locked != -1)
+    {
+        retval = VngoVVport8::clip_gline(p1,p2,clip_rect);
+        if (!was_locked)
+            unlock();
+    }
+    return retval;
+}
+
+VNGError VngoVportDD8::clip_gline (VngoPointF *p1, VngoPointF *p2,
+                                  VngoRect *clip_rect)
+{
+    int was_locked = lock();
+    VNGError retval = VNGO_INTERNAL_ERROR;
+    if (was_locked != -1)
+    {
+        retval = VngoVVport8::clip_gline(p1,p2,clip_rect);
+        if (!was_locked)
+            unlock();
+    }
+    return retval;
+}
+
+
+VNGError VngoVportDD8::poly (int count, VngoPoint pts[])
+{
+    int was_locked = lock();
+    VNGError retval = VNGO_INTERNAL_ERROR;
+    if (was_locked != -1)
+    {
+        retval = VngoVVport8::poly(count,pts);
+        if (!was_locked)
+            unlock();
+    }
+    return retval;
+}
+
+VNGError VngoVportDD8::poly (int count, VngoPointF pts[])
+{
+    int was_locked = lock();
+    VNGError retval = VNGO_INTERNAL_ERROR;
+    if (was_locked != -1)
+    {
+        retval = VngoVVport8::poly(count,pts);
+        if (!was_locked)
+            unlock();
+    }
+    return retval;
+}
+VNGError VngoVportDD8::gpoly (int count, VngoPoint pts[])
+{
+    int was_locked = lock();
+    VNGError retval = VNGO_INTERNAL_ERROR;
+    if (was_locked != -1)
+    {
+        retval = VngoVVport8::gpoly(count,pts);
+        if (!was_locked)
+            unlock();
+    }
+    return retval;
+}
+
+VNGError VngoVportDD8::gpoly (int count, VngoPointF pts[])
+{
+    int was_locked = lock();
+    VNGError retval = VNGO_INTERNAL_ERROR;
+    if (was_locked != -1)
+    {
+        retval = VngoVVport8::gpoly(count,pts);
+        if (!was_locked)
+            unlock();
+    }
+    return retval;
+}
+VNGError VngoVportDD8::gpoly_persp (int count, VngoPoint pts[])
+{
+    int was_locked = lock();
+    VNGError retval = VNGO_INTERNAL_ERROR;
+    if (was_locked != -1)
+    {
+        retval = VngoVVport8::gpoly(count,pts);
+        if (!was_locked)
+            unlock();
+    }
+    return retval;
+}
+
+VNGError VngoVportDD8::gpoly_persp (int count, VngoPointF pts[])
+{
+    int was_locked = lock();
+    VNGError retval = VNGO_INTERNAL_ERROR;
+    if (was_locked != -1)
+    {
+        retval = VngoVVport8::gpoly(count,pts);
+        if (!was_locked)
+            unlock();
+    }
+    return retval;
+}
+
+
+VNGError VngoVportDD8::tpoly (int count, VngoPoint pts[],VngoTexture *tex)
+{
+    int was_locked = lock();
+    VNGError retval = VNGO_INTERNAL_ERROR;
+    if (was_locked != -1)
+    {
+        retval = VngoVVport8::tpoly(count,pts,tex);
+        if (!was_locked)
+            unlock();
+    }
+    return retval;
+}
+
+VNGError VngoVportDD8::tpoly (int count, VngoPointF pts[],VngoTexture *tex)
+{
+    int was_locked = lock();
+    VNGError retval = VNGO_INTERNAL_ERROR;
+    if (was_locked != -1)
+    {
+        retval = VngoVVport8::tpoly(count,pts,tex);
+        if (!was_locked)
+            unlock();
+    }
+    return retval;
+}
+
+VNGError VngoVportDD8::tpoly_persp (int count, VngoPoint pts[],VngoTexture *tex)
+{
+    int was_locked = lock();
+    VNGError retval = VNGO_INTERNAL_ERROR;
+    if (was_locked != -1)
+    {
+        retval = VngoVVport8::tpoly_persp(count,pts,tex);
+        if (!was_locked)
+            unlock();
+    }
+    return retval;
+}
+
+VNGError VngoVportDD8::tpoly_persp (int count, VngoPointF pts[],VngoTexture *tex)
+{
+    int was_locked = lock();
+    VNGError retval = VNGO_INTERNAL_ERROR;
+    if (was_locked != -1)
+    {
+        retval = VngoVVport8::tpoly_persp(count,pts,tex);
+        if (!was_locked)
+            unlock();
+    }
+    return retval;
+}
+
+VNGError VngoVportDD8::gtpoly (int count, VngoPoint pts[],VngoTexture *tex)
+{
+    int was_locked = lock();
+    VNGError retval = VNGO_INTERNAL_ERROR;
+    if (was_locked != -1)
+    {
+        retval = VngoVVport8::gtpoly(count,pts,tex);
+        if (!was_locked)
+            unlock();
+    }
+    return retval;
+}
+
+VNGError VngoVportDD8::gtpoly (int count, VngoPointF pts[],VngoTexture *tex)
+{
+    int was_locked = lock();
+    VNGError retval = VNGO_INTERNAL_ERROR;
+    if (was_locked != -1)
+    {
+        retval = VngoVVport8::gtpoly(count,pts,tex);
+        if (!was_locked)
+            unlock();
+    }
+    return retval;
+}
+
+
+VNGError VngoVportDD8::gtpoly_persp (int count, VngoPoint pts[],VngoTexture *tex)
+{
+    int was_locked = lock();
+    VNGError retval = VNGO_INTERNAL_ERROR;
+    if (was_locked != -1)
+    {
+        retval = VngoVVport8::gtpoly_persp(count,pts,tex);
+        if (!was_locked)
+            unlock();
+    }
+    return retval;
+}
+
+VNGError VngoVportDD8::gtpoly_persp (int count, VngoPointF pts[],VngoTexture *tex)
+{
+    int was_locked = lock();
+    VNGError retval = VNGO_INTERNAL_ERROR;
+    if (was_locked != -1)
+    {
+        retval = VngoVVport8::gtpoly_persp(count,pts,tex);
+        if (!was_locked)
+            unlock();
+    }
+    return retval;
+}
+VNGError VngoVportDD8::grpoly (int count,VngoPoint pts[])
+{
+    int was_locked = lock();
+    VNGError retval = VNGO_INTERNAL_ERROR;
+    if (was_locked != -1)
+    {
+        retval = VngoVVport8::grpoly(count,pts);
+        if (!was_locked)
+            unlock();
+    }
+    return retval;
+}
+
+VNGError VngoVportDD8::grpoly (int count,VngoPointF pts[])
+{
+    int was_locked = lock();
+    VNGError retval = VNGO_INTERNAL_ERROR;
+    if (was_locked != -1)
+    {
+        retval = VngoVVport8::grpoly(count,pts);
+        if (!was_locked)
+            unlock();
+    }
+    return retval;
+}
+
+VNGError VngoVportDD8::poly_a (int count, VngoPoint pts[],long alpha)
+{
+    int was_locked = lock();
+    VNGError retval = VNGO_INTERNAL_ERROR;
+    if (was_locked != -1)
+    {
+        retval = VngoVVport8::poly_a(count,pts,alpha);
+        if (!was_locked)
+            unlock();
+    }
+    return retval;
+}
+VNGError VngoVportDD8::poly_a (int count, VngoPointF pts[],long alpha)
+{
+    int was_locked = lock();
+    VNGError retval = VNGO_INTERNAL_ERROR;
+    if (was_locked != -1)
+    {
+        retval = VngoVVport8::poly_a(count,pts,alpha);
+        if (!was_locked)
+            unlock();
+    }
+    return retval;
+}
+
+VNGError VngoVportDD8::gpoly_a (int count, VngoPoint pts[],long alpha)
+{
+    int was_locked = lock();
+    VNGError retval = VNGO_INTERNAL_ERROR;
+    if (was_locked != -1)
+    {
+        retval = VngoVVport8::gpoly_a(count,pts,alpha);
+        if (!was_locked)
+            unlock();
+    }
+    return retval;
+}
+VNGError VngoVportDD8::gpoly_a (int count, VngoPointF pts[],long alpha)
+{
+    int was_locked = lock();
+    VNGError retval = VNGO_INTERNAL_ERROR;
+    if (was_locked != -1)
+    {
+        retval = VngoVVport8::gpoly_a(count,pts,alpha);
+        if (!was_locked)
+            unlock();
+    }
+    return retval;
+}
+VNGError VngoVportDD8::gpoly_persp_a (int count, VngoPoint pts[],long alpha)
+{
+    int was_locked = lock();
+    VNGError retval = VNGO_INTERNAL_ERROR;
+    if (was_locked != -1)
+    {
+        retval = VngoVVport8::gpoly_persp_a(count,pts,alpha);
+        if (!was_locked)
+            unlock();
+    }
+    return retval;
+}
+VNGError VngoVportDD8::gpoly_persp_a (int count, VngoPointF pts[],long alpha)
+{
+    int was_locked = lock();
+    VNGError retval = VNGO_INTERNAL_ERROR;
+    if (was_locked != -1)
+    {
+        retval = VngoVVport8::gpoly_persp_a(count,pts,alpha);
+        if (!was_locked)
+            unlock();
+    }
+    return retval;
+}
+
+VNGError VngoVportDD8::tpoly_a (int count, VngoPoint pts[],VngoTexture *tex,long alpha)
+{
+    int was_locked = lock();
+    VNGError retval = VNGO_INTERNAL_ERROR;
+    if (was_locked != -1)
+    {
+        retval = VngoVVport8::tpoly_a(count,pts,tex,alpha);
+        if (!was_locked)
+            unlock();
+    }
+    return retval;
+}
+
+VNGError VngoVportDD8::tpoly_a (int count, VngoPointF pts[],VngoTexture *tex,long alpha)
+{
+    int was_locked = lock();
+    VNGError retval = VNGO_INTERNAL_ERROR;
+    if (was_locked != -1)
+    {
+        retval = VngoVVport8::tpoly_a(count,pts,tex,alpha);
+        if (!was_locked)
+            unlock();
+    }
+    return retval;
+}
+
+VNGError VngoVportDD8::tpoly_persp_a (int count, VngoPoint pts[],VngoTexture *tex,long alpha)
+{
+    int was_locked = lock();
+    VNGError retval = VNGO_INTERNAL_ERROR;
+    if (was_locked != -1)
+    {
+        retval = VngoVVport8::tpoly_persp_a(count,pts,tex,alpha);
+        if (!was_locked)
+            unlock();
+    }
+    return retval;
+}
+
+VNGError VngoVportDD8::tpoly_persp_a (int count, VngoPointF pts[],VngoTexture *tex,long alpha)
+{
+    int was_locked = lock();
+    VNGError retval = VNGO_INTERNAL_ERROR;
+    if (was_locked != -1)
+    {
+        retval = VngoVVport8::tpoly_persp_a(count,pts,tex,alpha);
+        if (!was_locked)
+            unlock();
+    }
+    return retval;
+}
+
+VNGError VngoVportDD8::gtpoly_a (int count, VngoPoint pts[],VngoTexture *tex,long alpha)
+{
+    int was_locked = lock();
+    VNGError retval = VNGO_INTERNAL_ERROR;
+    if (was_locked != -1)
+    {
+        retval = VngoVVport8::gtpoly_a(count,pts,tex,alpha);
+        if (!was_locked)
+            unlock();
+    }
+    return retval;
+}
+
+VNGError VngoVportDD8::gtpoly_a (int count, VngoPointF pts[],VngoTexture *tex,long alpha)
+{
+    int was_locked = lock();
+    VNGError retval = VNGO_INTERNAL_ERROR;
+    if (was_locked != -1)
+    {
+        retval = VngoVVport8::gtpoly_a(count,pts,tex,alpha);
+        if (!was_locked)
+            unlock();
+    }
+    return retval;
+}
+
+VNGError VngoVportDD8::gtpoly_persp_a (int count, VngoPoint pts[],VngoTexture *tex,long alpha)
+{
+    int was_locked = lock();
+    VNGError retval = VNGO_INTERNAL_ERROR;
+    if (was_locked != -1)
+    {
+        retval = VngoVVport8::gtpoly_persp_a(count,pts,tex,alpha);
+        if (!was_locked)
+            unlock();
+    }
+    return retval;
+}
+
+VNGError VngoVportDD8::gtpoly_persp_a (int count, VngoPointF pts[],VngoTexture *tex,long alpha)
+{
+    int was_locked = lock();
+    VNGError retval = VNGO_INTERNAL_ERROR;
+    if (was_locked != -1)
+    {
+        retval = VngoVVport8::gtpoly_persp_a(count,pts,tex,alpha);
+        if (!was_locked)
+            unlock();
+    }
+    return retval;
+}
+
+VNGError VngoVportDD8::image_trans (VngoRect *dest_rect,VngoTexture *img,dword flags)
+{
+    int was_locked = lock();
+    VNGError retval = VNGO_INTERNAL_ERROR;
+    if (was_locked != -1)
+    {
+        retval = VngoVVport8::image_trans(dest_rect,img,flags);
+        if (!was_locked)
+            unlock();
+    }
+    return retval;
+}
+
+
+VNGError VngoVportDD8::image_trans_mono (VngoRect *dest_rect,VngoTexture *img,
+                                         dword fgcol,dword bgcol)
+{
+    int was_locked = lock();
+    VNGError retval = VNGO_INTERNAL_ERROR;
+    if (was_locked != -1)
+    {
+        retval = VngoVVport8::image_trans_mono(dest_rect,img,fgcol,bgcol);
+        if (!was_locked)
+            unlock();
+    }
+    return retval;
+}
+
+VNGError VngoVportDD8::zblit_mono (VngoRect *dest_rect,VngoZMap *zmp,
+                                   dword fdist,dword ndist)
+{
+    int was_locked = lock();
+    VNGError retval = VNGO_INTERNAL_ERROR;
+    if (was_locked != -1)
+    {
+        retval = VngoVVport8::zblit_mono(dest_rect,zmp,fdist,ndist);
+        if (!was_locked)
+            unlock();
+    }
+    return retval;
+}
 
 //°±² End of module - vngvpdd8.cpp ²±°

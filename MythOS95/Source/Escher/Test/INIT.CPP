@@ -59,7 +59,7 @@ LRESULT CALLBACK ClientWndProc (HWND, UINT, WPARAM, LPARAM);
 //
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 
-extern MaxDevices Devs;
+extern MaxDevices *Devs;
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
@@ -207,21 +207,29 @@ LRESULT CALLBACK ClientWndProc (HWND hWnd, UINT message, WPARAM wParam, LPARAM l
             break;
 
         case WM_SYSKEYDOWN:
-            Devs.theKeyboard.wm_keydown (wParam);
+            if (Devs && Devs->theKeyboard)
+                Devs->theKeyboard->wm_keydown (wParam);
             return DefWindowProc (hWnd, message, wParam, lParam);
 
         case WM_KEYDOWN:
-            Devs.theKeyboard.wm_keydown (wParam);
+            if (Devs && Devs->theKeyboard)
+                Devs->theKeyboard->wm_keydown (wParam);
             return 0;
 
         case WM_SYSKEYUP:
         case WM_KEYUP:
-            Devs.theKeyboard.wm_keyup (wParam);
+            if (Devs && Devs->theKeyboard)
+                Devs->theKeyboard->wm_keyup (wParam);
             return 0;
 
         case WM_SETFOCUS:
+            if (Devs)
+                Devs->init();
+            return 0;
+
         case WM_KILLFOCUS:
-            Devs.theKeyboard.init();
+            if (Devs)
+                Devs->uninit();
             return 0;
 
         case WM_DESTROY:

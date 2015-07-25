@@ -2,9 +2,9 @@
 //
 //                                                           %__________%
 //                                                          %/ . .  .   \%
-//           Van Gogh 2D-Display Library                     |  . .  o. | 
+//           Van Gogh 2D-Display Library                     |  . .  o. |
 //                                                           |. _  .   .|
-//          Microsoft Windows '95 Version                    | / \   .  | 
+//          Microsoft Windows '95 Version                    | / \   .  |
 //                                                           |_|_|_._._.|
 // Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
 //              All rights reserved.                        %\__________/%
@@ -35,7 +35,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //#include <assert.h>
 #include <string.h>
@@ -72,13 +72,7 @@ extern "C" void draw_zghlines(VngoTriangle *tri);
 //
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 
-long DitherMatrix[4][4] = 
-{  
-    0 << 15,  8 << 15,  2 << 15, 10 << 15,
-   12 << 15,  4 << 15, 14 << 15,  6 << 15,
-    3 << 15, 11 << 15,  1 << 15,  9 << 15,
-   15 << 15,  7 << 15, 13 << 15,  5 << 15
-};
+extern long DitherMatrix[4][4];
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
@@ -113,7 +107,7 @@ extern "C" void vngo_zgtriangle8 (VngoVbuffer *vb,VngoPoint2 *pts,dword color)
 
     if (dy1 == 0)
     {   // the triangle is completely flat if this is true.
-        return;    
+        return;
     }
 
     if (dy1 > dy2)

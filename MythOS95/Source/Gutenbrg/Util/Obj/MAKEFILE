@@ -43,6 +43,10 @@
 DEBUG = NO
 !endif
 
+!if "$(THREAD)" == ""
+THREAD = YES
+!endif
+
 !if "$(MYTH95ROOT)" == ""
 MYTH95ROOT = \MythOS95
 !endif
@@ -68,9 +72,10 @@ OBJSFNT = \
 gflex.obj\
 gfont.obj\
 gfontbm.obj\
-gfontp.obj
+gfontp.obj\
+gfonttt.obj
 
-LIBS = xfile.lib ivory.lib
+LIBS = xfile.lib ivory.lib user32.lib gdi32.lib
 
 #컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
 # First target                                                             �

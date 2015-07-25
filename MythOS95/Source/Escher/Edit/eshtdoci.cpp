@@ -57,6 +57,7 @@
 #include "esfile.hpp"
 #include "dem.h"
 
+#include <float.h>
 #include <math.h>
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
@@ -80,7 +81,7 @@ static char BASED_CODE THIS_FILE[] = __FILE__;
 //                             °°° Protected °°°                            ³
 // TerrEditDoc - find_closest_htable_entry                                  ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-long TerrEditDoc::find_closest_htable_entry(Flx16 h, long start, long end)
+long TerrEditDoc::find_closest_htable_entry(float h, long start, long end)
 {
     if (start >= end)
     {
@@ -111,7 +112,7 @@ long TerrEditDoc::find_closest_htable_entry(Flx16 h, long start, long end)
 //                             °°° Protected °°°                            ³
 // TerrEditDoc - find_entry                                                 ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-long TerrEditDoc::find_entry(Flx16 *heights, Flx16 h, long start, long end)
+long TerrEditDoc::find_entry(float *heights, float h, long start, long end)
 {
     if (start >= end)
     {
@@ -168,7 +169,7 @@ void TerrEditDoc::compress_heights_standard(long xs, long ys, long w, long h,
     //ÄÄÄ Setup height table
     for(long i=0; i < 256; i++)
     {
-        htable[i] = Flx16(16*i) + Flx16(((normalize) ? 0 : min));
+        htable[i] = float(16*i) + float(((normalize) ? 0 : min));
     }
 
     //ÄÄÄ Copy data
@@ -227,9 +228,9 @@ void TerrEditDoc::compress_heights_uniform(long xs, long ys, long w, long h,
     }
 
     //ÄÄÄ Setup height table
-    htable[0] = (normalize) ? 0 : min;
+    htable[0] = (normalize) ? 0.0f : float(min);
 
-    Flx16 step = Flx16(max-min) / Flx16(256);
+    float step = float(max-min) / 256.0f;
     for(long i=1; i < 256; i++)
     {
         htable[i] = htable[i-1] + step;
@@ -246,7 +247,7 @@ void TerrEditDoc::compress_heights_uniform(long xs, long ys, long w, long h,
         for(x=xs, cx=0, sptr=data+(y*w)+xs, dptr=hfield+(y*width);
             x < w; x++)
         {
-            *(dptr++) = (byte)find_closest_htable_entry(Flx16(*(sptr++)-adjust),0,255);
+            *(dptr++) = (byte)find_closest_htable_entry(float(*(sptr++)-adjust),0,255);
             if (++cx >= width)
                 break;
         }
@@ -261,7 +262,7 @@ void TerrEditDoc::compress_heights_uniform(long xs, long ys, long w, long h,
 //                             °°° Protected °°°                            ³
 // TerrEditDoc - compress_heights_averaged                                  ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrEditDoc::compress_heights_averaged(Flx16 threshold, 
+void TerrEditDoc::compress_heights_averaged(float threshold, 
                                             long xs, long ys, long w, long h,
                                             ushort *data, BOOL normalize)
 {
@@ -278,7 +279,7 @@ void TerrEditDoc::compress_heights_averaged(Flx16 threshold,
     ushort  min;
     ulong   maxh = 256, hcount=0;
 
-    Flx16 *heights = new Flx16[maxh];
+    float *heights = new float[maxh];
     ASSERT(heights);
 
     long *counts = new long[maxh];
@@ -291,7 +292,7 @@ void TerrEditDoc::compress_heights_averaged(Flx16 threshold,
             if (*sptr < min)
                 min = *sptr;
 
-            Flx16 h = (Flx16) *(sptr++);
+            float h = (float) *(sptr++);
 
             long ind = find_entry(heights,h,0,hcount);
             if (ind == -1)
@@ -299,9 +300,9 @@ void TerrEditDoc::compress_heights_averaged(Flx16 threshold,
                 if (hcount >= maxh)
                 {
                     // Handle expand of array
-                    Flx16 *nh = new Flx16[maxh*2];
+                    float *nh = new float[maxh*2];
                     ASSERT(nh);
-                    memcpy(nh,heights,sizeof(Flx16)*maxh);
+                    memcpy(nh,heights,sizeof(float)*maxh);
                     delete [] heights;
                     heights = nh;
 
@@ -322,7 +323,7 @@ void TerrEditDoc::compress_heights_averaged(Flx16 threshold,
                 {
                     if (heights[i] < heights[i-1])
                     {
-                        Flx16 h = heights[i-1];
+                        float h = heights[i-1];
                         heights[i-1] = heights[i];
                         heights[i] = h;
 
@@ -364,7 +365,7 @@ void TerrEditDoc::compress_heights_averaged(Flx16 threshold,
             {
                 if (counts[i] > counts[i-1])
                 {
-                    Flx16 h = heights[i-1];
+                    float h = heights[i-1];
                     heights[i-1] = heights[i];
                     heights[i] = h;
 
@@ -391,7 +392,7 @@ void TerrEditDoc::compress_heights_averaged(Flx16 threshold,
                     break;
             }
 
-            Flx16 mind(0x7fffffff,0);
+            float mind = FLT_MAX;
             for(long i=hcount-1; i >= stop; i--)
             {
                 for(long j=hcount-1; j >= stop; j--)
@@ -399,7 +400,7 @@ void TerrEditDoc::compress_heights_averaged(Flx16 threshold,
                     if (i == j)
                         continue;
 
-                    Flx16 d = flx_abs(heights[i] - heights[j]);
+                    float d = float(fabs(heights[i] - heights[j]));
 
                     if (d < mind)
                     {
@@ -441,8 +442,7 @@ void TerrEditDoc::compress_heights_averaged(Flx16 threshold,
         }
 
         // Create averaged entry with sum of usage counts
-        heights[ind1] = Flx16((heights[ind1].flx
-                               + heights[ind2].flx) >> 1,0);
+        heights[ind1] = (heights[ind1] + heights[ind2]) / 2.0f;
         counts[ind1] = counts[ind1] + counts[ind2];
         
         // Remove now freed index
@@ -459,10 +459,10 @@ void TerrEditDoc::compress_heights_averaged(Flx16 threshold,
     //ÄÄÄ Setup height table
     ushort  adjust = (normalize) ? min : 0;
 
-    memset(htable,0,sizeof(Flx16)*256);
+    memset(htable,0,sizeof(float)*256);
     for(long i=0; i < (long)hcount; i++)
     {
-        htable[i] = heights[i] - Flx16(adjust);
+        htable[i] = heights[i] - float(adjust);
     }
 
     // Free temp data
@@ -478,7 +478,7 @@ void TerrEditDoc::compress_heights_averaged(Flx16 threshold,
         {
             if (htable[i] < htable[i-1])
             {
-                Flx16 h = htable[i-1];
+                float h = htable[i-1];
                 htable[i-1] = htable[i];
                 htable[i] = h;
 
@@ -500,7 +500,7 @@ void TerrEditDoc::compress_heights_averaged(Flx16 threshold,
         for(x=xs, cx=0, sptr=data+(y*w)+xs, dptr=hfield+(y*width);
             x < w; x++)
         {
-            *(dptr++) = (byte)find_closest_htable_entry(Flx16(*(sptr++)-adjust),0,hcount-1);
+            *(dptr++) = (byte)find_closest_htable_entry(float(*(sptr++)-adjust),0,hcount-1);
             if (++cx >= width)
                 break;
         }
@@ -705,7 +705,7 @@ BOOL TerrEditDoc::import_heights_from_vpdem(const char *fname, BOOL *isvpdem)
 
 //ÄÄÄ Determine data conversion algorithm
     int option;
-    Flx16 threshold;
+    float threshold;
     BOOL normalize;
     {
         DEMImportDlg dlg;
@@ -713,7 +713,7 @@ BOOL TerrEditDoc::import_heights_from_vpdem(const char *fname, BOOL *isvpdem)
             return FALSE;
 
         option=dlg.option;
-        threshold=(Flx16)dlg.m_avg_maxd;
+        threshold=dlg.m_avg_maxd;
         normalize=dlg.m_normalize;
     }
 
@@ -767,7 +767,7 @@ BOOL TerrEditDoc::import_heights_from_usgsdem(const char *fname)
 
 //ÄÄÄ Determine data conversion algorithm
     int option;
-    Flx16 threshold;
+    float threshold;
     BOOL normalize;
     long longitude, latitude;
     for(;;)
@@ -788,7 +788,7 @@ BOOL TerrEditDoc::import_heights_from_usgsdem(const char *fname)
         }
 
         option=dlg.option;
-        threshold=(Flx16)dlg.m_avg_maxd;
+        threshold=dlg.m_avg_maxd;
         normalize=dlg.m_normalize;
         longitude=dlg.longitude;
         latitude=dlg.latitude;
@@ -886,7 +886,7 @@ BOOL TerrEditDoc::import_heights_from_pcx(const char *fname)
 //ÄÄÄ Setup height table
     for(i=0; i < 256; i++)
     {
-        htable[i] = Flx16(16*i);
+        htable[i] = float(16*i);
     }
 
 //ÄÄÄ Copy data from PCX
@@ -969,7 +969,8 @@ void TerrEditDoc::ImportTerrain(const char *fname, int losswarn)
     }
 
 //ÄÄÄ Update application
-    ComputeNormals();
+    ComputeNormals(NORMALS_SMOOTH);
+    ComputeNormals(NORMALS_FLAT);
 
     SetModifiedFlag();
     SetLightsModifiedFlag();

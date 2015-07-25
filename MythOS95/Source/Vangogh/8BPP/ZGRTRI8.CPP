@@ -285,10 +285,27 @@ extern "C" void draw_zgrhlines(VngoTriangle *tri)
                 *zptr = wz;
 
                 int ltx = x & 3;
-                int idx = ((tB + dmatrixR[ltx]) >> 9) & (0x1f << 10);
-                idx |= ((tG + dmatrixG[ltx]) >> 14) & (0x1f << 5);
-                idx |= ((tR + dmatrixB[ltx]) >> 19);
-                *ptr = lut[idx];
+                int val = 0;
+                int tval = tB + dmatrixB[ltx];
+                if (tval > 0xff0000)
+                    val = word(0x1f << 10);
+                else if (tval >= 0)
+                    val = word(tval >> 9) & (0x1f << 10);
+
+                tval = tG + dmatrixG[ltx];
+                if (tval > 0xff0000)
+                    val |= word(0x1f << 5);
+                else if (tval >= 0)
+                    val |= word(tval >> 14) & (0x1f << 5);
+
+
+                tval = tR + dmatrixR[ltx];
+                if (tval > 0xff0000)
+                    val |= word(0x1f);
+                else if (tval >= 0)
+                    val |= word((tval >> 19) & 0x1f);
+
+                *ptr = lut[val];
             }
             ptr++;
             zptr++;

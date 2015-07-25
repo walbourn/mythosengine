@@ -27,15 +27,34 @@
 //
 // vngvpdb8.hpp
 //
+// Contains the 8-bit Windows DIB viewport class definition
 //
-//อออออออออออออออออออออออออออออ Revision History ออออออออออออออออออออออออออออ
 //อออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออ
 
 #ifndef __VNGVPDB8_HPP
 #define __VNGVPDB8_HPP
 
+//ฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐ
+//
+//                                Includes
+//
+//ฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐ
+
 #include "vngvvp8.hpp"
 
+#ifdef __WATCOMC__
+#pragma pack(1);
+#endif
+
+#ifdef _MSC_VER
+#pragma pack(push,1)
+#endif
+
+//ฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐ
+//
+//                                Classes
+//
+//ฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐ
 
 class VngoVportDB8 : public VngoVVport8
 {
@@ -52,4 +71,14 @@ public:
 
 };
 
+#ifdef __WATCOMC__
+#pragma pack();
+#endif
+
+#ifdef _MSC_VER
+#pragma pack(pop)
+#endif
+
 #endif  // __VNGVPDB8_HPP
+
+//ฐฑฒ End of header - vngvpdb8.hpp ฒฑฐ

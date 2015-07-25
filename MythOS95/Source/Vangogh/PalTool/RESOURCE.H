@@ -10,6 +10,8 @@
 #define IDD_PROPA                       132
 #define IDD_PROPB                       133
 #define IDD_PROPC                       134
+#define IDB_ABOUT                       168
+#define IDB_LOGO                        169
 #define IDC_PROGRESSBAR                 1000
 #define IDC_PROP_NAME                   1006
 #define IDC_PAL_RED                     1007

@@ -32,7 +32,7 @@
 //
 // Chuck Walbourn
 //
-// eshtdoc.cpp 
+// eshtdoc.cpp
 //
 // Terrain Editor Document class.
 //
@@ -43,9 +43,9 @@
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-//             
+//
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include "stdafx.h"
@@ -58,12 +58,13 @@
 
 #include "esfile.hpp"
 
+#include <float.h>
 #include <math.h>
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-//             
+//
 //                                Equates
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #define MAGIC   0xffab
@@ -110,6 +111,7 @@ static int FirstNew=1;                  // Hack to avoid 'New' dialog on startup
 // TerrEditDoc - Constructor                                                ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 TerrEditDoc::TerrEditDoc() :
+    ctrlfl(FLOATING | COMPRESS),
     width(0),
     depth(0),
     surfratio(1),
@@ -141,7 +143,7 @@ TerrEditDoc::TerrEditDoc() :
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 TerrEditDoc::~TerrEditDoc()
 {
-      DeleteContents();
+    DeleteContents();
 }
 
 
@@ -156,7 +158,7 @@ TerrEditDoc::~TerrEditDoc()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 void TerrEditDoc::AssertValid() const
 {
-        CDocument::AssertValid();
+    CDocument::AssertValid();
 }
 
 
@@ -165,7 +167,7 @@ void TerrEditDoc::AssertValid() const
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 void TerrEditDoc::Dump(CDumpContext& dc) const
 {
-        CDocument::Dump(dc);
+    CDocument::Dump(dc);
 }
 #endif //_DEBUG
 
@@ -178,7 +180,7 @@ void TerrEditDoc::Dump(CDumpContext& dc) const
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrEditDoc - DeleteContents                                             ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrEditDoc::DeleteContents() 
+void TerrEditDoc::DeleteContents()
 {
     for (EschLight *lptr=lights; lptr;)
     {
@@ -286,7 +288,7 @@ BOOL TerrEditDoc::LoadPalette(const char *fname, int doupdate)
         sprintf(str,"Error #%x loading Van Gogh palette file:\n\n%s",(int)err,fname);
         MessageBox(NULL,str,"Error",MB_OK | MB_ICONEXCLAMATION);
         return FALSE;
-    }  
+    }
 
     strcpy(pfname,fname);
 
@@ -318,7 +320,7 @@ BOOL TerrEditDoc::LoadPalette(const char *fname, int doupdate)
         MessageBox(NULL,
                    "Failed to create a palette from Van Gogh palette file",
                    "Error",MB_OK | MB_ICONEXCLAMATION);
-        return FALSE;       
+        return FALSE;
     }
 
     map_surfcolor_to_palette();
@@ -767,7 +769,7 @@ read_error: ;
                "Failed to read needed data",
                "Load Textures Error",MB_OK | MB_ICONEXCLAMATION);
     fclose (fptr);
-}   
+}
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
@@ -829,9 +831,7 @@ BOOL TerrEditDoc::SetColor(int ind, const char *name, dword color, dword flags)
 
     SetModifiedFlag();
 
-// ----------------------------------------------------
     UpdateAllViews(NULL,HINT_UPDATETXTS | HINT_UPDATECOLR,NULL);
-// ----------------------------------------------------
 
     return TRUE;
 }
@@ -1025,7 +1025,7 @@ read_error: ;
                "Failed to read needed data",
                "Load Colors Error",MB_OK | MB_ICONEXCLAMATION);
     fclose (fptr);
-}   
+}
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
@@ -1035,30 +1035,11 @@ void TerrEditDoc::ExportToIFF(const char *fname)
 {
     dword               status=0;
     XFParseIFF          iff;
-    EschFileTerrHDR     header;
     EschFileTerrHCLR    hcolor;
 
     dword surfsize = (width * depth) >> (surfshift*2);
 
-//ÄÄÄ Setup header
-    memset(&header,0,sizeof(EschFileTerrHDR));
-    strncpy(header.name,name,ESCH_MAX_NAME);
-    // flags, compression, na1, na[72] left at 0
-
-    header.width = width;
-    header.depth = depth;
-    header.surfratio = surfratio;
-    header.scale = scale;
-    header.ntxts = (byte) txtNumb;
-    header.origin_x = orgx;
-    header.origin_y = orgy;
-    header.origin_z = orgz;
-
-    strncpy(header.palname,palette.name,16);
-
-//ÄÄÄ Setup file
-
-    // Open output file
+//ÄÄÄ Open output file
     if (iff.create(fname,0))
     {
         char    str[512];
@@ -1070,7 +1051,7 @@ void TerrEditDoc::ExportToIFF(const char *fname)
         return;
     }
 
-    // Create form
+//ÄÄÄ Create form
     if (iff.newform(iff.makeid('E','T','E','R')))
     {
         char    str[64];
@@ -1082,21 +1063,69 @@ void TerrEditDoc::ExportToIFF(const char *fname)
         return;
     }
 
-    // Write header
-    if (iff.write(iff.makeid('H','D','R',' '),&header,sizeof(EschFileTerrHDR)))
+//ÄÄÄ Write header
+    if (ctrlfl & FLOATING)
     {
-        char    str[64];
+        EschFileTerrHDR header;
+        memset(&header,0,sizeof(header));
 
-        sprintf(str,"Error #%x while trying to write header chunk",(int)iff.error());
+        strncpy(header.name,name,ESCH_MAX_NAME);
 
-        MessageBox((AfxGetMainWnd()) ? AfxGetMainWnd()->GetSafeHwnd() : NULL,
-               str,"Export Error",MB_OK | MB_ICONEXCLAMATION);
-        return;
+        header.width = width;
+        header.depth = depth;
+        header.surfratio = surfratio;
+        header.scale = scale;
+        header.ntxts = (byte) txtNumb;
+        header.origin_x = orgx;
+        header.origin_y = orgy;
+        header.origin_z = orgz;
+
+        strncpy(header.palname,palette.name,16);
+
+        if (iff.write(iff.makeid('H','D','R','1'),&header,sizeof(header)))
+        {
+            char    str[64];
+
+            sprintf(str,"Error #%x while trying to write header chunk",(int)iff.error());
+
+            MessageBox((AfxGetMainWnd()) ? AfxGetMainWnd()->GetSafeHwnd() : NULL,
+                       str,"Export Error",MB_OK | MB_ICONEXCLAMATION);
+            return;
+        }
+    }
+    else
+    {
+        EschFileTerrHDRV1   header;
+        memset(&header,0,sizeof(header));
+
+        strncpy(header.name,name,ESCH_MAX_NAME);
+
+        header.width = width;
+        header.depth = depth;
+        header.surfratio = surfratio;
+        header.scale = long(scale * 65536.0f);
+        header.ntxts = (byte) txtNumb;
+        header.origin_x = long(orgx * 65536.0f);
+        header.origin_y = long(orgy * 65536.0f);
+        header.origin_z = long(orgz * 65536.0f);
+
+        strncpy(header.palname,palette.name,16);
+
+        if (iff.write(iff.makeid('H','D','R',' '),&header,sizeof(header)))
+        {
+            char    str[64];
+
+            sprintf(str,"Error #%x while trying to write header chunk",(int)iff.error());
+
+            MessageBox((AfxGetMainWnd()) ? AfxGetMainWnd()->GetSafeHwnd() : NULL,
+                       str,"Export Error",MB_OK | MB_ICONEXCLAMATION);
+            return;
+        }
     }
 
     status |= EXPSTAT_HDR;
 
-    // Write description, if any
+//ÄÄÄ Write description, if any
     if (*desc && iff.write(iff.makeid('D','E','S','C'),desc,strlen(desc)+1))
     {
         char    str[64];
@@ -1108,7 +1137,7 @@ void TerrEditDoc::ExportToIFF(const char *fname)
         return;
     }
 
-    // Write author, if any
+//ÄÄÄ Write author, if any
     if (*auth && iff.write(iff.makeid('A','U','T','H'),auth,strlen(auth)+1))
     {
         char    str[64];
@@ -1120,7 +1149,7 @@ void TerrEditDoc::ExportToIFF(const char *fname)
         return;
     }
 
-    // Write copyright, if any
+//ÄÄÄ Write copyright, if any
     if (*copy && iff.write(iff.makeid('(','C',')',' '),copy,strlen(copy)+1))
     {
         char    str[64];
@@ -1132,7 +1161,7 @@ void TerrEditDoc::ExportToIFF(const char *fname)
         return;
     }
 
-    // Write height-based color table
+//ÄÄÄ Write height-based color table
     hcolor.blue = color_bands[0];
     hcolor.lblue = color_bands[1];
     hcolor.white = color_bands[2];
@@ -1155,7 +1184,7 @@ void TerrEditDoc::ExportToIFF(const char *fname)
         return;
     }
 
-    // Write height field
+//ÄÄÄ Write height field
     if (hfield)
     {
         if (iff.write(iff.makeid('H','G','T','S'),hfield,width*depth))
@@ -1171,22 +1200,43 @@ void TerrEditDoc::ExportToIFF(const char *fname)
         status |= EXPSTAT_HGTS;
     }
 
-    // Write height table
+//ÄÄÄ Write height table
     if (htable)
     {
-        if (iff.write(iff.makeid('H','T','B','L'),htable,sizeof(Flx16)*256))
+        if (ctrlfl & FLOATING)
         {
-            char    str[64];
+            if (iff.write(iff.makeid('H','T','B','1'),htable,sizeof(float)*256))
+            {
+                char    str[64];
 
-            sprintf(str,"Error #%x while trying to write height table chunk",(int)iff.error());
+                sprintf(str,"Error #%x while trying to write height table chunk",(int)iff.error());
 
-            MessageBox((AfxGetMainWnd()) ? AfxGetMainWnd()->GetSafeHwnd() : NULL,
-                   str,"Export Error",MB_OK | MB_ICONEXCLAMATION);
-            return;
+                MessageBox((AfxGetMainWnd()) ? AfxGetMainWnd()->GetSafeHwnd() : NULL,
+                    str,"Export Error",MB_OK | MB_ICONEXCLAMATION);
+                return;
+            }
+        }
+        else
+        {
+            long v1[256];
+
+            for(int i=0; i < 256; i++)
+                v1[i] = long(htable[i] * 65536.0f);
+
+            if (iff.write(iff.makeid('H','T','B','L'),&v1,sizeof(Flx16)*256))
+            {
+                char    str[64];
+
+                sprintf(str,"Error #%x while trying to write height table chunk",(int)iff.error());
+
+                MessageBox((AfxGetMainWnd()) ? AfxGetMainWnd()->GetSafeHwnd() : NULL,
+                    str,"Export Error",MB_OK | MB_ICONEXCLAMATION);
+                return;
+            }
         }
     }
 
-    // Write normals info
+//ÄÄÄ Write normals info
     if (hsurfnorml)
     {
         EschVector *nml = (EschVector*)ivory_hlock(hsurfnorml);
@@ -1195,11 +1245,12 @@ void TerrEditDoc::ExportToIFF(const char *fname)
             MessageBox((AfxGetMainWnd()) ? AfxGetMainWnd()->GetSafeHwnd() : NULL,
                       "Could not lock normals memory, skipping normals export",
                       "Export Warning",MB_OK | MB_ICONEXCLAMATION);
+            return;
         }
-        else
+
+        if (ctrlfl & COMPRESS)
         {
-#if 1
-            // Output compressed normals
+            //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Output compressed normals
             ushort *cnrmls = new ushort[surfsize * 4];
             if (!cnrmls)
             {
@@ -1213,7 +1264,10 @@ void TerrEditDoc::ExportToIFF(const char *fname)
             for(ulong i=0; i < surfsize; i++, ptr++)
             {
                 ushort flags=0;
-                Flx16 i=ptr->i;  Flx16 j=ptr->j;  Flx16 k=ptr->k;
+
+                long i = long(ptr->i * 65536.0f);
+                long j = long(ptr->j * 65536.0f);
+                long k = long(ptr->k * 65536.0f);
 
                 if (i < 0)
                 {
@@ -1231,21 +1285,22 @@ void TerrEditDoc::ExportToIFF(const char *fname)
                     k = -k;
                 }
 
-                *(sptr++) = (ushort)(i.flx & 0xffff);
-                *(sptr++) = (ushort)(j.flx & 0xffff);
-                *(sptr++) = (ushort)(k.flx & 0xffff);
+                *(sptr++) = (ushort)(i & 0xffff);
+                *(sptr++) = (ushort)(j & 0xffff);
+                *(sptr++) = (ushort)(k & 0xffff);
 
-                if (i.flx & 0x00010000)
+                if (i & 0x00010000)
                     flags |= 0x1;
-                if (j.flx & 0x00010000)
+                if (j & 0x00010000)
                     flags |= 0x2;
-                if (k.flx & 0x00010000)
+                if (k & 0x00010000)
                     flags |= 0x4;
 
                 *(sptr++) = flags;
             }
 
-            if (iff.write(iff.makeid('N','R','M','1'),cnrmls,surfsize*sizeof(ushort)*4))
+            if (iff.write(iff.makeid('N','R','M','1'),
+                          cnrmls,surfsize*sizeof(ushort)*4))
             {
                 char    str[64];
 
@@ -1254,31 +1309,65 @@ void TerrEditDoc::ExportToIFF(const char *fname)
 
                 MessageBox((AfxGetMainWnd()) ? AfxGetMainWnd()->GetSafeHwnd() : NULL,
                            str,"Export Error",MB_OK | MB_ICONEXCLAMATION);
-                delete cnrmls;
+                delete [] cnrmls;
                 return;
             }
 
-            delete cnrmls;
-#else
-            // Output uncompressed normals
-            if (iff.write(iff.makeid('N','R','M','L'),nml,surfsize*sizeof(EschVector)))
-            {
-                char    str[64];
-
-                sprintf(str,"Error #%x while trying to write surface normals chunk",
-                            (int)iff.error());
-
-                MessageBox((AfxGetMainWnd()) ? AfxGetMainWnd()->GetSafeHwnd() : NULL,
-                           str,"Export Error",MB_OK | MB_ICONEXCLAMATION);
-                return;
-            }
-#endif
-
-            status |= EXPSTAT_NRML;
+            delete [] cnrmls;
         }
+        else if (ctrlfl & FLOATING)
+        {
+            //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Output uncompressed normals (floating-point)
+            if (iff.write(iff.makeid('N','R','M','2'),
+                          nml,surfsize*sizeof(EschVector)))
+            {
+                char    str[64];
+
+                sprintf(str,"Error #%x while trying to write surface normals chunk",
+                            (int)iff.error());
+
+                MessageBox((AfxGetMainWnd()) ? AfxGetMainWnd()->GetSafeHwnd() : NULL,
+                           str,"Export Error",MB_OK | MB_ICONEXCLAMATION);
+                return;
+            }
+        }
+        else
+        {
+            //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Output uncompressed normals (fixed-point)
+            EschVectorV1 *temp = new EschVectorV1[surfsize];
+            ASSERT(temp);
+
+            EschVector *tptr = nml;
+            EschVectorV1 *tmpptr = temp;
+            for(ulong i=0; i < surfsize; i++, tptr++, tmpptr++)
+            {
+                tmpptr->i = long(tptr->i * 65536.0f);
+                tmpptr->j = long(tptr->j * 65536.0f);
+                tmpptr->k = long(tptr->k * 65536.0f);
+            }
+
+            if (iff.write(iff.makeid('N','R','M','L'),
+                          temp,surfsize*sizeof(EschVectorV1)))
+            {
+                char    str[64];
+
+                sprintf(str,"Error #%x while trying to write surface normals chunk",
+                            (int)iff.error());
+
+                MessageBox((AfxGetMainWnd()) ? AfxGetMainWnd()->GetSafeHwnd() : NULL,
+                           str,"Export Error",MB_OK | MB_ICONEXCLAMATION);
+
+                delete [] temp;
+                return;
+            }
+
+            delete [] temp;
+        }
+
+        status |= EXPSTAT_NRML;
     }
 
-    // Write surface info
+//ÄÄÄ Write surface info
     if (surfinfo)
     {
         if (iff.write(iff.makeid('S','U','R','F'),surfinfo,surfsize*sizeof(esch_surf_type)))
@@ -1296,7 +1385,7 @@ void TerrEditDoc::ExportToIFF(const char *fname)
         status |= EXPSTAT_SURF;
     }
 
-    // Texture information
+//ÄÄÄ Texture information
     if (txtNumb)
     {
         EschFileMtlMHDR mhdr;
@@ -1336,7 +1425,7 @@ void TerrEditDoc::ExportToIFF(const char *fname)
             ASSERT(ptr);
 
             memset(&mhdr,0,sizeof(EschFileMtlMHDR));
-            strncpy(mhdr.name,txtName[i],ESCH_MAX_NAME);           
+            strncpy(mhdr.name,txtName[i],ESCH_MAX_NAME);
             mhdr.xsize = ptr->width;
             mhdr.ysize = ptr->height;
             mhdr.nframes = 1;
@@ -1367,7 +1456,7 @@ void TerrEditDoc::ExportToIFF(const char *fname)
             }
 
             dword size=XFParseXEB::compress_rle_8bpp(mhdr.xsize,mhdr.ysize,
-                                                     ptr->tex,work);
+                                                     (byte*)ptr->tex,work);
 
             if (size)
             {
@@ -1407,12 +1496,12 @@ void TerrEditDoc::ExportToIFF(const char *fname)
 
             iff.leaveform();
             txtEsch[i]->unlock();
-        }        
+        }
 
         status |= EXPSTAT_TXTS;
     }
 
-    // End form
+//ÄÄÄ End form
     iff.leaveform();
     iff.close();
 
@@ -1435,17 +1524,17 @@ void TerrEditDoc::ComputeNormals(dword flags)
     EschVector      *dptr;
 
     ASSERT(width && depth && hsurfnorml);
-    ASSERT((flags & ESCH_NORMALS_SMOOTH) || (flags & ESCH_NORMALS_FLAT));
+    ASSERT((flags & NORMALS_SMOOTH) || (flags & NORMALS_FLAT));
 
 //ÄÄÄ Setup memory for normals
     dword surfsize = (width * depth) >> (surfshift*2);
 
     EschVector  *nml;
-    if (flags & ESCH_NORMALS_SMOOTH)
+    if (flags & NORMALS_SMOOTH)
     {
         nml = (EschVector*)ivory_hlock(hsurfnorml);
     }
-    else if (flags & ESCH_NORMALS_FLAT)
+    else if (flags & NORMALS_FLAT)
     {
         nml = (EschVector*)ivory_hlock(hsurfnormlflat);
     }
@@ -1537,7 +1626,7 @@ void TerrEditDoc::ComputeNormals(dword flags)
                 }
             }
 
-            if ((y > 0 && x < width-1) && (flags & ESCH_NORMALS_SMOOTH))
+            if ((y > 0 && x < width-1) && (flags & NORMALS_SMOOTH))
             {
                 // Face 3 (E - SE)
                 v1[0] = (double)scale;
@@ -1596,7 +1685,7 @@ void TerrEditDoc::ComputeNormals(dword flags)
                 }
             }
 
-            if ((y > 0 && x > 0) && (flags & ESCH_NORMALS_SMOOTH)) 
+            if ((y > 0 && x > 0) && (flags & NORMALS_SMOOTH))
             {
                 // Face 5 (S - SW)
                 v1[0] = 0.0;
@@ -1655,7 +1744,7 @@ void TerrEditDoc::ComputeNormals(dword flags)
                 }
             }
 
-            if ((y < depth-1 && x > 0) && (flags & ESCH_NORMALS_SMOOTH)) 
+            if ((y < depth-1 && x > 0) && (flags & NORMALS_SMOOTH))
             {
                 // Face 7 (E - NW)
                 v1[0] = -(double)scale;
@@ -1725,9 +1814,9 @@ void TerrEditDoc::ComputeNormals(dword flags)
             }
             else
             {
-                dptr->i = (Flx16) (float)(sum[0] / mag);
-                dptr->j = (Flx16) (float)(sum[1] / mag);
-                dptr->k = (Flx16) (float)(sum[2] / mag);
+                dptr->i = (float)(sum[0] / mag);
+                dptr->j = (float)(sum[1] / mag);
+                dptr->k = (float)(sum[2] / mag);
             }
 
             // Update counters
@@ -1743,10 +1832,10 @@ void TerrEditDoc::ComputeNormals(dword flags)
             break;
     }
 
-    if (flags & ESCH_NORMALS_SMOOTH)
+    if (flags & NORMALS_SMOOTH)
         ivory_hunlock(hsurfnorml);
-    else if (flags & ESCH_NORMALS_FLAT)
-        ivory_hunlock(hsurfnormlflat); 
+    else if (flags & NORMALS_FLAT)
+        ivory_hunlock(hsurfnormlflat);
 
 
     SetModifiedFlag();
@@ -1782,13 +1871,13 @@ void TerrEditDoc::LightTerrain()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrEditDoc - GetMinMaxElevations                                        ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrEditDoc::GetMinMaxElevations(Flx16 &min, Flx16 &max) 
+void TerrEditDoc::GetMinMaxElevations(float &min, float &max)
 {
     if (!htable)
         return;
 
-    min.flx = 0x7fffffff;
-    max.flx = -0x7fffffff;
+    min = FLT_MAX;
+    max = -FLT_MAX;
 
     for(int i=0; i < 256; i++)
     {
@@ -1803,12 +1892,12 @@ void TerrEditDoc::GetMinMaxElevations(Flx16 &min, Flx16 &max)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrEditDoc - SetBaseElevation                                           ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrEditDoc::SetBaseElevation(Flx16 newbase)
+void TerrEditDoc::SetBaseElevation(float newbase)
 {
     if (!htable)
         return;
 
-    Flx16 base(0x7fffffff,0);
+    float base=FLT_MAX;
     for(int i=0; i < 256; i++)
     {
         if (htable[i] < base)
@@ -1818,7 +1907,7 @@ void TerrEditDoc::SetBaseElevation(Flx16 newbase)
     if (base == newbase)
         return;
 
-    Flx16 adjust = base - newbase;
+    float adjust = base - newbase;
 
     for(i=0; i < 256; i++)
     {
@@ -2488,14 +2577,14 @@ void TerrEditDoc::UITerrainProperities(CWnd *parent, UINT ipage, int edit)
                 ASSERT(0);
                 break;
         }
-        scale = (Flx16)(int)gdlg.m_scale;
+        scale = (float)(int)gdlg.m_scale;
 
         autocenter = (gdlg.m_autoCenterOrg) ? 1 : 0;
         if (autocenter)
         {
-            orgx = -(Flx16)(width/2)*scale;
+            orgx = -(float)(width/2)*scale;
             orgy = 0;
-            orgz = -(Flx16)(depth/2)*scale;
+            orgz = -(float)(depth/2)*scale;
         }
         else
         {
@@ -2532,7 +2621,7 @@ void TerrEditDoc::UITerrainProperities(CWnd *parent, UINT ipage, int edit)
         SetLightsModifiedFlag();
         if (!edit)
             UpdateAllViews(NULL,HINT_UPDATETERR|HINT_UPDATECOLR,NULL);
-    }  
+    }
 }
 
 
@@ -2787,16 +2876,16 @@ void TerrEditDoc::UILightProperties(CWnd *parent, UINT ipage)
         switch (lights->get_type())
         {
             case ESCH_LGTT_VECTOR:
-                ((EschVectorLight*)lights)->set_direction((Flx16)gdlg.m_xiValue,
-                                                          (Flx16)gdlg.m_yjValue,
-                                                          (Flx16)gdlg.m_zkValue);
+                ((EschVectorLight*)lights)->set_direction(gdlg.m_xiValue,
+                                                          gdlg.m_yjValue,
+                                                          gdlg.m_zkValue);
                 break;
             case ESCH_LGTT_POINT:
             case ESCH_LGTT_ATTEN:
             case ESCH_LGTT_SPOT:
-                ((EschPointLight*)lights)->set_position((Flx16)gdlg.m_xiValue,
-                                                        (Flx16)gdlg.m_yjValue,
-                                                        (Flx16)gdlg.m_zkValue);
+                ((EschPointLight*)lights)->set_position(gdlg.m_xiValue,
+                                                        gdlg.m_yjValue,
+                                                        gdlg.m_zkValue);
                 break;
         }
 
@@ -2811,17 +2900,17 @@ void TerrEditDoc::UILightProperties(CWnd *parent, UINT ipage)
         switch (lights->get_type())
         {
             case ESCH_LGTT_ATTEN:
-                ((EschAttenLight*)lights)->set_inner((Flx16)xdlg.m_inner);
-                ((EschAttenLight*)lights)->set_outer((Flx16)xdlg.m_outer);
+                ((EschAttenLight*)lights)->set_inner(xdlg.m_inner);
+                ((EschAttenLight*)lights)->set_outer(xdlg.m_outer);
                 break;
             case ESCH_LGTT_SPOT:
-                ((EschSpotLight*)lights)->set_direction((Flx16)xdlg.m_diri,
-                                                        (Flx16)xdlg.m_dirj,
-                                                        (Flx16)xdlg.m_dirk);
-                ((EschSpotLight*)lights)->set_hotspot((Flx16)xdlg.m_hotspot);
-                ((EschSpotLight*)lights)->set_falloff((Flx16)xdlg.m_falloff);
-                ((EschSpotLight*)lights)->set_inner((Flx16)xdlg.m_inner);
-                ((EschSpotLight*)lights)->set_outer((Flx16)xdlg.m_outer);
+                ((EschSpotLight*)lights)->set_direction(xdlg.m_diri,
+                                                        xdlg.m_dirj,
+                                                        xdlg.m_dirk);
+                ((EschSpotLight*)lights)->set_hotspot(xdlg.m_hotspot);
+                ((EschSpotLight*)lights)->set_falloff(xdlg.m_falloff);
+                ((EschSpotLight*)lights)->set_inner(xdlg.m_inner);
+                ((EschSpotLight*)lights)->set_outer(xdlg.m_outer);
                 break;
         }
 
@@ -2842,7 +2931,7 @@ void TerrEditDoc::UICameraProperties(CWnd *parent, UINT ipage)
     CameraPropGenPage   gdlg;
 
     EschPoint       pt;
-    cam.get_position(&pt);    
+    cam.get_position(&pt);
     gdlg.m_xpos = pt.x;
     gdlg.m_ypos = pt.y;
     gdlg.m_zpos = pt.z;
@@ -2893,22 +2982,22 @@ void TerrEditDoc::UICameraProperties(CWnd *parent, UINT ipage)
     if (sh.DoModal() == IDOK)
     {
         //ÄÄÄ General
-        cam.set_position((Flx16)gdlg.m_xpos,(Flx16)gdlg.m_ypos,(Flx16)gdlg.m_zpos);
-        cam.set_vects((Flx16)gdlg.m_topi,(Flx16)gdlg.m_topj,(Flx16)gdlg.m_topk,
-                      (Flx16)gdlg.m_diri,(Flx16)gdlg.m_dirj,(Flx16)gdlg.m_dirk);
-        cam.set_fov((Flx16)gdlg.m_fov);
+        cam.set_position(gdlg.m_xpos,gdlg.m_ypos,gdlg.m_zpos);
+        cam.set_vects(gdlg.m_topi,gdlg.m_topj,gdlg.m_topk,
+                      gdlg.m_diri,gdlg.m_dirj,gdlg.m_dirk);
+        cam.set_fov(gdlg.m_fov);
 
         //ÄÄÄ LOD
-        lod_active = (Flx16)ldlg.m_lod;
-        lod_medium = (Flx16)ldlg.m_med;
-        lod_low = (Flx16)ldlg.m_low;
+        lod_active = ldlg.m_lod;
+        lod_medium = ldlg.m_med;
+        lod_low = ldlg.m_low;
 
         //ÄÄÄ Misc
-        cam.set_hither((Flx16)mdlg.m_hither);
-        cam.set_yon((Flx16)mdlg.m_yon);
-        cam.set_factor((Flx16)mdlg.m_scalef);
+        cam.set_hither(mdlg.m_hither);
+        cam.set_yon(mdlg.m_yon);
+        cam.set_factor(mdlg.m_scalef);
         cam_bcolor = mdlg.m_bcolor;
-        hover_offset = (Flx16)mdlg.m_hover;
+        hover_offset = mdlg.m_hover;
 
         //ÄÄÄ Extended
         if (xdlg.m_haze_active)
@@ -2916,7 +3005,7 @@ void TerrEditDoc::UICameraProperties(CWnd *parent, UINT ipage)
             if (xdlg.haze_change || !cam.hz_pal)
             {
                 cam.create_haze(xdlg.m_levels, xdlg.m_slevels,
-                                 xdlg.m_blevels, Flx16(xdlg.m_bpercent / 100.0f),
+                                 xdlg.m_blevels, xdlg.m_bpercent / 100.0f,
                                  VngoColor24bit(xdlg.haze_color));
             }
         }
@@ -2929,7 +3018,7 @@ void TerrEditDoc::UICameraProperties(CWnd *parent, UINT ipage)
             {
                 cam.set_bg_bitmap(xdlg.bg_bm);
             }
-            else 
+            else
                 cam.set_flags(cam.flags | ESCH_CAM_OWNSBITMAP);
         }
         else
@@ -3098,7 +3187,7 @@ BOOL TerrEditDoc::load_and_recolor_texture(int ind, const char *fname)
 
         for(i=0; i < bm.width * bm.height; i++)
         {
-            txt->ptr->tex[i] = (byte)mypal[bm.data[i]];
+            ((byte*)txt->ptr->tex)[i] = (byte)mypal[bm.data[i]];
         }
     }
     else // bpp == 3
@@ -3106,7 +3195,7 @@ BOOL TerrEditDoc::load_and_recolor_texture(int ind, const char *fname)
         VngoColor24bit  clr;
         byte            *sptr, *dptr;
 
-        for(i=0, sptr=bm.data, dptr=txt->ptr->tex; i < bm.width * bm.height; i++)
+        for(i=0, sptr=bm.data, dptr=(byte*)txt->ptr->tex; i < bm.width * bm.height; i++)
         {
             clr.r = *(sptr++);
             clr.g = *(sptr++);
@@ -3142,9 +3231,9 @@ BOOL TerrEditDoc::OnNewDocument()
     scale=32;
 
     autocenter = 1;
-    orgx = -(Flx16)(width/2)*scale;
+    orgx = -(float)(width/2)*scale;
     orgy = 0;
-    orgz = -(Flx16)(depth/2)*scale;
+    orgz = -(float)(depth/2)*scale;
 
     strcpy(name,"NoName");
     *desc = 0;
@@ -3166,11 +3255,11 @@ BOOL TerrEditDoc::OnNewDocument()
         return FALSE;
     memset(hfield,0,width * depth);
 
-    htable = new Flx16[256];
+    htable = new float[256];
     if (!htable)
         return FALSE;
     {
-        Flx16 t=0;
+        float t=0;
         for(ulong i=0; i < 256; i++)
         {
             htable[i] = t;
@@ -3299,50 +3388,52 @@ void TerrEditDoc::Serialize(CArchive& ar)
 {
     int i;
 
-        if (ar.IsStoring())
-        {
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Saving
+    if (ar.IsStoring())
+    {
         EschPoint   pnt;
         EschLight   *lgt;
 
-        // Version tag (not in original)
+        //ÄÄÄ Version tag (not in original)
         ar << (ushort)MAGIC;                // Added v1.00
-        ar << (ushort)0x117;                // Current version 1.17
+        ar << (ushort)0x200;                // Current version 2.00
 
-        // Terrain Properities
+        //ÄÄÄ Terrain Properities
         ar << width;
         ar << depth;
         ar << surfratio;
         ar << surfshift;
-        ar << (float)scale;
+        ar << scale;
 
         // hscale removed in v1.16
 
         ar << autocenter;                   // Added in v1.10
         if (!autocenter)
         {
-            ar << (float)orgx;              // Added in v1.10
-            ar << (float)orgy;  
-            ar << (float)orgz;
+            ar << orgx;                     // Added in v1.10
+            ar << orgy;
+            ar << orgz;
         }
+
         ar << CString(name);
         ar << CString(desc);
         ar << CString(auth);
         ar << CString(copy);
         ar << CString(pfname);
 
-        // Height-field
+        //ÄÄÄ Height-field
         ar.Write(hfield,width*depth);
 
-        // Height table
-        ar.Write(htable,sizeof(Flx16)*256);
+        //ÄÄÄ Height table                  // Float in v2.00
+        ar.Write(htable,sizeof(float)*256);
 
-        // Surface information
+        //ÄÄÄ Surface information
         dword surfsize = (width * depth) >> (surfshift*2);
 
         ar.Write(surfinfo,surfsize*sizeof(esch_surf_type));
         ar.Write(surfcolr,surfsize*sizeof(dword));
 
-        // Write texture information
+        //ÄÄÄ Write texture information
         ar << (long)txtNumb;
         for(i=0; i < txtNumb; i++)
         {
@@ -3350,7 +3441,7 @@ void TerrEditDoc::Serialize(CArchive& ar)
             ar << txtDFlags[i];             // Added in 1.11
         }
 
-        // Write color information
+        //ÄÄÄ Write color information
         ar << (long)colorNumb;
         for(i=0; i < colorNumb; i++)
         {
@@ -3358,28 +3449,28 @@ void TerrEditDoc::Serialize(CArchive& ar)
             ar << colorDFlags[i];           // Added in 1.17
         }
 
-        // Write color bands                Added in 1.14
+        //ÄÄÄ Write color bands             Added in 1.14
         for(i=0; i < sizeof(color_bands)/sizeof(ushort); i++)
             ar << color_bands[i];
 
-        // Write camera info                Added in 1.14
+        //ÄÄÄ Write camera info             Added in 1.14
         cam.get_position(&pnt);
-        ar << (float)pnt.x;
-        ar << (float)pnt.y;
-        ar << (float)pnt.z;
-        ar << (float)cam.eye.dir.i;
-        ar << (float)cam.eye.dir.j;
-        ar << (float)cam.eye.dir.k;
-        ar << (float)cam.top.i;
-        ar << (float)cam.top.j;
-        ar << (float)cam.top.k;
-        ar << (float)cam.factor;
-        ar << (float)cam.hither;
-        ar << (float)cam.yon;
-        ar << (float)cam.fov;
+        ar << pnt.x;
+        ar << pnt.y;
+        ar << pnt.z;
+        ar << cam.eye.dir.i;
+        ar << cam.eye.dir.j;
+        ar << cam.eye.dir.k;
+        ar << cam.top.i;
+        ar << cam.top.j;
+        ar << cam.top.k;
+        ar << cam.factor;
+        ar << cam.hither;
+        ar << cam.yon;
+        ar << cam.fov;
         ar << cam_bcolor;
 
-        // Write lights info                Added in 1.14
+        //ÄÄÄ Write lights info             Added in 1.14
         for(i=0, lgt=lights; lgt != NULL; lgt=lgt->next(), i++);
         ar << i;
 
@@ -3392,33 +3483,33 @@ void TerrEditDoc::Serialize(CArchive& ar)
             switch (lgt->get_type())
             {
                 case ESCH_LGTT_VECTOR:
-                    ar << (float)((EschVectorLight*)lgt)->dir.i;
-                    ar << (float)((EschVectorLight*)lgt)->dir.j;
-                    ar << (float)((EschVectorLight*)lgt)->dir.k;
+                    ar << ((EschVectorLight*)lgt)->dir.i;
+                    ar << ((EschVectorLight*)lgt)->dir.j;
+                    ar << ((EschVectorLight*)lgt)->dir.k;
                     break;
                 case ESCH_LGTT_POINT:
-                    ar << (float)((EschPointLight*)lgt)->pos.x;
-                    ar << (float)((EschPointLight*)lgt)->pos.y;
-                    ar << (float)((EschPointLight*)lgt)->pos.z;
+                    ar << ((EschPointLight*)lgt)->pos.x;
+                    ar << ((EschPointLight*)lgt)->pos.y;
+                    ar << ((EschPointLight*)lgt)->pos.z;
                     break;
                 case ESCH_LGTT_ATTEN:
-                    ar << (float)((EschAttenLight*)lgt)->pos.x;
-                    ar << (float)((EschAttenLight*)lgt)->pos.y;
-                    ar << (float)((EschAttenLight*)lgt)->pos.z;
-                    ar << (float)((EschAttenLight*)lgt)->inner;
-                    ar << (float)((EschAttenLight*)lgt)->outer;
+                    ar << ((EschAttenLight*)lgt)->pos.x;
+                    ar << ((EschAttenLight*)lgt)->pos.y;
+                    ar << ((EschAttenLight*)lgt)->pos.z;
+                    ar << ((EschAttenLight*)lgt)->inner;
+                    ar << ((EschAttenLight*)lgt)->outer;
                     break;
                 case ESCH_LGTT_SPOT:
-                    ar << (float)((EschSpotLight*)lgt)->pos.x;
-                    ar << (float)((EschSpotLight*)lgt)->pos.y;
-                    ar << (float)((EschSpotLight*)lgt)->pos.z;
-                    ar << (float)((EschSpotLight*)lgt)->inner;
-                    ar << (float)((EschSpotLight*)lgt)->outer;
-                    ar << (float)((EschSpotLight*)lgt)->dir.i;
-                    ar << (float)((EschSpotLight*)lgt)->dir.j;
-                    ar << (float)((EschSpotLight*)lgt)->dir.k;
-                    ar << (float)((EschSpotLight*)lgt)->hotspot;
-                    ar << (float)((EschSpotLight*)lgt)->falloff;
+                    ar << ((EschSpotLight*)lgt)->pos.x;
+                    ar << ((EschSpotLight*)lgt)->pos.y;
+                    ar << ((EschSpotLight*)lgt)->pos.z;
+                    ar << ((EschSpotLight*)lgt)->inner;
+                    ar << ((EschSpotLight*)lgt)->outer;
+                    ar << ((EschSpotLight*)lgt)->dir.i;
+                    ar << ((EschSpotLight*)lgt)->dir.j;
+                    ar << ((EschSpotLight*)lgt)->dir.k;
+                    ar << ((EschSpotLight*)lgt)->hotspot;
+                    ar << ((EschSpotLight*)lgt)->falloff;
                     break;
                 default:
                     ASSERT(0);
@@ -3426,14 +3517,15 @@ void TerrEditDoc::Serialize(CArchive& ar)
             }
         }
 
-        // Write misc info                  Added in 1.14
-        ar << (float)hover_offset;
+        //ÄÄÄ Write misc info               Added in 1.14
+        ar << hover_offset;
         ar << lod_active;
-        ar << (float)lod_medium;
-        ar << (float)lod_low;
-        }
-        else
-        {
+        ar << lod_medium;
+        ar << lod_low;
+    }
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Loading
+    else
+    {
         float       f;
         ushort      magic;
         ushort      version;
@@ -3443,7 +3535,7 @@ void TerrEditDoc::Serialize(CArchive& ar)
         EschLight   *lgt;
         char        palname[256];
 
-        // Terrain Properities
+        //ÄÄÄ Terrain Properities
 
         ar >> magic;
         if (magic != MAGIC)
@@ -3469,21 +3561,21 @@ void TerrEditDoc::Serialize(CArchive& ar)
         }
         else
         {
-            ar >> f;  scale = (Flx16)f;
+            ar >> scale;;
         }
 
         if (version < 0x116)
         {
             ar >> f;
 
-            htable = new Flx16[256];
+            htable = new float[256];
             ASSERT(htable);
 
-            Flx16 t = 0;
+            float t = 0;
             for(ulong i=0; i < 256; i++)
             {
                 htable[i]=t;
-                t += Flx16(f);
+                t += f;
             }
         }
 
@@ -3492,23 +3584,23 @@ void TerrEditDoc::Serialize(CArchive& ar)
             ar >> autocenter;
             if (autocenter)
             {
-                orgx = -(Flx16)(width/2)*scale;
+                orgx = -(float)(width/2)*scale;
                 orgy = 0;
-                orgz = -(Flx16)(depth/2)*scale;
+                orgz = -(float)(depth/2)*scale;
             }
             else
             {
-                ar >> f;  orgx = (Flx16) f;
-                ar >> f;  orgy = (Flx16) f;
-                ar >> f;  orgz = (Flx16) f;
+                ar >> orgx;
+                ar >> orgy;
+                ar >> orgz;
             }
         }
         else
         {
             autocenter = 1;
-            orgx = -(Flx16)(width/2)*scale;
+            orgx = -(float)(width/2)*scale;
             orgy = 0;
-            orgz = -(Flx16)(depth/2)*scale;
+            orgz = -(float)(depth/2)*scale;
         }
 
         ar >> str;  strncpy(name,str,16);
@@ -3517,20 +3609,32 @@ void TerrEditDoc::Serialize(CArchive& ar)
         ar >> str;  strncpy(copy,str,256);
         ar >> str;  strncpy(palname,str,256);
 
-        // Height-field
+        //ÄÄÄ Height-field
         hfield = new byte[width * depth];
         ASSERT(hfield);
         ar.Read(hfield,width*depth);
 
-        // Height table
-        if (version >= 0x116)
+        //ÄÄÄ Height table
+        if (version >= 0x200)
         {
-            htable = new Flx16[256];
+            htable = new float[256];
             ASSERT(htable);
-            ar.Read(htable,sizeof(Flx16)*256);
+            ar.Read(htable,sizeof(float)*256);
+        }
+        else if (version >= 0x116)
+        {
+            long v1[256];
+
+            ar.Read(&v1,sizeof(Flx16)*256);
+
+            htable = new float[256];
+            ASSERT(htable);
+
+            for(int i=0; i < 256; i++)
+                htable[i] = v1[i] / 65536.0f;
         }
 
-        // Surface information
+        //ÄÄÄ Surface information
         dword surfsize = (width * depth) >> (surfshift*2);
 
         surfinfo = new esch_surf_type[surfsize];
@@ -3541,7 +3645,7 @@ void TerrEditDoc::Serialize(CArchive& ar)
         ASSERT(surfcolr);
         ar.Read(surfcolr,surfsize*sizeof(dword));
 
-        // Allocate undo buffers
+        //ÄÄÄ Allocate undo buffers
         undo_valid=FALSE;
         undo_surfinfo = new esch_surf_type[surfsize];
         ASSERT(undo_surfinfo);
@@ -3549,7 +3653,7 @@ void TerrEditDoc::Serialize(CArchive& ar)
         undo_surfcolr = new dword[surfsize];
         ASSERT(undo_surfcolr);
 
-        // Read texture information
+        //ÄÄÄ Read texture information
         long l;
 
         ar >> l; txtNumb = l;
@@ -3565,6 +3669,7 @@ void TerrEditDoc::Serialize(CArchive& ar)
                 txtDFlags[i] = 0;
         }
 
+        //ÄÄÄ Read color information
         if (version >= 0x115)
         {
             ar >> l; colorNumb = l;
@@ -3585,7 +3690,7 @@ void TerrEditDoc::Serialize(CArchive& ar)
             colorNumb = 0;
         }
 
-        // Read color bands
+        //ÄÄÄ Read color bands
         if (version >= 0x114)
         {
             for(i=0; i < sizeof(color_bands)/sizeof(ushort); i++)
@@ -3607,41 +3712,39 @@ void TerrEditDoc::Serialize(CArchive& ar)
             color_bands[10] = 1200;
         }
 
-        // Read camera info
+        //ÄÄÄ Read camera info
         if (version >= 0x114)
         {
-            ar >> f;  pnt.x = (Flx16)f;
-            ar >> f;  pnt.y = (Flx16)f;
-            ar >> f;  pnt.z = (Flx16)f;
+            ar >> pnt.x;;
+            ar >> pnt.y;;
+            ar >> pnt.z;;
             cam.set_position(&pnt);
 
-            ar >> f;  vec.i = (Flx16)f;  
-            ar >> f;  vec.j = (Flx16)f;  
-            ar >> f;  vec.k = (Flx16)f;  
+            ar >> vec.i;
+            ar >> vec.j;
+            ar >> vec.k;
             cam.set_dir(&vec);
 
-            ar >> f;  vec.i = (Flx16)f;  
-            ar >> f;  vec.j = (Flx16)f;  
-            ar >> f;  vec.k = (Flx16)f;  
+            ar >> vec.i;
+            ar >> vec.j;
+            ar >> vec.k;
             cam.set_top(&vec);
 
-            ar >> f;  cam.set_factor((Flx16)f);
-            ar >> f;  cam.set_hither((Flx16)f);
-            ar >> f;  cam.set_yon((Flx16)f);
-            ar >> f;  cam.set_fov((Flx16)f);
+            ar >> f;  cam.set_factor(f);
+            ar >> f;  cam.set_hither(f);
+            ar >> f;  cam.set_yon(f);
+            ar >> f;  cam.set_fov(f);
 
             ar >> cam_bcolor;
         }
         else
         {
             cam.reset();
-            cam.set_position( 0,
-                              64,
-                              0);
+            cam.set_position( 0.0f, 64.0f, 0.0f);
             cam_bcolor = 0x201414;
         }
 
-        // Read lights info
+        //ÄÄÄ Read lights info
         if (version >= 0x114)
         {
             ar >> i;
@@ -3686,42 +3789,42 @@ void TerrEditDoc::Serialize(CArchive& ar)
                 switch (t)
                 {
                     case ESCH_LGTT_VECTOR:
-                        ar >> f;  vec.i = (Flx16)f;
-                        ar >> f;  vec.j = (Flx16)f;
-                        ar >> f;  vec.k = (Flx16)f;
+                        ar >> vec.i;
+                        ar >> vec.j;
+                        ar >> vec.k;
                         ((EschVectorLight*)lgt)->set_direction(&vec);
                         break;
                     case ESCH_LGTT_POINT:
-                        ar >> f;  pnt.x = (Flx16)f;
-                        ar >> f;  pnt.y = (Flx16)f;
-                        ar >> f;  pnt.z = (Flx16)f;
+                        ar >> pnt.x;
+                        ar >> pnt.y;
+                        ar >> pnt.z;
                         ((EschPointLight*)lgt)->set_position(&pnt);
                         break;
                     case ESCH_LGTT_ATTEN:
-                        ar >> f;  pnt.x = (Flx16)f;
-                        ar >> f;  pnt.y = (Flx16)f;
-                        ar >> f;  pnt.z = (Flx16)f;
+                        ar >> pnt.x;
+                        ar >> pnt.y;
+                        ar >> pnt.z;
                         ((EschAttenLight*)lgt)->set_position(&pnt);
 
-                        ar >> f;  ((EschAttenLight*)lgt)->set_inner((Flx16)f);
-                        ar >> f;  ((EschAttenLight*)lgt)->set_outer((Flx16)f);
+                        ar >> f;  ((EschAttenLight*)lgt)->set_inner(f);
+                        ar >> f;  ((EschAttenLight*)lgt)->set_outer(f);
                         break;
                     case ESCH_LGTT_SPOT:
-                        ar >> f;  pnt.x = (Flx16)f;
-                        ar >> f;  pnt.y = (Flx16)f;
-                        ar >> f;  pnt.z = (Flx16)f;
+                        ar >> pnt.x;
+                        ar >> pnt.y;
+                        ar >> pnt.z;
                         ((EschSpotLight*)lgt)->set_position(&pnt);
 
-                        ar >> f;  ((EschSpotLight*)lgt)->set_inner((Flx16)f);
-                        ar >> f;  ((EschSpotLight*)lgt)->set_outer((Flx16)f);
+                        ar >> f;  ((EschSpotLight*)lgt)->set_inner(f);
+                        ar >> f;  ((EschSpotLight*)lgt)->set_outer(f);
 
-                        ar >> f;  vec.i = (Flx16)f;
-                        ar >> f;  vec.j = (Flx16)f;
-                        ar >> f;  vec.k = (Flx16)f;
+                        ar >> vec.i;
+                        ar >> vec.j;
+                        ar >> vec.k;
                         ((EschSpotLight*)lgt)->set_direction(&vec);
 
-                        ar >> f;  ((EschSpotLight*)lgt)->set_hotspot((Flx16)f);
-                        ar >> f;  ((EschSpotLight*)lgt)->set_falloff((Flx16)f);
+                        ar >> f;  ((EschSpotLight*)lgt)->set_hotspot(f);
+                        ar >> f;  ((EschSpotLight*)lgt)->set_falloff(f);
                         break;
                     default:
                         ASSERT(0);
@@ -3740,23 +3843,23 @@ void TerrEditDoc::Serialize(CArchive& ar)
             ASSERT(lights);
         }
 
-        // Read misc info
+        //ÄÄÄ Read misc info
         if (version >= 0x114)
         {
-            ar >> f;  hover_offset = (Flx16)f;
+            ar >> hover_offset;
             ar >> lod_active;
-            ar >> f;  lod_medium = (Flx16)f;
-            ar >> f;  lod_low = (Flx16)f;
+            ar >> lod_medium;
+            ar >> lod_low;
         }
         else
         {
-            hover_offset = 64;
+            hover_offset = 64.0f;
             lod_active = TRUE;
-            lod_medium = 512;
-            lod_low = 1024;
+            lod_medium = 512.0f;
+            lod_low = 1024.0f;
         }
 
-        // Load palette (which implicitly loads textures)
+        //ÄÄÄ Load palette (which implicitly loads textures)
         if (!xf_exist(palname))
         {
             LocateDlg   dlg;
@@ -3778,7 +3881,7 @@ void TerrEditDoc::Serialize(CArchive& ar)
                        "Load Error",MB_OK | MB_ICONEXCLAMATION);
         }
 
-        // Compute normals
+        //ÄÄÄ Compute normals
 
         hsurfnorml = ivory_halloc((ulong)(surfsize * sizeof(EschVector)));
         ASSERT(hsurfnorml);
@@ -3788,7 +3891,7 @@ void TerrEditDoc::Serialize(CArchive& ar)
         memset(vptr,0,(ulong)(surfsize * sizeof(EschVector)));
         ivory_hunlock(hsurfnorml);
 
-        ComputeNormals(ESCH_NORMALS_SMOOTH);
+        ComputeNormals(NORMALS_SMOOTH);
 
         hsurfnormlflat = ivory_halloc((ulong)(surfsize * sizeof(EschVector)));
         ASSERT(hsurfnormlflat);
@@ -3798,9 +3901,9 @@ void TerrEditDoc::Serialize(CArchive& ar)
         memset(vptr,0,(ulong)(surfsize * sizeof(EschVector)));
         ivory_hunlock(hsurfnormlflat);
 
-        ComputeNormals(ESCH_NORMALS_FLAT);
+        ComputeNormals(NORMALS_FLAT);
 
-        // Set default camera flags
+        //ÄÄÄ Set default camera flags
         cam.set_flags(ESCH_CAM_SHADE_WIRE
                       | ESCH_CAM_SHADE_SOLID
                       | ESCH_CAM_SHADE_FLAT

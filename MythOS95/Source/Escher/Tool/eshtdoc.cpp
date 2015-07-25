@@ -39,9 +39,9 @@
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-//             
+//
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include "stdafx.h"
@@ -72,28 +72,28 @@ class CXFile: public XFileDOS
 {
 
 public:
-		CXFile (CFile *cf)
-		{
-			fHandle = (void *)cf->m_hFile;
-			sFlags = XF_OPEN_READ | XF_OPEN_WRITE | XF_STATUS_OPEN;
-		}
+                CXFile (CFile *cf)
+                {
+                        fHandle = (void *)cf->m_hFile;
+                        sFlags = XF_OPEN_READ | XF_OPEN_WRITE | XF_STATUS_OPEN;
+                }
 
-		~CXFile ()
-		{
-			fHandle = INVALID_HANDLE_VALUE;
-		}
- 
-		// DON'T CALL THESE!  They are here to prevent the unwary caller from
-		// hosing the file handes (owned by MFC, in this case).
-    	xf_error_codes close ()
-		{
-			return XF_ERR_NONE;
-		}
+                ~CXFile ()
+                {
+                        fHandle = INVALID_HANDLE_VALUE;
+                }
 
-		xf_error_codes open (const char *fname, int mode)
-		{
-			return XF_ERR_NONE;
-		}
+                // DON'T CALL THESE!  They are here to prevent the unwary caller from
+                // hosing the file handes (owned by MFC, in this case).
+        xf_error_codes close ()
+                {
+                        return XF_ERR_NONE;
+                }
+
+                xf_error_codes open (const char *fname, int mode)
+                {
+                        return XF_ERR_NONE;
+                }
 };
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
@@ -114,10 +114,10 @@ static char BASED_CODE THIS_FILE[] = __FILE__;
 IMPLEMENT_DYNCREATE(ToolDoc, CDocument)
 
 BEGIN_MESSAGE_MAP(ToolDoc, CDocument)
-	//{{AFX_MSG_MAP(ToolDoc)
-	//}}AFX_MSG_MAP
-	ON_COMMAND(ID_FILE_SEND_MAIL, OnFileSendMail)
-	ON_UPDATE_COMMAND_UI(ID_FILE_SEND_MAIL, OnUpdateFileSendMail)
+        //{{AFX_MSG_MAP(ToolDoc)
+        //}}AFX_MSG_MAP
+        ON_COMMAND(ID_FILE_SEND_MAIL, OnFileSendMail)
+        ON_UPDATE_COMMAND_UI(ID_FILE_SEND_MAIL, OnUpdateFileSendMail)
 END_MESSAGE_MAP()
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
@@ -141,11 +141,11 @@ ToolDoc::ToolDoc() :
     nmeshes(0),
     meshes(0),
     hpal(0),
-    flags(COMPRESS)
+    flags(COMPRESS | FLOATING)
 {
     int     i;
     char    *c;
-  
+
     GetModuleFileName(NULL, pfname, 256);
 
     for (i=strlen(pfname), c = &pfname[i-1]; i > 0; i--, c--)
@@ -185,7 +185,7 @@ ToolDoc::~ToolDoc()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 void ToolDoc::AssertValid() const
 {
-	CDocument::AssertValid();
+        CDocument::AssertValid();
 }
 
 
@@ -194,7 +194,7 @@ void ToolDoc::AssertValid() const
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 void ToolDoc::Dump(CDumpContext& dc) const
 {
-	CDocument::Dump(dc);
+        CDocument::Dump(dc);
 }
 #endif //_DEBUG
 
@@ -207,13 +207,13 @@ void ToolDoc::Dump(CDumpContext& dc) const
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // ToolDoc - DeleteContents                                                 ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void ToolDoc::DeleteContents() 
+void ToolDoc::DeleteContents()
 {
     memset(name,0,sizeof(name));
     memset(desc,0,sizeof(desc));
     memset(auth,0,sizeof(auth));
     memset(copy,0,sizeof(copy));
- 
+
     for (EschLight *lptr=lights; lptr;)
     {
         EschLight   *t=lptr;
@@ -247,7 +247,7 @@ void ToolDoc::DeleteContents()
         hpal=0;
     }
 
-	CDocument::DeleteContents();
+        CDocument::DeleteContents();
 }
 
 
@@ -339,7 +339,7 @@ esch_error_codes ToolDoc::serialize_store_mesh(XFParseIFF *iff, EschMeshDraw *ms
         }
 
         //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Header
-        memset(&header,0,sizeof(EschFileMeshHDR));
+        memset(&header,0,sizeof(header));
 
         strncpy(header.name,msh->mesh->name,ESCH_MAX_NAME);
         header.nverts=msh->mesh->nverts;
@@ -355,18 +355,35 @@ esch_error_codes ToolDoc::serialize_store_mesh(XFParseIFF *iff, EschMeshDraw *ms
         }
 
         //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Matrix
-        if (iff->write(iff->makeid('M','T','R','X'),
-                       &msh->local.orient.mtx,sizeof(EschMatrix)))
+        if (flags & FLOATING)
         {
-            iff->leaveform();
-            return ESCH_ERR_FILEERROR;
+            if (iff->write(iff->makeid('M','T','R','1'),
+                           &msh->local.orient.mtx,sizeof(EschMatrix)))
+            {
+                iff->leaveform();
+                return ESCH_ERR_FILEERROR;
+            }
+        }
+        else
+        {
+            EschMatrixV1 mtx;
+
+            for(int i=0; i < ESCH_MTX_NUM; i++)
+                mtx.mtx[i] = long(msh->local.orient.mtx[i] * 65536.0f);
+
+            if (iff->write(iff->makeid('M','T','R','X'),
+                           &mtx,sizeof(mtx)))
+            {
+                iff->leaveform();
+                return ESCH_ERR_FILEERROR;
+            }
         }
 
         //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Hierarchy
         if (msh->parent())
         {
             EschFileMeshHIER hier;
-            memset(&hier,0,sizeof(EschFileMeshHIER));
+            memset(&hier,0,sizeof(hier));
             strncpy(hier.parent,msh->parent()->name,ESCH_MAX_NAME);
 
             if (iff->write(iff->makeid('H','I','E','R'),
@@ -378,23 +395,47 @@ esch_error_codes ToolDoc::serialize_store_mesh(XFParseIFF *iff, EschMeshDraw *ms
         }
 
         //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Extent
+        if (flags & FLOATING)
         {
             EschFileMeshEXNT    extent;
-            memset(&extent,0,sizeof(EschFileMeshEXNT));
+            memset(&extent,0,sizeof(extent));
 
-            extent.cenx.flx          = msh->mesh->sphere.center.x.flx;
-            extent.ceny.flx          = msh->mesh->sphere.center.y.flx;
-            extent.cenz.flx          = msh->mesh->sphere.center.z.flx;
-            extent.extent_radius.flx = msh->mesh->sphere.radius.flx;
-            extent.minx.flx          = msh->mesh->box.mins[0].flx;
-            extent.miny.flx          = msh->mesh->box.mins[1].flx;
-            extent.minz.flx          = msh->mesh->box.mins[2].flx;
-            extent.maxx.flx          = msh->mesh->box.maxs[0].flx;
-            extent.maxy.flx          = msh->mesh->box.maxs[1].flx;
-            extent.maxz.flx          = msh->mesh->box.maxs[2].flx;
-        
+            extent.cenx          = msh->mesh->sphere.center.x;
+            extent.ceny          = msh->mesh->sphere.center.y;
+            extent.cenz          = msh->mesh->sphere.center.z;
+            extent.extent_radius = msh->mesh->sphere.radius;
+            extent.minx          = msh->mesh->box.mins[0];
+            extent.miny          = msh->mesh->box.mins[1];
+            extent.minz          = msh->mesh->box.mins[2];
+            extent.maxx          = msh->mesh->box.maxs[0];
+            extent.maxy          = msh->mesh->box.maxs[1];
+            extent.maxz          = msh->mesh->box.maxs[2];
+
+            if (iff->write(iff->makeid('E','X','N','1'),
+                           &extent,sizeof(extent)))
+            {
+                iff->leaveform();
+                return ESCH_ERR_FILEERROR;
+            }
+        }
+        else
+        {
+            EschFileMeshEXNTV1    extent;
+            memset(&extent,0,sizeof(extent));
+
+            extent.cenx          = long(msh->mesh->sphere.center.x * 65536.0f);
+            extent.ceny          = long(msh->mesh->sphere.center.y * 65536.0f);
+            extent.cenz          = long(msh->mesh->sphere.center.z * 65536.0f);
+            extent.extent_radius = long(msh->mesh->sphere.radius * 65536.0f);
+            extent.minx          = long(msh->mesh->box.mins[0] * 65536.0f);
+            extent.miny          = long(msh->mesh->box.mins[1] * 65536.0f);
+            extent.minz          = long(msh->mesh->box.mins[2] * 65536.0f);
+            extent.maxx          = long(msh->mesh->box.maxs[0] * 65536.0f);
+            extent.maxy          = long(msh->mesh->box.maxs[1] * 65536.0f);
+            extent.maxz          = long(msh->mesh->box.maxs[2] * 65536.0f);
+
             if (iff->write(iff->makeid('E','X','N','T'),
-                        &extent,sizeof(EschFileMeshEXNT)))
+                           &extent,sizeof(extent)))
             {
                 iff->leaveform();
                 return ESCH_ERR_FILEERROR;
@@ -435,12 +476,48 @@ esch_error_codes ToolDoc::serialize_store_mesh(XFParseIFF *iff, EschMeshDraw *ms
             return ESCH_ERR_LOCKFAILED;
         }
 
-        if (iff->write(iff->makeid('V','E','R','T'),
-                       vptr,msh->mesh->nverts * sizeof(EschVertex)))
+        if (flags & FLOATING)
         {
-            iff->leaveform();
-            ivory_hunlock(msh->mesh->v);
-            return ESCH_ERR_FILEERROR;
+            if (iff->write(iff->makeid('V','E','R','1'),
+                           vptr,msh->mesh->nverts * sizeof(EschVertex)))
+            {
+                iff->leaveform();
+                ivory_hunlock(msh->mesh->v);
+                return ESCH_ERR_FILEERROR;
+            }
+        }
+        else
+        {
+            EschVertexV1 *vtemp = new EschVertexV1[msh->mesh->nverts];
+            if (!vtemp)
+            {
+                iff->leaveform();
+                ivory_hunlock(msh->mesh->v);
+                return ESCH_ERR_NOMEMORY;
+            }
+
+            EschVertex *tptr = vptr;
+            EschVertexV1 *tmpptr = vtemp;
+            for(ulong i=0; i < msh->mesh->nverts; i++, tptr++, tmpptr++)
+            {
+                tmpptr->x = long(tptr->x * 65536.0f);
+                tmpptr->y = long(tptr->y * 65536.0f);
+                tmpptr->z = long(tptr->z * 65536.0f);
+                tmpptr->normal.i = long(tptr->normal.i * 65536.0f);
+                tmpptr->normal.j = long(tptr->normal.j * 65536.0f);
+                tmpptr->normal.k = long(tptr->normal.k * 65536.0f);
+            }
+
+            if (iff->write(iff->makeid('V','E','R','T'),
+                           vtemp,msh->mesh->nverts * sizeof(EschVertexV1)))
+            {
+                iff->leaveform();
+                delete [] vtemp;
+                ivory_hunlock(msh->mesh->v);
+                return ESCH_ERR_FILEERROR;
+            }
+
+            delete [] vtemp;
         }
 
         ivory_hunlock(msh->mesh->v);
@@ -459,16 +536,67 @@ esch_error_codes ToolDoc::serialize_store_mesh(XFParseIFF *iff, EschMeshDraw *ms
             VngoColor24bit clr = palette.hw_pal.p[(byte)fptr[i].color];
             fptr[i].color = (clr.r | (clr.g << 8) | (clr.b << 16));
         }
-        
-        if (iff->write(iff->makeid('F','A','C','E'),
-                       fptr,msh->mesh->nfaces * sizeof(EschFace)))
+
+        if (flags & FLOATING)
         {
-            iff->leaveform();
-            // Convert face color back to index
-            for(i=0; i < (int)msh->mesh->nfaces; i++)
-                fptr[i].color = (byte)palette.get_index((VngoColor24bit)fptr[i].color);
-            ivory_hunlock(msh->mesh->f);
-            return ESCH_ERR_FILEERROR;
+            if (iff->write(iff->makeid('F','A','C','1'),
+                           fptr,msh->mesh->nfaces * sizeof(EschFace)))
+            {
+                iff->leaveform();
+                // Convert face color back to index
+                for(i=0; i < (int)msh->mesh->nfaces; i++)
+                    fptr[i].color = (byte)palette.get_index((VngoColor24bit)fptr[i].color);
+                ivory_hunlock(msh->mesh->f);
+                return ESCH_ERR_FILEERROR;
+            }
+        }
+        else
+        {
+            EschFaceV1 *ftemp = new EschFaceV1[msh->mesh->nfaces];
+            if (!ftemp)
+            {
+                iff->leaveform();
+                // Convert face color back to index
+                for(i=0; i < (int)msh->mesh->nfaces; i++)
+                    fptr[i].color = (byte)palette.get_index((VngoColor24bit)fptr[i].color);
+                ivory_hunlock(msh->mesh->f);
+                return ESCH_ERR_NOMEMORY;
+            }
+
+            EschFace *tptr = fptr;
+            EschFaceV1 *tmpptr = ftemp;
+            for(ulong i=0; i < msh->mesh->nfaces; i++, tptr++, tmpptr++)
+            {
+                tmpptr->flags = tptr->flags;
+                tmpptr->a = tptr->a;
+                tmpptr->b = tptr->b;
+                tmpptr->c = tptr->c;
+                tmpptr->txt = tptr->txt;
+                tmpptr->u[0] = long(tptr->u[0] * 65536.0f);
+                tmpptr->u[1] = long(tptr->u[1] * 65536.0f);
+                tmpptr->u[2] = long(tptr->u[2] * 65536.0f);
+                tmpptr->v[0] = long(tptr->v[0] * 65536.0f);
+                tmpptr->v[1] = long(tptr->v[1] * 65536.0f);
+                tmpptr->v[2] = long(tptr->v[2] * 65536.0f);
+                tmpptr->color = tptr->color;
+                tmpptr->normal.i = long(tptr->normal.i * 65536.0f);
+                tmpptr->normal.j = long(tptr->normal.j * 65536.0f);
+                tmpptr->normal.k = long(tptr->normal.k * 65536.0f);
+            }
+
+            if (iff->write(iff->makeid('F','A','C','E'),
+                           ftemp,msh->mesh->nfaces * sizeof(EschFaceV1)))
+            {
+                iff->leaveform();
+                // Convert face color back to index
+                for(i=0; i < (int)msh->mesh->nfaces; i++)
+                    fptr[i].color = (byte)palette.get_index((VngoColor24bit)fptr[i].color);
+                delete [] ftemp;
+                ivory_hunlock(msh->mesh->f);
+                return ESCH_ERR_FILEERROR;
+            }
+
+            delete [] ftemp;
         }
 
         // Convert face color back to index
@@ -501,7 +629,7 @@ esch_error_codes ToolDoc::serialize_store_mesh(XFParseIFF *iff, EschMeshDraw *ms
 
                 // Determine if transparent
                 BOOL transp=FALSE;
-                byte *tptr=t->ptr->tex;
+                byte *tptr=(byte*)t->ptr->tex;
                 for(int j=0; j < (t->ptr->width*t->ptr->height); j++)
                 {
                     if (*(tptr++) == VNGO_TRANSPARENT_COLOR)
@@ -510,7 +638,7 @@ esch_error_codes ToolDoc::serialize_store_mesh(XFParseIFF *iff, EschMeshDraw *ms
                         break;
                     }
                 }
-               
+
                 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Create EMTL form
                 if (iff->newform((t->get_type() == ESCH_TXTT_MFRAME)
                                  ? iff->makeid('E','M','T','1')
@@ -520,9 +648,9 @@ esch_error_codes ToolDoc::serialize_store_mesh(XFParseIFF *iff, EschMeshDraw *ms
                     t->unlock();
                     return ESCH_ERR_FILEERROR;
                 }
-        
+
                 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Header
-                memset(&mheader,0,sizeof(EschFileMtlMHDR));
+                memset(&mheader,0,sizeof(mheader));
 
                 strncpy(mheader.name,t->name,ESCH_MAX_NAME);
 
@@ -541,7 +669,7 @@ esch_error_codes ToolDoc::serialize_store_mesh(XFParseIFF *iff, EschMeshDraw *ms
                 else
                 {
                     mheader.type = (transp)
-                                   ? ESCH_MTL_TYPE_8BIT_TRANSP 
+                                   ? ESCH_MTL_TYPE_8BIT_TRANSP
                                    : ESCH_MTL_TYPE_8BIT;
                 }
                 mheader.compress = (flags & COMPRESS)
@@ -558,19 +686,19 @@ esch_error_codes ToolDoc::serialize_store_mesh(XFParseIFF *iff, EschMeshDraw *ms
                 ASSERT((mheader.xsize * mheader.ysize) > 0);
 
                 if (iff->write(iff->makeid('M','H','D','R'),
-                               &mheader,sizeof(EschFileMtlMHDR)))
+                               &mheader,sizeof(mheader)))
                 {
                     iff->leaveform();
                     t->unlock();
                     return ESCH_ERR_FILEERROR;
                 }
-                
+
                 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Body
                 int bpp=1;
                 if (flags & TRUECOLOR)
                     bpp = (transp) ? 4 : 3;
 
-                tptr = t->ptr->tex;
+                tptr = (byte*)t->ptr->tex;
                 for(j=0; j < (int)mheader.nframes; j++)
                 {
                     byte *body=tptr;
@@ -711,8 +839,8 @@ void ToolDoc::Serialize(CArchive& ar)
     iff.begin();
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Saving
-	if (ar.IsStoring())
-	{
+        if (ar.IsStoring())
+        {
         esch_error_codes    err;
         EschFileSceneHDR    sdata;
         EschCameraEx        *cam;
@@ -726,7 +854,7 @@ void ToolDoc::Serialize(CArchive& ar)
         }
 
         //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Header
-        memset(&sdata,0,sizeof(EschFileSceneHDR));
+        memset(&sdata,0,sizeof(sdata));
         strcpy(sdata.name,name);
 
         GetCounts(&sdata.ncameras,
@@ -740,7 +868,7 @@ void ToolDoc::Serialize(CArchive& ar)
                   &sdata.nobjects);
 
         if (iff.write(iff.makeid('H','D','R',' '),
-                      &sdata,sizeof(EschFileSceneHDR)))
+                      &sdata,sizeof(sdata)))
         {
             err=ESCH_ERR_FILEERROR;
             goto save_error_exit;
@@ -782,35 +910,69 @@ void ToolDoc::Serialize(CArchive& ar)
         //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Cameras
         for(cam=cameras; cam; cam = (EschCameraEx*)cam->next())
         {
-            EschFileCamera  cdata;
-            memset(&cdata,0,sizeof(EschFileCamera));
-
-            strncpy(cdata.name,cam->name,ESCH_MAX_NAME);
-            cdata.flags = cam->flags & ~(ESCH_CAM_OWNSBITMAP
-                                         | ESCH_CAM_OWNSHAZE);
-
-            EschPoint  pos;
-            cam->get_position(&pos);
-            cdata.x.flx = pos.x.flx;
-            cdata.y.flx = pos.y.flx;
-            cdata.z.flx = pos.z.flx;
-
-            cdata.fov.flx = cam->fov.flx;
-            
-            cdata.diri.flx = cam->eye.dir.i.flx;
-            cdata.dirj.flx = cam->eye.dir.j.flx;
-            cdata.dirk.flx = cam->eye.dir.k.flx;
-            
-            cdata.topi.flx = cam->top.i.flx;
-            cdata.topj.flx = cam->top.j.flx;
-            cdata.topk.flx = cam->top.k.flx;
-
-
-            if (iff.write(iff.makeid('E','C','A','M'),
-                          &cdata,sizeof(EschFileCamera)))
+            if (flags & FLOATING)
             {
-                err=ESCH_ERR_FILEERROR;
-                goto save_error_exit;
+                EschFileCamera  cdata;
+                memset(&cdata,0,sizeof(cdata));
+
+                strncpy(cdata.name,cam->name,ESCH_MAX_NAME);
+                cdata.flags = cam->flags & ~(ESCH_CAM_OWNSBITMAP
+                                            | ESCH_CAM_OWNSHAZE);
+
+                EschPoint  pos;
+                cam->get_position(&pos);
+                cdata.x = pos.x;
+                cdata.y = pos.y;
+                cdata.z = pos.z;
+
+                cdata.fov = cam->fov;
+
+                cdata.diri = cam->eye.dir.i;
+                cdata.dirj = cam->eye.dir.j;
+                cdata.dirk = cam->eye.dir.k;
+
+                cdata.topi = cam->top.i;
+                cdata.topj = cam->top.j;
+                cdata.topk = cam->top.k;
+
+                if (iff.write(iff.makeid('E','C','A','1'),
+                              &cdata,sizeof(cdata)))
+                {
+                    err=ESCH_ERR_FILEERROR;
+                    goto save_error_exit;
+                }
+            }
+            else
+            {
+                EschFileCameraV1  cdata;
+                memset(&cdata,0,sizeof(cdata));
+
+                strncpy(cdata.name,cam->name,ESCH_MAX_NAME);
+                cdata.flags = cam->flags & ~(ESCH_CAM_OWNSBITMAP
+                                            | ESCH_CAM_OWNSHAZE);
+
+                EschPoint  pos;
+                cam->get_position(&pos);
+                cdata.x = long(pos.x * 65536.0f);
+                cdata.y = long(pos.y * 65536.0f);
+                cdata.z = long(pos.z * 65536.0f);
+
+                cdata.fov = long(cam->fov * 65536.0f);
+
+                cdata.diri = long(cam->eye.dir.i * 65536.0f);
+                cdata.dirj = long(cam->eye.dir.j * 65536.0f);
+                cdata.dirk = long(cam->eye.dir.k * 65536.0f);
+
+                cdata.topi = long(cam->top.i * 65536.0f);
+                cdata.topj = long(cam->top.j * 65536.0f);
+                cdata.topk = long(cam->top.k * 65536.0f);
+
+                if (iff.write(iff.makeid('E','C','A','M'),
+                              &cdata,sizeof(cdata)))
+                {
+                    err=ESCH_ERR_FILEERROR;
+                    goto save_error_exit;
+                }
             }
         }
 
@@ -819,144 +981,295 @@ void ToolDoc::Serialize(CArchive& ar)
         {
             if (lgt->get_type() == ESCH_LGTT_VECTOR)
             {
-                EschFileLightVect   vec;
-                memset(&vec,0,sizeof(EschFileLightVect));
-
-                strncpy(vec.name,lgt->name,ESCH_MAX_NAME);
-                vec.flags = lgt->flags;
-
-                byte i = lgt->get_intensity();
-                vec.color = i << 16 | i << 8 | i;
-
-                vec.i.flx = ((EschVectorLight*)lgt)->dir.i.flx;
-                vec.j.flx = ((EschVectorLight*)lgt)->dir.j.flx;
-                vec.k.flx = ((EschVectorLight*)lgt)->dir.k.flx;
-
-                if (iff.write(iff.makeid('E','V','E','C'),
-                              &vec,sizeof(EschFileLightVect)))
+                if (flags & FLOATING)
                 {
-                    err=ESCH_ERR_FILEERROR;
-                    goto save_error_exit;
+                    EschFileLightVect   vec;
+                    memset(&vec,0,sizeof(vec));
+
+                    strncpy(vec.name,lgt->name,ESCH_MAX_NAME);
+                    vec.flags = lgt->flags;
+
+                    byte i = lgt->get_intensity();
+                    vec.color = i << 16 | i << 8 | i;
+
+                    vec.i = ((EschVectorLight*)lgt)->dir.i;
+                    vec.j = ((EschVectorLight*)lgt)->dir.j;
+                    vec.k = ((EschVectorLight*)lgt)->dir.k;
+
+                    if (iff.write(iff.makeid('E','V','E','1'),
+                                  &vec,sizeof(vec)))
+                    {
+                        err=ESCH_ERR_FILEERROR;
+                        goto save_error_exit;
+                    }
+                }
+                else
+                {
+                    EschFileLightVectV1   vec;
+                    memset(&vec,0,sizeof(vec));
+
+                    strncpy(vec.name,lgt->name,ESCH_MAX_NAME);
+                    vec.flags = lgt->flags;
+
+                    byte i = lgt->get_intensity();
+                    vec.color = i << 16 | i << 8 | i;
+
+                    vec.i = long(((EschVectorLight*)lgt)->dir.i * 65536.0f);
+                    vec.j = long(((EschVectorLight*)lgt)->dir.j * 65536.0f);
+                    vec.k = long(((EschVectorLight*)lgt)->dir.k * 65536.0f);
+
+                    if (iff.write(iff.makeid('E','V','E','C'),
+                                  &vec,sizeof(vec)))
+                    {
+                        err=ESCH_ERR_FILEERROR;
+                        goto save_error_exit;
+                    }
                 }
             }
             else if (lgt->get_type() == ESCH_LGTT_FPOINT
                      || lgt->get_type() == ESCH_LGTT_POINT)
             {
-                EschFileLightPoint   pnt;
-                memset(&pnt,0,sizeof(EschFileLightPoint));
-
-                strncpy(pnt.name,lgt->name,ESCH_MAX_NAME);
-                pnt.flags = lgt->flags;
-
-                byte i = lgt->get_intensity();
-                pnt.color = i << 16 | i << 8 | i;
-
-                if (lgt->get_type() == ESCH_LGTT_FPOINT)
+                if (flags & FLOATING)
                 {
-                    pnt.x.flx = ((EschFastPointLight*)lgt)->pos.x.flx;
-                    pnt.y.flx = ((EschFastPointLight*)lgt)->pos.y.flx;
-                    pnt.z.flx = ((EschFastPointLight*)lgt)->pos.z.flx;
+                    EschFileLightPoint   pnt;
+                    memset(&pnt,0,sizeof(pnt));
+
+                    strncpy(pnt.name,lgt->name,ESCH_MAX_NAME);
+                    pnt.flags = lgt->flags;
+
+                    byte i = lgt->get_intensity();
+                    pnt.color = i << 16 | i << 8 | i;
+
+                    if (lgt->get_type() == ESCH_LGTT_FPOINT)
+                    {
+                        pnt.x = ((EschFastPointLight*)lgt)->pos.x;
+                        pnt.y = ((EschFastPointLight*)lgt)->pos.y;
+                        pnt.z = ((EschFastPointLight*)lgt)->pos.z;
+                    }
+                    else
+                    {
+                        pnt.x = ((EschPointLight*)lgt)->pos.x;
+                        pnt.y = ((EschPointLight*)lgt)->pos.y;
+                        pnt.z = ((EschPointLight*)lgt)->pos.z;
+                    }
+
+                    if (iff.write((lgt->get_type() == ESCH_LGTT_FPOINT)
+                                  ? iff.makeid('E','F','P','1')
+                                  : iff.makeid('E','P','N','1'),
+                                  &pnt,sizeof(pnt)))
+                    {
+                        err=ESCH_ERR_FILEERROR;
+                        goto save_error_exit;
+                    }
                 }
                 else
                 {
-                    pnt.x.flx = ((EschPointLight*)lgt)->pos.x.flx;
-                    pnt.y.flx = ((EschPointLight*)lgt)->pos.y.flx;
-                    pnt.z.flx = ((EschPointLight*)lgt)->pos.z.flx;
-                }
+                    EschFileLightPointV1   pnt;
+                    memset(&pnt,0,sizeof(pnt));
 
-                if (iff.write((lgt->get_type() == ESCH_LGTT_FPOINT)
-                              ? iff.makeid('E','F','P','T')
-                              : iff.makeid('E','P','N','T'),
-                              &pnt,sizeof(EschFileLightPoint)))
-                {
-                    err=ESCH_ERR_FILEERROR;
-                    goto save_error_exit;
+                    strncpy(pnt.name,lgt->name,ESCH_MAX_NAME);
+                    pnt.flags = lgt->flags;
+
+                    byte i = lgt->get_intensity();
+                    pnt.color = i << 16 | i << 8 | i;
+
+                    if (lgt->get_type() == ESCH_LGTT_FPOINT)
+                    {
+                        pnt.x = long(((EschFastPointLight*)lgt)->pos.x * 65536.0f);
+                        pnt.y = long(((EschFastPointLight*)lgt)->pos.y * 65536.0f);
+                        pnt.z = long(((EschFastPointLight*)lgt)->pos.z * 65536.0f);
+                    }
+                    else
+                    {
+                        pnt.x = long(((EschPointLight*)lgt)->pos.x * 65536.0f);
+                        pnt.y = long(((EschPointLight*)lgt)->pos.y * 65536.0f);
+                        pnt.z = long(((EschPointLight*)lgt)->pos.z * 65536.0f);
+                    }
+
+                    if (iff.write((lgt->get_type() == ESCH_LGTT_FPOINT)
+                                  ? iff.makeid('E','F','P','T')
+                                  : iff.makeid('E','P','N','T'),
+                                  &pnt,sizeof(pnt)))
+                    {
+                        err=ESCH_ERR_FILEERROR;
+                        goto save_error_exit;
+                    }
                 }
             }
             else if (lgt->get_type() == ESCH_LGTT_FATTEN
                      || lgt->get_type() == ESCH_LGTT_ATTEN)
             {
-                EschFileLightAtten atn;
-                memset(&atn,0,sizeof(EschFileLightAtten));
-
-                strncpy(atn.name,lgt->name,ESCH_MAX_NAME);
-                atn.flags = lgt->flags;
-
-                byte i = lgt->get_intensity();
-                atn.color = i << 16 | i << 8 | i;
-
-                if (lgt->get_type() == ESCH_LGTT_FATTEN)
+                if (flags & FLOATING)
                 {
-                    atn.x.flx = ((EschFastAttenLight*)lgt)->pos.x.flx;
-                    atn.y.flx = ((EschFastAttenLight*)lgt)->pos.y.flx;
-                    atn.z.flx = ((EschFastAttenLight*)lgt)->pos.z.flx;
-                    atn.inner = ((EschFastAttenLight*)lgt)->inner.flx;
-                    atn.outer = ((EschFastAttenLight*)lgt)->outer.flx;
+                    EschFileLightAtten atn;
+                    memset(&atn,0,sizeof(atn));
+
+                    strncpy(atn.name,lgt->name,ESCH_MAX_NAME);
+                    atn.flags = lgt->flags;
+
+                    byte i = lgt->get_intensity();
+                    atn.color = i << 16 | i << 8 | i;
+
+                    if (lgt->get_type() == ESCH_LGTT_FATTEN)
+                    {
+                        atn.x = ((EschFastAttenLight*)lgt)->pos.x;
+                        atn.y = ((EschFastAttenLight*)lgt)->pos.y;
+                        atn.z = ((EschFastAttenLight*)lgt)->pos.z;
+                        atn.inner = ((EschFastAttenLight*)lgt)->inner;
+                        atn.outer = ((EschFastAttenLight*)lgt)->outer;
+                    }
+                    else
+                    {
+                        atn.x = ((EschAttenLight*)lgt)->pos.x;
+                        atn.y = ((EschAttenLight*)lgt)->pos.y;
+                        atn.z = ((EschAttenLight*)lgt)->pos.z;
+                        atn.inner = ((EschAttenLight*)lgt)->inner;
+                        atn.outer = ((EschAttenLight*)lgt)->outer;
+                    }
+
+                    if (iff.write((lgt->get_type() == ESCH_LGTT_FATTEN)
+                                  ? iff.makeid('E','F','A','1')
+                                  : iff.makeid('E','A','T','1'),
+                                  &atn,sizeof(atn)))
+                    {
+                        err=ESCH_ERR_FILEERROR;
+                        goto save_error_exit;
+                    }
                 }
                 else
                 {
-                    atn.x.flx = ((EschAttenLight*)lgt)->pos.x.flx;
-                    atn.y.flx = ((EschAttenLight*)lgt)->pos.y.flx;
-                    atn.z.flx = ((EschAttenLight*)lgt)->pos.z.flx;
-                    atn.inner = ((EschAttenLight*)lgt)->inner.flx;
-                    atn.outer = ((EschAttenLight*)lgt)->outer.flx;
-                }
+                    EschFileLightAttenV1 atn;
+                    memset(&atn,0,sizeof(atn));
 
-                if (iff.write((lgt->get_type() == ESCH_LGTT_FATTEN)
-                              ? iff.makeid('E','F','A','T')
-                              : iff.makeid('E','A','T','N'),
-                              &atn,sizeof(EschFileLightAtten)))
-                {
-                    err=ESCH_ERR_FILEERROR;
-                    goto save_error_exit;
+                    strncpy(atn.name,lgt->name,ESCH_MAX_NAME);
+                    atn.flags = lgt->flags;
+
+                    byte i = lgt->get_intensity();
+                    atn.color = i << 16 | i << 8 | i;
+
+                    if (lgt->get_type() == ESCH_LGTT_FATTEN)
+                    {
+                        atn.x = long(((EschFastAttenLight*)lgt)->pos.x * 65536.0f);
+                        atn.y = long(((EschFastAttenLight*)lgt)->pos.y * 65536.0f);
+                        atn.z = long(((EschFastAttenLight*)lgt)->pos.z * 65536.0f);
+                        atn.inner = long(((EschFastAttenLight*)lgt)->inner * 65536.0f);
+                        atn.outer = long(((EschFastAttenLight*)lgt)->outer * 65536.0f);
+                    }
+                    else
+                    {
+                        atn.x = long(((EschAttenLight*)lgt)->pos.x * 65536.0f);
+                        atn.y = long(((EschAttenLight*)lgt)->pos.y * 65536.0f);
+                        atn.z = long(((EschAttenLight*)lgt)->pos.z * 65536.0f);
+                        atn.inner = long(((EschAttenLight*)lgt)->inner * 65536.0f);
+                        atn.outer = long(((EschAttenLight*)lgt)->outer * 65536.0f);
+                    }
+
+                    if (iff.write((lgt->get_type() == ESCH_LGTT_FATTEN)
+                                  ? iff.makeid('E','F','A','T')
+                                  : iff.makeid('E','A','T','N'),
+                                  &atn,sizeof(atn)))
+                    {
+                        err=ESCH_ERR_FILEERROR;
+                        goto save_error_exit;
+                    }
                 }
             }
             else if (lgt->get_type() == ESCH_LGTT_FSPOT
                      || lgt->get_type() == ESCH_LGTT_SPOT)
             {
-                EschFileLightSpot   spot;
-                memset(&spot,0,sizeof(EschFileLightSpot));
-
-                strncpy(spot.name,lgt->name,ESCH_MAX_NAME);
-                spot.flags = lgt->flags;
-
-                byte i = lgt->get_intensity();
-                spot.color = i << 16 | i << 8 | i;
-
-                if (lgt->get_type() == ESCH_LGTT_FSPOT)
+                if (flags & FLOATING)
                 {
-                    spot.x.flx = ((EschFastSpotLight*)lgt)->pos.x.flx;
-                    spot.y.flx = ((EschFastSpotLight*)lgt)->pos.y.flx;
-                    spot.z.flx = ((EschFastSpotLight*)lgt)->pos.z.flx;
-                    spot.i.flx = ((EschFastSpotLight*)lgt)->dir.i.flx;
-                    spot.j.flx = ((EschFastSpotLight*)lgt)->dir.j.flx;
-                    spot.k.flx = ((EschFastSpotLight*)lgt)->dir.k.flx;
-                    spot.hotspot.flx = ((EschFastSpotLight*)lgt)->hotspot.flx;
-                    spot.falloff.flx = ((EschFastSpotLight*)lgt)->falloff.flx;
-                    spot.inner.flx = ((EschFastSpotLight*)lgt)->inner.flx;
-                    spot.outer.flx = ((EschFastSpotLight*)lgt)->outer.flx;
+                    EschFileLightSpot   spot;
+                    memset(&spot,0,sizeof(spot));
+
+                    strncpy(spot.name,lgt->name,ESCH_MAX_NAME);
+                    spot.flags = lgt->flags;
+
+                    byte i = lgt->get_intensity();
+                    spot.color = i << 16 | i << 8 | i;
+
+                    if (lgt->get_type() == ESCH_LGTT_FSPOT)
+                    {
+                        spot.x = ((EschFastSpotLight*)lgt)->pos.x;
+                        spot.y = ((EschFastSpotLight*)lgt)->pos.y;
+                        spot.z = ((EschFastSpotLight*)lgt)->pos.z;
+                        spot.i = ((EschFastSpotLight*)lgt)->dir.i;
+                        spot.j = ((EschFastSpotLight*)lgt)->dir.j;
+                        spot.k = ((EschFastSpotLight*)lgt)->dir.k;
+                        spot.hotspot = ((EschFastSpotLight*)lgt)->hotspot;
+                        spot.falloff = ((EschFastSpotLight*)lgt)->falloff;
+                        spot.inner = ((EschFastSpotLight*)lgt)->inner;
+                        spot.outer = ((EschFastSpotLight*)lgt)->outer;
+                    }
+                    else
+                    {
+                        spot.x = ((EschSpotLight*)lgt)->pos.x;
+                        spot.y = ((EschSpotLight*)lgt)->pos.y;
+                        spot.z = ((EschSpotLight*)lgt)->pos.z;
+                        spot.i = ((EschSpotLight*)lgt)->dir.i;
+                        spot.j = ((EschSpotLight*)lgt)->dir.j;
+                        spot.k = ((EschSpotLight*)lgt)->dir.k;
+                        spot.hotspot = ((EschSpotLight*)lgt)->hotspot;
+                        spot.falloff = ((EschSpotLight*)lgt)->falloff;
+                        spot.inner = ((EschSpotLight*)lgt)->inner;
+                        spot.outer = ((EschSpotLight*)lgt)->outer;
+                    }
+
+                    if (iff.write((lgt->get_type() == ESCH_LGTT_FSPOT)
+                                  ? iff.makeid('E','F','S','1')
+                                  : iff.makeid('E','S','P','1'),
+                                  &spot,sizeof(spot)))
+                    {
+                        err=ESCH_ERR_FILEERROR;
+                        goto save_error_exit;
+                    }
                 }
                 else
                 {
-                    spot.x.flx = ((EschSpotLight*)lgt)->pos.x.flx;
-                    spot.y.flx = ((EschSpotLight*)lgt)->pos.y.flx;
-                    spot.z.flx = ((EschSpotLight*)lgt)->pos.z.flx;
-                    spot.i.flx = ((EschSpotLight*)lgt)->dir.i.flx;
-                    spot.j.flx = ((EschSpotLight*)lgt)->dir.j.flx;
-                    spot.k.flx = ((EschSpotLight*)lgt)->dir.k.flx;
-                    spot.hotspot.flx = ((EschSpotLight*)lgt)->hotspot.flx;
-                    spot.falloff.flx = ((EschSpotLight*)lgt)->falloff.flx;
-                    spot.inner.flx = ((EschSpotLight*)lgt)->inner.flx;
-                    spot.outer.flx = ((EschSpotLight*)lgt)->outer.flx;
-                }
+                    EschFileLightSpotV1   spot;
+                    memset(&spot,0,sizeof(spot));
 
-                if (iff.write((lgt->get_type() == ESCH_LGTT_FSPOT)
-                              ? iff.makeid('E','F','S','P')
-                              : iff.makeid('E','S','P','T'),
-                              &spot,sizeof(EschFileLightSpot)))
-                {
-                    err=ESCH_ERR_FILEERROR;
-                    goto save_error_exit;
+                    strncpy(spot.name,lgt->name,ESCH_MAX_NAME);
+                    spot.flags = lgt->flags;
+
+                    byte i = lgt->get_intensity();
+                    spot.color = i << 16 | i << 8 | i;
+
+                    if (lgt->get_type() == ESCH_LGTT_FSPOT)
+                    {
+                        spot.x = long(((EschFastSpotLight*)lgt)->pos.x * 65536.0f);
+                        spot.y = long(((EschFastSpotLight*)lgt)->pos.y * 65536.0f);
+                        spot.z = long(((EschFastSpotLight*)lgt)->pos.z * 65536.0f);
+                        spot.i = long(((EschFastSpotLight*)lgt)->dir.i * 65536.0f);
+                        spot.j = long(((EschFastSpotLight*)lgt)->dir.j * 65536.0f);
+                        spot.k = long(((EschFastSpotLight*)lgt)->dir.k * 65536.0f);
+                        spot.hotspot = long(((EschFastSpotLight*)lgt)->hotspot * 65536.0f);
+                        spot.falloff = long(((EschFastSpotLight*)lgt)->falloff * 65536.0f);
+                        spot.inner = long(((EschFastSpotLight*)lgt)->inner * 65536.0f);
+                        spot.outer = long(((EschFastSpotLight*)lgt)->outer * 65536.0f);
+                    }
+                    else
+                    {
+                        spot.x = long(((EschSpotLight*)lgt)->pos.x * 65536.0f);
+                        spot.y = long(((EschSpotLight*)lgt)->pos.y * 65536.0f);
+                        spot.z = long(((EschSpotLight*)lgt)->pos.z * 65536.0f);
+                        spot.i = long(((EschSpotLight*)lgt)->dir.i * 65536.0f);
+                        spot.j = long(((EschSpotLight*)lgt)->dir.j * 65536.0f);
+                        spot.k = long(((EschSpotLight*)lgt)->dir.k * 65536.0f);
+                        spot.hotspot = long(((EschSpotLight*)lgt)->hotspot * 65536.0f);
+                        spot.falloff = long(((EschSpotLight*)lgt)->falloff * 65536.0f);
+                        spot.inner = long(((EschSpotLight*)lgt)->inner * 65536.0f);
+                        spot.outer = long(((EschSpotLight*)lgt)->outer * 65536.0f);
+                    }
+
+                    if (iff.write((lgt->get_type() == ESCH_LGTT_FSPOT)
+                                  ? iff.makeid('E','F','S','P')
+                                  : iff.makeid('E','S','P','T'),
+                                  &spot,sizeof(spot)))
+                    {
+                        err=ESCH_ERR_FILEERROR;
+                        goto save_error_exit;
+                    }
                 }
             }
             else // ESCH_LGTT_AMBIENT
@@ -997,16 +1310,16 @@ save_error_exit: ;
         char    str[512];
 
         sprintf(str,"Error error 0x%x saving file.",(int)err);
-                                              
+
         MessageBox(NULL,
                    str,"Escher Tool",MB_OK | MB_ICONEXCLAMATION);
 
         AfxThrowArchiveException(CArchiveException::generic);
         return;
-	}
+        }
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Loading
-	else
-	{
+        else
+        {
         ulong               i;
         esch_error_codes    err;
         ulong               ncams=0;
@@ -1069,7 +1382,7 @@ save_error_exit: ;
                 continue;
 
             //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Found an ESEN form
-            
+
             iff.enterform();
 
             //ÄÄÄ Handle header
@@ -1145,7 +1458,7 @@ save_error_exit: ;
                     }
                 }
                 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Meshes
-                else if (iff.chunkid == iff.makeid('F','O','R','M') 
+                else if (iff.chunkid == iff.makeid('F','O','R','M')
                          && iff.formid == iff.makeid('E','M','S','H'))
                 {
                     EschMeshDraw    *m;
@@ -1176,7 +1489,7 @@ save_error_exit: ;
                     else
                     {
                         // Need to save for later patchup
-    
+
                         strncpy(hier[nmshs].pname,pname,ESCH_MAX_NAME);
                         hier[nmshs].m = m;
                     }
@@ -1184,10 +1497,11 @@ save_error_exit: ;
                 }
 
                 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Cameras
-                else if (iff.chunkid == iff.makeid('E','C','A','M'))
+                else if (iff.chunkid == iff.makeid('E','C','A','M')
+                         || iff.chunkid == iff.makeid('E','C','A','1'))
                 {
                     EschCameraEx *c;
-            
+
                     c = new EschCameraEx;
                     if (!c)
                     {
@@ -1214,31 +1528,61 @@ save_error_exit: ;
                 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Lights
                 else if (iff.chunkid == iff.makeid('E','A','M','B')
                          || iff.chunkid == iff.makeid('E','V','E','C')
+                         || iff.chunkid == iff.makeid('E','V','E','1')
                          || iff.chunkid == iff.makeid('E','F','P','T')
+                         || iff.chunkid == iff.makeid('E','F','P','1')
                          || iff.chunkid == iff.makeid('E','F','A','T')
+                         || iff.chunkid == iff.makeid('E','F','A','1')
                          || iff.chunkid == iff.makeid('E','F','S','P')
+                         || iff.chunkid == iff.makeid('E','F','S','1')
                          || iff.chunkid == iff.makeid('E','P','N','T')
+                         || iff.chunkid == iff.makeid('E','P','N','1')
                          || iff.chunkid == iff.makeid('E','A','T','N')
-                         || iff.chunkid == iff.makeid('E','S','P','T') )
+                         || iff.chunkid == iff.makeid('E','A','T','1')
+                         || iff.chunkid == iff.makeid('E','S','P','T')
+                         || iff.chunkid == iff.makeid('E','S','P','1') )
                 {
                     EschLight   *l;
-            
+
                     if (iff.chunkid == iff.makeid('E','A','M','B'))
+                    {
                         l = new EschLight;
-                    else if (iff.chunkid == iff.makeid('E','V','E','C'))
+                    }
+                    else if (iff.chunkid == iff.makeid('E','V','E','C')
+                             || iff.chunkid == iff.makeid('E','V','E','1'))
+                    {
                         l = (EschLight*)new EschVectorLight;
-                    else if (iff.chunkid == iff.makeid('E','F','P','T'))
+                    }
+                    else if (iff.chunkid == iff.makeid('E','F','P','T')
+                             || iff.chunkid == iff.makeid('E','F','P','1'))
+                    {
                         l = (EschLight*)new EschFastPointLight;
-                    else if (iff.chunkid == iff.makeid('E','F','A','T'))
+                    }
+                    else if (iff.chunkid == iff.makeid('E','F','A','T')
+                             || iff.chunkid == iff.makeid('E','F','A','1'))
+                    {
                         l = (EschLight*)new EschFastAttenLight;
-                    else if (iff.chunkid == iff.makeid('E','F','S','P'))
+                    }
+                    else if (iff.chunkid == iff.makeid('E','F','S','P')
+                             || iff.chunkid == iff.makeid('E','F','S','1'))
+                    {
                         l = (EschLight*)new EschFastSpotLight;
-                    else if (iff.chunkid == iff.makeid('E','P','N','T'))
+                    }
+                    else if (iff.chunkid == iff.makeid('E','P','N','T')
+                             || iff.chunkid == iff.makeid('E','P','N','1'))
+                    {
                         l = (EschLight*)new EschPointLight;
-                    else if (iff.chunkid == iff.makeid('E','A','T','N'))
+                    }
+                    else if (iff.chunkid == iff.makeid('E','A','T','N')
+                             || iff.chunkid == iff.makeid('E','A','T','1'))
+                    {
                         l = (EschLight*)new EschAttenLight;
-                    else if (iff.chunkid == iff.makeid('E','S','P','T'))
+                    }
+                    else if (iff.chunkid == iff.makeid('E','S','P','T')
+                             || iff.chunkid == iff.makeid('E','S','P','1'))
+                    {
                         l = (EschLight*)new EschSpotLight;
+                    }
 
                     if (!l)
                     {
@@ -1326,14 +1670,14 @@ load_error_exit: ;
             char    str[512];
 
             sprintf(str,"Escher error 0x%x loading file.",(int)err);
-                                                  
+
             MessageBox(NULL,
                        str,"Escher Tool",MB_OK | MB_ICONEXCLAMATION);
 
             AfxThrowArchiveException(CArchiveException::generic);
             return;
         }
-	}
+        }
 }
 
 
@@ -1354,16 +1698,16 @@ BOOL ToolDoc::LoadPalette(const char *fname)
         char    str[512];
 
         sprintf(str,"Error #%x loading Van Gogh palette file:\n\n%s",(int)err,fname);
-                                                  
+
         MessageBox(NULL,
                    str,"Error",MB_OK | MB_ICONEXCLAMATION);
 
         return FALSE;
-    }  
+    }
 
     if (fname != pfname)
         strcpy(pfname,fname);
- 
+
     LOGPALETTE *lpal = (LOGPALETTE *) ivory_alloc(sizeof(LOGPALETTE)
                                                   + 256*sizeof(PALETTEENTRY));
 
@@ -1390,7 +1734,7 @@ BOOL ToolDoc::LoadPalette(const char *fname)
         MessageBox(NULL,
                    "Failed to create a palette from Van Gogh palette file","Error",MB_OK | MB_ICONEXCLAMATION);
 
-        return FALSE;       
+        return FALSE;
     }
 
     return TRUE;
@@ -1407,14 +1751,14 @@ BOOL ToolDoc::LoadPalette(const char *fname)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 BOOL ToolDoc::OnNewDocument()
 {
-	if (!CDocument::OnNewDocument())
-		return FALSE;
+        if (!CDocument::OnNewDocument())
+                return FALSE;
 
     strcpy(name,"NoName");
     *desc = 0;
     SetTitle(name);
 
-    flags = COMPRESS;
+    flags = COMPRESS | FLOATING;
 
 //ÄÄÄ Load default palette (required)
     if (!LoadPalette(pfname))
@@ -1424,7 +1768,7 @@ BOOL ToolDoc::OnNewDocument()
         return FALSE;
     }
 
-	return TRUE;
+        return TRUE;
 }
 
 //°±² eof - eshtdoc.cpp ²±°

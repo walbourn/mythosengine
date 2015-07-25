@@ -59,7 +59,7 @@
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 static char id[] =
 "Escher -  A component of the MythOS collection\n"
-"Copyright (C) 1994-1996 by Charybdis Enterprises, Inc. All Rights Reserved.\n"
+"Copyright (C) 1994-1997 by Charybdis Enterprises, Inc. All Rights Reserved.\n"
 "MythOS is a trademark of Charybdis Enterprises, Inc.\n";
 
 

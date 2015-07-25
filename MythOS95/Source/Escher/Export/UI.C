@@ -39,7 +39,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include <io.h>
@@ -61,7 +61,7 @@
 //
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
-#define VERSION "1.50"
+#define VERSION "2.00"
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
@@ -75,12 +75,14 @@ static void feel_cancel(Dialog *d, int mouse);
 static void feel_about(Dialog *d, int mouse);
 static void feel_target(Dialog *d, int mouse);
 static void feel_lights(Dialog *d, int mouse);
+static void feel_keyframes(Dialog *d, int mouse);
 static void feel_complete(Dialog *d, int mouse);
 //static void feel_nyi(Dialog *d, int mouse);
 
 //ÄÄÄ Functions in other modules
 void do_light();
 void do_mtl();
+void do_key();
 void export();
 void load_from_ini(char *inifname);
 
@@ -112,7 +114,8 @@ static FeelSub Escher_feel[] =
     CANCEL,     feel_cancel,
     ABOUT,      feel_about,
     TARGET,     feel_target,
-    INC_LGTS,   feel_lights, 
+    INC_LGTS,   feel_lights,
+    KEYFRAME,   feel_keyframes,
 
     -1, FNULL
 };
@@ -123,11 +126,13 @@ int extent_mode=1;
 int material_mode=1;
 int hierarchy_mode=1;
 int orientation_mode=1;
+int format_mode=1;
 
 dword  object_flags=0;
 
 int    cameras_flag=0;
 int    lights_flag=0;
+int    keys_flag=0;
 
 float  scale_3ds2esch=1.0;
 
@@ -154,10 +159,13 @@ static RadSub Escher_rad[] =
     ORI_DEF, feel_radio, &orientation_mode, 1,
     ORI_MTX, feel_radio, &orientation_mode, 2,
 
+    FMT_FLT, feel_radio, &format_mode, 1,
+    FMT_FIX, feel_radio, &format_mode, 2,
+
     -1, FNULL, NULL, -1
 };
 
-extern char mtl_palpath[]; 
+extern char mtl_palpath[];
 extern char mtl_palname[];
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
@@ -179,7 +187,7 @@ void about(void)
        "[           Escher Data Exporter|"
        "             for 3D Studio R4|"
        "|"
-       " (C) 1994-6 by Charybdis Enterprises, Inc.|"
+       " (C) 1994-7 by Charybdis Enterprises, Inc.|"
        "        Version " VERSION "   " __DATE__ "]"
        "[ OK ]", x);
 }
@@ -212,7 +220,7 @@ void do_user_interaction()
     // as the filename.
 
     gfx_get_paths(GFX_PROCESS_PATH,0,path,file);
-    
+
     strcpy(mtl_palpath,path);
     strcpy(mtl_palname,"ESPORT.VGP");
 
@@ -245,16 +253,17 @@ void do_user_interaction()
     ready_dialog(Escher, Escher_edit, NULL, Escher_feel, Escher_rad,
                 NULL, NULL);
 
-	init_editable(&Escher[SCN_NAME], scene_name);
+        init_editable(&Escher[SCN_NAME], scene_name);
 
     sprintf(buff,"%f",scale_3ds);
-	init_editable(&Escher[SCAL_3DS], buff);
+        init_editable(&Escher[SCAL_3DS], buff);
 
     sprintf(buff,"%f",scale_esh);
-	init_editable(&Escher[SCAL_ESH], buff);
+        init_editable(&Escher[SCAL_ESH], buff);
 
     Escher[INC_CAMS].radio = (cameras_flag) ? 1 : 0;
     Escher[INC_LGTS].radio = (lights_flag) ? 1 : 0;
+    Escher[KEYFRAME].radio = (keys_flag) ? 1 : 0;
 
     Escher[FLAGS_0].radio = (object_flags & ESCH_MSH_APP0) ? 1 : 0;
     Escher[FLAGS_1].radio = (object_flags & ESCH_MSH_APP1) ? 1 : 0;
@@ -346,6 +355,7 @@ startover: ;
 
         cameras_flag = (Escher[INC_CAMS].radio) ? 1 : 0;
         lights_flag = (Escher[INC_LGTS].radio) ? 1 : 0;
+        keys_flag = (Escher[KEYFRAME].radio) ? 1 : 0;
 
         export();
     }
@@ -377,7 +387,7 @@ static void feel_ok(Dialog *d, int mouse)
 static void feel_cancel(Dialog *d, int mouse)
 {
     int status;
-   
+
     if(mouse)
         if(!(press_button(d)))
             return;
@@ -463,6 +473,14 @@ static void feel_lights(Dialog *d, int mouse)
     restore_under_dialog();
     do_light();
     d->radio = (lights_flag) ? 1 : 0;
+}
+
+static void feel_keyframes(Dialog *d, int mouse)
+{
+    dialog_done=1;
+    restore_under_dialog();
+    do_key();
+    d->radio = (keys_flag) ? 1 : 0;
 }
 
 static void feel_complete(Dialog *d, int mouse)

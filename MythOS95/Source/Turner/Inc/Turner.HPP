@@ -93,6 +93,7 @@ class TurnerNetwork
 {
 protected:
         BOOL    is_opened;
+        BOOL    creator;
         HANDLE  hMessageEvent;
 
         char    szSessionName[64];
@@ -102,7 +103,7 @@ public:
         IDirectPlay2A   *pIDP;
         DPSESSIONDESC2  session;
 
-        BOOL            is_creator()    { return session.dwFlags == DPOPEN_CREATESESSION; }
+        BOOL            is_creator() const  { return creator; }
 
 private:
         // Hide this constructor so that others cannot copy this
@@ -208,4 +209,3 @@ static  BOOL CALLBACK DlgProcSelSession (HWND, UINT, WPARAM, LPARAM);
 #endif
 
 //°±² End of header - turner.hpp ²±°
-

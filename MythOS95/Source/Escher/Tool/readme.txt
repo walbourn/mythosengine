@@ -38,22 +38,17 @@
 
  Notes by: Chuck Walbourn
 
- Last Updated: September 18, 1996
+ Last Updated: May 21, 1997
 
  Escher Tool - MFC Application
 
  Changes for this release --------------------------------------------------
 
- Version 1.10
+ Version 2.00
 
-    o Added options for saving texture data as compressed and/or as truecolor.
-      See Known Problems below.
+    o Updated for floating-point formats
 
-    o Extended mesh properties to include verticies, faces, and textures.
-
-    o Added option for viewing of spherical and box extents.
-
-    o Added support for multi-frame textures.
+    o Updated for darklights
 
 
 

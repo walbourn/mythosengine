@@ -66,6 +66,7 @@
 
 #include <portable.h>
 #include <mmsystem.h>
+#include <dinput.h>
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
@@ -91,222 +92,156 @@
 //
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
+class MaxMouse;
+class MaxKeyboard;
+class MaxJoystick;
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-// The Keyboard class is used to manage the keyboad, it mantains
-// a list of all the keys on the keyboard and has their state.
-// Any given key can be either up or down.  A Zero value for that
-// key will represent the UP position of the key, any other value
-// will represent the DOWN position of the key.  There should be
-// no reason to ever use this class seperate from the EventSystem.
-// However, there is nothing keeping you from doing it.
-//
-// Not Yet Implemented:
-// It is also the responsibility of the Keyboard class to hook the
-// <CTRL><ALT><DEL> & <CTRL>(<BREAK>/<C>) key sequences.  If you
-// wish for them to be handled in a special manner.
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-class MaxKeyboard
-{
-private:
-        dword   KeyStat[8];         // The Up/Down Status of the keys.
-        dword   KeyStatHold[8];     // The Up/Down Status of the keys.
-        int     KeyStatCount;
-
-        // And now, for the MaxKbBuffer support.
-        // The MaxKbBuffer objects modify this link pointer themselves.
-        // Consequently, we should only read it.
-friend  class MaxKbBuffer;
-        MaxKbBuffer *BuffList;
-
-public:
-        MaxKeyboard ();
-        ~MaxKeyboard ();
-        void    init ();
-        void    uninit ();
-        void    clear ();
-
-        int     check_key (int key) const;
-
-        // Some members to change the state of the "lock" keys.
-        void    num_lock (int state);
-        void    caps_lock (int state);
-        void    scroll_lock (int state);
-
-        // These members allows a Windows application to avoid loosing
-        // characters when the frame rate drops too low for "normal"
-        // responsiveness.  Simply call these members with the WindowProc
-        // on WM_KEYDOWN and WM_KEYUP messages respectively.
-        void    wm_keydown (int);
-        void    wm_keyup (int);
-};
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-// Mouse Class:
-//  The Mouse class interfaces with the mouse and retrives data
-//  about the button status and which type of mouse is actualy in
-//  use on the system.  (ie. 2 button or 3 button)
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-class MaxMouse
-{
-private:
-        short   last_x;
-        short   last_y;
-
-public:
-        int     NumButtons;
-        int     MouseSupported;
-
-public:
-        int     init ();
-        void    uninit();
-        void    clear();
-
-        void    hide();
-        void    show();
-
-        void    get_pos (short *mx, short *my) const;
-        void    set_pos (short _mx, short _my);
-        void    get_movement (short *dx, short *dy);
-        byte    get_buttons() const;    // bits 0,1,2 button up/down
-                                        // bits 4,5,6 button dblclick status.
-};
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-// MaxJoystick
-//  Supports the standard IBM joystick device.
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-class MaxJoystick
-{
-        // Controls the access method for the joystick
-        short   auto_polled;
-        MMRESULT timer_id;
-
-public:
-        // Tells which axes are active; bit 1 == Joy1, etc.
-        short   joy_present;
-
-        // Store capabilities and current snapshot
-        JOYCAPS     caps;
-        JOYINFOEX   info;
-
-        MaxJoystick();
-        ~MaxJoystick();
-
-        short   init ();
-        void    uninit ();
-        void    clear();
-
-        // Return the entire "joystick gestalt"
-        void    get_stat (JOYINFOEX *) const;
-
-        // The polling interface (turns on automatic polling, which increases accuracy)
-        int     auto_poll (BOOL = TRUE, UINT rate = 50);
-};
-
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-// MaxDevices:
+// MaxDevices - ABSTRACT BASE CLASS:
 //  The set of devices currently supported by Max.
-//  Each devices may be enabled/disabled individually
+//  Each devices may be enabled/disabled individually.  This interface is
+//  the base class for talking to Max devices.
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-
 class MaxDevices
 {
-public:
-        // Actual devices, made public for special access.
-        MaxMouse    theMouse;
-        MaxKeyboard theKeyboard;
-        MaxJoystick theJoystick;
+protected:
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+    // Protected Data
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 
-private:
-        // Enabled states
-        short   keyboard_enabled;
-        short   mouse_enabled;
-        short   joystick_enabled;
+    // Mouse state info
+    short   snapshot_mx;
+    short   snapshot_my;
+    short   snapshot_mdx;
+    short   snapshot_mdy;
+    byte    snapshot_mbuttons;
 
-        // Keyboard state info
-        // None required!
-
-        // Mouse state info
-        short   snapshot_mx;
-        short   snapshot_my;
-        short   snapshot_mdx;
-        short   snapshot_mdy;
-        byte    snapshot_mbuttons;
-
-        // Joystick state info
-        JOYINFOEX   snapshot_jstat;
+    // Joystick state info
+    JOYINFOEX   snapshot_jstat;
 
 public:
-        MaxDevices();
-        ~MaxDevices();
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+    // Public Data
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+    MaxMouse    *theMouse;
+    MaxKeyboard *theKeyboard;
+    MaxJoystick *theJoystick;
 
-int     enable_keyboard (int);
-int     enable_mouse    (int);
-int     enable_joystick (int);
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+    // Construtor/Destructor
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+    MaxDevices();
+    virtual ~MaxDevices();
 
-        // Update the internal values for the various devices
-void    update ();
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+    // Operations
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+    virtual int enable_keyboard (int) = 0;
+    virtual int enable_mouse    (int) = 0;
+    virtual int enable_joystick (int) = 0;
 
-        // Used to clear any special states when using the WM_* pump
-        // Must be called if an wm_ device members are used.
-void    wm_clear ();
+    // Update the internal values for the various devices
+    virtual void update ();
+    virtual void wm_clear ();
 
-        // Values for the devices
-void    get_mouse_movement (short *, short *) const;
-void    get_mouse_pos (short *, short *) const;
-void    set_mouse_pos (short, short);
-byte    get_mouse_buttons () const;
+    // Values for the devices
+    virtual void get_mouse_movement (short *, short *) const;
+    virtual void get_mouse_pos (short *, short *) const;
+    virtual void set_mouse_pos (short, short);
+    virtual byte get_mouse_buttons () const;
 
-        // Keyboard device
-int     check_keyboard_key (int) const;
+    // Keyboard device
+    virtual int  check_keyboard_key (int) const;
 
-        // Joystick device
-void    get_joystick (JOYINFOEX *) const;
+    // Joystick device
+    virtual void get_joystick (JOYINFOEX *) const;
+
+    // Device operations (spread over all devices)
+    void init ();
+    void uninit ();
+
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+    // Accessors
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+    bool is_mouse_enabled () const { return theMouse != 0; }
+    bool is_keyboard_enabled () const { return theKeyboard != 0; }
+    bool is_joystick_enabled () const { return theJoystick != 0; }
 };
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-// MaxKbBuffer
-//  This class provides a character buffer for MaxKeyboard.  This key
-//  buffer can be queried with "C" conio-like routines.  It is a little
-//  magic, since the keyboard interrupt routine knows about it.
+// MaxDevicesWin32:
+//  This implementation of the MaxDevices interface uses the "standard"
+//  Win32 interface to provide all input.  This interface requires some
+//  "extra" work, such as feeding data in from WindowProcs, but it should
+//  work under any circumstances.  The MaxDevicesDirectX class is suggested
+//  for any realtime applications.
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-class MaxKbBuffer
+class MaxDevicesWin32: public MaxDevices
 {
-// This is actually a linked list node.  MaxKeyboard is given direct
-// access so that it alone can walk the list.
-friend  class MaxKeyboard;
-        MaxKbBuffer *next;
-        MaxKeyboard *kb;
-
-// The actual KbBuff stuff
-        enum    { BuffSize = 16 };
-        ushort  buff[BuffSize];
-        int     head;
-        int     tail;
+private:
+    // The client's window handle
+    HWND    hwndClient;
 
 public:
-        MaxKbBuffer (MaxKeyboard *);
-        ~MaxKbBuffer();
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+    // Construtor/Destructor
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+    MaxDevicesWin32 (HWND);
+    virtual ~MaxDevicesWin32();
 
-        // The "serial" interface to emulate the standard C console routines
-        int     getch ();
-        int     getscan();
-        int     kbhit () const  { return tail != head; }
-        void    clear ()        { head = tail = 0; }
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+    // Operations
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+    virtual int enable_keyboard (int);
+    virtual int enable_mouse    (int);
+    virtual int enable_joystick (int);
 
-        // Translation services
-        byte    get_ascii (byte scan) const;
+    // Update the internal values for the various devices
+//    virtual void update ();
 
-        // Add a key to the keypress buffer
-        void    AddKey (ushort);
-
-        // For link support
-        void        set_next (MaxKbBuffer *n)   { next = n; }
-        MaxKbBuffer *get_next () const          { return next; }
+    // Used to clear any special states when using the WM_* pump
+    // Must be called if wm_ device members are used.
+//    virtual void wm_clear ();
 };
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// MaxDevicesDirectX:
+//  This implementation of the MaxDevices interface uses the DirectInput
+//  interface to provide input.  This is more efficient, but may cause some
+//  interaction problems, due to its reliance on DirectInput.
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+class MaxDevicesDirectX: public MaxDevices
+{
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+    // Private Data
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+    IDirectInput    *pdi;
+    HWND            hwndClient;
+
+public:
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+    // Construtor/Destructor
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+    MaxDevicesDirectX (HWND);
+    virtual ~MaxDevicesDirectX();
+
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+    // Operations
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+    virtual int enable_keyboard (int);
+    virtual int enable_mouse    (int);
+    virtual int enable_joystick (int);
+
+    // Update the internal values for the various devices
+//    virtual void update ();
+
+    // Used to clear any special states when using the WM_* pump
+    // Must be called if wm_ device members are used.
+//    virtual void wm_clear ();
+};
+
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
@@ -321,4 +256,3 @@ public:
 #endif
 
 //°±² End of header - maxdevs.hpp ²±°
-

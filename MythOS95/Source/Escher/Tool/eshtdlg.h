@@ -352,6 +352,7 @@ public:
 	float	m_yjValue;
 	float	m_zkValue;
 	BOOL	m_atten;
+	BOOL	m_dark;
 	//}}AFX_DATA
 
 

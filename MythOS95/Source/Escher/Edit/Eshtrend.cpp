@@ -222,7 +222,7 @@ void TerrEditRender::UpdateRender()
         EschPoint   pnt;
         pDoc->cam.get_position(&pnt);
         pDoc->cam.set_position(pnt.x,
-                               terr.get_height(pnt.x, pnt.z) + Flx16(pDoc->hover_offset),
+                               terr.get_height(pnt.x, pnt.z) + pDoc->hover_offset,
                                pnt.z);
     }
 
@@ -366,7 +366,7 @@ void TerrEditRender::OnPaint()
 void TerrEditRender::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) 
 {
     int     t, pos, render=0;
-    Flx16   f;
+    float   f;
     static  lastpos=0;
 
     TerrEditDoc* pDoc = (TerrEditDoc*)((CView *) GetParent())->GetDocument();
@@ -380,23 +380,23 @@ void TerrEditRender::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
             switch (nSBCode)
             {
                 case SB_LINELEFT:
-                    pDoc->cam.yaw(-1);
+                    pDoc->cam.yaw(-1.0f);
                     render=1;
                     break;
                 case SB_PAGELEFT:
-                    pDoc->cam.yaw((Flx16)(-11.25));
+                    pDoc->cam.yaw(-11.25f);
                     render=1;
                     break;
                 case SB_LINERIGHT:
-                    pDoc->cam.yaw(1);
+                    pDoc->cam.yaw(1.0f);
                     render=1;
                     break;
                 case SB_PAGERIGHT:
-                    pDoc->cam.yaw((Flx16)(11.25));
+                    pDoc->cam.yaw(11.25f);
                     render=1;
                     break;
                 case SB_THUMBTRACK:
-                    pDoc->cam.yaw(pos - lastpos);
+                    pDoc->cam.yaw(float(pos - lastpos));
                     lastpos=pos;
                     render=2;
                     break;
@@ -411,24 +411,24 @@ void TerrEditRender::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
             switch (nSBCode)
             {
                 case SB_LINELEFT:
-                    pDoc->cam.move(-pDoc->scale,0,0);
+                    pDoc->cam.move(-pDoc->scale,0.0f,0.0f);
                     render=1;
                     break;
                 case SB_PAGELEFT:
-                    pDoc->cam.move(-pDoc->scale * (Flx16)3,0,0);
+                    pDoc->cam.move(-pDoc->scale * 3.0f,0.0f,0.0f);
                     render=1;
                     break;
                 case SB_LINERIGHT:
-                    pDoc->cam.move(pDoc->scale,0,0);
+                    pDoc->cam.move(pDoc->scale,0.0f,0.0f);
                     render=1;
                     break;
                 case SB_PAGERIGHT:
-                    pDoc->cam.move(pDoc->scale * (Flx16)3,0,0);
+                    pDoc->cam.move(pDoc->scale * 3.0f,0.0f,0.0f);
                     render=1;
                     break;
                 case SB_THUMBTRACK:
-                    f = (Flx16)(pos-lastpos) * pDoc->scale;
-                    pDoc->cam.move(f,0,0);
+                    f = (float)(pos-lastpos) * pDoc->scale;
+                    pDoc->cam.move(f,0.0f,0.0f);
                     lastpos=pos;
                     render=2;
                     break;
@@ -442,23 +442,23 @@ void TerrEditRender::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
             switch (nSBCode)
             {
                 case SB_LINERIGHT:
-                    pDoc->cam.roll(-1);
+                    pDoc->cam.roll(-1.0f);
                     render=1;
                     break;
                 case SB_PAGERIGHT:
-                    pDoc->cam.roll((Flx16)(-11.25));
+                    pDoc->cam.roll(-11.25f);
                     render=1;
                     break;
                 case SB_LINELEFT:
-                    pDoc->cam.roll(1);
+                    pDoc->cam.roll(1.0f);
                     render=1;
                     break;
                 case SB_PAGELEFT:
-                    pDoc->cam.roll((Flx16)(11.25));
+                    pDoc->cam.roll(11.25f);
                     render=1;
                     break;
                 case SB_THUMBTRACK:
-                    pDoc->cam.roll(lastpos - pos);
+                    pDoc->cam.roll(float(lastpos - pos));
                     lastpos=pos;
                     render=2;
                     break;
@@ -475,40 +475,40 @@ void TerrEditRender::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
             {
                 case SB_LINELEFT:
                     if (pDoc->lights->get_type() == ESCH_LGTT_VECTOR)
-                        ((EschVectorLight*)pDoc->lights)->rotatex(-1);
+                        ((EschVectorLight*)pDoc->lights)->rotatex(-1.0f);
                     else
-                        ((EschPointLight*)pDoc->lights)->translate(-1,0,0);
+                        ((EschPointLight*)pDoc->lights)->translate(-1.0f,0.0f,0.0f);
                     render=1;
                     break;
                 case SB_PAGELEFT:
                     if (pDoc->lights->get_type() == ESCH_LGTT_VECTOR)
-                        ((EschVectorLight*)pDoc->lights)->rotatex((Flx16)(-11.25));
+                        ((EschVectorLight*)pDoc->lights)->rotatex(-11.25f);
                     else
-                        ((EschPointLight*)pDoc->lights)->translate(-10,0,0);
+                        ((EschPointLight*)pDoc->lights)->translate(-10.0f,0.0f,0.0f);
                     render=1;
                     break;
                 case SB_LINERIGHT:
                     if (pDoc->lights->get_type() == ESCH_LGTT_VECTOR)
-                        ((EschVectorLight*)pDoc->lights)->rotatex(1);
+                        ((EschVectorLight*)pDoc->lights)->rotatex(1.0f);
                     else
-                        ((EschPointLight*)pDoc->lights)->translate(1,0,0);
+                        ((EschPointLight*)pDoc->lights)->translate(1.0f,0.0f,0.0f);
                     render=1;
                     break;
                 case SB_PAGERIGHT:
                     if (pDoc->lights->get_type() == ESCH_LGTT_VECTOR)
-                        ((EschVectorLight*)pDoc->lights)->rotatex((Flx16)(11.25));
+                        ((EschVectorLight*)pDoc->lights)->rotatex(11.25f);
                     else
-                        ((EschPointLight*)pDoc->lights)->translate(10,0,0);
+                        ((EschPointLight*)pDoc->lights)->translate(10.0f,0.0f,0.0f);
                     render=1;
                     break;
                 case SB_THUMBTRACK:
                     if (pDoc->lights->get_type() == ESCH_LGTT_VECTOR)
-                        ((EschVectorLight*)pDoc->lights)->rotatex(pos - lastpos);
+                        ((EschVectorLight*)pDoc->lights)->rotatex(float(pos - lastpos));
                     else
                     {
-                        f = (Flx16)(pos-lastpos) / (Flx16)10;
+                        f = (float)(pos-lastpos) / 10.0f;
 
-                        ((EschPointLight*)pDoc->lights)->translate(f,0,0);
+                        ((EschPointLight*)pDoc->lights)->translate(f,0.0f,0.0f);
                     }
                     lastpos=pos;
                     render=2;
@@ -611,7 +611,7 @@ void TerrEditRender::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 void TerrEditRender::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) 
 {
     int     t, pos, render=0;
-    Flx16   f;
+    float   f;
     static  lastpos=0;
 
     TerrEditDoc* pDoc = (TerrEditDoc*) ((CView *) GetParent())->GetDocument();
@@ -625,23 +625,23 @@ void TerrEditRender::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
             switch (nSBCode)
             {
                 case SB_LINEUP:
-                    pDoc->cam.pitch(-1);
+                    pDoc->cam.pitch(-1.0f);
                     render=1;
                     break;
                 case SB_PAGEUP:
-                    pDoc->cam.pitch((Flx16)(-11.25));
+                    pDoc->cam.pitch(-11.25f);
                     render=1;
                     break;
                 case SB_LINEDOWN:
-                    pDoc->cam.pitch(1);
+                    pDoc->cam.pitch(1.0f);
                     render=1;
                     break;
                 case SB_PAGEDOWN:
-                    pDoc->cam.pitch((Flx16)(11.25));
+                    pDoc->cam.pitch(11.25f);
                     render=1;
                     break;
                 case SB_THUMBTRACK:
-                    pDoc->cam.pitch(pos - lastpos);
+                    pDoc->cam.pitch(float(pos - lastpos));
                     lastpos=pos;
                     render=2;
                     break;
@@ -655,24 +655,24 @@ void TerrEditRender::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
             switch (nSBCode)
             {
                 case SB_LINEUP:
-                    pDoc->cam.move(0,pDoc->scale,0);
+                    pDoc->cam.move(0.0f,pDoc->scale,0.0f);
                     render=1;
                     break;
                 case SB_PAGEUP:
-                    pDoc->cam.move(0,pDoc->scale * (Flx16)3,0);
+                    pDoc->cam.move(0.0f,pDoc->scale * 3.0f,0.0f);
                     render=1;
                     break;
                 case SB_LINEDOWN:
-                    pDoc->cam.move(0,-pDoc->scale,0);
+                    pDoc->cam.move(0.0f,-pDoc->scale,0.0f);
                     render=1;
                     break;
                 case SB_PAGEDOWN:
-                    pDoc->cam.move(0,-pDoc->scale * (Flx16)3,0);
+                    pDoc->cam.move(0.0f,-pDoc->scale * 3.0f,0.0f);
                     render=1;
                     break;
                 case SB_THUMBTRACK:
-                    f = (Flx16)(lastpos-pos) * pDoc->scale;
-                    pDoc->cam.move(0,f,0);
+                    f = (float)(lastpos-pos) * pDoc->scale;
+                    pDoc->cam.move(0.0f,f,0.0f);
                     lastpos=pos;
                     render=2;
                     break;
@@ -687,24 +687,24 @@ void TerrEditRender::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
             switch (nSBCode)
             {
                 case SB_LINEUP:
-                    pDoc->cam.move(0,0,pDoc->scale);
+                    pDoc->cam.move(0.0f,0.0f,pDoc->scale);
                     render=1;
                     break;
                 case SB_PAGEUP:
-                    pDoc->cam.move(0,0,pDoc->scale * (Flx16)3);
+                    pDoc->cam.move(0.0f,0.0f,pDoc->scale * 3.0f);
                     render=1;
                     break;
                 case SB_LINEDOWN:
-                    pDoc->cam.move(0,0,-pDoc->scale);
+                    pDoc->cam.move(0.0f,0.0f,-pDoc->scale);
                     render=1;
                     break;
                 case SB_PAGEDOWN:
-                    pDoc->cam.move(0,0,-pDoc->scale * (Flx16)3);
+                    pDoc->cam.move(0.0f,0.0f,-pDoc->scale * 3.0f);
                     render=1;
                     break;
                 case SB_THUMBTRACK:
-                    f = (Flx16)(lastpos-pos) * pDoc->scale;
-                    pDoc->cam.move(0,0,f);
+                    f = (float)(lastpos-pos) * pDoc->scale;
+                    pDoc->cam.move(0.0f,0.0f,f);
                     lastpos=pos;
                     render=2;
                     break;
@@ -721,39 +721,39 @@ void TerrEditRender::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
             {
                 case SB_LINELEFT:
                     if (pDoc->lights->get_type() == ESCH_LGTT_VECTOR)
-                        ((EschVectorLight*)pDoc->lights)->rotatey(-1);
+                        ((EschVectorLight*)pDoc->lights)->rotatey(-1.0f);
                     else
-                        ((EschPointLight*)pDoc->lights)->translate(0,-1,0);
+                        ((EschPointLight*)pDoc->lights)->translate(0.0f,-1.0f,0.0f);
                     render=1;
                     break;
                 case SB_PAGELEFT:
                     if (pDoc->lights->get_type() == ESCH_LGTT_VECTOR)
-                        ((EschVectorLight*)pDoc->lights)->rotatey((Flx16)(-11.25));
+                        ((EschVectorLight*)pDoc->lights)->rotatey(-11.25f);
                     else
-                        ((EschPointLight*)pDoc->lights)->translate(0,-10,0);
+                        ((EschPointLight*)pDoc->lights)->translate(0.0f,-10.0f,0.0f);
                     render=1;
                     break;
                 case SB_LINERIGHT:
                     if (pDoc->lights->get_type() == ESCH_LGTT_VECTOR)
-                        ((EschVectorLight*)pDoc->lights)->rotatey(1);
+                        ((EschVectorLight*)pDoc->lights)->rotatey(1.0f);
                     else
-                        ((EschPointLight*)pDoc->lights)->translate(0,1,0);
+                        ((EschPointLight*)pDoc->lights)->translate(0.0f,1.0f,0.0f);
                     render=1;
                     break;
                 case SB_PAGERIGHT:
                     if (pDoc->lights->get_type() == ESCH_LGTT_VECTOR)
-                        ((EschVectorLight*)pDoc->lights)->rotatey((Flx16)(11.25));
+                        ((EschVectorLight*)pDoc->lights)->rotatey(11.25f);
                     else
-                        ((EschPointLight*)pDoc->lights)->translate(0,10,0);
+                        ((EschPointLight*)pDoc->lights)->translate(0.0f,10.0f,0.0f);
                     render=1;
                     break;
                 case SB_THUMBTRACK:
                     if (pDoc->lights->get_type() == ESCH_LGTT_VECTOR)
-                        ((EschVectorLight*)pDoc->lights)->rotatey(pos - lastpos);
+                        ((EschVectorLight*)pDoc->lights)->rotatey(float(pos - lastpos));
                     else
                     {
-                        f = (Flx16)(pos-lastpos) / (Flx16)10;
-                        ((EschPointLight*)pDoc->lights)->translate(0,f,0);
+                        f = (float)(pos-lastpos) / 10.0f;
+                        ((EschPointLight*)pDoc->lights)->translate(0.0f,f,0.0f);
                     }
                     lastpos=pos;
                     render=2;
@@ -907,23 +907,23 @@ void TerrEditRender::OnMouseMove(UINT nFlags, CPoint point)
     switch (mode)
     {
         case RNDCTRL_HOVER:                     // Hover
-            pDoc->cam.move(-dx, FLX16_ZERO, dy);
+            pDoc->cam.move((float)-dx, 0.0f, (float)dy);
             render=1;
             break;
         case RNDCTRL_ROTATEXY:                  // Rotate X/Y
-            pDoc->cam.yaw(-dx);
-            pDoc->cam.pitch(-dy);
+            pDoc->cam.yaw((float)-dx);
+            pDoc->cam.pitch((float)-dy);
             render=1;
             break;
         case RNDCTRL_MOVEXY:                    // Move X/Y
-            pDoc->cam.move(-dx, dy, FLX16_ZERO);
+            pDoc->cam.move((float)-dx, (float)dy, 0.0f);
             render=1;
             break;
         case RNDCTRL_ROTMOVEZ:                  // Move Z/Rotate Z
             if (nFlags & MK_SHIFT)
-                pDoc->cam.roll(-dx);
+                pDoc->cam.roll((float)-dx);
             else
-                pDoc->cam.move(FLX16_ZERO, FLX16_ZERO, dy);
+                pDoc->cam.move(0.0f, 0.0f, (float)dy);
             render=1;
             break;
         case RNDCTRL_LIGHTXY:                   // Lights X/Y
@@ -931,16 +931,16 @@ void TerrEditRender::OnMouseMove(UINT nFlags, CPoint point)
                 break;
             if (pDoc->lights->get_type() == ESCH_LGTT_VECTOR)
             {
-                ((EschVectorLight*)pDoc->lights)->rotatex(dx);
-                ((EschVectorLight*)pDoc->lights)->rotatey(dy);
+                ((EschVectorLight*)pDoc->lights)->rotatex((float)dx);
+                ((EschVectorLight*)pDoc->lights)->rotatey((float)dy);
             }
             else if (nFlags & MK_SHIFT)
             {
-                ((EschPointLight*)pDoc->lights)->translate(FLX16_ZERO, FLX16_ZERO, dy);
+                ((EschPointLight*)pDoc->lights)->translate(0.0f, 0.0f, (float)dy);
             }
             else
             {
-                ((EschPointLight*)pDoc->lights)->translate(dx, -dy, FLX16_ZERO);
+                ((EschPointLight*)pDoc->lights)->translate((float)dx, (float)-dy, 0.0f);
             }
             render=1;
             pDoc->SetModifiedFlag();

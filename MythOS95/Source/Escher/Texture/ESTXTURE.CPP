@@ -42,7 +42,7 @@
 //같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같�
 //
 //                                Includes
-//                                
+//
 //같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같�
 
 #include "escher.hpp"
@@ -268,8 +268,8 @@ esch_error_codes EschTexture::load_body(XFParseIFF *iff,
         {
             case 3:
                 {
-                    byte *dptr=ptr->tex;
-                    byte *eptr=ptr->tex + (header.xsize*header.ysize);
+                    byte *dptr=(byte*)ptr->tex;
+                    byte *eptr=(byte*)ptr->tex + (header.xsize*header.ysize);
                     for(byte *wptr=work; wptr < work+iff->chunkSize; )
                     {
                         int j = (char) *(wptr++);
@@ -317,8 +317,8 @@ esch_error_codes EschTexture::load_body(XFParseIFF *iff,
                 break;
             case 4:
                 {
-                    byte *dptr=ptr->tex;
-                    byte *eptr=ptr->tex + (header.xsize*header.ysize);
+                    byte *dptr=(byte*)ptr->tex;
+                    byte *eptr=(byte*)ptr->tex + (header.xsize*header.ysize);
                     for(byte *wptr=work; wptr < work+iff->chunkSize; )
                     {
                         int j = (char) *(wptr++);
@@ -381,7 +381,7 @@ esch_error_codes EschTexture::load_body(XFParseIFF *iff,
             default:
                 if (XFParseXEB::uncompress_rle_8bpp(header.xsize, header.ysize,
                                                     iff->chunkSize, work,
-                                                    ptr->tex))
+                                                    (byte*)ptr->tex))
                 {
                     delete [] work;
                     return ESCH_ERR_INVALIDDATA;
@@ -422,7 +422,7 @@ esch_error_codes EschTexture::load_body(XFParseIFF *iff,
 
         if (bpp == 4)
         {
-            byte *dptr = ptr->tex;
+            byte *dptr = (byte*)ptr->tex;
             byte *sptr = work;
             for(ulong i=0; i < (ulong)(header.xsize * header.ysize); i++)
             {
@@ -443,7 +443,7 @@ esch_error_codes EschTexture::load_body(XFParseIFF *iff,
         else
         {
             assert(bpp == 3);
-            byte *dptr = ptr->tex;
+            byte *dptr = (byte*)ptr->tex;
             byte *sptr = work;
             for(ulong i=0; i < (ulong)(header.xsize * header.ysize); i++)
             {

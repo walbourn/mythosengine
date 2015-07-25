@@ -49,6 +49,7 @@
 3 C-style Interface=PG_CHRONOS_CINTERFACE
 3 Chronos System Class=PG_CHRONOS_SYSTEM
 3 Chronometer Class=PG_CHRONOMETER
+3 AtomicChronometer Class=PG_ACHRONOMETER
 2 Bozo
 3 Overview=PG_BOZO_OVERVIEW
 3 C Tasking Interface=PG_BOZO_CTASKING
@@ -85,43 +86,67 @@
 4 Low-level Output Functions=PG_VNGO_CSTYLOW
 4 Support Functions=PG_VNGO_CSTYSUPPORT
 4 Misc. Functions=PG_VNGO_CSTYMISC
-3 Base Devices 
-4 VngoBaseDev Class=PG_VNGO_BASEDEV
-3 Viewport Classes 
+3 Viewport Classes
 4 VngoVport Class=PG_VNGO_VPORT
-4 VngoVVport8 Class=PG_VNGO_VVPORT8
-4 VngoVportDB8 Class=PG_VNGO_VPORTDB8
-4 VngoVportDD8 Class=PG_VNGO_VPORTDD8
+4 8 bpp
+5 VngoVVport8 Class=PG_VNGO_VVPORT8
+5 VngoVportDB8 Class=PG_VNGO_VPORTDB8
+5 VngoVportDD8 Class=PG_VNGO_VPORTDD8
+4 16 bpp
+5 VngoVVport16 Class=PG_VNGO_VVPORT16
+5 VngoVportDB16 Class=PG_VNGO_VPORTDB16
+5 VngoVportDD16 Class=PG_VNGO_VPORTDD16
+4 Hardware-specific
+5 VngoVportD3D Class=PG_VNGO_VPORTD3D
+5 VngoVport3Dfx Class=PG_VNGO_VPORT3DFX
+5 VngoVportCL3D Class=PG_VNGO_VPORTCL3D
+5 VngoVportMSI Class=PG_VNGO_VPORTMSI
+3 Screen Manager Classes
+4 VngoScreenManager Class=PG_VNGO_SCRNMNGR
+4 VngoDIB Class=PG_VNGO_DIB
+4 VngoDirectDraw Class=PG_VNGO_DIRECTDRAW
+4 VngoHybrid Class=PG_VNGO_HYBRID
+4 Hardware-specific
+5 VngoDirect3D Class=PG_VNGO_DIRECT3D
+5 Vngo3Dfx Class=PG_VNGO_3DFX
+5 VngoClear3D Class=PG_VNGO_CLEAR3D
+5 VngoMSI Class=PG_VNGO_MSI
 3 Color Classes
-4 Vngo24to8bit Class=PG_VNGO_24TO8BIT
 4 VngoColorHLS Class=PG_VNGO_COLORHLS
 4 VngoColor24bit Class=PG_VNGO_COLOR24BIT
 4 VngoColor16bit Class=PG_VNGO_COLOR16BIT
 4 VngoColor15bit Class=PG_VNGO_COLOR15BIT
+4 Vngo24to8bit Class=PG_VNGO_24TO8BIT
 4 VngoClrConvert Class=PG_VNGO_CLRCONVERT
 4 VngoColorShade Class=PG_VNGO_COLORSHADE
 4 VngoColorShadeHLS Class=PG_VNGO_COLORSHADEHLS
-4 VngoColorShade8 Class=PG_VNGO_COLORSHADE8
-4 VngoColorShade15 Class=PG_VNGO_COLORSHADE15
-4 VngoColorShade16 Class=PG_VNGO_COLORSHADE16
-4 VngoColorShade24 Class=PG_VNGO_COLORSHADE24
+4 VngoColorShade8/15/16/24 Class=PG_VNGO_COLORSHADE8_15_16_24
 3 Palette Classes
 4 VngoHwPal Class=PG_VNGO_HWPAL
 4 VngoShadePal Class=PG_VNGO_SHADEPAL
-4 VngoShadePal8 Class=PG_VNGO_SHADEPAL8
-4 VngoHazePal8 Class=PG_VNGO_HAZEPAL8
+4 VngoShadePal8/15/16 Class=PG_VNGO_SHADEPAL8_15_16
 4 VngoPal Class=PG_VNGO_PAL
-4 VngoPal8 Class=PG_VNGO_PAL8
+4 VngoPal8/15/16 Class=PG_VNGO_PAL8_15_16
 4 VngoPalIFF Class=PG_VNGO_PALIFF
-4 VngoPalIFF8 Class=PG_VNGO_PALIFF8
+4 VngoPalIFF8/15/16 Class=PG_VNGO_PALIFF8_15_16
+3 Texture Classes
+4 VngoTexture Class=PG_VNGO_TEXTURE
+4 VngoCTexture Class=PG_VNGO_CTEXTURE
+4 3D Texture Classes
+5 VngoTexture3D Class=PG_VNGO_TEXTURE3D
+5 VngoMemTexture3D Class=PG_VNGO_MEMTEXTURE3D
+5 VngoD3DTexture3D Class=PG_VNGO_D3DTEXTURE3D
+5 VngoCL3DTexture3D Class=PG_VNGO_CL3DTEXTURE3D
 3 Support Structures
 4 VngoRect=PG_VNGO_RECT
 4 VngoPoint=PG_VNGO_POINT
-4 VngoTriangle=PG_VNGO_TRIANGLE
+4 VngoPointF=PG_VNGO_POINTF
 4 VngoVbuffer=PG_VNGO_VBUFFER
-4 VngoTexture=PG_VNGO_TEXTURE
 3 Support Classes
-4 VngoZMap=PG_VNGO_ZMAP
+4 VngoSurfaceManager Class=PG_VNGO_SURFMNGR
+4 VngoTextureManager Class=PG_VNGO_TXTRMNGR
+4 VngoSystem Class=PG_VNGO_SYSTEM
+4 VngoZMap Class=PG_VNGO_ZMAP
 2 Escher
 3 Overview=PG_ESCH_OVERVIEW
 3 C-style
@@ -144,12 +169,15 @@
 4 EschGeometry Class=PG_ESCH_GEOMETRY
 4 EschMeshDraw Class=PG_ESCH_MESHDRAW
 4 EschTerrain Class=PG_ESCH_TERRAIN
+4 EschTerrainEx Class=PG_ESCH_TERRAINEX
+4 EschTerrainTreeTop Class=PG_ESCH_TERRAINTREETOP
 4 EschPartition Class=PG_ESCH_PARTITION
 4 EschGridPartition Class=PG_ESCH_GRIDPARTITION
 4 EschStarfield Class=PG_ESCH_STARFIELD
 4 EschPlosion Class=PG_ESCH_PLOSION
-4 EschMetabox=PG_ESCH_METABOX
-4 EschLevelOfDetail=PG_ESCH_LOD
+4 EschMetabox Class=PG_ESCH_METABOX
+4 EschLevelOfDetail Class=PG_ESCH_LOD
+4 EschKeyframeDraw Class=PG_ESCH_KFDRAW
 3 Drawable Support Structures
 4 EschCollision Structure=PG_ESCH_COLLISION
 4 EschPicking Structure=PG_ESCH_PICKING
@@ -181,6 +209,10 @@
 4 EschMultiFrameTexture Class=PG_ESCH_MFRAMETEXTURE
 4 EschProceduralTexture Class=PG_ESCH_PROCTEXTURE
 4 EschFireTexture Class=PG_ESCH_FIRETEXTURE
+3 Motion Classes
+4 EschKeyframer Class=PG_ESCH_KEYFRAMER
+4 EschKeyframeDraw Class=PG_ESCH_KFDRAW
+4 EschLimbSegment Class=PG_ESCH_LIMBSEG
 3 Builder Classes
 4 EschBuildTexture=PG_ESCH_BUILDTEXTURE
 4 EschBuildMesh=PG_ESCH_BUILDMESH
@@ -241,3 +273,29 @@
 2 Utilities
 3 Overview=UG_UTIL_OVERVIEW
 3 Picture Utility=UG_UTIL_PIC
+1 SimGine Framework Guide
+2 About this guide=SG_ABOUT
+2 Overview=SG_OVERVIEW
+2 SimGine Class=SG_SIMGINE
+2 SimAudio Class=SG_SIMAUDIO
+2 SimText Class=SG_SIMTEXT
+2 SimTimeTable Class=SG_SIMTIMETABLE
+2 Screen Classes
+3 SimScreen Class=SG_SIMSCREEN
+3 SimScreenDD Class=SG_SIMSCREENDD
+3 SimScreenDIB Class=SG_SIMSCREENDIB
+3 SimScreenD3D Class=SG_SIMSCREEND3D
+3 SimScreenCL3D Class=SG_SIMSCREENCL3D
+2 State Classes
+3 SimState Class=SG_SIMSTATE
+3 SimulatorState Class=SG_SIMULATORSTATE
+3 Simulator UI Classes
+4 SimUI=SG_SIMUI
+4 SimView=SG_SIMVIEW
+3 Simulator Model Classes
+4 SimBase=SG_SIMBASE
+4 SimObject=SG_SIMOBJECT
+4 SimUnit=SG_SIMUNIT
+4 SimEquip=SG_SIMEQUIP
+4 SimTemp=SG_SIMTEMP
+4 SimOffield=SG_SIMOFFIELD

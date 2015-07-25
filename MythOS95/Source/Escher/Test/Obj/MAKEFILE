@@ -35,11 +35,15 @@
 #°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 #
 #                               Variables
-#                                
+#
 #°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 !if "$(DEBUG)" == ""
 DEBUG = NO
+!endif
+
+!if "$(THREAD)" == ""
+THREAD = YES
 !endif
 
 !if "$(MYTH95ROOT)" == ""
@@ -80,6 +84,9 @@ comdlg32.lib\
 winmm.lib\
 msacm32.lib\
 ddraw.lib\
+dinput.lib\
+d3drm.lib\
+dxguid.lib\
 user32.lib
 
 #ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
@@ -115,7 +122,7 @@ all: setstden $(EXE).exe
 ..\etevt.iff : ..\etevt.hpp
 
 ..\etevt.hpp:  ..\etevt.cel
-   $(MYTH95ROOT)\bin\maxc ..\etevt.cel 
+   $(MYTH95ROOT)\bin\maxc ..\etevt.cel
 
 #ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 # C++ files

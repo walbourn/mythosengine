@@ -44,6 +44,8 @@
 //                                
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
+#include <float.h>
+
 #include "escher.hpp"
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
@@ -227,7 +229,7 @@ int EschDrawable::get_extents(EschSphereExtents *sp) const
 // The base drawable does a ray/sphere intersection if the drawable         ³
 // supports get_extents.                                                    ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-Flx16 EschDrawable::ray(const EschPoint *pt, const EschVector *v, int coarse) const
+float EschDrawable::ray(const EschPoint *pt, const EschVector *v, int coarse) const
 {
     assertMyth("EschDrawable::ray needs point and vector",
                pt != 0 && v != 0);
@@ -235,7 +237,7 @@ Flx16 EschDrawable::ray(const EschPoint *pt, const EschVector *v, int coarse) co
     EschSphereExtents   sphere;
 
     if (get_extents(&sphere) != 0)
-        return Flx16(-1);
+        return float(-1);
 
     return sphere.ray(pt,v);
 }
@@ -250,7 +252,7 @@ Flx16 EschDrawable::ray(const EschPoint *pt, const EschVector *v, int coarse) co
 // The base drawable does a sphere hit test if the drawable supports        ³
 // get_extents.                                                             ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-int EschDrawable::hit(const EschPoint *pt, const Flx16 r, int coarse) const
+int EschDrawable::hit(const EschPoint *pt, const float r, int coarse) const
 {
     assertMyth("EschDrawable::hit needs point and radius",
                pt != 0 && r >= 0);
@@ -315,12 +317,11 @@ esch_error_codes EschDrawable::pick(EschPicking *data) const
             //ÄÄÄ Assume point is on projection-plane (1),
             //ÄÄÄ reverse project, and transform form eye to world
 
-            EschPoint point( flx_16div16( Flx16(data->sx)
-                                          - Flx16(cam->vport->vbuff.width >> 1),
-                                          cam->xscalar),
-                             flx_16div16( Flx16(cam->vport->vbuff.height >> 1)
-                                          - Flx16(data->sy),
-                                          cam->yscalar),
+            EschPoint point( (float(data->sx)
+                              - float(cam->vport->vbuff.width >> 1))
+                             / cam->xscalar,
+                             (float(cam->vport->vbuff.height >> 1)
+                              - float(data->sy)) / cam->yscalar,
                              1);
             point.transform(&cam->eye.orient);
             
@@ -335,7 +336,7 @@ esch_error_codes EschDrawable::pick(EschPicking *data) const
             return ESCH_ERR_INVALIDPARMS;
 
         if (!(data->flags & ESCH_PICK_MAXDIST))
-            data->maxdist = Flx16(0x3fffffff,0);
+            data->maxdist = FLT_MAX;
     }
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Walk list
@@ -374,7 +375,7 @@ esch_error_codes EschDrawable::pick(EschPicking *data) const
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Test
     if (data->flags & ESCH_PICK_TESTSELF)
     {
-        Flx16 dist = ray(&data->start,
+        float dist = ray(&data->start,
                          &data->direction,
                          (data->flags & ESCH_PICK_COARSE) ? 1 : 0);
 

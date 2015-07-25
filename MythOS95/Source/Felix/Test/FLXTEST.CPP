@@ -107,13 +107,12 @@ void main()
 
 
    printf("\n\nDIV Section-------\n");
-   a.flx = 0xfffc153b;
-   b.flx = 0xfffffff9;
+   a = 17;
+   b = 128;
    c = 4;
-   c = flx_16div16(a,b);
 
-//   c = b / a;
-   printf ("%f / %f = %f\n",(float)a,(float)b,(float)c);
+   c = b / a;
+   printf ("%f / %f = %f\n",(float)b,(float)a,(float)c);
 
 
    printf("\n\nSIN Section-------\n");
@@ -127,7 +126,7 @@ void main()
    printf ("ASIN of %f is %f \n",(float)flx_sin(b),(float)flx_asin(flx_sin(b)));
    printf ("SIN of %f is %f \n",(float)c,(float)flx_sin(c));
    printf ("ASIN of %f is %f \n",(float)flx_sin(c),(float)flx_asin(flx_sin(c)));
-
+   
 
    printf("\n\nCOS Section-------\n");
    a = 17;
@@ -140,7 +139,7 @@ void main()
    printf ("ACOS of %f is %f \n",(float)flx_cos(b),(float)flx_acos(flx_cos(b)));
    printf ("COS of %f is %f \n",(float)c,(float)flx_cos(c));
    printf ("ACOS of %f is %f \n",(float)flx_cos(c),(float)flx_acos(flx_cos(c)));
-
+   
    printf("\n\nTAN Section-------\n");
    a = 17;
    b = 128;
@@ -152,7 +151,7 @@ void main()
    printf ("COT of %f is %f \n",(float)b,(float)flx_cot(b));
    printf ("TAN of %f is %f \n",(float)c,(float)flx_tan(c));
    printf ("COT of %f is %f \n",(float)c,(float)flx_cot(c));
-
+   
 
 
 

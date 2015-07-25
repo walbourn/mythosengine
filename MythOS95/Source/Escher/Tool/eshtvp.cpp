@@ -404,7 +404,7 @@ void ToolVPort::OnSize(UINT nType, int cx, int cy)
 void ToolVPort::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) 
 {
     int             t, pos, render=0;
-    Flx16           f;
+    float           f;
     static          lastpos=0;
     EschLight       *lgt;
     EschMeshDraw    *msh;
@@ -422,23 +422,23 @@ void ToolVPort::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
             switch (nSBCode)
             {
                 case SB_LINELEFT:
-                    cam->yaw(-1);
+                    cam->yaw(-1.0f);
                     render=1;
                     break;
                 case SB_PAGELEFT:
-                    cam->yaw((Flx16)(-11.25));
+                    cam->yaw(-11.25f);
                     render=1;
                     break;
                 case SB_LINERIGHT:
-                    cam->yaw(1);
+                    cam->yaw(1.0f);
                     render=1;
                     break;
                 case SB_PAGERIGHT:
-                    cam->yaw((Flx16)(11.25));
+                    cam->yaw(11.25f);
                     render=1;
                     break;
                 case SB_THUMBTRACK:
-                    cam->yaw(pos - lastpos);
+                    cam->yaw(float(pos - lastpos));
                     lastpos=pos;
                     render=1;
                     break;
@@ -453,24 +453,24 @@ void ToolVPort::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
             switch (nSBCode)
             {
                 case SB_LINELEFT:
-                    cam->move(-1,0,0);
+                    cam->move(-1.0f,0.0f,0.0f);
                     render=1;
                     break;
                 case SB_PAGELEFT:
-                    cam->move(-10,0,0);
+                    cam->move(-10.0f,0.0f,0.0f);
                     render=1;
                     break;
                 case SB_LINERIGHT:
-                    cam->move(1,0,0);
+                    cam->move(1.0f,0.0f,0.0f);
                     render=1;
                     break;
                 case SB_PAGERIGHT:
-                    cam->move(10,0,0);
+                    cam->move(10.0f,0.0f,0.0f);
                     render=1;
                     break;
                 case SB_THUMBTRACK:
-                    f = (Flx16)(pos-lastpos) / (Flx16)10;
-                    cam->move(f,0,0);
+                    f = (float)(pos-lastpos) / 10.0f;
+                    cam->move(f,0.0f,0.0f);
                     lastpos=pos;
                     render=1;
                     break;
@@ -485,23 +485,23 @@ void ToolVPort::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
             switch (nSBCode)
             {
                 case SB_LINERIGHT:
-                    cam->roll(-1);
+                    cam->roll(-1.0f);
                     render=1;
                     break;
                 case SB_PAGERIGHT:
-                    cam->roll((Flx16)(-11.25));
+                    cam->roll(-11.25f);
                     render=1;
                     break;
                 case SB_LINELEFT:
-                    cam->roll(1);
+                    cam->roll(1.0f);
                     render=1;
                     break;
                 case SB_PAGELEFT:
-                    cam->roll((Flx16)(11.25));
+                    cam->roll(11.25f);
                     render=1;
                     break;
                 case SB_THUMBTRACK:
-                    cam->roll(lastpos - pos);
+                    cam->roll(float(lastpos - pos));
                     lastpos=pos;
                     render=1;
                     break;
@@ -517,23 +517,23 @@ void ToolVPort::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
             switch (nSBCode)
             {
                 case SB_LINELEFT:
-                    msh->yaw(-1);
+                    msh->yaw(-1.0f);
                     render=1;
                     break;
                 case SB_PAGELEFT:
-                    msh->yaw((Flx16)(-11.25));
+                    msh->yaw(-11.25f);
                     render=1;
                     break;
                 case SB_LINERIGHT:
-                    msh->yaw(1);
+                    msh->yaw(1.0f);
                     render=1;
                     break;
                 case SB_PAGERIGHT:
-                    msh->yaw((Flx16)(11.25));
+                    msh->yaw(11.25f);
                     render=1;
                     break;
                 case SB_THUMBTRACK:
-                    msh->yaw(pos - lastpos);
+                    msh->yaw(float(pos - lastpos));
                     lastpos=pos;
                     render=1;
                     break;
@@ -549,24 +549,24 @@ void ToolVPort::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
             switch (nSBCode)
             {
                 case SB_LINELEFT:
-                    msh->move(-1,0,0);
+                    msh->move(-1.0f,0.0f,0.0f);
                     render=1;
                     break;
                 case SB_PAGELEFT:
-                    msh->move(-10,0,0);
+                    msh->move(-10.0f,0.0f,0.0f);
                     render=1;
                     break;
                 case SB_LINERIGHT:
-                    msh->move(1,0,0);
+                    msh->move(1.0f,0.0f,0.0f);
                     render=1;
                     break;
                 case SB_PAGERIGHT:
-                    msh->move(10,0,0);
+                    msh->move(10.0f,0.0f,0.0f);
                     render=1;
                     break;
                 case SB_THUMBTRACK:
-                    f = (Flx16)(pos-lastpos) / (Flx16)10;
-                    msh->move(f,0,0);
+                    f = (float)(pos-lastpos) / 10.0f;
+                    msh->move(f,0.0f,0.0f);
                     lastpos=pos;
                     render=1;
                     break;
@@ -582,23 +582,23 @@ void ToolVPort::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
             switch (nSBCode)
             {
                 case SB_LINERIGHT:
-                    msh->roll(-1);
+                    msh->roll(-1.0f);
                     render=1;
                     break;
                 case SB_PAGERIGHT:
-                    msh->roll((Flx16)(-11.25));
+                    msh->roll(-11.25f);
                     render=1;
                     break;
                 case SB_LINELEFT:
-                    msh->roll(1);
+                    msh->roll(1.0f);
                     render=1;
                     break;
                 case SB_PAGELEFT:
-                    msh->roll((Flx16)(11.25));
+                    msh->roll(11.25f);
                     render=1;
                     break;
                 case SB_THUMBTRACK:
-                    msh->roll(lastpos - pos);
+                    msh->roll(float(lastpos - pos));
                     lastpos=pos;
                     render=1;
                     break;
@@ -620,67 +620,67 @@ void ToolVPort::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
                     else if (lgt->get_type() == ESCH_LGTT_POINT
                              || lgt->get_type() == ESCH_LGTT_ATTEN
                              || lgt->get_type() == ESCH_LGTT_SPOT)
-                        ((EschPointLight*)lgt)->translate(-1,0,0);
+                        ((EschPointLight*)lgt)->translate(-1.0f,0.0f,0.0f);
                     else if (lgt->get_type() == ESCH_LGTT_FPOINT
                             || lgt->get_type() == ESCH_LGTT_FATTEN
                             || lgt->get_type() == ESCH_LGTT_FSPOT)
-                        ((EschFastPointLight*)lgt)->translate(-1,0,0);
+                        ((EschFastPointLight*)lgt)->translate(-1.0f,0.0f,0.0f);
                     render=1;
                     break;
                 case SB_PAGELEFT:
                     if (lgt->get_type() == ESCH_LGTT_VECTOR)
-                        ((EschVectorLight*)lgt)->rotatex((Flx16)(-11.25));
+                        ((EschVectorLight*)lgt)->rotatex(-11.25f);
                     else if (lgt->get_type() == ESCH_LGTT_POINT
                              || lgt->get_type() == ESCH_LGTT_ATTEN
                              || lgt->get_type() == ESCH_LGTT_SPOT)
-                        ((EschPointLight*)lgt)->translate(-10,0,0);
+                        ((EschPointLight*)lgt)->translate(-10.0f,0.0f,0.0f);
                     else if (lgt->get_type() == ESCH_LGTT_FPOINT
                              || lgt->get_type() == ESCH_LGTT_FATTEN
                              || lgt->get_type() == ESCH_LGTT_FSPOT)
-                        ((EschFastPointLight*)lgt)->translate(-10,0,0);
+                        ((EschFastPointLight*)lgt)->translate(-10.0f,0.0f,0.0f);
                     render=1;
                     break;
                 case SB_LINERIGHT:
                     if (lgt->get_type() == ESCH_LGTT_VECTOR)
-                        ((EschVectorLight*)lgt)->rotatex(1);
+                        ((EschVectorLight*)lgt)->rotatex(1.0f);
                     else if (lgt->get_type() == ESCH_LGTT_POINT
                              || lgt->get_type() == ESCH_LGTT_ATTEN
                              || lgt->get_type() == ESCH_LGTT_SPOT)
-                        ((EschPointLight*)lgt)->translate(1,0,0);
+                        ((EschPointLight*)lgt)->translate(1.0f,0.0f,0.0f);
                     else if (lgt->get_type() == ESCH_LGTT_FPOINT
                              || lgt->get_type() == ESCH_LGTT_FATTEN
                              || lgt->get_type() == ESCH_LGTT_FSPOT)
-                        ((EschFastPointLight*)lgt)->translate(1,0,0);
+                        ((EschFastPointLight*)lgt)->translate(1.0f,0.0f,0.0f);
                     render=1;
                     break;
                 case SB_PAGERIGHT:
                     if (lgt->get_type() == ESCH_LGTT_VECTOR)
-                        ((EschVectorLight*)lgt)->rotatex((Flx16)(11.25));
+                        ((EschVectorLight*)lgt)->rotatex(11.25f);
                     else if (lgt->get_type() == ESCH_LGTT_POINT
                              || lgt->get_type() == ESCH_LGTT_ATTEN
                              || lgt->get_type() == ESCH_LGTT_SPOT)
-                        ((EschPointLight*)lgt)->translate(10,0,0);
+                        ((EschPointLight*)lgt)->translate(10.0f,0.0f,0.0f);
                     else if (lgt->get_type() == ESCH_LGTT_FPOINT
                              || lgt->get_type() == ESCH_LGTT_FATTEN
                              || lgt->get_type() == ESCH_LGTT_FSPOT)
-                        ((EschFastPointLight*)lgt)->translate(10,0,0);
+                        ((EschFastPointLight*)lgt)->translate(10.0f,0.0f,0.0f);
                     render=1;
                     break;
                 case SB_THUMBTRACK:
                     if (lgt->get_type() == ESCH_LGTT_VECTOR)
-                        ((EschVectorLight*)lgt)->rotatex(pos - lastpos);
+                        ((EschVectorLight*)lgt)->rotatex(float(pos - lastpos));
                     else
                     {
-                        f = (Flx16)(pos-lastpos) / (Flx16)10;
+                        f = (float)(pos-lastpos) / 10.0f;
 
                         if (lgt->get_type() == ESCH_LGTT_POINT
                              || lgt->get_type() == ESCH_LGTT_ATTEN
                              || lgt->get_type() == ESCH_LGTT_SPOT)
-                            ((EschPointLight*)lgt)->translate(f,0,0);
+                            ((EschPointLight*)lgt)->translate(f,0.0f,0.0f);
                         else if (lgt->get_type() == ESCH_LGTT_FPOINT
                              || lgt->get_type() == ESCH_LGTT_FATTEN
                              || lgt->get_type() == ESCH_LGTT_FSPOT)
-                            ((EschFastPointLight*)lgt)->translate(f,0,0);
+                            ((EschFastPointLight*)lgt)->translate(f,0.0f,0.0f);
                     }
                     lastpos=pos;
                     render=1;
@@ -768,7 +768,7 @@ void ToolVPort::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 void ToolVPort::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) 
 {
     int             t, pos, render=0;
-    Flx16           f;
+    float           f;
     static          lastpos=0;
     EschLight       *lgt;
     EschMeshDraw    *msh;
@@ -786,23 +786,23 @@ void ToolVPort::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
             switch (nSBCode)
             {
                 case SB_LINEUP:
-                    cam->pitch(-1);
+                    cam->pitch(-1.0f);
                     render=1;
                     break;
                 case SB_PAGEUP:
-                    cam->pitch((Flx16)(-11.25));
+                    cam->pitch(-11.25f);
                     render=1;
                     break;
                 case SB_LINEDOWN:
-                    cam->pitch(1);
+                    cam->pitch(1.0f);
                     render=1;
                     break;
                 case SB_PAGEDOWN:
-                    cam->pitch((Flx16)(11.25));
+                    cam->pitch(11.25f);
                     render=1;
                     break;
                 case SB_THUMBTRACK:
-                    cam->pitch(pos - lastpos);
+                    cam->pitch(float(pos - lastpos));
                     lastpos=pos;
                     render=1;
                     break;
@@ -817,24 +817,24 @@ void ToolVPort::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
             switch (nSBCode)
             {
                 case SB_LINEUP:
-                    cam->move(0,1,0);
+                    cam->move(0.0f,1.0f,0.0f);
                     render=1;
                     break;
                 case SB_PAGEUP:
-                    cam->move(0,10,0);
+                    cam->move(0.0f,10.0f,0.0f);
                     render=1;
                     break;
                 case SB_LINEDOWN:
-                    cam->move(0,-1,0);
+                    cam->move(0.0f,-1.0f,0.0f);
                     render=1;
                     break;
                 case SB_PAGEDOWN:
-                    cam->move(0,-10,0);
+                    cam->move(0.0f,-10.0f,0.0f);
                     render=1;
                     break;
                 case SB_THUMBTRACK:
-                    f = (Flx16)(lastpos-pos) / (Flx16)10;
-                    cam->move(0,f,0);
+                    f = (float)(lastpos-pos) / 10.0f;
+                    cam->move(0.0f,f,0.0f);
                     lastpos=pos;
                     render=1;
                     break;
@@ -849,24 +849,24 @@ void ToolVPort::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
             switch (nSBCode)
             {
                 case SB_LINEUP:
-                    cam->move(0,0,1);
+                    cam->move(0.0f,0.0f,1.0f);
                     render=1;
                     break;
                 case SB_PAGEUP:
-                    cam->move(0,0,10);
+                    cam->move(0.0f,0.0f,10.0f);
                     render=1;
                     break;
                 case SB_LINEDOWN:
-                    cam->move(0,0,-1);
+                    cam->move(0.0f,0.0f,-1.0f);
                     render=1;
                     break;
                 case SB_PAGEDOWN:
-                    cam->move(0,0,-10);
+                    cam->move(0.0f,0.0f,-10.0f);
                     render=1;
                     break;
                 case SB_THUMBTRACK:
-                    f = (Flx16)(lastpos-pos) / (Flx16)10;
-                    cam->move(0,0,f);
+                    f = (float)(lastpos-pos) / 10.0f;
+                    cam->move(0.0f,0.0f,f);
                     lastpos=pos;
                     render=1;
                     break;
@@ -882,23 +882,23 @@ void ToolVPort::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
             switch (nSBCode)
             {
                 case SB_LINEUP:
-                    msh->pitch(-1);
+                    msh->pitch(-1.0f);
                     render=1;
                     break;
                 case SB_PAGEUP:
-                    msh->pitch((Flx16)(-11.25));
+                    msh->pitch(-11.25f);
                     render=1;
                     break;
                 case SB_LINEDOWN:
-                    msh->pitch(1);
+                    msh->pitch(1.0f);
                     render=1;
                     break;
                 case SB_PAGEDOWN:
-                    msh->pitch((Flx16)(11.25));
+                    msh->pitch(11.25f);
                     render=1;
                     break;
                 case SB_THUMBTRACK:
-                    msh->pitch(pos - lastpos);
+                    msh->pitch(float(pos - lastpos));
                     lastpos=pos;
                     render=1;
                     break;
@@ -914,24 +914,24 @@ void ToolVPort::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
             switch (nSBCode)
             {
                 case SB_LINEUP:
-                    msh->move(0,1,0);
+                    msh->move(0.0f,1.0f,0.0f);
                     render=1;
                     break;
                 case SB_PAGEUP:
-                    msh->move(0,10,0);
+                    msh->move(0.0f,10.0f,0.0f);
                     render=1;
                     break;
                 case SB_LINEDOWN:
-                    msh->move(0,-1,0);
+                    msh->move(0.0f,-1.0f,0.0f);
                     render=1;
                     break;
                 case SB_PAGEDOWN:
-                    msh->move(0,-10,0);
+                    msh->move(0.0f,-10.0f,0.0f);
                     render=1;
                     break;
                 case SB_THUMBTRACK:
-                    f = (Flx16)(lastpos-pos) / (Flx16)10;
-                    msh->move(0,f,0);
+                    f = (float)(lastpos-pos) / 10.0f;
+                    msh->move(0.0f,f,0.0f);
                     lastpos=pos;
                     render=1;
                     break;
@@ -947,24 +947,24 @@ void ToolVPort::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
             switch (nSBCode)
             {
                 case SB_LINEUP:
-                    msh->move(0,0,1);
+                    msh->move(0.0f,0.0f,1.0f);
                     render=1;
                     break;
                 case SB_PAGEUP:
-                    msh->move(0,0,10);
+                    msh->move(0.0f,0.0f,10.0f);
                     render=1;
                     break;
                 case SB_LINEDOWN:
-                    msh->move(0,0,-1);
+                    msh->move(0.0f,0.0f,-1.0f);
                     render=1;
                     break;
                 case SB_PAGEDOWN:
-                    msh->move(0,0,-10);
+                    msh->move(0.0f,0.0f,-10.0f);
                     render=1;
                     break;
                 case SB_THUMBTRACK:
-                    f = (Flx16)(lastpos-pos) / (Flx16)10;
-                    msh->move(0,0,f);
+                    f = (float)(lastpos-pos) / 10.0f;
+                    msh->move(0.0f,0.0f,f);
                     lastpos=pos;
                     render=1;
                     break;
@@ -982,71 +982,71 @@ void ToolVPort::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
             {
                 case SB_LINELEFT:
                     if (lgt->get_type() == ESCH_LGTT_VECTOR)
-                        ((EschVectorLight*)lgt)->rotatey(-1);
+                        ((EschVectorLight*)lgt)->rotatey(-1.0f);
                     else if (lgt->get_type() == ESCH_LGTT_POINT
                              || lgt->get_type() == ESCH_LGTT_ATTEN
                              || lgt->get_type() == ESCH_LGTT_SPOT)
-                        ((EschPointLight*)lgt)->translate(0,-1,0);
+                        ((EschPointLight*)lgt)->translate(0.0f,-1.0f,0.0f);
                     else if (lgt->get_type() == ESCH_LGTT_FPOINT
                              || lgt->get_type() == ESCH_LGTT_FATTEN
                              || lgt->get_type() == ESCH_LGTT_FSPOT)
-                        ((EschFastPointLight*)lgt)->translate(0,-1,0);
+                        ((EschFastPointLight*)lgt)->translate(0.0f,-1.0f,0.0f);
                     render=1;
                     break;
                 case SB_PAGELEFT:
                     if (lgt->get_type() == ESCH_LGTT_VECTOR)
-                        ((EschVectorLight*)lgt)->rotatey((Flx16)(-11.25));
+                        ((EschVectorLight*)lgt)->rotatey(-11.25f);
                     else if (lgt->get_type() == ESCH_LGTT_POINT
                              || lgt->get_type() == ESCH_LGTT_ATTEN
                              || lgt->get_type() == ESCH_LGTT_SPOT)
-                        ((EschPointLight*)lgt)->translate(0,-10,0);
+                        ((EschPointLight*)lgt)->translate(0.0f,-10.0f,0.0f);
                     else if (lgt->get_type() == ESCH_LGTT_FPOINT
                              || lgt->get_type() == ESCH_LGTT_FATTEN
                              || lgt->get_type() == ESCH_LGTT_FSPOT)
-                        ((EschFastPointLight*)lgt)->translate(0,-10,0);
+                        ((EschFastPointLight*)lgt)->translate(0.0f,-10.0f,0.0f);
                     render=1;
                     break;
                 case SB_LINERIGHT:
                     if (lgt->get_type() == ESCH_LGTT_VECTOR)
-                        ((EschVectorLight*)lgt)->rotatey(1);
+                        ((EschVectorLight*)lgt)->rotatey(1.0f);
                     else if (lgt->get_type() == ESCH_LGTT_POINT
                              || lgt->get_type() == ESCH_LGTT_ATTEN
                              || lgt->get_type() == ESCH_LGTT_SPOT)
-                        ((EschPointLight*)lgt)->translate(0,1,0);
+                        ((EschPointLight*)lgt)->translate(0.0f,1.0f,0.0f);
                     else if (lgt->get_type() == ESCH_LGTT_FPOINT
                              || lgt->get_type() == ESCH_LGTT_FATTEN
                              || lgt->get_type() == ESCH_LGTT_FSPOT)
-                        ((EschFastPointLight*)lgt)->translate(0,1,0);
+                        ((EschFastPointLight*)lgt)->translate(0.0f,1.0f,0.0f);
                     render=1;
                     break;
                 case SB_PAGERIGHT:
                     if (lgt->get_type() == ESCH_LGTT_VECTOR)
-                        ((EschVectorLight*)lgt)->rotatey((Flx16)(11.25));
+                        ((EschVectorLight*)lgt)->rotatey(11.25f);
                     else if (lgt->get_type() == ESCH_LGTT_POINT
                              || lgt->get_type() == ESCH_LGTT_ATTEN
                              || lgt->get_type() == ESCH_LGTT_SPOT)
-                        ((EschPointLight*)lgt)->translate(0,10,0);
+                        ((EschPointLight*)lgt)->translate(0.0f,10.0f,0.0f);
                     else if (lgt->get_type() == ESCH_LGTT_FPOINT
                              || lgt->get_type() == ESCH_LGTT_FATTEN
                              || lgt->get_type() == ESCH_LGTT_FSPOT)
-                        ((EschFastPointLight*)lgt)->translate(0,10,0);
+                        ((EschFastPointLight*)lgt)->translate(0.0f,10.0f,0.0f);
                     render=1;
                     break;
                 case SB_THUMBTRACK:
                     if (lgt->get_type() == ESCH_LGTT_VECTOR)
-                        ((EschVectorLight*)lgt)->rotatey(pos - lastpos);
+                        ((EschVectorLight*)lgt)->rotatey(float(pos - lastpos));
                     else
                     {
-                        f = (Flx16)(pos-lastpos) / (Flx16)10;
+                        f = (float)(pos-lastpos) / 10.0f;
 
                         if (lgt->get_type() == ESCH_LGTT_POINT
                              || lgt->get_type() == ESCH_LGTT_ATTEN
                              || lgt->get_type() == ESCH_LGTT_SPOT)
-                            ((EschPointLight*)lgt)->translate(0,f,0);
+                            ((EschPointLight*)lgt)->translate(0.0f,f,0.0f);
                         else if (lgt->get_type() == ESCH_LGTT_FPOINT
                              || lgt->get_type() == ESCH_LGTT_FATTEN
                              || lgt->get_type() == ESCH_LGTT_FSPOT)
-                            ((EschFastPointLight*)lgt)->translate(0,f,0);
+                            ((EschFastPointLight*)lgt)->translate(0.0f,f,0.0f);
                     }
                     lastpos=pos;
                     render=1;
@@ -1182,31 +1182,31 @@ void ToolVPort::OnMouseMove(UINT nFlags, CPoint point)
         case RNDCTRL_ROTATEXY:                  // Rotate X/Y
             if (!cam)
                 break;
-            cam->yaw(-dx);
-            cam->pitch(-dy);
+            cam->yaw((float)-dx);
+            cam->pitch((float)-dy);
             render=1;
             break;
         case RNDCTRL_MOVEXY:                    // Move X/Y
             if (!cam)
                 break;
-            cam->move(-dx, dy, FLX16_ZERO);
+            cam->move((float)-dx, (float)dy, 0.0f);
             render=1;
             break;
         case RNDCTRL_ROTMOVEZ:                  // Rotate Z/Move Z
             if (!cam)
                 break;
             if (nFlags & MK_SHIFT)
-                cam->roll(-dx);
+                cam->roll((float)-dx);
             else
-                cam->move(FLX16_ZERO, FLX16_ZERO, dy);
+                cam->move(0.0f, 0.0f, (float)dy);
             render=1;
             break;
         case RNDCTRL_ROTATEIJ:                  // Rotate I/J
             if (!modeTarget)
                 break;
             msh = (EschMeshDraw*)modeTarget;
-            msh->yaw(-dx);
-            msh->pitch(-dy);
+            msh->yaw((float)-dx);
+            msh->pitch((float)-dy);
             render=1;
             break;
         case RNDCTRL_MOVEIJ:                    // Move I/J
@@ -1214,7 +1214,7 @@ void ToolVPort::OnMouseMove(UINT nFlags, CPoint point)
                 break;
             msh = (EschMeshDraw*)modeTarget;
             {
-                EschVector v(dx, -dy, FLX16_ZERO);
+                EschVector v((float)dx, (float)-dy, 0.0f);
                 v.transform(&cam->eye.orient);
                 msh->translate (&v);
             }
@@ -1225,10 +1225,10 @@ void ToolVPort::OnMouseMove(UINT nFlags, CPoint point)
                 break;
             msh = (EschMeshDraw*)modeTarget;
             if (nFlags & MK_SHIFT)
-                msh->roll(-dx);
+                msh->roll((float)-dx);
             else
             {
-                EschVector v(FLX16_ZERO, FLX16_ZERO, -dy);
+                EschVector v(0.0f, 0.0f, (float)-dy);
                 v.transform(&cam->eye.orient);
                 msh->translate (&v);
             }
@@ -1241,30 +1241,30 @@ void ToolVPort::OnMouseMove(UINT nFlags, CPoint point)
             ASSERT(lgt->get_type() != ESCH_LGTT_AMBIENT);
             if (lgt->get_type() == ESCH_LGTT_VECTOR)
             {
-                ((EschVectorLight*)lgt)->rotatex(dx);
-                ((EschVectorLight*)lgt)->rotatey(dy);
+                ((EschVectorLight*)lgt)->rotatex((float)dx);
+                ((EschVectorLight*)lgt)->rotatey((float)dy);
             }
             else if (nFlags & MK_SHIFT)
             {
                 if (lgt->get_type() == ESCH_LGTT_POINT
                     || lgt->get_type() == ESCH_LGTT_ATTEN
                     || lgt->get_type() == ESCH_LGTT_SPOT)
-                    ((EschPointLight*)lgt)->translate(FLX16_ZERO, FLX16_ZERO, dy);
+                    ((EschPointLight*)lgt)->translate(0.0f, 0.0f, (float)dy);
                 else if (lgt->get_type() == ESCH_LGTT_FPOINT
                          || lgt->get_type() == ESCH_LGTT_FATTEN
                          || lgt->get_type() == ESCH_LGTT_FSPOT)
-                    ((EschFastPointLight*)lgt)->translate(FLX16_ZERO, FLX16_ZERO, dy);
+                    ((EschFastPointLight*)lgt)->translate(0.0f, 0.0f, (float)dy);
             }
             else
             {
                 if (lgt->get_type() == ESCH_LGTT_POINT
                     || lgt->get_type() == ESCH_LGTT_ATTEN
                     || lgt->get_type() == ESCH_LGTT_SPOT)
-                    ((EschPointLight*)lgt)->translate(dx, -dy, FLX16_ZERO);
+                    ((EschPointLight*)lgt)->translate((float)dx, (float)-dy, 0.0f);
                 else if (lgt->get_type() == ESCH_LGTT_FPOINT
                          || lgt->get_type() == ESCH_LGTT_FATTEN
                          || lgt->get_type() == ESCH_LGTT_FSPOT)
-                    ((EschFastPointLight*)lgt)->translate(dx, -dy, FLX16_ZERO);
+                    ((EschFastPointLight*)lgt)->translate((float)dx, (float)-dy, 0.0f);
             }
             render=1;
             break;

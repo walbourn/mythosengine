@@ -180,7 +180,7 @@ public:
 	CListBox	m_list;
 	//}}AFX_DATA
 
-    Flx16 htable[256];
+    float htable[256];
 
 // Overrides
 	// ClassWizard generate virtual function overrides

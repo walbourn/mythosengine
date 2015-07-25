@@ -4,8 +4,8 @@
 //         °°                °°
 //          °°              °°
 //           °°        ÚÄÄÄÄÄ  ³   ³ ÚÄÄÄ¿ ÚÄÄÄ¿ ³   ³ ÚÄÄÄ¿  ÚÄÄÄ¿
-//            °°       ³  °°   ³   ³ ³   ³ ³   ³ ³   ³ ³   ³  ³   
-//             °°±± ± ²³±°°    ³   ³ ³   ³ ³   ³ ³\  ³ ³   ³  ³   
+//            °°       ³  °°   ³   ³ ³   ³ ³   ³ ³   ³ ³   ³  ³
+//             °°±± ± ²³±°°    ³   ³ ³   ³ ³   ³ ³\  ³ ³   ³  ³
 //              °°² ²±±³°°     ÃÄÄÄ´ ÃÄÄÄÙ ³   ³ ³\\ ³ ³   ³  ÀÄÄÄ¿
 //               °°±±² ³°      ³   ³ ³\    ³   ³ ³ \\³ ³   ³      ³
 //               °°    ³°      ³   ³ ³ \   ³   ³ ³  \³ ³   ³      ³
@@ -53,7 +53,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include <assert.h>
@@ -95,6 +95,8 @@ struct iChronosUserProc
 extern "C" int mythos_atexit (register void (*__func) (void));
 extern "C" void mythos_atexit_remove (register void (*__func) (void));
 
+extern "C" double profiler_rdtsc();
+
 // A cleanup function
 static void chronos_cleanup ();
 
@@ -110,6 +112,9 @@ const int MAX_CALLBACKS = 32;
 static volatile ulong system_freq;
 static volatile int   instance = 0;
 static iChronosUserProc timer_handles[MAX_CALLBACKS];
+static bool    __chronos_use_pentium = false;
+static double  __chronos_scale;
+
 
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
@@ -142,6 +147,39 @@ void CALLBACK ichronos_timer_proc (UINT idTimer, UINT msg, DWORD dwUser, DWORD d
 }
 
 
+BOOL profiler_init()
+{
+    SYSTEM_INFO  ProfilerSysinfo;
+
+    GetSystemInfo (&ProfilerSysinfo);
+    __chronos_use_pentium = false;
+
+    if (ProfilerSysinfo.dwProcessorType == PROCESSOR_INTEL_PENTIUM)
+    {
+        int     c0,cf;  // clocks.
+        double  t0,tf;  // ticks.
+
+        int x = 1;
+
+        c0 = clock();
+        t0 = profiler_rdtsc();
+
+        for (int i=0;i < 20000000; i++)
+            x = (i & x) ? 0 : 1;
+
+        tf = profiler_rdtsc();
+        cf = clock();
+
+        double rate = (tf-t0)/((cf-c0)*(1000000.0 / double(CLOCKS_PER_SEC)));
+        __chronos_scale = 1.0 / (rate * 1000.0);
+
+        __chronos_use_pentium = true;
+    }
+
+    return __chronos_use_pentium;
+}
+
+
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //  Initialize Chronos, install the int 8 handler
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -153,6 +191,9 @@ void chronos_init ()
         chronos_interval (0);
         memset (timer_handles, 0, sizeof (timer_handles));
         mythos_atexit (chronos_cleanup);
+
+        // Set up the pentium timer (was profiler)
+        profiler_init();
     }
 
     instance++;
@@ -275,13 +316,27 @@ void chronos_clear_callbacks ()
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//  Return the current time in processor clock fractions
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+double chronos_time_now_precise ()
+{
+    if (__chronos_use_pentium)
+        return profiler_rdtsc() * __chronos_scale;
+    else
+        return double (timeGetTime());
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //  Return the current time in milliseconds.
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 clock_t chronos_time_now ()
 {
-    return (clock_t)timeGetTime();
+    if (__chronos_use_pentium)
+        return clock_t (profiler_rdtsc() * __chronos_scale);
+    else
+        return timeGetTime();
 }
 
 
 //°±² End of module - chronos.cpp ²±°
-

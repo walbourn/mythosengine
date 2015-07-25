@@ -550,7 +550,7 @@ void TerrEditView::OnEditAssignByHeight()
     ASSERT(dlg.count > 0);
     grid.AssignByHeight(dlg.count,
                         dlg.tc, dlg.istxt, dlg.heights,
-                        Flx16(dlg.m_height_stop),
+                        dlg.m_height_stop,
                         dlg.area, dlg.m_preserve);
 }
 
@@ -581,7 +581,7 @@ void TerrEditView::OnEditAssignByRandomRoll()
     grid.AssignByRandomRoll(dlg.count,
                             dlg.tc, dlg.istxt, dlg.chances,
                             dlg.m_elvcutoff,
-                            Flx16(dlg.m_elvlow), Flx16(dlg.m_elvhigh),
+                            dlg.m_elvlow, dlg.m_elvhigh,
                             dlg.area, dlg.m_preserve);
 }
 
@@ -611,9 +611,9 @@ void TerrEditView::OnEditAssignByAngle()
     ASSERT(dlg.count > 0);
     grid.AssignByAngle(dlg.count,
                        dlg.tc, dlg.istxt, dlg.angles,
-                       Flx16(dlg.m_angle_stop),
+                       dlg.m_angle_stop,
                        dlg.m_elvcutoff,
-                       Flx16(dlg.m_elvlow), Flx16(dlg.m_elvhigh),
+                       dlg.m_elvlow, dlg.m_elvhigh,
                        dlg.area, dlg.m_preserve);
 }
 

@@ -230,10 +230,16 @@ void EschLight::setup(const EschFrameRef *fr)
     assertMyth("EschLight::setup needs current context's camera to have a palette",
                EschCurrent->camera->vport->vbuff.pal);
 
-    int mp = EschCurrent->camera->vport->vbuff.pal->shd_pal->mid_point;
+    mp = EschCurrent->camera->vport->vbuff.pal->shd_pal->mid_point;
 
-    _hintensity = (Flx16)((intensity * VNGO_SHADE_FULL) / 255);
-    _intensity = (Flx16)((intensity * mp) / 255);
+    _hintensity = ((long)intensity * VNGO_SHADE_FULL) / 255.0f;
+    _intensity = ((long)intensity * mp) / 255.0f;
+
+    if (flags & ESCH_LGT_DARK)
+    {
+        _hintensity = - _hintensity;
+        _intensity = - _intensity;
+    }
 
 //ÄÄÄ Chain for true multiple lights
     if (inext)
@@ -253,14 +259,22 @@ void EschLight::shine(const EschVertex *v, VngoPoint *vpt, int revnrml) const
 {
     if (!(flags & ESCH_LGT_OFF))
     {
-        long i = (long) _intensity;
-        if (vpt->shade < i)
-            vpt->shade = i;
+        vpt->shade += (long) _intensity;
     }
 
 //ÄÄÄ Chain for true multiple lights
     if (inext)
+    {
         inext->shine(v,vpt,revnrml);
+    }
+//ÄÄÄ Clamp shade value
+    else
+    {
+        if (vpt->shade > mp)
+            vpt->shade = mp;
+        else if (vpt->shade < 0)
+            vpt->shade = 0;
+    }
 }
 
 
@@ -278,14 +292,22 @@ void EschLight::hishine(const EschVertex *v, VngoPoint *vpt, int revnrml) const
 {
     if (!(flags & ESCH_LGT_OFF))
     {
-        long i = (long) _intensity;
-        if (vpt->shade < i)
-            vpt->shade = i;
+        vpt->shade += (long) _hintensity;
     }
 
 //ÄÄÄ Chain for true multiple lights
     if (inext)
+    {
         inext->hishine(v,vpt,revnrml);
+    }
+//ÄÄÄ Clamp shade value
+    else
+    {
+        if (vpt->shade > VNGO_SHADE_FULL)
+            vpt->shade = VNGO_SHADE_FULL;
+        else if (vpt->shade < 0)
+            vpt->shade = 0;
+    }
 }
 
 

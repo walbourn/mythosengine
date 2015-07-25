@@ -96,7 +96,15 @@ void EschStaticTexture::release()
     else if (flags & ESCH_TXT_OWNSDATA)
     {
         if (handle)
+        {
+            VngoTexture *p = (VngoTexture*)ivory_hlock(handle);
+            if (p)
+            {
+                p->VngoTexture::~VngoTexture();
+                ivory_hunlock(handle);
+            }
             ivory_hfree(&handle);
+        }
         if (name && name != EschNoName)
             delete [] name;
         name=EschNoName;
@@ -384,7 +392,7 @@ esch_error_codes EschStaticTexture::load(XFParseIFF *iff, const char *tname,
     {
         if (!cache_register(header.name, handle,
                             ESCH_TXTT_STATIC, header.flags,
-                            header.xsize, header.ysize, 0,
+                            header.xsize, header.ysize, 1,
                             &name,1))
         {
             flags &= ~ESCH_TXT_OWNSDATA;

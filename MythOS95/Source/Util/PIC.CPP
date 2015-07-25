@@ -64,6 +64,8 @@
 #define FLAGS_PALPRINT  0x20    // Display image palette
 #define FLAGS_TRANSP    0x40    // Transparent (don't lookup color 255).
 #define FLAGS_COMPRESS  0x80    // Compress transparent images to monochrome.
+#define FLAGS_2BPP      0x100   // Convert to 2 bytes/pixel
+#define FLAGS_3BPP      0x200   // Convert to 3 bytes/pixel
 
 //--- Error values ---
 typedef enum _pic_err_codes {
@@ -94,6 +96,8 @@ public:
     // Operations on Canvas objects.                                        ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
     pic_err_codes convert_to_paletted(VngoPal8 *pal);
+    pic_err_codes convert_to_2bpp();
+    pic_err_codes convert_to_3bpp();
     byte *compress_transparent();
 };
 
@@ -211,6 +215,18 @@ void main(int argc, char *argv[])
                     strcpy(Pal_name,argv[i]);
                     break;
 
+                //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ 2bpp
+
+                case '2':
+                    Flags |= FLAGS_2BPP;
+                    break;
+
+                //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ 3bpp
+
+                case '3':
+                    Flags |= FLAGS_3BPP;
+                    break;
+
                 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Output file
 
                 case 'O':
@@ -317,6 +333,18 @@ void main(int argc, char *argv[])
         }
     }
 
+    switch (Flags & (FLAGS_2BPP|FLAGS_3BPP|FLAGS_PALETTED))
+    {
+        case 0:
+        case FLAGS_2BPP:
+        case FLAGS_3BPP:
+        case FLAGS_PALETTED:
+            break;
+        default:
+            cout << "±±± -p, -2, and -3 are mutually exclusive options";
+            return;
+    }
+
 //ÄÄÄ Load palette
     Palette = new VngoPal8;
     if (!(Flags & FLAGS_QUIET))
@@ -415,15 +443,32 @@ void main(int argc, char *argv[])
                 "\tHeight: " << Canvas->height <<
                 "\tColor-depth: ";
 
-        if (Canvas->bpp == 1)
-            cout << "8-bit\n";
-        else
-            cout << "24-bit\n";
+        switch (Canvas->bpp)
+        {
+            case XFBM_BPP_MONO:
+                cout << "Monochrome\n";
+                break;
+            case XFBM_BPP_8BIT:
+                cout << "8-bit\n";
+                break;
+            case XFBM_BPP_15BIT:
+                cout << "15-bit\n";
+                break;
+            case XFBM_BPP_24BIT:
+                cout << "24-bit\n";
+                break;
+            case XFBM_BPP_32BIT:
+                cout << "32-bit\n";
+                break;
+            default:
+                cout << "Unknown\n";
+                break;
+        }
     }
 
     if (Flags & FLAGS_PALPRINT)
     {
-        if (Canvas->bpp == 1 && Canvas->pal)
+        if (Canvas->bpp == XFBM_BPP_8BIT && Canvas->pal)
         {
             VngoColor24bit  clr;
 
@@ -455,7 +500,7 @@ void main(int argc, char *argv[])
     {
         if (!(Flags & FLAGS_QUIET))
         {
-            if ((Flags & FLAGS_TRANSP) && Canvas->bpp == 1)
+            if ((Flags & FLAGS_TRANSP) && Canvas->bpp == XFBM_BPP_8BIT)
             {
                 cout << "Converting image to use palette (preserving index 255)\n";
             }
@@ -465,7 +510,37 @@ void main(int argc, char *argv[])
             }
         }
 
-        Canvas->convert_to_paletted((VngoPal8*)Palette);
+        if (Canvas->convert_to_paletted((VngoPal8*)Palette))
+        {
+            cout << "±±± Error occurred during convert to palette\n";
+            return;
+        }
+    }
+    else if (Flags & FLAGS_2BPP)
+    {
+        if (!(Flags & FLAGS_QUIET))
+        {
+            cout << "Converting image to 2 bytes/pixel\n";
+        }
+
+        if (Canvas->convert_to_2bpp())
+        {
+            cout << "±±± Error occurred during convert to 2bpp\n";
+            return;
+        }
+    }
+    else if (Flags & FLAGS_3BPP)
+    {
+        if (!(Flags & FLAGS_QUIET))
+        {
+            cout << "Converting image to 3 bytes/pixel\n";
+        }
+
+        if (Canvas->convert_to_3bpp())
+        {
+            cout << "±±± Error occurred during convert to 3bpp\n";
+            return;
+        }
     }
 
 //ÄÄÄ Compress to .zmp format.
@@ -495,7 +570,8 @@ void main(int argc, char *argv[])
         }
         else
         {
-            cout << "Error occured compressing image.\n";
+            cout << "±±± Error occured compressing image.\n";
+            return;
         }
         if (!(Flags & FLAGS_OUTPUT))
         {
@@ -627,7 +703,8 @@ STATIC void print_help(int full)
 {
    cout << "°± MythOS Pic Image Utility - (C) 1994-1997 Charybdis Enterprises, Inc. ±°\n";
    cout << "                              " __DATE__ "   All Rights Reserved.\n";
-   cout << "   Usage: pic [-q |  -i  | -s | -p | -x | -m | -t <fname.pal>] <fname.xxx>\n";
+   cout << "   Usage: pic [-q | -i | -s | -x | -m | -t <fname.pal>]\n";
+   cout << "              [-p | -2 | -3] <fname.xxx>\n";
    cout << "              [-o <fname.xxx>]\n";
    if (full)
    {
@@ -635,11 +712,14 @@ STATIC void print_help(int full)
        cout << "          -q = Quiet mode.\n";
        cout << "          -i = Show image information\n";
        cout << "          -s = Show image palette\n";
-       cout << "          -p = Convert to use loaded palette\n";
        cout << "          -x = Keep transparent (index 255) in 8-bit images\n";
-       cout << "          -x = Convert color (255,0,255) to transparent (index 255) for 24-bit images\n";
+       cout << "          -x = Convert color (255,0,255) to transparent\n";
+       cout << "               (index 255) for 24-bit images\n";
        cout << "          -m = Convert transparent images to a monochrome Zmap\n";
        cout << "          -t <filename.pal/.vgp> = Palette file to use (default is DEFAULT.PAL)\n";
+       cout << "          -p = Convert to use loaded palette\n";
+       cout << "          -2 = Convert to 2 bytes/pixel\n";
+       cout << "          -3 = Convert to 3 bytes/pixel\n";
        cout << "          -o = Output resulting image\n";
    }
 }
@@ -669,101 +749,351 @@ pic_err_codes PicCanvas::convert_to_paletted(VngoPal8 *p)
     byte            *sptr, *dptr, *nptr;
     IvoryHandle     nhandle;
     VngoColor24bit  clr;
+    int             had_transparency=0;
     int             mypal[256];
 
-    if (bpp == 1)
+    if (!palhandle)
     {
-        for(i=0; i < 256; i++)
-        {
-            clr=(VngoColor24bit)pal[i];
-            mypal[i] = (byte)p->get_index(clr);
-
-            clr = p->hw_pal.p[i];
-            pal[i] = (clr.r | (clr.g << 8) | (clr.b << 16));
-        }
-        if (Flags & FLAGS_TRANSP)
-        {
-            for(i=0; i < width*height; i++)
-            {
-                if (data[i] != 255)
-                    data[i] = (byte)mypal[data[i]];
-            }
-        }
-        else
-        {
-            for(i=0; i < width*height; i++)
-                data[i] = (byte)mypal[data[i]];
-        }
-        return PIC_ERR_NONE;
-    }
-    else if (bpp == 3)
-    {
+        palhandle = ivory_halloc(256 * sizeof(dword));
         if (!palhandle)
-        {
-            palhandle = ivory_halloc(256 * sizeof(dword));
-            if (!palhandle)
-                return PIC_ERR_NOMEMORY;
-
-            pal = (dword*) ivory_hlock(palhandle);
-            if (!pal)
-                return PIC_ERR_LOCKFAILED;
-        }
-
-        nhandle = ivory_halloc(width * height);
-        if (!nhandle)
             return PIC_ERR_NOMEMORY;
 
-        nptr = (byte*) ivory_hlock(nhandle);
-        if (!nptr)
+        pal = (dword*) ivory_hlock(palhandle);
+        if (!pal)
             return PIC_ERR_LOCKFAILED;
+    }
 
-        for(i=0; i < 256; i++)
-        {
-            clr = p->hw_pal.p[i];
-            pal[i] = (clr.r | (clr.g << 8) | (clr.b << 16));
-        }
-
-        int had_transparency=0;
-        for(i=0, sptr=data, dptr=nptr; i < width*height; i++)
-        {
-            clr.r = *(sptr++);
-            clr.g = *(sptr++);
-            clr.b = *(sptr++);
-
-            if ((Flags & FLAGS_TRANSP) &&
-                (clr.r == 255) &&
-                (clr.b == 255) &&
-                (clr.g == 0))
+    switch (bpp)
+    {
+        //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ 8-bits per pixel
+        case XFBM_BPP_8BIT:
+            for(i=0; i < 256; i++)
             {
-                *(dptr++) = (byte)255;
-                had_transparency = 1;
+                clr=(VngoColor24bit)pal[i];
+                mypal[i] = (byte)p->get_index(clr);
+
+                clr = p->hw_pal.p[i];
+                pal[i] = (clr.r | (clr.g << 8) | (clr.b << 16));
+            }
+            if (Flags & FLAGS_TRANSP)
+            {
+                for(i=0; i < width*height; i++)
+                {
+                    if (data[i] != 255)
+                        data[i] = (byte)mypal[data[i]];
+                }
             }
             else
             {
-                *(dptr++) = (byte)p->get_index(clr);
+                for(i=0; i < width*height; i++)
+                    data[i] = (byte)mypal[data[i]];
             }
-        }
+            return PIC_ERR_NONE;
 
-        if (had_transparency)
-        {
-            VngoColor24bit tclr(255,0,255);
-            pal[255] = (tclr.r | (tclr.g << 8) | (tclr.b << 16));
-        }
+        //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ 15-bits per pixel
+        case XFBM_BPP_15BIT:
+            nhandle = ivory_halloc(width * height);
+            if (!nhandle)
+                return PIC_ERR_NOMEMORY;
 
-        ivory_hfree(&handle);
+            nptr = (byte*) ivory_hlock(nhandle);
+            if (!nptr)
+                return PIC_ERR_LOCKFAILED;
 
-        handle = nhandle;
-        data = nptr;
-        bpp = 1;
+            for(i=0; i < 256; i++)
+            {
+                clr = p->hw_pal.p[i];
+                pal[i] = (clr.r | (clr.g << 8) | (clr.b << 16));
+            }
 
-        return PIC_ERR_NONE;
+            for(i=0, sptr=data, dptr=nptr; i < width*height; i++)
+            {
+                word pcolor = *sptr | (*(sptr+1) << 8);
+
+                sptr += 2;
+
+                clr.r = (pcolor >> 7) & 0xf8;
+                clr.g = (pcolor >> 2) & 0xf8;
+                clr.b = (pcolor << 3) & 0xf8;
+
+                if ((Flags & FLAGS_TRANSP) &&
+                    (clr.r == 248) &&
+                    (clr.b == 248) &&
+                    (clr.g == 0))
+                {
+                    *(dptr++) = (byte)255;
+                    had_transparency = 1;
+                }
+                else
+                {
+                    *(dptr++) = (byte)p->get_index(clr);
+                }
+            }
+
+            if (had_transparency)
+            {
+                VngoColor24bit tclr(255,0,255);
+                pal[255] = (tclr.r | (tclr.g << 8) | (tclr.b << 16));
+            }
+
+            ivory_hfree(&handle);
+
+            handle = nhandle;
+            data = nptr;
+            bpp = 1;
+
+            return PIC_ERR_NONE;
+
+        //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ 24-bits per pixel
+        case XFBM_BPP_24BIT:
+            nhandle = ivory_halloc(width * height);
+            if (!nhandle)
+                return PIC_ERR_NOMEMORY;
+
+            nptr = (byte*) ivory_hlock(nhandle);
+            if (!nptr)
+                return PIC_ERR_LOCKFAILED;
+
+            for(i=0; i < 256; i++)
+            {
+                clr = p->hw_pal.p[i];
+                pal[i] = (clr.r | (clr.g << 8) | (clr.b << 16));
+            }
+
+            for(i=0, sptr=data, dptr=nptr; i < width*height; i++)
+            {
+                clr.r = *(sptr++);
+                clr.g = *(sptr++);
+                clr.b = *(sptr++);
+
+                if ((Flags & FLAGS_TRANSP) &&
+                    (clr.r == 255) &&
+                    (clr.b == 255) &&
+                    (clr.g == 0))
+                {
+                    *(dptr++) = (byte)255;
+                    had_transparency = 1;
+                }
+                else
+                {
+                    *(dptr++) = (byte)p->get_index(clr);
+                }
+            }
+
+            if (had_transparency)
+            {
+                VngoColor24bit tclr(255,0,255);
+                pal[255] = (tclr.r | (tclr.g << 8) | (tclr.b << 16));
+            }
+
+            ivory_hfree(&handle);
+
+            handle = nhandle;
+            data = nptr;
+            bpp = 1;
+
+            return PIC_ERR_NONE;
+
+
+        //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ 32-bits per pixel
+        case XFBM_BPP_32BIT:
+            nhandle = ivory_halloc(width * height);
+            if (!nhandle)
+                return PIC_ERR_NOMEMORY;
+
+            nptr = (byte*) ivory_hlock(nhandle);
+            if (!nptr)
+                return PIC_ERR_LOCKFAILED;
+
+            for(i=0; i < 256; i++)
+            {
+                clr = p->hw_pal.p[i];
+                pal[i] = (clr.r | (clr.g << 8) | (clr.b << 16));
+            }
+
+            for(i=0, sptr=data, dptr=nptr; i < width*height; i++)
+            {
+                clr.r = *(sptr++);
+                clr.g = *(sptr++);
+                clr.b = *(sptr++);
+
+                if (*(sptr++) < 255)
+                {
+                    *(dptr++) = (byte)255;
+                    had_transparency = 1;
+                }
+                else
+                {
+                    *(dptr++) = (byte)p->get_index(clr);
+                }
+            }
+
+            if (had_transparency)
+            {
+                VngoColor24bit tclr(255,0,255);
+                pal[255] = (tclr.r | (tclr.g << 8) | (tclr.b << 16));
+            }
+
+            ivory_hfree(&handle);
+
+            handle = nhandle;
+            data = nptr;
+            bpp = 1;
+
+            return PIC_ERR_NONE;
     }
 
     return PIC_ERR_NOTSUPPORTED;
 }
 
+
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// PicCanvas - compress_transparent;                                        ³
+// PicCanvas - convert_to_2bpp                                              ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+pic_err_codes PicCanvas::convert_to_2bpp()
+{
+    int             i;
+    byte            *sptr, *dptr, *nptr;
+    IvoryHandle     nhandle;
+
+    switch (bpp)
+    {
+        case XFBM_BPP_15BIT:
+            return PIC_ERR_NONE;
+
+        case XFBM_BPP_24BIT:
+            nhandle = ivory_halloc(width * height * 2);
+            if (!nhandle)
+                return PIC_ERR_NOMEMORY;
+
+            nptr = (byte*) ivory_hlock(nhandle);
+            if (!nptr)
+                return PIC_ERR_LOCKFAILED;
+
+            for(i=0, sptr=data, dptr=nptr; i < width*height; i++)
+            {
+                word pcolor = (((*sptr) >> 3) << 10)
+                                + (((*(sptr+1)) >> 3) << 5)
+                                + ((*(sptr+2)) >> 3);
+
+                *(dptr++) = byte(pcolor & 0xff);
+                *(dptr++) = byte((pcolor & 0xff00) >> 8);
+
+                sptr += 3;
+            }
+
+            ivory_hfree(&handle);
+
+            handle = nhandle;
+            data = nptr;
+            bpp = XFBM_BPP_15BIT;
+            return PIC_ERR_NONE;
+
+        case XFBM_BPP_32BIT:
+            nhandle = ivory_halloc(width * height * 2);
+            if (!nhandle)
+                return PIC_ERR_NOMEMORY;
+
+            nptr = (byte*) ivory_hlock(nhandle);
+            if (!nptr)
+                return PIC_ERR_LOCKFAILED;
+
+            for(i=0, sptr=data, dptr=nptr; i < width*height; i++)
+            {
+                word pcolor = (((*sptr) >> 3) << 10)
+                                + (((*(sptr+1)) >> 3) << 5)
+                                + ((*(sptr+2)) >> 3);
+
+                *(dptr++) = byte(pcolor & 0xff);
+                *(dptr++) = byte((pcolor & 0xff00) >> 8);
+
+                sptr += 4;
+            }
+
+            ivory_hfree(&handle);
+
+            handle = nhandle;
+            data = nptr;
+            bpp = XFBM_BPP_15BIT;
+            return PIC_ERR_NONE;
+    }
+
+    return PIC_ERR_NOTSUPPORTED;
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// PicCanvas - convert_to_3bpp                                              ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+pic_err_codes PicCanvas::convert_to_3bpp()
+{
+    int             i;
+    byte            *sptr, *dptr, *nptr;
+    IvoryHandle     nhandle;
+
+    switch (bpp)
+    {
+        case XFBM_BPP_24BIT:
+            return PIC_ERR_NONE;
+
+        case XFBM_BPP_15BIT:
+            nhandle = ivory_halloc(width * height * 3);
+            if (!nhandle)
+                return PIC_ERR_NOMEMORY;
+
+            nptr = (byte*) ivory_hlock(nhandle);
+            if (!nptr)
+                return PIC_ERR_LOCKFAILED;
+
+            for(i=0, sptr=data, dptr=nptr; i < width*height; i++)
+            {
+                word pcolor = *sptr | (*(sptr+1) << 8);
+
+                sptr += 2;
+
+                *(dptr++) = (pcolor >> 7) & 0xf8;
+                *(dptr++) = (pcolor >> 2) & 0xf8;
+                *(dptr++) = (pcolor << 3) & 0xf8;
+            }
+
+            ivory_hfree(&handle);
+
+            handle = nhandle;
+            data = nptr;
+            bpp = XFBM_BPP_24BIT;
+            return PIC_ERR_NONE;
+
+        case XFBM_BPP_32BIT:
+            nhandle = ivory_halloc(width * height * 3);
+            if (!nhandle)
+                return PIC_ERR_NOMEMORY;
+
+            nptr = (byte*) ivory_hlock(nhandle);
+            if (!nptr)
+                return PIC_ERR_LOCKFAILED;
+
+            for(i=0, sptr=data, dptr=nptr; i < width*height; i++)
+            {
+                *(dptr++) = *(sptr++);
+                *(dptr++) = *(sptr++);
+                *(dptr++) = *(sptr++);
+                sptr++;
+            }
+
+            ivory_hfree(&handle);
+
+            handle = nhandle;
+            data = nptr;
+            bpp = XFBM_BPP_24BIT;
+            return PIC_ERR_NONE;
+    }
+
+    return PIC_ERR_NOTSUPPORTED;
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// PicCanvas - compress_transparent                                         ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 byte *PicCanvas::compress_transparent()
 {
@@ -774,7 +1104,7 @@ byte *PicCanvas::compress_transparent()
     int             dbcount=0;
     int             offset = 0;
 
-    if (bpp == 1)
+    if (bpp == XFBM_BPP_8BIT)
     {
         rptr = new byte [((width+7) >> 3) * height];
         nptr = rptr;

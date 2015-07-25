@@ -98,7 +98,7 @@ public:
     word        flags;          // Flags for bitmap.
     ushort      width;          // X-size of bitmap
     ushort      height;         // Y-size of bitmap
-    byte        bpp;            // Bytes per pixel for bitmap (1 or 3)
+    byte        bpp;            // Bytes per pixel for bitmap
     byte        clrinuse;       // Highest pal index in use
     dword       *pal;           // Pointer to locked palette data, if any.
     byte        *data;          // Pointer to locked bitmap data.
@@ -119,7 +119,8 @@ public:
     xf_error_codes lock();
     void unlock();
 
-    xf_error_codes create(ushort w, ushort h, byte _bpp=1, int clear=1);
+    xf_error_codes create(ushort w, ushort h, byte _bpp=XFBM_BPP_8BIT,
+                          int clear=1);
 
     byte *generate_mono(dword bgcolor);
 };

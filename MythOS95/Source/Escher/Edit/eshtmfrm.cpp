@@ -98,6 +98,10 @@ BEGIN_MESSAGE_MAP(TerrMainFrame, CFrameWnd)
 	ON_COMMAND(ID_TERR_SETBASE, OnTerrSetBaseElevation)
 	ON_COMMAND(ID_SURF_REMTXT, OnSurfRemoveUnusedTxts)
 	ON_UPDATE_COMMAND_UI(ID_SURF_REMTXT, OnUpdateSurfRemoveUnusedTxts)
+	ON_COMMAND(IDS_FILE_FLOATING, OnFileFloating)
+	ON_UPDATE_COMMAND_UI(IDS_FILE_FLOATING, OnUpdateFileFloating)
+	ON_COMMAND(IDS_FILE_COMPRESS, OnFileCompress)
+	ON_UPDATE_COMMAND_UI(IDS_FILE_COMPRESS, OnUpdateFileCompress)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -261,6 +265,50 @@ void TerrMainFrame::OnFileExport()
 }
 
 
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// TerrMainFrame - OnFileCompress                                           ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+void TerrMainFrame::OnFileCompress()
+{
+	TerrEditDoc *pDoc = (TerrEditDoc*)GetActiveDocument();
+	pDoc->ctrlfl ^= TerrEditDoc::COMPRESS;
+}
+
+void TerrMainFrame::OnUpdateFileCompress(CCmdUI* pCmdUI) 
+{
+    TerrEditDoc *pDoc = (TerrEditDoc*)GetActiveDocument();
+
+    pCmdUI->Enable((pDoc) ? TRUE : FALSE);
+    if (pDoc)
+    {
+        pCmdUI->SetCheck((pDoc->ctrlfl & TerrEditDoc::COMPRESS) ? 1 : 0);
+    }
+}
+
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// TerrMainFrame - OnFileFloating                                           ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+void TerrMainFrame::OnFileFloating()
+{
+	TerrEditDoc *pDoc = (TerrEditDoc*)GetActiveDocument();
+	pDoc->ctrlfl ^= TerrEditDoc::FLOATING;
+}
+
+void TerrMainFrame::OnUpdateFileFloating(CCmdUI* pCmdUI) 
+{
+    TerrEditDoc *pDoc = (TerrEditDoc*)GetActiveDocument();
+
+    pCmdUI->Enable((pDoc) ? TRUE : FALSE);
+    if (pDoc)
+    {
+        pCmdUI->SetCheck((pDoc->ctrlfl & TerrEditDoc::FLOATING) ? 1 : 0);
+    }
+}
+
+
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrMainFrame - OnTerrSetBaseElevation                                   ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
@@ -271,16 +319,16 @@ void TerrMainFrame::OnTerrSetBaseElevation()
 
     SetBaseElvDlg   dlg;
 
-    Flx16 elvmin, elvmax;
+    float elvmin, elvmax;
     pDoc->GetMinMaxElevations(elvmin,elvmax);
 
-    dlg.m_elvmin = Flx16(elvmin);
-    dlg.m_elvmax = Flx16(elvmax);
+    dlg.m_elvmin = elvmin;
+    dlg.m_elvmax = elvmax;
 
     if (dlg.DoModal() == IDCANCEL)
         return;
 
-    pDoc->SetBaseElevation(Flx16(dlg.m_setbase_elv));
+    pDoc->SetBaseElevation(dlg.m_setbase_elv);
 }
 
 

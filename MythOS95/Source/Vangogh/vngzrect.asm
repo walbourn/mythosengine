@@ -2,9 +2,9 @@
 ;
 ;                                                           %__________%
 ;                                                          %/ . .  .   \%
-;           Van Gogh 2D-Display Library                     |  . .  o. | 
+;           Van Gogh 2D-Display Library                     |  . .  o. |
 ;                                                           |. _  .   .|
-;          Microsoft Windows '95 Version                    | / \   .  | 
+;          Microsoft Windows '95 Version                    | / \   .  |
 ;                                                           |_|_|_._._.|
 ;  Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.   |.-.-.-.-..|
 ;              All rights reserved.                        %\__________/%
@@ -25,7 +25,7 @@
 ;
 ;ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 ;
-; vngZRECT.ASM 
+; vngZRECT.ASM
 ;
 ;      This module draws filled rectangles in all of their permutations.
 ;
@@ -41,7 +41,7 @@
 ;°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 ;
 ;                                Includes
-;                                
+;
 ;°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 include macros.inc
@@ -120,7 +120,7 @@ START_PROC     zbuff_reset_rect16, C CurScreen:DWORD, rectptr:DWORD, depth:DWORD
         add     eax,LX1
         mov     edi,(VNGO_VBUFFER PTR [esi]).vb_zbuff_ptr
         add     edi,eax
-        mov     ecx,LDX         
+        mov     ecx,LDX
         shl     ecx,1
 
         mov     eax,depth       ; it is already expanded to 32bits.
@@ -132,31 +132,31 @@ START_PROC     zbuff_reset_rect16, C CurScreen:DWORD, rectptr:DWORD, depth:DWORD
 
 ;; The outside loop....
 Outside_loop:
-	mov	ecx,esi
-	test	edi,2
-	jns	@f
-	mov	word ptr [edi],ax
-	sub	ecx,2
-	lea	edi,[edi+2]
+        mov     ecx,esi
+        test    edi,2
+        jns     @f
+        mov     word ptr [edi],ax
+        sub     ecx,2
+        lea     edi,[edi+2]
 @@:
-	push	ecx
-	shr	ecx,2
+;        push    ecx
+        shr     ecx,2
     rep stosd
-    	pop	ecx
-	and	ecx,2
-	jz 	@f
-   	mov	word ptr [edi],ax
-	lea	edi,[edi+2]	
+;        pop     ecx
+;        and     ecx,2
+        jnc     @f
+        mov     word ptr [edi],ax
+        lea     edi,[edi+2]
 @@:
         add     edi,ebx         ; go to the next scan line.
         dec     edx
         jg      Outside_loop
 
-        pop	ebx
-        pop	esi
-        pop	edi
+        pop     ebx
+        pop     esi
+        pop     edi
         ret
-END_PROC       zbuff_reset_rect16     
+END_PROC       zbuff_reset_rect16
 
 _text   ends
         end

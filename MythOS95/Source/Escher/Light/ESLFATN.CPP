@@ -89,7 +89,7 @@ EschFastAttenLight::EschFastAttenLight(const char *fname, const char *lname) :
     }
 };
 
-EschFastAttenLight::EschFastAttenLight(const EschPoint *pnt, Flx16 i, Flx16 o) :
+EschFastAttenLight::EschFastAttenLight(const EschPoint *pnt, float i, float o) :
     EschFastPointLight(pnt),
     inner(i),
     outer(o)
@@ -98,8 +98,8 @@ EschFastAttenLight::EschFastAttenLight(const EschPoint *pnt, Flx16 i, Flx16 o) :
     flags |= ESCH_LGT_ATTEN;
 };
 
-EschFastAttenLight::EschFastAttenLight(Flx16 ix, Flx16 iy, Flx16 iz,
-                                       Flx16 i, Flx16 o) : 
+EschFastAttenLight::EschFastAttenLight(float ix, float iy, float iz,
+                                       float i, float o) : 
     EschFastPointLight(ix,iy,iz),
     inner(i),
     outer(o)
@@ -154,8 +154,8 @@ void EschFastAttenLight::setup(const EschFrameRef *fr)
 
     EschLight::setup(fr);
 
-    Flx16 mag = tdir.magnitude();
-    if (mag.flx >= outer.flx)
+    float mag = tdir.magnitude();
+    if (mag >= outer)
     {
         _intensity = 0;
         _hintensity = 0;
@@ -163,7 +163,7 @@ void EschFastAttenLight::setup(const EschFrameRef *fr)
     else
     {
         // Complete normalization
-        if (mag.flx > 0)
+        if (mag > 0)
         {
             tdir.i /= mag;
             tdir.j /= mag;
@@ -172,11 +172,11 @@ void EschFastAttenLight::setup(const EschFrameRef *fr)
 
         // Attenuate intensity, if allowed
         if ((flags & ESCH_LGT_ATTEN)
-            && (outer-inner).flx > 0
-            && (mag.flx > inner.flx))
+            && (outer-inner) > 0
+            && (mag > inner))
         {
-            _intensity -= flx_muldiv( (mag - inner), _intensity, (outer - inner) );
-            _hintensity -= flx_muldiv( (mag - inner), _hintensity, (outer - inner) );
+            _intensity -=  ((mag - inner) * _intensity) / (outer - inner);
+            _hintensity -= ((mag - inner) * _hintensity) / (outer - inner);
         }
     }
 }
@@ -218,7 +218,8 @@ esch_error_codes EschFastAttenLight::load(const char *fname, const char *lname)
             iff.leaveform();
         }
 
-        if (iff.chunkid == iff.makeid('E','F','A','T'))
+        if (iff.chunkid == iff.makeid('E','F','A','T')
+            || iff.chunkid == iff.makeid('E','F','A','1'))
         {
             err=load(&iff,lname);
             if (!err
@@ -241,37 +242,67 @@ esch_error_codes EschFastAttenLight::load(const char *fname, const char *lname)
 
 esch_error_codes EschFastAttenLight::load(XFParseIFF *iff, const char *lname)
 {
-    EschFileLightAtten fatn;
-
     assertMyth("EschFastAttenLight::load requries iff pointer",
                iff);
 
-//컴 Verify correct chunk name and size
-    if (iff->chunkid != iff->makeid('E','F','A','T'))
+//컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴� Floating-point format
+    if (iff->chunkid == iff->makeid('E','F','A','1'))
+    {
+        EschFileLightAtten fatn;
+
+        if (iff->chunkSize != sizeof(fatn))
+            return ESCH_ERR_INVALIDDATA;
+
+        //컴 Read chunk and verify name, if given.
+        if (iff->read(&fatn))
+            return ESCH_ERR_FILEERROR;
+
+        if (lname && strcmp(lname,fatn.name))
+            return ESCH_ERR_NOTFOUND;
+
+        //컴 Found, so setup Fast Atten Light
+        strcpy(name,fatn.name);
+        flags = fatn.flags;
+
+        VngoColor24bit  c(fatn.color);
+        set_intensity( max( max(c.r, c.g), c.b ) );
+
+        set_position(fatn.x,fatn.y,fatn.z);
+
+        set_inner( fatn.inner );
+        set_outer( fatn.outer );
+    }
+//컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴 Fixed-point format
+    else if (iff->chunkid == iff->makeid('E','F','A','T'))
+    {
+        EschFileLightAttenV1 fatn;
+
+        if (iff->chunkSize != sizeof(fatn))
+            return ESCH_ERR_INVALIDDATA;
+
+        //컴 Read chunk and verify name, if given.
+        if (iff->read(&fatn))
+            return ESCH_ERR_FILEERROR;
+
+        if (lname && strcmp(lname,fatn.name))
+            return ESCH_ERR_NOTFOUND;
+
+        //컴 Found, so setup Fast Atten Light
+        strcpy(name,fatn.name);
+        flags = fatn.flags;
+
+        VngoColor24bit  c(fatn.color);
+        set_intensity( max( max(c.r, c.g), c.b ) );
+
+        set_position(fatn.x / 65536.0f,fatn.y / 65536.0f,fatn.z / 65536.0f);
+
+        set_inner( fatn.inner / 65536.0f );
+        set_outer( fatn.outer / 65536.0f );
+    }
+    else
+    {
         return ESCH_ERR_NOTFOUND;
-
-    if (iff->chunkSize != sizeof(EschFileLightAtten))
-        return ESCH_ERR_INVALIDDATA;
-
-//컴 Read chunk and verify name, if given.
-    if (iff->read(&fatn))
-        return ESCH_ERR_FILEERROR;
-
-    if (lname && strcmp(lname,fatn.name))
-        return ESCH_ERR_NOTFOUND;
-
-//컴 Found, so setup Fast Atten Light
-
-    strcpy(name,fatn.name);
-    flags = fatn.flags;
-
-    VngoColor24bit  c(fatn.color);
-    set_intensity( max( max(c.r, c.g), c.b ) );
-
-    set_position(fatn.x,fatn.y,fatn.z);
-
-    set_inner( fatn.inner );
-    set_outer( fatn.outer );
+    }
 
 //컴 Return ok
     return ESCH_ERR_NONE;

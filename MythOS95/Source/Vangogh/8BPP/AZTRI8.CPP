@@ -2,9 +2,9 @@
 //
 //                                                           %__________%
 //                                                          %/ . .  .   \%
-//           Van Gogh 2D-Display Library                     |  . .  o. | 
+//           Van Gogh 2D-Display Library                     |  . .  o. |
 //                                                           |. _  .   .|
-//          Microsoft Windows '95 Version                    | / \   .  | 
+//          Microsoft Windows '95 Version                    | / \   .  |
 //                                                           |_|_|_._._.|
 // Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
 //              All rights reserved.                        %\__________/%
@@ -36,7 +36,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 #include <assert.h>
 
@@ -63,7 +63,8 @@
 //
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
-extern "C" void vngo_ztriangle8 (VngoVbuffer *vb,VngoPoint2 *pts,dword color);
+extern "C" void vngo_azgtriangle8 (VngoVbuffer *vb,VngoPoint2 *pts,
+                                   dword color,long alpha);
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
@@ -87,7 +88,7 @@ extern "C" void vngo_ztriangle8 (VngoVbuffer *vb,VngoPoint2 *pts,dword color);
 
 extern "C" void vngo_aztriangle8 (VngoVbuffer *vb,VngoPoint2 *pts,dword color,long alpha)
 {
-    vngo_ztriangle8(vb,pts,color);
+    vngo_azgtriangle8(vb,pts,color,alpha);
     return;
 }
 

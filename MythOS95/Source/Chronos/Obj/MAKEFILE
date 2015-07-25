@@ -4,8 +4,8 @@
 #         °°                °°
 #          °°              °°
 #           °°        ÚÄÄÄÄÄ  ³   ³ ÚÄÄÄ¿ ÚÄÄÄ¿ ³   ³ ÚÄÄÄ¿  ÚÄÄÄ¿
-#            °°       ³  °°   ³   ³ ³   ³ ³   ³ ³   ³ ³   ³  ³   
-#             °°±± ± ²³±°°    ³   ³ ³   ³ ³   ³ ³\  ³ ³   ³  ³   
+#            °°       ³  °°   ³   ³ ³   ³ ³   ³ ³   ³ ³   ³  ³
+#             °°±± ± ²³±°°    ³   ³ ³   ³ ³   ³ ³\  ³ ³   ³  ³
 #              °°² ²±±³°°     ÃÄÄÄ´ ÃÄÄÄÙ ³   ³ ³\\ ³ ³   ³  ÀÄÄÄ¿
 #               °°±±² ³°      ³   ³ ³\    ³   ³ ³ \\³ ³   ³      ³
 #               °°    ³°      ³   ³ ³ \   ³   ³ ³  \³ ³   ³      ³
@@ -42,11 +42,15 @@
 #°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 #
 #                               Variables
-#                                
+#
 #°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 !if "$(DEBUG)" == ""
 DEBUG = NO
+!endif
+
+!if "$(THREAD)" == ""
+THREAD=YES
 !endif
 
 !if "$(MYTH95ROOT)" == ""
@@ -61,7 +65,7 @@ INCPATH = ;..\inc;$(MYTH95ROOT)\inc;
 
 LIB = chronos
 
-OBJS = chronos.obj
+OBJS = chronos.obj prfrdtsc.obj
 
 LIBPATH = $(MYTH95ROOT)\lib;
 
@@ -92,6 +96,8 @@ all: setstden $(LIB).lib
 #±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 
 chronos.obj: ..\chronos.cpp ..\inc\chronos.hpp
+
+prfrdtsc.obj: ..\prfrdtsc.asm
 
 #ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 # Library                                                                  ³

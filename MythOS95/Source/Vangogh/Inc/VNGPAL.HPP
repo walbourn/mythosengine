@@ -25,11 +25,10 @@
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
-// Vngpal.hpp
+// vngpal.hpp
 //
-//     This file has all of the various palette definitions.
+// This file has all of the various palette definitions.
 //
-//ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ Revision History ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
 
 #ifndef __VNGPAL_HPP
@@ -47,21 +46,25 @@
 #include "felix.hpp"
 #include "vngcolor.hpp"
 #include "xfile.hpp"
+#include <ddraw.h>
 
+#ifdef __WATCOMC__
+#pragma pack(1);
+#endif
+
+#ifdef _MSC_VER
+#pragma pack(push,1)
+#endif
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
-//                                Equates
+//                                Classes
 //
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
-
-//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-//
-//                               Prototypes
-//
-//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// Hardware palette class
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 class VngoHwPal
 {
 public:
@@ -71,6 +74,9 @@ public:
 };
 
 
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// Shade palette classes
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 class VngoShadePal
 {
 public:
@@ -88,8 +94,6 @@ public:
         long    mid_point;
     };
 };
-
-
 
 class VngoShadePal8 : public VngoShadePal
 {
@@ -131,8 +135,6 @@ public:
     }
 };
 
-
-
 class VngoShadePal15 : public VngoShadePal
 {
     word    *p;
@@ -172,7 +174,6 @@ public:
         }
     }
 };
-
 
 class VngoShadePal16 : public VngoShadePal
 {
@@ -215,17 +216,24 @@ public:
 };
 
 
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// Palette classes
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 class VngoPal
 {
 public:
-    VngoShadePal    *shd_pal;
-    dword           flags;
-    dword           type;
-    char            name[16];
+    VngoShadePal        *shd_pal;
+    VngoHwPal           hw_pal;
+    VngoClrConvert      convert;
+    dword               flags;
+    dword               type;
+    char                name[16];
 
 
     VngoPal(): shd_pal(0) { }
     virtual ~VngoPal();
+
+    void create_ddpal(LPDIRECTDRAW _dd, IDirectDrawPalette **_ddpal);
 
 // Virtual Utility functions.
     virtual void release();
@@ -245,8 +253,6 @@ public:
 class VngoPal8 : public VngoPal
 {
 public:
-    VngoHwPal       hw_pal;
-    VngoClrConvert  convert;
 
     VngoPal8();
     virtual ~VngoPal8();
@@ -265,7 +271,52 @@ public:
     int init(dword flags,XFParseIFF *palfile);
 };
 
+class VngoPal15 : public VngoPal
+{
+public:
 
+    VngoPal15();
+    virtual ~VngoPal15();
+    virtual void release();
+
+// Inline functions.
+
+    dword get_index(VngoColorHLS c) { return (convert.get_index(c));}
+    dword get_index(VngoColor24bit c) { return (convert.get_index(c));}
+    int set_hwpal(VngoColor24bit pal[],int count) { return (hw_pal.init(pal,count));};
+    VngoColor24bit get_RGB(int indx) { return (hw_pal.p[indx]);}
+
+// Initialization of the palette.
+    int init(dword flags,VngoHwPal *hw=NULL,VngoShadePal16 *sh=NULL);
+    int init(dword flags,const char *palfile);
+    int init(dword flags,XFParseIFF *palfile);
+};
+
+class VngoPal16 : public VngoPal
+{
+public:
+
+    VngoPal16();
+    virtual ~VngoPal16();
+    virtual void release();
+
+// Inline functions.
+
+    dword get_index(VngoColorHLS c) { return (convert.get_index(c));}
+    dword get_index(VngoColor24bit c) { return (convert.get_index(c));}
+    int set_hwpal(VngoColor24bit pal[],int count) { return (hw_pal.init(pal,count));};
+    VngoColor24bit get_RGB(int indx) { return (hw_pal.p[indx]);}
+
+// Initialization of the palette.
+    int init(dword flags,VngoHwPal *hw=NULL,VngoShadePal16 *sh=NULL);
+    int init(dword flags,const char *palfile);
+    int init(dword flags,XFParseIFF *palfile);
+};
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// Palette I/O classes
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 class VngoPalIFF
 {
 public:
@@ -293,6 +344,36 @@ public:
     virtual int load(XFParseIFF *iffp);
 };
 
+class VngoPalIFF15 : public VngoPalIFF
+{
+public:
+    VngoPalIFF15();
+    VngoPalIFF15(VngoPal *p);
+    virtual int save(const char *filename);
+    virtual int save(XFParseIFF *iffp);
+    virtual int load(const char *filename);
+    virtual int load(XFParseIFF *iffp);
+};
+
+class VngoPalIFF16 : public VngoPalIFF
+{
+public:
+    VngoPalIFF16();
+    VngoPalIFF16(VngoPal *p);
+    virtual int save(const char *filename);
+    virtual int save(XFParseIFF *iffp);
+    virtual int load(const char *filename);
+    virtual int load(XFParseIFF *iffp);
+};
+
+#ifdef __WATCOMC__
+#pragma pack();
+#endif
+
+#ifdef _MSC_VER
+#pragma pack(pop)
+#endif
 
 #endif         // __VNGPAL_HPP
-//°±² End of header - VNGPAL.hpp ²±°
+
+//°±² End of header - vngpal.hpp ²±°

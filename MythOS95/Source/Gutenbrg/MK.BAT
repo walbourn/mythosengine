@@ -2,7 +2,7 @@
 if %1.==tools. goto tools
 echo 같같같굉 Gutenberg '95 껑같같같같같같같같같같같같같같같같같같같같같같같�
 cd obj
-call nmaker /nologo %1 %2 %3 %4 %5 %6 %7 %8 %9
+call nmake /nologo %1 %2 %3 %4 %5 %6 %7 %8 %9
 cd ..
 if ERRORLEVEL 1 goto error
 echo 같같같굉 Gutenberg '95 - Done 껑같같같같같같같같같같같같같같같같같같같같

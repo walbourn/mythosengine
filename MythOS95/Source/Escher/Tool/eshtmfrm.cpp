@@ -77,6 +77,8 @@ BEGIN_MESSAGE_MAP(ToolFrame, CFrameWnd)
 	ON_UPDATE_COMMAND_UI(ID_FILE_COMPRESS, OnUpdateFileCompress)
 	ON_COMMAND(ID_FILE_TRUECOLOR, OnFileTruecolor)
 	ON_UPDATE_COMMAND_UI(ID_FILE_TRUECOLOR, OnUpdateFileTruecolor)
+	ON_COMMAND(ID_FILE_FLOATING, OnFileFloating)
+	ON_UPDATE_COMMAND_UI(ID_FILE_FLOATING, OnUpdateFileFloating)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -292,6 +294,27 @@ void ToolFrame::OnUpdateFileTruecolor(CCmdUI* pCmdUI)
     if (pDoc)
     {
         pCmdUI->SetCheck((pDoc->flags & ToolDoc::TRUECOLOR) ? 1 : 0);
+    }
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// ToolFrame - On(Update)Floating                                           ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+void ToolFrame::OnFileFloating() 
+{
+    ToolDoc *pDoc = (ToolDoc*)GetActiveDocument();
+    pDoc->flags ^= ToolDoc::FLOATING;
+}
+
+void ToolFrame::OnUpdateFileFloating(CCmdUI* pCmdUI) 
+{
+    ToolDoc *pDoc = (ToolDoc*)GetActiveDocument();
+
+    pCmdUI->Enable((pDoc) ? TRUE : FALSE);
+    if (pDoc)
+    {
+        pCmdUI->SetCheck((pDoc->flags & ToolDoc::FLOATING) ? 1 : 0);
     }
 }
 

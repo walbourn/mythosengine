@@ -77,7 +77,7 @@
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //  NewtObject - Vector constructor
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-NewtObject::NewtObject (Flx16 m, const NewtVector &_position, const NewtVector &_velocity):
+NewtObject::NewtObject (float m, const NewtVector &_position, const NewtVector &_velocity):
     mass     (m),
     drag     (0),
     position (_position),
@@ -89,7 +89,7 @@ NewtObject::NewtObject (Flx16 m, const NewtVector &_position, const NewtVector &
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //  NewtObject - Location constructor
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-NewtObject::NewtObject (Flx16 m, Flx16 x, Flx16 y, Flx16 z, const NewtVector &_velocity):
+NewtObject::NewtObject (float m, float x, float y, float z, const NewtVector &_velocity):
     mass     (m),
     drag     (0),
     position (x, y, z),
@@ -101,7 +101,7 @@ NewtObject::NewtObject (Flx16 m, Flx16 x, Flx16 y, Flx16 z, const NewtVector &_v
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //  NewtObject - Alternate location constructor
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-NewtObject::NewtObject (Flx16 m, Flx16 x, Flx16 y, Flx16 z):
+NewtObject::NewtObject (float m, float x, float y, float z):
     mass     (m),
     drag     (0),
     position (x, y, z)
@@ -136,7 +136,7 @@ NewtObject::~NewtObject ()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //  NewtObject - step
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-void NewtObject::step (Flx16 t)
+void NewtObject::step (float t)
 {
 //ÄÄÄ If no time passed, then nothing should change and temps should
 //ÄÄÄ not be lost
@@ -168,7 +168,7 @@ void NewtObject::step (Flx16 t)
     vel.k *= t;
 
     // acc == 1/2at^2
-    t.flx >>= 1;    // t = 1/2t
+    t /= 2.0f;      // t = 1/2t
     acc.i *= t;
     acc.j *= t;
     acc.k *= t;

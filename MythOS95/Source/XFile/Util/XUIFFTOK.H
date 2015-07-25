@@ -79,6 +79,7 @@
 #define YY_FLOAT               120
 #define YY_DOUBLE              121
 #define YY_FIXED16             122
+#define YY_BPP                 123
 
 #define YY_INTEGER             200
 #define YY_REAL                201

@@ -32,7 +32,7 @@
 //
 // esdefs.h
 //
-// Contains the global constants and defines for the Escher 3D library. 
+// Contains the global constants and defines for the Escher 3D library.
 //
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
 
@@ -70,11 +70,13 @@ typedef enum _esch_error_codes
     ESCH_ERR_INVALIDHIER            =18,    // Hierarchy invalid data
     ESCH_ERR_INVALIDHGTDATA         =19,    // Invalid height data
     ESCH_ERR_INVALIDSRFDATA         =20,    // Invalid surface data
+    ESCH_ERR_INVALIDBEND            =21,    // Invalid bend constraint data
 
     //ÄÄÄ Drawable picking/collide error codes
     ESCH_ERR_NEEDILIST              =30,    // No input list
     ESCH_ERR_NEEDARENA              =31,    // Arena missing
     ESCH_ERR_NEEDCAMERA             =32,    // Need camera data
+    ESCH_ERR_NEEDTERRAIN            =33,    // Need terrain data
 
     //ÄÄÄ Shade-table generation error codes
     ESCH_ERR_NEEDVPORT              =40,    // Camera needs viewport
@@ -177,7 +179,7 @@ typedef enum _esch_error_codes
 #define ESCH_CAM_PERSPECTIVE        0x400   // Draw with perspective routines
 #define ESCH_CAM_ALPHA              0x800   // If set, alpha on faces is used
 
-#define ESCH_CAM_SHOW_ALL_LINES     0x1000  // Don't use visibility flags for 
+#define ESCH_CAM_SHOW_ALL_LINES     0x1000  // Don't use visibility flags for
                                             // wireframe mode
 
 #define ESCH_CAM_VPWASLOCKED        0x2000  // pre_rend() sets/clears this for post_rend()
@@ -218,6 +220,7 @@ typedef enum _esch_error_codes
 
 //ÄÄÄ Flags
 #define ESCH_LGT_OFF                0x1     // Light is off
+#define ESCH_LGT_DARK               0x2     // Light is a darklight
 #define ESCH_LGT_ATTEN              0x10    // Light attenuates over a range
 
 #define ESCH_LGT_APP0               0x1000000   // Application defined bits
@@ -337,6 +340,7 @@ typedef enum _esch_error_codes
 #define ESCH_DRWT_EXPLOSION         0x1100
 #define ESCH_DRWT_METABOX           0x1200
 #define ESCH_DRWT_LOD               0x1300
+#define ESCH_DRWT_SKELETON          0x2000
 
 //ÄÄÄ EschMeshDraw
 
@@ -353,7 +357,7 @@ typedef enum _esch_error_codes
 
 //ÄÄÄ EschTerrain
 
-#define ESCH_TRN_DOTS               0x10000 // Draws height field as dots 
+#define ESCH_TRN_DOTS               0x10000 // Draws height field as dots
 #define ESCH_TRN_LOD                0x20000 // Draw w/ Level Of Detail adjustments
 #define ESCH_TRN_DEBUG              0x40000 // Draw the debug info.
 
@@ -518,6 +522,7 @@ typedef enum _esch_error_codes
 #define ESCH_SCENELD_CAMSEX         0x10
 #define ESCH_SCENELD_NOMFTXT        0x20
 #define ESCH_SCENELD_NOSHARETXT     0x40
+#define ESCH_SCENELD_SKELETON       0x80
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
@@ -581,6 +586,173 @@ typedef enum _esch_error_codes
 #define ESCH_MBLD_ALL               0xf
 
 #define ESCH_MBLD_INSCENE           0x10
+#define ESCH_MBLD_FIXED             0x20
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// EschLimbSegment                                                          ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+#define ESCH_FOOT_MAX_PITCH         45
+#define ESCH_FOOT_MIN_PITCH         -60
+#define ESCH_FOOT_MAX_ROLL          30
+#define ESCH_FOOT_MIN_ROLL          -30
+#define ESCH_FOOT_MAX_YAW           90
+#define ESCH_FOOT_MIN_YAW           -10
+#define ESCH_HAND_MAX_PITCH         90
+#define ESCH_HAND_MIN_PITCH         -90
+#define ESCH_HAND_MAX_ROLL          0
+#define ESCH_HAND_MIN_ROLL          0
+#define ESCH_HAND_MAX_YAW           0
+#define ESCH_HAND_MIN_YAW           0
+#define ESCH_SHIN_MAX_PITCH         5
+#define ESCH_SHIN_MIN_PITCH         -100
+#define ESCH_SHIN_MAX_ROLL          45
+#define ESCH_SHIN_MIN_ROLL          -45
+#define ESCH_SHIN_MAX_YAW           0
+#define ESCH_SHIN_MIN_YAW           0
+#define ESCH_FOREARM_MAX_PITCH      135
+#define ESCH_FOREARM_MIN_PITCH      -5
+#define ESCH_FOREARM_MAX_ROLL       45
+#define ESCH_FOREARM_MIN_ROLL       -45
+#define ESCH_FOREARM_MAX_YAW        0
+#define ESCH_FOREARM_MIN_YAW        0
+#define ESCH_THIGH_MAX_PITCH        135
+#define ESCH_THIGH_MIN_PITCH        -30
+
+#define ESCH_THIGH_MAX_ROLL         45
+#define ESCH_THIGH_MIN_ROLL         -45
+
+#define ESCH_THIGH_MAX_YAW          45
+#define ESCH_THIGH_MIN_YAW          -5
+#define ESCH_UPARM_MAX_PITCH        160
+#define ESCH_UPARM_MIN_PITCH        -5
+#define ESCH_UPARM_MAX_ROLL         90
+#define ESCH_UPARM_MIN_ROLL         -90
+#define ESCH_UPARM_MAX_YAW          90
+#define ESCH_UPARM_MIN_YAW          -90
+#define ESCH_TORSO_MAX_PITCH        45
+#define ESCH_TORSO_MIN_PITCH        -30
+#define ESCH_TORSO_MAX_ROLL         0
+#define ESCH_TORSO_MIN_ROLL         0
+#define ESCH_TORSO_MAX_YAW          80
+#define ESCH_TORSO_MIN_YAW          -80
+#define ESCH_HEAD_MAX_PITCH         30
+#define ESCH_HEAD_MIN_PITCH         -30
+#define ESCH_HEAD_MAX_ROLL          10
+#define ESCH_HEAD_MIN_ROLL          -10
+#define ESCH_HEAD_MAX_YAW           95
+#define ESCH_HEAD_MIN_YAW           -95
+#define ESCH_SHLDR_MAX_PITCH        15
+#define ESCH_SHLDR_MIN_PITCH        -15
+#define ESCH_SHLDR_MAX_ROLL         15
+#define ESCH_SHLDR_MIN_ROLL         -5
+#define ESCH_SHLDR_MAX_YAW          0
+#define ESCH_SHLDR_MIN_YAW          0
+#define ESCH_DOME_MAX_PITCH         0
+#define ESCH_DOME_MIN_PITCH         0
+#define ESCH_DOME_MAX_ROLL          0
+#define ESCH_DOME_MIN_ROLL          0
+#define ESCH_DOME_MAX_YAW           0
+#define ESCH_DOME_MIN_YAW           0
+#define ESCH_HIP_MAX_PITCH          45
+#define ESCH_HIP_MIN_PITCH          -30
+#define ESCH_HIP_MAX_ROLL           0
+#define ESCH_HIP_MIN_ROLL           0
+#define ESCH_HIP_MAX_YAW            0
+#define ESCH_HIP_MIN_YAW            0
+
+
+typedef long esch_limb_type;
+#define M_TYPE_LEN      80
+
+// Flags
+#define ESCH_KEYFRAME_LOOPING               0x01
+#define ESCH_KEYFRAME_PING_PONG             0x02
+#define ESCH_KEYFRAME_CHAINING              0x04
+#define ESCH_KEYFRAME_SWAPPING_1            0x08
+#define ESCH_KEYFRAME_SWAPPING_2            0x10
+#define ESCH_KEYFRAME_FIRST_CHAIN           0x20
+#define ESCH_KEYFRAME_LAST_CHAIN            0x40
+
+#define ESCH_KEYFRAME_DATAERROR             -1
+#define ESCH_KEYFRAME_FRAMENUMSYNCERR       -2
+#define ESCH_KEYFRAME_LOOPEND               -3
+
+// Base types
+#define ESCH_KEYFRAME_NONE                  0x00000000
+#define ESCH_KEYFRAME_FOOT                  0x00000001
+#define ESCH_KEYFRAME_SHIN                  0x00000002
+#define ESCH_KEYFRAME_THIGH                 0x00000004
+#define ESCH_KEYFRAME_UPARM                 0x00000008
+#define ESCH_KEYFRAME_FOREARM               0x00000010
+#define ESCH_KEYFRAME_HAND                  0x00000020
+#define ESCH_KEYFRAME_TORSO                 0x00000040
+#define ESCH_KEYFRAME_HEAD                  0x00000080
+#define ESCH_KEYFRAME_WAIST                 0x00000100
+#define ESCH_KEYFRAME_HIP                   0x00000200
+#define ESCH_KEYFRAME_DOME                  0x00000400
+#define ESCH_KEYFRAME_SHLDR                 0x00000800
+
+// Duplicates one of the above -- base object for a hierarchy
+#define ESCH_KEYFRAME_ROOT                  0x00000100
+
+// Modifiers
+#define ESCH_KEYFRAME_LEADING               0x00001000
+#define ESCH_KEYFRAME_TRAILING              0x00002000
+#define ESCH_KEYFRAME_LEFT                  0x00004000
+#define ESCH_KEYFRAME_RIGHT                 0x00008000
+#define ESCH_KEYFRAME_ARM                   0x00010000
+#define ESCH_KEYFRAME_LEG                   0x00020000
+#define ESCH_KEYFRAME_MISC                  0x00040000
+#define ESCH_KEYFRAME_LEADING_2             0x00080000
+#define ESCH_KEYFRAME_TRAILING_2            0x00100000
+
+// Combined Leading Leg
+#define ESCH_KEYFRAME_FOOTLL                0x00021001
+#define ESCH_KEYFRAME_SHINLL                0x00021002
+#define ESCH_KEYFRAME_THIGHLL               0x00021004
+#define ESCH_KEYFRAME_HIPLL                 0x00021200
+
+// Combined Leading Arm
+#define ESCH_KEYFRAME_UPARMLA               0x00011008
+#define ESCH_KEYFRAME_FOREARMLA             0x00011010
+#define ESCH_KEYFRAME_HANDLA                0x00011020
+#define ESCH_KEYFRAME_SHLDRLA               0x00011800
+
+// Combined Trailing Leg
+#define ESCH_KEYFRAME_FOOTTL                0x00022001
+#define ESCH_KEYFRAME_SHINTL                0x00022002
+#define ESCH_KEYFRAME_THIGHTL               0x00022004
+#define ESCH_KEYFRAME_HIPTL                 0x00022200
+
+// Combined Trailing Arm
+#define ESCH_KEYFRAME_UPARMTA               0x00012008
+#define ESCH_KEYFRAME_FOREARMTA             0x00012010
+#define ESCH_KEYFRAME_HANDTA                0x00012020
+#define ESCH_KEYFRAME_SHLDRTA               0x00012800
+
+// Combined Miscellaneous
+#define ESCH_KEYFRAME_TORSOM                0x00040040
+#define ESCH_KEYFRAME_HEADM                 0x00040080
+#define ESCH_KEYFRAME_WAISTM                0x00040100
+#define ESCH_KEYFRAME_DOMEM                 0x00040400
+
+#define ESCH_KEYFRAME_ALL                   0xFFFFFFFF
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// EschKeyframer Motion types                                               ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+#define     ESCH_MAX_MOTION_TYPES           31
+#define     ESCH_MAX_SIMULTANEOUS           6
+
+
+#define     ESCH_MOTION_NONE                0x0
+#define     ESCH_MOTION_LEADING             0x1
+#define     ESCH_MOTION_TRAILING            0x2
+#define     ESCH_MOTION_LOOPING             0x4
+#define     ESCH_MOTION_PING_PONG           0x8
+#define     ESCH_MOTION_SWAPPING            0x10
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿

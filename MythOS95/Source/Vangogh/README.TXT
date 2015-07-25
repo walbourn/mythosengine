@@ -27,36 +27,51 @@
                             _Library Status_
 
   Notes by:  Tim Little
-  Updated:   November 5, 1996
+  Updated:   July 31, 1997
 
-  This library is not yet complete.  It is functional using the DIB engine 
-  present in Win95, but does not yet utilize any of the D3D features
-  of Win95.
-
-  
   Changes for this release --------------------------------------------------
-    o All the service routines that subdivide the polygons now also
-      take fractional S not just (u,v).	
 
-    o Direct Draw is now functioning properly.
+    o This release is reworked in many ways from previous releases with
+      a general cleanup and removal of obsolete functions.
 
-    o All new directory structure.
+    o 3D hardware implementations of Direct3D and Cirrus Clear3D are
+      mostly complete except for on-board texture caching management--for
+      now when the board's texture memory is full, all additional
+      textured polygons are ignored.  Additional work needs to be done to
+      check for caps bits, etc.
 
-    o Fixes a z-buffer bug in the linear flat shadded texture mapper.
+    o Added new viewport flag VNGO_TRUE_ALPHA which activates software-based
+      alpha blending.
 
-    o First cut of new screen managers.
+    o DirectDraw support has been completed.
+
+    o Added screen manager classes to simplify setup and management of
+      devices and the associated viewports.
+
+    o Fixed a z-buffer bug in the linear flat shadded texture mapper.
 
     o Added new vngo_stretch_blt functions.
 
     o New sub-pixel accurate polygon scan-converters.
 
+    o Documentation has been completed for all classes except 3D
+      hardware classes which are still under development.
+
+    o Van Gogh tester has been included in this release.
+
     
   Pending changes -----------------------------------------------------------
-  
-    o Add support for 15,16,24 bit per pixel display usage.
 
-    o Many new features for PalTool.
+    o Completion of texture management for Direct3D and Cirrus Clear3D.
 
+    o The screen manager check_mode() functions need to be implemented.
+
+    o Implementation of 3D/fx Glide and Matrox Simple Interface 3D
+      viewports/screen managers.
+
+    o Possibly add 24-bit/32-bit display support.
+
+    o More features for PalTool.
 
 *** END OF FILE ***
 

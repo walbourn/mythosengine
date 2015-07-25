@@ -101,6 +101,7 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "Use &compression",            ID_FILE_COMPRESS
         MENUITEM "Use &truecolor",              ID_FILE_TRUECOLOR
+        MENUITEM "Use &floating-point",         ID_FILE_FLOATING
         MENUITEM SEPARATOR
         MENUITEM "Recent File",                 ID_FILE_MRU_FILE1, GRAYED
         MENUITEM SEPARATOR
@@ -352,7 +353,9 @@ BEGIN
     CONTROL         "Generic2",IDC_LPROP_INTENSITY,"msctls_trackbar32",
                     TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,50,70,110,15
     CONTROL         "Active",IDC_LPROP_ON,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,190,70,40,10
+                    WS_TABSTOP,190,57,40,10
+    CONTROL         "Darklight",IDC_LPROP_DARK,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,190,71,44,10
     CONTROL         "Attenuate",IDC_LPROP_ATTEN,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,190,85,47,10
     RTEXT           "Position/",ID_STATIC,5,100,30,10
@@ -806,8 +809,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,1,0,0
- PRODUCTVERSION 1,1,0,0
+ FILEVERSION 2,0,0,0
+ PRODUCTVERSION 2,0,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -825,13 +828,13 @@ BEGIN
             VALUE "Comments", "by Chuck Walbourn\0"
             VALUE "CompanyName", "Charybdis Enterprises, Inc.\0"
             VALUE "FileDescription", "Escher Tool MFC Application\0"
-            VALUE "FileVersion", "1.10\0"
+            VALUE "FileVersion", "2.00\0"
             VALUE "InternalName", "EschTool\0"
             VALUE "LegalCopyright", "Copyright © 1995-1997\0"
             VALUE "LegalTrademarks", "MythOS is a trademark of Charybdis Enterprises, Inc.\0"
             VALUE "OriginalFilename", "ESHTOOL.EXE\0"
             VALUE "ProductName", "Escher Tool\0"
-            VALUE "ProductVersion", "1.10\0"
+            VALUE "ProductVersion", "2.00\0"
         END
     END
     BLOCK "VarFileInfo"
@@ -1025,6 +1028,7 @@ END
 STRINGTABLE DISCARDABLE 
 BEGIN
     ID_FILE_TRUECOLOR       "When saving/sending documents, this controls the use of 8-bit vs true-color format for texture data\nTruecolor"
+    ID_FILE_FLOATING        "When saving/sending documents, this controls the use of floating vs. fixed-poitn data formats\nFloating-point"
     ID_VIEW_REFRESH         "Redraw the current views\nRefresh"
 END
 

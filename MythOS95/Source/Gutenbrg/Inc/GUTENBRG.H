@@ -71,6 +71,7 @@ extern "C" {
 #define GBERG_INIT_FONT             2
 #define GBERG_INIT_TEXT             2
 
+
 //ÄÄÄ Error codes for Guttenberg functions.
 typedef enum _gberg_error_codes {
     GBERG_ERR_NONE                  =0,
@@ -96,6 +97,11 @@ typedef enum _gberg_error_codes {
 
 #define GBERG_FNT_MONOFIXEDEX       10 // 256 chars, monochrone, fixed size
 
+#define GBERG_FNT_MONOVARIABLE      20 // 128 chars, monochrome, variable size
+
+#define GBERG_FNT_MONOVARIABLEEX    30 // 256 chars, monochrome, variable size
+
+
 //ÄÄÄ Flags for gberg_outf
 #define GBERG_FMT_LEFT              0x1
 #define GBERG_FMT_CENTER            0x2
@@ -114,9 +120,10 @@ typedef enum _gberg_error_codes {
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // Font information structure.                                              ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-typedef struct GBergFontInfo {
+typedef struct GBergFontInfo
+{
     char                name[GBERG_MAX_NAME];   // Name
-    ushort              width;                  // Size, if fixed
+    ushort              width;                  // Size (max width)
     ushort              height;
     ushort              bpc;                    // Bytes/character
     ushort              type;                   // Type
@@ -124,20 +131,23 @@ typedef struct GBergFontInfo {
     IvoryHandle         data;                   // Data handle
 } GBergFontInfo;
 
+
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // Text information structure.                                              ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-typedef struct GBergTextInfo {
+typedef struct GBergTextInfo
+{
     char                name[GBERG_MAX_NAME];   // Name
     ulong               number_of_strings;
     IvoryHandle         data;                   // Data handle
 } GBergTextInfo;
 
+
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // Internal data structures.                                                ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-typedef struct GBergIData {
-
+typedef struct GBergIData
+{
     //ÄÄÄ Font Data
     GBergFontInfo   *font_active;
     dword           fcol, bcol;

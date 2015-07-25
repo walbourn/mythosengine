@@ -188,7 +188,7 @@ public:
         EschVertex vtx(pnt,0,0,0);
         return add_vertex(&vtx);
     }
-    esch_error_codes add_vertex(Flx16 ix, Flx16 iy, Flx16 iz)
+    esch_error_codes add_vertex(float ix, float iy, float iz)
     {
         EschVertex vtx(ix,iy,iz,0,0,0);
         return add_vertex (&vtx);
@@ -200,7 +200,7 @@ public:
         EschVertex vtx(pnt,0,0,0);
         return set_vertex(i,&vtx);
     }
-    esch_error_codes set_vertex(ulong i, Flx16 ix, Flx16 iy, Flx16 iz)
+    esch_error_codes set_vertex(ulong i, float ix, float iy, float iz)
     {
         EschVertex vtx(ix,iy,iz,0,0,0);
         return set_vertex(i,&vtx);
@@ -216,7 +216,7 @@ public:
         return add_face(&face);
     }
     esch_error_codes add_face(word a, word b, word c, dword color,
-                              word txt, Flx16 u[], Flx16 v[])
+                              word txt, float u[], float v[])
     {
         EschFace   face(fflags | ESCH_FACE_TEXTURED,
                         a,b,c,
@@ -235,7 +235,7 @@ public:
         return set_face(i, &face);
     }
     esch_error_codes set_face(ulong i, word a, word b, word c, dword color,
-                                       word txt, Flx16 u[], Flx16 v[])
+                                       word txt, float u[], float v[])
     {
         EschFace   face(fflags | ESCH_FACE_TEXTURED,
                         a,b,c,

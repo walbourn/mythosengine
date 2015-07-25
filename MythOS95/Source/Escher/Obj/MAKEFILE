@@ -45,11 +45,15 @@
 #°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 #
 #                               Variables
-#                                
+#
 #°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 !if "$(DEBUG)" == ""
 DEBUG = NO
+!endif
+
+!if "$(THREAD)" == ""
+THREAD = YES
 !endif
 
 !if "$(MYTH95ROOT)" == ""
@@ -65,6 +69,7 @@ INCPATH   = ;..\inc;$(MYTH95ROOT)\inc;
 LIB = escher
 
 OBJS = \
+espch.obj\
 esbldmsh.obj\
 esbldtxt.obj\
 escamera.obj\
@@ -79,11 +84,15 @@ esfref.obj\
 esfrrot.obj\
 esgeom.obj\
 esgpartn.obj\
+eskeydrw.obj\
+eskeyfrm.obj\
 eslatten.obj\
 eslfatn.obj\
 eslfpnt.obj\
 eslfspot.obj\
 eslight.obj\
+eslimb.obj\
+eslimbsg.obj\
 eslindrw.obj\
 eslod.obj\
 eslpoint.obj\
@@ -94,7 +103,6 @@ esmatrix.obj\
 esmesh.obj\
 esmeshdr.obj\
 esmetabx.obj\
-esmisc.obj\
 espartik.obj\
 esplosn.obj\
 espntdrw.obj\
@@ -109,6 +117,8 @@ essystem.obj\
 estcache.obj\
 esterran.obj\
 esternex.obj\
+estrtop.obj\
+estoken.obj\
 estxfire.obj\
 estxtmfr.obj\
 estxtprc.obj\
@@ -120,7 +130,7 @@ esvector.obj
 # First target                                                             ³
 #ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
-all: setstden $(LIB).lib
+all: setstden $(LIB).pch $(LIB).lib
 
 #ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 # Standard make include                                                    ³
@@ -136,59 +146,38 @@ all: setstden $(LIB).lib
 
 #--- .c, .cpp, .asm setup in standard include ---
 
-#--- .asm
-{..\Build\}.asm{}.obj:
-   $(ASM) $(ASMOPTS) $<
-
-{..\Draw\}.asm{}.obj:
-   $(ASM) $(ASMOPTS) $<
-
-{..\Light\}.asm{}.obj:
-   $(ASM) $(ASMOPTS) $<
-
-{..\Math\}.asm{}.obj:
-   $(ASM) $(ASMOPTS) $<
-
-{..\Texture\}.asm{}.obj:
-   $(ASM) $(ASMOPTS) $<
-
-#--- .c
-{..\Build\}.c{}.obj:
-	$(CC) $(CCOPTIONS) $<
-
-{..\Draw\}.c{}.obj:
-	$(CC) $(CCOPTIONS) $<
-
-{..\Light\}.c{}.obj:
-	$(CC) $(CCOPTIONS) $<
-
-{..\Math\}.c{}.obj:
-	$(CC) $(CCOPTIONS) $<
-
-{..\Texture\}.c{}.obj:
-	$(CC) $(CCOPTIONS) $<
-
 #--- .cpp
+{..\}.cpp{}.obj:
+	$(CPP) $(CCOPTIONS) /Yuescher.hpp /Fp$(LIB).pch $<
+
 {..\Build\}.cpp{}.obj:
-	$(CPP) $(CCOPTIONS) $<
+        $(CPP) $(CCOPTIONS) /Yuescher.hpp /Fp$(LIB).pch $<
 
 {..\Draw\}.cpp{}.obj:
-	$(CPP) $(CCOPTIONS) $<
+        $(CPP) $(CCOPTIONS) /Yuescher.hpp /Fp$(LIB).pch $<
 
 {..\Light\}.cpp{}.obj:
-	$(CPP) $(CCOPTIONS) $<
+        $(CPP) $(CCOPTIONS) /Yuescher.hpp /Fp$(LIB).pch $<
 
 {..\Math\}.cpp{}.obj:
-	$(CPP) $(CCOPTIONS) $<
+        $(CPP) $(CCOPTIONS) /Yuescher.hpp /Fp$(LIB).pch $<
+
+{..\Motion\}.cpp{}.obj:
+        $(CPP) $(CCOPTIONS) /Yuescher.hpp /Fp$(LIB).pch $<
 
 {..\Texture\}.cpp{}.obj:
-	$(CPP) $(CCOPTIONS) $<
+        $(CPP) $(CCOPTIONS) /Yuescher.hpp /Fp$(LIB).pch $<
 
 #±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 #
 #                              Dependancies
 #
 #±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+
+$(LIB).pch : espch.obj
+
+espch.obj : ..\espch.cpp
+    $(CPP) /Ycescher.hpp /Fp$(LIB).pch $(CCOPTIONS) ..\$*.cpp
 
 #ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 # Library                                                                  ³
@@ -211,6 +200,7 @@ clean:
     del *.lst
     del *.ilk
     del *.pdb
+    del *.pch
 
 #°±² End of makefile ²±°
 

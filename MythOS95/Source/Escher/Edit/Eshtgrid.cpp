@@ -249,7 +249,7 @@ void TerrEditGrid::UpdateSurfaceColors()
             hgts_color[i] = bcolor;
             for(int j=10; j >= 0; j--)
             {
-                if (pDoc->htable[i] > Flx16(pDoc->color_bands[j]))
+                if (pDoc->htable[i] > float(pDoc->color_bands[j]))
                 {
                     hgts_color[i] = colors[j];
                     break;
@@ -537,7 +537,7 @@ void TerrEditGrid::assign_by_height(TerrEditDoc* pDoc,
 
 //ÄÄÄ Lookup height
     ulong surfshift = pDoc->surfshift;
-    Flx16 h = pDoc->htable[*(pDoc->hfield
+    float h = pDoc->htable[*(pDoc->hfield
                              + (dspos << surfshift)*(width << surfshift)
                              + (xspos << surfshift))];
 
@@ -617,7 +617,7 @@ void TerrEditGrid::assign_by_random_roll(TerrEditDoc* pDoc,
     if (a_elvcutoff)
     {
         ulong surfshift = pDoc->surfshift;
-        Flx16 h = pDoc->htable[*(pDoc->hfield
+        float h = pDoc->htable[*(pDoc->hfield
                                  + (dspos << surfshift)
                                    *(width << surfshift)
                                  + (xspos << surfshift))];
@@ -706,7 +706,7 @@ void TerrEditGrid::assign_by_angle(TerrEditDoc* pDoc,
     if (a_elvcutoff)
     {
         ulong surfshift = pDoc->surfshift;
-        Flx16 h = pDoc->htable[*(pDoc->hfield
+        float h = pDoc->htable[*(pDoc->hfield
                                  + (dspos << surfshift)
                                    *(width << surfshift)
                                  + (xspos << surfshift))];
@@ -722,7 +722,7 @@ void TerrEditGrid::assign_by_angle(TerrEditDoc* pDoc,
 
     nml += (dspos*width) + xspos;
 
-    Flx16 dot = *nml DOT EschVector(0,1,0);
+    float dot = *nml DOT EschVector(0,1,0);
 
 //ÄÄÄ Check to see if point fullfills criteria
     if (dot <= a_values[0] && dot > a_stop)
@@ -787,8 +787,8 @@ void TerrEditGrid::assign_by_angle(TerrEditDoc* pDoc,
 // TerrEditGrid - AssignByHeight                                            ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 void TerrEditGrid::AssignByHeight(ulong count,
-                                  ushort *tc, ushort *istxt, Flx16 *heights,
-                                  Flx16 hstop, BOOL area, BOOL preserve)
+                                  ushort *tc, ushort *istxt, float *heights,
+                                  float hstop, BOOL area, BOOL preserve)
 {
     if (!count)
         return;
@@ -844,7 +844,7 @@ void TerrEditGrid::AssignByHeight(ulong count,
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 void TerrEditGrid::AssignByRandomRoll(ulong count,
                                       ushort *tc, ushort *istxt, UINT *chances,
-                                      BOOL elvcutoff, Flx16 elvlow, Flx16 elvhigh,
+                                      BOOL elvcutoff, float elvlow, float elvhigh,
                                       BOOL area, BOOL preserve)
 {
     if (!count)
@@ -904,9 +904,9 @@ void TerrEditGrid::AssignByRandomRoll(ulong count,
 // TerrEditGrid - AssignByAngle                                             ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 void TerrEditGrid::AssignByAngle(ulong count,
-                                 ushort *tc, ushort *istxt, Flx16 *angles,
-                                 Flx16 astop,
-                                 BOOL elvcutoff, Flx16 elvlow, Flx16 elvhigh,
+                                 ushort *tc, ushort *istxt, float *angles,
+                                 float astop,
+                                 BOOL elvcutoff, float elvlow, float elvhigh,
                                  BOOL area, BOOL preserve)
 {
     if (!count)
@@ -916,7 +916,7 @@ void TerrEditGrid::AssignByAngle(ulong count,
     ASSERT(count <= 8);
 
     a_count = count;
-    a_stop = astop.cos();
+    a_stop = esch_cos(astop);
     a_preserve = preserve;
     a_elvcutoff = elvcutoff;
     a_elvlow = elvlow;
@@ -925,7 +925,7 @@ void TerrEditGrid::AssignByAngle(ulong count,
     {
         a_tc[i] = tc[i];
         a_istxt[i] = istxt[i];
-        a_values[i] = angles[i].cos();
+        a_values[i] = esch_cos(angles[i]);
     }
 
 //ÄÄ If we are doing all, run through all now...

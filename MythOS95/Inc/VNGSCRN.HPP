@@ -27,18 +27,47 @@
 //
 // vngscrn.hpp
 //
-//     The screen manager classes.
+// The screen manager classes.
 //
-//ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ Revision History ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
 
 #ifndef __VNGSCRN_HPP
 #define __VNGSCRN_HPP  1
 
-#if 0
-extern "C" {
-#include <glide.h>
-}
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//
+//                                Includes
+//
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+#include "ivory.hpp"
+
+#ifdef _OEMS
+
+#ifdef _3DFX
+    extern "C" {
+    #include <glide.h>
+    }
+#endif // _3DFX
+
+#ifdef _MSI
+    #include <msi95.h>
+#endif // _MSI
+
+#ifdef _CLEAR_3D
+    #include <wll3d.h>
+#endif // _CLEAR_3D
+#endif // _OEMS
+
+#include <ddraw.h>
+#include <d3d.h>
+
+#ifdef __WATCOMC__
+#pragma pack(1);
+#endif
+
+#ifdef _MSC_VER
+#pragma pack(push,1)
 #endif
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
@@ -47,13 +76,16 @@ extern "C" {
 //
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
-// Direct Draw management class.
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// Base screen manager
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 class VngoScreenManager
 {
 protected:
     dword   type_info;
     dword   lflags;
     BOOL    init_state;
+    BOOL    frame_is_open;
     RECT    damage_rect;
 
 public:
@@ -61,13 +93,17 @@ public:
     long    starty;
     long    width;
     long    height;
+    long    bit_depth;
+    char    hwName[12];
     VngoPal *pal;
 
-    enum { SCREENTYPE_DDRAW = 1,
-           SCREENTYPE_DIB = 2,
-           SCREENTYPE_D3D = 3,
-           SCREENTYPE_3DFX = 4,
-           SCREENTYPE_LAGUNA = 5};
+    enum { SCREENTYPE_DDRAW     = 1,
+           SCREENTYPE_DIB       = 2,
+           SCREENTYPE_D3D       = 3,
+           SCREENTYPE_3DFX      = 4,
+           SCREENTYPE_CLEAR3D   = 5,
+           SCREENTYPE_MSI       = 6,
+           SCREENTYPE_HYBRID    = 7};
 
     virtual ~VngoScreenManager() {};
 
@@ -107,9 +143,15 @@ public:
         damage_rect.left = 0;
         damage_rect.right = width;
     }
+    virtual void open_frame() {};
+    virtual void close_frame() {};
 
 };
 
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// Windows DIB screen manager
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 class VngoDIB : public VngoScreenManager
 {
 public:
@@ -121,21 +163,11 @@ public:
     HPALETTE            hpal;
     HWND                hWndClient;
 
+
     VngoDIB() {};
     VngoDIB(HWND hwndclient);
+
     virtual ~VngoDIB();
-
-    virtual void flip() {VngoScreenManager::flip();}
-
-};
-
-class VngoDIB8 : public VngoDIB
-{
-public:
-    VngoDIB8() {};
-    VngoDIB8(HWND hwndclient);
-
-    virtual ~VngoDIB8();
 
     virtual BOOL init();
     virtual void reinit(Flx16 brightness=0);
@@ -144,10 +176,12 @@ public:
     virtual void set_palette(VngoPal *p,Flx16 brightness=0);
     virtual void term();
     virtual void flip();
-
 };
 
 
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// DirectDraw screen manager
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 class VngoDirectDraw : public VngoScreenManager
 {
 public:
@@ -156,6 +190,7 @@ public:
     LPDIRECTDRAWSURFACE     FrontBuffer;
     LPDIRECTDRAWSURFACE     BackBuffer;
     LPDIRECTDRAWSURFACE     Primary;
+    LPDIRECTDRAWSURFACE     ZBuffer;
     VngoSurfaceManager      *SurfaceManager;
     LPDIRECTDRAWPALETTE     Palette;
     DDSURFACEDESC           ddsd;
@@ -176,7 +211,134 @@ public:
 
 };
 
-#if 0
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// Windows DIB with DirectDraw blit screen manager
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+class VngoHybrid : public VngoScreenManager
+{
+public:
+    HRESULT                 err;
+    LPDIRECTDRAW            dd;
+    LPDIRECTDRAWSURFACE     FrontBuffer;
+    LPDIRECTDRAWSURFACE     BackBuffer;
+    LPDIRECTDRAWSURFACE     Primary;
+    LPDIRECTDRAWPALETTE     Palette;
+    DDSURFACEDESC           ddsd;
+    HWND                    hWndClient;
+    BYTE                    *gmap;
+    int                     pitch;
+
+    VngoHybrid();
+    VngoHybrid(HWND hwndclient);
+    virtual ~VngoHybrid();
+
+    virtual BOOL init();
+    virtual void reinit(Flx16 brightness=0);
+    virtual BOOL set_mode(int width, int height, int bpp, VngoPal *pal, dword flags = 0);
+    virtual BOOL check_mode(int width, int height, int bpp);
+    virtual void flip();
+    virtual void set_palette(VngoPal *p,Flx16 brightness=0);
+    virtual void term();
+
+};
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// Direct3D screen manager
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+#ifdef _D3D
+class VngoDirect3D : public VngoScreenManager
+{
+public:
+    HRESULT                 err;
+    LPDIRECTDRAW            dd;
+    LPDIRECTDRAWSURFACE     FrontBuffer;
+    LPDIRECTDRAWSURFACE     BackBuffer;
+    LPDIRECTDRAWSURFACE     Primary;
+    LPDIRECTDRAWSURFACE     ZBuffer;
+    VngoSurfaceManager      *SurfaceManager;
+    LPDIRECTDRAWPALETTE     Palette;
+    DDSURFACEDESC           ddsd;
+    HFONT                   AppFont;
+    HWND                    hWndClient;
+    IDirect3D2              *d3d;
+    IDirect3DDevice2        *d3dDevice;
+    IDirect3DViewport2      *d3dViewport;
+    char                    *target;
+
+    VngoDirect3D() {};
+    VngoDirect3D(HWND hwndclient);
+    virtual ~VngoDirect3D();
+
+    virtual BOOL init();
+    virtual void reinit(Flx16 brightness=0);
+    virtual BOOL set_mode(int width, int height, int bpp, VngoPal *pal, dword flags = 0);
+    virtual BOOL check_mode(int width, int height, int bpp);
+    virtual void flip();
+    virtual void set_palette(VngoPal *p,Flx16 brightness=0);
+    virtual void term();
+    virtual void open_frame();
+    virtual void close_frame();
+
+};
+#endif
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// Cirrus Clear3D screen manager
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+#ifdef _OEMS
+#ifdef _CLEAR_3D
+
+#define CLEAR3D_MAX_BATCH_COPROCESSOR 25
+#define CLEAR3D_MAX_BATCH_PROCESSOR 1000
+
+class VngoClear3D : public VngoScreenManager
+{
+public:
+    HRESULT                 err;
+    LPDIRECTDRAW            dd;
+    LPDIRECTDRAWSURFACE     FrontBuffer;
+    LPDIRECTDRAWSURFACE     BackBuffer;
+    LPDIRECTDRAWSURFACE     Primary;
+    LPDIRECTDRAWSURFACE     ZBuffer;
+    VngoSurfaceManager      *SurfaceManager;
+    LPDIRECTDRAWPALETTE     Palette;
+    DDSURFACEDESC           ddsd;
+    HFONT                   AppFont;
+    HWND                    hWndClient;
+
+    int                     BatchCount;
+    ClrContext              *pContext;
+    LL_Batch                *pBatchRef;
+    LL_Batch                *pBatch;
+    IvoryArena              *VertPool;
+
+    VngoClear3D(HWND hwndclient);
+    virtual ~VngoClear3D();
+    virtual BOOL init();
+    virtual void reinit(Flx16 brightness);
+    virtual BOOL check_mode(int _width, int _height, int _bpp);
+    virtual BOOL set_mode(int _width, int _height, int _bpp, VngoPal *_pal,dword flags);
+    virtual void flip();
+    virtual void set_palette(VngoPal *p,Flx16 brightness);
+    virtual void open_frame();
+    virtual void close_frame();
+    virtual void flush();
+    virtual void run_dl();
+    virtual void wait_busy();
+    virtual void term();
+
+    LL_Batch *get_batch(int num_batches=1);
+};
+#endif _CLEAR_3D
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// 3D/fx Glide screen manager
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+#ifdef _3DFX
 class Vngo3Dfx : public VngoScreenManager
 {
     GrHwConfiguration       hwconfig;
@@ -186,30 +348,82 @@ public:
     Vngo3Dfx();
     virtual ~Vngo3Dfx();
 
-    virtual BOOL Init();
-    virtual void reinit(Flx16 brightness=0);
-    virtual BOOL SetMode(int width, int height, int bpp, VngoPal *pal, dword flags = 0);
-    virtual void Flip();
-    virtual void set_palette(VngoPal *p,Flx16 brightness=0);
-    virtual void Term();
+    virtual BOOL init();
+    virtual void reinit(Flx16 brightness=0){return;};
+    virtual BOOL set_mode(int width, int height, int bpp, VngoPal *pal, dword flags = 0);
+    virtual BOOL check_mode(int width, int height, int bpp) {return FALSE;}
+    virtual void flip();
+    virtual void set_palette(VngoPal *p,Flx16 brightness=0){return;};
+    virtual void term();
 };
-#endif
+#endif // _3DFX
 
-class VngoD3D : public VngoScreenManager
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// Matrox Simple Interface screen manager
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+#ifdef _MSI
+class VngoMSI : public VngoScreenManager
 {
+    WNDPROC lpWinProc;
 public:
-    VngoD3D();
-    virtual ~VngoD3D();
+    T_msiParameters     msiParms;
+    T_msiInfo           *pInfo;
+    QueryInfoStruct     BoardInfo;
 
-    virtual BOOL Init();
-    virtual void reinit(Flx16 brightness=0);
-    virtual BOOL SetMode(int width, int height, int bpp, VngoPal *pal, dword flags = 0);
-    virtual void Flip();
-    virtual void set_palette(VngoPal *p,Flx16 brightness=0);
-    virtual void Term();
+    VngoMSI();
+    VngoMSI(WNDPROC lpWindowProc);
+    virtual ~VngoMSI();
 
+    virtual BOOL init();
+    virtual BOOL init(WNDPROC lpWindowProc=NULL);
+    virtual void reinit(Flx16 brightness=0){return;};
+    virtual BOOL set_mode(int width, int height, int bpp, VngoPal *pal, dword flags = 0);
+    virtual BOOL check_mode(int width, int height, int bpp) {return FALSE;}
+    virtual void flip();
+    virtual void set_palette(VngoPal *p,Flx16 brightness=0){return;};
+    virtual void term();
+
+    virtual void open_frame()
+    {
+        if (!frame_is_open)
+        {
+            if (msiStartFrame(FALSE,0.f,0.f,0.f,FALSE,1.f))
+            {
+                frame_is_open = TRUE;
+            }
+        }
+    }
+    virtual void close_frame() { close_frame(0,0,1);}
+
+    int close_frame(BOOL dump,long frame,BOOL wait)
+    {
+        if (frame_is_open)
+        {
+            if (msiEndFrame(dump,frame,wait))
+            {
+                frame_is_open=FALSE;
+                return TRUE;
+            }
+            else
+                return FALSE;
+        }
+        else
+            return TRUE;
+    }
 };
+#endif // _MSI
+#endif // _OEMS
+
+#ifdef __WATCOMC__
+#pragma pack();
+#endif
+
+#ifdef _MSC_VER
+#pragma pack(pop)
+#endif
 
 #endif
+
 //°±² End of header - vngscrn.hpp ²±°
 

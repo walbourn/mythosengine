@@ -160,62 +160,62 @@ void EschGridPartition::draw()
     EschPoint   pos;
     cam->get_position(&pos);
 
-    Flx16 minx = pos.x;
-    Flx16 minz = pos.z;
-    Flx16 maxx = pos.x;
-    Flx16 maxz = pos.z;
+    float minx = pos.x;
+    float minz = pos.z;
+    float maxx = pos.x;
+    float maxz = pos.z;
 
     //ÄÄÄ Far points
-    Flx16 tx = flx_16mul16(cam->yon, cam->xsize);
-    Flx16 ty = flx_16mul16(cam->yon, cam->ysize);
+    float tx = cam->yon * cam->xsize;
+    float ty = cam->yon * cam->ysize;
 
     // -tx, ty
-    pos.x.flx = -tx.flx;
-    pos.y.flx = ty.flx;
-    pos.z.flx = cam->yon.flx;
+    pos.x = -tx;
+    pos.y = ty;
+    pos.z = cam->yon;
     pos.transform(&cam->eye.orient);
-    if (minx.flx > pos.x.flx)  minx.flx = pos.x.flx;
-    if (minz.flx > pos.z.flx)  minz.flx = pos.z.flx;
-    if (maxx.flx < pos.x.flx)  maxx.flx = pos.x.flx;
-    if (maxz.flx < pos.z.flx)  maxz.flx = pos.z.flx;
+    if (minx > pos.x)  minx = pos.x;
+    if (minz > pos.z)  minz = pos.z;
+    if (maxx < pos.x)  maxx = pos.x;
+    if (maxz < pos.z)  maxz = pos.z;
 
     // tx, ty
-    pos.x.flx = tx.flx;
-    pos.y.flx = ty.flx;
-    pos.z.flx = cam->yon.flx;
+    pos.x = tx;
+    pos.y = ty;
+    pos.z = cam->yon;
     pos.transform(&cam->eye.orient);
-    if (minx.flx > pos.x.flx)  minx.flx = pos.x.flx;
-    if (minz.flx > pos.z.flx)  minz.flx = pos.z.flx;
-    if (maxx.flx < pos.x.flx)  maxx.flx = pos.x.flx;
-    if (maxz.flx < pos.z.flx)  maxz.flx = pos.z.flx;
+    if (minx > pos.x)  minx = pos.x;
+    if (minz > pos.z)  minz = pos.z;
+    if (maxx < pos.x)  maxx = pos.x;
+    if (maxz < pos.z)  maxz = pos.z;
 
     // -tx, -ty
-    pos.x.flx = -tx.flx;
-    pos.y.flx = -ty.flx;
-    pos.z.flx = cam->yon.flx;
+    pos.x = -tx;
+    pos.y = -ty;
+    pos.z = cam->yon;
     pos.transform(&cam->eye.orient);
-    if (minx.flx > pos.x.flx)  minx.flx = pos.x.flx;
-    if (minz.flx > pos.z.flx)  minz.flx = pos.z.flx;
-    if (maxx.flx < pos.x.flx)  maxx.flx = pos.x.flx;
-    if (maxz.flx < pos.z.flx)  maxz.flx = pos.z.flx;
+    if (minx > pos.x)  minx = pos.x;
+    if (minz > pos.z)  minz = pos.z;
+    if (maxx < pos.x)  maxx = pos.x;
+    if (maxz < pos.z)  maxz = pos.z;
 
     // tx, -ty
-    pos.x.flx = tx.flx;
-    pos.y.flx = -ty.flx;
-    pos.z.flx = cam->yon.flx;
+    pos.x = tx;
+    pos.y = -ty;
+    pos.z = cam->yon;
     pos.transform(&cam->eye.orient);
-    if (minx.flx > pos.x.flx)  minx.flx = pos.x.flx;
-    if (minz.flx > pos.z.flx)  minz.flx = pos.z.flx;
-    if (maxx.flx < pos.x.flx)  maxx.flx = pos.x.flx;
-    if (maxz.flx < pos.z.flx)  maxz.flx = pos.z.flx;
+    if (minx > pos.x)  minx = pos.x;
+    if (minz > pos.z)  minz = pos.z;
+    if (maxx < pos.x)  maxx = pos.x;
+    if (maxz < pos.z)  maxz = pos.z;
 
     // minx,minz to maxx, maxz is now the bounding area on the XZ plane
 
 //ÄÄÄ Compute min/max points for region grid.
-    long sw = (long)((minx.flx - origin.x.flx) >> (sizeshift+16));
-    long d = (long)((minz.flx - origin.z.flx) >> (sizeshift+16));
-    long ew = (long)((maxx.flx - origin.x.flx) >> (sizeshift+16));
-    long ed = (long)((maxz.flx - origin.z.flx) >> (sizeshift+16));
+    long sw = long(minx - origin.x) >> sizeshift;
+    long d = long(minz - origin.z) >> sizeshift;
+    long ew = long(maxx - origin.x) >> sizeshift;
+    long ed = long(maxz - origin.z) >> sizeshift;
 
 //ÄÄÄ Draw all regions within min/max
     if (sw < width && d < depth && ew >= 0 && ed >= 0)
@@ -302,25 +302,25 @@ esch_error_codes EschGridPartition::pick(EschPicking *data) const
         }
 
         //ÄÄÄ Perform DDA through grid for pick vector
-        Flx16 x = data->start.x - origin.x;
-        Flx16 z = data->start.z - origin.z;
+        float x = data->start.x - origin.x;
+        float z = data->start.z - origin.z;
 
         assertMyth("EschGridPartition::pick assumes start inside grid...",
                    x >= 0 && z >= 0);
 
-        long w = (long)(x.flx >> (sizeshift+16));
-        long d = (long)(z.flx >> (sizeshift+16));
+        long w = long(x) >> sizeshift;
+        long d = long(z) >> sizeshift;
 
-        Flx16 dist = data->maxdist
-                     + EschVector (x - Flx16(w)*size,
+        float dist = data->maxdist
+                     + EschVector (x - float(w)*size,
                                    0,
-                                   z - Flx16(d)*size).magnitude();
+                                   z - float(d)*size).magnitude();
 
-        Flx16 ex = x + (dist * data->direction.i);
-        Flx16 ez = z + (dist * data->direction.k);
+        float ex = x + (dist * data->direction.i);
+        float ez = z + (dist * data->direction.k);
 
-        long ew = (long)(ex.flx >> (sizeshift+16));
-        long ed = (long)(ez.flx >> (sizeshift+16));
+        long ew = long(ex) >> sizeshift;
+        long ed = long(ez) >> sizeshift;
 
         long dw = ew - w;
         long dd = ed - d;
@@ -557,21 +557,21 @@ esch_error_codes EschGridPartition::collide(EschCollision *data) const
         }
 
         //ÄÄÄ Check only those regions the target sphere touches
-        Flx16 radius = data->sphere.radius;
+        float radius = data->sphere.radius;
 
         if (data->sphere.center.x + radius >= origin.x
             && data->sphere.center.z + radius >= origin.z)
         {
-            Flx16 x = data->sphere.center.x - origin.x;
-            Flx16 z = data->sphere.center.z - origin.z;
+            float x = data->sphere.center.x - origin.x;
+            float z = data->sphere.center.z - origin.z;
 
-            long w = (long)(x.flx >> (sizeshift+16));
-            long d = (long)(z.flx >> (sizeshift+16));
+            long w = long(x) >> sizeshift;
+            long d = long(z) >> sizeshift;
 
-            long x1 = (x.flx - radius.flx) >> (sizeshift+16);
-            long x2 = (x.flx + radius.flx) >> (sizeshift+16);
-            long z1 = (z.flx - radius.flx) >> (sizeshift+16);
-            long z2 = (z.flx + radius.flx) >> (sizeshift+16);
+            long x1 = long(x - radius) >> sizeshift;
+            long x2 = long(x + radius) >> sizeshift;
+            long z1 = long(z - radius) >> sizeshift;
+            long z2 = long(z + radius) >> sizeshift;
 
             long sw = (x1 < w) ? x1 : w;
             if (sw < 0)  sw = 0;
@@ -695,7 +695,7 @@ void EschGridPartition::release()
 //                                                                          ³
 // Initializes the partitioning.                                            ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-esch_error_codes EschGridPartition::init(ushort w, ushort d, Flx16 s,
+esch_error_codes EschGridPartition::init(ushort w, ushort d, float s,
                                          const EschPoint *o)
 {
     release();
@@ -710,7 +710,7 @@ esch_error_codes EschGridPartition::init(ushort w, ushort d, Flx16 s,
 
         for(ulong i=0; i < 16; i++, msk <<= 1)
         {
-            if (msk == (s.flx >> 16))
+            if (msk == long(s))
             {
                 size = s;
                 sizeshift = i;
@@ -763,19 +763,19 @@ esch_error_codes EschGridPartition::insert(EschDrawable *drw)
 
     if (sphere.center.x >= origin.x && sphere.center.z >= origin.z)
     {
-        Flx16 x = sphere.center.x - origin.x;
-        Flx16 z = sphere.center.z - origin.z;
+        float x = sphere.center.x - origin.x;
+        float z = sphere.center.z - origin.z;
 
-        long w = (long)(x.flx >> (sizeshift+16));
-        long d = (long)(z.flx >> (sizeshift+16));
+        long w = long(x) >> sizeshift;
+        long d = long(z) >> sizeshift;
 
         if (w < width && d < depth)
         {
             //ÄÄÄ Check to see if it crosses a region boundary
-            if ( ((x.flx + sphere.radius.flx) >> (sizeshift+16)) > w
-                 || ((x.flx - sphere.radius.flx) >> (sizeshift+16)) < w
-                 || ((z.flx + sphere.radius.flx) >> (sizeshift+16)) > d
-                 || ((z.flx - sphere.radius.flx) >> (sizeshift+16)) < d )
+            if ( (long(x + sphere.radius) >> sizeshift) > w
+                 || (long(x - sphere.radius) >> sizeshift) < w
+                 || (long(z + sphere.radius) >> sizeshift) > d
+                 || (long(z - sphere.radius) >> sizeshift) < d )
             {
                 // For now, put in global list...
                 n = 0;
@@ -887,20 +887,20 @@ esch_error_codes EschGridPartition::update(EschDrawable *drw)
 
         if (sphere.center.x >= origin.x && sphere.center.z >= origin.z)
         {
-            Flx16 x = sphere.center.x - origin.x;
-            Flx16 z = sphere.center.z - origin.z;
+            float x = sphere.center.x - origin.x;
+            float z = sphere.center.z - origin.z;
 
-            long w = (long)(x.flx >> (sizeshift+16));
-            long d = (long)(z.flx >> (sizeshift+16));
+            long w = long(x) >> sizeshift;
+            long d = long(z) >> sizeshift;
 
             if (w >= 0 && w < width
                 && d >= 0 && d < depth)
             {
                 //ÄÄÄ Check to see if it crosses a region boundary
-                if ( ((x.flx + sphere.radius.flx) >> (sizeshift+16)) > w
-                    || ((x.flx - sphere.radius.flx) >> (sizeshift+16)) < w
-                    || ((z.flx + sphere.radius.flx) >> (sizeshift+16)) > d
-                    || ((z.flx - sphere.radius.flx) >> (sizeshift+16)) < d )
+                if ( (long(x + sphere.radius) >> sizeshift) > w
+                    || (long(x - sphere.radius) >> sizeshift) < w
+                    || (long(z + sphere.radius) >> sizeshift) > d
+                    || (long(z - sphere.radius) >> sizeshift) < d )
                 {
                     // For now, put in global list...
                     n = 0;
@@ -986,19 +986,19 @@ esch_error_codes EschGridPartition::update(EschDrawable *drw)
 
                 if (sphere.center.x >= origin.x && sphere.center.z >= origin.z)
                 {
-                    Flx16 x = sphere.center.x - origin.x;
-                    Flx16 z = sphere.center.z - origin.z;
+                    float x = sphere.center.x - origin.x;
+                    float z = sphere.center.z - origin.z;
 
-                    long w = (long)(x.flx >> (sizeshift+16));
-                    long d = (long)(z.flx >> (sizeshift+16));
+                    long w = long(x) >> sizeshift;
+                    long d = long(z) >> sizeshift;
 
                     if (w < width && d < depth)
                     {
                         //ÄÄÄ Check to see if it crosses a region boundary
-                        if ( ((x.flx + sphere.radius.flx) >> (sizeshift+16)) > w
-                            || ((x.flx - sphere.radius.flx) >> (sizeshift+16)) < w
-                            || ((z.flx + sphere.radius.flx) >> (sizeshift+16)) > d
-                            || ((z.flx - sphere.radius.flx) >> (sizeshift+16)) < d )
+                        if ( (long(x + sphere.radius) >> sizeshift) > w
+                            || (long(x - sphere.radius) >> sizeshift) < w
+                            || (long(z + sphere.radius) >> sizeshift) > d
+                            || (long(z - sphere.radius) >> sizeshift) < d )
                         {
                             // For now, put in global list...
                             n = 0;

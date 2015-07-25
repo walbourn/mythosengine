@@ -47,12 +47,12 @@
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
-//                                 Data
+//                                Equates
 //
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
-ulong EschProposedTris=0;
-ulong EschDrawnTris=0;
+#define ES_MAX_VERTS    9
+#define ES_SNAP_VERTS
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
@@ -61,24 +61,24 @@ ulong EschDrawnTris=0;
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 extern "C" int esch_clip_to_frustrum (ulong *count, VngoPoint *pts,
-                                       VngoPoint *outpts,
-                                       EschCamera *cam, dword flags);
+                                      VngoPoint *outpts,
+                                      EschCamera *cam, dword flags);
 
-
-//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
-//                                Equates
+//                                 Data
 //
-//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 
-#define ES_MAX_VERTS 9
-#define ES_SNAP_VERTS
+ulong EschProposedTris=0;
+ulong EschDrawnTris=0;
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
 //                                 Code
 //
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // esch_clipdraw_face                                                       ³
 //                                                                          ³
@@ -87,18 +87,17 @@ extern "C" int esch_clip_to_frustrum (ulong *count, VngoPoint *pts,
 extern "C" void esch_clipdraw_face(ulong ind, dword ctrlfl)
 {
     ulong               i;
-    Flx16               tx, ty;
     dword               lclip_flags=0;
 
     // Static work-space
     static VngoPoint    *vpt[ES_MAX_VERTS];
     static dword        *vflags[ES_MAX_VERTS];
     static dword        flags[ES_MAX_VERTS];
-#ifdef ES_SNAP_VERTS
-    static VngoPoint    vpoly2[ES_MAX_VERTS]; 
-#else
-    static VngoPoint2   vpoly2[ES_MAX_VERTS];
-#endif
+//#ifdef ES_SNAP_VERTS
+//    static VngoPoint    vpoly2[ES_MAX_VERTS];
+//#else
+    static VngoPointF   vpoly2[ES_MAX_VERTS];
+//#endif
     static VngoPoint    vpoly[ES_MAX_VERTS];
     static VngoPoint    tvpoly[ES_MAX_VERTS];
 
@@ -126,14 +125,15 @@ extern "C" void esch_clipdraw_face(ulong ind, dword ctrlfl)
     vpt[1] = &EschCurrent->vpoints[face->b];
     vpt[2] = &EschCurrent->vpoints[face->c];
 
-    vpt[0]->u = face->u[0].flx;
-    vpt[0]->v = face->v[0].flx;
+//!!! Convert float to Flx16 for Van Gogh
+    vpt[0]->u = long(face->u[0] * 65536.0f);
+    vpt[0]->v = long(face->v[0] * 65536.0f);
 
-    vpt[1]->u = face->u[1].flx;
-    vpt[1]->v = face->v[1].flx;
+    vpt[1]->u = long(face->u[1] * 65536.0f);
+    vpt[1]->v = long(face->v[1] * 65536.0f);
 
-    vpt[2]->u = face->u[2].flx;
-    vpt[2]->v = face->v[2].flx;
+    vpt[2]->u = long(face->u[2] * 65536.0f);
+    vpt[2]->v = long(face->v[2] * 65536.0f);
 
     vflags[0]=&EschCurrent->vflags[face->a];
     vflags[1]=&EschCurrent->vflags[face->b];
@@ -141,14 +141,57 @@ extern "C" void esch_clipdraw_face(ulong ind, dword ctrlfl)
 
     ulong edge_count = 3;
 
-    //ÄÄÄ Figure out shade level (take minimum of shade levels for
-    //ÄÄÄ camera, drawable limits, and face limits)
+//ÄÄÄ Figure out shade level (take minimum of shade levels for
+//ÄÄÄ camera, drawable limits, and face limits)
 
     dword level = ( (cflags & current->limits)
                     | ((ctrlfl & ESCH_CDF_MUSTTXT) ? ESCH_CAM_TEXTURED : 0) )
                   & face->flags;
 
+//ÄÄÄ Perform Backface and/or Clip
+    if (ctrlfl & (ESCH_CDF_BFCULL | ESCH_CDF_CLIP))
+    {
+        for (i=0;i < edge_count;i++)
+        {
+            tvpoly[i] = *vpt[i]; // copy content to work space.
+            tvpoly[i].clr = vpt[0]->clr;
+            if (!(level & ESCH_CAM_SHADE_SMOOTH))
+                tvpoly[i].shade = vpt[0]->shade;
+        }
 
+        //ÄÄÄ Back Face Cull if needed.
+        if (ctrlfl & ESCH_CDF_BFCULL)
+        {
+            if (!esch_rotate_check(edge_count,tvpoly,cam))
+            {
+                return;
+            }
+        }
+
+        //ÄÄÄ Clip if needed
+        if (ctrlfl & ESCH_CDF_CLIP)
+        {
+            // call the new 3d-clip here.
+            int cstate = esch_clip_to_frustrum(&edge_count,tvpoly,vpoly,cam,level);
+            if (cstate == 1) // The poly was modified.
+            {
+                lclip_flags = 1;
+                for (i=0;i < edge_count;i++)
+                {
+                    vpt[i] = &vpoly[i];
+                    flags[i] = 0;
+                    vflags[i] = &flags[i];
+                }
+            }
+            else if (cstate == 0)   // it is fully clipped.
+            {
+                return;
+            }
+            // the return of -1 means that the poly was fully visible.
+        }
+    }
+
+#if 0
     for (i=0;i < edge_count;i++)
     {
         tvpoly[i] = *vpt[i]; // copy content to work space.
@@ -157,17 +200,14 @@ extern "C" void esch_clipdraw_face(ulong ind, dword ctrlfl)
             tvpoly[i].shade = vpt[0]->shade;
     }
 
-#if 1
-//ÄÄÄ Back Face Cull if needed.
+    //ÄÄÄ Back Face Cull if needed.
     if (ctrlfl & ESCH_CDF_BFCULL)
     {
         if (!esch_rotate_check(edge_count,tvpoly,cam))
             return;
     }
-#endif
 
-
-//ÄÄÄ Clip if needed
+    //ÄÄÄ Clip if needed
     if (ctrlfl & ESCH_CDF_CLIP)
     {
         // call the new 3d-clip here.
@@ -188,99 +228,78 @@ extern "C" void esch_clipdraw_face(ulong ind, dword ctrlfl)
         }
         // the return of -1 means that the poly was fully visible.
     }
+#endif
 
 //ÄÄÄ Setup local copies of frequently used data
     assertMyth("esch_clipdraw_face expects current context's camera to have a viewport",
                cam->vport != 0);
     VngoVport *vp=cam->vport;
 
-    Flx16 height(vp->vbuff.height >> 1);
-    Flx16 width(vp->vbuff.width >> 1);
+    long height(vp->vbuff.height >> 1);
+    long width(vp->vbuff.width >> 1);
 
-    tx = cam->xscalar;
-    ty = cam->yscalar;
-
+    float tx = cam->xscalar;
+    float ty = cam->yscalar;
 
 //ÄÄÄ Project vertecies
     for(i=0; i < edge_count; i++)
     {
         if (!(*vflags[i] & ESCH_VVERT_PROJECTED))
         {
+            float z = ((const EschPoint*)(vpt[i]))->z;
 
-            Flx16 z= Flx16(vpt[i]->wz,1);
+            float tv = (((const EschPoint*)(vpt[i]))->x * tx) / z;
 
-            Flx16 tv = flx_muldiv(Flx16(vpt[i]->wx,1),tx,z);
-#ifdef ES_SNAP_VERTS 
-            vpt[i]->x = (width.flx + tv.flx) >> 16;
+#ifdef ES_SNAP_VERTS
+            vpt[i]->x = long(tv) + width;
 #else
-            vpt[i]->x = (width.flx + tv.flx);
-#endif
-            tv = flx_muldiv(Flx16(vpt[i]->wy,1),ty,z);
-
-#ifdef ES_SNAP_VERTS 
-            vpt[i]->y = (height.flx - tv.flx) >> 16;
-#else
-            vpt[i]->y = (height.flx - tv.flx);
+            vpt[i]->x = long(tv * 65536.0f) + (width<<16);
 #endif
 
-            vpt[i]->w = flx_recip230(z);
+            tv = (((const EschPoint*)(vpt[i]))->y * ty) / z;
+
+#ifdef ES_SNAP_VERTS
+            vpt[i]->y = height - long(tv);
+#else
+            vpt[i]->y = (height<<16) - long(tv * 65536.0f);
+#endif
+
+            //!!! w is 2.30 fixed instead of float
+            vpt[i]->w = flx_recip230(Flx16(z));
 
             *vflags[i] |= ESCH_VVERT_PROJECTED;
         }
     }
-    int swidth = cam->vport->vbuff.width;
-    int sheight = cam->vport->vbuff.height;
+
+    int swidth = vp->vbuff.width;
+    int sheight = vp->vbuff.height;
 
     for(i=0; i < edge_count; i++)
     {
 //        vpoly2[i].wz     = vpt[i]->wz;
-        vpoly2[i].x      = vpt[i]->x;
-        vpoly2[i].y      = vpt[i]->y;
-        vpoly2[i].z      = vpt[i]->z;
-        vpoly2[i].shade  = vpt[i]->shade;
-        vpoly2[i].u      = vpt[i]->u;
-        vpoly2[i].v      = vpt[i]->v;
-        vpoly2[i].w      = vpt[i]->w;
+        vpoly2[i].x      = float(vpt[i]->x);
+        vpoly2[i].y      = float(vpt[i]->y);
+        vpoly2[i].z      = float(vpt[i]->z);
+        vpoly2[i].shade  = float(vpt[i]->shade);
+        vpoly2[i].u      = float(vpt[i]->u) / float(0x10000);
+        vpoly2[i].v      = float(vpt[i]->v) / float(0x10000);
+        
+        vpoly2[i].w      = float(vpt[i]->w / float(0x3fffffff));
 
         vpoly2[i].clr = EschCurrent->vpoints[face->a].clr;
 
         if (!(level & ESCH_CAM_SHADE_SMOOTH))
-            vpoly2[i].shade = EschCurrent->vpoints[face->a].shade;
+            vpoly2[i].shade = float(EschCurrent->vpoints[face->a].shade);
 
-#ifdef ES_SNAP_VERTS 
-        if (vpoly2[i].x < 0)
-            vpoly2[i].x = 0;
+        if (vpoly2[i].x < 0.f)
+            vpoly2[i].x = 0.f;
         else if (vpoly2[i].x >= swidth)
-            vpoly2[i].x = swidth-1;
-        if (vpoly2[i].y < 0)
-            vpoly2[i].y = 0;
+            vpoly2[i].x = float(swidth-1);
+        if (vpoly2[i].y < 0.f)
+            vpoly2[i].y = 0.f;
         else if (vpoly2[i].y >= sheight)
-            vpoly2[i].y = sheight - 1;
-#else
-        int tswidth = (swidth << 16) - 0x8080;
-        int tsheight = (sheight << 16) - 0x8080;
-
-        if (vpoly2[i].x < 0)
-            vpoly2[i].x = 0;
-        else if (vpoly2[i].x > tswidth)
-            vpoly2[i].x = tswidth;
-        if (vpoly2[i].y < 0)
-            vpoly2[i].y = 0;
-        else if (vpoly2[i].y > tsheight)
-            vpoly2[i].y = tsheight;
-#endif
+            vpoly2[i].y = float(sheight - 1);
     }
-
-#if 0
-//ÄÄÄ Back Face Cull if needed.
-    if (ctrlfl & ESCH_CDF_BFCULL)
-    {
-        if (!esch_rotate_check(edge_count,vpoly2))
-        {
-            return;
-        }
-    }
-#endif
 
 //ÄÄÄ Draw triangle
     assertMyth ("esch_clipdraw_face has invalid polygon before clipping",
@@ -297,12 +316,26 @@ extern "C" void esch_clipdraw_face(ulong ind, dword ctrlfl)
     if (ctrlfl & ESCH_CDF_INFINITEZ)
     {
         for (i=0; i < edge_count; i++)
-            vpoly2[i].z = 0xfffeffff;
+            vpoly2[i].z = 1.f;
+//            vpoly2[i].z = 0xfffeffff;
     }
     else
     {
         for (i=0; i < edge_count; i++)
-            vpoly2[i].z = flx_16mul16(Flx16(vpt[i]->wz,1),cam->z_factor).flx << 1;
+        {
+            vpoly2[i].z = (((const EschPoint*)(vpt[i]))->z * (cam->z_factor / float(0xffffffff)));
+//            if (vpt[i]->z)
+//            {
+//                vpoly2[i].w = 1.f / vpt[i]->z;
+//                if (vpoly2[i].w < 0.00000001f)
+//                    vpoly2[i].w = 0.00000001f;
+//            }
+//            else
+//                vpoly2[i].w = 1.f;
+        }
+
+//            vpoly2[i].z = ulong(((const EschPoint*)(vpt[i]))->z
+//                                * cam->z_factor);
     }
 
     EschDrawnTris++;
@@ -401,28 +434,29 @@ extern "C" void esch_clipdraw_face(ulong ind, dword ctrlfl)
     }
 
     //ÄÄÄ Draw wireframe
-    if (!lclip_flags)
+    if (level & ESCH_CAM_SHADE_WIRE)
     {
-        if ((cflags & ESCH_CAM_SHOW_ALL_LINES) || (face->flags & ESCH_FACE_ABLINE))
-            vp->line(&vpoly2[0],&vpoly2[1]);
-
-        if ((cflags & ESCH_CAM_SHOW_ALL_LINES) || (face->flags & ESCH_FACE_BCLINE))
-            vp->line(&vpoly2[1],&vpoly2[2]);
-
-        if ((cflags & ESCH_CAM_SHOW_ALL_LINES) || (face->flags & ESCH_FACE_CALINE))
-            vp->line(&vpoly2[2],&vpoly2[0]);
-    }
-    else
-    {
-        for (i=0;i < edge_count-1;i++)
+        if (!lclip_flags)
         {
-            vp->line(&vpoly2[i],&vpoly2[i+1]);
+            if ((cflags & ESCH_CAM_SHOW_ALL_LINES) || (face->flags & ESCH_FACE_ABLINE))
+                vp->line(&vpoly2[0],&vpoly2[1]);
+
+            if ((cflags & ESCH_CAM_SHOW_ALL_LINES) || (face->flags & ESCH_FACE_BCLINE))
+                vp->line(&vpoly2[1],&vpoly2[2]);
+
+            if ((cflags & ESCH_CAM_SHOW_ALL_LINES) || (face->flags & ESCH_FACE_CALINE))
+                vp->line(&vpoly2[2],&vpoly2[0]);
         }
-        vp->line(&vpoly2[i],&vpoly2[0]);
+        else
+        {
+            for (i=0;i < edge_count-1;i++)
+            {
+                vp->line(&vpoly2[i],&vpoly2[i+1]);
+            }
+            vp->line(&vpoly2[i],&vpoly2[0]);
+        }
     }
 }
-
-
 
 //°±² End of module - esdrface.cpp ²±°
 

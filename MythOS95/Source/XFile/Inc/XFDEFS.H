@@ -214,6 +214,7 @@ typedef enum _xf_error_codes
 #define XF_ATTRIB_ARCHIVE       0x20
 #define XF_ATTRIB_SHAREABLE     0x100
 
+
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 // Values for status
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -243,6 +244,12 @@ typedef enum _xf_error_codes
 // Misc
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 #define XFEB_VERSION    0x001
+
+#define XFBM_BPP_MONO   0
+#define XFBM_BPP_8BIT   1
+#define XFBM_BPP_15BIT  2
+#define XFBM_BPP_24BIT  3
+#define XFBM_BPP_32BIT  4
 
 #endif
 

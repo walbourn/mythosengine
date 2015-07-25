@@ -70,7 +70,9 @@ EschMultiFrameTexture::EschMultiFrameTexture() :
     EschTexture(),
     index(0),
     handle(0),
-    time(0)
+    time(0),
+    interval(0),
+    rate(0)
 {
     ttyp = ESCH_TXTT_MFRAME;
     max=0;
@@ -110,7 +112,18 @@ void EschMultiFrameTexture::release()
     else if (flags & ESCH_TXT_OWNSDATA)
     {
         if (handle)
+        {
+            VngoTexture *p = (VngoTexture*)ivory_hlock(handle);
+            if (p)
+            {
+                for(ushort i = 0; i < max; i++, p++)
+                {
+                    p->VngoTexture::~VngoTexture();
+                }
+                ivory_hunlock(handle);
+            }
             ivory_hfree(&handle);
+        }
         if (name && name != EschNoName)
             delete [] name;
         name=EschNoName;
@@ -189,7 +202,7 @@ void EschMultiFrameTexture::animate()
     if (flags & ESCH_MFTXT_TIMEBASED)
     {
         assertMyth("EschMultiFrameTexture::animate needs valid rate/interval",
-                   interval > 0 && rate > 0);
+                   interval >= 0 && rate > 0);
 
         time += interval;
         while (time > rate)

@@ -43,6 +43,8 @@
 //                                
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
+#include <windows.h>
+
 #include <conio.h>
 #include <iostream.h>
 #include <stdio.h>
@@ -65,12 +67,16 @@ STATIC void print_help(int full);
 
 void print_error(XFParseIFF &xp, char *s=0);
 
-extern void compile(char *);
-extern void bitmap(char *, XFBitmap *,
+extern void compile(char *name);
+extern void bitmap(char *name, XFBitmap *bm,
                    ushort width, ushort height,
                    ushort startx, ushort starty,
                    ushort spacer,
-                   byte startc, byte numc, byte cpr);
+                   byte startc, ushort numc, byte cpr);
+extern void enumerate_tt();
+extern void capture_tt(char *name, char *ttname,
+                       ushort width, ushort height,
+                       byte startc, ushort numc);
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
@@ -106,9 +112,11 @@ void main(int argc, char *argv[])
     ushort      width=0, height=0;
     ushort      startx=0, starty=0;
     ushort      spacer=0;
-    byte        startc=0, numc=0, cpr=0;
+    byte        startc=0, cpr=0;
+    ushort      numc=0;
 
     char        fontname[16];
+    char        ttname[32];
 
     char        path[XF_MAX_PATH];
 
@@ -125,6 +133,7 @@ void main(int argc, char *argv[])
     }
 
     *fontname=0;
+    *ttname=0;
 
 //ÄÄÄ Process arguments
     for(i=1, ifn=0, ofn=0; i < argc; i++)
@@ -173,7 +182,7 @@ void main(int argc, char *argv[])
                     break;
                 case 'C':
                 case 'c':
-                    numc = (byte) atoi(&argv[i][2]);
+                    numc = (ushort) atoi(&argv[i][2]);
                     break;
                 case 'R':
                 case 'r':
@@ -182,6 +191,33 @@ void main(int argc, char *argv[])
                 case 'I':
                 case 'i':
                     Flags |= FLAGS_INVERSE;
+                    break;
+                case 'E':
+                case 'e':
+                    enumerate_tt();
+                    break;
+                case 'B':
+                case 'b':
+                    Flags |= FLAGS_TT_BOLD;
+                    break;
+                case 'T':
+                case 't':
+                    Flags |= FLAGS_TT_ITALIC;
+                    break;
+                case 'U':
+                case 'u':
+                    Flags |= FLAGS_TT_UNDERLINE;
+                    break;
+                case 'K':
+                case 'k':
+                    Flags |= FLAGS_TT_STRIKEOUT;
+                    break;
+                case 'O':
+                case 'o':
+                    Flags |= FLAGS_TT_OEMCHARSET;
+                    break;
+                case '8':
+                    Flags |= FLAGS_TT_CP850;
                     break;
                 case '?':
                     print_help(1);
@@ -209,16 +245,16 @@ void main(int argc, char *argv[])
         return;
     }
 
-//ÄÄÄ Check to see if supplied file exists
-    if (!xf_exist(ifn))
-    {
-        cout << "±±± " << ifn << " does not exist\n";
-        return;
-    }
-
 //ÄÄÄ Check for valid input file extension
     if (strstr(ifn,".bdf"))
     {
+        //ÄÄÄ Check to see if supplied file exists
+        if (!xf_exist(ifn))
+        {
+            cout << "±±± " << ifn << " does not exist\n";
+            return;
+        }
+
         //ÄÄÄ Open source file
         if ((yyin=fopen(ifn,"r"))==NULL)
         {
@@ -233,6 +269,13 @@ void main(int argc, char *argv[])
              || strstr(ifn,".bmp")
              || strstr(ifn,".xeb"))
     {
+        //ÄÄÄ Check to see if supplied file exists
+        if (!xf_exist(ifn))
+        {
+            cout << "±±± " << ifn << " does not exist\n";
+            return;
+        }
+
         if (!width || !height || !startc || !numc)
         {
             cout << Util_name;
@@ -242,10 +285,10 @@ void main(int argc, char *argv[])
     }
     else
     {
-        cout << Util_name;
-        cout << "±±± Input file must be a .BDF, .BMP, .CEL, .LBM, .PCX, or .XEB file\n";
-        return;
+        // Assume it is a TrueType font name...
+        strncpy(ttname,ifn,sizeof(ttname));
     }
+
 
 //ÄÄÄ Setup output filename (uses input name if none given)
     if (ofn)
@@ -270,7 +313,15 @@ void main(int argc, char *argv[])
     if (!(Flags & FLAGS_QUIET))
     {
         cout << Util_name;
-        cout << "   Source: " << ifn << "    Output: " << ofn << "\n";
+
+        if (ifn)
+        {
+            cout << "   Source: " << ifn;
+        }
+        if (ofn)
+        {
+            cout << "   Output: " << ofn << "\n";
+        }
     }
 
 //ÄÄÄ Kill target file...
@@ -284,7 +335,13 @@ void main(int argc, char *argv[])
         return;
     }
 
-    if (strstr(ifn,".bdf"))
+    if (*ttname)
+    {
+        capture_tt(fontname, ttname,
+                   width,height,
+                   startc, (numc) ? numc : 256);
+    }
+    else if (strstr(ifn,".bdf"))
     {
         compile(fontname);
     }
@@ -354,24 +411,50 @@ STATIC void print_help(int full)
     cout << Util_name;
     cout << "                            " __DATE__ "   All Rights Reserved.\n";
     cout << "   Usage: gfont [-q] [-i] [-n fontname]\n";
+    cout << "\n";
+    cout << "                <filename.bdf> [<filename.iff>]\n";
+    cout << "     -or-\n";
+    cout << "                -w<number> -h<number>\n";
     cout << "                [-x<number>] [-y<number>] [-p<number>]\n";
-    cout << "                [-s<number>] [-c<number>] [-r<number>]\n";
+    cout << "                -s<number> -c<number> [-r<number>]\n";
     cout << "                <filename.xxx> [<filename.iff>]\n";
+    cout << "     -or-\n";
+    cout << "                [-e]\n";
+    cout << "                [-h<number>] [-w<number>]\n";
+    cout << "                [-s<number>] [-c<number>]\n";
+    cout << "                [-b] [-t] [-u] [-k] [-o] [-8]\n";
+    cout << "                <TrueType fontname> [<filename.iff>]\n";
     if (full)
     {
-        cout << "\n          xxx can be BDF, BMP, CEL, LBM, PCX, or XEB\n\n";
         cout << "          -q = Quiet mode.\n";
         cout << "          -i = Inverse font images.\n";
         cout << "          -n = Font identifer name (defaults to output file name base).\n";
         cout << "\n";
         cout << "          These only apply to converting from a bitmap file\n";
+        cout << "          (.xxx can be BMP, CEL, LBM, PCX, or XEB)\n\n";
+        cout << "          -w = Width of font cells (required)\n";
+        cout << "          -h = Height of font cells (required)\n";
         cout << "          -x = Starting offset in X of font cells\n";
         cout << "          -y = Starting offset in Y of font cells\n";
         cout << "          -p = Space between cells (in pixels, defaults to 0)\n";
-        cout << "          -s = Starting character number\n";
-        cout << "          -c = Number of characters defined\n";
-        cout << "          -r = Number of characters per row\n";
+        cout << "          -s = Starting character number (required)\n";
+        cout << "          -c = Number of characters defined (required)\n";
+        cout << "          -r = Characters per row\n";
+        cout << "\n";
+        cout << "          These only apply to capturing a TrueType font\n";
+        cout << "          -e = Enumerate installed TrueType fonts\n";
+        cout << "          -h = Height of font to capture\n";
+        cout << "          -w = Maximum width (defaults to 0 for no maximum)\n";
+        cout << "          -s = Starting character number (defaults to 0)\n";
+        cout << "          -c = Number of characters to capture (defaults to 256)\n";
+        cout << "          -b = Bold\n";
+        cout << "          -t = Italic\n";
+        cout << "          -u = Underline\n";
+        cout << "          -k = StrikeOut\n";
+        cout << "          -o = OEM Character Set\n";
+        cout << "          -8 = Capture German characters as Codepage 850 instead of 1232\n";
     }
+    cout << "\n";
 }
 
 
@@ -426,6 +509,7 @@ void print_error(XFParseIFF &xp, char *s)
    
     cout << "\n";
 }
+
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 // _charybdis_assert

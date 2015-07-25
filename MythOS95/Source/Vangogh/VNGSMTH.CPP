@@ -69,27 +69,9 @@
 //                                 Data
 //
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
-long RedDitherMatrix[4][4] =
-{
-    0 << 16,  8 << 16,  2 << 16, 10 << 16,
-   12 << 16,  4 << 16, 14 << 16,  6 << 16,
-    3 << 16, 11 << 16,  1 << 16,  9 << 16,
-   15 << 16,  7 << 16, 13 << 16,  5 << 16
-};
-long GreenDitherMatrix[4][4] =
-{
-   10 << 16,  6 << 16,  9 << 16,  5 << 16,
-    2 << 16, 14 << 16,  1 << 16, 13 << 16,
-    8 << 16,  4 << 16, 11 << 16,  7 << 16,
-    0 << 16, 12 << 16,  3 << 16, 15 << 16
-};
-long BlueDitherMatrix[4][4] =
-{
-    5 << 16, 13 << 16,  7 << 16, 15 << 16,
-    9 << 16,  1 << 16, 11 << 16,  3 << 16,
-    6 << 16,  6 << 16, 14 << 16, 12 << 16,
-   10 << 16,  2 << 16,  8 << 16,  0 << 16
-};
+extern long RedDitherMatrix[4][4];
+extern long GreenDitherMatrix[4][4];
+extern long BlueDitherMatrix[4][4];
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
@@ -104,6 +86,57 @@ void vngo_smooth_rect (VngoVport *vp,
     int prestepx=0,prestepy=0;
     int dy = pts[2].y - pts[0].y;
     int dx = pts[1].x - pts[0].x;
+
+    VngoColor24bit colors[4];
+    for (int corners=0;corners < 4;corners++)
+    {
+        if (pts[corners].clr & VNGO_COLOR_24BIT)
+        {
+            int t = pts[corners].clr;
+            colors[corners].r = t >> 16;
+            colors[corners].g = (t >> 8) & 0xff;
+            colors[corners].b = t & 0xff;
+        }
+        else if ( pts[corners].clr & VNGO_COLOR_16BIT)
+        {
+            int t = pts[corners].clr;
+            colors[corners].r = (t >> 8) & 0xf8;
+            colors[corners].g = (t >> 2) & 0xfc;
+            colors[corners].b = (t << 3) & 0xf8;
+        }
+        else if ( pts[corners].clr & VNGO_COLOR_15BIT)
+        {
+            int t = pts[corners].clr;
+            colors[corners].r = (t >> 7) & 0xf8;
+            colors[corners].g = (t >> 2) & 0xf8;
+            colors[corners].b = (t << 3) & 0xf8;
+        }
+        else
+        {
+            VngoShadePal *shade=(VngoShadePal*)vp->vbuff.pal->shd_pal;
+            int t;
+            if (vp->vbuff.pal->flags & VNGO_15BIT)
+            {
+                t = ((VngoShadePal16*)shade)->get_shaded_index(pts[corners].clr,pts[corners].shade);
+                colors[corners].r = (t >> 7) & 0xf8;
+                colors[corners].g = (t >> 2) & 0xf8;
+                colors[corners].b = (t << 3) & 0xf8;
+            }
+            else if (vp->vbuff.pal->flags & VNGO_16BIT)
+            {
+                t = ((VngoShadePal16*)shade)->get_shaded_index(pts[corners].clr,pts[corners].shade);
+                colors[corners].r = (t >> 8) & 0xf8;
+                colors[corners].g = (t >> 2) & 0xfc;
+                colors[corners].b = (t << 3) & 0xf8;
+            }
+            else
+            {
+                t = ((VngoShadePal8*)shade)->get_shaded_index(pts[corners].clr,pts[corners].shade);
+                colors[corners] = vp->vbuff.pal->get_RGB(t);
+            }
+        }
+
+    }
 
     if (dx < 1 && dy < 1)
     {
@@ -120,7 +153,7 @@ void vngo_smooth_rect (VngoVport *vp,
                     return;
                 }
             }
-            vp->pixel(pts);
+            vp->pixel(pts,&colors[0]);
         }
         return;
     }
@@ -186,13 +219,12 @@ void vngo_smooth_rect (VngoVport *vp,
     int lb,lbs,rb,rbs;
 
     VngoShadePal8 *tshd = (VngoShadePal8 *)lpal->shd_pal;
-    VngoColorShade8 *tc = &(*tshd)[0];
-    byte            *ct = &(tc->shl[0]);
 
-    VngoColor24bit lstart = lpal->get_RGB(ct[(pts[0].clr << 5) + (pts[0].shade >> 3)]);
-    VngoColor24bit lend   = lpal->get_RGB(ct[(pts[3].clr << 5) + (pts[3].shade >> 3)]);
-    VngoColor24bit rstart = lpal->get_RGB(ct[(pts[1].clr << 5) + (pts[1].shade >> 3)]);
-    VngoColor24bit rend   = lpal->get_RGB(ct[(pts[2].clr << 5) + (pts[2].shade >> 3)]);
+    VngoColor24bit lstart = colors[0];
+    VngoColor24bit lend   = colors[3];
+    VngoColor24bit rstart = colors[1];
+    VngoColor24bit rend   = colors[2];
+
 
     int tr,tg,tb;
     int trs,tgs,tbs;
@@ -341,10 +373,18 @@ void vngo_smooth_rect (VngoVport *vp,
             {
                 tpoint.x = xstart + j;
                 tpoint.y = ystart + i;
-//                VngoColor24bit tclr (tr >> 16,tg >> 16, tb >> 16);
-                VngoColor24bit tclr (byte((tr + RedDitherMatrix[tpoint.x&3][tpoint.y&3]) >> 16),
-                                     byte((tg + GreenDitherMatrix[tpoint.x&3][tpoint.y&3]) >> 16),
-                                     byte((tb + BlueDitherMatrix[tpoint.x&3][tpoint.y&3]) >> 16));
+                VngoColor24bit tclr;
+                int t;
+                if (tclr.r < 0)
+                    tclr.r = 0;
+                if (tclr.g < 0)
+                    tclr.g = 0;
+                if (tclr.b < 0)
+                    tclr.b = 0;
+
+                tclr.r = ((t = ((tr + RedDitherMatrix[tpoint.x&3][tpoint.y&3]) >> 16)) > 255) ? 255 : t;
+                tclr.g = ((t = ((tg + GreenDitherMatrix[tpoint.x&3][tpoint.y&3]) >> 16)) > 255) ? 255 : t;
+                tclr.b = ((t = ((tb + BlueDitherMatrix[tpoint.x&3][tpoint.y&3]) >> 16)) > 255) ? 255 : t;
 
                 vp->pixel(&tpoint,&tclr);
 
@@ -376,9 +416,21 @@ void vngo_smooth_rect (VngoVport *vp,
                 tpoint.x = xstart + j;
                 tpoint.y = ystart + i;
 
-                VngoColor24bit tclr (byte((tr + RedDitherMatrix[tpoint.x&3][tpoint.y&3]) >> 16),
-                                     byte((tg + GreenDitherMatrix[tpoint.x&3][tpoint.y&3]) >> 16),
-                                     byte((tb + BlueDitherMatrix[tpoint.x&3][tpoint.y&3]) >> 16));
+//                VngoColor24bit tclr (byte((tr + RedDitherMatrix[tpoint.x&3][tpoint.y&3]) >> 16),
+//                                     byte((tg + GreenDitherMatrix[tpoint.x&3][tpoint.y&3]) >> 16),
+//                                     byte((tb + BlueDitherMatrix[tpoint.x&3][tpoint.y&3]) >> 16));
+                VngoColor24bit tclr;
+                int t;
+                if (tclr.r < 0)
+                    tclr.r = 0;
+                if (tclr.g < 0)
+                    tclr.g = 0;
+                if (tclr.b < 0)
+                    tclr.b = 0;
+
+                tclr.r = ((t = ((tr + RedDitherMatrix[tpoint.x&3][tpoint.y&3]) >> 16)) > 255) ? 255 : t;
+                tclr.g = ((t = ((tg + GreenDitherMatrix[tpoint.x&3][tpoint.y&3]) >> 16)) > 255) ? 255 : t;
+                tclr.b = ((t = ((tb + BlueDitherMatrix[tpoint.x&3][tpoint.y&3]) >> 16)) > 255) ? 255 : t;
 
                 vp->pixel(&tpoint,&tclr);
 

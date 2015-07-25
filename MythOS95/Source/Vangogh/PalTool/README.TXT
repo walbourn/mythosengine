@@ -35,21 +35,13 @@
 
   Notes by: Chuck Walbourn
 
-  Last Updated: Feb 27, 1996
+  Last Updated: July 31, 1997
 
   Palette Tool - MFC Application
 
  Changes for this release --------------------------------------------------
 
-  o General cleanup and extention to the UI, including updated toolbar,
-    right-mouse menus, and new menu options.
-
-  o Added Palette and Properties dialogs and support for various
-    algorithmically generated palettes.
-
-  o Added Help/Help option to display help topic for PALTOOl in MythOS.HLP.
-
-  o Updated for new Van Gogh changes.
+  o General cleanup.
 
 *** END OF FILE ***
 

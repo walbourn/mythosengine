@@ -39,8 +39,13 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+#define __VNGVPDD8_HPP 1
+#define __VNGSCRN_HPP  1
+#define __ESTERRAN_HPP    1
+#define __VNGTXTR_HPP 1
 
 #define assert(a)
 
@@ -50,16 +55,17 @@
 #include <string.h>
 #include <math.h>
 
+#include "xfbitmap.hpp"
 #include "xfiff.hpp"
 
 #include "felix.hpp"
 
 #include <vngdefs.h>
+#include <vngpal.hpp>
 #include <vngstrct.hpp>
 
 #include <esdefs.h>
 #include <esmath.hpp>
-#include <estxture.hpp>
 #include <esgeom.hpp>
 #include <esfile.hpp>
 
@@ -70,6 +76,32 @@ extern "C"
 #include "pxp.h"
 #include "keys.h"
 }
+
+#include "estoken.hpp"
+
+
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//
+//                               Defines
+//
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+#define MTX_A       0
+#define MTX_B       1
+#define MTX_C       2
+#define MTX_D       3
+#define MTX_E       4
+#define MTX_F       5
+#define MTX_G       6
+#define MTX_H       7
+#define MTX_I       8
+#define MTX_J       9
+#define MTX_K       10
+#define MTX_L       11
+
+#define PI  3.1415926539
+#define RADS_2_DEGS(rad) ((180.0*rad)/PI)
+#define DEGS_2_RADS(deg) (PI*deg)/180.0
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
@@ -106,6 +138,7 @@ STATIC int export_spot_light(XFParseIFF &iff, ItemData *idata);
 STATIC int export_omni_light(XFParseIFF &iff, ItemData *idata);
 STATIC int export_mesh(XFParseIFF &iff, ItemData *idata,
                        XVData *verts, XFData *faces, VngoPal *pal);
+STATIC int export_keyframes();
 
 STATIC void compute_box_extents( ItemData *idata,
                                  XVData *verts,
@@ -125,6 +158,15 @@ STATIC int load_pal(VngoPal *pal,char *infile);
 
 STATIC int check_abort();
 
+STATIC float det_mtx(float *m);
+STATIC int inverse_mtx(float *m, float *inv);
+STATIC void concat_mtx(float *ina, float *b, float *res);
+
+STATIC void init_key_data();
+STATIC void capture_hierarchy_rotations();
+STATIC void process_child (int parent, int this_node, int this_keyframe);
+STATIC esch_limb_type get_token (char name[22]);
+
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
 //                                 Data
@@ -134,6 +176,13 @@ STATIC int check_abort();
 extern "C" char output_path[];
 extern "C" char output_name[];
 extern "C" char scene_name[];
+
+extern "C" char key_output_path[];
+extern "C" char key_output_name[];
+extern "C" long key_apnd;
+extern "C" long key_flags;
+extern "C" char key_mtyp[M_TYPE_LEN];
+extern "C" char key_ctyp[M_TYPE_LEN];
 
 extern "C" dword  object_flags;
 
@@ -145,6 +194,9 @@ extern "C" int extent_mode;
 extern "C" int material_mode;
 extern "C" int hierarchy_mode;
 extern "C" int orientation_mode;
+extern "C" int format_mode;
+
+extern "C" int keys_flag;
 
 extern "C" int count_camera;
 extern "C" int count_vectlights;
@@ -173,6 +225,43 @@ extern "C" int lgt_spotas;
 extern "C" int lgt_ambient;
 extern "C" int lgt_atten;
 
+
+// Global to this file
+struct keyframe
+{
+    char name[22];
+    char m_type[M_TYPE_LEN];
+    esch_limb_type l_type;
+    long frame_num;
+    float rotation[3];
+};
+
+struct delta
+{
+    float dx;
+    float dy;
+    float dz;
+};
+
+struct morph_keyframe
+{
+    char name[22];
+    char m_type[M_TYPE_LEN];
+    ulong k_type;
+    int frame_num;
+    int vert_count;
+    struct delta *deltas;
+};
+
+struct keyframe *key=0;
+struct morph_keyframe *morph_key=0;
+int actual_key_count;
+int actual_morph_count;
+int actual_morph_key_count;
+char dump[80];
+int next_key = 0;
+
+
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
 //                                 Code
@@ -192,6 +281,7 @@ extern "C" void export()
     VngoPal             *pal=0;
     XFParseIFF          iff;
     char                buff[128];
+    int i;
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Get initial data information, check for outputable data.
     switch(capture_setup())
@@ -211,7 +301,7 @@ extern "C" void export()
     if (output_path[strlen(output_path)-1] != '\\')
         strcat(buff,"\\");
     strcat(buff,output_name);
- 
+
     if (iff.create(buff,0))
     {
         sprintf(buff,"ERROR:  Cannot create output file, error #%d",
@@ -220,9 +310,9 @@ extern "C" void export()
         capture_terminate();
         return;
     }
- 
+
     gfx_stand_by("Exporting...");
- 
+
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Create Scene
     if (iff.newform(iff.makeid('E','S','E','N')))
     {
@@ -231,7 +321,7 @@ extern "C" void export()
         gfx_continu_line(buff);
         goto error_exit;
     }
- 
+
     {
         EschFileSceneHDR    sdata;
         memset(&sdata,0,sizeof(EschFileSceneHDR));
@@ -246,7 +336,7 @@ extern "C" void export()
         sdata.npointlights = count_pointlights;
         sdata.nattenlights = (ushort) count_attenlights;
         sdata.nspotlights = (ushort) count_spotlights;
- 
+
         if (iff.write(iff.makeid('H','D','R',' '),
                       &sdata,sizeof(sdata)))
         {
@@ -256,7 +346,17 @@ extern "C" void export()
             goto error_exit;
         }
     }
- 
+
+    if (keys_flag)
+    {
+        init_key_data();
+
+        if (key)
+        {
+            capture_hierarchy_rotations();
+        }
+    }
+
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Loop through captureable objects, exporting FORM for each
     while (!capture_get(&idata,&verts,&faces))
     {
@@ -265,10 +365,10 @@ extern "C" void export()
 
         if (check_abort())
             goto error_exit;
- 
+
         switch(idata->type)
         {
- 
+
 //ÄÄÄ Cameras ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
             case PXPCAMERA:
                 //ÄÄÄ Export camera
@@ -276,7 +376,7 @@ extern "C" void export()
                     goto error_exit;
                 break;
 
-//ÄÄÄ Lights ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ  
+//ÄÄÄ Lights ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
            case PXPAMBIENT:
                 //ÄÄÄ Export ambient light
                 if (lgt_ambient)
@@ -301,7 +401,7 @@ extern "C" void export()
                 }
                 break;
 
-//ÄÄÄ Meshs ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ 
+//ÄÄÄ Meshs ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
            case PXPMESH:
                 //ÄÄÄ Load palette, if not already loaded once
                 if (material_mode == 2 && mtl_format == 1 && !pal)
@@ -318,7 +418,7 @@ extern "C" void export()
                     if (mtl_palpath[strlen(mtl_palpath)-1] != '\\')
                         strcat(pname,"\\");
                     strcat(pname,mtl_palname);
-            
+
                     sprintf(buff,"Loading Van Gogh palette %s...",
                             pname);
                     gfx_prompt(buff);
@@ -337,6 +437,15 @@ extern "C" void export()
                     goto error_exit;
         }
     }
+
+    //ÄÄÄ Export keyframes
+    if (keys_flag && key)
+    {
+        if (export_keyframes())
+            goto error_exit;
+    }
+
+    gfx_put_hole();
 
     iff.leaveform();
 
@@ -372,33 +481,27 @@ error_exit:;
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 STATIC int export_camera(XFParseIFF &iff, ItemData *idata)
 {
-    EschFileCamera      cdata;
-    char                buff[128];
+    char    buff[128];
 
     sprintf(buff,"Exporting Camera: %s",idata->name);
     gfx_stand_by(buff);
     gfx_report(buff);
 
-    memset(&cdata,0,sizeof(EschFileCamera));
-    strncpy(cdata.name,idata->name,ESCH_MAX_NAME);
-    cdata.x = (Flx16) (idata->item.c.x * scale_3ds2esch);
-    cdata.y = (Flx16) (idata->item.c.z * scale_3ds2esch);
-    cdata.z = (Flx16) (idata->item.c.y * scale_3ds2esch);
-    cdata.fov = (Flx16) (2400.0 / idata->item.c.focal);
+//ÄÄÄ Compute look-at vector from bank and target point
 
     // Z rotate a [0 1 0] top vector for bank angle
     float tx=0;
     float ty=1;
     float tz=0;
 
-    float cs = cos(idata->item.c.bank);
-    float sn = sin(idata->item.c.bank);
+    float cs = esch_cos(idata->item.c.bank);
+    float sn = esch_sin(idata->item.c.bank);
 
     tx = tx*cs + ty*sn;
     ty = tx*sn + ty*cs;
 
     // Normalize top vector
-    float mag = sqrt(tx*tx + ty*ty + tz*tz);
+    float mag = esch_sqrt(tx*tx + ty*ty + tz*tz);
     tx /= mag;
     ty /= mag;
     tz /= mag;
@@ -410,7 +513,7 @@ STATIC int export_camera(XFParseIFF &iff, ItemData *idata)
     vr[2] = idata->item.c.ty - idata->item.c.y;
 
     // Normalize direction vector
-    mag = sqrt(vr[0]*vr[0] + vr[1]*vr[1] + vr[2]*vr[2]);
+    mag = esch_sqrt(vr[0]*vr[0] + vr[1]*vr[1] + vr[2]*vr[2]);
     vr[0] /= mag;
     vr[1] /= mag;
     vr[2] /= mag;
@@ -419,34 +522,79 @@ STATIC int export_camera(XFParseIFF &iff, ItemData *idata)
     //
     //     top = top - dir*(top DOT dir)
     //
+
     float dot = (tx*vr[0]) + (ty*vr[1]) + (tz*vr[2]);
     tx -= vr[0]*dot;
     ty -= vr[1]*dot;
     tz -= vr[2]*dot;
 
     // Normalize top vector again
-    mag = sqrt(tx*tx + ty*ty + tz*tz);
+    mag = esch_sqrt(tx*tx + ty*ty + tz*tz);
     tx /= mag;
     ty /= mag;
     tz /= mag;
 
-    // Store into struct
-    cdata.diri = (Flx16) vr[0];
-    cdata.dirj = (Flx16) vr[1];
-    cdata.dirk = (Flx16) vr[2];
-
-    cdata.topi = (Flx16) tx;
-    cdata.topj = (Flx16) ty;
-    cdata.topk = (Flx16) tz;
-
-    // Write chunk
-    if (iff.write(iff.makeid('E','C','A','M'),
-                &cdata,sizeof(EschFileCamera)))
+//ÄÄÄ Output
+    if (format_mode == 1)
     {
-        sprintf(buff,"ERROR:  Writing ECAM chunk, error #%d",
-            iff.error());
-        gfx_continu_line(buff);
-        return 1;
+        //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Floating-point
+        EschFileCamera      cdata;
+
+        memset(&cdata,0,sizeof(cdata));
+        strncpy(cdata.name,idata->name,ESCH_MAX_NAME);
+        cdata.x = idata->item.c.x * scale_3ds2esch;
+        cdata.y = idata->item.c.z * scale_3ds2esch;
+        cdata.z = idata->item.c.y * scale_3ds2esch;
+        cdata.fov = 2400.0f / idata->item.c.focal;
+
+        cdata.diri = vr[0];
+        cdata.dirj = vr[1];
+        cdata.dirk = vr[2];
+
+        cdata.topi = tx;
+        cdata.topj = ty;
+        cdata.topk = tz;
+
+        // Write chunk
+        if (iff.write(iff.makeid('E','C','A','1'),
+                      &cdata,sizeof(cdata)))
+        {
+            sprintf(buff,"ERROR:  Writing ECA1 (camera) chunk, error #%d",
+                    iff.error());
+            gfx_continu_line(buff);
+            return 1;
+        }
+
+    }
+    else
+    {
+        //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Fixed-point
+        EschFileCameraV1    cdata;
+
+        memset(&cdata,0,sizeof(cdata));
+        strncpy(cdata.name,idata->name,ESCH_MAX_NAME);
+        cdata.x = long(idata->item.c.x * scale_3ds2esch * 65536.0f);
+        cdata.y = long(idata->item.c.z * scale_3ds2esch * 65536.0f);
+        cdata.z = long(idata->item.c.y * scale_3ds2esch * 65536.0f);
+        cdata.fov = long((2400.0f / idata->item.c.focal) * 65536.0f);
+
+        cdata.diri = long(vr[0] * 65536.0f);
+        cdata.dirj = long(vr[1] * 65536.0f);
+        cdata.dirk = long(vr[2] * 65536.0f);
+
+        cdata.topi = long(tx * 65536.0f);
+        cdata.topj = long(ty * 65536.0f);
+        cdata.topk = long(tz * 65536.0f);
+
+        // Write chunk
+        if (iff.write(iff.makeid('E','C','A','M'),
+                      &cdata,sizeof(cdata)))
+        {
+            sprintf(buff,"ERROR:  Writing ECAM (camera) chunk, error #%d",
+                    iff.error());
+            gfx_continu_line(buff);
+            return 1;
+        }
     }
 
     return 0;
@@ -470,17 +618,17 @@ STATIC int export_ambient(XFParseIFF &iff, ItemData *idata)
     gfx_stand_by(buff);
     gfx_report(buff);
 
-    memset(&adata,0,sizeof(EschFileLightAmbi));
+    memset(&adata,0,sizeof(adata));
     strncpy(adata.name,idata->name,ESCH_MAX_NAME);
     ((VngoColor24bit*)&adata.color)->r = (byte)(idata->item.a.color.r*255.0);
     ((VngoColor24bit*)&adata.color)->g = (byte)(idata->item.a.color.g*255.0);
     ((VngoColor24bit*)&adata.color)->b = (byte)(idata->item.a.color.b*255.0);
 
     if (iff.write(iff.makeid('E','A','M','B'),
-                &adata,sizeof(EschFileLightAmbi)))
+                  &adata,sizeof(adata)))
     {
-        sprintf(buff,"ERROR:  Writing EAMB chunk, error #%d",
-            iff.error());
+        sprintf(buff,"ERROR:  Writing EAMB (ambient light) chunk, error #%d",
+                iff.error());
         gfx_continu_line(buff);
         return 1;
     }
@@ -505,98 +653,213 @@ STATIC int export_spot_light(XFParseIFF &iff, ItemData *idata)
 //ÄÄÄ Vector
     if (lgt_spotas == 3)
     {
-        EschFileLightVect   vdata;
-        memset(&vdata,0,sizeof(EschFileLightVect));
-        strncpy(vdata.name,idata->name,ESCH_MAX_NAME);
-
-        if (!(idata->item.l.flags & LIGHT_ON))
-            vdata.flags |= ESCH_LGT_OFF;
-
         vr[0] = idata->item.l.tx - idata->item.l.x;
         vr[1] = idata->item.l.tz - idata->item.l.z;
         vr[2] = idata->item.l.ty - idata->item.l.y;
-        mag = sqrt(vr[0]*vr[0] + vr[1]*vr[1] + vr[2]*vr[2]);
+        mag = esch_sqrt(vr[0]*vr[0] + vr[1]*vr[1] + vr[2]*vr[2]);
 
-        vdata.i = (Flx16) (vr[0] / mag);
-        vdata.j = (Flx16) (vr[1] / mag);
-        vdata.k = (Flx16) (vr[2] / mag);
+        vr[0] /= mag;
+        vr[1] /= mag;
+        vr[2] /= mag;
 
-        ((VngoColor24bit*)&vdata.color)->r = (byte)(idata->item.l.color.r
-                                                * idata->item.l.mult * 255.0);
-        ((VngoColor24bit*)&vdata.color)->g = (byte)(idata->item.l.color.g
-                                                * idata->item.l.mult * 255.0);
-        ((VngoColor24bit*)&vdata.color)->b = (byte)(idata->item.l.color.b
-                                                * idata->item.l.mult * 255.0);
-    
-        if (iff.write(iff.makeid('E','V','E','C'),
-                    &vdata,sizeof(EschFileLightVect)))
+        if (format_mode == 1)
         {
-            sprintf(buff,"ERROR:  Writing EVEC chunk, error #%d",
-                iff.error());
-            gfx_continu_line(buff);
-            return 1;
-        }
-    }
-//ÄÄÄ Fast or Spot
-    else // lgt_spot == 1 or lgt_spotas == 2
-    {
-        EschFileLightSpot  sdata;
-        memset(&sdata,0,sizeof(EschFileLightSpot));
-        strncpy(sdata.name,idata->name,ESCH_MAX_NAME);
+            //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Floating-point
+            EschFileLightVect   vdata;
 
-        if (!(idata->item.l.flags & LIGHT_ON))
-            sdata.flags |= ESCH_LGT_OFF;
+            memset(&vdata,0,sizeof(vdata));
+            strncpy(vdata.name,idata->name,ESCH_MAX_NAME);
 
-        sdata.x = (Flx16) (idata->item.l.x * scale_3ds2esch);
-        sdata.y = (Flx16) (idata->item.l.z * scale_3ds2esch);
-        sdata.z = (Flx16) (idata->item.l.y * scale_3ds2esch);
+            if (!(idata->item.l.flags & LIGHT_ON))
+                vdata.flags |= ESCH_LGT_OFF;
 
-        vr[0] = idata->item.l.tx - idata->item.l.x;
-        vr[1] = idata->item.l.tz - idata->item.l.z;
-        vr[2] = idata->item.l.ty - idata->item.l.y;
-        mag = sqrt(vr[0]*vr[0] + vr[1]*vr[1] + vr[2]*vr[2]);
+            vdata.i = vr[0];
+            vdata.j = vr[1];
+            vdata.k = vr[2];
 
-        sdata.i = (Flx16) (vr[0] / mag);
-        sdata.j = (Flx16) (vr[1] / mag);
-        sdata.k = (Flx16) (vr[2] / mag);
-
-        sdata.hotspot = (Flx16) idata->item.l.hotsize;
-        sdata.falloff = (Flx16) idata->item.l.fallsize;
-
-        ((VngoColor24bit*)&sdata.color)->r = (byte)(idata->item.l.color.r
-                                                * idata->item.l.mult * 255.0);
-        ((VngoColor24bit*)&sdata.color)->g = (byte)(idata->item.l.color.g
-                                                * idata->item.l.mult * 255.0);
-        ((VngoColor24bit*)&sdata.color)->b = (byte)(idata->item.l.color.b
-                                                * idata->item.l.mult * 255.0);
-
-        if (lgt_atten
-            && idata->item.l.flags & LIGHT_ATTEN)
-        {
-            sdata.flags |= ESCH_LGT_ATTEN;
-            sdata.inner = (Flx16) (idata->item.l.in_range * scale_3ds2esch);
-            sdata.outer = (Flx16) (idata->item.l.out_range * scale_3ds2esch);
-        }
-        else
-            sdata.outer = Flx16(0x1000);
-
-        if (lgt_spotas == 2)
-        {
-            if (iff.write(iff.makeid('E','S','P','T'),
-                        &sdata,sizeof(EschFileLightSpot)))
+            float mult = idata->item.l.mult;
+            if (mult < 0)
             {
-                sprintf(buff,"ERROR:  Writing ESPT chunk, error #%d",
-                    iff.error());
+                mult = -mult;
+                vdata.flags |= ESCH_LGT_DARK;
+            }
+
+            ((VngoColor24bit*)&vdata.color)->r = (byte)(idata->item.l.color.r
+                                                        * mult * 255.0);
+            ((VngoColor24bit*)&vdata.color)->g = (byte)(idata->item.l.color.g
+                                                        * mult * 255.0);
+            ((VngoColor24bit*)&vdata.color)->b = (byte)(idata->item.l.color.b
+                                                        * mult * 255.0);
+
+            if (iff.write(iff.makeid('E','V','E','1'),
+                          &vdata,sizeof(vdata)))
+            {
+                sprintf(buff,"ERROR:  Writing EVE1 (vector light) chunk, error #%d",
+                        iff.error());
                 gfx_continu_line(buff);
                 return 1;
             }
         }
         else
         {
-            if (iff.write(iff.makeid('E','F','S','P'),
-                        &sdata,sizeof(EschFileLightSpot)))
+            //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Fixed-point
+            EschFileLightVectV1 vdata;
+
+            memset(&vdata,0,sizeof(vdata));
+            strncpy(vdata.name,idata->name,ESCH_MAX_NAME);
+
+            if (!(idata->item.l.flags & LIGHT_ON))
+                vdata.flags |= ESCH_LGT_OFF;
+
+            vdata.i = long(vr[0] * 65536.0f);
+            vdata.j = long(vr[1] * 65536.0f);
+            vdata.k = long(vr[2] * 65536.0f);
+
+            float mult = idata->item.l.mult;
+            if (mult < 0)
             {
-                sprintf(buff,"ERROR:  Writing EFSP chunk, error #%d",
+                mult = -mult;
+                vdata.flags |= ESCH_LGT_DARK;
+            }
+
+            ((VngoColor24bit*)&vdata.color)->r = (byte)(idata->item.l.color.r
+                                                        * mult * 255.0);
+            ((VngoColor24bit*)&vdata.color)->g = (byte)(idata->item.l.color.g
+                                                        * mult * 255.0);
+            ((VngoColor24bit*)&vdata.color)->b = (byte)(idata->item.l.color.b
+                                                        * mult * 255.0);
+
+            if (iff.write(iff.makeid('E','V','E','C'),
+                          &vdata,sizeof(vdata)))
+            {
+                sprintf(buff,"ERROR:  Writing EVEC (vector light) chunk, error #%d",
+                        iff.error());
+                gfx_continu_line(buff);
+                return 1;
+            }
+        }
+    }
+//ÄÄÄ Fast or Spot
+    else // lgt_spot == 1 or lgt_spotas == 2
+    {
+        vr[0] = idata->item.l.tx - idata->item.l.x;
+        vr[1] = idata->item.l.tz - idata->item.l.z;
+        vr[2] = idata->item.l.ty - idata->item.l.y;
+        mag = esch_sqrt(vr[0]*vr[0] + vr[1]*vr[1] + vr[2]*vr[2]);
+
+        vr[0] /= mag;
+        vr[1] /= mag;
+        vr[2] /= mag;
+
+        if (format_mode == 1)
+        {
+            //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Floating-point
+            EschFileLightSpot  sdata;
+
+            memset(&sdata,0,sizeof(sdata));
+            strncpy(sdata.name,idata->name,ESCH_MAX_NAME);
+
+            if (!(idata->item.l.flags & LIGHT_ON))
+                sdata.flags |= ESCH_LGT_OFF;
+
+            sdata.x = idata->item.l.x * scale_3ds2esch;
+            sdata.y = idata->item.l.z * scale_3ds2esch;
+            sdata.z = idata->item.l.y * scale_3ds2esch;
+
+            sdata.i = vr[0];
+            sdata.j = vr[1];
+            sdata.k = vr[2];
+
+            float mult = idata->item.l.mult;
+            if (mult < 0)
+            {
+                mult = -mult;
+                sdata.flags |= ESCH_LGT_DARK;
+            }
+
+            ((VngoColor24bit*)&sdata.color)->r = (byte)(idata->item.l.color.r
+                                                        * mult * 255.0);
+            ((VngoColor24bit*)&sdata.color)->g = (byte)(idata->item.l.color.g
+                                                        * mult * 255.0);
+            ((VngoColor24bit*)&sdata.color)->b = (byte)(idata->item.l.color.b
+                                                        * mult * 255.0);
+
+            sdata.hotspot = idata->item.l.hotsize;
+            sdata.falloff = idata->item.l.fallsize;
+
+            if (lgt_atten
+                && (idata->item.l.flags & LIGHT_ATTEN))
+            {
+                sdata.flags |= ESCH_LGT_ATTEN;
+                sdata.inner = idata->item.l.in_range * scale_3ds2esch;
+                sdata.outer = idata->item.l.out_range * scale_3ds2esch;
+            }
+            else
+                sdata.outer = float(0x1000);
+
+            if (iff.write((lgt_spotas == 2) ? iff.makeid('E','S','P','1')
+                                            : iff.makeid('E','F','S','1'),
+                          &sdata,sizeof(sdata)))
+            {
+                sprintf(buff,"ERROR:  Writing %s (spot light) chunk, error #%d",
+                        (lgt_spotas == 2) ? "ESP1" : "EFS1",
+                        iff.error());
+                gfx_continu_line(buff);
+                return 1;
+            }
+        }
+        else
+        {
+            //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Fixed-point
+            EschFileLightSpotV1 sdata;
+
+            memset(&sdata,0,sizeof(sdata));
+            strncpy(sdata.name,idata->name,ESCH_MAX_NAME);
+
+            if (!(idata->item.l.flags & LIGHT_ON))
+                sdata.flags |= ESCH_LGT_OFF;
+
+            sdata.x = long(idata->item.l.x * scale_3ds2esch * 65536.0f);
+            sdata.y = long(idata->item.l.z * scale_3ds2esch * 65536.0f);
+            sdata.z = long(idata->item.l.y * scale_3ds2esch * 65536.0f);
+
+            sdata.i = long(vr[0] * 65536.0f);
+            sdata.j = long(vr[1] * 65536.0f);
+            sdata.k = long(vr[2] * 65536.0f);
+
+            float mult = idata->item.l.mult;
+            if (mult < 0)
+            {
+                mult = -mult;
+                sdata.flags |= ESCH_LGT_DARK;
+            }
+
+            ((VngoColor24bit*)&sdata.color)->r = (byte)(idata->item.l.color.r
+                                                        * mult * 255.0);
+            ((VngoColor24bit*)&sdata.color)->g = (byte)(idata->item.l.color.g
+                                                        * mult * 255.0);
+            ((VngoColor24bit*)&sdata.color)->b = (byte)(idata->item.l.color.b
+                                                        * mult * 255.0);
+
+            sdata.hotspot = long(idata->item.l.hotsize * 65536.0f);
+            sdata.falloff = long(idata->item.l.fallsize * 65536.0f);
+
+            if (lgt_atten
+                && (idata->item.l.flags & LIGHT_ATTEN))
+            {
+                sdata.flags |= ESCH_LGT_ATTEN;
+                sdata.inner = long(idata->item.l.in_range * scale_3ds2esch * 65536.0f);
+                sdata.outer = long(idata->item.l.out_range * scale_3ds2esch * 65536.0f);
+            }
+            else
+                sdata.outer = 0x1000 << 16;
+
+            if (iff.write((lgt_spotas == 2) ? iff.makeid('E','S','P','T')
+                                            : iff.makeid('E','F','S','P'),
+                          &sdata,sizeof(sdata)))
+            {
+                sprintf(buff,"ERROR:  Writing %s (spot light) chunk, error #%d",
+                    (lgt_spotas == 2) ? "ESPT" : "EFSP",
                     iff.error());
                 gfx_continu_line(buff);
                 return 1;
@@ -621,48 +884,92 @@ STATIC int export_omni_light(XFParseIFF &iff, ItemData *idata)
 
     //ÄÄÄ Attenuated version
     if (lgt_atten
-        && idata->item.l.flags & LIGHT_ATTEN)
+        && (idata->item.l.flags & LIGHT_ATTEN))
     {
-        EschFileLightAtten  adata;
-        memset(&adata,0,sizeof(EschFileLightAtten));
-        strncpy(adata.name,idata->name,ESCH_MAX_NAME);
-
-        adata.flags |= ESCH_LGT_ATTEN;
-        if (!(idata->item.l.flags & LIGHT_ON))
-            adata.flags |= ESCH_LGT_OFF;
-
-        adata.x = (Flx16) (idata->item.l.x * scale_3ds2esch);
-        adata.y = (Flx16) (idata->item.l.z * scale_3ds2esch);
-        adata.z = (Flx16) (idata->item.l.y * scale_3ds2esch);
-
-        adata.inner = (Flx16) (idata->item.l.in_range * scale_3ds2esch);
-        adata.outer = (Flx16) (idata->item.l.out_range * scale_3ds2esch);
-
-        ((VngoColor24bit*)&adata.color)->r = (byte)(idata->item.l.color.r
-                                                * idata->item.l.mult * 255.0);
-        ((VngoColor24bit*)&adata.color)->g = (byte)(idata->item.l.color.g
-                                                * idata->item.l.mult * 255.0);
-        ((VngoColor24bit*)&adata.color)->b = (byte)(idata->item.l.color.b
-                                                * idata->item.l.mult * 255.0);
-
-        if (lgt_omnias == 2)
+        if (format_mode == 1)
         {
-            if (iff.write(iff.makeid('E','A','T','N'),
-                        &adata,sizeof(EschFileLightAtten)))
+            //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Floating-point
+            EschFileLightAtten  adata;
+
+            memset(&adata,0,sizeof(adata));
+            strncpy(adata.name,idata->name,ESCH_MAX_NAME);
+
+            adata.flags |= ESCH_LGT_ATTEN;
+            if (!(idata->item.l.flags & LIGHT_ON))
+                adata.flags |= ESCH_LGT_OFF;
+
+            adata.x = idata->item.l.x * scale_3ds2esch;
+            adata.y = idata->item.l.z * scale_3ds2esch;
+            adata.z = idata->item.l.y * scale_3ds2esch;
+
+            adata.inner = idata->item.l.in_range * scale_3ds2esch;
+            adata.outer = idata->item.l.out_range * scale_3ds2esch;
+
+            float mult = idata->item.l.mult;
+            if (mult < 0)
             {
-                sprintf(buff,"ERROR:  Writing EATN chunk, error #%d",
-                    iff.error());
+                mult = -mult;
+                adata.flags |= ESCH_LGT_DARK;
+            }
+
+            ((VngoColor24bit*)&adata.color)->r = (byte)(idata->item.l.color.r
+                                                        * mult * 255.0);
+            ((VngoColor24bit*)&adata.color)->g = (byte)(idata->item.l.color.g
+                                                        * mult * 255.0);
+            ((VngoColor24bit*)&adata.color)->b = (byte)(idata->item.l.color.b
+                                                        * mult * 255.0);
+
+            if (iff.write((lgt_omnias == 2) ? iff.makeid('E','A','T','1')
+                                            : iff.makeid('E','F','A','1'),
+                          &adata,sizeof(adata)))
+            {
+                sprintf(buff,"ERROR:  Writing %s (atten light) chunk, error #%d",
+                        (lgt_omnias == 2) ? "EAT1" : "EFA1",
+                        iff.error());
                 gfx_continu_line(buff);
                 return 1;
             }
         }
-        else // lgt_omnias == 1
+        else
         {
-            if (iff.write(iff.makeid('E','F','A','T'),
-                        &adata,sizeof(EschFileLightAtten)))
+            //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Fixed-point
+            EschFileLightAttenV1    adata;
+
+            memset(&adata,0,sizeof(adata));
+            strncpy(adata.name,idata->name,ESCH_MAX_NAME);
+
+            adata.flags |= ESCH_LGT_ATTEN;
+            if (!(idata->item.l.flags & LIGHT_ON))
+                adata.flags |= ESCH_LGT_OFF;
+
+            adata.x = long(idata->item.l.x * scale_3ds2esch * 65536.0f);
+            adata.y = long(idata->item.l.z * scale_3ds2esch * 65536.0f);
+            adata.z = long(idata->item.l.y * scale_3ds2esch * 65536.0f);
+
+            adata.inner = long(idata->item.l.in_range * scale_3ds2esch * 65536.0f);
+            adata.outer = long(idata->item.l.out_range * scale_3ds2esch * 65536.0f);
+
+            float mult = idata->item.l.mult;
+            if (mult < 0)
             {
-                sprintf(buff,"ERROR:  Writing EFAT chunk, error #%d",
-                    iff.error());
+                mult = -mult;
+                adata.flags |= ESCH_LGT_DARK;
+            }
+
+            ((VngoColor24bit*)&adata.color)->r = (byte)(idata->item.l.color.r
+                                                        * mult * 255.0);
+            ((VngoColor24bit*)&adata.color)->g = (byte)(idata->item.l.color.g
+                                                        * mult * 255.0);
+            ((VngoColor24bit*)&adata.color)->b = (byte)(idata->item.l.color.b
+                                                        * mult * 255.0);
+
+            if (iff.write((lgt_omnias == 2) ? iff.makeid('E','A','T','N')
+                                            : iff.makeid('E','F','A','T'),
+                          &adata,sizeof(adata)))
+            {
+                sprintf(buff,"ERROR:  Writing %s (atten light) chunk, error #%d",
+                        (lgt_omnias == 2) ? "EATN" : "EFAT",
+                        iff.error());
                 gfx_continu_line(buff);
                 return 1;
             }
@@ -671,42 +978,82 @@ STATIC int export_omni_light(XFParseIFF &iff, ItemData *idata)
     //ÄÄÄ Nonattenuated version
     else
     {
-        EschFileLightPoint  pdata;
-        memset(&pdata,0,sizeof(EschFileLightPoint));
-        strncpy(pdata.name,idata->name,ESCH_MAX_NAME);
-
-        if (!(idata->item.l.flags & LIGHT_ON))
-            pdata.flags |= ESCH_LGT_OFF;
-
-        pdata.x = (Flx16) (idata->item.l.x * scale_3ds2esch);
-        pdata.y = (Flx16) (idata->item.l.z * scale_3ds2esch);
-        pdata.z = (Flx16) (idata->item.l.y * scale_3ds2esch);
-
-        ((VngoColor24bit*)&pdata.color)->r = (byte)(idata->item.l.color.r
-                                                * idata->item.l.mult * 255.0);
-        ((VngoColor24bit*)&pdata.color)->g = (byte)(idata->item.l.color.g
-                                                * idata->item.l.mult * 255.0);
-        ((VngoColor24bit*)&pdata.color)->b = (byte)(idata->item.l.color.b
-                                                * idata->item.l.mult * 255.0);
-
-        if (lgt_omnias == 2)
+        if (format_mode == 1)
         {
-            if (iff.write(iff.makeid('E','P','N','T'),
-                        &pdata,sizeof(EschFileLightPoint)))
+            //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Floating-point
+            EschFileLightPoint  pdata;
+
+            memset(&pdata,0,sizeof(pdata));
+            strncpy(pdata.name,idata->name,ESCH_MAX_NAME);
+
+            if (!(idata->item.l.flags & LIGHT_ON))
+                pdata.flags |= ESCH_LGT_OFF;
+
+            pdata.x = idata->item.l.x * scale_3ds2esch;
+            pdata.y = idata->item.l.z * scale_3ds2esch;
+            pdata.z = idata->item.l.y * scale_3ds2esch;
+
+            float mult = idata->item.l.mult;
+            if (mult < 0)
             {
-                sprintf(buff,"ERROR:  Writing EPNT chunk, error #%d",
-                    iff.error());
+                mult = -mult;
+                pdata.flags |= ESCH_LGT_DARK;
+            }
+
+            ((VngoColor24bit*)&pdata.color)->r = (byte)(idata->item.l.color.r
+                                                        * mult * 255.0);
+            ((VngoColor24bit*)&pdata.color)->g = (byte)(idata->item.l.color.g
+                                                        * mult * 255.0);
+            ((VngoColor24bit*)&pdata.color)->b = (byte)(idata->item.l.color.b
+                                                        * mult * 255.0);
+
+            if (iff.write((lgt_omnias == 2) ? iff.makeid('E','P','N','1')
+                                            : iff.makeid('E','F','P','1'),
+                          &pdata,sizeof(pdata)))
+            {
+                sprintf(buff,"ERROR:  Writing %s (point light) chunk, error #%d",
+                        (lgt_omnias == 2) ? "EPN1" : "EFP1",
+                        iff.error());
                 gfx_continu_line(buff);
                 return 1;
             }
         }
-        else // lgt_omnias == 1
+        else
         {
-            if (iff.write(iff.makeid('E','F','P','T'),
-                        &pdata,sizeof(EschFileLightPoint)))
+            //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Fixed-point
+            EschFileLightPointV1    pdata;
+
+            memset(&pdata,0,sizeof(pdata));
+            strncpy(pdata.name,idata->name,ESCH_MAX_NAME);
+
+            if (!(idata->item.l.flags & LIGHT_ON))
+                pdata.flags |= ESCH_LGT_OFF;
+
+            pdata.x = long(idata->item.l.x * scale_3ds2esch * 65536.0f);
+            pdata.y = long(idata->item.l.z * scale_3ds2esch * 65536.0f);
+            pdata.z = long(idata->item.l.y * scale_3ds2esch * 65536.0f);
+
+            float mult = idata->item.l.mult;
+            if (mult < 0)
             {
-                sprintf(buff,"ERROR:  Writing EFPT chunk, error #%d",
-                    iff.error());
+                mult = -mult;
+                pdata.flags |= ESCH_LGT_DARK;
+            }
+
+            ((VngoColor24bit*)&pdata.color)->r = (byte)(idata->item.l.color.r
+                                                        * mult * 255.0);
+            ((VngoColor24bit*)&pdata.color)->g = (byte)(idata->item.l.color.g
+                                                        * mult * 255.0);
+            ((VngoColor24bit*)&pdata.color)->b = (byte)(idata->item.l.color.b
+                                                        * mult * 255.0);
+
+            if (iff.write((lgt_omnias == 2) ? iff.makeid('E','P','N','T')
+                                            : iff.makeid('E','F','P','T'),
+                          &pdata,sizeof(pdata)))
+            {
+                sprintf(buff,"ERROR:  Writing %s (point light) chunk, error #%d",
+                        (lgt_omnias == 2) ? "EPNT" : "EFPT",
+                        iff.error());
                 gfx_continu_line(buff);
                 return 1;
             }
@@ -824,9 +1171,9 @@ STATIC int export_mesh(XFParseIFF &iff, ItemData *idata,
             // verticies as captured in get_verts
         }
 
-        mtx.mtx[ESCH_MTX_J] = (Flx16) (cx * scale_3ds2esch);
-        mtx.mtx[ESCH_MTX_K] = (Flx16) (cz * scale_3ds2esch);
-        mtx.mtx[ESCH_MTX_L] = (Flx16) (cy * scale_3ds2esch);
+        mtx.mtx[ESCH_MTX_J] = cx * scale_3ds2esch;
+        mtx.mtx[ESCH_MTX_K] = cz * scale_3ds2esch;
+        mtx.mtx[ESCH_MTX_L] = cy * scale_3ds2esch;
     }
     else if (hierarchy_mode == 2)
     {
@@ -863,7 +1210,7 @@ STATIC int export_mesh(XFParseIFF &iff, ItemData *idata,
         gfx_continu_line("Out of Memory!");
         return 1;
     }
-    
+
 //ÄÄÄ Compute Faces
     sprintf(buff,"Object '%s': Computing faces...",idata->name);
     gfx_set_gasgauge(buff,0,steps);
@@ -890,11 +1237,11 @@ STATIC int export_mesh(XFParseIFF &iff, ItemData *idata,
         efaces[i].c = faces[i].c;
 
         // Compute face normal (ABC is in counter-clockwise order)
-        v1[0] = verts[faces[i].a].x - verts[faces[i].b].x; 
+        v1[0] = verts[faces[i].a].x - verts[faces[i].b].x;
         v1[1] = verts[faces[i].a].z - verts[faces[i].b].z;
         v1[2] = verts[faces[i].a].y - verts[faces[i].b].y;
 
-        v2[0] = verts[faces[i].c].x - verts[faces[i].b].x; 
+        v2[0] = verts[faces[i].c].x - verts[faces[i].b].x;
         v2[1] = verts[faces[i].c].z - verts[faces[i].b].z;
         v2[2] = verts[faces[i].c].y - verts[faces[i].b].y;
 
@@ -903,27 +1250,27 @@ STATIC int export_mesh(XFParseIFF &iff, ItemData *idata,
         vr[1] = (v1[2] * v2[0]) - (v1[0] * v2[2]);
         vr[2] = (v1[0] * v2[1]) - (v1[1] * v2[0]);
 
-        float mag = sqrt(vr[0]*vr[0] + vr[1]*vr[1] + vr[2]*vr[2]);
+        float mag = esch_sqrt(vr[0]*vr[0] + vr[1]*vr[1] + vr[2]*vr[2]);
 
-        efaces[i].normal.i = (Flx16) (vr[0] / mag);
-        efaces[i].normal.j = (Flx16) (vr[1] / mag);
-        efaces[i].normal.k = (Flx16) (vr[2] / mag);
+        efaces[i].normal.i = vr[0] / mag;
+        efaces[i].normal.j = vr[1] / mag;
+        efaces[i].normal.k = vr[2] / mag;
 
         // Fill out vertex mapping parameters
         if (idata->item.m.tverts)
         {
-            efaces[i].u[0] = (Flx16) (verts[faces[i].a].u);
-            efaces[i].u[1] = (Flx16) (verts[faces[i].b].u);
-            efaces[i].u[2] = (Flx16) (verts[faces[i].c].u);
+            efaces[i].u[0] = verts[faces[i].a].u;
+            efaces[i].u[1] = verts[faces[i].b].u;
+            efaces[i].u[2] = verts[faces[i].c].u;
 
             // 3DS Uses the opposite definition of v, so we
             // have to negate it to result in right-side up
             // images.
 
-            efaces[i].v[0] = (Flx16) (-verts[faces[i].a].v);
-            efaces[i].v[1] = (Flx16) (-verts[faces[i].b].v);
-            efaces[i].v[2] = (Flx16) (-verts[faces[i].c].v);
-        }   
+            efaces[i].v[0] = -verts[faces[i].a].v;
+            efaces[i].v[1] = -verts[faces[i].b].v;
+            efaces[i].v[2] = -verts[faces[i].c].v;
+        }
 
         efaces[i].flags |= ESCH_FACE_WIRE
                            | ESCH_FACE_SOLID;
@@ -998,7 +1345,7 @@ STATIC int export_mesh(XFParseIFF &iff, ItemData *idata,
                 char name[ESCH_MAX_NAME+1];
                 strncpy(name,mtl->name,ESCH_MAX_NAME);
                 name[ESCH_MAX_NAME] = 0;
-            
+
                 sprintf(buff,"%s: Opacity maps without Texture1 maps ignored",
                         name);
                 gfx_prompt(buff);
@@ -1023,7 +1370,7 @@ STATIC int export_mesh(XFParseIFF &iff, ItemData *idata,
                             break;
                         }
                     }
-                    
+
                     if (!nmtls || (j >= nmtls))
                     {
                         strncpy(emtls[nmtls].name,mtl->name,ESCH_MAX_NAME);
@@ -1103,9 +1450,9 @@ STATIC int export_mesh(XFParseIFF &iff, ItemData *idata,
             tz -= cz;
         }
 
-        everts[i].x = (Flx16) (tx * scale_3ds2esch);
-        everts[i].y = (Flx16) (tz * scale_3ds2esch);
-        everts[i].z = (Flx16) (ty * scale_3ds2esch);
+        everts[i].x = tx * scale_3ds2esch;
+        everts[i].y = tz * scale_3ds2esch;
+        everts[i].z = ty * scale_3ds2esch;
 
         vr[0]=vr[1]=vr[2]=0.0;
         for(int j=0; j < idata->item.m.faces; j++)
@@ -1120,10 +1467,10 @@ STATIC int export_mesh(XFParseIFF &iff, ItemData *idata,
             }
         }
 
-        float mag = sqrt(vr[0]*vr[0] + vr[1]*vr[1] + vr[2]*vr[2]);
-        everts[i].normal.i = (Flx16) (vr[0] / mag);
-        everts[i].normal.j = (Flx16) (vr[1] / mag);
-        everts[i].normal.k = (Flx16) (vr[2] / mag);
+        float mag = esch_sqrt(vr[0]*vr[0] + vr[1]*vr[1] + vr[2]*vr[2]);
+        everts[i].normal.i = vr[0] / mag;
+        everts[i].normal.j = vr[1] / mag;
+        everts[i].normal.k = vr[2] / mag;
     }
 
 //ÄÄÄ Output Data
@@ -1139,16 +1486,36 @@ STATIC int export_mesh(XFParseIFF &iff, ItemData *idata,
     }
 
     // Matrix
-    if ((orientation_mode == 2)
-         && iff.write(iff.makeid('M','T','R','X'),&mtx,sizeof(mtx)))
+    if (orientation_mode == 2)
     {
-        sprintf(buff,"ERROR:  Writing MTRX chunk, error #%d", iff.error());
-        gfx_continu_line(buff);
-        goto error_exit;
+        if (format_mode == 1)
+        {
+            if (iff.write(iff.makeid('M','T','R','1'),&mtx,sizeof(mtx)))
+            {
+                sprintf(buff,"ERROR:  Writing MTR1 (matrix) chunk, error #%d", iff.error());
+                gfx_continu_line(buff);
+                goto error_exit;
+            }
+        }
+        else
+        {
+            EschMatrixV1    v1;
+
+            for(int i=0; i < ESCH_MTX_NUM; i++)
+                v1.mtx[i] = long(mtx.mtx[i] * 65536.0f);
+
+            if (iff.write(iff.makeid('M','T','R','X'),&v1,sizeof(v1)))
+            {
+                sprintf(buff,"ERROR:  Writing MTRX (matrix) chunk, error #%d", iff.error());
+                gfx_continu_line(buff);
+                goto error_exit;
+            }
+        }
     }
 
     // Hierarchy
-    if (hierarchy_mode == 2 && *ehier.parent
+    if (hierarchy_mode == 2
+        && *ehier.parent
         && iff.write(iff.makeid('H','I','E','R'),&ehier,sizeof(ehier)))
     {
         sprintf(buff,"ERROR:  Writing HIER chunk, error #%d", iff.error());
@@ -1157,20 +1524,81 @@ STATIC int export_mesh(XFParseIFF &iff, ItemData *idata,
     }
 
     // Extents
-    if (iff.write(iff.makeid('E','X','N','T'),&mextents,sizeof(mextents)))
+    if (format_mode == 1)
     {
-        sprintf(buff,"ERROR:  Writing EXNT chunk, error #%d", iff.error());
-        gfx_continu_line(buff);
-        goto error_exit;
+        if (iff.write(iff.makeid('E','X','N','1'),&mextents,sizeof(mextents)))
+        {
+            sprintf(buff,"ERROR:  Writing EXN1 (extents) chunk, error #%d", iff.error());
+            gfx_continu_line(buff);
+            goto error_exit;
+        }
+    }
+    else
+    {
+        EschFileMeshEXNTV1  v1;
+
+        memset(&v1,0,sizeof(v1));
+        v1.cenx          = long(mextents.cenx * 65536.0f);
+        v1.ceny          = long(mextents.ceny * 65536.0f);
+        v1.cenz          = long(mextents.cenz * 65536.0f);
+        v1.extent_radius = long(mextents.extent_radius * 65536.0f);
+        v1.minx          = long(mextents.minx * 65536.0f);
+        v1.miny          = long(mextents.miny * 65536.0f);
+        v1.minz          = long(mextents.minz * 65536.0f);
+        v1.maxx          = long(mextents.maxx * 65536.0f);
+        v1.maxy          = long(mextents.maxy * 65536.0f);
+        v1.maxz          = long(mextents.maxz * 65536.0f);
+
+        if (iff.write(iff.makeid('E','X','N','T'),&v1,sizeof(v1)))
+        {
+            sprintf(buff,"ERROR:  Writing EXNT (extents) chunk, error #%d", iff.error());
+            gfx_continu_line(buff);
+            goto error_exit;
+        }
     }
 
     // Verticies
-    if (iff.write(iff.makeid('V','E','R','T'),everts,
-                  idata->item.m.verts * sizeof(EschVertex)))
+    if (format_mode == 1)
     {
-        sprintf(buff,"ERROR:  Writing VERT chunk, error #%d", iff.error());
-        gfx_continu_line(buff);
-        goto error_exit;
+        if (iff.write(iff.makeid('V','E','R','1'),everts,
+                      idata->item.m.verts * sizeof(EschVertex)))
+        {
+            sprintf(buff,"ERROR:  Writing VER1 (vertex) chunk, error #%d", iff.error());
+            gfx_continu_line(buff);
+            goto error_exit;
+        }
+    }
+    else
+    {
+        EschVertexV1 *temp = new EschVertexV1[idata->item.m.verts];
+        if (!temp)
+        {
+            gfx_continu_line("Out of Memory!");
+            return 1;
+        }
+
+        EschVertex *tptr = everts;
+        EschVertexV1 *tmpptr = temp;
+        for(ulong i=0; i < idata->item.m.verts; i++, tptr++, tmpptr++)
+        {
+            tmpptr->x = long(tptr->x * 65536.0f);
+            tmpptr->y = long(tptr->y * 65536.0f);
+            tmpptr->z = long(tptr->z * 65536.0f);
+            tmpptr->normal.i = long(tptr->normal.i * 65536.0f);
+            tmpptr->normal.j = long(tptr->normal.j * 65536.0f);
+            tmpptr->normal.k = long(tptr->normal.k * 65536.0f);
+        }
+
+        if (iff.write(iff.makeid('V','E','R','T'),temp,
+                      idata->item.m.verts * sizeof(EschVertexV1)))
+        {
+            sprintf(buff,"ERROR:  Writing VERT (vertex) chunk, error #%d", iff.error());
+            gfx_continu_line(buff);
+            delete [] temp;
+            goto error_exit;
+        }
+
+        delete [] temp;
     }
 
     // Material names
@@ -1183,12 +1611,56 @@ STATIC int export_mesh(XFParseIFF &iff, ItemData *idata,
     }
 
     // Faces
-    if (iff.write(iff.makeid('F','A','C','E'), efaces,
-                  idata->item.m.faces * sizeof(EschFace)))
+    if (format_mode == 1)
     {
-        sprintf(buff,"ERROR:  Writing FACE chunk, error #%d", iff.error());
-        gfx_continu_line(buff);
-        goto error_exit;
+        if (iff.write(iff.makeid('F','A','C','1'), efaces,
+                      idata->item.m.faces * sizeof(EschFace)))
+        {
+            sprintf(buff,"ERROR:  Writing FAC1 (face) chunk, error #%d", iff.error());
+            gfx_continu_line(buff);
+            goto error_exit;
+        }
+    }
+    else
+    {
+        EschFaceV1 *temp = new EschFaceV1[idata->item.m.faces];
+        if (!temp)
+        {
+            gfx_continu_line("Out of Memory!");
+            return 1;
+        }
+
+        EschFace *tptr = efaces;
+        EschFaceV1 *tmpptr = temp;
+        for(ulong i=0; i < idata->item.m.faces; i++, tptr++, tmpptr++)
+        {
+            tmpptr->flags = tptr->flags;
+            tmpptr->a = tptr->a;
+            tmpptr->b = tptr->b;
+            tmpptr->c = tptr->c;
+            tmpptr->txt = tptr->txt;
+            tmpptr->u[0] = long(tptr->u[0] * 65536.0f);
+            tmpptr->u[1] = long(tptr->u[1] * 65536.0f);
+            tmpptr->u[2] = long(tptr->u[2] * 65536.0f);
+            tmpptr->v[0] = long(tptr->v[0] * 65536.0f);
+            tmpptr->v[1] = long(tptr->v[1] * 65536.0f);
+            tmpptr->v[2] = long(tptr->v[2] * 65536.0f);
+            tmpptr->color = tptr->color;
+            tmpptr->normal.i = long(tptr->normal.i * 65536.0f);
+            tmpptr->normal.j = long(tptr->normal.j * 65536.0f);
+            tmpptr->normal.k = long(tptr->normal.k * 65536.0f);
+        }
+
+        if (iff.write(iff.makeid('F','A','C','E'), temp,
+                      idata->item.m.faces * sizeof(EschFaceV1)))
+        {
+            sprintf(buff,"ERROR:  Writing FACE (face) chunk, error #%d", iff.error());
+            gfx_continu_line(buff);
+            delete [] temp;
+            goto error_exit;
+        }
+
+        delete [] temp;
     }
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Materials
@@ -1255,7 +1727,7 @@ STATIC int export_mesh(XFParseIFF &iff, ItemData *idata,
                     gfx_continu_line(buff);
                     goto error_exit;
                 }
-                
+
                 raster_pix = (byte*)malloc(info.width * info.height);
                 if (!raster_pix
                     || pj_raster_bind_ram(&raster, info.width, info.height, raster_pix))
@@ -1458,7 +1930,7 @@ STATIC int export_mesh(XFParseIFF &iff, ItemData *idata,
                             byte *ptr = body;
                             for(int k=0; k < mtlhdr.xsize*mtlhdr.ysize; k++)
                             {
-                                if (tptr->r <= 10 
+                                if (tptr->r <= 10
                                     && tptr->g <= 10
                                     && tptr->b <= 10)
                                 {
@@ -1686,7 +2158,7 @@ STATIC void compute_box_extents( ItemData *idata,
     cx = idata->item.m.matrix[3][0];
     cy = idata->item.m.matrix[3][1];
     cz = idata->item.m.matrix[3][2];
-            
+
     // Adjust center for pivot points, if any
     if (coord_mode == 1
         && capture_getpivot(idata, &tx, &ty, &tz))
@@ -1697,13 +2169,13 @@ STATIC void compute_box_extents( ItemData *idata,
     }
 
     long nverts = idata->item.m.verts;
-            
+
     for(i=0; i < nverts; i++)
     {
         tx = verts[i].x;
         ty = verts[i].y;
         tz = verts[i].z;
-        
+
          // Handle adjustment to center, if not exporting world coords.
         if (coord_mode == 1)
         {
@@ -1711,7 +2183,7 @@ STATIC void compute_box_extents( ItemData *idata,
             ty -= cy;
             tz -= cz;
         }
-            
+
         if (tx < xmin)
         {
             xmin = tx;
@@ -1739,12 +2211,12 @@ STATIC void compute_box_extents( ItemData *idata,
     }
 
 //ÄÄÄ Convert result to mextent structure
-    mextents->minx = (Flx16) (xmin * scale_3ds2esch);
-    mextents->miny = (Flx16) (zmin * scale_3ds2esch);
-    mextents->minz = (Flx16) (ymin * scale_3ds2esch);
-    mextents->maxx = (Flx16) (xmax * scale_3ds2esch);
-    mextents->maxy = (Flx16) (zmax * scale_3ds2esch);
-    mextents->maxz = (Flx16) (ymax * scale_3ds2esch);
+    mextents->minx = xmin * scale_3ds2esch;
+    mextents->miny = zmin * scale_3ds2esch;
+    mextents->minz = ymin * scale_3ds2esch;
+    mextents->maxx = xmax * scale_3ds2esch;
+    mextents->maxy = zmax * scale_3ds2esch;
+    mextents->maxz = ymax * scale_3ds2esch;
 }
 
 
@@ -1765,7 +2237,7 @@ STATIC void compute_quick_extents(  ItemData *idata,
     double rad, rad_sq;
     double xspan, yspan, zspan, maxspan;
     double old_to_p, old_to_p_sq, old_to_new;
-    struct FloatPoint   xmin, xmax, 
+    struct FloatPoint   xmin, xmax,
                         ymin, ymax,
                         zmin, zmax,
                         dia1, dia2,
@@ -1786,7 +2258,7 @@ STATIC void compute_quick_extents(  ItemData *idata,
 
     for(i=0; i < nverts; i++)
     {
-        v=&verts[i];    
+        v=&verts[i];
 
         if (v->x < xmin.x)
         {
@@ -1813,7 +2285,7 @@ STATIC void compute_quick_extents(  ItemData *idata,
             ymax.y = v->z;
             ymax.z = v->y;
         }
-        
+
         if (v->y < zmin.z)
         {
             zmin.x = v->x;
@@ -1875,7 +2347,7 @@ STATIC void compute_quick_extents(  ItemData *idata,
 
     for(i=0; i < idata->item.m.verts; i++)
     {
-        v=&verts[i];    
+        v=&verts[i];
 
         dx = v->x - cen.x;
         dy = v->z - cen.y;
@@ -1910,7 +2382,7 @@ STATIC void compute_quick_extents(  ItemData *idata,
         cx = idata->item.m.matrix[3][0];
         cy = idata->item.m.matrix[3][1];
         cz = idata->item.m.matrix[3][2];
-            
+
         // Adjust center for pivot points, if any
         if (capture_getpivot(idata, &tx, &ty, &tz))
         {
@@ -1923,12 +2395,12 @@ STATIC void compute_quick_extents(  ItemData *idata,
         cen.y -= cz;
         cen.z -= cy;
     }
-   
+
 //ÄÄÄ Convert result to mextent structure
-    mextents->cenx = (Flx16) (cen.x * scale_3ds2esch);
-    mextents->ceny = (Flx16) (cen.y * scale_3ds2esch);
-    mextents->cenz = (Flx16) (cen.z * scale_3ds2esch);
-    mextents->extent_radius = (Flx16) (rad * scale_3ds2esch);
+    mextents->cenx = cen.x * scale_3ds2esch;
+    mextents->ceny = cen.y * scale_3ds2esch;
+    mextents->cenz = cen.z * scale_3ds2esch;
+    mextents->extent_radius = rad * scale_3ds2esch;
 }
 
 
@@ -1961,7 +2433,7 @@ STATIC int compute_optimal_extents(  ItemData *idata,
             return 1;
 
         gfx_set_gasgauge("",i,nverts);
-        v=&verts[i];    
+        v=&verts[i];
 
         for(j=i+1; j < nverts; j++)
         {
@@ -2004,7 +2476,7 @@ STATIC int compute_optimal_extents(  ItemData *idata,
         cx = idata->item.m.matrix[3][0];
         cy = idata->item.m.matrix[3][1];
         cz = idata->item.m.matrix[3][2];
-        
+
         // Adjust center for pivot points, if any
         if (capture_getpivot(idata, &tx, &ty, &tz))
         {
@@ -2017,12 +2489,12 @@ STATIC int compute_optimal_extents(  ItemData *idata,
         cen.y -= cz;
         cen.z -= cy;
     }
-   
+
 //ÄÄÄ Convert result to mextent structure
-    mextents->cenx = (Flx16) (cen.x * scale_3ds2esch);
-    mextents->ceny = (Flx16) (cen.y * scale_3ds2esch);
-    mextents->cenz = (Flx16) (cen.z * scale_3ds2esch);
-    mextents->extent_radius = (Flx16) ((sqrt(max_sq) / 2.0) * scale_3ds2esch);
+    mextents->cenx = cen.x * scale_3ds2esch;
+    mextents->ceny = cen.y * scale_3ds2esch;
+    mextents->cenz = cen.z * scale_3ds2esch;
+    mextents->extent_radius =  (esch_sqrt(max_sq) / 2.0) * scale_3ds2esch;
 
     return 0;
 }
@@ -2039,7 +2511,7 @@ STATIC ulong compress_rle_8bpp(ushort w, ushort h, byte *data, byte *cdata)
 {
     ulong   size = w*h;
     ulong   count = 0;
-    
+
     byte *wptr = cdata;
     byte *ptr = data;
 
@@ -2115,7 +2587,7 @@ STATIC ulong compress_rle_24bpp(ushort w, ushort h, byte *data, byte *cdata)
 {
     ulong   size = w*h*3;
     ulong   count = 0;
-    
+
     byte *wptr = cdata;
     byte *ptr = data;
 
@@ -2199,7 +2671,7 @@ STATIC ulong compress_rle_32bpp(ushort w, ushort h, byte *data, byte *cdata)
 {
     ulong   size = w*h*4;
     ulong   count = 0;
-    
+
     byte *wptr = cdata;
     dword *ptr = (dword*)data;
 
@@ -2274,6 +2746,206 @@ STATIC ulong compress_rle_32bpp(ushort w, ushort h, byte *data, byte *cdata)
 
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°° KeyFrames °°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// export_keyframes                                                         ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+STATIC int export_keyframes()
+{
+    int         i;
+    char        buff[128];
+    XFParseIFF  iff;
+
+    sprintf(buff,"Exporting All Keyframes");
+    gfx_show_gasgauge(buff);
+    gfx_report(buff);
+
+//ÄÄÄ Open the key_output file
+    strcpy (buff,key_output_path);
+    if (key_output_path[strlen(key_output_path)-1] != '\\')
+    {
+        strcat(buff,"\\");
+    }
+    strcpy (buff, key_output_name);
+
+    if (key_apnd)
+    {
+        if (iff.open(buff,XF_OPEN_WRITE))
+        {
+            sprintf (buff, "ERROR: Cannot open output file, error #%d",
+                     iff.error());
+            gfx_continu_line(buff);
+            capture_terminate();
+            return 1;
+        }
+        // this "should" put the file pointer to the end of the file
+        iff.seekchunk(0);
+    }
+    else
+    {
+        if (iff.create(buff,0))
+        {
+            sprintf (buff, "ERROR: Cannot create output file, error #%d",
+                     iff.error());
+            gfx_continu_line(buff);
+            capture_terminate();
+            return 1;
+        }
+    }
+
+    if (iff.newform(iff.makeid('K','E','Y','F')))
+    {
+        sprintf(buff,"ERROR:  Cannot create form KEYF, error #%d",
+                iff.error());
+        gfx_continu_line(buff);
+        return 1;
+    }
+
+//ÄÄÄ Create keyframe form
+    EschFileKeyframeHeader header;
+    memset(&header,0,sizeof(header));
+
+    strncpy ((char *)&header.m_type, (char *)&key[0].m_type, M_TYPE_LEN);
+    header.flags = key_flags;
+
+    // find the largest keyframe number
+    header.key_depth = -1;
+    for (i=0; i<actual_key_count; i++)
+    {
+        if ((long)key[i].frame_num > (long)header.key_depth)
+        {
+            header.key_depth = key[i].frame_num;
+        }
+    }
+    // increment for the 0 frame.
+    header.key_depth ++;
+
+
+    if (header.flags & ESCH_KEYFRAME_CHAINING)
+    {
+        strcpy (header.chain, key_ctyp);
+    }
+    else
+    {
+        memset (header.chain,2,ESCH_MAX_NAME);
+    }
+
+    if (iff.write(iff.makeid('H','D','R',' '),&header, sizeof (header)))
+    {
+        sprintf(buff,"ERROR:  Writing HDR chunk, error #%d", iff.error());
+        gfx_continu_line(buff);
+        return 1;
+    }
+
+//ÄÄÄ Write keyframe chunks
+    for (i=0; i < actual_key_count; i++)
+    {
+        if (format_mode == 1)
+        {
+            // rotations are in float
+            EschFileKeyframe    out_key;
+
+            out_key.k_type = get_token(key[i].name);
+            out_key.frame_num = key[i].frame_num;
+
+            for (int j=0; j<3; j++)
+            {
+                if (key[i].rotation[j] > -0.0001 && key[i].rotation[j] < 0.0001)
+                {
+                    out_key.rotation[j] = 0.0f;
+                }
+                else
+                {
+                    out_key.rotation[j] = (float)key[i].rotation[j];
+                }
+            }
+
+            if (iff.write(iff.makeid('K','E','Y','1'),&out_key,sizeof(out_key)))
+            {
+                sprintf(buff,"ERROR:  Writing KEY1 chunk %d, error #%d", i,
+                        iff.error());
+                gfx_continu_line(buff);
+                return 1;
+            }
+        }
+        else
+        {
+            EschFileKeyframeV1  out_key;
+
+            out_key.k_type = get_token(key[i].name);
+            out_key.frame_num = key[i].frame_num;
+            for (int j=0; j<3; j++)
+            {
+                out_key.rotation[j] = long(key[i].rotation[j] * 65536.0f);
+            }
+
+            if (iff.write(iff.makeid('K','E','Y',' '),&out_key,sizeof (out_key)))
+            {
+                sprintf(buff,"ERROR:  Writing KEY chunk %d, error #%d", i,
+                        iff.error());
+                gfx_continu_line(buff);
+                return 1;
+            }
+        }
+    }
+
+    iff.leaveform();
+
+    return 0;
+}
+
+esch_token esch_token_list[ESCH_KEYFRAME_TOKEN_COUNT] =
+{
+    "NONE",ESCH_KEYFRAME_NONE,
+    "FOOTL",(ESCH_KEYFRAME_FOOT|ESCH_KEYFRAME_LEADING|ESCH_KEYFRAME_LEG)  ,
+    "FOOTR",(ESCH_KEYFRAME_FOOT|ESCH_KEYFRAME_TRAILING|ESCH_KEYFRAME_LEG),
+    "CALFL",(ESCH_KEYFRAME_SHIN|ESCH_KEYFRAME_LEADING|ESCH_KEYFRAME_LEG ) ,
+    "CALFR",(ESCH_KEYFRAME_SHIN|ESCH_KEYFRAME_TRAILING|ESCH_KEYFRAME_LEG),
+    "THIGHL",(ESCH_KEYFRAME_THIGH|ESCH_KEYFRAME_LEADING|ESCH_KEYFRAME_LEG ) ,
+    "THIGHR",(ESCH_KEYFRAME_THIGH|ESCH_KEYFRAME_TRAILING|ESCH_KEYFRAME_LEG),
+    "U_ARML",(ESCH_KEYFRAME_UPARM|ESCH_KEYFRAME_LEADING|ESCH_KEYFRAME_ARM) ,
+    "U_ARMR",(ESCH_KEYFRAME_UPARM|ESCH_KEYFRAME_TRAILING|ESCH_KEYFRAME_ARM),
+    "F_ARML",(ESCH_KEYFRAME_FOREARM|ESCH_KEYFRAME_LEADING|ESCH_KEYFRAME_ARM) ,
+    "F_ARMR",(ESCH_KEYFRAME_FOREARM|ESCH_KEYFRAME_TRAILING|ESCH_KEYFRAME_ARM),
+    "UARML",(ESCH_KEYFRAME_UPARM|ESCH_KEYFRAME_LEADING|ESCH_KEYFRAME_ARM) ,
+    "UARMR",(ESCH_KEYFRAME_UPARM|ESCH_KEYFRAME_TRAILING|ESCH_KEYFRAME_ARM),
+    "FARML",(ESCH_KEYFRAME_FOREARM|ESCH_KEYFRAME_LEADING|ESCH_KEYFRAME_ARM) ,
+    "FARMR",(ESCH_KEYFRAME_FOREARM|ESCH_KEYFRAME_TRAILING|ESCH_KEYFRAME_ARM),
+    "UPARML",(ESCH_KEYFRAME_UPARM|ESCH_KEYFRAME_LEADING|ESCH_KEYFRAME_ARM) ,
+    "UPARMR",(ESCH_KEYFRAME_UPARM|ESCH_KEYFRAME_TRAILING|ESCH_KEYFRAME_ARM),
+    "HANDL",(ESCH_KEYFRAME_HAND|ESCH_KEYFRAME_LEADING|ESCH_KEYFRAME_ARM) ,
+    "HANDR",(ESCH_KEYFRAME_HAND|ESCH_KEYFRAME_TRAILING|ESCH_KEYFRAME_ARM),
+    "BODY",(ESCH_KEYFRAME_TORSO|ESCH_KEYFRAME_MISC),
+    "TORSO",(ESCH_KEYFRAME_TORSO|ESCH_KEYFRAME_MISC),
+    "HEAD",(ESCH_KEYFRAME_HEAD|ESCH_KEYFRAME_MISC),
+    "DOME",(ESCH_KEYFRAME_DOME|ESCH_KEYFRAME_MISC),
+    "WAIST",(ESCH_KEYFRAME_WAIST|ESCH_KEYFRAME_MISC),
+    "HIPL",(ESCH_KEYFRAME_HIP|ESCH_KEYFRAME_LEADING|ESCH_KEYFRAME_LEG)  ,
+    "HIPR",(ESCH_KEYFRAME_HIP|ESCH_KEYFRAME_TRAILING|ESCH_KEYFRAME_LEG),
+    "SHLDRL",(ESCH_KEYFRAME_SHLDR|ESCH_KEYFRAME_LEADING|ESCH_KEYFRAME_ARM) ,
+    "SHLDRR",(ESCH_KEYFRAME_SHLDR|ESCH_KEYFRAME_TRAILING|ESCH_KEYFRAME_ARM),
+    "MISC",ESCH_KEYFRAME_MISC,
+    "ALL",ESCH_KEYFRAME_ALL
+};
+
+esch_limb_type get_token (char name[22])
+{
+    char buff[256];
+    for (int i=0; i<ESCH_KEYFRAME_TOKEN_COUNT; i++)
+    {
+        if (strstr(&name[0], esch_token_list[i].name))
+        {
+            return esch_token_list[i].type;
+        }
+    }
+    return ESCH_KEYFRAME_NONE;
+}
+
+
+
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°° Misc °°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
@@ -2285,9 +2957,9 @@ STATIC ulong compress_rle_32bpp(ushort w, ushort h, byte *data, byte *cdata)
 STATIC int load_pal(VngoPal *pal,char *infile)
 {
     int err;
-   
+
     err=pal->init(0,infile);
-   
+
     return(err);
 }
 
@@ -2345,6 +3017,634 @@ void ivory_free (void **ptr)
 {
     free(*ptr);
     *ptr=0;
+}
+
+
+void init_key_data()
+{
+    int status;
+    int count;
+    int key_count;
+    int morph_key_count;
+
+    actual_key_count = 0;
+
+    kxp_init_keyframer ();
+    kxp_get_node_count (count);
+    for (int i=0; i<count; i++)
+    {
+        kxp_get_key_count(i, KT_ROTATE, key_count, status);
+        kxp_get_key_count (i, KT_MORPH, morph_key_count, status);
+        if (key_count > 0)
+        {
+            actual_key_count += key_count;
+        }
+        else if (morph_key_count > 0)
+        {
+            actual_morph_count += morph_key_count;
+        }
+    }
+
+    if (actual_key_count)
+    {
+        morph_key = 0;
+        key = new struct keyframe[actual_key_count];
+        memset (key[i].name, 0, sizeof (key[i].name));
+    }
+    else if (actual_morph_count)
+    {
+        key = 0;
+        morph_key = new struct morph_keyframe[actual_morph_count];
+        for (i=0; i<actual_morph_count; i++)
+        {
+            morph_key[i].name[0] = '\0';
+            morph_key[i].deltas = 0;
+        }
+    }
+    else
+    {
+        key = 0;
+        morph_key = 0;
+    }
+}
+
+void capture_hierarchy_rotations()
+{
+    // start with the ultimate parent OBJECT_NODE
+    // calculate the matrix for said parent
+    // step through all of this object's children and
+    // calculate the child matrix and concatenate it to
+    //  the parent matrix to get the child rotation
+    float matrix[4][3];
+    float z_vec[3];
+    float refv[3];
+    float rot[3];
+    int the_parent;
+    int node_type;
+    int child_count;
+    int this_node;
+    int status;
+    int key_count;
+    int count;
+    int child_node;
+    char dump[80];
+    char name[22];
+
+    next_key = 0;
+
+    kxp_get_node_count(count);
+    for (int i=0; i<count; i++)
+    {
+        kxp_get_parent (i, the_parent);
+        kxp_get_node_name (i,name,node_type);
+        if ((the_parent == -1) && (node_type == OBJECT_NODE))
+        {
+            this_node = i;
+            break;
+        }
+    }
+
+    kxp_get_key_count(this_node,KT_ROTATE,key_count,status);
+    for (int j=0; j<key_count; j++)
+    {
+        key[next_key].frame_num = j;
+        kxp_get_xform(this_node,j,&matrix[0][0]);
+
+        if (!inverse_mtx(&matrix[0][0], &matrix[0][0]))
+        {
+            sprintf (dump, "Determinant is 0");
+            gfx_continu_line(dump);
+            return;
+        }
+
+        refv[0] = 0;
+        refv[1] = 1;
+        refv[2] = 0;
+
+        z_vec[0] = 0;
+        z_vec[1] = matrix[1][0]*refv[0] +
+                   matrix[1][1]*refv[1] +
+                   matrix[1][2]*refv[2];
+        z_vec[2] = matrix[2][0]*refv[0] +
+                   matrix[2][1]*refv[1] +
+                   matrix[2][2]*refv[2];
+
+        // normalize z_vec
+        float mag = sqrt(z_vec[0]*z_vec[0] + z_vec[1]*z_vec[1] + z_vec[2]*z_vec[2]);
+        for (i=0; i<3; i++)
+        {
+            z_vec[i] /= mag;
+        }
+
+        // take DOT PRODUCT of i and z_vec
+        rot[0] = refv[0]*z_vec[0] + refv[1]*z_vec[1] + refv[2]*z_vec[2];
+        if (z_vec[1] < 0)
+        {
+            rot[0] *= (-1);
+        }
+                rot[0] = RADS_2_DEGS(acos(rot[0]));
+        if (z_vec[1] < 0)
+        {
+            rot[0] -= 180;
+        }
+
+
+        refv[0] = 1;
+        refv[1] = 0;
+        refv[2] = 0;
+
+        z_vec[0] = matrix[0][0]*refv[0] +
+                   matrix[0][1]*refv[1] +
+                   matrix[0][2]*refv[2];
+        z_vec[1] = 0;
+        z_vec[2] = matrix[2][0]*refv[0] +
+                   matrix[2][1]*refv[1] +
+                   matrix[2][2]*refv[2];
+
+        // normalize z_vec
+        mag = sqrt(z_vec[0]*z_vec[0] + z_vec[1]*z_vec[1] + z_vec[2]*z_vec[2]);
+        for (i=0; i<3; i++)
+        {
+            z_vec[i] /= mag;
+        }
+
+        // take DOT PRODUCT of j and z_vec
+        rot[1] = refv[0]*z_vec[0] + refv[1]*z_vec[1] + refv[2]*z_vec[2];
+        if (z_vec[0] < 0)
+        {
+            rot[1] *= (-1);
+        }
+                rot[1] = RADS_2_DEGS(acos(rot[1]));
+        if (z_vec[0] < 0)
+        {
+            rot[1] -= 180;
+        }
+
+        refv[0] = 1;
+        refv[1] = 0;
+        refv[2] = 0;
+
+        z_vec[0] = matrix[0][0]*refv[0] +
+                   matrix[0][1]*refv[1] +
+                   matrix[0][2]*refv[2];
+        z_vec[1] = matrix[1][0]*refv[0] +
+                   matrix[1][1]*refv[1] +
+                   matrix[1][2]*refv[2];
+        z_vec[2] = 0;
+
+        // normalize z_vec
+        mag = sqrt(z_vec[0]*z_vec[0] + z_vec[1]*z_vec[1] + z_vec[2]*z_vec[2]);
+        for (i=0; i<3; i++)
+        {
+            z_vec[i] /= mag;
+        }
+
+        // take DOT PRODUCT of k and z_vec
+        rot[2] = refv[0]*z_vec[0] + refv[1]*z_vec[1] + refv[2]*z_vec[2];
+        if (z_vec[0] < 0)
+        {
+            rot[2] *= (-1);
+        }
+        rot[2] = RADS_2_DEGS(acos(rot[2]));
+        if (z_vec[0] < 0)
+        {
+            rot[2] -= 180;
+        }
+
+        for (i=0; i<3; i++)
+        {
+            key[next_key].rotation[i] = rot[i];
+        }
+        strcpy (key[next_key].m_type, key_mtyp);
+        strcpy (key[next_key].name, name);
+
+        next_key ++;
+    }
+
+    kxp_get_num_children(this_node,child_count);
+
+    for (i=0; i<child_count; i++)
+    {
+        kxp_get_child(this_node,i,child_node);
+        kxp_get_key_count(child_node,KT_ROTATE,key_count,status);
+        for (int j=0; j<key_count; j++)
+        {
+            process_child(this_node, child_node, j);
+        }
+    }
+}
+
+void process_child (int parent, int this_node, int this_keyframe)
+{
+    float matrix_par[4][3];
+    float matrix_new[4][3];
+    float matrix[4][3];
+    float z_vec[3];
+    float refv[3];
+    float rot[3];
+    int node_type;
+    int child_count;
+    int key_count;
+    int child_node;
+    int status;
+    int i;
+    char dump[80];
+    char name[22];
+
+    // check to see if this keyframe has already been processed
+    for (i=0; i<actual_key_count; i++)
+    {
+        if (key[i].frame_num == this_keyframe)
+        {
+            kxp_get_node_name(this_node,name,status);
+            if (!strcmp(name,key[i].name))
+            {
+                // name and keyframe match, so return
+                return;
+            }
+        }
+    }
+
+    kxp_get_xform(parent,this_keyframe,&matrix_par[0][0]);
+    kxp_get_xform(this_node,this_keyframe,&matrix_new[0][0]);
+
+    if (!inverse_mtx(&matrix_par[0][0], &matrix_par[0][0]))
+    {
+        sprintf (dump, "Determinant is 0");
+        gfx_continu_line(dump);
+        return;
+    }
+    concat_mtx(&matrix_par[0][0], &matrix_new[0][0], &matrix[0][0]);
+
+    refv[0] = 0;
+    refv[1] = 1;
+    refv[2] = 0;
+
+    z_vec[0] = 0;
+    z_vec[1] = matrix[1][0]*refv[0] +
+               matrix[1][1]*refv[1] +
+               matrix[1][2]*refv[2];
+    z_vec[2] = matrix[2][0]*refv[0] +
+               matrix[2][1]*refv[1] +
+               matrix[2][2]*refv[2];
+
+    // normalize z_vec
+    float mag = sqrt(z_vec[0]*z_vec[0] + z_vec[1]*z_vec[1] + z_vec[2]*z_vec[2]);
+    for (i=0; i<3; i++)
+    {
+        z_vec[i] /= mag;
+    }
+
+    // take DOT PRODUCT of i and z_vec
+
+    rot[0] = refv[0]*z_vec[0] + refv[1]*z_vec[1] + refv[2]*z_vec[2];
+    if (z_vec[2] < 0)
+    {
+        rot[0] *= (-1);
+    }
+    rot[0] = RADS_2_DEGS(acos(rot[0]));
+    if (z_vec[2] < 0)
+    {
+        rot[0] -= 180;
+    }
+
+    refv[0] = 1;
+    refv[1] = 0;
+    refv[2] = 0;
+
+    z_vec[0] = matrix[0][0]*refv[0] +
+               matrix[0][1]*refv[1] +
+               matrix[0][2]*refv[2];
+    z_vec[1] = 0;
+    z_vec[2] = matrix[2][0]*refv[0] +
+               matrix[2][1]*refv[1] +
+               matrix[2][2]*refv[2];
+
+    // normalize z_vec
+    mag = sqrt(z_vec[0]*z_vec[0] + z_vec[1]*z_vec[1] + z_vec[2]*z_vec[2]);
+    for (i=0; i<3; i++)
+    {
+        z_vec[i] /= mag;
+    }
+
+    // take DOT PRODUCT of j and z_vec
+    rot[1] = refv[0]*z_vec[0] + refv[1]*z_vec[1] + refv[2]*z_vec[2];
+    if (z_vec[2] < 0)
+    {
+        rot[1] *= (-1);
+    }
+    rot[1] = RADS_2_DEGS(acos(rot[1]));
+    if (z_vec[2] < 0)
+    {
+        rot[1] -= 180;
+    }
+
+    refv[0] = 1;
+    refv[1] = 0;
+    refv[2] = 0;
+
+    z_vec[0] = matrix[0][0]*refv[0] +
+               matrix[0][1]*refv[1] +
+               matrix[0][2]*refv[2];
+    z_vec[1] = matrix[1][0]*refv[0] +
+               matrix[1][1]*refv[1] +
+               matrix[1][2]*refv[2];
+    z_vec[2] = 0;
+
+    // normalize z_vec
+    mag = sqrt(z_vec[0]*z_vec[0] + z_vec[1]*z_vec[1] + z_vec[2]*z_vec[2]);
+    for (i=0; i<3; i++)
+    {
+        z_vec[i] /= mag;
+    }
+
+    // take DOT PRODUCT of k and z_vec
+    rot[2] = refv[0]*z_vec[0] + refv[1]*z_vec[1] + refv[2]*z_vec[2];
+    if (z_vec[1] < 0)
+    {
+        rot[2] *= (-1);
+    }
+    rot[2] = RADS_2_DEGS(acos(rot[2]));
+    if (z_vec[1] < 0)
+    {
+        rot[2] -= 180;
+    }
+
+    kxp_get_node_name(this_node,name,node_type);
+    strcpy(key[next_key].name, name);
+    key[next_key].frame_num = this_keyframe;
+
+    strcpy (key[next_key].m_type, key_mtyp);
+    for (i=0; i<3; i++)
+    {
+        key[next_key].rotation[i] = rot[i];
+    }
+
+    next_key ++;
+
+    kxp_get_num_children(this_node,child_count);
+    for (i=0; i<child_count; i++)
+    {
+        kxp_get_child(this_node,i,child_node);
+        kxp_get_key_count(child_node,KT_ROTATE,key_count,status);
+        for (int j=0; j<key_count; j++)
+        {
+            process_child(this_node, child_node, j);
+        }
+    }
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// det_mtx                                                                  ³
+//                                                                          ³
+// Computes the determinment of a matrix.                                   ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+float det_mtx(float *m)
+{
+    double  r;
+
+//     [A B C 0]
+// det [D E F 0] =  A |E F 0|  - B |D F 0|  + C |D E 0|   - 0 |D E F|
+//     [G H I 0]      |H I 0|      |G I 0|      |G H 0|       |G H I|
+//     [J K L 1]      |K L 1|      |J L 1|      |J K 1|       |H K L|
+//
+//
+//               =  A(                )
+//                   ( E|I 0| - F|H 0|)
+//                   (  |L 1|    |K 1|)
+//
+//                 -B(                )
+//                   ( D|I 0| - F|G 0|)
+//                   (  |L 1|    |J 1|)
+//
+//                 +C(                )
+//                   ( D|H 0| - E|G 0|)
+//                   (  |K 1|    |J 1|)
+//
+//               =  A(EI - FH) - B(DI - FG) + C(DH - EG)
+
+// A |E F 0|
+//   |H I 0| = A (EI - FH)
+//   |K L 1|
+
+    r = m[MTX_A] * ( m[MTX_E]*m[MTX_I] - m[MTX_F]*m[MTX_H] );
+
+// - B |D F 0|
+//     |G I 0| = - B (DI - FG)
+//     |J L 1|
+
+    r = r - m[MTX_B] * ( m[MTX_D]*m[MTX_I] - m[MTX_F]*m[MTX_G] );
+
+// C |D E 0|
+//   |G H 0| = C (DH - EG)
+//   |J K 1|
+
+    return (r + m[MTX_C] * ( m[MTX_D]*m[MTX_H] - m[MTX_E]*m[MTX_G] ));
+}
+
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// inverse_mtx                                                              ³
+//                                                                          ³
+// Computes the inverse of a 4x3 matrix, returning it in 'inv' and a value  ³
+// of 1.  If no inverse exists, 0 is returned.                              ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+int inverse_mtx(float *m, float *inv)
+{
+    double  det;
+    double  iv1, iv2, iv3;
+    float   tm[12];
+
+    det = det_mtx(m);
+
+    if (det == 0.0)
+        return 0;
+
+    memcpy(tm,m,sizeof(float)*12);
+
+// [A B C 0]      det is A(EI - FH) - B(DI - FG) + C(DH - EG)
+// [D E F 0]
+// [G H I 0]
+// [J K L 1]      The inverse is :-
+//
+//
+//                [ |E F 0|   |B C 0|   |B C 0|   |B C 0| ]
+//                [ |H I 0|  -|H I 0|   |E F 0|  -|E F 0| ]
+//                [ |K L 1|   |K L 1|   |K L 1|   |H I 0| ]
+//                [                                       ]
+//                [ |D F 0|   |A C 0|   |A C 0|   |A C 0| ]
+//          1     [-|G I 0|   |G I 0|  -|D F 0|   |D F 0| ]
+//        ----- * [ |J L 1|   |J L 1|   |J L 1|   |G I 0| ]
+//         det    [                                       ]
+//                [ |D E 0|   |A B 0|   |A B 0|   |A B 0| ]
+//                [ |G H 0|  -|G H 0|   |D E 0|  -|D E 0| ]
+//                [ |J K 1|   |J K 1|   |J K 1|   |G H 0| ]
+//                [                                       ]
+//                [ |D E F|   |A B C|   |A B C|   |A B C| ]
+//                [-|G H I|   |G H I|  -|D E F|   |D E F| ]
+//                [ |J K L|   |J K L|   |J K L|   |G H I| ]
+//
+
+// <A>
+//     1      |E F 0|
+//   ----- *  |H I 0| = ( EI - FH ) / det
+//    det     |K L 1|
+
+    inv[MTX_A] = (tm[MTX_E]*tm[MTX_I] - tm[MTX_F]*tm[MTX_H]) / det;
+
+// <D>
+//     1      |D F 0|
+//   ----- * -|G I 0| = ( FG - DI ) / det
+//    det     |J L 1|
+
+    inv[MTX_D] = (tm[MTX_F]*tm[MTX_G] - tm[MTX_D]*tm[MTX_I]) / det;
+
+// <G>
+//     1      |D E 0|
+//   ----- *  |G H 0| = ( DH - EG ) / det
+//    det     |J K 1|
+
+    inv[MTX_G] = (tm[MTX_D]*tm[MTX_H] - tm[MTX_E]*tm[MTX_G]) / det;
+
+// <J>
+//     1      |D E F|       <IV1>      <IV2>      <IV3>
+//   ----- * -|G H I| = ( E(GL-IJ) - D(HL-KI) - F(GK-JH) ) / det
+//    det     |J K L|
+
+    iv1 = tm[MTX_G]*tm[MTX_L] - tm[MTX_I]*tm[MTX_J];
+    iv2 = tm[MTX_H]*tm[MTX_L] - tm[MTX_K]*tm[MTX_I];
+    iv3 = tm[MTX_G]*tm[MTX_K] - tm[MTX_J]*tm[MTX_H];
+
+    inv[MTX_J] = (tm[MTX_E]*iv1 - tm[MTX_D]*iv2 - tm[MTX_F]*iv3) / det;
+
+// <B>
+//     1      |B C 0|
+//   ----- * -|H I 0| = ( CH - BI ) / det
+//    det     |K L 1|
+
+    inv[MTX_B] = (tm[MTX_C]*tm[MTX_H] - tm[MTX_B]*tm[MTX_I]) / det;
+
+// <E>
+//     1      |A C 0|
+//   ----- *  |G I 0| = ( AI - CG ) / det
+//    det     |J L 1|
+
+    inv[MTX_E] = (tm[MTX_A]*tm[MTX_I] - tm[MTX_C]*tm[MTX_G]) / det;
+
+// <H>
+//     1      |A B 0|
+//   ----- * -|G H 0| = ( BG - AH ) / det
+//    det     |J K 1|
+
+    inv[MTX_H] = (tm[MTX_B]*tm[MTX_G] - tm[MTX_A]*tm[MTX_H]) / det;
+
+// <K>
+//     1      |A B C|       <IV2>      <IV1>      <IV3>
+//   ----- *  |G H I| = ( A(HL-KI) - B(GL-JI) + C(GK-JH) ) / det
+//    det     |J K L|
+
+    inv[MTX_K] = (tm[MTX_A]*iv2 - tm[MTX_B]*iv1 + tm[MTX_C]*iv3) / det;
+
+// <C>
+//     1      |B C 0|
+//   ----- *  |E F 0| = ( BF - CE ) / det
+//    det     |K L 1|
+
+    inv[MTX_C] = (tm[MTX_B]*tm[MTX_F] - tm[MTX_C]*tm[MTX_E]) / det;
+
+// <F>
+//     1      |A C 0|
+//   ----- * -|D F 0| = ( CD - AF ) / det
+//    det     |J L 1|
+
+    inv[MTX_F] = (tm[MTX_C]*tm[MTX_D] - tm[MTX_A]*tm[MTX_F]) / det;
+
+// <I>
+//     1      |A B 0|
+//   ----- *  |D E 0| = ( AE - BD ) / det
+//    det     |J K 1|
+
+    inv[MTX_I] = (tm[MTX_A]*tm[MTX_E] - tm[MTX_B]*tm[MTX_D]) / det;
+
+// <L>
+//     1      |A B C|
+//   ----- * -|D E F| = ( B(DL-JF) - A(EL-KF) - C(DK-JE) ) / det
+//    det     |J K L|
+
+    inv[MTX_L] = ( tm[MTX_B]*( tm[MTX_D]*tm[MTX_L] - tm[MTX_J]*tm[MTX_F] )
+                   - tm[MTX_A]*( tm[MTX_E]*tm[MTX_L] - tm[MTX_K]*tm[MTX_F] )
+                   - tm[MTX_C]*( tm[MTX_D]*tm[MTX_K] - tm[MTX_J]*tm[MTX_E] )
+                 ) / det;
+
+    return 1;
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// concat_mtx                                                               ³
+//                                                                          ³
+// Concats two matricies by multiplying them.                               ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+void concat_mtx(float *ina, float *b, float *res)
+{
+    float   a[12];
+
+    memcpy(a,ina,sizeof(float)*12);
+
+// [A B C 0]      [a b c 0]    [Aa+Bd+Cg   Ab+Be+Ch   Ac+Bf+Ci   0]
+// [D E F 0]      [d e f 0]    [Da+Ed+Fg   Db+Ee+Fh   Dc+Ef+Fi   0]
+// [G H I 0]  *   [g h i 0] =  [Ga+Hd+Ig   Gb+He+Ih   Gc+Hf+Ii   0]
+// [J K L 1]      [j k l 1]    [Ja+Kd+Lg+j Jb+Ke+Lh+k Jc+Kf+Li+l 1]
+
+// Calculate the new a: Aa+Bd+Cg
+
+    res[MTX_A] = a[MTX_A]*b[MTX_A] + a[MTX_B]*b[MTX_D] + a[MTX_C]*b[MTX_G];
+
+// Calculate the new b: Ab+Be+Ch
+
+    res[MTX_B] = a[MTX_A]*b[MTX_B] + a[MTX_B]*b[MTX_E] + a[MTX_C]*b[MTX_H];
+
+// Calculate the new c: Ac+Bf+Ci
+
+    res[MTX_C] = a[MTX_A]*b[MTX_C] + a[MTX_B]*b[MTX_F] + a[MTX_C]*b[MTX_I];
+
+// Calculate the new d: Da+Ed+Fg
+
+    res[MTX_D] = a[MTX_D]*b[MTX_A] + a[MTX_E]*b[MTX_D] + a[MTX_F]*b[MTX_G];
+
+// Calculate the new e: Db+Ee+Fh
+
+    res[MTX_E] = a[MTX_D]*b[MTX_B] + a[MTX_E]*b[MTX_E] + a[MTX_F]*b[MTX_H];
+
+// Calculate the new f: Dc+Ef+Fi
+
+    res[MTX_F] = a[MTX_D]*b[MTX_C] + a[MTX_E]*b[MTX_F] + a[MTX_F]*b[MTX_I];
+
+// Calculate the new g: Ga+Hd+Ig
+
+    res[MTX_G] = a[MTX_G]*b[MTX_A] + a[MTX_H]*b[MTX_D] + a[MTX_I]*b[MTX_G];
+
+// Calculate the new h: Gb+He+Ih
+
+    res[MTX_H] = a[MTX_G]*b[MTX_B] + a[MTX_H]*b[MTX_E] + a[MTX_I]*b[MTX_H];
+
+// Calculate the new i: Gc+Hf+Ii
+
+    res[MTX_I] = a[MTX_G]*b[MTX_C] + a[MTX_H]*b[MTX_F] + a[MTX_I]*b[MTX_I];
+
+// Calculate the new j: Ja+Kd+Lg+j
+
+    res[MTX_J] = a[MTX_J]*b[MTX_A] + a[MTX_K]*b[MTX_D] + a[MTX_L]*b[MTX_G] + b[MTX_J];
+
+// Calculate the new k: Jb+Ke+Lh+k
+
+    res[MTX_K] = a[MTX_J]*b[MTX_B] + a[MTX_K]*b[MTX_E] + a[MTX_L]*b[MTX_H] + b[MTX_K];
+
+// Calculate the new l: Jc+Kf+Li+l
+
+    res[MTX_L] = a[MTX_J]*b[MTX_C] + a[MTX_K]*b[MTX_F] + a[MTX_L]*b[MTX_I] + b[MTX_L];
 }
 
 //°±² End of module - export.cpp ²±°

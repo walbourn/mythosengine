@@ -1,0 +1,283 @@
+//ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
+//
+//                                                           %__________%
+//                                                          %/ . .  .   \%
+//           Van Gogh 2D-Display Library                     |  . .  o. | 
+//                                                           |. _  .   .|
+//          Microsoft Windows '95 Version                    | / \   .  | 
+//                                                           |_|_|_._._.|
+// Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
+//              All rights reserved.                        %\__________/%
+//                                                           %          %
+//
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//
+//           *** Charybdis Enterprises, Inc. Company Confidential ***
+//
+//  This file and all associated files are the company proprietary property
+//        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+//
+// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
+// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
+// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
+// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
+// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+//
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//
+// init.cpp
+//
+//ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
+
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//
+//                                Includes
+//                                
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+#define WIN32_LEAN_AND_MEAN
+#include "global.hpp"
+#include <commctrl.h>
+#include "resource.h"
+
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//
+//                               Routines
+//
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+LRESULT CALLBACK ClientWndProc (HWND, UINT, WPARAM, LPARAM);
+
+//±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+//
+//                                 Data
+//
+//±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+
+extern MaxDevices *Devs;
+
+//±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+//
+//                                 Code
+//
+//±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// InitApplication
+//
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+BOOL InitApplication (HINSTANCE hInstance, int nCmdShow)
+{
+    char    szTitle[MAX_PATH];
+
+    // Win32 will always set hPrevInstance to NULL, so lets check
+    // things a little closer. This is because we only want a single
+    // version of this app to run at a time
+    HWND hwnd = FindWindow (szAppName, NULL);
+    if (hwnd != 0)
+    {
+        // We found another version of ourself. Lets defer to it:
+        if (IsIconic (hwnd))
+            ShowWindow (hwnd, SW_RESTORE);
+        SetForegroundWindow (hwnd);
+
+        MessageBox (NULL, "You're already running this program, dummy!", "Note", MB_OK);
+
+        // If this app actually had any functionality, we would
+        // also want to communicate any action that our 'twin'
+        // should now perform based on how the user tried to
+        // execute us.
+        return FALSE;
+    }
+
+    // Make sure our Common Controls are available
+    // InitCommonControls();
+
+    // Register the client window's class
+    WNDCLASSEX  wc;
+
+    // Fill in window class structure with parameters that describe
+    // the main window.
+    wc.cbSize        = sizeof (WNDCLASSEX);
+    wc.style         = CS_OWNDC;
+    wc.lpfnWndProc   = (WNDPROC)ClientWndProc;
+    wc.cbClsExtra    = 0;
+    wc.cbWndExtra    = 0;
+    wc.hInstance     = hInstance;
+    wc.hIcon         = LoadIcon (hInstance, szAppName);
+    wc.hCursor       = LoadCursor (NULL, IDC_ARROW);
+    wc.hbrBackground = (HBRUSH)GetStockObject (BLACK_BRUSH);
+    wc.lpszClassName = szAppName;
+    wc.lpszMenuName  = 0;
+
+    // This will load the small icon image from the icon resource
+    wc.hIconSm = LoadImage (hInstance,
+                            szAppName,
+                            IMAGE_ICON,
+                            GetSystemMetrics(SM_CXSMICON), 
+                            GetSystemMetrics(SM_CYSMICON), 
+                            LR_DEFAULTCOLOR);              
+
+    if (!RegisterClassEx (&wc))
+        return FALSE;
+
+    // Save the instance handle in static variable, which will be used in
+    // many subsequence calls from this application to Windows.
+    hInst = hInstance;
+
+    int map_xsize = GameState::MAP_XSIZE;
+    int map_ysize = GameState::MAP_YSIZE;
+
+#if 1
+    char buff[128];
+    XFParseINI  ini;
+
+    if (ini.open(".\\VT.INI",XF_OPEN_READ) == XF_ERR_NONE)
+    {
+        ini.section("Screen");
+        if (!ini.read("Resolution",buff))
+        {
+            strlwr(buff);
+            if (strstr(buff,"640x480"))
+            {
+                map_xsize = 640;
+                map_ysize = 480;
+            }
+            if (strstr(buff,"320x240"))
+            {
+                map_xsize = 320;
+                map_ysize = 240;
+            }
+            if (strstr(buff,"320x200"))
+            {
+                map_xsize = 320;
+                map_ysize = 200;
+            }
+            if (strstr(buff,"800x600"))
+            {
+                map_xsize = 800;
+                map_ysize = 600;
+            }
+            if (strstr(buff,"1024x768"))
+            {
+                map_xsize = 1024;
+                map_ysize = 768;
+            }
+        }
+        ini.close();
+    }
+#endif
+
+    LoadString (hInstance, IDS_TITLE, szTitle, sizeof (szTitle));
+    hWndClient = CreateWindowEx (0, //WS_EX_TOPMOST,
+                                szAppName, szTitle,
+                                WS_VISIBLE | WS_POPUP,
+                                0, 0, map_xsize, 
+                                      map_ysize,
+                                NULL, NULL, hInstance, NULL);
+
+    if (hWndClient == 0)
+        return FALSE;
+
+    ShowWindow (hWndClient, nCmdShow);
+    UpdateWindow (hWndClient);
+    SetFocus (hWndClient);
+
+    return TRUE;
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// ClientWndProc
+//
+//  This is the Main Application Window's procedure.
+//  Mostly, this just allows a black rectangle to overlay GDI.
+//  In a game, very little else happens here, but some inter-app interaction
+//  must be processed here; most importantly activation and termination.
+//
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+LRESULT CALLBACK ClientWndProc (HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
+{
+    LRESULT     res		= (LRESULT)0;
+
+    switch (message)
+    {
+
+        case WM_CREATE:
+            break;
+
+        case WM_SYSKEYDOWN:
+            if (Devs && Devs->theKeyboard)
+                Devs->theKeyboard->wm_keydown (wParam);
+            return DefWindowProc (hWnd, message, wParam, lParam);
+
+        case WM_KEYDOWN:
+            if (Devs && Devs->theKeyboard)
+                Devs->theKeyboard->wm_keydown (wParam);
+            return 0;
+
+        case WM_SYSKEYUP:
+        case WM_KEYUP:
+            if (Devs && Devs->theKeyboard)
+                Devs->theKeyboard->wm_keyup (wParam);
+            return 0;
+
+        case WM_SETFOCUS:
+            if (Devs)
+                Devs->init();
+            return 0;
+
+        case WM_KILLFOCUS:
+            if (Devs)
+                Devs->uninit();
+            return 0;
+
+        case WM_DESTROY:
+            // Get the heck outta here.
+            PostQuitMessage (0);
+            break;
+
+        default:    /* Pass other commands through */
+            res = DefWindowProc (hWnd, message, wParam, lParam);
+            break;
+    }
+
+    return res;
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// _charybdis_assert
+// 
+// Handler for failed asserts.  If msg is set to non-NULL, then an assertMyth
+// was used with a comment.
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+extern "C" void _charybdis_assert(char *msg, char *exp, char *f, unsigned ln)
+{
+    int     i;
+    char    title[28];
+    char    buff[988];
+
+    sprintf(buff,"Assertion Failed\t\t\t\t\t\n"
+                 "Expr:\t%s\n"
+                 "File:\t%s\t\tLine %d",exp,f,ln);
+    if (msg)
+    {
+        strcat(buff,
+               "\nComment:\n");
+        strcat(buff,msg);
+    }
+    strcat(buff,"\n\n\tOK to continue, Cancel to exit");
+
+    sprintf(title,"%s Debug Message",szAppName);
+
+    i=MessageBox( (IsWindow(hWndClient)) ? hWndClient : NULL,
+                 buff,
+                 title,
+                 MB_OKCANCEL | MB_DEFBUTTON2 | MB_APPLMODAL | MB_ICONSTOP);
+
+    if (i == IDCANCEL)
+        ExitProcess(1);
+}
+
+//°±² eof - init.cpp ²±°

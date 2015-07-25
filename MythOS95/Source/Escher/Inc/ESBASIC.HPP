@@ -84,7 +84,7 @@ public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
     EschPointDraw() : EschDrawable(ESCH_DRWT_POINTDRAW) {}
 
-    EschPointDraw(Flx16 ix, Flx16 iy, Flx16 iz, dword c) :
+    EschPointDraw(float ix, float iy, float iz, dword c) :
         EschDrawable(ESCH_DRWT_POINTDRAW),
         pos(ix,iy,iz), color(c) {}
 
@@ -102,7 +102,7 @@ public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Utility routines.                                                    ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-    void set_position(Flx16 ix, Flx16 iy, Flx16 iz)
+    void set_position(float ix, float iy, float iz)
     {
         pos.x = ix;  pos.y = iy;  pos.z = iz;
     }
@@ -133,8 +133,8 @@ public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
     EschLineDraw() : EschDrawable(ESCH_DRWT_LINEDRAW) {}
 
-    EschLineDraw(Flx16 ix1, Flx16 iy1, Flx16 iz1,
-                 Flx16 ix2, Flx16 iy2, Flx16 iz2,
+    EschLineDraw(float ix1, float iy1, float iz1,
+                 float ix2, float iy2, float iz2,
                  dword c) :
         EschDrawable(ESCH_DRWT_LINEDRAW),
         pos1(ix1,iy1,iz1), pos2(ix2,iy2,iz2), color(c) {}
@@ -153,8 +153,8 @@ public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Utility routines.                                                    ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-    void set_position(Flx16 ix1, Flx16 iy1, Flx16 iz1,
-                      Flx16 ix2, Flx16 iy2, Flx16 iz2)
+    void set_position(float ix1, float iy1, float iz1,
+                      float ix2, float iy2, float iz2)
     {
         pos1.x = ix1;  pos1.y = iy1;  pos1.z = iz1;
         pos2.x = ix2;  pos2.y = iy2;  pos2.z = iz2;
@@ -183,8 +183,8 @@ public:
     // Public data members                                                  ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
     EschPoint       pos;
-    Flx16           width;
-    Flx16           height;
+    float           width;
+    float           height;
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Constructor/Destructors                                              ³
@@ -193,7 +193,7 @@ public:
         EschDrawable(ESCH_DRWT_SPRITE),
         txt(0),
         alpha_level(255) {};
-    EschSprite(Flx16 ix, Flx16 iy, Flx16 iz, Flx16 w, Flx16 h) :
+    EschSprite(float ix, float iy, float iz, float w, float h) :
         EschDrawable(ESCH_DRWT_SPRITE),
         pos(ix,iy,iz),
         width(w), height(h),
@@ -216,7 +216,7 @@ public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Utility functions.                                                   ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-    void set_position(Flx16 ix, Flx16 iy, Flx16 iz)
+    void set_position(float ix, float iy, float iz)
     {
         pos.x = ix;
         pos.y = iy;
@@ -229,7 +229,7 @@ public:
         pos.z = pnt->z;
     }
 
-    void set_size(Flx16 w, Flx16 h)
+    void set_size(float w, float h)
     {
         width=w;
         height=h;
@@ -240,7 +240,7 @@ public:
 
     void attach(EschTexture *t);
 
-    esch_error_codes create(XFBitmap *bm, Flx16 w, Flx16 h);
+    esch_error_codes create(XFBitmap *bm, float w, float h);
 };
 
 #ifdef __WATCOMC__

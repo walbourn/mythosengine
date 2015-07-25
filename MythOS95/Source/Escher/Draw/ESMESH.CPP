@@ -286,7 +286,6 @@ esch_error_codes EschMesh::load(XFParseIFF *iff,
     ulong               i;
     esch_error_codes    err;
     EschFileMeshHDR     header;
-    EschFileMeshEXNT    extent;
     EschFileMeshMTL     *emtl=0;
 
     assertMyth("EschMesh::load expects that there are no references active",
@@ -346,8 +345,9 @@ esch_error_codes EschMesh::load(XFParseIFF *iff,
     {
 
         //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Verticies
-        if (iff->chunkid == iff->makeid('V','E','R','T'))
+        if (iff->chunkid == iff->makeid('V','E','R','1'))
         {
+            //ÄÄÄ Data in floating-point
             if (v || iff->chunkSize != (nverts * sizeof(EschVertex)))
             {
                 err=ESCH_ERR_INVALIDVDATA;
@@ -373,10 +373,62 @@ esch_error_codes EschMesh::load(XFParseIFF *iff,
             }
             ivory_hunlock(v);
         }
+        else if (iff->chunkid == iff->makeid('V','E','R','T'))
+        {
+            //ÄÄÄ Data in fixed-point
+            if (v || iff->chunkSize != (nverts * sizeof(EschVertexV1)))
+            {
+                err=ESCH_ERR_INVALIDVDATA;
+                goto error_exit;
+            }
+            v = ivory_halloc( sizeof(EschVertex) * nverts );
+            if (!v)
+            {
+                err=ESCH_ERR_NOMEMORY;
+                goto error_exit;
+            }
+
+            EschVertex *ptr = (EschVertex*)ivory_hlock(v);
+            if (!ptr)
+            {
+                err=ESCH_ERR_LOCKFAILED;
+                goto error_exit;
+            }
+
+            EschVertexV1 *vtemp = new EschVertexV1[nverts];
+            if (!vtemp)
+            {
+                err=ESCH_ERR_NOMEMORY;
+                goto error_exit;
+            }
+
+            if (iff->read(vtemp))
+            {
+                delete [] vtemp;
+                err=ESCH_ERR_FILEERROR;
+                goto error_exit;
+            }
+
+            EschVertex *tptr = ptr;
+            EschVertexV1 *tmpptr = vtemp;
+            for(ulong i=0; i < nverts; i++, tptr++, tmpptr++)
+            {
+                tptr->x = tmpptr->x / 65536.0f;
+                tptr->y = tmpptr->y / 65536.0f;
+                tptr->z = tmpptr->z / 65536.0f;
+                tptr->normal.i = tmpptr->normal.i / 65536.0f;
+                tptr->normal.j = tmpptr->normal.j / 65536.0f;
+                tptr->normal.k = tmpptr->normal.k / 65536.0f;
+            }
+
+            delete [] vtemp;
+            ivory_hunlock(v);
+        }
 
         //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Faces
-        else if (iff->chunkid == iff->makeid('F','A','C','E'))
+        else if (iff->chunkid == iff->makeid('F','A','C','1'))
         {
+            //ÄÄÄ Data in floating-point
             if (f || iff->chunkSize != (nfaces * sizeof(EschFace)))
             {
                 err=ESCH_ERR_INVALIDFDATA;
@@ -402,36 +454,127 @@ esch_error_codes EschMesh::load(XFParseIFF *iff,
             }
             ivory_hunlock(f);
         }
+        else if (iff->chunkid == iff->makeid('F','A','C','E'))
+        {
+            //ÄÄÄ Data in fixed-point
+            if (f || iff->chunkSize != (nfaces * sizeof(EschFaceV1)))
+            {
+                err=ESCH_ERR_INVALIDFDATA;
+                goto error_exit;
+            }
+            f = ivory_halloc( sizeof(EschFace) * nfaces );
+            if (!f)
+            {
+                err=ESCH_ERR_NOMEMORY;
+                goto error_exit;
+            }
+
+            EschFace *ptr = (EschFace*)ivory_hlock(f);
+            if (!ptr)
+            {
+                err=ESCH_ERR_LOCKFAILED;
+                goto error_exit;
+            }
+
+            EschFaceV1 *ftemp = new EschFaceV1[nfaces];
+            if (!ftemp)
+            {
+                err=ESCH_ERR_NOMEMORY;
+                goto error_exit;
+            }
+
+            if (iff->read(ftemp))
+            {
+                delete [] ftemp;
+                err=ESCH_ERR_FILEERROR;
+                goto error_exit;
+            }
+
+            EschFace *tptr = ptr;
+            EschFaceV1 *tmpptr = ftemp;
+            for(ulong i=0; i < nfaces; i++, tptr++, tmpptr++)
+            {
+                tptr->flags = tmpptr->flags;
+                tptr->a = tmpptr->a;
+                tptr->b = tmpptr->b;
+                tptr->c = tmpptr->c;
+                tptr->txt = tmpptr->txt;
+                tptr->u[0] = tmpptr->u[0] / 65536.0f;
+                tptr->u[1] = tmpptr->u[1] / 65536.0f;
+                tptr->u[2] = tmpptr->u[2] / 65536.0f;
+                tptr->v[0] = tmpptr->v[0] / 65536.0f;
+                tptr->v[1] = tmpptr->v[1] / 65536.0f;
+                tptr->v[2] = tmpptr->v[2] / 65536.0f;
+                tptr->color = tmpptr->color;
+                tptr->normal.i = tmpptr->normal.i / 65536.0f;
+                tptr->normal.j = tmpptr->normal.j / 65536.0f;
+                tptr->normal.k = tmpptr->normal.k / 65536.0f;
+            }
+
+            delete [] ftemp;
+            ivory_hunlock(f);
+        }
 
         //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Extents
-        else if (iff->chunkid == iff->makeid('E','X','N','T'))
+        else if (iff->chunkid == iff->makeid('E','X','N','1'))
         {
-            if (iff->chunkSize != sizeof(EschFileMeshEXNT))
+            //ÄÄÄ Data in floating-point
+            EschFileMeshEXNT ext;
+
+            if (iff->chunkSize != sizeof(ext))
             {
                 err=ESCH_ERR_INVALIDDATA;
                 goto error_exit;
             }
-            if (iff->read(&extent))
+            if (iff->read(&ext))
             {
                 err=ESCH_ERR_FILEERROR;
                 goto error_exit;
             }
          
-            sphere.center.x=extent.cenx;
-            sphere.center.y=extent.ceny;
-            sphere.center.z=extent.cenz;
-            sphere.radius=extent.extent_radius;
-            box.mins[0]=extent.minx;
-            box.mins[1]=extent.miny;
-            box.mins[2]=extent.minz;
-            box.maxs[0]=extent.maxx;
-            box.maxs[1]=extent.maxy;
-            box.maxs[2]=extent.maxz;
+            sphere.center.x=ext.cenx;
+            sphere.center.y=ext.ceny;
+            sphere.center.z=ext.cenz;
+            sphere.radius=ext.extent_radius;
+            box.mins[0]=ext.minx;
+            box.mins[1]=ext.miny;
+            box.mins[2]=ext.minz;
+            box.maxs[0]=ext.maxx;
+            box.maxs[1]=ext.maxy;
+            box.maxs[2]=ext.maxz;
+        }
+        else if (iff->chunkid == iff->makeid('E','X','N','T'))
+        {
+            //ÄÄÄ Data in fixed-point
+            EschFileMeshEXNTV1 ext;
+
+            if (iff->chunkSize != sizeof(ext))
+            {
+                err=ESCH_ERR_INVALIDDATA;
+                goto error_exit;
+            }
+            if (iff->read(&ext))
+            {
+                err=ESCH_ERR_FILEERROR;
+                goto error_exit;
+            }
+         
+            sphere.center.x=ext.cenx / 65536.0f;
+            sphere.center.y=ext.ceny / 65536.0f;
+            sphere.center.z=ext.cenz / 65536.0f;
+            sphere.radius=ext.extent_radius / 65536.0f;
+            box.mins[0]=ext.minx / 65536.0f;
+            box.mins[1]=ext.miny / 65536.0f;
+            box.mins[2]=ext.minz / 65536.0f;
+            box.maxs[0]=ext.maxx / 65536.0f;
+            box.maxs[1]=ext.maxy / 65536.0f;
+            box.maxs[2]=ext.maxz / 65536.0f;
         }
 
         //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Orientation Matrix
-        else if (m && iff->chunkid == iff->makeid('M','T','R','X'))
+        else if (m && iff->chunkid == iff->makeid('M','T','R','1'))
         {
+            //ÄÄÄ Data in floating-point
             if (iff->chunkSize != sizeof(EschMatrix))
             {
                 err=ESCH_ERR_INVALIDDATA;
@@ -442,6 +585,25 @@ esch_error_codes EschMesh::load(XFParseIFF *iff,
                 err=ESCH_ERR_FILEERROR;
                 goto error_exit;
             }
+        }
+        else if (m && iff->chunkid == iff->makeid('M','T','R','X'))
+        {
+            //ÄÄÄ Data in fixed-point
+            EschMatrixV1 mtx;
+
+            if (iff->chunkSize != sizeof(mtx))
+            {
+                err=ESCH_ERR_INVALIDDATA;
+                goto error_exit;
+            }
+            if (iff->read(&mtx)) 
+            {
+                err=ESCH_ERR_FILEERROR;
+                goto error_exit;
+            }
+
+            for(int i=0; i < ESCH_MTX_NUM; i++)
+                m->mtx[i] = mtx.mtx[i] / 65536.0f;
         }
 
         //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Hiearchy

@@ -92,18 +92,18 @@ public:
     surfdisp_mode_type GetMode() { return mode; }
 
     void AssignByHeight(ulong count,
-                        ushort *tc, ushort *istxt, Flx16 *heights,
-                        Flx16 hstop, BOOL area, BOOL preserve);
+                        ushort *tc, ushort *istxt, float *heights,
+                        float hstop, BOOL area, BOOL preserve);
 
     void AssignByRandomRoll(ulong count,
                             ushort *tc, ushort *istxt, UINT *chances,
-                            BOOL elvcutoff, Flx16 elvlow, Flx16 elvhigh,
+                            BOOL elvcutoff, float elvlow, float elvhigh,
                             BOOL area, BOOL preserve);
 
     void AssignByAngle(ulong count,
-                       ushort *tc, ushort *istxt, Flx16 *angles,
-                       Flx16 astop, 
-                       BOOL elvcutoff, Flx16 elvlow, Flx16 elvhigh,
+                       ushort *tc, ushort *istxt, float *angles,
+                       float astop, 
+                       BOOL elvcutoff, float elvlow, float elvhigh,
                        BOOL area, BOOL preserve);
 
 // Overrides
@@ -141,13 +141,13 @@ protected:
     ulong   a_count;
     ushort  a_tc[8];
     ushort  a_istxt[8];
-    Flx16   a_values[8];
+    float   a_values[8];
     int     a_values_int[8];
-    Flx16   a_stop;
+    float   a_stop;
     BOOL    a_preserve;
     BOOL    a_elvcutoff;
-    Flx16   a_elvlow;
-    Flx16   a_elvhigh;
+    float   a_elvlow;
+    float   a_elvhigh;
 
     void randomize();
     void assign_by_height(TerrEditDoc* pDoc, int xspos, int dspos, BOOL &changed);

@@ -134,7 +134,7 @@ BEGIN_MESSAGE_MAP(ToolView, CView)
 END_MESSAGE_MAP()
 
 extern dword AutoRotate;
-extern Flx16 AutoRotateSpeed;
+extern float AutoRotateSpeed;
 extern Chronometer Clock;
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
@@ -216,7 +216,7 @@ void ToolView::OnIdle()
     {
         if (AutoRotate)
         {
-            Flx16 degrees = Flx16(Clock.check() << 6,0) * AutoRotateSpeed;
+            float degrees = float(Flx16(Clock.check() << 6,0)) * AutoRotateSpeed;
             Clock.clear();
 
             for(EschMeshDraw *m=pDoc->meshes; m != NULL; m=(EschMeshDraw*)m->next())
@@ -389,10 +389,10 @@ BOOL ToolView::ui_camera_properties(EschCameraEx *cam, int doupdate)
     {
         //ÄÄÄ General
         strncpy(cam->name,gdlg.m_name,ESCH_MAX_NAME);
-        cam->set_position((Flx16)gdlg.m_xpos,(Flx16)gdlg.m_ypos,(Flx16)gdlg.m_zpos);
-        cam->set_vects((Flx16)gdlg.m_itop,(Flx16)gdlg.m_jtop,(Flx16)gdlg.m_ktop,
-                       (Flx16)gdlg.m_idir,(Flx16)gdlg.m_jdir,(Flx16)gdlg.m_kdir);
-        cam->set_fov((Flx16)gdlg.m_fov);
+        cam->set_position(gdlg.m_xpos,gdlg.m_ypos,gdlg.m_zpos);
+        cam->set_vects(gdlg.m_itop,gdlg.m_jtop,gdlg.m_ktop,
+                       gdlg.m_idir,gdlg.m_jdir,gdlg.m_kdir);
+        cam->set_fov(gdlg.m_fov);
         
         //ÄÄÄ Application Flags
         dword flags = cam->flags;
@@ -423,9 +423,9 @@ BOOL ToolView::ui_camera_properties(EschCameraEx *cam, int doupdate)
         cam->set_flags(flags);
 
         //ÄÄÄ Misc
-        cam->set_yon((Flx16)mdlg.m_yon);
-        cam->set_hither((Flx16)mdlg.m_hither);
-        cam->set_factor((Flx16)mdlg.m_scalef);
+        cam->set_yon(mdlg.m_yon);
+        cam->set_hither(mdlg.m_hither);
+        cam->set_factor(mdlg.m_scalef);
         cam->set_bcolor(pDoc->palette.get_index((VngoColor24bit)mdlg.m_bcolor));
         
         //ÄÄÄ Extended
@@ -434,7 +434,7 @@ BOOL ToolView::ui_camera_properties(EschCameraEx *cam, int doupdate)
             if (xdlg.haze_change || !cam->hz_pal)
             {
                 cam->create_haze(xdlg.m_levels, xdlg.m_slevels,
-                                 xdlg.m_blevels, Flx16(xdlg.m_bpercent / 100.0f),
+                                 xdlg.m_blevels, xdlg.m_bpercent / 100.0f,
                                  VngoColor24bit(xdlg.haze_color));
             }
         }
@@ -529,6 +529,7 @@ BOOL ToolView::ui_light_properties(EschLight **lgt, int doupdate, int edittype)
             ASSERT(0);
     }
     gdlg.m_active = ((*lgt)->flags & ESCH_LGT_OFF) ? 0 : 1;
+    gdlg.m_dark = ((*lgt)->flags & ESCH_LGT_DARK) ? 1 : 0;
     gdlg.m_atten = ((*lgt)->flags & ESCH_LGT_ATTEN) ? 1 : 0;
     switch ((*lgt)->get_type())
     {
@@ -646,23 +647,23 @@ BOOL ToolView::ui_light_properties(EschLight **lgt, int doupdate, int edittype)
         switch ((*lgt)->get_type())
         {
             case ESCH_LGTT_VECTOR:
-                ((EschVectorLight*)(*lgt))->set_direction((Flx16)gdlg.m_xiValue,
-                                                          (Flx16)gdlg.m_yjValue,
-                                                          (Flx16)gdlg.m_zkValue);
+                ((EschVectorLight*)(*lgt))->set_direction(gdlg.m_xiValue,
+                                                          gdlg.m_yjValue,
+                                                          gdlg.m_zkValue);
                 break;
             case ESCH_LGTT_FPOINT:
             case ESCH_LGTT_FATTEN:
             case ESCH_LGTT_FSPOT:
-                ((EschFastPointLight*)(*lgt))->set_position((Flx16)gdlg.m_xiValue,
-                                                            (Flx16)gdlg.m_yjValue,
-                                                            (Flx16)gdlg.m_zkValue);
+                ((EschFastPointLight*)(*lgt))->set_position(gdlg.m_xiValue,
+                                                            gdlg.m_yjValue,
+                                                            gdlg.m_zkValue);
                 break;
             case ESCH_LGTT_POINT:
             case ESCH_LGTT_ATTEN:
             case ESCH_LGTT_SPOT:
-                ((EschPointLight*)(*lgt))->set_position((Flx16)gdlg.m_xiValue,
-                                                        (Flx16)gdlg.m_yjValue,
-                                                        (Flx16)gdlg.m_zkValue);
+                ((EschPointLight*)(*lgt))->set_position(gdlg.m_xiValue,
+                                                        gdlg.m_yjValue,
+                                                        gdlg.m_zkValue);
                 break;
         }
 
@@ -672,39 +673,45 @@ BOOL ToolView::ui_light_properties(EschLight **lgt, int doupdate, int edittype)
         else
             flags |= ESCH_LGT_OFF;
 
+        if (gdlg.m_dark)
+            flags |= ESCH_LGT_DARK;
+        else
+            flags &= ~ESCH_LGT_DARK;
+
         if (gdlg.m_atten)
             flags |= ESCH_LGT_ATTEN;
         else
             flags &= ~ESCH_LGT_ATTEN;
+
         
         //ÄÄÄ Extra
         switch ((*lgt)->get_type())
         {
             case ESCH_LGTT_FATTEN:
-                ((EschFastAttenLight*)(*lgt))->set_inner((Flx16)xdlg.m_inner);
-                ((EschFastAttenLight*)(*lgt))->set_outer((Flx16)xdlg.m_outer);
+                ((EschFastAttenLight*)(*lgt))->set_inner(xdlg.m_inner);
+                ((EschFastAttenLight*)(*lgt))->set_outer(xdlg.m_outer);
                 break;
             case ESCH_LGTT_ATTEN:
-                ((EschAttenLight*)(*lgt))->set_inner((Flx16)xdlg.m_inner);
-                ((EschAttenLight*)(*lgt))->set_outer((Flx16)xdlg.m_outer);
+                ((EschAttenLight*)(*lgt))->set_inner(xdlg.m_inner);
+                ((EschAttenLight*)(*lgt))->set_outer(xdlg.m_outer);
                 break;
             case ESCH_LGTT_FSPOT:
-                ((EschFastSpotLight*)(*lgt))->set_direction((Flx16)xdlg.m_diri,
-                                                        (Flx16)xdlg.m_dirj,
-                                                        (Flx16)xdlg.m_dirk);
-                ((EschFastSpotLight*)(*lgt))->set_hotspot((Flx16)xdlg.m_hotspot);
-                ((EschFastSpotLight*)(*lgt))->set_falloff((Flx16)xdlg.m_falloff);
-                ((EschFastSpotLight*)(*lgt))->set_inner((Flx16)xdlg.m_inner);
-                ((EschFastSpotLight*)(*lgt))->set_outer((Flx16)xdlg.m_outer);
+                ((EschFastSpotLight*)(*lgt))->set_direction(xdlg.m_diri,
+                                                            xdlg.m_dirj,
+                                                            xdlg.m_dirk);
+                ((EschFastSpotLight*)(*lgt))->set_hotspot(xdlg.m_hotspot);
+                ((EschFastSpotLight*)(*lgt))->set_falloff(xdlg.m_falloff);
+                ((EschFastSpotLight*)(*lgt))->set_inner(xdlg.m_inner);
+                ((EschFastSpotLight*)(*lgt))->set_outer(xdlg.m_outer);
                 break;
             case ESCH_LGTT_SPOT:
-                ((EschSpotLight*)(*lgt))->set_direction((Flx16)xdlg.m_diri,
-                                                        (Flx16)xdlg.m_dirj,
-                                                        (Flx16)xdlg.m_dirk);
-                ((EschSpotLight*)(*lgt))->set_hotspot((Flx16)xdlg.m_hotspot);
-                ((EschSpotLight*)(*lgt))->set_falloff((Flx16)xdlg.m_falloff);
-                ((EschSpotLight*)(*lgt))->set_inner((Flx16)xdlg.m_inner);
-                ((EschSpotLight*)(*lgt))->set_outer((Flx16)xdlg.m_outer);
+                ((EschSpotLight*)(*lgt))->set_direction(xdlg.m_diri,
+                                                        xdlg.m_dirj,
+                                                        xdlg.m_dirk);
+                ((EschSpotLight*)(*lgt))->set_hotspot(xdlg.m_hotspot);
+                ((EschSpotLight*)(*lgt))->set_falloff(xdlg.m_falloff);
+                ((EschSpotLight*)(*lgt))->set_inner(xdlg.m_inner);
+                ((EschSpotLight*)(*lgt))->set_outer(xdlg.m_outer);
                 break;
         }
 
@@ -888,34 +895,34 @@ BOOL ToolView::ui_mesh_properties(EschMeshDraw *msh, int doupdate)
 
         // Set directly since we are already directly setting
         // the orient matrix below.
-        msh->local.orient.mtx[ESCH_MTX_J] = (Flx16)gdlg.m_xpos;
-        msh->local.orient.mtx[ESCH_MTX_K] = (Flx16)gdlg.m_ypos;
-        msh->local.orient.mtx[ESCH_MTX_L] = (Flx16)gdlg.m_zpos;
+        msh->local.orient.mtx[ESCH_MTX_J] = gdlg.m_xpos;
+        msh->local.orient.mtx[ESCH_MTX_K] = gdlg.m_ypos;
+        msh->local.orient.mtx[ESCH_MTX_L] = gdlg.m_zpos;
 
         //ÄÄÄ Orientation
-        msh->local.orient.mtx[ESCH_MTX_A] = (Flx16)odlg.m_mtxa;
-        msh->local.orient.mtx[ESCH_MTX_B] = (Flx16)odlg.m_mtxb;
-        msh->local.orient.mtx[ESCH_MTX_C] = (Flx16)odlg.m_mtxc;
-        msh->local.orient.mtx[ESCH_MTX_D] = (Flx16)odlg.m_mtxd;
-        msh->local.orient.mtx[ESCH_MTX_E] = (Flx16)odlg.m_mtxe;
-        msh->local.orient.mtx[ESCH_MTX_F] = (Flx16)odlg.m_mtxf;
-        msh->local.orient.mtx[ESCH_MTX_G] = (Flx16)odlg.m_mtxg;
-        msh->local.orient.mtx[ESCH_MTX_H] = (Flx16)odlg.m_mtxh;
-        msh->local.orient.mtx[ESCH_MTX_I] = (Flx16)odlg.m_mtxi;
+        msh->local.orient.mtx[ESCH_MTX_A] = odlg.m_mtxa;
+        msh->local.orient.mtx[ESCH_MTX_B] = odlg.m_mtxb;
+        msh->local.orient.mtx[ESCH_MTX_C] = odlg.m_mtxc;
+        msh->local.orient.mtx[ESCH_MTX_D] = odlg.m_mtxd;
+        msh->local.orient.mtx[ESCH_MTX_E] = odlg.m_mtxe;
+        msh->local.orient.mtx[ESCH_MTX_F] = odlg.m_mtxf;
+        msh->local.orient.mtx[ESCH_MTX_G] = odlg.m_mtxg;
+        msh->local.orient.mtx[ESCH_MTX_H] = odlg.m_mtxh;
+        msh->local.orient.mtx[ESCH_MTX_I] = odlg.m_mtxi;
         msh->local.compute_inverse();
         msh->compute_world();
 
         //ÄÄÄ Extents
-        msh->mesh->sphere.center.x  = (Flx16)edlg.m_xcen;
-        msh->mesh->sphere.center.y  = (Flx16)edlg.m_ycen;
-        msh->mesh->sphere.center.z  = (Flx16)edlg.m_zcen;
-        msh->mesh->sphere.radius    = (Flx16)edlg.m_radius;
-        msh->mesh->box.mins[0]      = (Flx16)edlg.m_xmin;
-        msh->mesh->box.mins[1]      = (Flx16)edlg.m_ymin;
-        msh->mesh->box.mins[2]      = (Flx16)edlg.m_zmin;
-        msh->mesh->box.maxs[0]      = (Flx16)edlg.m_xmax;
-        msh->mesh->box.maxs[1]      = (Flx16)edlg.m_ymax;
-        msh->mesh->box.maxs[2]      = (Flx16)edlg.m_zmax;
+        msh->mesh->sphere.center.x  = edlg.m_xcen;
+        msh->mesh->sphere.center.y  = edlg.m_ycen;
+        msh->mesh->sphere.center.z  = edlg.m_zcen;
+        msh->mesh->sphere.radius    = edlg.m_radius;
+        msh->mesh->box.mins[0]      = edlg.m_xmin;
+        msh->mesh->box.mins[1]      = edlg.m_ymin;
+        msh->mesh->box.mins[2]      = edlg.m_zmin;
+        msh->mesh->box.maxs[0]      = edlg.m_xmax;
+        msh->mesh->box.maxs[1]      = edlg.m_ymax;
+        msh->mesh->box.maxs[2]      = edlg.m_zmax;
         
         //ÄÄÄ Application Flags
         dword flags = msh->mesh->flags;
@@ -2098,13 +2105,13 @@ void ToolView::OnUpdateViewAutoRotateZ(CCmdUI* pCmdUI)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 void ToolView::OnViewAutoRotateFast() 
 {
-    AutoRotateSpeed = Flx16(AUTOROTATE_FAST);
+    AutoRotateSpeed = float(AUTOROTATE_FAST);
     Clock.clear();
 }
 
 void ToolView::OnUpdateViewAutoRotateFast(CCmdUI* pCmdUI) 
 {
-    pCmdUI->SetCheck( (AutoRotateSpeed == Flx16(AUTOROTATE_FAST)) ? 1 : 0);
+    pCmdUI->SetCheck( (AutoRotateSpeed == float(AUTOROTATE_FAST)) ? 1 : 0);
 }
 
 
@@ -2113,13 +2120,13 @@ void ToolView::OnUpdateViewAutoRotateFast(CCmdUI* pCmdUI)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 void ToolView::OnViewAutoRotateSlow() 
 {
-    AutoRotateSpeed = Flx16(AUTOROTATE_SLOW);
+    AutoRotateSpeed = float(AUTOROTATE_SLOW);
     Clock.clear();
 }
 
 void ToolView::OnUpdateViewAutoRotateSlow(CCmdUI* pCmdUI) 
 {
-    pCmdUI->SetCheck( (AutoRotateSpeed == Flx16(AUTOROTATE_SLOW)) ? 1 : 0);
+    pCmdUI->SetCheck( (AutoRotateSpeed == float(AUTOROTATE_SLOW)) ? 1 : 0);
 }
 
 

@@ -2,9 +2,9 @@
 //
 //                                                           %__________%
 //                                                          %/ . .  .   \%
-//           Van Gogh 2D-Display Library                     |  . .  o. | 
+//           Van Gogh 2D-Display Library                     |  . .  o. |
 //                                                           |. _  .   .|
-// Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.    | / \   .  | 
+// Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.    | / \   .  |
 //              All rights reserved.                         |_|_|_._._.|
 //                                                           |.-.-.-.-..|
 //                                                          %\__________/%
@@ -27,11 +27,10 @@
 //
 // vngdefs.h
 //
-//ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ Revision History ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
+
 #ifndef __VNGDEFS_H
 #define __VNGDEFS_H    1
-
 
 #ifdef __cplusplus
 extern "C" {
@@ -39,15 +38,16 @@ extern "C" {
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
-//                                Includes
-//                                
-//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-
-//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-//
 //                                Equates
 //
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+#define _D3D         // Does not depend on the _OEMS #define
+
+#define _OEMS
+//#define _CLEAR_3D    // Does depend on the _OEMS #define
+//#define _3DFX        // Does depend on the _OEMS #define
+//#define _MSI         // Does depend on the _OEMS #define
 
 #define VNGO_MAX_RESOLUTION     2048
 #define VNGO_PERSP_OFF          VNGO_MAX_RESOLUTION + 1
@@ -55,11 +55,15 @@ extern "C" {
 #define VNGO_MAX_VERTCOUNT      12
 
 #define VNGO_COLOR_24BIT        0x10000000
+#define VNGO_COLOR_15BIT        0x20000000
+#define VNGO_COLOR_16BIT        0x40000000
 
 // Flags for the Screen manager
 #define VNGO_SET_RESOLUTION     0x1
 #define VNGO_TRUE_FLIP          0x2
 #define VNGO_FORCE_SYSTEMMEMORY 0x4
+#define VNGO_ALLOC_ZBUFFER      0x8
+#define VNGO_3DDEVICE           0x10
 
 // Flags for the ViewPort.
 #define VNGO_PAL_MAPPED_DEV     0x1
@@ -73,12 +77,15 @@ extern "C" {
 #define VNGO_PAL_CALC           0x100
 #define VNGO_ZMAP_DEV           0x200
 #define VNGO_ZMAP_ACTIVE        0x400
+
 // Flags for the ViewPort Drawing control.
 #define VNGO_DITHER_OFF         0x1000
 #define VNGO_DITHER_4X4         0x2000
+#define VNGO_TRUE_ALPHA         0x4000
 
 #define VNGO_MYMEM_SHADE        0x10
 #define VNGO_MYMEM_HAZE         0x20
+#define VNGO_MYDDPAL            0x40
 
 #define VNGO_PAL_SIZE           256
 #define VNGO_SHADE_TABLE_SIZE   32
@@ -89,7 +96,6 @@ extern "C" {
 #define VNGO_32BIT              0x10
 #define VNGO_SHADE_RGB          0x20
 
-
 // Image transfer flags.
 #define VNGO_TRANSPARENT        0xFF000000
 #define VNGO_TRANSPARENT_COLOR  0xFF
@@ -98,21 +104,25 @@ extern "C" {
 #define VNGO_COMPARE_EQUAL      0x400
 #define VNGO_COPY               0x000
 
+// Flags for the Texture Manager
+#define VNGO_TEXTURE_CACHED_OUT     0x0
+#define VNGO_TEXTURE_CACHED_IN      0x1
+
 // VangoTexture flags.
 #define VNGO_TEXTURE_MONO           0x1
 #define VNGO_TEXTURE_1BIT           0x1
-#define VNGO_TEXTURE_2BIT           0x2     // Not Currently in use 
-#define VNGO_TEXTURE_4BIT           0x4     // Not Currently in use 
-#define VNGO_TEXTURE_8BIT           0x8  
-#define VNGO_TEXTURE_15BIT          0x10    // Not Currently in use 
-#define VNGO_TEXTURE_16BIT          0x20    // Not Currently in use 
-#define VNGO_TEXTURE_24BIT          0x40    // Not Currently in use 
-#define VNGO_TEXTURE_32BIT          0x80    // Not Currently in use 
+#define VNGO_TEXTURE_2BIT           0x2     // Not Currently in use
+#define VNGO_TEXTURE_4BIT           0x4     // Not Currently in use
+#define VNGO_TEXTURE_8BIT           0x8
+#define VNGO_TEXTURE_15BIT          0x10    // Only used for image_trans
+#define VNGO_TEXTURE_16BIT          0x20    // Only used for image_trans
+#define VNGO_TEXTURE_24BIT          0x40    // Not Currently in use
+#define VNGO_TEXTURE_32BIT          0x80    // Not Currently in use
 #define VNGO_TEXTURE_SHADOWS        0x100   // Not Currently in use
-#define VNGO_TEXTURE_ALPHA          0x200   // Not Currently in use 
-#define VNGO_TEXTURE_ZMAP           0x400   
-#define VNGO_TEXTURE_SHADE          0x800   // Not Currently in use 
-#define VNGO_TEXTURE_COMPRESSED     0x1000  // Not Currently in use
+#define VNGO_TEXTURE_ALPHA          0x200   // Not Currently in use
+#define VNGO_TEXTURE_ZMAP           0x400
+#define VNGO_TEXTURE_SHADE          0x800   // Not Currently in use
+#define VNGO_TEXTURE_COMPRESSED     0x1000
 #define VNGO_TEXTURE_TRANSPARENT    0x2000
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
@@ -131,15 +141,22 @@ enum _vngo_error_codes
    VNGO_UNSUPPORTED_TEXTURE     = 5,
    VNGO_MEMORY_ERROR            = 6,
    VNGO_INTERNAL_ERROR          = 7,
+   VNGO_NOSCREEN_ERROR          = 8,
 };
 
 typedef enum _vngo_error_codes VNGError;
 
-//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-//
-//                                Macros
-//
-//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+enum _vngo_texture_type
+{
+    VNGO_MEM_TEX                = 0,
+    VNGO_D3D_TEX                = 1,
+    VNGO_CLEAR3D_TEX            = 2,
+    VNGO_OPENGL_TEX             = 3,
+    VNGO_MSI_TEX                = 4,
+    VNGO_GLIDE_TEX              = 5,
+};
+
+typedef enum _vngo_texture_type VngoTextureType;
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
@@ -147,10 +164,10 @@ typedef enum _vngo_error_codes VNGError;
 //
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
-
 #ifdef __cplusplus
 }
 #endif          // __cplusplus
-#endif          // __VNGDEFS_INC
 
-//°±² End of module - vngdefs.inc ²±°
+#endif          // __VNGDEFS_H
+
+//°±² End of module - vngdefs.h ²±°

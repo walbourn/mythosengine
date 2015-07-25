@@ -30,8 +30,9 @@
 // xfxeb.cpp
 //
 // Contains code for working with Charybdis' XEB form, which is
-// a custom RLE format, which supports 8-bit, 16-bit, 24-bit, and
-// 32-bit image data in both compressed and uncompressed forms.
+// a custom RLE format, which supports monochrome uncompressed and
+// 8-bit, 16-bit, 24-bit, and 32-bit image data in both compressed
+// and uncompressed forms.
 //
 //อออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออ
 
@@ -89,6 +90,7 @@ xf_error_codes XFParseXEB::read(XFParseIFF *iff, XFBitmap *b)
 {
     xf_error_codes  err;
     byte            *work=0;
+    ulong           size=0;
     XFXEBHeader     header;
 
     if (!b)
@@ -128,12 +130,30 @@ xf_error_codes XFParseXEB::read(XFParseIFF *iff, XFBitmap *b)
     if (header.version != XFEB_VERSION
         || !header.width
         || !header.height
-        || (header.bpp < 1 || header.bpp > 4)
         || (header.compress != XF_XEB_COMPRESS_RLE
             && header.compress != XF_XEB_COMPRESS_NONE))
     {
         err=XF_ERR_NOTSUPPORTED;
         goto error_exit;
+    }
+
+    switch (header.bpp)
+    {
+        case XFBM_BPP_MONO:
+            if (header.compress != XF_XEB_COMPRESS_NONE)
+            {
+                err=XF_ERR_NOTSUPPORTED;
+                goto error_exit;
+            }
+            break;
+        case XFBM_BPP_8BIT:
+        case XFBM_BPP_15BIT:
+        case XFBM_BPP_24BIT:
+        case XFBM_BPP_32BIT:
+            break;
+        default:
+            err=XF_ERR_NOTSUPPORTED;
+            goto error_exit;
     }
 
 //ฤฤฤ Setup bitmap object
@@ -146,7 +166,7 @@ xf_error_codes XFParseXEB::read(XFParseIFF *iff, XFBitmap *b)
     b->bpp = header.bpp;
 
 //ฤฤฤ Palette data
-    if (b->bpp == 1)
+    if (b->bpp == XFBM_BPP_8BIT)
     {
         if (iff->seekchunk(iff->makeid('P','A','L',' ')))
         {
@@ -193,8 +213,12 @@ xf_error_codes XFParseXEB::read(XFParseIFF *iff, XFBitmap *b)
         goto error_exit;
     }
 
+    size = (header.bpp == XFBM_BPP_MONO)
+           ? (((b->width + 7) >> 3) * b->height)
+           : (b->width * b->height * b->bpp);
+
     // Allocate memory
-    b->handle = ivory_halloc(b->width * b->height * b->bpp);
+    b->handle = ivory_halloc(size);
     if (!b->handle)
     {
         err=XF_ERR_NOMEMORY;
@@ -211,7 +235,7 @@ xf_error_codes XFParseXEB::read(XFParseIFF *iff, XFBitmap *b)
     switch (header.compress)
     {
         case XF_XEB_COMPRESS_NONE:
-            if (iff->chunkSize != (ulong)(b->width * b->height * b->bpp))
+            if (iff->chunkSize != size)
             {
                 err=XF_ERR_INVALIDIMAGE;
                 goto error_exit;
@@ -240,7 +264,7 @@ xf_error_codes XFParseXEB::read(XFParseIFF *iff, XFBitmap *b)
 
             switch (b->bpp)
             {
-                case 2:
+                case XFBM_BPP_15BIT:
                     if (uncompress_rle_16bpp(b->width,b->height,
                                              iff->chunkSize, work,
                                              b->data))
@@ -249,7 +273,7 @@ xf_error_codes XFParseXEB::read(XFParseIFF *iff, XFBitmap *b)
                         goto error_exit;
                     }
                     break;
-                case 3:
+                case XFBM_BPP_24BIT:
                     if (uncompress_rle_24bpp(b->width,b->height,
                                              iff->chunkSize, work,
                                              b->data))
@@ -258,7 +282,7 @@ xf_error_codes XFParseXEB::read(XFParseIFF *iff, XFBitmap *b)
                         goto error_exit;
                     }
                     break;
-                case 4:
+                case XFBM_BPP_32BIT:
                     if (uncompress_rle_32bpp(b->width,b->height,
                                              iff->chunkSize, work,
                                              b->data))
@@ -268,7 +292,7 @@ xf_error_codes XFParseXEB::read(XFParseIFF *iff, XFBitmap *b)
                     }
                     break;
                 default:
-                    assert(b->bpp == 1);
+                    assert(b->bpp == XFBM_BPP_8BIT);
                     if (uncompress_rle_8bpp(b->width,b->height,
                                             iff->chunkSize, work,
                                             b->data))
@@ -334,15 +358,26 @@ xf_error_codes XFParseXEB::write(XFParseIFF *iff, XFBitmap *b)
     int             locked=0;
     xf_error_codes  err;
     byte            *work=0;
-    dword           size;
+    ulong           size=0;
     XFXEBHeader     header;
 
     if (!b)
         b = bm;
 
-    if ((b->bpp < 1 || b->bpp > 4)
-        || !b->width || !b->height)
-        return XF_ERR_NOTSUPPORTED;
+    if (!b->width || !b->height)
+        return (errorn=XF_ERR_NOTSUPPORTED);
+
+    switch (b->bpp)
+    {
+        case XFBM_BPP_MONO:
+        case XFBM_BPP_8BIT:
+        case XFBM_BPP_15BIT:
+        case XFBM_BPP_24BIT:
+        case XFBM_BPP_32BIT:
+            break;
+        default:
+            return (errorn=XF_ERR_NOTSUPPORTED);
+    }
 
 //ฤฤ Enter form
     if (iff->newform(iff->makeid('X','F','E','B')))
@@ -375,34 +410,39 @@ xf_error_codes XFParseXEB::write(XFParseIFF *iff, XFBitmap *b)
         return (errorn=XF_ERR_INVALIDIMAGE);
     }
 
-    work=new byte[b->width * b->height * b->bpp];
-    if (!work)
+    if (b->bpp != XFBM_BPP_MONO)
     {
-        err=XF_ERR_NOMEMORY;
-        goto error_exit;
-    }
+        work=new byte[b->width * b->height * b->bpp];
+        if (!work)
+        {
+            err=XF_ERR_NOMEMORY;
+            goto error_exit;
+        }
 
-    switch (b->bpp)
-    {
-        case 2:
-            size=compress_rle_16bpp(b->width,b->height,b->data,work);
-            break;
-        case 3:
-            size=compress_rle_24bpp(b->width,b->height,b->data,work);
-            break;
-        case 4:
-            size=compress_rle_32bpp(b->width,b->height,b->data,work);
-            break;
-        default:
-            assert(b->bpp == 1);
-            size=compress_rle_8bpp(b->width,b->height,b->data,work);
-            break;
-    }
+        switch (b->bpp)
+        {
+            case XFBM_BPP_8BIT:
+                size=compress_rle_8bpp(b->width,b->height,b->data,work);
+                break;
+            case XFBM_BPP_15BIT:
+                size=compress_rle_16bpp(b->width,b->height,b->data,work);
+                break;
+            case XFBM_BPP_24BIT:
+                size=compress_rle_24bpp(b->width,b->height,b->data,work);
+                break;
+            case XFBM_BPP_32BIT:
+                size=compress_rle_32bpp(b->width,b->height,b->data,work);
+                break;
+            default:
+                size=0;
+                break;
+        }
 
-    if (!size)
-    {
-        delete [] work;
-        work=0;
+        if (!size)
+        {
+            delete [] work;
+            work=0;
+        }
     }
 
 //ฤฤฤ Write header ฤฤฤ
@@ -420,7 +460,7 @@ xf_error_codes XFParseXEB::write(XFParseIFF *iff, XFBitmap *b)
     }
 
 //ฤฤฤ Palette data
-    if (b->bpp == 1)
+    if (b->bpp == XFBM_BPP_8BIT)
     {
         if (!b->pal)
         {
@@ -444,8 +484,12 @@ xf_error_codes XFParseXEB::write(XFParseIFF *iff, XFBitmap *b)
     else
     {
         assert(header.compress == XF_XEB_COMPRESS_NONE);
-        err=iff->write(iff->makeid('B','O','D','Y'),
-                       b->data,b->width*b->height*b->bpp);
+
+        size = (b->bpp == XFBM_BPP_MONO)
+               ? (((b->width + 7) >> 3) * b->height)
+               : (b->width * b->height * b->bpp);
+
+        err=iff->write(iff->makeid('B','O','D','Y'),b->data,size);
     }
 
     if (err)

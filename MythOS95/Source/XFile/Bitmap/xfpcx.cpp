@@ -119,7 +119,7 @@ xf_error_codes XFParsePCX::read(XFBitmap *b)
     b->clrinuse=0;
     b->width = (ushort) (header.xmax - header.xmin + 1);
     b->height = (ushort) (header.ymax - header.ymin + 1);
-    b->bpp = 1;
+    b->bpp = XFBM_BPP_8BIT;
  
 //ÄÄÄ Load image data ÄÄÄ
 
@@ -248,8 +248,9 @@ xf_error_codes XFParsePCX::write(XFBitmap *b)
     if (!b)
         b = bm;
 
-    if (b->bpp != 1 || !b->width || !b->height)
-        return XF_ERR_NOTSUPPORTED;
+    if (b->bpp != XFBM_BPP_8BIT
+        || !b->width || !b->height)
+        return (errorn=XF_ERR_NOTSUPPORTED);
 
 //ÄÄÄ Write header ÄÄÄ
     memset(&header,0,sizeof(PCX_header));

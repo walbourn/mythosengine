@@ -95,7 +95,7 @@ EschFastPointLight::EschFastPointLight(const EschPoint *pnt) :
     intensity = 255;
 };
 
-EschFastPointLight::EschFastPointLight(Flx16 ix, Flx16 iy, Flx16 iz) : 
+EschFastPointLight::EschFastPointLight(float ix, float iy, float iz) : 
     EschLight(),
     pos(ix,iy,iz)
 {
@@ -146,7 +146,13 @@ void EschFastPointLight::setup(const EschFrameRef *fr)
         tdir.j = pos.y;
         tdir.k = pos.z;
     }
-    tdir.normalize();
+    float mag = tdir.magnitude();
+    if (mag > 0)
+    {
+        tdir.i /= mag;
+        tdir.j /= mag;
+        tdir.k /= mag;
+    }
 
     EschLight::setup(fr);
 }
@@ -162,28 +168,35 @@ void EschFastPointLight::setup(const EschFrameRef *fr)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 void EschFastPointLight::shine(const EschVertex *v, VngoPoint *vpt, int revnrml) const 
 {                                                          
-    if (!(flags & ESCH_LGT_OFF) && _intensity.flx > 0)
+    if (!(flags & ESCH_LGT_OFF) && _intensity > 0)
     {
         // Compute dot product
-        Flx16 dot = v->normal DOT tdir;
+        float dot = v->normal DOT tdir;
 
-        if (dot.flx < 0)
+        if (dot < 0)
         {
-            dot.flx = (revnrml) ? -dot.flx : 0;
+            dot = (revnrml) ? -dot : 0;
         }
 
-        if (dot.flx > (1<<16))
-            dot.flx = (1<<16);
-        
         // Compute shade value
-        long i = (dot.flx * (_intensity.flx >> 16)) >> 16;
-        if (vpt->shade < i)
-            vpt->shade = i;
+        long i = long(dot * _intensity);
+
+        vpt->shade += long(dot * _intensity);
     }
 
 //ÄÄÄ Chain for true multiple lights
     if (inext)
+    {
         inext->shine(v,vpt,revnrml);
+    }
+//ÄÄÄ Clamp shade value
+    else
+    {
+        if (vpt->shade > mp)
+            vpt->shade = mp;
+        else if (vpt->shade < 0)
+            vpt->shade = 0;
+    }
 }
 
 
@@ -197,28 +210,33 @@ void EschFastPointLight::shine(const EschVertex *v, VngoPoint *vpt, int revnrml)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 void EschFastPointLight::hishine(const EschVertex *v, VngoPoint *vpt, int revnrml) const 
 {
-    if (!(flags & ESCH_LGT_OFF) && _hintensity.flx > 0)
+    if (!(flags & ESCH_LGT_OFF) && _hintensity > 0)
     {
         // Compute dot product
-        Flx16 dot = v->normal DOT tdir;
+        float dot = v->normal DOT tdir;
 
-        if (dot.flx < 0)
+        if (dot < 0)
         {
-            dot.flx = (revnrml) ? -dot.flx : 0;
+            dot = (revnrml) ? -dot : 0;
         }
-
-        if (dot.flx > (1<<16))
-            dot.flx = (1<<16);
         
         // Compute shade value
-        long i = (dot.flx * (_hintensity.flx >> 16)) >> 16;
-        if (vpt->shade < i)
-            vpt->shade = i;
+        vpt->shade += long(dot * _hintensity);
     }
 
 //ÄÄÄ Chain for true multiple lights
     if (inext)
+    {
         inext->hishine(v,vpt,revnrml);
+    }
+//ÄÄÄ Clamp shade value
+    else
+    {
+        if (vpt->shade > VNGO_SHADE_FULL)
+            vpt->shade = VNGO_SHADE_FULL;
+        else if (vpt->shade < 0)
+            vpt->shade = 0;
+    }
 }
 
 
@@ -258,7 +276,8 @@ esch_error_codes EschFastPointLight::load(const char *fname, const char *lname)
             iff.leaveform();
         }
 
-        if (iff.chunkid == iff.makeid('E','F','P','T'))
+        if (iff.chunkid == iff.makeid('E','F','P','T')
+            || iff.chunkid == iff.makeid('E','F','P','1'))
         {
             err=load(&iff,lname);
             if (!err
@@ -281,34 +300,62 @@ esch_error_codes EschFastPointLight::load(const char *fname, const char *lname)
 
 esch_error_codes EschFastPointLight::load(XFParseIFF *iff, const char *lname)
 {
-    EschFileLightPoint fpnt;
 
     assertMyth("EschFastPointLight::load requries iff pointer",
                iff);
 
-//ÄÄ Verify correct chunk name and size
-    if (iff->chunkid != iff->makeid('E','F','P','T'))
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Floating-point format
+    if (iff->chunkid == iff->makeid('E','F','P','1'))
+    {
+        EschFileLightPoint fpnt;
+
+        if (iff->chunkSize != sizeof(fpnt))
+            return ESCH_ERR_INVALIDDATA;
+
+        //ÄÄ Read chunk and verify name, if given.
+        if (iff->read(&fpnt))
+            return ESCH_ERR_FILEERROR;
+
+        if (lname && strcmp(lname,fpnt.name))
+            return ESCH_ERR_NOTFOUND;
+
+        //ÄÄ Found, so setup Fast Point Light
+        strcpy(name,fpnt.name);
+        flags = fpnt.flags;
+
+        VngoColor24bit  c(fpnt.color);
+        set_intensity( max( max(c.r, c.g), c.b ) );
+
+        set_position( fpnt.x, fpnt.y, fpnt.z );
+    }
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Fixed-point format
+    else if (iff->chunkid == iff->makeid('E','F','P','T'))
+    {
+        EschFileLightPointV1 fpnt;
+
+        if (iff->chunkSize != sizeof(fpnt))
+            return ESCH_ERR_INVALIDDATA;
+
+        //ÄÄ Read chunk and verify name, if given.
+        if (iff->read(&fpnt))
+            return ESCH_ERR_FILEERROR;
+
+        if (lname && strcmp(lname,fpnt.name))
+            return ESCH_ERR_NOTFOUND;
+
+        //ÄÄ Found, so setup Fast Point Light
+        strcpy(name,fpnt.name);
+        flags = fpnt.flags;
+
+        VngoColor24bit  c(fpnt.color);
+        set_intensity( max( max(c.r, c.g), c.b ) );
+
+        set_position(fpnt.x / 65536.0f, fpnt.y / 65536.0f, fpnt.z / 65536.0f);
+    }
+    else
+    {
         return ESCH_ERR_NOTFOUND;
-
-    if (iff->chunkSize != sizeof(EschFileLightPoint))
-        return ESCH_ERR_INVALIDDATA;
-
-//ÄÄ Read chunk and verify name, if given.
-    if (iff->read(&fpnt))
-        return ESCH_ERR_FILEERROR;
-
-    if (lname && strcmp(lname,fpnt.name))
-        return ESCH_ERR_NOTFOUND;
-
-//ÄÄ Found, so setup Fast Point Light
-
-    strcpy(name,fpnt.name);
-    flags = fpnt.flags;
-
-    VngoColor24bit  c(fpnt.color);
-    set_intensity( max( max(c.r, c.g), c.b ) );
-
-    set_position( fpnt.x, fpnt.y, fpnt.z );
+    }
 
 //ÄÄ Return ok
     return ESCH_ERR_NONE;

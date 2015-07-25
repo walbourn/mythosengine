@@ -303,7 +303,7 @@ int EschGeometry::get_extents(EschSphereExtents *sp) const
                sp != 0);
 
     sphere->center.transform(&world.orient,&sp->center);
-    sp->radius = flx_16mul16(sphere->radius,world.scalef);
+    sp->radius = sphere->radius * world.scalef;
 
     assertMyth("EschGeometry::get_extents transformed to invalid radius",
                sp->radius >= 0);
@@ -320,7 +320,7 @@ int EschGeometry::get_extents(EschSphereExtents *sp) const
 // It returns a zero if it missed the object, a positive distance along the ³
 // ray if it hit, or -1 if the intersection is not supported.               ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-Flx16 EschGeometry::ray(const EschPoint *pt, const EschVector *v, int coarse) const
+float EschGeometry::ray(const EschPoint *pt, const EschVector *v, int coarse) const
 {
     assertMyth("EschGeometry::ray needs point and vector",
                pt != 0 && v != 0);
@@ -339,9 +339,9 @@ Flx16 EschGeometry::ray(const EschPoint *pt, const EschVector *v, int coarse) co
 //  ray.normalize();
 
 //ÄÄÄ Perform intersection check (Ray/Sphere intersection)
-    Flx16 dist=sphere->ray(&point,&ray);
+    float dist=sphere->ray(&point,&ray);
     
-    if (dist.flx <= 0)
+    if (dist <= 0)
         return 0;
 
     return ((world.scalef == 1) ? dist : (dist * world.scalef));
@@ -354,7 +354,7 @@ Flx16 EschGeometry::ray(const EschPoint *pt, const EschVector *v, int coarse) co
 // Performs a sphere intersection test with the object (or its extents),    ³
 // returning 1 if it hit, 0 if it missed, -1 if not supported.              ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-int EschGeometry::hit(const EschPoint *pt, const Flx16 r, int coarse) const
+int EschGeometry::hit(const EschPoint *pt, const float r, int coarse) const
 {
     assertMyth("EschGeometry::hit needs point and radius",
                pt != 0 && r >= 0);
@@ -365,8 +365,8 @@ int EschGeometry::hit(const EschPoint *pt, const Flx16 r, int coarse) const
     EschPoint   center;
     pt->transform(&world.iorient,&center);
 
-    return sphere->hit(&center,(world.scalef == 1)
-                               ? r : flx_16div16(r,world.scalef));
+    return sphere->hit(&center,(world.scalef == 1.0)
+                               ? r : (r / world.scalef));
 }
 
 
@@ -456,7 +456,7 @@ esch_error_codes EschGeometry::collide(EschCollision *data) const
 
         // Test
         if (exts.hit(&center,
-                     flx_16div16(data->sphere.radius,world.scalef)) != 1)
+                     (data->sphere.radius / world.scalef)) != 1)
             return ESCH_ERR_NONE;
 
         //ÄÄÄ Do standard operation on 'this'
@@ -558,10 +558,8 @@ void EschGeometry::compute_world(dword update)
 void EschGeometry::compute_extents(int partialfix, int doparent)
 {
     EschGeometry    *ptr;
-    Flx16           diff;
-    Flx16           maxdiff;
     EschPoint       pt;
-    Flx16           r;
+    float           r;
 
 //ÄÄÄ Redo children, if not doing a partial fix (don't have children
 //ÄÄÄ call parent or we'll loop infinetly).
@@ -587,7 +585,7 @@ void EschGeometry::compute_extents(int partialfix, int doparent)
         // after the transform).
 
         ptr->exts.center.transform(&ptr->local,&pt);
-        r = flx_16mul16( ptr->exts.radius, ptr->local.scalef );
+        r = ptr->exts.radius * ptr->local.scalef;
 
         // Extend our extents to include child, if needed
         // (for simplicity, we won't allow our center to move).
@@ -596,7 +594,7 @@ void EschGeometry::compute_extents(int partialfix, int doparent)
                       pt.y - exts.center.y,
                       pt.z - exts.center.z);
 
-        Flx16 m = v.magnitude() + r;
+        float m = v.magnitude() + r;
 
         if (m > exts.radius)
             exts.radius = m;

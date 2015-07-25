@@ -81,34 +81,32 @@ void EschSphereExtents::draw(const EschFrameRef *fr, dword clr) const
         frame.orient = cam->eye.iorient;
 
 //ÄÄÄ Setup for compare
-    Flx16 yon = cam->yon;
-    Flx16 hither = cam->hither;
+    float yon = cam->yon;
+    float hither = cam->hither;
     
 //ÄÄÄ Transform center into view
     center.transform(&frame,&p);
 
 //ÄÄÄ Scale radius
-    Flx16 r = flx_16mul16( radius, 
-              flx_16mul16( fr->scalef, 
-                           cam->radius_factor ) );
+    float r = radius * fr->scalef * cam->radius_factor;
 
     assertMyth("EschSphereExtents::draw scaled to a negative radius",
-               r.flx >= 0);
+               r >= 0);
 
 //ÄÄÄ Check for fully invisible against hither/yon
-    if ( (p.z.flx < hither.flx)
-         || (p.z.flx > yon.flx)
-         || ((p.z.flx + r.flx) < hither.flx)
-         || ((p.z.flx - r.flx) > yon.flx) )
+    if ( (p.z < hither)
+         || (p.z > yon)
+         || ((p.z + r) < hither)
+         || ((p.z - r) > yon) )
         return;
 
 //ÄÄÄ Draw radial extent
-    long x = (flx_muldiv(p.x, cam->xscalar, p.z).flx
-             + (cam->vport->get_vbuff()->width<<15)) >> 16;
-    long y = ((cam->vport->get_vbuff()->height<<15)
-             - flx_muldiv(p.y, cam->yscalar, p.z).flx) >> 16;
-    long rd = ((flx_muldiv(p.x + r, cam->xscalar, p.z).flx
-               + (cam->vport->get_vbuff()->width<<15)) >> 16) - x;
+    long x = long((p.x * cam->xscalar) / p.z)
+             + (cam->vport->vbuff.width>>1);
+    long y = (cam->vport->vbuff.height>>1)
+             - long((p.y * cam->yscalar) / p.z);
+    long rd = long(((p.x + r) * cam->xscalar) / p.z)
+              + (cam->vport->vbuff.width>>1) - x;
 
     vngo_clip_circle(cam->vport,x,y,rd,clr);
 }
@@ -130,22 +128,22 @@ int EschSphereExtents::hit(const EschPoint *pt) const
                   pt->z - center.z);
 
 //ÄÄÄ Check for trivial reject
-    Flx16 r = radius;
-    Flx16 nr = - r;
+    float r = radius;
+    float nr = - r;
 
-    if (p.i.flx > r.flx
-        || p.i.flx < nr.flx
-        || p.k.flx > r.flx
-        || p.k.flx < nr.flx
-        || p.j.flx > r.flx
-        || p.j.flx < nr.flx)
+    if (p.i > r
+        || p.i < nr
+        || p.k > r
+        || p.k < nr
+        || p.j > r
+        || p.j < nr)
         return 0;
 
 //ÄÄÄ Check with true magnitude
-    return  (((p.magnitude()).flx < r.flx) ? 1 : 0);
+    return  (((p.magnitude()) < r) ? 1 : 0);
 }
 
-int EschSphereExtents::hit(const EschPoint *pt, const Flx16 r) const
+int EschSphereExtents::hit(const EschPoint *pt, const float r) const
 {
     assertMyth("EschSphereExtents::hit needs point and radius",
                pt != 0 && r >= 0);
@@ -155,20 +153,60 @@ int EschSphereExtents::hit(const EschPoint *pt, const Flx16 r) const
                   pt->z - center.z);
 
 //ÄÄÄ Check for trivial reject
-    Flx16 rs = radius + r;
-    Flx16 nrs = - rs;
+    float rs = radius + r;
+    float nrs = - rs;
 
-    if (p.i.flx > rs.flx
-        || p.i.flx < nrs.flx
-        || p.k.flx > rs.flx
-        || p.k.flx < nrs.flx
-        || p.j.flx > rs.flx
-        || p.j.flx < nrs.flx)
+    if (p.i > rs
+        || p.i < nrs
+        || p.k > rs
+        || p.k < nrs
+        || p.j > rs
+        || p.j < nrs)
         return 0;
 
 //ÄÄÄ Check with true magnitude
-    return  (( (p.magnitude()).flx < rs.flx )
+    return  (( (p.magnitude()) < rs )
              ? 1 : 0);
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// EschSphereExtents - ray                                                  ³
+//                                                                          ³
+// Computes the ray/sphere intersection of the ray starting at point and    ³
+// moving along the unit vector ray with the sphere defined by the center   ³
+// and the radius.                                                          ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+float EschSphereExtents::ray(const EschPoint *pt, const EschVector *v) const
+{
+    EschVector tvect(center.x - pt->x,
+                     center.y - pt->y,
+                     center.z - pt->z);
+
+    // tvect DOT v
+    float dot = tvect.i*v->i
+                + tvect.j*v->j
+                + tvect.k*v->k;
+
+    // (radius^2) - (tvect DOT tvect) + (dot * dot)
+    float disc = (radius*radius) - (tvect.i*tvect.i
+                                    + tvect.j*tvect.j
+                                    + tvect.k*tvect.k) + (dot*dot);
+
+    if (disc < 0)
+        return 0;
+
+    disc = esch_sqrt(disc);
+
+    float t2 = dot+disc;
+    if (t2 <= 0)
+        return 0;
+
+    float t1 = dot-disc;
+    if (t1 <= 0)
+        return t2;
+
+    return t1;
 }
 
 //°±² End of module - esextsph.cpp ²±°

@@ -82,7 +82,7 @@ class GameState
 protected:
     TCHAR   szFileName[MAX_PATH];
 
-    MaxDevices      &devs;  // Just a reference, so we can process events
+    MaxDevices      *devs;
     MaxEventSource  *evt;           // Source of our events
     MaxEventListOneshot oneshot;    // Track events for single_events
     MaxEventList    events;         // Most current event set
@@ -95,7 +95,7 @@ public:     // Construction/Destruction
     VngoVport       *gvp;
     VngoPal         *mypal;
 
-    GameState (MaxDevices &);
+    GameState (MaxDevices *);
     ~GameState ();
 
 public:     // Misc. Members

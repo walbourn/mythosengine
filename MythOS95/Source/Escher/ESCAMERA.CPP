@@ -82,7 +82,7 @@ EschCamera::EschCamera(VngoVport *vp) :
     inext(0),
     flags(0),
     vport(0),
-    aspect_ratio(1),
+    aspect_ratio(1.0),
     bcolor(0)
 {
     strcpy(name,EschNoName);
@@ -99,10 +99,10 @@ EschCamera::EschCamera(const char *fname, const char *cname) :
     inext(0),
     flags(0),
     vport(0),
-    aspect_ratio(1),
-    factor(1),
-    hither(1),
-    yon(0x1000),
+    aspect_ratio(1.0),
+    factor(1.0),
+    hither(1.0),
+    yon(4096.0),
     bcolor(0)
 {
     strncpy(name,cname ? cname : EschNoName,ESCH_MAX_NAME);
@@ -339,22 +339,22 @@ void EschCamera::post_rend()
 void EschCamera::reset()
 {
 //ÄÄÄ Default camera parameters ÄÄÄ
-    eye.set_position(0,0,0);
+    eye.set_position(0.0,0.0,0.0);
 
-    eye.dir.i = 0;                          // Looking down positive Z.
-    eye.dir.j = 0;
-    eye.dir.k = 1;
+    eye.dir.i = 0.0;                        // Looking down positive Z.
+    eye.dir.j = 0.0;
+    eye.dir.k = 1.0;
 
-    top.i=0;                                // Head is positive Y.
-    top.j=1;
-    top.k=0;
+    top.i=0.0;                              // Head is positive Y.
+    top.j=1.0;
+    top.k=0.0;
 
-    hither=1;                               // Arbitrary start values.
-    yon=0x1000;
+    hither=1.0;                             // Arbitrary start values.
+    yon=4096.0;
 
-    fov=48;                                 // Default used by 3DS, so why not?
+    fov=48.0;                               // Default used by 3DS, so why not?
 
-    factor=1;                               // No user zoom factor by default.
+    factor=1.0;                             // No user zoom factor by default.
 
 
 //ÄÄÄ Call computation functions
@@ -386,7 +386,7 @@ void EschCamera::set_top(const EschVector *t, dword update)
         compute_eye(update);
 }
 
-void EschCamera::set_top(const Flx16 ii, const Flx16 ij, const Flx16 ik,
+void EschCamera::set_top(const float ii, const float ij, const float ik,
                          dword update)
 {
     top.i=ii;
@@ -419,7 +419,7 @@ void EschCamera::set_dir(const EschVector *d, dword update)
         compute_eye(update);
 }
 
-void EschCamera::set_dir(const Flx16 ii, const Flx16 ij, const Flx16 ik,
+void EschCamera::set_dir(const float ii, const float ij, const float ik,
                          dword update)
 {
     eye.dir.i=ii;
@@ -456,8 +456,8 @@ void EschCamera::set_vects(const EschVector *t, const EschVector *d,
         compute_eye(update);
 }
 
-void EschCamera::set_vects(const Flx16 ti, const Flx16 tj, const Flx16 tk,
-                           const Flx16 di, const Flx16 dj, const Flx16 dk,
+void EschCamera::set_vects(const float ti, const float tj, const float tk,
+                           const float di, const float dj, const float dk,
                            dword update)
 {
     top.i = ti;
@@ -490,9 +490,10 @@ void EschCamera::set_lookat(const EschPoint *pt, dword update)
     get_position(&pos);
 
 //ÄÄÄ Determine direction from lookat point and position
-    eye.dir.i.flx = pt->x.flx - pos.x.flx;
-    eye.dir.j.flx = pt->y.flx - pos.y.flx;
-    eye.dir.k.flx = pt->z.flx - pos.z.flx;
+    eye.dir.i = pt->x - pos.x;
+    eye.dir.j = pt->y - pos.y;
+    eye.dir.k = pt->z - pos.z;
+    eye.dir.normalize();
 
 //ÄÄÄ Call orthogonalize function
     if (update & ESCH_UPD_ORTHO)
@@ -501,7 +502,7 @@ void EschCamera::set_lookat(const EschPoint *pt, dword update)
         compute_eye(update);
 }
 
-void EschCamera::set_lookat(const Flx16 ix, const Flx16 iy, const Flx16 iz,
+void EschCamera::set_lookat(const float ix, const float iy, const float iz,
                             dword update)
 {
     EschPoint   pos;
@@ -509,9 +510,10 @@ void EschCamera::set_lookat(const Flx16 ix, const Flx16 iy, const Flx16 iz,
     get_position(&pos);
 
 //ÄÄÄ Determine direction from lookat point and position
-    eye.dir.i.flx = ix.flx - pos.x.flx;
-    eye.dir.j.flx = iy.flx - pos.y.flx;
-    eye.dir.k.flx = iz.flx - pos.z.flx;
+    eye.dir.i = ix - pos.x;
+    eye.dir.j = iy - pos.y;
+    eye.dir.k = iz - pos.z;
+    eye.dir.normalize();
 
 //ÄÄÄ Call orthogonalize function
     if (update & ESCH_UPD_ORTHO)
@@ -527,7 +529,7 @@ void EschCamera::set_lookat(const Flx16 ix, const Flx16 iy, const Flx16 iz,
 // Addes a rotation of 'degrees' degrees to the frame of reference about the³
 // X-axis.                                                                  ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void EschCamera::rotatex(const Flx16 degrees, dword update)
+void EschCamera::rotatex(const float degrees, dword update)
 {
     eye.rotatex(degrees,update & ~ESCH_UPD_ORTHO);
 
@@ -537,9 +539,9 @@ void EschCamera::rotatex(const Flx16 degrees, dword update)
     }
 
 //ÄÄÄ Update top vector
-    top.i.flx = eye.orient.mtx[ESCH_MTX_D].flx;
-    top.j.flx = eye.orient.mtx[ESCH_MTX_E].flx;
-    top.k.flx = eye.orient.mtx[ESCH_MTX_F].flx;
+    top.i = eye.orient.mtx[ESCH_MTX_D];
+    top.j = eye.orient.mtx[ESCH_MTX_E];
+    top.k = eye.orient.mtx[ESCH_MTX_F];
     top.normalize();
 }
 
@@ -550,7 +552,7 @@ void EschCamera::rotatex(const Flx16 degrees, dword update)
 // Addes a rotation of 'degrees' degrees to the frame of reference about the³
 // Y-axis.                                                                  ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void EschCamera::rotatey(const Flx16 degrees, dword update)
+void EschCamera::rotatey(const float degrees, dword update)
 {
     eye.rotatey(degrees,update & ~ESCH_UPD_ORTHO);
 
@@ -560,9 +562,9 @@ void EschCamera::rotatey(const Flx16 degrees, dword update)
     }
 
 //ÄÄÄ Update top vector
-    top.i.flx = eye.orient.mtx[ESCH_MTX_D].flx;
-    top.j.flx = eye.orient.mtx[ESCH_MTX_E].flx;
-    top.k.flx = eye.orient.mtx[ESCH_MTX_F].flx;
+    top.i = eye.orient.mtx[ESCH_MTX_D];
+    top.j = eye.orient.mtx[ESCH_MTX_E];
+    top.k = eye.orient.mtx[ESCH_MTX_F];
     top.normalize();
 }
 
@@ -573,7 +575,7 @@ void EschCamera::rotatey(const Flx16 degrees, dword update)
 // Addes a rotation of 'degrees' degrees to the frame of reference about the³
 // Z-axis.                                                                  ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void EschCamera::rotatez(const Flx16 degrees, dword update)
+void EschCamera::rotatez(const float degrees, dword update)
 {
     eye.rotatez(degrees,update & ~ESCH_UPD_ORTHO);
 
@@ -583,9 +585,9 @@ void EschCamera::rotatez(const Flx16 degrees, dword update)
     }
 
 //ÄÄÄ Update top vector
-    top.i.flx = eye.orient.mtx[ESCH_MTX_D].flx;
-    top.j.flx = eye.orient.mtx[ESCH_MTX_E].flx;
-    top.k.flx = eye.orient.mtx[ESCH_MTX_F].flx;
+    top.i = eye.orient.mtx[ESCH_MTX_D];
+    top.j = eye.orient.mtx[ESCH_MTX_E];
+    top.k = eye.orient.mtx[ESCH_MTX_F];
     top.normalize();
 }
 
@@ -596,7 +598,7 @@ void EschCamera::rotatez(const Flx16 degrees, dword update)
 // Addes a rotation of 'degrees' degrees to the frame of reference about the³
 // relative X-axis.                                                         ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void EschCamera::pitch(const Flx16 degrees, dword update)
+void EschCamera::pitch(const float degrees, dword update)
 {
     eye.pitch(degrees,update & ~ESCH_UPD_ORTHO);
 
@@ -606,9 +608,9 @@ void EschCamera::pitch(const Flx16 degrees, dword update)
     }
 
 //ÄÄÄ Update top vector
-    top.i.flx = eye.orient.mtx[ESCH_MTX_D].flx;
-    top.j.flx = eye.orient.mtx[ESCH_MTX_E].flx;
-    top.k.flx = eye.orient.mtx[ESCH_MTX_F].flx;
+    top.i = eye.orient.mtx[ESCH_MTX_D];
+    top.j = eye.orient.mtx[ESCH_MTX_E];
+    top.k = eye.orient.mtx[ESCH_MTX_F];
     top.normalize();
 }
 
@@ -619,7 +621,7 @@ void EschCamera::pitch(const Flx16 degrees, dword update)
 // Addes a rotation of 'degrees' degrees to the frame of reference about the³
 // relative Y-axis.                                                         ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void EschCamera::yaw(const Flx16 degrees, dword update)
+void EschCamera::yaw(const float degrees, dword update)
 {
     eye.yaw(degrees,update & ~ESCH_UPD_ORTHO);
 
@@ -629,9 +631,9 @@ void EschCamera::yaw(const Flx16 degrees, dword update)
     }
 
 //ÄÄÄ Update top vector
-    top.i.flx = eye.orient.mtx[ESCH_MTX_D].flx;
-    top.j.flx = eye.orient.mtx[ESCH_MTX_E].flx;
-    top.k.flx = eye.orient.mtx[ESCH_MTX_F].flx;
+    top.i = eye.orient.mtx[ESCH_MTX_D];
+    top.j = eye.orient.mtx[ESCH_MTX_E];
+    top.k = eye.orient.mtx[ESCH_MTX_F];
     top.normalize();
 }
 
@@ -642,7 +644,7 @@ void EschCamera::yaw(const Flx16 degrees, dword update)
 // Addes a rotation of 'degrees' degrees to the frame of reference about the³
 // relative Z-axis.                                                         ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void EschCamera::roll(const Flx16 degrees, dword update)
+void EschCamera::roll(const float degrees, dword update)
 {
     eye.roll(degrees,update & ~ESCH_UPD_ORTHO);
 
@@ -652,9 +654,9 @@ void EschCamera::roll(const Flx16 degrees, dword update)
     }
 
 //ÄÄÄ Update top vector
-    top.i.flx = eye.orient.mtx[ESCH_MTX_D].flx;
-    top.j.flx = eye.orient.mtx[ESCH_MTX_E].flx;
-    top.k.flx = eye.orient.mtx[ESCH_MTX_F].flx;
+    top.i = eye.orient.mtx[ESCH_MTX_D];
+    top.j = eye.orient.mtx[ESCH_MTX_E];
+    top.k = eye.orient.mtx[ESCH_MTX_F];
     top.normalize();
 }
 
@@ -672,11 +674,11 @@ void EschCamera::orthogonalize(dword update)
 
     eye.dir.normalize();
 
-    Flx16 dot = top DOT eye.dir;
+    float dot = top DOT eye.dir;
 
-    top.i.flx = top.i.flx - flx_16mul16(eye.dir.i,dot).flx;
-    top.j.flx = top.j.flx - flx_16mul16(eye.dir.j,dot).flx;
-    top.k.flx = top.k.flx - flx_16mul16(eye.dir.k,dot).flx;
+    top.i = top.i - (eye.dir.i * dot);
+    top.j = top.j - (eye.dir.j * dot);
+    top.k = top.k - (eye.dir.k * dot);
     top.normalize();
 
     if (update & ESCH_UPD_EYE)
@@ -697,11 +699,11 @@ void EschCamera::orthogonalize_top(dword update)
 
     top.normalize();
 
-    Flx16 dot = top DOT eye.dir;
+    float dot = top DOT eye.dir;
 
-    eye.dir.i.flx = eye.dir.i.flx - flx_16mul16(top.i,dot).flx;
-    eye.dir.j.flx = eye.dir.j.flx - flx_16mul16(top.j,dot).flx;
-    eye.dir.k.flx = eye.dir.k.flx - flx_16mul16(top.k,dot).flx;
+    eye.dir.i = eye.dir.i - (top.i * dot);
+    eye.dir.j = eye.dir.j - (top.j * dot);
+    eye.dir.k = eye.dir.k - (top.k * dot);
     eye.dir.normalize();
 
     if (update & ESCH_UPD_EYE)
@@ -723,8 +725,8 @@ void EschCamera::orthogonalize_top(dword update)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 void EschCamera::compute_scalar()
 {
-    Flx16   size;
-    Flx16   angle;
+    float   size;
+    float   angle;
 
     if (!vport)
         return;
@@ -733,13 +735,13 @@ void EschCamera::compute_scalar()
                ((fov >= 1) && (fov <= 175)));
 
     // angle is fov / 2
-    angle.flx = fov.flx >> 1;
+    angle = fov / 2.0f;
 
     assertMyth("EschCamera::compute_scalar requires factor > 0",
                factor > 0);
 
     // Save off radius factor.
-    radius_factor.flx = flx_16div16( factor, angle.cos()).flx;
+    radius_factor = factor / esch_cos(angle);
 
 //ÄÄÄ Compute 1/2 size of projection-plane from FOV angle
 //
@@ -754,24 +756,19 @@ void EschCamera::compute_scalar()
 //                     | Projection-plane distance (always 1)
 //
 
-    size.flx = flx_16div16( angle.sin(), angle.cos() ).flx;
+    size = esch_sin(angle) / esch_cos(angle);
 
     assertMyth("EschCamera::compute_scalar requires FOV to result in non-zero size",
-               size.flx != 0);
+               size != 0);
 
 //ÄÄÄ Save 1/2 size of projection-plane in X and compute Y.
-    xsize.flx = flx_16div16(size, factor).flx;
-    ysize.flx = flx_muldiv(xsize,
-                           vport->vbuff.height,
-                           vport->vbuff.width).flx;
-    ysize.flx = flx_16mul16(ysize,aspect_ratio).flx;
+    xsize = size / factor;
+    ysize = ((xsize * vport->vbuff.height) / vport->vbuff.width)
+            * aspect_ratio;
 
 //ÄÄÄ Compute scalar values for X and Y to get pixel locations.
-    xscalar.flx = flx_muldiv( (Flx16)(vport->vbuff.width>>1),
-                              factor,
-                              size).flx;
-
-    yscalar.flx = flx_16div16(xscalar,aspect_ratio).flx;
+    xscalar = ((vport->vbuff.width / 2) * factor) / size;
+    yscalar = xscalar / aspect_ratio;
 
     compute_z_factor();
 }
@@ -785,17 +782,17 @@ void EschCamera::compute_scalar()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 void EschCamera::compute_frustrum()
 {
-    Flx16   xangle = flx_atan (xsize);
-    Flx16   yangle = flx_atan (ysize);
+    float   xangle = esch_atan(xsize);
+    float   yangle = esch_atan(ysize);
 
-    xangle = (Flx16(90) - xangle);  // Get the perpendicular to the frustrum.
-    yangle = (Flx16(90) - yangle);  // Get the perpendicular to the frustrum.
+    xangle = (90.0f - xangle);  // Get the perpendicular to the frustrum.
+    yangle = (90.0f - yangle);  // Get the perpendicular to the frustrum.
 
-    Flx16   top_cos = flx_cos(yangle);
-    Flx16   top_sin = flx_sin(yangle);
-    Flx16   left_cos = flx_cos(xangle);
-    Flx16   left_sin = flx_sin(xangle);
-    Flx16   epsilon(0.000);
+    float   top_cos = esch_cos(yangle);
+    float   top_sin = esch_sin(yangle);
+    float   left_cos = esch_cos(xangle);
+    float   left_sin = esch_sin(xangle);
+    float   epsilon(0.001f);
 
     // Near
     frustrum[ESCH_CAM_FRUSTRUM_HITHER].normal.i = 0;
@@ -807,13 +804,13 @@ void EschCamera::compute_frustrum()
     frustrum[ESCH_CAM_FRUSTRUM_YON].normal.i = 0;
     frustrum[ESCH_CAM_FRUSTRUM_YON].normal.j = 0;
     frustrum[ESCH_CAM_FRUSTRUM_YON].normal.k = -1;
-    frustrum[ESCH_CAM_FRUSTRUM_YON].dist = -(yon * Flx16(.99));
+    frustrum[ESCH_CAM_FRUSTRUM_YON].dist = -(yon * 0.99f);
 
     // Left
     frustrum[ESCH_CAM_FRUSTRUM_LEFT].normal.i = left_sin;
     frustrum[ESCH_CAM_FRUSTRUM_LEFT].normal.j = 0;
     frustrum[ESCH_CAM_FRUSTRUM_LEFT].normal.k = left_cos;
-    frustrum[ESCH_CAM_FRUSTRUM_LEFT].dist = epsilon;
+    frustrum[ESCH_CAM_FRUSTRUM_LEFT].dist = -epsilon;
 
     // Right
     frustrum[ESCH_CAM_FRUSTRUM_RIGHT].normal.i = -left_sin;
@@ -825,7 +822,7 @@ void EschCamera::compute_frustrum()
     frustrum[ESCH_CAM_FRUSTRUM_TOP].normal.i = 0;
     frustrum[ESCH_CAM_FRUSTRUM_TOP].normal.j = -top_sin;
     frustrum[ESCH_CAM_FRUSTRUM_TOP].normal.k = top_cos;
-    frustrum[ESCH_CAM_FRUSTRUM_TOP].dist = epsilon;
+    frustrum[ESCH_CAM_FRUSTRUM_TOP].dist = -epsilon;
 
     // Bottom
     frustrum[ESCH_CAM_FRUSTRUM_BOTTOM].normal.i = 0;
@@ -844,12 +841,11 @@ void EschCamera::compute_frustrum()
 void EschCamera::compute_z_factor()
 {
     assertMyth("EschCamera::compute_z_factor assumes yon greater than hither",
-               yon.flx > hither.flx);
+               yon > hither);
 
-    Flx16  max_z_size(0x7ffd0000,0);
-
-    z_factor = flx_16div16(max_z_size,
-                           Flx16((yon.flx-hither.flx + 0x10000),1));
+    z_factor = (0.9999f / (yon - hither + 1.0f)) * float(0xffffffff);
+    // go ahead and normalize Z between 0 and 1.
+//    z_factor = (0.9999f / (yon - hither + 1.0f));
 }
 
 
@@ -875,17 +871,17 @@ void EschCamera::compute_eye(dword update)
 //ÄÄÄ Fill in matrix for ortho rotation
 
     //ÄÄÄ Transform
-    eye.orient.mtx[ESCH_MTX_A].flx = right.i.flx;
-    eye.orient.mtx[ESCH_MTX_B].flx = right.j.flx;
-    eye.orient.mtx[ESCH_MTX_C].flx = right.k.flx;
+    eye.orient.mtx[ESCH_MTX_A] = right.i;
+    eye.orient.mtx[ESCH_MTX_B] = right.j;
+    eye.orient.mtx[ESCH_MTX_C] = right.k;
 
-    eye.orient.mtx[ESCH_MTX_D].flx = top.i.flx;
-    eye.orient.mtx[ESCH_MTX_E].flx = top.j.flx;
-    eye.orient.mtx[ESCH_MTX_F].flx = top.k.flx;
+    eye.orient.mtx[ESCH_MTX_D] = top.i;
+    eye.orient.mtx[ESCH_MTX_E] = top.j;
+    eye.orient.mtx[ESCH_MTX_F] = top.k;
 
-    eye.orient.mtx[ESCH_MTX_G].flx = eye.dir.i.flx;
-    eye.orient.mtx[ESCH_MTX_H].flx = eye.dir.j.flx;
-    eye.orient.mtx[ESCH_MTX_I].flx = eye.dir.k.flx;
+    eye.orient.mtx[ESCH_MTX_G] = eye.dir.i;
+    eye.orient.mtx[ESCH_MTX_H] = eye.dir.j;
+    eye.orient.mtx[ESCH_MTX_I] = eye.dir.k;
 
     //ÄÄÄ Inverse Transform
     if (update & ESCH_UPD_INVERSE)
@@ -928,7 +924,8 @@ esch_error_codes EschCamera::load(const char *fname, const char *cname)
             iff.leaveform();
         }
 
-        if (iff.chunkid == iff.makeid('E','C','A','M'))
+        if (iff.chunkid == iff.makeid('E','C','A','M')
+            || iff.chunkid == iff.makeid('E','C','A','1'))
         {
             err=load(&iff,cname);
             if (!err
@@ -951,42 +948,77 @@ esch_error_codes EschCamera::load(const char *fname, const char *cname)
 
 esch_error_codes EschCamera::load(XFParseIFF *iff, const char *cname)
 {
-    EschFileCamera  cam;
-
     assertMyth("EschCamera::load requries iff pointer",
                iff);
 
-//ÄÄ Verify correct chunk name and size
-    if (iff->chunkid != iff->makeid('E','C','A','M'))
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Floating-point format
+    if (iff->chunkid == iff->makeid('E','C','A','1'))
+    {
+        EschFileCamera  cam;
+
+        if (iff->chunkSize != sizeof(cam))
+            return ESCH_ERR_INVALIDDATA;
+
+        //ÄÄ Read chunk and verify name, if given.
+        if (iff->read(&cam))
+            return ESCH_ERR_FILEERROR;
+
+        if (cname && strcmp(cname,cam.name))
+            return ESCH_ERR_NOTFOUND;
+
+        //ÄÄ Found, so setup camera
+        strcpy(name,cam.name);
+        flags = cam.flags;
+
+        set_position(cam.x,cam.y,cam.z);
+
+        fov=cam.fov;
+
+        eye.dir.i = cam.diri;
+        eye.dir.j = cam.dirj;
+        eye.dir.k = cam.dirk;
+
+        top.i = cam.topi;
+        top.j = cam.topj;
+        top.k = cam.topk;
+    }
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Fixed-point format
+    else if (iff->chunkid == iff->makeid('E','C','A','M'))
+    {
+        EschFileCameraV1  cam;
+
+        if (iff->chunkSize != sizeof(cam))
+            return ESCH_ERR_INVALIDDATA;
+
+        //ÄÄ Read chunk and verify name, if given.
+        if (iff->read(&cam))
+            return ESCH_ERR_FILEERROR;
+
+        if (cname && strcmp(cname,cam.name))
+            return ESCH_ERR_NOTFOUND;
+
+        //ÄÄ Found, so setup camera
+        strcpy(name,cam.name);
+        flags = cam.flags;
+
+        set_position(cam.x / 65536.0f,cam.y / 65536.0f,cam.z / 65536.0f);
+
+        fov=cam.fov / 65536.0f;
+
+        eye.dir.i = cam.diri / 65536.0f;
+        eye.dir.j = cam.dirj / 65536.0f;
+        eye.dir.k = cam.dirk / 65536.0f;
+
+        top.i = cam.topi / 65536.0f;
+        top.j = cam.topj / 65536.0f;
+        top.k = cam.topk / 65536.0f;
+    }
+    else
+    {
         return ESCH_ERR_NOTFOUND;
+    }
 
-    if (iff->chunkSize != sizeof(EschFileCamera))
-        return ESCH_ERR_INVALIDDATA;
-
-//ÄÄ Read chunk and verify name, if given.
-    if (iff->read(&cam))
-        return ESCH_ERR_FILEERROR;
-
-    if (cname && strcmp(cname,cam.name))
-        return ESCH_ERR_NOTFOUND;
-
-//ÄÄ Found, so setup camera
-    strcpy(name,cam.name);
-    flags = cam.flags;
-
-    set_position(cam.x,cam.y,cam.z);
-
-    fov=cam.fov;
-
-    factor=1;
-
-    eye.dir.i.flx = cam.diri.flx;
-    eye.dir.j.flx = cam.dirj.flx;
-    eye.dir.k.flx = cam.dirk.flx;
-
-    top.i.flx = cam.topi.flx;
-    top.j.flx = cam.topj.flx;
-    top.k.flx = cam.topk.flx;
+    factor=1.0;
 
 //ÄÄÄ Call computation functions
     compute_scalar();

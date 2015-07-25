@@ -2,9 +2,9 @@
 //
 //                                                           %__________%
 //                                                          %/ . .  .   \%
-//           Van Gogh 2D-Display Library                     |  . .  o. | 
+//           Van Gogh 2D-Display Library                     |  . .  o. |
 //                                                           |. _  .   .|
-//          Microsoft Windows '95 Version                    | / \   .  | 
+//          Microsoft Windows '95 Version                    | / \   .  |
 //                                                           |_|_|_._._.|
 // Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
 //              All rights reserved.                        %\__________/%
@@ -36,7 +36,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 #include <assert.h>
 
@@ -63,7 +63,7 @@
 //
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
-STATIC void find_quadratic(long &dx, double &q0, double &q2, 
+STATIC void find_quadratic(long &dx, double &q0, double &q2,
                     double &w0, double &w2,long *d1,long *d2,long upscale);
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
@@ -82,14 +82,14 @@ STATIC void find_quadratic(long &dx, double &q0, double &q2,
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //  void vngo_zgtriangle8_persp (VngoVbuffer *vp,VngoPoint2 *pts,
-//                               VngoTextureInfo *tex)
+//                               VngoTexture3D *tex)
 //      This routine draws a Gouraud shaded perspected texture mapped
-//      triangle, making the assumption that it has already been clipped.  
+//      triangle, making the assumption that it has already been clipped.
 //      It draws with respect for the Z-buffer.
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 
 extern "C" void vngo_ztgtriangle8_persp (VngoVbuffer *vb,VngoPoint2 *pts,
-                                         VngoTextureInfo *tex) 
+                                         VngoTexture3D *tex)
 {
     int high_pt_idx = 0;
     int has_flat_top=0;
@@ -121,7 +121,7 @@ extern "C" void vngo_ztgtriangle8_persp (VngoVbuffer *vb,VngoPoint2 *pts,
     if (dy1 == 0)
     {   // the triangle is completely flat if this is true.
         // So we need to do a horizontal line here.....tl
-        return;    
+        return;
     }
 
     double  u1 = uhigh_pt;
@@ -229,7 +229,7 @@ extern "C" void vngo_ztgtriangle8_persp (VngoVbuffer *vb,VngoPoint2 *pts,
             vstep2 = (vlow_pt - vmid_pt) * idy1;
             vstep2 = (vlow_pt - vmid_pt) * idy1;
 
-            long    dx = ((edge1 + 0x80000) >> 20) - (edge2 >> 20); 
+            long    dx = ((edge1 + 0x80000) >> 20) - (edge2 >> 20);
             if (dx)
             {
                 sstep = (s1 - s2) / dx;
@@ -421,7 +421,7 @@ extern "C" void vngo_ztgtriangle8_persp (VngoVbuffer *vb,VngoPoint2 *pts,
                     vstep += vstep_dx2;
                     curz += zstep;
                     curs += sstep;
-                }            
+                }
                 u1 += ustep1;
                 v1 += vstep1;
                 w1 += wstep1;
@@ -435,7 +435,7 @@ extern "C" void vngo_ztgtriangle8_persp (VngoVbuffer *vb,VngoPoint2 *pts,
             }
         }
         else
-        {   // edge 2 is on the left; 
+        {   // edge 2 is on the left;
             while (line_count)
             {
                 long t = edge2 >> 20;
@@ -479,7 +479,7 @@ extern "C" void vngo_ztgtriangle8_persp (VngoVbuffer *vb,VngoPoint2 *pts,
                     curv += vstep;
                     ustep += ustep_dx2;
                     vstep += vstep_dx2;
-                }            
+                }
 
                 edge1 += xstep1;
                 edge2 += xstep2;
@@ -529,12 +529,12 @@ extern "C" void vngo_ztgtriangle8_persp (VngoVbuffer *vb,VngoPoint2 *pts,
         {
             return;
         }
-    } 
+    }
     return;
 }
 
 
-STATIC void find_quadratic(long &dx, double &q0, double &q2, 
+STATIC void find_quadratic(long &dx, double &q0, double &q2,
                     double &w0, double &w2,long *d1,long *d2,long upscale)
 {
     double pdx = 1. / double(dx);

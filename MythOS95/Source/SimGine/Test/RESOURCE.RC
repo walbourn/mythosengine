@@ -1,0 +1,146 @@
+//ммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммм
+//
+//                              S I M   G I N E
+//
+//             __               ___   ______,-------
+//           __==__,------------/|\--|      | .-.-.|    ___________
+//         (|     |--------------|---|------| '-`-`|  _/___________\_
+//         (|_____|      _       _   |   _  | 6000 | |               |
+//          |__\\_|`-._/___\___/___\_|_/___\|      | |               |
+//         __/ |===|--|_____|_|_____|_|___  |\_____|=|_______________|
+//      |=|[_]==[_]    \ _ /   \ _ /   \ _ /          [_]   [_]   [_]
+//ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд
+//
+//                     A Simluator Framework for MythOS(tm)
+//
+//                        Microsoft Windows '95 Version
+//
+//               Copyright (c) 1997 by Charybdis Enterprises, Inc.
+//                           All Rights Reserved.
+//
+//ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд
+//
+//           *** Charybdis Enterprises, Inc. Company Confidential ***
+//
+//  This file and all associated files are the company proprietary property
+//        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+//
+// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
+// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
+// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
+// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
+// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+//
+//ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд
+//
+// MythOS is a trademark of Charybdis Enterprises, Inc.
+//
+//ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд
+//
+//                               *** Tester ***
+//
+// resource.rc
+//
+//ммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммм
+
+//╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟
+//
+//                                Includes
+//
+//╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟
+
+#define WIN32_LEAN_AND_MEAN
+#include "windows.h"
+#include "simdefs.h"
+
+//╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠
+//
+//                               Resources
+//
+//╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠
+
+//дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+// Menu pulldowns                                                           Ё
+//дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+
+//дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+// String Table                                                             Ё
+//дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+
+STRINGTABLE DISCARDABLE
+BEGIN
+
+    IDS_SIM_APPNAME     "Tester"
+
+    IDS_SIM_NOMEMORY    "Out of Memory"
+
+END
+
+
+//дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+// Cursors                                                                  Ё
+//дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+
+IDC_SIM_ARROW   CURSOR  DISCARDABLE "..\\res\\arrow2.cur"
+
+
+//дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+// Icons (Large and Small)                                                  Ё
+//дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+
+IDI_SIM_APPICON ICON "..\\res\\charybds.ico"
+
+
+
+//дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+// Dialogs                                                                  Ё
+//дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+
+
+//дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+// Version Information                                                      Ё
+//дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+
+1 VERSIONINFO
+ FILEVERSION 0,1,0,0
+ PRODUCTVERSION 0,1,0,0
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0xbL
+#else
+ FILEFLAGS 0xaL
+#endif
+ FILEOS 0x10001L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904E4"
+        BEGIN
+            VALUE "OriginalFilename", "St.EXE\0"
+
+            VALUE "ProductName", "SimGine Framework\0"
+            VALUE "InternalName", "SimGine\0"
+            VALUE "FileDescription", "SimGine Tester Executable\0"
+
+            VALUE "ProductVersion", "0.1\0"
+            VALUE "FileVersion", "0.1\0"
+
+            VALUE "CompanyName", "Charybdis Enterprises, Inc.\0"
+
+            VALUE "LegalCopyright",
+"Copyright \251 1997 by Charybdis Enterprises, Inc.\0"
+
+            VALUE "LegalTrademarks",
+"MythOS is a trademark of Charybdis Enterprises, Inc.\n\
+Microsoft and Windows are tradmarks of Microsoft Corp.\0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1252
+    END
+END
+
+//╟╠╡ eof - resource.rc ╡╠╟

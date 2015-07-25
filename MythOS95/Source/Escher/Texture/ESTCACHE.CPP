@@ -140,20 +140,30 @@ int EschTexture::cache_release(IvoryHandle h)
         return 0;
 
 //ÄÄÄ Find texture handle in cache
-    for(ulong i=0; i < EschSysInstance->tcache_hi; i++)
+    EschTextureCache *tc = EschSysInstance->tcache;
+    for(ulong i=0; i < EschSysInstance->tcache_hi; i++, tc++)
     {
-        if (EschSysInstance->tcache[i].handle == h)
+        if (tc->handle == h)
         {
             assertMyth("EschTexture::cache_release count should be non-zero",
-                       EschSysInstance->tcache[i].count > 0);
+                       tc->count > 0);
 
             //ÄÄÄ Decrement count
-            EschSysInstance->tcache[i].count--;
+            tc->count--;
 
-            if (!EschSysInstance->tcache[i].count)
+            if (!tc->count)
             {
                 //ÄÄÄ Last reference, so free
-                ivory_hfree(&EschSysInstance->tcache[i].handle);
+                VngoTexture *p = (VngoTexture*)ivory_hlock(tc->handle);
+                if (p)
+                {
+                    for(ushort i=0; i < tc->max; i++, p++)
+                    {
+                        p->VngoTexture::~VngoTexture();
+                    }
+                    ivory_hunlock(tc->handle);
+                }
+                ivory_hfree(&tc->handle);
             }
             return 1;
         }

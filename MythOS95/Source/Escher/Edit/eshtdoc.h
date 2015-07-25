@@ -58,22 +58,30 @@ protected: // create from serialization only
 public:
     enum
     {
-        ESCH_NORMALS_SMOOTH = 0x1,
-        ESCH_NORMALS_FLAT   = 0x2
+        NORMALS_SMOOTH  = 0x1,
+        NORMALS_FLAT    = 0x2
     };
+
+    enum
+    {
+        FLOATING    = 0x1,
+        COMPRESS    = 0x2,
+    };
+
+    dword           ctrlfl;
 
     ushort          width;                  // Width of height field
     ushort          depth;                  // Depth of height field
     ushort          surfratio;              // Surface ratio (height : surface)
     ushort          surfshift;              // Shift value for surf ratio
 
-    Flx16           scale;                  // Scale factor
+    float           scale;                  // Scale factor
 
     int             autocenter;             // Autocenter terrain in XZ plane
-    Flx16           orgx, orgy, orgz;       // Terrain origin
+    float           orgx, orgy, orgz;       // Terrain origin
 
     byte            *hfield;                // Height field array
-    Flx16           *htable;                // Height table
+    float           *htable;                // Height table
     esch_surf_type  *surfinfo;              // Surface array
     dword           *surfcolr;              // Surface RGB color array
     IvoryHandle     hsurfnorml;             // Lighting normal array
@@ -113,10 +121,10 @@ public:
 
     ushort          color_bands[11];        // Height-colors
 
-    Flx16           hover_offset;           // Misc Properties
+    float           hover_offset;           // Misc Properties
     BOOL            lod_active;
-    Flx16           lod_medium;
-    Flx16           lod_low;
+    float           lod_medium;
+    float           lod_low;
 
     void SetLightsModifiedFlag() { lightsdirty = TRUE; }
 
@@ -147,11 +155,11 @@ public:
     void SaveColors(const char *fname);
     void LoadColors(const char *fname);
 
-    void ComputeNormals(dword flags = ESCH_NORMALS_SMOOTH);
+    void ComputeNormals(dword flags = NORMALS_SMOOTH);
     void LightTerrain();
 
-    void GetMinMaxElevations(Flx16 &min, Flx16 &max);
-    void SetBaseElevation(Flx16 newbase);
+    void GetMinMaxElevations(float &min, float &max);
+    void SetBaseElevation(float newbase);
 
     void PushUndo();
     void PopUndo();
@@ -189,16 +197,16 @@ protected:
     BOOL load_and_recolor_texture(int ind, const char *fname);
 
     // Import helper routines
-    long find_closest_htable_entry(Flx16 h, long start, long end);
-    long find_entry(Flx16 *heights, Flx16 h, long start, long end);
+    long find_closest_htable_entry(float h, long start, long end);
+    long find_entry(float *heights, float h, long start, long end);
 
     void compress_heights_standard(long xs, long ys, long w, long h,
                                    ushort *data, BOOL normalize);
     void compress_heights_uniform(long xs, long ys, long w, long h,
                                   ushort *data, BOOL normalize);
-    void compress_heights_averaged(Flx16 threshold,
-                                  long xs, long ys, long w, long h,
-                                  ushort *data, BOOL normalize);
+    void compress_heights_averaged(float threshold,
+                                   long xs, long ys, long w, long h,
+                                   ushort *data, BOOL normalize);
 
     // Import routines
     BOOL import_heights_from_vpdem(const char *fname, BOOL *isvpdem);

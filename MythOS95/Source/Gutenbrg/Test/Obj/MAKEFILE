@@ -43,6 +43,10 @@
 DEBUG = NO
 !endif
 
+!if "$(THREAD)" == ""
+THREAD = YES
+!endif
+
 !if "$(MYTH95ROOT)" == ""
 MYTH95ROOT = \MythOS95
 !endif
@@ -78,7 +82,9 @@ comctl32.lib\
 comdlg32.lib\
 winmm.lib\
 msacm32.lib\
-user32.lib
+user32.lib\
+dxguid.lib\
+dinput.lib
 
 #ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 # First target                                                             ³
@@ -105,6 +111,35 @@ all: setstden $(EXE).exe
 #                              Dependencies
 #
 #±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+
+#ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+# Event system Files
+#ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+..\gframe.iff : ..\gframe.hpp
+
+..\gframe.hpp:  ..\gframe.cel
+   $(MYTH95ROOT)\bin\maxc ..\gframe.cel
+
+#ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+# C++ files
+#ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+gstate.obj : ..\gstate.cpp\
+             ..\global.hpp\
+             ..\test.hpp\
+             ..\gframe.hpp
+
+init.obj : ..\init.cpp\
+           ..\global.hpp\
+           ..\resource.h
+
+main.obj : ..\main.cpp\
+           ..\global.hpp\
+           ..\resource.h
+
+resource.res : ..\resource.rc\
+               ..\resource.h
 
 #ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 # Executable                                                               ³

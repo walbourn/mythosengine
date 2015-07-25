@@ -141,8 +141,8 @@ END
 //дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
 
 1 VERSIONINFO
- FILEVERSION 3,5,0,0
- PRODUCTVERSION 3,5,0,0
+ FILEVERSION 4,0,0,0
+ PRODUCTVERSION 4,0,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0xbL
@@ -163,8 +163,8 @@ BEGIN
             VALUE "InternalName", "Game Frame LLander\0"
             VALUE "FileDescription", "The MythOS '95 Game Framework Example\0"
 
-            VALUE "ProductVersion", "1.1\0"
-            VALUE "FileVersion", "0.2\0"
+            VALUE "ProductVersion", "4.0\0"
+            VALUE "FileVersion", "4.0\0"
 
             VALUE "Comments", "CHARYBDIS ENTERPRISES, INC. COMPANY CONFIDENTIAL\0"
 

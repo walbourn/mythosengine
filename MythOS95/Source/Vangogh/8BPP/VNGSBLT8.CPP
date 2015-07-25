@@ -2,9 +2,9 @@
 //
 //                                                           %__________%
 //                                                          %/ . .  .   \%
-//           Van Gogh 2D-Display Library                     |  . .  o. | 
+//           Van Gogh 2D-Display Library                     |  . .  o. |
 //                                                           |. _  .   .|
-//          Microsoft Windows '95 Version                    | / \   .  | 
+//          Microsoft Windows '95 Version                    | / \   .  |
 //                                                           |_|_|_._._.|
 // Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
 //              All rights reserved.                        %\__________/%
@@ -35,7 +35,7 @@
 //같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같�
 //
 //                                Includes
-//                                
+//
 //같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같�
 #include <assert.h>
 
@@ -88,7 +88,7 @@ void vngo_stretch_zblt_cmp_eq8 (VngoVbuffer *vb,VngoRect *dest,VngoTexture *tex,
 //
 //컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
 
-void vngo_stretch_blt8 (VngoVport *vp, VngoRect *dest_rect, 
+void vngo_stretch_blt8 (VngoVport *vp, VngoRect *dest_rect,
                         VngoTexture *img, dword flags)
 {
     Flx16 ustep;
@@ -107,11 +107,11 @@ void vngo_stretch_blt8 (VngoVport *vp, VngoRect *dest_rect,
     {
         for (int y=0;y < dest_rect->dy;y++)
         {
-            byte    *sptr = img->tex + (((cur_v.flx + 0x8000) >> 16) * img->width);
+            byte    *sptr = (byte*)img->tex + (((cur_v.flx + 0x8000) >> 16) * img->width);
             cur_u = 0;
             for (int x=0; x < dest_rect->dx;x++)
             {
-                byte    t = sptr[(cur_u.flx + 0x8000) >> 16]; 
+                byte    t = sptr[(cur_u.flx + 0x8000) >> 16];
                 if (t != VNGO_TRANSPARENT_COLOR)
                     hptr[x] = t;
                 cur_u += ustep;
@@ -124,11 +124,11 @@ void vngo_stretch_blt8 (VngoVport *vp, VngoRect *dest_rect,
     {
         for (int y=0;y < dest_rect->dy;y++)
         {
-            byte    *sptr = img->tex + (((cur_v.flx + 0x8000) >> 16) * img->width);
+            byte    *sptr = (byte*)img->tex + (((cur_v.flx + 0x8000) >> 16) * img->width);
             cur_u = 0;
             for (int x=0; x < dest_rect->dx;x++)
             {
-                hptr[x] = sptr[(cur_u.flx + 0x8000) >> 16];  
+                hptr[x] = sptr[(cur_u.flx + 0x8000) >> 16];
                 cur_u += ustep;
             }
             hptr += vp->vbuff.pitch;
@@ -158,7 +158,7 @@ void vngo_stretch_zblt8 (VngoVport *vp, VngoRect *dest_rect,
         {
             vngo_stretch_zblt_cmp8 (&(vp->vbuff),dest_rect,img,zsource);
         }
-        else 
+        else
         {
             vngo_stretch_zblt_copy8 (&(vp->vbuff),dest_rect,img,zsource);
         }
@@ -177,7 +177,7 @@ void vngo_stretch_zblt8 (VngoVport *vp, VngoRect *dest_rect,
                     + vp->vbuff.ytable[dest_rect->y]
                     + dest_rect->x;
 
-    word    *zptr = vp->vbuff.zbuff_ptr 
+    word    *zptr = vp->vbuff.zbuff_ptr
                     + vp->vbuff.ztable[dest_rect->y]
                     + dest_rect->x;
 
@@ -186,7 +186,7 @@ void vngo_stretch_zblt8 (VngoVport *vp, VngoRect *dest_rect,
     long    fstep = 0;
     long    twidth = img->width;
 
-    byte    *sptr = img->tex;
+    byte    *sptr = (byte*)img->tex;
     word    tz;
     long    pitch = vp->vbuff.pitch;
     long    zpitch = vp->vbuff.zpitch >> 1;
@@ -204,7 +204,7 @@ void vngo_stretch_zblt8 (VngoVport *vp, VngoRect *dest_rect,
                 {
                     if ((word)zptr[x] >= (tz = zsource[offset + (cur_u.flx >> 16)]))
                     {
-                        byte    t = sptr[offset + (cur_u.flx >> 16)]; 
+                        byte    t = sptr[offset + (cur_u.flx >> 16)];
                         if (t != VNGO_TRANSPARENT_COLOR)
                         {
                             zptr[x] = tz;
@@ -229,7 +229,7 @@ void vngo_stretch_zblt8 (VngoVport *vp, VngoRect *dest_rect,
                     if ((word)zptr[x] >= (tz = zsource[offset + (cur_u.flx >> 16)]))
                     {
                         zptr[x] = tz;
-                        hptr[x] = sptr[offset + (cur_u.flx >> 16)];  
+                        hptr[x] = sptr[offset + (cur_u.flx >> 16)];
                     }
 
                     cur_u += ustep;
@@ -252,7 +252,7 @@ void vngo_stretch_zblt8 (VngoVport *vp, VngoRect *dest_rect,
                 {
                     if ((word)zptr[x] > (tz = zsource[offset + (cur_u.flx >> 16)]))
                     {
-                        byte    t = sptr[offset + (cur_u.flx >> 16)]; 
+                        byte    t = sptr[offset + (cur_u.flx >> 16)];
                         if (t != VNGO_TRANSPARENT_COLOR)
                         {
                             zptr[x] = tz;
@@ -277,7 +277,7 @@ void vngo_stretch_zblt8 (VngoVport *vp, VngoRect *dest_rect,
                     if ((word)zptr[x] > (tz = zsource[offset + (cur_u.flx >> 16)]))
                     {
                         zptr[x] = tz;
-                        hptr[x] = sptr[offset + (cur_u.flx >> 16)];  
+                        hptr[x] = sptr[offset + (cur_u.flx >> 16)];
                     }
 
                     cur_u += ustep;
@@ -299,7 +299,7 @@ void vngo_stretch_zblt8 (VngoVport *vp, VngoRect *dest_rect,
                 cur_u = 0;
                 for (int x=0; x < dest_rect->dx;x++)
                 {
-                    byte    t = sptr[offset + (cur_u.flx >> 16)]; 
+                    byte    t = sptr[offset + (cur_u.flx >> 16)];
                     if (t != VNGO_TRANSPARENT_COLOR)
                     {
                         hptr[x] = t;
@@ -358,7 +358,7 @@ void vngo_stretch_zblt8 (VngoVport *vp, VngoRect *dest_rect,
                 {
                     long    t = cur_u.flx >> 16;
                     zptr[x] = zsrc[t];
-                    hptr[x] = sptr[t];  
+                    hptr[x] = sptr[t];
 
                     cur_u += ustep;
                 }

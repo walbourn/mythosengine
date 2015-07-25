@@ -41,6 +41,10 @@
 DEBUG = NO
 !endif
 
+!if "$(THREAD)" == ""
+THREAD=YES
+!endif
+
 !if "$(MYTH95ROOT)" == ""
 MYTH95ROOT = \MythOS95
 !endif
@@ -56,6 +60,9 @@ OBJS=\
 maxevt.obj\
 maxesrc.obj\
 maxdevs.obj\
+maxkb.obj\
+maxmouse.obj\
+maxjoy.obj\
 maxetsk.obj\
 maxvmap.obj
 
@@ -87,11 +94,14 @@ all: setstden $(LIB).lib
 #
 #±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 
-maxevt.obj:  ..\maxevt.cpp  ..\inc\maxevt.hpp  ..\inc\maxdevs.hpp
-maxesrc.obj: ..\maxesrc.cpp ..\inc\maxesrc.hpp ..\inc\maxevt.hpp ..\inc\maxdevs.hpp
-maxdevs.obj: ..\maxdevs.cpp ..\inc\maxdevs.hpp
-maxetsk.obj: ..\maxetsk.cpp ..\inc\maxesrc.hpp ..\inc\maxevt.hpp
-maxvmap.obj: ..\maxvmap.cpp ..\inc\maxvmap.hpp
+maxevt.obj:   ..\maxevt.cpp  ..\inc\maxevt.hpp  ..\inc\maxdevs.hpp
+maxesrc.obj:  ..\maxesrc.cpp ..\inc\maxesrc.hpp ..\inc\maxevt.hpp ..\inc\maxdevs.hpp
+maxdevs.obj:  ..\maxdevs.cpp ..\inc\maxdevs.hpp ..\inc\maxjoy.hpp ..\inc\maxkb.hpp ..\inc\maxmouse.hpp
+maxkb.obj:    ..\maxkb.cpp   ..\inc\maxkb.hpp
+maxjoy.obj:   ..\maxjoy.cpp  ..\inc\maxjoy.hpp
+maxmouse.obj: ..\maxmouse.cpp ..\inc\maxmouse.hpp
+maxetsk.obj:  ..\maxetsk.cpp ..\inc\maxesrc.hpp ..\inc\maxevt.hpp
+maxvmap.obj:  ..\maxvmap.cpp ..\inc\maxvmap.hpp
 
 #ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 # Library                                                                  ³

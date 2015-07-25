@@ -2,9 +2,9 @@
 //
 //                                                           %__________%
 //                                                          %/ . .  .   \%
-//           Van Gogh 2D-Display Library                     |  . .  o. | 
+//           Van Gogh 2D-Display Library                     |  . .  o. |
 //                                                           |. _  .   .|
-//          Microsoft Windows '95 Version                    | / \   .  | 
+//          Microsoft Windows '95 Version                    | / \   .  |
 //                                                           |_|_|_._._.|
 // Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
 //              All rights reserved.                        %\__________/%
@@ -36,9 +36,9 @@
 //같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같�
 //
 //                                Includes
-//                                
+//
 //같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같�
-//#include <assert.h>
+#include <assert.h>
 #include <string.h>
 
 #include "debug.h"
@@ -85,7 +85,7 @@ extern "C" void draw_zlhlines(VngoTriangle *tri);
 //      that it has already been clipped.
 //컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
 
-extern "C" void vngo_zttriangle8 (VngoVbuffer *vb,VngoPoint2 *pts,VngoTextureInfo *tex)
+extern "C" void vngo_zttriangle8 (VngoVbuffer *vb,VngoPoint2 *pts,VngoTexture3D *tex)
 {
     long            mid_y;
     VngoTriangle    tri;
@@ -96,7 +96,7 @@ extern "C" void vngo_zttriangle8 (VngoVbuffer *vb,VngoPoint2 *pts,VngoTextureInf
     VngoPoint2      *edge2 = vb->edge2;
 
     calc_order(high_pt_idx,mid_pt_idx,low_pt_idx,pts);
- 
+
     VngoPoint2 *high_pt = &pts[high_pt_idx];
     VngoPoint2 *mid_pt = &pts[mid_pt_idx];
     VngoPoint2 *low_pt = &pts[low_pt_idx];
@@ -106,7 +106,7 @@ extern "C" void vngo_zttriangle8 (VngoVbuffer *vb,VngoPoint2 *pts,VngoTextureInf
 
     if (dy1 == 0)
     {   // the triangle is completely flat if this is true.
-        return;    
+        return;
     }
 
     tri.start_y = (high_pt->y + 0x8000) >> 16;
@@ -124,7 +124,10 @@ extern "C" void vngo_zttriangle8 (VngoVbuffer *vb,VngoPoint2 *pts,VngoTextureInf
     tri.pitch = vb->pitch;
     tri.zpitch = vb->zpitch;
     tri.height = dy1;
-    tri.tex = tex;
+
+    assert (tex->get_type() == VNGO_MEM_TEX);
+
+    tri.tex = (VngoMemTexture3D *)tex;
     tri.shade = pts[0].shade;
 
     if (dy1 > dy2)
@@ -135,11 +138,11 @@ extern "C" void vngo_zttriangle8 (VngoVbuffer *vb,VngoPoint2 *pts,VngoTextureInf
     {
         mid_y = dy2 - 1;
     }
-    long mid_dx = ((edge2[mid_y].x + 0x8000) >> 16) 
+    long mid_dx = ((edge2[mid_y].x + 0x8000) >> 16)
                   - ((edge1[mid_y].x + 0x8000) >> 16);
 
 
-    mid_dx = ((edge2[mid_y].x + 0x8000) >> 16) 
+    mid_dx = ((edge2[mid_y].x + 0x8000) >> 16)
              - ((edge1[mid_y].x + 0x8000) >> 16);
 
 
@@ -150,8 +153,8 @@ extern "C" void vngo_zttriangle8 (VngoVbuffer *vb,VngoPoint2 *pts,VngoTextureInf
         if (mid_dx)
         {
             tri.zstep_dx1 = (long(edge2[mid_y].z) - long(edge1[mid_y].z)) / mid_dx;
-            tri.ustep_dx1 = ((edge2[mid_y].u - edge1[mid_y].u) / mid_dx) << tex->u_upshift;
-            tri.vstep_dx1 = ((edge2[mid_y].v - edge1[mid_y].v) / mid_dx) << tex->v_upshift;
+            tri.ustep_dx1 = ((edge2[mid_y].u - edge1[mid_y].u) / mid_dx) << tri.tex->u_upshift;
+            tri.vstep_dx1 = ((edge2[mid_y].v - edge1[mid_y].v) / mid_dx) << tri.tex->v_upshift;
         }
         else
         {
@@ -166,8 +169,8 @@ extern "C" void vngo_zttriangle8 (VngoVbuffer *vb,VngoPoint2 *pts,VngoTextureInf
         tri.right_edge = edge1;
 
         tri.zstep_dx1 = (long(edge1[mid_y].z) - long(edge2[mid_y].z)) / -mid_dx;
-        tri.ustep_dx1 = ((edge1[mid_y].u - edge2[mid_y].u) / -mid_dx) << tex->u_upshift;
-        tri.vstep_dx1 = ((edge1[mid_y].v - edge2[mid_y].v) / -mid_dx) << tex->v_upshift;
+        tri.ustep_dx1 = ((edge1[mid_y].u - edge2[mid_y].u) / -mid_dx) << tri.tex->u_upshift;
+        tri.vstep_dx1 = ((edge1[mid_y].v - edge2[mid_y].v) / -mid_dx) << tri.tex->v_upshift;
     }
     draw_zlhlines(&tri);
 }
@@ -247,7 +250,7 @@ extern "C" void draw_zlhlines(VngoTriangle *tri)
     long            udown = tri->tex->u_downshift;
     long            vdown = tri->tex->v_downshift - tri->tex->widthshift;
     long            start_y = tri->start_y;
-    byte            *tptr = tri->tex->vtxt->tex;
+    byte            *tptr = (byte*)tri->tex->vtxt->tex;
     long            mask = ~((1 << tri->tex->widthshift) - 1);
     byte            clr;
 

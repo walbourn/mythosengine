@@ -51,15 +51,26 @@
 #endif
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-//             
+//
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include <portable.h>
 
 #include "esmath.hpp"
 #include "esdraw.hpp"
+
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//
+//                                Equates
+//
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+#define TESTING_TERRAIN
+#define ESCH_LOW_TERRAIN_X_PRIMARY  0x1
+#define ESCH_LOW_TERRAIN_Z_PRIMARY  0x2
+#define ESCH_MAX_LOD                8
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
@@ -86,16 +97,17 @@ struct esch_surf_type
 // Terrain is assumed to start at the origin and extends out along the XZ   ³
 // plane, with heights in positive Y.                                       ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-class EschTerrain : public EschDrawable {
+class EschTerrain : public EschDrawable
+{
 protected:
 
-    int compute_area(Flx16 lox, Flx16 loz, Flx16 hix, Flx16 hiz,
+    int compute_area(float lox, float loz, float hix, float hiz,
                      int *sw, int *ew, int *sd, int *ed, int bits);
 
     int compute_shift_value(ulong x, ulong *shift);
 
-    void compute_texture_uv(Flx16 &u_left, Flx16 &u_right,
-                            Flx16 &v_top, Flx16 &v_bottom,
+    void compute_texture_uv(float &u_left, float &u_right,
+                            float &v_top, float &v_bottom,
                             dword flags,
                             int w, int d,
                             ulong shift=0);
@@ -135,13 +147,13 @@ public:
     ushort          depth;                  // Depth of height field
     ulong           surfratio;              // Surface ratio (height : surface)
     ulong           surfshift;              // Shift value for surf ratio
-    Flx16           scale;                  // World space per unit in width/depth
+    float           scale;                  // World space per unit in width/depth
     ulong           scaleshift;             // Shift value for scale
-    Flx16           lodmedium;              // Eye distance for medium LOD
-    Flx16           lodlow;                 // Eye distance for low LOD
+    float           lodmedium;              // Eye distance for medium LOD
+    float           lodlow;                 // Eye distance for low LOD
     EschPoint       origin;                 // Origin of height field
     byte            *hfield;                // 2D array of heights
-    Flx16           *htable;                // Array of world height values
+    float           *htable;                // Array of world height values
     esch_surf_type  *surfinfo;              // 2D array of surface information
     IvoryHandle     hsurfnorml;             // 2D array of surface normals
     ulong           tmax;                   // Number of textures
@@ -167,19 +179,19 @@ public:
 
     virtual void release();
 
-    virtual Flx16 get_height(Flx16 x, Flx16 z) const;
-    Flx16 get_height(const EschPoint *pt) const
+    virtual float get_height(float x, float z) const;
+    float get_height(const EschPoint *pt) const
     {
         return get_height(pt->x, pt->z);
     }
 
-    virtual ushort get_surface_flags(Flx16 x, Flx16 z) const;
+    virtual ushort get_surface_flags(float x, float z) const;
     ushort get_surface_flags(const EschPoint *pt) const
     {
         return get_surface_flags(pt->x, pt->z);
     }
 
-    virtual int check_LOS(EschPoint *pt1, EschPoint *pt2, int precision=-1,Flx16 *dist=NULL) const;
+    virtual int check_LOS(EschPoint *pt1, EschPoint *pt2, int precision=-1,float *dist=NULL) const;
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Utility functions.                                                   ³
@@ -188,16 +200,16 @@ public:
     {
         origin = *pt;
     }
-    void set_origin(const Flx16 ix, const Flx16 iy, const Flx16 iz)
+    void set_origin(const float ix, const float iy, const float iz)
     {
         origin.x = ix;
         origin.y = iy;
         origin.z = iz;
     }
 
-    void set_scale(const Flx16 i);
+    void set_scale(const float i);
 
-    void set_lod(const Flx16 lodm, const Flx16 lodl)
+    void set_lod(const float lodm, const float lodl)
     {
         lodmedium = (lodm <= 0) ? 0 : lodm;
         lodlow = (lodl < lodmedium) ? lodmedium : lodl;
@@ -209,6 +221,99 @@ public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
     virtual esch_error_codes load(const char *fname, const char *tname=0, ushort *hclr=0);
     virtual esch_error_codes load(XFParseIFF *iff, const char *tname=0, ushort *hclr=0);
+};
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// EschTerrainEx - Height-field terrain drawable object.                    ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+class EschTerrainEx : public EschTerrain
+{
+public:
+    enum
+    {
+        ESCH_TERNEX_SMOOTH_NONE     = 0x0,
+        ESCH_TERNEX_SMOOTH_TOP      = 0x1,
+        ESCH_TERNEX_SMOOTH_BOTTOM   = 0x2,
+        ESCH_TERNEX_SMOOTH_LEFT     = 0x4,
+        ESCH_TERNEX_SMOOTH_RIGHT    = 0x8,
+        ESCH_TERNEX_SMOOTH_ALL      = ESCH_TERNEX_SMOOTH_TOP
+                                    | ESCH_TERNEX_SMOOTH_BOTTOM
+                                    | ESCH_TERNEX_SMOOTH_LEFT
+                                    | ESCH_TERNEX_SMOOTH_RIGHT,
+
+        ESCH_TERNEX_CLIP            =0x10,
+        ESCH_TERNEX_ALIGN           =0x20,
+        ESCH_TERNEX_TEXTURE         =0x40,
+        ESCH_TERNEX_PERSPECTIVE     =0x80,
+        ESCH_TERNEX_SMOOTH          =0x100
+    };
+
+protected:
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    // Protected data members                                               ³
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+//    EschPoint   dvolume[10];
+    long        *left_edge;
+    long        *right_edge;
+    long        edge_count;
+    VngoRect    darea;
+    int         ccol;   // colomn coord in array.
+    int         crow;   // row coord in array.
+    int         max_texture_lod;
+    int         max_perspective_lod;
+    int         max_smooth_lod;
+    int         num_dlevels;
+    int         start_dlevel;
+    float       *dlevels;
+    dword       view_dir;
+
+    EschCamera  *cam;
+    dword       cflags;
+    EschPoint   pos;
+    EschPoint   po;
+
+    EschVector  wvec;
+    EschVector  dvec;
+    EschVector  hvec;
+
+    void esch_find_draw_volume();
+    VngoRect draw_terrain_rect(VngoRect *iclip, VngoRect *oclip,int dlevel,dword flags);
+    void draw_terrain_rect(VngoRect *iclip, int dlevel, dword flags);
+    void display_pixel_row(VngoPoint *vpt, int count);
+    void setup_edge_limits(VngoPoint *edge);
+    void add_edge_to_limits(VngoPoint *p1,VngoPoint *p2);
+
+public:
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    // Public data members                                                  ³
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+    EschTerrainEx (const char *fname=0, const char *tname=0);
+    EschTerrainEx (const EschTerrainEx &_t);
+    virtual ~EschTerrainEx();
+
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    // Operations                                                           ³
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+    virtual void draw();
+
+    virtual float get_height(float x, float z) const;
+    virtual void set_lod (int count,...);
+    virtual void set_texture_lod(int lod);
+    virtual void set_perspective_lod(int lod);
+    virtual void set_smooth_lod(int lod);
+    virtual void set_start_lod(int lod);
+
+    float *get_dlevels () {return dlevels;}
+    int get_texture_lod() {return max_texture_lod;}
+    int get_perspective_lod() {return max_perspective_lod;}
+    int get_smooth_lod() {return max_smooth_lod;}
+    int get_start_lod() {return start_dlevel;}
+    int get_num_lod() {return num_dlevels;}
+    void hide_rect(VngoRect &hrect);
+
+    virtual void release();
 };
 
 #ifdef __WATCOMC__

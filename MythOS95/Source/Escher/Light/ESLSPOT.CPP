@@ -91,7 +91,7 @@ EschSpotLight::EschSpotLight(const char *fname, const char *lname) :
 
 EschSpotLight::EschSpotLight(const EschPoint *pnt,
                              const EschVector *d,
-                             Flx16 h, Flx16 f, Flx16 i, Flx16 o) :
+                             float h, float f, float i, float o) :
     EschAttenLight(pnt,i,o),
     dir(*d),
     hotspot(h),
@@ -102,9 +102,9 @@ EschSpotLight::EschSpotLight(const EschPoint *pnt,
     dir.normalize();
 };
 
-EschSpotLight::EschSpotLight(Flx16 ix, Flx16 iy, Flx16 iz,
-                             Flx16 ii, Flx16 ij, Flx16 ik,
-                             Flx16 h, Flx16 f, Flx16 i, Flx16 o) : 
+EschSpotLight::EschSpotLight(float ix, float iy, float iz,
+                             float ii, float ij, float ik,
+                             float h, float f, float i, float o) : 
     EschAttenLight(ix,iy,iz,i,o),
     dir(ii,ij,ik),
     hotspot(h),
@@ -154,17 +154,17 @@ void EschSpotLight::setup(const EschFrameRef *fr)
     EschLight::setup(fr);
 
     arate=harate=0;
-    if ((outer-inner).flx > 0)
+    if ((outer-inner) > 0)
     {
         arate = _intensity / (outer - inner);
         harate = _hintensity / (outer - inner);
     }
 
-    hotcos = hotspot.cos();
-    fallcos = falloff.cos();
+    hotcos = esch_cos(hotspot);
+    fallcos = esch_cos(falloff);
 
     frate=hfrate=0;
-    if ((hotcos-fallcos).flx > 0)
+    if ((hotcos-fallcos) > 0)
     {
         frate = _intensity / (hotcos-fallcos);
         hfrate = _hintensity / (hotcos-fallcos);
@@ -191,14 +191,14 @@ void EschSpotLight::shine(const EschVertex *v, VngoPoint *vpt, int revnrml) cons
                        tpos.y - v->y,
                        tpos.z - v->z);
 
-        Flx16 mag = vtx.magnitude();
+        float mag = vtx.magnitude();
 
         // Check for point beyond outer range before
         // continuing
-        if (mag.flx < outer.flx)
+        if (mag < outer)
         {
             // Complete normalization
-            if (mag.flx > 0)
+            if (mag > 0)
             {
                 vtx.i /= mag;
                 vtx.j /= mag;
@@ -206,49 +206,51 @@ void EschSpotLight::shine(const EschVertex *v, VngoPoint *vpt, int revnrml) cons
             }
 
             // Use dot product with light to determine fall-off
-            Flx16 dotcone = vtx DOT tdir;
+            float dotcone = vtx DOT tdir;
 
             // Check to see if we are inside fall-off cone
-            if (dotcone.flx > fallcos.flx)
+            if (dotcone > fallcos)
             {
                 // Compute dot product
-                Flx16 dot = v->normal DOT vtx;
+                float dot = v->normal DOT vtx;
 
-                if (dot.flx < 0)
+                if (dot < 0)
                 {
-                    dot.flx = (revnrml) ? -dot.flx : 0;
+                    dot = (revnrml) ? -dot : 0;
                 }
         
-                if (dot.flx > (1<<16))
-                    dot.flx = (1<<16);
-
                 // Compute intensity output (including attenuation)
-                Flx16 inten = _intensity;
+                float inten = _intensity;
 
-                if (dotcone.flx < hotcos.flx)
+                if (dotcone < hotcos)
                 {
                     inten -= (hotcos - dotcone) * frate;
                 }
 
-                if ((flags & ESCH_LGT_ATTEN) && (mag.flx > inner.flx))
+                if ((flags & ESCH_LGT_ATTEN) && (mag > inner))
                 {
                     inten -= (mag - inner) * arate;
                 }
 
-                if (inten > 0)
-                {
-                    // Compute final shade value
-                    long i = (dot.flx * (inten.flx >> 16)) >> 16;
-                    if (vpt->shade < i)
-                        vpt->shade = i;
-                }
+                // Compute shade value
+                vpt->shade += long(dot * inten);
             }
         }
     }
 
 //컴� Chain for true multiple lights
     if (inext)
+    {
         inext->shine(v,vpt,revnrml);
+    }
+//컴� Clamp shade value
+    else
+    {
+        if (vpt->shade > mp)
+            vpt->shade = mp;
+        else if (vpt->shade < 0)
+            vpt->shade = 0;
+    }
 }
 
 
@@ -271,14 +273,14 @@ void EschSpotLight::hishine(const EschVertex *v, VngoPoint *vpt, int revnrml) co
                        tpos.y - v->y,
                        tpos.z - v->z);
 
-        Flx16 mag = vtx.magnitude();
+        float mag = vtx.magnitude();
 
         // Check for point beyond outer range before
         // continuing
-        if (mag.flx < outer.flx)
+        if (mag < outer)
         {
             // Complete normalization
-            if (mag.flx > 0)
+            if (mag > 0)
             {
                 vtx.i /= mag;
                 vtx.j /= mag;
@@ -286,49 +288,51 @@ void EschSpotLight::hishine(const EschVertex *v, VngoPoint *vpt, int revnrml) co
             }
 
             // Use dot product with light to determine fall-off
-            Flx16 dotcone = vtx DOT tdir;
+            float dotcone = vtx DOT tdir;
 
             // Check to see if we are inside fall-off cone
-            if (dotcone.flx > fallcos.flx)
+            if (dotcone > fallcos)
             {
                 // Compute dot product
-                Flx16 dot = v->normal DOT vtx;
+                float dot = v->normal DOT vtx;
 
-                if (dot.flx < 0)
+                if (dot < 0)
                 {
-                    dot.flx = (revnrml) ? -dot.flx : 0;
+                    dot = (revnrml) ? -dot : 0;
                 }
-        
-                if (dot.flx > (1<<16))
-                    dot.flx = (1<<16);
 
                 // Compute intensity output (including attenuation)
-                Flx16 inten = _hintensity;
+                float inten = _hintensity;
 
-                if (dotcone.flx < hotcos.flx)
+                if (dotcone < hotcos)
                 {
                     inten -= (hotcos - dotcone) * hfrate;
                 }
 
-                if ((flags & ESCH_LGT_ATTEN) && (mag.flx > inner.flx))
+                if ((flags & ESCH_LGT_ATTEN) && (mag > inner))
                 {
                     inten -= (mag - inner) * harate;
                 }
 
-                if (inten > 0)
-                {
-                    // Compute final shade value
-                    long i = (dot.flx * (inten.flx >> 16)) >> 16;
-                    if (vpt->shade < i)
-                        vpt->shade = i;
-                }
+                // Compute shade value
+                vpt->shade += long(dot * inten);
             }
         }
     }
 
 //컴� Chain for true multiple lights
     if (inext)
+    {
         inext->hishine(v,vpt,revnrml);
+    }
+//컴� Clamp shade value
+    else
+    {
+        if (vpt->shade > VNGO_SHADE_FULL)
+            vpt->shade = VNGO_SHADE_FULL;
+        else if (vpt->shade < 0)
+            vpt->shade = 0;
+    }
 }
 
 
@@ -368,7 +372,8 @@ esch_error_codes EschSpotLight::load(const char *fname, const char *lname)
             iff.leaveform();
         }
 
-        if (iff.chunkid == iff.makeid('E','S','P','T'))
+        if (iff.chunkid == iff.makeid('E','S','P','T')
+            || iff.chunkid == iff.makeid('E','S','P','1'))
         {
             err=load(&iff,lname);
             if (!err
@@ -391,41 +396,75 @@ esch_error_codes EschSpotLight::load(const char *fname, const char *lname)
 
 esch_error_codes EschSpotLight::load(XFParseIFF *iff, const char *lname)
 {
-    EschFileLightSpot   spot;
-
     assertMyth("EschSpotLight::load requries iff pointer",
                iff);
 
-//컴 Verify correct chunk name and size
-    if (iff->chunkid != iff->makeid('E','S','P','T'))
+//컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴� Floating-point format
+    if (iff->chunkid == iff->makeid('E','S','P','1'))
+    {
+        EschFileLightSpot   spot;
+
+        if (iff->chunkSize != sizeof(spot))
+            return ESCH_ERR_INVALIDDATA;
+
+        //컴 Read chunk and verify name, if given.
+        if (iff->read(&spot))
+            return ESCH_ERR_FILEERROR;
+
+        if (lname && strcmp(lname,spot.name))
+            return ESCH_ERR_NOTFOUND;
+
+        //컴 Found, so setup Spot Light
+        strcpy(name,spot.name);
+        flags = spot.flags;
+
+        VngoColor24bit  c(spot.color);
+        set_intensity( max( max(c.r, c.g), c.b ) );
+
+        set_position( spot.x, spot.y, spot.z );
+        set_direction( spot.i, spot.j, spot.k );
+
+        set_inner( spot.inner );
+        set_outer( spot.outer );
+
+        set_hotspot( spot.hotspot );
+        set_falloff( spot.falloff );
+    }
+//컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴 Fixed-point format
+    else if (iff->chunkid == iff->makeid('E','S','P','T'))
+    {
+        EschFileLightSpotV1   spot;
+
+        if (iff->chunkSize != sizeof(spot))
+            return ESCH_ERR_INVALIDDATA;
+
+        //컴 Read chunk and verify name, if given.
+        if (iff->read(&spot))
+            return ESCH_ERR_FILEERROR;
+
+        if (lname && strcmp(lname,spot.name))
+            return ESCH_ERR_NOTFOUND;
+
+        //컴 Found, so setup Spot Light
+        strcpy(name,spot.name);
+        flags = spot.flags;
+
+        VngoColor24bit  c(spot.color);
+        set_intensity( max( max(c.r, c.g), c.b ) );
+
+        set_position(spot.x / 65536.0f, spot.y / 65536.0f, spot.z / 65536.0f);
+        set_direction(spot.i / 65536.0f, spot.j / 65536.0f, spot.k / 65536.0f);
+
+        set_inner( spot.inner / 65536.0f );
+        set_outer( spot.outer / 65536.0f );
+
+        set_hotspot( spot.hotspot / 65536.0f );
+        set_falloff( spot.falloff / 65536.0f );
+    }
+    else
+    {
         return ESCH_ERR_NOTFOUND;
-
-    if (iff->chunkSize != sizeof(EschFileLightSpot))
-        return ESCH_ERR_INVALIDDATA;
-
-//컴 Read chunk and verify name, if given.
-    if (iff->read(&spot))
-        return ESCH_ERR_FILEERROR;
-
-    if (lname && strcmp(lname,spot.name))
-        return ESCH_ERR_NOTFOUND;
-
-//컴 Found, so setup Spot Light
-
-    strcpy(name,spot.name);
-    flags = spot.flags;
-
-    VngoColor24bit  c(spot.color);
-    set_intensity( max( max(c.r, c.g), c.b ) );
-
-    set_position( spot.x, spot.y, spot.z );
-    set_direction( spot.i, spot.j, spot.k );
-
-    set_inner( spot.inner );
-    set_outer( spot.outer );
-
-    set_hotspot( spot.hotspot );
-    set_falloff( spot.falloff );
+    }
 
 //컴 Return ok
     return ESCH_ERR_NONE;

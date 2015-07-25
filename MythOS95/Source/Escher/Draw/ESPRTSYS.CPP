@@ -234,7 +234,7 @@ void EschParticleSystem::add(EschParticle *p)
 //                                                                          ³
 // This calls set_interval() for each defined particle in the class.        ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void EschParticleSystem::set_interval(Flx16 i)
+void EschParticleSystem::set_interval(float i)
 {
     if (!maxcount || !particles)
         return;

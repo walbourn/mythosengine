@@ -101,11 +101,9 @@ struct TGA_header
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 xf_error_codes XFParseTGA::read(XFBitmap *b)
 {
-    int                 i;
+    int                 x;
     int                 y;
-    ulong               lsize;
     byte                *sptr, *dptr;
-    byte                *work;
     struct TGA_header   header;
 
     if (!b)
@@ -121,8 +119,8 @@ xf_error_codes XFParseTGA::read(XFBitmap *b)
 
 //ÄÄÄ Check for unsupported formats ÄÄÄ
     if ( header.cmap_type                           // No colormap
-         || (header.bpp != 24 && header.bpp != 32)  // 24- or 32-bit only
-         || header.img_type != IMG_TC               // Uncompressed truecolor
+         || (header.img_type != IMG_TC
+             && header.img_type != IMG_TC_RLE)      // Truecolor
          || (header.ibits & 0xc0)                   // Non interleaved
          || !header.imgw || !header.imgh            // Non-empty size
        )
@@ -135,11 +133,24 @@ xf_error_codes XFParseTGA::read(XFBitmap *b)
     b->clrinuse=0;
     b->width = header.imgw;
     b->height = header.imgh;
-    b->bpp = 3;
- 
-//ÄÄÄ Load image data ÄÄÄ
 
-    // Allocate memory
+    switch (header.bpp)
+    {
+        case 15:
+        case 16:
+            b->bpp = XFBM_BPP_15BIT;
+            break;
+        case 24:
+            b->bpp = XFBM_BPP_24BIT;
+            break;
+        case 32:
+            b->bpp = XFBM_BPP_32BIT;
+            break;
+        default:
+            return (errorn=XF_ERR_NOTSUPPORTED);
+    }
+
+//ÄÄÄ Setup memory ÄÄÄ
     b->handle = ivory_halloc(b->width * b->height * b->bpp);
     if (!b->handle)
     {
@@ -154,49 +165,242 @@ xf_error_codes XFParseTGA::read(XFBitmap *b)
         return (errorn=XF_ERR_LOCKFAILED);
     }
 
-    lsize = ulong (b->width) * ((header.bpp == 32) ? 4ul : 3ul);
-
-    // Allocate workspace
-    work = new byte[lsize];
-    if (!work)
+//ÄÄÄ Load image data ÄÄÄ
+    switch (header.img_type)
     {
-        b->release();
-        return (errorn=XF_ERR_NOMEMORY);
+        //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ RLE Compressed
+        case IMG_TC_RLE:
+            {
+                byte work[4];
+
+                for(y=0; y < b->height; y++)
+                {
+                    // Compute start location for current line given images bits
+                    dptr = b->data + ( (b->width*b->bpp)
+                                       * ( (header.ibits & 0x20)
+                                           ? y
+                                           : (b->height - y - 1) ) )
+                                   + ( (header.ibits & 0x10)
+                                       ? (b->width-1)*b->bpp
+                                       : 0 );
+
+                    for(x=0; x < b->width;)
+                    {
+                        if (xf->read(work,1) != 1)
+                        {
+                            b->release();
+                            return (errorn=XF_ERR_INVALIDIMAGE);
+                        }
+                        
+                        if ((*work & 0x80) == 0x80)
+                        {
+                            // Repeat
+                            int j = (*work & 0x7f) + 1;
+                            
+                            if (xf->read(work,b->bpp) != b->bpp)
+                            {
+                                b->release();
+                                return (errorn=XF_ERR_INVALIDIMAGE);
+                            }
+
+                            for(; j > 0; j--, x++)
+                            {
+                                if (x >= b->width)
+                                {
+                                    b->release();
+                                    return (errorn=XF_ERR_INVALIDIMAGE);
+                                }
+
+                                switch (b->bpp)
+                                {
+                                    case XFBM_BPP_15BIT:
+                                        *dptr     = *work;
+                                        *(dptr+1) = *(work+1);
+
+                                                 // Right to left transversal
+                                        if (header.ibits & 0x10)
+                                            dptr -= 2;
+                                        else
+                                            dptr += 2;
+                                        break;
+
+                                    case XFBM_BPP_24BIT:
+                                        *(dptr+2) = *work;      // Blue
+                                        *(dptr+1) = *(work+1);  // Green
+                                        *dptr     = *(work+2);  // Red
+
+                                                 // Right to left transversal
+                                        if (header.ibits & 0x10)
+                                            dptr -= 3;
+                                        else
+                                            dptr += 3;
+                                        break;
+
+                                    case XFBM_BPP_32BIT:
+                                        *(dptr+2) = *work;      // Blue
+                                        *(dptr+1) = *(work+1);  // Green
+                                        *dptr     = *(work+2);  // Red
+                                        *(dptr+3) = *(work+3);  // Alpha
+
+                                                 // Right to left transversal
+                                        if (header.ibits & 0x10)
+                                            dptr -= 4;
+                                        else
+                                            dptr += 4;
+                                        break;
+                                }
+                            }
+                        }
+                        else
+                        {
+                            // Literal
+                            int j = (*work & 0x7f) + 1;
+                            
+                            for(; j > 0; j--, x++)
+                            {
+                                if (xf->read(work,b->bpp) != b->bpp)
+                                {
+                                    b->release();
+                                    return (errorn=XF_ERR_INVALIDIMAGE);
+                                }
+
+                                if (x >= b->width)
+                                {
+                                    b->release();
+                                    return (errorn=XF_ERR_INVALIDIMAGE);
+                                }
+
+                                switch (b->bpp)
+                                {
+                                    case XFBM_BPP_15BIT:
+                                        *dptr     = *work;
+                                        *(dptr+1) = *(work+1);
+
+                                                 // Right to left transversal
+                                        if (header.ibits & 0x10)
+                                            dptr -= 2;
+                                        else
+                                            dptr += 2;
+                                        break;
+
+                                    case XFBM_BPP_24BIT:
+                                        *(dptr+2) = *work;      // Blue
+                                        *(dptr+1) = *(work+1);  // Green
+                                        *dptr     = *(work+2);  // Red
+
+                                                 // Right to left transversal
+                                        if (header.ibits & 0x10)
+                                            dptr -= 3;
+                                        else
+                                            dptr += 3;
+                                        break;
+
+                                    case XFBM_BPP_32BIT:
+                                        *(dptr+2) = *work;      // Blue
+                                        *(dptr+1) = *(work+1);  // Green
+                                        *dptr     = *(work+2);  // Red
+                                        *(dptr+3) = *(work+3);  // Alpha
+
+                                                 // Right to left transversal
+                                        if (header.ibits & 0x10)
+                                            dptr -= 4;
+                                        else
+                                            dptr += 4;
+                                        break;
+                                }
+                            }
+                        }
+                    }
+                }
+            }
+            break;
+        //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Uncompressed
+        case IMG_TC:
+            {
+                ulong lsize = ulong (b->width) * b->bpp;
+
+                // Allocate workspace
+                byte *work = new byte[lsize];
+                if (!work)
+                {
+                    b->release();
+                    return (errorn=XF_ERR_NOMEMORY);
+                }
+
+                for(y=0; y < b->height; y++)
+                {
+                    // Compute start location for current line given images bits
+                    dptr = b->data + ( (b->width*b->bpp)
+                                       * ( (header.ibits & 0x20)
+                                           ? y
+                                           : (b->height - y - 1) ) )
+                                   + ( (header.ibits & 0x10)
+                                       ? (b->width-1)*b->bpp
+                                       : 0 );
+
+                    // Read scanline into workspace
+                    if (xf->read (work,lsize) != lsize)
+                    {
+                        b->release();
+                        delete [] work;
+                        return (errorn=XF_ERR_INVALIDIMAGE);
+                    }
+
+                    switch (b->bpp)
+                    {
+                        case XFBM_BPP_15BIT:
+                            for(sptr=work, x=0; x < b->width; x++)
+                            {
+                                *dptr     = *(sptr++);
+                                *(dptr+1) = *(sptr++);
+
+                                                 // Right to left transversal
+                                if (header.ibits & 0x10)
+                                    dptr -= 2;
+                                else
+                                    dptr += 2;
+                            }
+                            break;
+
+                        case XFBM_BPP_24BIT:
+                            // Convert BGR to proper order while copying
+                            for(sptr=work, x=0; x < b->width; x++)
+                            {
+                                *(dptr+2) = *(sptr++);      // Blue
+                                *(dptr+1) = *(sptr++);      // Green
+                                *dptr     = *(sptr++);      // Red
+
+                                                 // Right to left transversal
+                                if (header.ibits & 0x10)
+                                    dptr -= 3;
+                                else
+                                    dptr += 3;
+                            }
+                            break;
+
+                        case XFBM_BPP_32BIT:
+                            // Convert BGRA to proper order while copying
+                            for(sptr=work, x=0; x < b->width; x++)
+                            {
+                                *(dptr+2) = *(sptr++);      // Blue
+                                *(dptr+1) = *(sptr++);      // Green
+                                *dptr     = *(sptr++);      // Red
+                                *(dptr+3) = *(sptr++);      // Alpha
+
+                                                 // Right to left transversal
+                                if (header.ibits & 0x10)
+                                    dptr -= 4;
+                                else
+                                    dptr += 4;
+                            }
+                            break;
+                    }
+                }
+
+                delete [] work;
+            }
+            break;
     }
-
-    for(y=0; y < b->height; y++)
-    {
-        // Compute start location for current line given images bits
-        dptr = b->data + ( (b->width * 3)
-                           * ( (header.ibits & 0x20) ? y : (b->height - y - 1) ) )
-                       + ( (header.ibits & 0x10) ? (b->width-1)*3 : 0  );
-
-        // Read scanline into workspace
-        if (xf->read (work,lsize) != lsize)
-        {
-            b->release();
-            delete [] work;
-            return (errorn=XF_ERR_INVALIDIMAGE);
-        }
-
-        // Convert BGRA or BGR to proper order while copying to data area
-        for(sptr=work, i=0; i < b->width; i++)
-        {
-            *(dptr+2) = *(sptr++);      // Blue
-            *(dptr+1) = *(sptr++);      // Green
-            *dptr     = *(sptr++);      // Red
-
-            if (header.bpp == 32)       // Skip Alpha
-                sptr++;
-
-            if (header.ibits & 0x10)    // Right to left transversal
-                dptr -= 3;
-            else
-                dptr += 3;
-        }
-    }
-
-    delete [] work;
 
     return XF_ERR_NONE;
 }
@@ -220,16 +424,37 @@ xf_error_codes XFParseTGA::write(XFBitmap *b)
     if (!b)
         b = bm;
 
-    if (b->bpp != 3 || !b->width || !b->height)
-        return XF_ERR_NOTSUPPORTED;
+    if (!b->width || !b->height)
+
+    switch (b->bpp)
+    {
+        case XFBM_BPP_15BIT:
+        case XFBM_BPP_24BIT:
+        case XFBM_BPP_32BIT:
+            break;
+        default:
+            return (errorn=XF_ERR_NOTSUPPORTED);
+    }
 
 //ÄÄÄ Create/write header ÄÄÄ
     memset(&header,0,sizeof(TGA_header));
     header.imgw = b->width;
     header.imgh = b->height;
-    header.bpp = 24;
     header.img_type = IMG_TC;
     header.ibits = 0x20;                // Left to right, top to bottom
+
+    switch (b->bpp)
+    {
+        case XFBM_BPP_15BIT:
+            header.bpp = 15;
+            break;
+        case XFBM_BPP_24BIT:
+            header.bpp = 24;
+            break;
+        case XFBM_BPP_32BIT:
+            header.bpp = 32;
+            break;
+    }
 
     if (xf->write(&header,sizeof(TGA_header)) != sizeof(TGA_header))
     {
@@ -260,7 +485,7 @@ xf_error_codes XFParseTGA::write(XFBitmap *b)
         return (errorn=XF_ERR_INVALIDIMAGE);
     }
 
-    lsize = b->width * 3ul;
+    lsize = b->width * b->bpp;
 
     // Allocate workspace
     work = new byte[lsize];
@@ -273,14 +498,42 @@ xf_error_codes XFParseTGA::write(XFBitmap *b)
 
     for(y=0, sptr=b->data; y < b->height; y++)
     {
-        // Convert RGB to BGR order
-        for(dptr=work, i=0; i < b->width; i++)
+        switch (b->bpp)
         {
-            *(dptr++) = *(sptr+2);      // Blue
-            *(dptr++) = *(sptr+1);      // Green
-            *(dptr++) = *sptr;          // Red
+            case XFBM_BPP_15BIT:
+                for(dptr=work, i=0; i < b->width; i++)
+                {
+                    *(dptr++) = *sptr;
+                    *(dptr++) = *(sptr+1);
 
-            sptr += 3;
+                    sptr += 2;
+                }
+                break;
+
+            case XFBM_BPP_24BIT:
+                // Convert RGB to BGR order
+                for(dptr=work, i=0; i < b->width; i++)
+                {
+                    *(dptr++) = *(sptr+2);      // Blue
+                    *(dptr++) = *(sptr+1);      // Green
+                    *(dptr++) = *sptr;          // Red
+
+                    sptr += 3;
+                }
+                break;
+
+            case XFBM_BPP_32BIT:
+                // Convert RGBA to BGRA order
+                for(dptr=work, i=0; i < b->width; i++)
+                {
+                    *(dptr++) = *(sptr+2);      // Blue
+                    *(dptr++) = *(sptr+1);      // Green
+                    *(dptr++) = *sptr;          // Red
+                    *(dptr++) = *(sptr+3);      // Alpha
+
+                    sptr += 4;
+                }
+                break;
         }
 
         // Write scanline from workspace

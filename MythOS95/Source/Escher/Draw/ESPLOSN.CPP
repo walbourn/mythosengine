@@ -57,12 +57,12 @@
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // EschPlosion - Constructor                                                ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-EschPlosion::EschPlosion(Flx16 w, Flx16 h, EschFireTexture *f) :
+EschPlosion::EschPlosion(float w, float h, EschFireTexture *f) :
     EschDrawable(ESCH_DRWT_EXPLOSION),
     fire(f),
     width(w),
     height(h),
-    fv(Flx16(0.90)),
+    fv(float(0.90)),
     alpha_level(255),
     step(0)
 {
@@ -208,8 +208,8 @@ void EschPlosion::draw()
         //       1                          1  
         //
 
-        Flx16 width_half = Flx16(width.flx >> 1,0);
-        Flx16 height_half = Flx16(height.flx >> 1,0);
+        float width_half = width / 2;
+        float height_half = height / 2;
 
         ec.verts[0].x = 0;
         ec.verts[0].y = 0;
@@ -241,91 +241,91 @@ void EschPlosion::draw()
 
         //ÄÄÄ Create 8 faces
         ec.faces[0].a     = 0;
-        ec.faces[0].u[0]  = Flx16(0.5);
+        ec.faces[0].u[0]  = float(0.5);
         ec.faces[0].v[0]  = fv;
         ec.faces[0].b     = 2;
-        ec.faces[0].u[1]  = Flx16(0.01);
-        ec.faces[0].v[1]  = Flx16(0.01);
+        ec.faces[0].u[1]  = float(0.01);
+        ec.faces[0].v[1]  = float(0.01);
         ec.faces[0].c     = 1;
-        ec.faces[0].u[2]  = Flx16(0.90);
-        ec.faces[0].v[2]  = Flx16(0.01);
+        ec.faces[0].u[2]  = float(0.90);
+        ec.faces[0].v[2]  = float(0.01);
         ec.faces[0].txt   = 1;
 
         ec.faces[1].a     = 0;
-        ec.faces[1].u[0]  = Flx16(0.5);
+        ec.faces[1].u[0]  = float(0.5);
         ec.faces[1].v[0]  = fv;
         ec.faces[1].b     = 3;
-        ec.faces[1].u[1]  = Flx16(0.90);
-        ec.faces[1].v[1]  = Flx16(0.01);
+        ec.faces[1].u[1]  = float(0.90);
+        ec.faces[1].v[1]  = float(0.01);
         ec.faces[1].c     = 2;
-        ec.faces[1].u[2]  = Flx16(0.01);
-        ec.faces[1].v[2]  = Flx16(0.01);
+        ec.faces[1].u[2]  = float(0.01);
+        ec.faces[1].v[2]  = float(0.01);
         ec.faces[1].txt   = 1;
 
         ec.faces[2].a     = 0;
-        ec.faces[2].u[0]  = Flx16(0.5);
+        ec.faces[2].u[0]  = float(0.5);
         ec.faces[2].v[0]  = fv;
         ec.faces[2].b     = 4;
-        ec.faces[2].u[1]  = Flx16(0.01);
-        ec.faces[2].v[1]  = Flx16(0.01);
+        ec.faces[2].u[1]  = float(0.01);
+        ec.faces[2].v[1]  = float(0.01);
         ec.faces[2].c     = 3;
-        ec.faces[2].u[2]  = Flx16(0.90);
-        ec.faces[2].v[2]  = Flx16(0.01);
+        ec.faces[2].u[2]  = float(0.90);
+        ec.faces[2].v[2]  = float(0.01);
         ec.faces[2].txt   = 1;
 
         ec.faces[3].a     = 0;
-        ec.faces[3].u[0]  = Flx16(0.5);
+        ec.faces[3].u[0]  = float(0.5);
         ec.faces[3].v[0]  = fv;
         ec.faces[3].b     = 1;
-        ec.faces[3].u[1]  = Flx16(0.90);
-        ec.faces[3].v[1]  = Flx16(0.01);
+        ec.faces[3].u[1]  = float(0.90);
+        ec.faces[3].v[1]  = float(0.01);
         ec.faces[3].c     = 4;
-        ec.faces[3].u[2]  = Flx16(0.01);
-        ec.faces[3].v[2]  = Flx16(0.01);
+        ec.faces[3].u[2]  = float(0.01);
+        ec.faces[3].v[2]  = float(0.01);
         ec.faces[3].txt   = 1;
 
         ec.faces[4].a     = 0;
-        ec.faces[4].u[0]  = Flx16(0.5);
+        ec.faces[4].u[0]  = float(0.5);
         ec.faces[4].v[0]  = fv;
         ec.faces[4].b     = 5;
-        ec.faces[4].u[1]  = Flx16(0.01);
-        ec.faces[4].v[1]  = Flx16(0.01);
+        ec.faces[4].u[1]  = float(0.01);
+        ec.faces[4].v[1]  = float(0.01);
         ec.faces[4].c     = 1;
-        ec.faces[4].u[2]  = Flx16(0.90);
-        ec.faces[4].v[2]  = Flx16(0.01);
+        ec.faces[4].u[2]  = float(0.90);
+        ec.faces[4].v[2]  = float(0.01);
         ec.faces[4].txt   = 1;
 
         ec.faces[5].a     = 0;
-        ec.faces[5].u[0]  = Flx16(0.5);
+        ec.faces[5].u[0]  = float(0.5);
         ec.faces[5].v[0]  = fv;
         ec.faces[5].b     = 3;
-        ec.faces[5].u[1]  = Flx16(0.90);
-        ec.faces[5].v[1]  = Flx16(0.01);
+        ec.faces[5].u[1]  = float(0.90);
+        ec.faces[5].v[1]  = float(0.01);
         ec.faces[5].c     = 5;
-        ec.faces[5].u[2]  = Flx16(0.01);
-        ec.faces[5].v[2]  = Flx16(0.01);
+        ec.faces[5].u[2]  = float(0.01);
+        ec.faces[5].v[2]  = float(0.01);
         ec.faces[5].txt   = 1;
 
         ec.faces[6].a     = 0;
-        ec.faces[6].u[0]  = Flx16(0.5);
+        ec.faces[6].u[0]  = float(0.5);
         ec.faces[6].v[0]  = fv;
         ec.faces[6].b     = 6;
-        ec.faces[6].u[1]  = Flx16(0.01);
-        ec.faces[6].v[1]  = Flx16(0.01);
+        ec.faces[6].u[1]  = float(0.01);
+        ec.faces[6].v[1]  = float(0.01);
         ec.faces[6].c     = 3;
-        ec.faces[6].u[2]  = Flx16(0.90);
-        ec.faces[6].v[2]  = Flx16(0.01);
+        ec.faces[6].u[2]  = float(0.90);
+        ec.faces[6].v[2]  = float(0.01);
         ec.faces[6].txt   = 1;
 
         ec.faces[7].a     = 0;
-        ec.faces[7].u[0]  = Flx16(0.5);
+        ec.faces[7].u[0]  = float(0.5);
         ec.faces[7].v[0]  = fv;
         ec.faces[7].b     = 1;
-        ec.faces[7].u[1]  = Flx16(0.90);
-        ec.faces[7].v[1]  = Flx16(0.01);
+        ec.faces[7].u[1]  = float(0.90);
+        ec.faces[7].v[1]  = float(0.01);
         ec.faces[7].c     = 6;
-        ec.faces[7].u[2]  = Flx16(0.01);
-        ec.faces[7].v[2]  = Flx16(0.01);
+        ec.faces[7].u[2]  = float(0.01);
+        ec.faces[7].v[2]  = float(0.01);
         ec.faces[7].txt   = 1;
     }
     else if (flags & ESCH_PLSN_TRIANGULAR)
@@ -351,7 +351,7 @@ void EschPlosion::draw()
         //       0                          0  
         //
 
-        Flx16 width_half = Flx16(width.flx >> 1,0);
+        float width_half = width / 2;
 
         ec.verts[0].x = 0;
         ec.verts[0].y = 0;
@@ -375,25 +375,25 @@ void EschPlosion::draw()
 
         //ÄÄÄ Create 2 faces
         ec.faces[0].a     = 0;
-        ec.faces[0].u[0]  = Flx16(0.5);
+        ec.faces[0].u[0]  = float(0.5);
         ec.faces[0].v[0]  = fv;
         ec.faces[0].b     = 1;
-        ec.faces[0].u[1]  = Flx16(0.90);
-        ec.faces[0].v[1]  = Flx16(0.01);
+        ec.faces[0].u[1]  = float(0.90);
+        ec.faces[0].v[1]  = float(0.01);
         ec.faces[0].c     = 2;
-        ec.faces[0].u[2]  = Flx16(0.01);
-        ec.faces[0].v[2]  = Flx16(0.01);
+        ec.faces[0].u[2]  = float(0.01);
+        ec.faces[0].v[2]  = float(0.01);
         ec.faces[0].txt   = 1;
 
         ec.faces[1].a     = 0;
-        ec.faces[1].u[0]  = Flx16(0.5);
+        ec.faces[1].u[0]  = float(0.5);
         ec.faces[1].v[0]  = fv;
         ec.faces[1].b     = 3;
-        ec.faces[1].u[1]  = Flx16(0.90);
-        ec.faces[1].v[1]  = Flx16(0.01);
+        ec.faces[1].u[1]  = float(0.90);
+        ec.faces[1].v[1]  = float(0.01);
         ec.faces[1].c     = 4;
-        ec.faces[1].u[2]  = Flx16(0.01);
-        ec.faces[1].v[2]  = Flx16(0.01);
+        ec.faces[1].u[2]  = float(0.01);
+        ec.faces[1].v[2]  = float(0.01);
         ec.faces[1].txt   = 1;
     }
     else
@@ -411,8 +411,8 @@ void EschPlosion::draw()
         //
         //
 
-        Flx16 width_half = Flx16(width.flx >> 1,0);
-        Flx16 width_quarter = Flx16(width.flx >> 2,0);
+        float width_half = width / 2;
+        float width_quarter = width / 4;
 
         ec.verts[0].x = -width_quarter;
         ec.verts[0].y = 0;
@@ -448,47 +448,47 @@ void EschPlosion::draw()
 
         //ÄÄÄ Create 4 faces
         ec.faces[0].a     = 0;
-        ec.faces[0].u[0]  = Flx16(0.01);
+        ec.faces[0].u[0]  = float(0.01);
         ec.faces[0].v[0]  = fv;
         ec.faces[0].b     = 1;
-        ec.faces[0].u[1]  = Flx16(0.90);
+        ec.faces[0].u[1]  = float(0.90);
         ec.faces[0].v[1]  = fv;
         ec.faces[0].c     = 2;
-        ec.faces[0].u[2]  = Flx16(0.90);
-        ec.faces[0].v[2]  = Flx16(0.01);
+        ec.faces[0].u[2]  = float(0.90);
+        ec.faces[0].v[2]  = float(0.01);
         ec.faces[0].txt   = 1;
 
         ec.faces[1].a     = 0;
-        ec.faces[1].u[0]  = Flx16(0.01);
+        ec.faces[1].u[0]  = float(0.01);
         ec.faces[1].v[0]  = fv;
         ec.faces[1].b     = 2;
-        ec.faces[1].u[1]  = Flx16(0.90); 
-        ec.faces[1].v[1]  = Flx16(0.01);
+        ec.faces[1].u[1]  = float(0.90); 
+        ec.faces[1].v[1]  = float(0.01);
         ec.faces[1].c     = 3;
-        ec.faces[1].u[2]  = Flx16(0.01);
-        ec.faces[1].v[2]  = Flx16(0.01);
+        ec.faces[1].u[2]  = float(0.01);
+        ec.faces[1].v[2]  = float(0.01);
         ec.faces[1].txt   = 1;
 
         ec.faces[2].a     = 4;
-        ec.faces[2].u[0]  = Flx16(0.01);
+        ec.faces[2].u[0]  = float(0.01);
         ec.faces[2].v[0]  = fv;
         ec.faces[2].b     = 5;
-        ec.faces[2].u[1]  = Flx16(0.90);
+        ec.faces[2].u[1]  = float(0.90);
         ec.faces[2].v[1]  = fv;
         ec.faces[2].c     = 6;
-        ec.faces[2].u[2]  = Flx16(0.90);
-        ec.faces[2].v[2]  = Flx16(0.01);
+        ec.faces[2].u[2]  = float(0.90);
+        ec.faces[2].v[2]  = float(0.01);
         ec.faces[2].txt   = 1;
 
         ec.faces[3].a     = 4;
-        ec.faces[3].u[0]  = Flx16(0.01);
+        ec.faces[3].u[0]  = float(0.01);
         ec.faces[3].v[0]  = fv;
         ec.faces[3].b     = 6;
-        ec.faces[3].u[1]  = Flx16(0.90);
-        ec.faces[3].v[1]  = Flx16(0.01);
+        ec.faces[3].u[1]  = float(0.90);
+        ec.faces[3].v[1]  = float(0.01);
         ec.faces[3].c     = 7;
-        ec.faces[3].u[2]  = Flx16(0.01);
-        ec.faces[3].v[2]  = Flx16(0.01);
+        ec.faces[3].u[2]  = float(0.01);
+        ec.faces[3].v[2]  = float(0.01);
         ec.faces[3].txt   = 1;
     }
 
@@ -496,7 +496,7 @@ void EschPlosion::draw()
     for(i=0; i < verts; i++)
     {
         vflags[i] = ESCH_VVERT_TRANSFORMED;
-        ec.verts[i].transform(&frame,(EschPoint*)&vpt[i]);
+        ec.verts[i].transform(&frame,(EschPoint*)(&vpt[i]));
         vpt[i].shade=mp;
     }
     
@@ -519,7 +519,7 @@ void EschPlosion::animate()
     if (fire && !(fire->flags & ESCH_TXT_SKIPANIMATE))
         fire->animate();
 
-    if (fv > Flx16(0.2))
+    if (fv > float(0.2))
         fv -= step;
 }
 
@@ -532,7 +532,7 @@ void EschPlosion::animate()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // EschPlosion - set_top                                                    ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void EschPlosion::set_top(Flx16 ii, Flx16 ij, Flx16 ik, dword update)
+void EschPlosion::set_top(float ii, float ij, float ik, dword update)
 {
     EschVector v(ii,ij,ik);
     v.normalize();
@@ -547,13 +547,13 @@ void EschPlosion::set_top(Flx16 ii, Flx16 ij, Flx16 ik, dword update)
 //ÄÄÄ Fill in matrix for ortho rotation
 
     //ÄÄÄ Transform
-    world.orient.mtx[ESCH_MTX_A].flx = right.i.flx;
-    world.orient.mtx[ESCH_MTX_B].flx = right.j.flx;
-    world.orient.mtx[ESCH_MTX_C].flx = right.k.flx;
+    world.orient.mtx[ESCH_MTX_A] = right.i;
+    world.orient.mtx[ESCH_MTX_B] = right.j;
+    world.orient.mtx[ESCH_MTX_C] = right.k;
 
-    world.orient.mtx[ESCH_MTX_D].flx = v.i.flx;
-    world.orient.mtx[ESCH_MTX_E].flx = v.j.flx;
-    world.orient.mtx[ESCH_MTX_F].flx = v.k.flx;
+    world.orient.mtx[ESCH_MTX_D] = v.i;
+    world.orient.mtx[ESCH_MTX_E] = v.j;
+    world.orient.mtx[ESCH_MTX_F] = v.k;
 
     //ÄÄÄ Inverse Transform
     if (update & ESCH_UPD_INVERSE)
@@ -564,7 +564,7 @@ void EschPlosion::set_top(Flx16 ii, Flx16 ij, Flx16 ik, dword update)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // EschPlosion - set_direction                                              ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void EschPlosion::set_direction(Flx16 ii, Flx16 ij, Flx16 ik, dword update)
+void EschPlosion::set_direction(float ii, float ij, float ik, dword update)
 {
     world.dir.i = ii;
     world.dir.j = ij;
@@ -584,9 +584,9 @@ void EschPlosion::set_direction(Flx16 ii, Flx16 ij, Flx16 ik, dword update)
 //ÄÄÄ Fill in matrix for ortho rotation
 
     //ÄÄÄ Transform
-    world.orient.mtx[ESCH_MTX_A].flx = right.i.flx;
-    world.orient.mtx[ESCH_MTX_B].flx = right.j.flx;
-    world.orient.mtx[ESCH_MTX_C].flx = right.k.flx;
+    world.orient.mtx[ESCH_MTX_A] = right.i;
+    world.orient.mtx[ESCH_MTX_B] = right.j;
+    world.orient.mtx[ESCH_MTX_C] = right.k;
 
     world.orient.mtx[ESCH_MTX_G] = world.dir.i;
     world.orient.mtx[ESCH_MTX_H] = world.dir.j;

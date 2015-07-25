@@ -282,7 +282,7 @@ HRESULT BachSample::restore ()
 
             // Copy the data into the buffer
             DWORD   dwLen;
-            BYTE    *pbdata;
+            void    *pbdata;
 
             res = pdsb->Lock (0, length,
                               &pbdata, &dwLen,
@@ -623,7 +623,7 @@ bach_err_codes BachSample::load (XFParseIFF *iff)
 
         // Copy the data into the buffer
         DWORD   dwLen;
-        BYTE    *pbdata;
+        void    *pbdata;
 
         if (pdsb->Lock (0, length,
                         &pbdata, &dwLen,

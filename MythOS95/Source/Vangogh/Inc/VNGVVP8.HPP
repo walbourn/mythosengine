@@ -27,15 +27,12 @@
 //
 // vngvvp8.hpp
 //
-//     This is the Virtual 8bpp viewport Class header file for the
-//     Van Gogh 2D draw library.
+// Contains the 8-bit virtual viewport class definition
 //
-//ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ Revision History ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
 
 #ifndef __VNGVVP8_HPP
 #define __VNGVVP8_HPP  1
-
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
@@ -48,12 +45,19 @@
 #include "vngvp.hpp"
 #include "vngstrct.hpp"
 
-//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-//
-//                               Prototypes
-//
-//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+#ifdef __WATCOMC__
+#pragma pack(1);
+#endif
 
+#ifdef _MSC_VER
+#pragma pack(push,1)
+#endif
+
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//
+//                                Classes
+//
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 class VngoVVport8 : public VngoVport
 {
@@ -67,13 +71,13 @@ public:
     virtual void reset(dword c=0,dword farz=0xffffffff);
 
 
-    virtual VNGError vpcopy (int destx,int desty,VngoBaseDev *dest);
+    virtual VNGError vpcopy (int destx,int desty,VngoVport *dest);
 
     virtual VNGError pixel (VngoPoint *pt, VngoColor24bit *rgb_val = NULL);
-    virtual VNGError pixel (VngoPoint2 *pt, VngoColor24bit *rgb_val = NULL);
+    virtual VNGError pixel (VngoPointF *pt, VngoColor24bit *rgb_val = NULL);
     virtual VNGError clip_pixel (VngoPoint *pt, VngoColor24bit *rgb_val = NULL,
                                  VngoRect *clip_rect=NULL);
-    virtual VNGError clip_pixel (VngoPoint2 *pt, VngoColor24bit *rgb_val = NULL,
+    virtual VNGError clip_pixel (VngoPointF *pt, VngoColor24bit *rgb_val = NULL,
                                  VngoRect *clip_rect=NULL);
     virtual dword read_pixel (VngoPoint *pt, VngoPoint *dest);
     virtual dword read_pixel (int x, int y, VngoPoint *dest);
@@ -88,226 +92,73 @@ public:
 
     virtual VNGError line (VngoPoint *p1, VngoPoint *p2,
                            VngoColor24bit *rgb_val=NULL);
-    virtual VNGError line (VngoPoint2 *p1, VngoPoint2 *p2,
+    virtual VNGError line (VngoPointF *p1, VngoPointF *p2,
                            VngoColor24bit *rgb_val=NULL);
     virtual VNGError gline (VngoPoint *p1, VngoPoint *p2);
-    virtual VNGError gline (VngoPoint2 *p1, VngoPoint2 *p2);
+    virtual VNGError gline (VngoPointF *p1, VngoPointF *p2);
 // Not yet implemented.
     virtual VNGError gline_persp (VngoPoint *p1, VngoPoint *p2);
-    virtual VNGError gline_persp (VngoPoint2 *p1, VngoPoint2 *p2);
+    virtual VNGError gline_persp (VngoPointF *p1, VngoPointF *p2);
 
     virtual VNGError clip_line (VngoPoint *p1, VngoPoint *p2,
                                 VngoColor24bit *rgb_val=NULL,
                                 VngoRect *clip_rect=NULL);
-    virtual VNGError clip_line (VngoPoint2 *p1, VngoPoint2 *p2,
+    virtual VNGError clip_line (VngoPointF *p1, VngoPointF *p2,
                                 VngoColor24bit *rgb_val=NULL,
                                 VngoRect *clip_rect=NULL);
     virtual VNGError clip_gline (VngoPoint *p1, VngoPoint *p2,
                                  VngoRect *clip_rect=NULL);
-    virtual VNGError clip_gline (VngoPoint2 *p1, VngoPoint2 *p2,
+    virtual VNGError clip_gline (VngoPointF *p1, VngoPointF *p2,
                                  VngoRect *clip_rect=NULL);
 // Not yet implemented.
     virtual VNGError clip_gline_persp (VngoPoint *p1, VngoPoint *p2,
                                        VngoRect *clip_rect=NULL);
-    virtual VNGError clip_gline_persp (VngoPoint2 *p1, VngoPoint2 *p2,
+    virtual VNGError clip_gline_persp (VngoPointF *p1, VngoPointF *p2,
                                        VngoRect *clip_rect=NULL);
 
     virtual VNGError poly (int count, VngoPoint pts[]);
-    virtual VNGError poly (int count, VngoPoint2 pts[]);
+    virtual VNGError poly (int count, VngoPointF pts[]);
     virtual VNGError gpoly (int count, VngoPoint pts[]);
-    virtual VNGError gpoly (int count, VngoPoint2 pts[]);
+    virtual VNGError gpoly (int count, VngoPointF pts[]);
     virtual VNGError gpoly_persp (int count, VngoPoint pts[]);
-    virtual VNGError gpoly_persp (int count, VngoPoint2 pts[]);
+    virtual VNGError gpoly_persp (int count, VngoPointF pts[]);
     virtual VNGError tpoly (int count, VngoPoint pts[],VngoTexture *tex);
-    virtual VNGError tpoly (int count, VngoPoint2 pts[],VngoTexture *tex);
+    virtual VNGError tpoly (int count, VngoPointF pts[],VngoTexture *tex);
     virtual VNGError tpoly_persp (int count, VngoPoint pts[],VngoTexture *tex);
-    virtual VNGError tpoly_persp (int count, VngoPoint2 pts[],VngoTexture *tex);
+    virtual VNGError tpoly_persp (int count, VngoPointF pts[],VngoTexture *tex);
     virtual VNGError gtpoly (int count, VngoPoint pts[],VngoTexture *tex);
-    virtual VNGError gtpoly (int count, VngoPoint2 pts[],VngoTexture *tex);
+    virtual VNGError gtpoly (int count, VngoPointF pts[],VngoTexture *tex);
     virtual VNGError gtpoly_persp (int count, VngoPoint pts[],VngoTexture *tex);
-    virtual VNGError gtpoly_persp (int count, VngoPoint2 pts[],VngoTexture *tex);
+    virtual VNGError gtpoly_persp (int count, VngoPointF pts[],VngoTexture *tex);
     virtual VNGError grpoly (int count,VngoPoint pts[]);
-    virtual VNGError grpoly (int count,VngoPoint2 pts[]);
+    virtual VNGError grpoly (int count,VngoPointF pts[]);
 // Alpha blended versions
     virtual VNGError poly_a (int count, VngoPoint pts[],long alpha=127);
-    virtual VNGError poly_a (int count, VngoPoint2 pts[],long alpha=127);
+    virtual VNGError poly_a (int count, VngoPointF pts[],long alpha=127);
     virtual VNGError gpoly_a (int count, VngoPoint pts[],long alpha=127);
-    virtual VNGError gpoly_a (int count, VngoPoint2 pts[],long alpha=127);
+    virtual VNGError gpoly_a (int count, VngoPointF pts[],long alpha=127);
     virtual VNGError gpoly_persp_a (int count, VngoPoint pts[],long alpha=127);
-    virtual VNGError gpoly_persp_a (int count, VngoPoint2 pts[],long alpha=127);
+    virtual VNGError gpoly_persp_a (int count, VngoPointF pts[],long alpha=127);
     virtual VNGError tpoly_a (int count, VngoPoint pts[],VngoTexture *tex,
                               long alpha=127);
-    virtual VNGError tpoly_a (int count, VngoPoint2 pts[],VngoTexture *tex,
+    virtual VNGError tpoly_a (int count, VngoPointF pts[],VngoTexture *tex,
                               long alpha=127);
     virtual VNGError tpoly_persp_a (int count, VngoPoint pts[],
                                     VngoTexture *tex,long alpha=127);
-    virtual VNGError tpoly_persp_a (int count, VngoPoint2 pts[],
+    virtual VNGError tpoly_persp_a (int count, VngoPointF pts[],
                                     VngoTexture *tex,long alpha=127);
     virtual VNGError gtpoly_a (int count, VngoPoint pts[],VngoTexture *tex,
                                long alpha=127);
-    virtual VNGError gtpoly_a (int count, VngoPoint2 pts[],VngoTexture *tex,
+    virtual VNGError gtpoly_a (int count, VngoPointF pts[],VngoTexture *tex,
                                long alpha=127);
     virtual VNGError gtpoly_persp_a (int count, VngoPoint pts[],
                                      VngoTexture *tex,long alpha=127);
-    virtual VNGError gtpoly_persp_a (int count, VngoPoint2 pts[],
+    virtual VNGError gtpoly_persp_a (int count, VngoPointF pts[],
                                      VngoTexture *tex,long alpha=127);
 
-// Not yet implemented.
-    virtual VNGError clip_poly (int count, VngoPoint pts[],
-                                VngoRect *clip_rect)
-    {
-        return VNGO_NOT_SUPPORTED;
-    }
-    virtual VNGError clip_poly (int count, VngoPoint2 pts[],
-                                VngoRect *clip_rect)
-    {
-        return VNGO_NOT_SUPPORTED;
-    }
-    virtual VNGError clip_gpoly (int count, VngoPoint pts[],
-                                 VngoRect *clip_rect)
-    {
-        return VNGO_NOT_SUPPORTED;
-    }
-    virtual VNGError clip_gpoly (int count, VngoPoint2 pts[],
-                                 VngoRect *clip_rect)
-    {
-        return VNGO_NOT_SUPPORTED;
-    }
-    virtual VNGError clip_gpoly_persp (int count, VngoPoint pts[],
-                                       VngoRect *clip_rect)
-    {
-        return VNGO_NOT_SUPPORTED;
-    }
-    virtual VNGError clip_gpoly_persp (int count, VngoPoint2 pts[],
-                                       VngoRect *clip_rect)
-    {
-        return VNGO_NOT_SUPPORTED;
-    }
-    virtual VNGError clip_tpoly (int count, VngoPoint pts[],VngoTexture *tex,
-                                 VngoRect *clip_rect)
-    {
-        return VNGO_NOT_SUPPORTED;
-    }
-    virtual VNGError clip_tpoly (int count, VngoPoint2 pts[],VngoTexture *tex,
-                                 VngoRect *clip_rect)
-    {
-        return VNGO_NOT_SUPPORTED;
-    }
-    virtual VNGError clip_tpoly_persp (int count, VngoPoint pts[],
-                                       VngoTexture *tex, VngoRect *clip_rect)
-    {
-        return VNGO_NOT_SUPPORTED;
-    }
-    virtual VNGError clip_tpoly_persp (int count, VngoPoint2 pts[],
-                                       VngoTexture *tex, VngoRect *clip_rect)
-    {
-        return VNGO_NOT_SUPPORTED;
-    }
-    virtual VNGError clip_gtpoly (int count, VngoPoint pts[],
-                                  VngoTexture *tex, VngoRect *clip_rect)
-    {
-        return VNGO_NOT_SUPPORTED;
-    }
-    virtual VNGError clip_gtpoly (int count, VngoPoint2 pts[],
-                                  VngoTexture *tex, VngoRect *clip_rect)
-    {
-        return VNGO_NOT_SUPPORTED;
-    }
-    virtual VNGError clip_gtpoly_persp (int count, VngoPoint pts[],
-                                        VngoTexture *tex, VngoRect *clip_rect)
-    {
-        return VNGO_NOT_SUPPORTED;
-    }
-    virtual VNGError clip_gtpoly_persp (int count, VngoPoint2 pts[],
-                                        VngoTexture *tex, VngoRect *clip_rect)
-    {
-        return VNGO_NOT_SUPPORTED;
-    }
-// Alpha blended versions
-    virtual VNGError clip_poly_a (int count, VngoPoint pts[],
-                                  VngoRect *clip_rect,long alpha=127)
-    {
-        return VNGO_NOT_SUPPORTED;
-    }
-    virtual VNGError clip_poly_a (int count, VngoPoint2 pts[],
-                                  VngoRect *clip_rect,long alpha=127)
-    {
-        return VNGO_NOT_SUPPORTED;
-    }
-    virtual VNGError clip_gpoly_a (int count, VngoPoint pts[],
-                                   VngoRect *clip_rect,long alpha=127)
-    {
-        return VNGO_NOT_SUPPORTED;
-    }
-    virtual VNGError clip_gpoly_a (int count, VngoPoint2 pts[],
-                                   VngoRect *clip_rect,long alpha=127)
-    {
-        return VNGO_NOT_SUPPORTED;
-    }
-    virtual VNGError clip_gpoly_persp_a (int count, VngoPoint pts[],
-                                         VngoRect *clip_rect,long alpha=127)
-    {
-        return VNGO_NOT_SUPPORTED;
-    }
-    virtual VNGError clip_gpoly_persp_a (int count, VngoPoint2 pts[],
-                                         VngoRect *clip_rect,long alpha=127)
-    {
-        return VNGO_NOT_SUPPORTED;
-    }
-    virtual VNGError clip_tpoly_a (int count, VngoPoint pts[],VngoTexture *tex,
-                                   VngoRect *clip_rect,long alpha=127)
-    {
-        return VNGO_NOT_SUPPORTED;
-    }
-    virtual VNGError clip_tpoly_a (int count, VngoPoint2 pts[],VngoTexture *tex,
-                                   VngoRect *clip_rect,long alpha=127)
-    {
-        return VNGO_NOT_SUPPORTED;
-    }
-    virtual VNGError clip_tpoly_persp_a (int count, VngoPoint pts[],
-                                         VngoTexture *tex, VngoRect *clip_rect,
-                                         long alpha=127)
-    {
-        return VNGO_NOT_SUPPORTED;
-    }
-    virtual VNGError clip_tpoly_persp_a (int count, VngoPoint2 pts[],
-                                         VngoTexture *tex, VngoRect *clip_rect,
-                                         long alpha=127)
-    {
-        return VNGO_NOT_SUPPORTED;
-    };
-    virtual VNGError clip_gtpoly_a (int count, VngoPoint pts[],VngoTexture *tex,
-                                    VngoRect *clip_rect,long alpha=127)
-    {
-        return VNGO_NOT_SUPPORTED;
-    }
-    virtual VNGError clip_gtpoly_a (int count, VngoPoint2 pts[],
-                                    VngoTexture *tex, VngoRect *clip_rect,
-                                    long alpha=127)
-    {
-        return VNGO_NOT_SUPPORTED;
-    }
-    virtual VNGError clip_gtpoly_persp_a (int count, VngoPoint pts[],
-                                          VngoTexture *tex, VngoRect *clip_rect,
-                                          long alpha=127)
-    {
-        return VNGO_NOT_SUPPORTED;
-    }
-    virtual VNGError clip_gtpoly_persp_a (int count, VngoPoint2 pts[],
-                                          VngoTexture *tex, VngoRect *clip_rect,
-                                          long alpha=127)
-    {
-        return VNGO_NOT_SUPPORTED;
-    }
 
     virtual VNGError image_trans (VngoRect *dest_rect,VngoTexture *img,
                                   dword flags=0);
-    virtual VNGError image_trans_s (VngoRect *dest_rect,VngoTexture *img,
-                                    dword shade, dword flags=0);
-    virtual VNGError image_trans_z (VngoRect *dest_rect,VngoTexture *img,
-                                    dword depth, dword flags=0);
-    virtual VNGError image_trans_zs (VngoRect *dest_rect,VngoTexture *img,
-                                     dword depth,dword shade,dword flags=0);
 
     virtual VNGError image_trans_mono (VngoRect *dest_rect,VngoTexture *img,
                                        dword fgcol,dword bgcol=VNGO_TRANSPARENT);
@@ -319,12 +170,6 @@ public:
     {
         return VNGO_NOT_SUPPORTED;
     }
-    virtual VNGError image_trans_mono_a (VngoRect *dest_rect,VngoTexture *img,
-                                         dword fgcol,dword bgcol=VNGO_TRANSPARENT,
-                                         long alpha=127)
-    {
-        return VNGO_NOT_SUPPORTED;
-    }
 
     virtual VNGError haze(VngoShadePal *hazepal,long startZ=0,VngoRect *rect=NULL)
     {
@@ -332,6 +177,14 @@ public:
     }
 
 };
+
+#ifdef __WATCOMC__
+#pragma pack();
+#endif
+
+#ifdef _MSC_VER
+#pragma pack(pop)
+#endif
 
 #endif          // __VNGVVP8_HPP
 

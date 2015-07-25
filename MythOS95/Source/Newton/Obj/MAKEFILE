@@ -53,11 +53,15 @@
 #같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같�
 #
 #                               Variables
-#                                
+#
 #같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같�
 
 !if "$(DEBUG)" == ""
 DEBUG = NO
+!endif
+
+!if "$(THREAD)" == ""
+THREAD=YES
 !endif
 
 !if "$(MYTH95ROOT)" == ""

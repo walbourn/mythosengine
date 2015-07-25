@@ -61,9 +61,9 @@
 #endif
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-//             
+//
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include "esdraw.hpp"
@@ -149,11 +149,11 @@ class EschFireTexture : public EschProceduralTexture
     {
         int t = (v << u_shift) + u;
         flames[t] = intensity;
-        txt.tex[t] = write_lut[intensity];
+        ((byte*)txt.tex)[t] = write_lut[intensity];
     }
 
     void make_lut(VngoPal *vpal);
-    VngoColor24bit to_RGB(Flx16 h, Flx16 s, Flx16 i);
+    VngoColor24bit to_RGB(float h, float s, float i);
 
 public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
@@ -175,14 +175,14 @@ public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Utility functions.                                                   ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-    void increase(int amount=2) 
+    void increase(int amount=2)
     {
         if (more_fire + amount < 20)
            more_fire += amount;
         else
            more_fire = 20;
     }
-    void decrease(int amount=2) 
+    void decrease(int amount=2)
     {
         if (more_fire - amount > -20)
            more_fire -= amount;
@@ -204,8 +204,8 @@ class EschPlosion : public EschDrawable
 protected:
     EschFrameRef    world;
     EschTexture     *fire;
-    Flx16           step;
-    Flx16           fv;
+    float           step;
+    float           fv;
     long            alpha_level;
 
     void check_workspace();
@@ -214,15 +214,15 @@ public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Public data members                                                  ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-    Flx16   width;
-    Flx16   height;
+    float   width;
+    float   height;
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Constructor/Destructors                                              ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-    EschPlosion() : EschDrawable(ESCH_DRWT_EXPLOSION), fire(0), fv(0.90),
+    EschPlosion() : EschDrawable(ESCH_DRWT_EXPLOSION), fire(0), fv(0.90f),
                     alpha_level(255)                  { check_workspace(); }
-    EschPlosion(Flx16 w, Flx16 h, EschFireTexture *f);
+    EschPlosion(float w, float h, EschFireTexture *f);
 
     virtual ~EschPlosion() {}
 
@@ -240,7 +240,7 @@ public:
         world.get_position(p);
     }
 
-    void set_position(Flx16 ix, Flx16 iy, Flx16 iz, dword update=ESCH_UPD_ALL)
+    void set_position(float ix, float iy, float iz, dword update=ESCH_UPD_ALL)
     {
         world.set_position(ix, iy, iz, update);
     }
@@ -249,19 +249,19 @@ public:
         world.set_position(pnt->x, pnt->y, pnt->z, update);
     }
 
-    void set_top(Flx16 ii, Flx16 ij, Flx16 ik, dword update=ESCH_UPD_ALL);
+    void set_top(float ii, float ij, float ik, dword update=ESCH_UPD_ALL);
     void set_top(const EschVector *v, dword update=ESCH_UPD_ALL)
     {
         set_top(v->i, v->j, v->k, update);
     }
 
-    void set_direction(Flx16 ii, Flx16 ij, Flx16 ik, dword update=ESCH_UPD_ALL);
+    void set_direction(float ii, float ij, float ik, dword update=ESCH_UPD_ALL);
     void set_direction(const EschVector *v, dword update=ESCH_UPD_ALL)
     {
         set_direction(v->i, v->j, v->k, update);
     }
 
-    void set_size(Flx16 w, Flx16 h)
+    void set_size(float w, float h)
     {
         width=w;
         height=h;
@@ -269,9 +269,9 @@ public:
 
     void set_fire(EschTexture *f) { fire=f; }
 
-    void set_step(Flx16 i) { step=i; }
+    void set_step(float i) { step=i; }
 
-    void reset() { fv=Flx16(0.90); }
+    void reset() { fv=float(0.90); }
 
     void set_alpha(long alpha) { alpha_level = alpha; }
     long get_alpha() const { return alpha_level; }
@@ -296,8 +296,8 @@ public:
     EschPoint       corner[8];
     dword           color[6];
     EschTexture     *txt[6];
-    Flx16           u[4];
-    Flx16           v[4];
+    float           u[4];
+    float           v[4];
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Constructor/Destructors                                              ³
@@ -322,7 +322,7 @@ public:
         world.get_position(p);
     }
 
-    void set_position(Flx16 ix, Flx16 iy, Flx16 iz, dword update=ESCH_UPD_ALL)
+    void set_position(float ix, float iy, float iz, dword update=ESCH_UPD_ALL)
     {
         world.set_position(ix, iy, iz, update);
     }
@@ -331,13 +331,13 @@ public:
         world.set_position(pnt->x, pnt->y, pnt->z, update);
     }
 
-    void set_top(Flx16 ii, Flx16 ij, Flx16 ik, dword update=ESCH_UPD_ALL);
+    void set_top(float ii, float ij, float ik, dword update=ESCH_UPD_ALL);
     void set_top(const EschVector *v, dword update=ESCH_UPD_ALL)
     {
         set_top(v->i, v->j, v->k, update);
     }
 
-    void set_direction(Flx16 ii, Flx16 ij, Flx16 ik, dword update=ESCH_UPD_ALL);
+    void set_direction(float ii, float ij, float ik, dword update=ESCH_UPD_ALL);
     void set_direction(const EschVector *v, dword update=ESCH_UPD_ALL)
     {
         set_direction(v->i, v->j, v->k, update);
@@ -345,16 +345,16 @@ public:
 
     void set_color(dword clr, int face = -1);
     void set_texture(EschTexture *t, int face = -1);
-    void set_texture_uv(Flx16 u1, Flx16 v1,
-                        Flx16 u2, Flx16 v2,
-                        Flx16 u3, Flx16 v3,
-                        Flx16 u4, Flx16 v4)
+    void set_texture_uv(float u1, float v1,
+                        float u2, float v2,
+                        float u3, float v3,
+                        float u4, float v4)
     {
         u[0] = u1;  u[1] = u2;  u[2] = u3;  u[3] = u4;
         v[0] = v1;  v[1] = v2;  v[2] = v3;  v[3] = v4;
     }
 
-    void create_cube(Flx16 size);
+    void create_cube(float size);
 
     void set_alpha(long alpha) { alpha_level = alpha; }
     long get_alpha() const { return alpha_level; }
@@ -376,7 +376,7 @@ public:
     ushort          na;
     dword           color;
     EschGeometry    *geom[ESCH_LOD_MAX_LEVELS];
-    static Flx16    dist[ESCH_LOD_MAX_LEVELS];
+    static float    dist[ESCH_LOD_MAX_LEVELS];
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Constructor/Destructors                                              ³
@@ -396,9 +396,9 @@ public:
 
     virtual int get_extents(EschSphereExtents *sp) const;
 
-    virtual Flx16 ray(const EschPoint *pt, const EschVector *v, int coarse=0) const;
+    virtual float ray(const EschPoint *pt, const EschVector *v, int coarse=0) const;
 
-    virtual int hit(const EschPoint *pt, const Flx16 r, int coarse=0) const;
+    virtual int hit(const EschPoint *pt, const float r, int coarse=0) const;
 
     virtual esch_error_codes pick(EschPicking *data) const;
     virtual esch_error_codes collide(EschCollision *data) const;
@@ -417,7 +417,7 @@ public:
 
     void set_color(dword c) { color=c; }
 
-    static void set_dist(ushort lvl, Flx16 d);
+    static void set_dist(ushort lvl, float d);
 };
 
 #ifdef __WATCOMC__

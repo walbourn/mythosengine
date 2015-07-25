@@ -194,20 +194,18 @@ void EschMeshDraw::draw()
         p.transform(&cam->eye.iorient);
         
         // Scale radius
-        Flx16 r = flx_16mul16( exts.radius, 
-                  flx_16mul16( world.scalef, 
-                               cam->radius_factor ) );
-        r = flx_16mul16(r,Flx16(1.05));
+        float r = exts.radius * world.scalef * cam->radius_factor * 1.05f;
+
         assertMyth("EschMeshDraw::draw radius scale resulted in negative radius",
-                   r.flx >= 0);
+                   r >= 0);
         
         // Setup for compare
-        Flx16 yon = cam->yon;
-        Flx16 hither = cam->hither;
+        float yon = cam->yon;
+        float hither = cam->hither;
         
         // Check for fully invisible against hither/yon
-        if ( ((p.z.flx + r.flx) < hither.flx)
-             || ((p.z.flx - r.flx) > yon.flx) )
+        if ( ((p.z + r) < hither)
+             || ((p.z - r) > yon) )
         {
             // Since the extents are inclusive of children, don't
             // need to do anything for children meshes.
@@ -219,14 +217,14 @@ void EschMeshDraw::draw()
         // case)
         if (p.z > 0)
         {
-            Flx16 tx = flx_16mul16(p.z , cam->xsize);
-            Flx16 ty = flx_16mul16(p.z , cam->ysize);
+            float tx = p.z * cam->xsize;
+            float ty = p.z * cam->ysize;
             
             // Check for fully invisible against left/right/top/bottom
-            if ( ((p.x.flx + r.flx) < -tx.flx)
-                 || ((p.x.flx - r.flx) > tx.flx)
-                 || ((p.y.flx + r.flx) < -ty.flx)
-                 || ((p.y.flx - r.flx) > ty.flx) )
+            if ( ((p.x + r) < -tx)
+                 || ((p.x - r) > tx)
+                 || ((p.y + r) < -ty)
+                 || ((p.y - r) > ty) )
             {
                 // Since the extents are inclusive of children, don't
                 // need to do anything for children meshes.
@@ -234,12 +232,12 @@ void EschMeshDraw::draw()
             }
             
             // See if fully visible or needs clipping
-            ctrlfl = ( ((p.z.flx - r.flx) > hither.flx)
-                        && ((p.z.flx + r.flx) < yon.flx)
-                        && ((p.x.flx - r.flx) > -tx.flx)
-                        && ((p.x.flx + r.flx) < tx.flx)
-                        && ((p.y.flx - r.flx) > -ty.flx)
-                        && ((p.y.flx + r.flx) < ty.flx) ) ? 0 : ESCH_CDF_CLIP;
+            ctrlfl = ( ((p.z - r) > hither)
+                        && ((p.z + r) < yon)
+                        && ((p.x - r) > -tx)
+                        && ((p.x + r) < tx)
+                        && ((p.y - r) > -ty)
+                        && ((p.y + r) < ty) ) ? 0 : ESCH_CDF_CLIP;
 
         }
         else ctrlfl = ESCH_CDF_CLIP;
@@ -315,18 +313,18 @@ void EschMeshDraw::draw()
         if (level & ESCH_CAM_BACKCULL)
         {
             EschVector fview;
-            fview.i.flx = ec.verts[face->a].x.flx - eyep.x.flx;
-            fview.j.flx = ec.verts[face->a].y.flx - eyep.y.flx;
-            fview.k.flx = ec.verts[face->a].z.flx - eyep.z.flx;
+            fview.i = ec.verts[face->a].x - eyep.x;
+            fview.j = ec.verts[face->a].y - eyep.y;
+            fview.k = ec.verts[face->a].z - eyep.z;
 
-            if ((fview DOT face->normal).flx > 0)
+            if ((fview DOT face->normal) > 0)
                 continue;
         }
 
         //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Transform face's verts
         if (!(vflags[face->a] & ESCH_VVERT_TRANSFORMED))
         {
-            ec.verts[face->a].transform(&frame,(EschPoint*)&vpt[face->a]);
+            ec.verts[face->a].transform(&frame,(EschPoint*)(&vpt[face->a]));
             vflags[face->a] |= ESCH_VVERT_TRANSFORMED;
 
             // Transform vertex to world, if needed, for shading
@@ -335,14 +333,14 @@ void EschMeshDraw::draw()
             {
                 ec.verts[face->a].transform(&world,&vn[face->a]);
                 ec.verts[face->a].normal.transform(&world,&vn[face->a].normal);
-                if (world.scalef.flx != (1<<16))
+                if (world.scalef != 1.0)
                     vn[face->a].normal.normalize();
             }
         }
 
         if (!(vflags[face->b] & ESCH_VVERT_TRANSFORMED))
         {
-            ec.verts[face->b].transform(&frame,(EschPoint*)&vpt[face->b]);
+            ec.verts[face->b].transform(&frame,(EschPoint*)(&vpt[face->b]));
             vflags[face->b] |= ESCH_VVERT_TRANSFORMED;
 
             // Transform vertex to world, if needed, for shading
@@ -351,7 +349,7 @@ void EschMeshDraw::draw()
             {
                 ec.verts[face->b].transform(&world,&vn[face->b]);
                 ec.verts[face->b].normal.transform(&world,&vn[face->b].normal);
-                if (world.scalef.flx != (1<<16))
+                if (world.scalef != 1.0)
                     vn[face->b].normal.normalize();
             }
         }
@@ -359,7 +357,7 @@ void EschMeshDraw::draw()
         if (!(vflags[face->c] & ESCH_VVERT_TRANSFORMED))
         {
             vflags[face->c] |= ESCH_VVERT_TRANSFORMED;
-            ec.verts[face->c].transform(&frame,(EschPoint*)&vpt[face->c]);
+            ec.verts[face->c].transform(&frame,(EschPoint*)(&vpt[face->c]));
 
             // Transform vertex to world, if needed, for shading
             if (!(cflags & ESCH_CAM_MODELSPACE)
@@ -367,7 +365,7 @@ void EschMeshDraw::draw()
             {
                 ec.verts[face->c].transform(&world,&vn[face->c]);
                 ec.verts[face->c].normal.transform(&world,&vn[face->c].normal);
-                if (world.scalef.flx != (1<<16))
+                if (world.scalef != 1.0)
                     vn[face->c].normal.normalize();
             }
         }
@@ -512,9 +510,9 @@ void EschMeshDraw::draw()
 // It returns a zero if it missed the object, a positive distance along the ³
 // ray if it hit, or -1 if the intersection is not supported.               ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-Flx16 EschMeshDraw::ray(const EschPoint *pt, const EschVector *v, int coarse) const
+float EschMeshDraw::ray(const EschPoint *pt, const EschVector *v, int coarse) const
 {
-    Flx16   dist;
+    float   dist;
 
     assertMyth("EschMeshDraw::ray needs an attached mesh",
                mesh && mesh->ref_count);
@@ -539,7 +537,7 @@ Flx16 EschMeshDraw::ray(const EschPoint *pt, const EschVector *v, int coarse) co
 
     //ÄÄÄ If doing coarse only, return result now
     if (coarse)
-        return ((world.scalef == 1) ? dist : (dist * world.scalef));
+        return ((world.scalef == 1.0) ? dist : (dist * world.scalef));
 
 //ÄÄÄ Perform fine check (Ray/Box intersection)
     dist=mesh->box.ray(&point,&ray);
@@ -557,7 +555,7 @@ Flx16 EschMeshDraw::ray(const EschPoint *pt, const EschVector *v, int coarse) co
 // Performs a sphere intersection test with the object (or its extents),    ³
 // returning 1 if it hit, 0 if it missed, -1 if not supported.              ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-int EschMeshDraw::hit(const EschPoint *pt, const Flx16 r, int coarse) const
+int EschMeshDraw::hit(const EschPoint *pt, const float r, int coarse) const
 {
     assertMyth("EschMeshDraw::hit needs point and radius",
                pt != 0 && r >= 0);
@@ -571,8 +569,8 @@ int EschMeshDraw::hit(const EschPoint *pt, const Flx16 r, int coarse) const
     EschPoint   center;
     pt->transform(&world.iorient,&center);
 
-    Flx16 radius = (world.scalef == 1)
-                   ? r : flx_16div16(r,world.scalef);
+    float radius = (world.scalef == 1.0)
+                   ? r : (r / world.scalef);
 
     // Box hit is actually cheaper than sphere/sphere test and more
     // accurate when the target sphere is in world coords.

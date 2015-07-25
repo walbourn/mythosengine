@@ -1,0 +1,8 @@
+°°°°°°±² Escher '95 Tester ²±°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+³         Windows '95 Makefile - Charybdis Enterprises, Inc.           ³
+ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+	cl /c /G5 -Ze -Zp1 /nologo -W3 /Ox -DNDEBUG /DWIN32 /D_WINDOWS ..\ddraw.cpp
+ddraw.cpp
+d:\glide\win32\include\3dfx.h(61) : fatal error C1021: invalid preprocessor command 'warning'
+°°°°°°±² Escher '95 Tester - Done ²±°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°

@@ -144,6 +144,82 @@ void GBergText::outf (const char *fmt, ...)
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// GBergText - outc_vert                                                    ³
+//                                                                          ³
+// Outputs a character vertically.                                          ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+void GBergText::outc_vert(char c)
+{
+    assertMyth("GBergText assumes Gutenberg is initalized and has an active font",
+               GBergInstance && GBergInstance->font_active);
+
+//ÄÄ Skip single character returns
+    if (c == '\r')
+        return;
+
+//ÄÄ skip newlines
+    if (c == '\n')
+        return;
+
+//ÄÄ Output character and update cursor position
+    cury += gberg_outc(vport, curx, cury, c, TRUE);     // last param indicates VERTICAL text
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// GBergText - out_vert                                                     ³
+//                                                                          ³
+// Outputs a string or long value as string vertically on the screen.       ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+void GBergText::out_vert(const char *str)
+{
+    assertMyth("GBergText assumes Gutenberg is initalized and has an active font",
+               GBergInstance && GBergInstance->font_active);
+
+    while (*str != 0)
+    {
+        outc_vert(*(str++));
+    }
+}
+
+void GBergText::out_vert(long num)
+{
+    char    buff[16];
+
+#ifdef WIN32
+    wsprintf(buff,"%li",num);
+#else
+    sprintf(buff,"%li",num);
+#endif
+    out_vert(buff);
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// GBergText - outf_vert                                                    ³
+//                                                                          ³
+// Outputs a string formatted with wsprintf vertically on the screen.       ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+void GBergText::outf_vert (const char *fmt, ...)
+{
+    char buff[256];
+
+    // Perform a printf
+    va_list parms;
+    va_start (parms, fmt);
+#ifdef WIN32
+    int len = wvsprintf (buff, fmt, parms);
+#else
+    int len = vsprintf (buff, fmt, parms);
+#endif
+    va_end (parms);
+
+    assert (len < sizeof (buff));
+    out_vert (buff);
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // GBergText - out_wrap                                                     ³
 //                                                                          ³
 // Outputs a string wrapped to the given rectangle.                         ³

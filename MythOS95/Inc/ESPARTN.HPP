@@ -97,7 +97,7 @@ struct EschTraverse
     void                    *data;      // Data for traverse function
     EschPoint               pos;        // Start position
     EschVector              dir;        // Traverse direction
-    Flx16                   dist;       // Distance from start point
+    float                   dist;       // Distance from start point
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Constructor/Destructors                                              ³
@@ -110,7 +110,7 @@ struct EschTraverse
         data(df),
         pos(p) {}
     EschTraverse(EschPoint &p,
-                 Flx16 d,
+                 float d,
                  EschTraverseCallback f, void *df=0) :
         flags(ESCH_TRAV_DIST),
         func(f),
@@ -126,7 +126,7 @@ struct EschTraverse
         pos(p),
         dir(v) {}
     EschTraverse(EschPoint &p,  
-                 EschVector &v, Flx16 d,
+                 EschVector &v, float d,
                  EschTraverseCallback f, void *df=0) :
         flags(ESCH_TRAV_DIRECTION | ESCH_TRAV_DIST),
         func(f),
@@ -180,7 +180,7 @@ public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
     ushort              width;              // Width of grid
     ushort              depth;              // Depth of grid
-    Flx16               size;               // World size of each region
+    float               size;               // World size of each region
     ulong               sizeshift;          // Shift value for size
     EschPoint           origin;             // Origin of grid
     ulong               nregions;           // Number of regions (computed from width*depth)
@@ -207,7 +207,7 @@ public:
 
     virtual void release();
 
-    virtual esch_error_codes init(ushort w, ushort d, Flx16 s,
+    virtual esch_error_codes init(ushort w, ushort d, float s,
                                   const EschPoint *o);
 
     virtual esch_error_codes insert(EschDrawable *drw);

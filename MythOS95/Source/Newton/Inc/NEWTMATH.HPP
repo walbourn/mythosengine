@@ -70,7 +70,6 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include <portable.h>
-#include <felix.hpp>
 #include <assert.h>
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
@@ -99,18 +98,8 @@
 class NewtVector;
 
 extern "C" NewtVector *newt_cross(const NewtVector *v1,const NewtVector *v2,NewtVector *dest);
-
-extern "C" long asm_newt_dot(const NewtVector *v1,const NewtVector *v2);
-inline Flx16 newt_dot(const NewtVector *v1,const NewtVector *v2)
-{
-    return Flx16(asm_newt_dot(v1,v2),0);
-}
-
-extern "C" long asm_newt_magnitude(const NewtVector *vect);
-inline Flx16 newt_magnitude(const NewtVector *vect)
-{
-    return Flx16(asm_newt_magnitude(vect),0);
-}
+extern "C" float newt_dot(const NewtVector *v1,const NewtVector *v2);
+extern "C" float newt_magnitude(const NewtVector *vect);
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
@@ -127,16 +116,16 @@ public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Public data members                                                  ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-    Flx16   i;
-    Flx16   j;
-    Flx16   k;
+    float   i;
+    float   j;
+    float   k;
     dword   flags;
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Constructor/Destructors                                              ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
     NewtVector () : i (0), j (0), k (0), flags (0) {};
-    NewtVector (Flx16 _ii, Flx16 _ij, Flx16 _ik) : 
+    NewtVector (float _ii, float _ij, float _ik) : 
                 i (_ii), j (_ij), k (_ik), flags (0) {};
 
 #ifdef __ESMATH_HPP
@@ -153,21 +142,21 @@ public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Operations                                                           ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-    Flx16 magnitude(void) const { return (newt_magnitude(this));}
+    float magnitude(void) const { return (newt_magnitude(this));}
     void normalize(void) 
     {
-        Flx16 mag=magnitude();
+        float mag=magnitude();
 
 #ifdef assertMyth
         assertMyth("NewtVector::normalize found magnitude of zero",
-                   mag.flx);
+                   mag > 0.0f);
 #endif
 
-        if (mag.flx)    // can't normalize a vector of magnitude 0.
+        if (mag > 0.0f) // can't normalize a vector of magnitude 0.
         {
-            i.flx = flx_16div16(i,mag).flx;
-            j.flx = flx_16div16(j,mag).flx;
-            k.flx = flx_16div16(k,mag).flx;
+            i = i / mag;
+            j = j / mag;
+            k = k / mag;
         }
     }
 };
@@ -194,9 +183,9 @@ inline NewtVector operator + (const NewtVector &a, const NewtVector &b)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 inline NewtVector &operator += (NewtVector &a, const NewtVector &b)
 {
-    a.i.flx += b.i.flx;
-    a.j.flx += b.j.flx;
-    a.k.flx += b.k.flx;
+    a.i += b.i;
+    a.j += b.j;
+    a.k += b.k;
 
     return a;
 }
@@ -218,9 +207,9 @@ inline NewtVector operator - (const NewtVector &a, const NewtVector &b)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 inline NewtVector &operator -= (NewtVector &a, const NewtVector &b)
 {
-    a.i.flx -= b.i.flx;
-    a.j.flx -= b.j.flx;
-    a.k.flx -= b.k.flx;
+    a.i -= b.i;
+    a.j -= b.j;
+    a.k -= b.k;
 
     return a;
 }
@@ -240,7 +229,7 @@ inline NewtVector operator - (const NewtVector &a)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //  operator + scalar
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-inline NewtVector operator + (const NewtVector &a, const Flx16 b)
+inline NewtVector operator + (const NewtVector &a, const float b)
 {
     return NewtVector (a.i + b,
                        a.j + b,
@@ -251,11 +240,11 @@ inline NewtVector operator + (const NewtVector &a, const Flx16 b)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //  operator += scalar
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-inline NewtVector &operator += (NewtVector &a, const Flx16 b)
+inline NewtVector &operator += (NewtVector &a, const float b)
 {
-    a.i.flx += b.flx;
-    a.j.flx += b.flx;
-    a.k.flx += b.flx;
+    a.i += b;
+    a.j += b;
+    a.k += b;
 
     return a;
 }
@@ -264,7 +253,7 @@ inline NewtVector &operator += (NewtVector &a, const Flx16 b)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //  operator - scalar
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-inline NewtVector operator - (const NewtVector &a, const Flx16 b)
+inline NewtVector operator - (const NewtVector &a, const float b)
 {
     return NewtVector (a.i - b,
                        a.j - b,
@@ -275,11 +264,11 @@ inline NewtVector operator - (const NewtVector &a, const Flx16 b)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //  operator -= scalar
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-inline NewtVector &operator -= (NewtVector &a, const Flx16 b)
+inline NewtVector &operator -= (NewtVector &a, const float b)
 {
-    a.i.flx -= b.flx;
-    a.j.flx -= b.flx;
-    a.k.flx -= b.flx;
+    a.i -= b;
+    a.j -= b;
+    a.k -= b;
 
     return a;
 }
@@ -288,22 +277,22 @@ inline NewtVector &operator -= (NewtVector &a, const Flx16 b)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //  operator * scalar
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-inline NewtVector operator * (const NewtVector &a, const Flx16 b)
+inline NewtVector operator * (const NewtVector &a, const float b)
 {
-    return NewtVector (flx_16mul16(a.i,b),
-                       flx_16mul16(a.j,b),
-                       flx_16mul16(a.k,b));
+    return NewtVector (a.i * b,
+                       a.j * b,
+                       a.k * b);
 }
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //  operator *= scalar
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-inline NewtVector &operator *= (NewtVector &a, const Flx16 b)
+inline NewtVector &operator *= (NewtVector &a, const float b)
 {
-    a.i.flx = flx_16mul16(a.i,b).flx;
-    a.j.flx = flx_16mul16(a.j,b).flx;
-    a.k.flx = flx_16mul16(a.k,b).flx;
+    a.i = a.i * b;
+    a.j = a.j * b;
+    a.k = a.k * b;
 
     return a;
 }
@@ -312,22 +301,22 @@ inline NewtVector &operator *= (NewtVector &a, const Flx16 b)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //  operator / scalar
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-inline NewtVector operator / (const NewtVector &a, const Flx16 b)
+inline NewtVector operator / (const NewtVector &a, const float b)
 {
-    return NewtVector (flx_16div16(a.i,b),
-                       flx_16div16(a.j,b),
-                       flx_16div16(a.k,b));
+    return NewtVector (a.i / b,
+                       a.j / b,
+                       a.k / b);
 }
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //  operator /= scalar
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-inline NewtVector &operator /= (NewtVector &a, const Flx16 b)
+inline NewtVector &operator /= (NewtVector &a, const float b)
 {
-    a.i.flx = flx_16div16(a.i,b).flx;
-    a.j.flx = flx_16div16(a.j,b).flx;
-    a.k.flx = flx_16div16(a.k,b).flx;
+    a.i = a.i / b;
+    a.j = a.j / b;
+    a.k = a.k / b;
 
     return a;
 }
@@ -346,7 +335,7 @@ inline NewtVector operator CROSS (const NewtVector &a, const NewtVector &b)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //  operator DOT
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-inline Flx16 operator DOT (const NewtVector &a, const NewtVector &b)
+inline float operator DOT (const NewtVector &a, const NewtVector &b)
 {
     return (::newt_dot(&a,&b));
 }

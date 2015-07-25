@@ -47,6 +47,14 @@
 
 #include "escher.hpp"
 
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//
+//                                Equates
+//
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+#define INCREMENTAL_INVERSE
+
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
 //                                 Code
@@ -68,11 +76,20 @@ void EschFrameRef::set_position(const EschPoint *pt, dword update)
     orient.mtx[ESCH_MTX_K] = pt->y;
     orient.mtx[ESCH_MTX_L] = pt->z;
 
+//ÄÄÄ Update inverse transform
     if (update & ESCH_UPD_INVERSE)
-        compute_inverse();
+    {
+#ifdef INCREMENTAL_INVERSE
+        iorient.mtx[ESCH_MTX_J] = -pt->x;
+        iorient.mtx[ESCH_MTX_K] = -pt->y;
+        iorient.mtx[ESCH_MTX_L] = -pt->z;
+#else
+        orient.inverse(&iorient);
+#endif
+    }
 }
 
-void EschFrameRef::set_position(const Flx16 ix, const Flx16 iy, const Flx16 iz,
+void EschFrameRef::set_position(const float ix, const float iy, const float iz,
                                 dword update)
 
 { 
@@ -80,8 +97,17 @@ void EschFrameRef::set_position(const Flx16 ix, const Flx16 iy, const Flx16 iz,
     orient.mtx[ESCH_MTX_K] = iy;
     orient.mtx[ESCH_MTX_L] = iz; 
 
+//ÄÄÄ Update inverse transform
     if (update & ESCH_UPD_INVERSE)
-        compute_inverse();
+    {
+#ifdef INCREMENTAL_INVERSE
+        iorient.mtx[ESCH_MTX_J] = -ix;
+        iorient.mtx[ESCH_MTX_K] = -iy;
+        iorient.mtx[ESCH_MTX_L] = -iz;
+#else
+        orient.inverse(&iorient);
+#endif
+    }
 }
 
 
@@ -90,13 +116,12 @@ void EschFrameRef::set_position(const Flx16 ix, const Flx16 iy, const Flx16 iz,
 //                                                                          ³
 // Appends a rotation about X to the frame of reference.                    ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void EschFrameRef::rotatex(const Flx16 degrees, dword update)
+void EschFrameRef::rotatex(const float degrees, dword update)
 {
-    Flx16   s,c;
-    Flx16   m[3];
+    float   m[3];
 
-    s=degrees.sin();
-    c=degrees.cos();
+    float s=esch_sin(degrees);
+    float c=esch_cos(degrees);
 
 //ÄÄÄ Append transform
 
@@ -105,19 +130,16 @@ void EschFrameRef::rotatex(const Flx16 degrees, dword update)
     // [G H I 0]   [0  0  1  0]   [0 -s c 0]   [0 0 1 0]   [G Hc-Is Hs+Ic 0]
     // [J K L 1]   [-J -K -L 1]   [0 0  0 1]   [J K L 1]   [J K     L     1]
 
-    m[0].flx = flx_16mul16(orient.mtx[ESCH_MTX_B],c).flx
-               - flx_16mul16(orient.mtx[ESCH_MTX_C],s).flx;
-    m[1].flx = flx_16mul16(orient.mtx[ESCH_MTX_E],c).flx
-               - flx_16mul16(orient.mtx[ESCH_MTX_F],s).flx;
-    m[2].flx = flx_16mul16(orient.mtx[ESCH_MTX_H],c).flx
-               - flx_16mul16(orient.mtx[ESCH_MTX_I],s).flx;
+    m[0] = orient.mtx[ESCH_MTX_B]*c - orient.mtx[ESCH_MTX_C]*s;
+    m[1] = orient.mtx[ESCH_MTX_E]*c - orient.mtx[ESCH_MTX_F]*s;
+    m[2] = orient.mtx[ESCH_MTX_H]*c - orient.mtx[ESCH_MTX_I]*s;
     
-    orient.mtx[ESCH_MTX_C].flx = flx_16mul16(orient.mtx[ESCH_MTX_B],s).flx
-                                 + flx_16mul16(orient.mtx[ESCH_MTX_C],c).flx;
-    orient.mtx[ESCH_MTX_F].flx = flx_16mul16(orient.mtx[ESCH_MTX_E],s).flx
-                                 + flx_16mul16(orient.mtx[ESCH_MTX_F],c).flx;
-    orient.mtx[ESCH_MTX_I].flx = flx_16mul16(orient.mtx[ESCH_MTX_H],s).flx
-                                 + flx_16mul16(orient.mtx[ESCH_MTX_I],c).flx;
+    orient.mtx[ESCH_MTX_C] = orient.mtx[ESCH_MTX_B]*s
+                             + orient.mtx[ESCH_MTX_C]*c;
+    orient.mtx[ESCH_MTX_F] = orient.mtx[ESCH_MTX_E]*s
+                             + orient.mtx[ESCH_MTX_F]*c;
+    orient.mtx[ESCH_MTX_I] = orient.mtx[ESCH_MTX_H]*s
+                             + orient.mtx[ESCH_MTX_I]*c;
     
     orient.mtx[ESCH_MTX_B] = m[0];
     orient.mtx[ESCH_MTX_E] = m[1];
@@ -134,8 +156,57 @@ void EschFrameRef::rotatex(const Flx16 degrees, dword update)
         orthogonalize(update);
         ortho_count=0;
     }
+//ÄÄÄ Update inverse transform
     else if (update & ESCH_UPD_INVERSE)
+    {
+#ifdef INCREMENTAL_INVERSE
+        float n[3];
+
+        // [1  0  0  0]   [1 0  0  0]   [1 0 0 0]   [A B C 0]
+        // [0  1  0  0] * [0 c  -s 0] * [0 1 0 0] * [D E F 0]
+        // [0  0  1  0]   [0 s  c  0]   [0 0 1 0]   [G H I 0]
+        // [-j -k -l 1]   [0 0  0  1]   [j k l 1]   [J K L 1]
+        //
+        //   [A           B           C           0]
+        // = [Dc-Gs       Ec-Hs       Fc-Is       0]
+        //   [Ds+Gc       Es+Hc       Fs+Ic       0]
+        //   [D(-kc-ls+k) E(-kc-ls+k) F(-kc-ls+k) 1]
+        //    +G(ks-lc+l) +H(ks-lc+l) +I(ks-lc+l)
+        //    +J          +K          +L
+
+        float t1 = orient.mtx[ESCH_MTX_K] 
+                   - orient.mtx[ESCH_MTX_K]*c - orient.mtx[ESCH_MTX_L]*s;
+
+        float t2 = orient.mtx[ESCH_MTX_L]
+                   + orient.mtx[ESCH_MTX_K]*s - orient.mtx[ESCH_MTX_L]*c;
+
+        m[0] = iorient.mtx[ESCH_MTX_D]*c - iorient.mtx[ESCH_MTX_G]*s;
+        n[0] = iorient.mtx[ESCH_MTX_D]*s + iorient.mtx[ESCH_MTX_G]*c;
+
+        m[1] = iorient.mtx[ESCH_MTX_E]*c - iorient.mtx[ESCH_MTX_H]*s;
+        n[1] = iorient.mtx[ESCH_MTX_E]*s + iorient.mtx[ESCH_MTX_H]*c;
+
+        m[2] = iorient.mtx[ESCH_MTX_F]*c - iorient.mtx[ESCH_MTX_I]*s;
+        n[2] = iorient.mtx[ESCH_MTX_F]*s + iorient.mtx[ESCH_MTX_I]*c;
+
+        iorient.mtx[ESCH_MTX_J] += iorient.mtx[ESCH_MTX_D]*t1
+                                   + iorient.mtx[ESCH_MTX_G]*t2;
+        iorient.mtx[ESCH_MTX_K] += iorient.mtx[ESCH_MTX_E]*t1
+                                   + iorient.mtx[ESCH_MTX_H]*t2;
+        iorient.mtx[ESCH_MTX_L] += iorient.mtx[ESCH_MTX_F]*t1
+                                   + iorient.mtx[ESCH_MTX_I]*t2;
+
+        iorient.mtx[ESCH_MTX_D] = m[0];
+        iorient.mtx[ESCH_MTX_E] = m[1];
+        iorient.mtx[ESCH_MTX_F] = m[2];
+
+        iorient.mtx[ESCH_MTX_G] = n[0];
+        iorient.mtx[ESCH_MTX_H] = n[1];
+        iorient.mtx[ESCH_MTX_I] = n[2];
+#else
         orient.inverse(&iorient);
+#endif
+    }
 }
 
 
@@ -144,13 +215,12 @@ void EschFrameRef::rotatex(const Flx16 degrees, dword update)
 //                                                                          ³
 // Appends a rotation about Y to the frame of reference.                    ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void EschFrameRef::rotatey(const Flx16 degrees, dword update)
+void EschFrameRef::rotatey(const float degrees, dword update)
 {
-    Flx16   s,c;
-    Flx16   m[3];
+    float   m[3];
 
-    s=degrees.sin();
-    c=degrees.cos();
+    float s=esch_sin(degrees);
+    float c=esch_cos(degrees);
 
 //ÄÄÄ Append transform
 
@@ -159,19 +229,16 @@ void EschFrameRef::rotatey(const Flx16 degrees, dword update)
     // [G H I 0]   [0  0  1  0]   [s 0 c  0]   [0 0 1 0]   [Gc+Is H Ic-Gs 0]
     // [J K L 1]   [-J -K -L 1]   [0 0 0  1]   [J K L 1]   [J     K L     1]
 
-    m[0].flx = flx_16mul16(orient.mtx[ESCH_MTX_A],c).flx
-               + flx_16mul16(orient.mtx[ESCH_MTX_C],s).flx;
-    m[1].flx = flx_16mul16(orient.mtx[ESCH_MTX_D],c).flx
-               + flx_16mul16(orient.mtx[ESCH_MTX_F],s).flx;
-    m[2].flx = flx_16mul16(orient.mtx[ESCH_MTX_G],c).flx
-               + flx_16mul16(orient.mtx[ESCH_MTX_I],s).flx;
+    m[0] = orient.mtx[ESCH_MTX_A]*c + orient.mtx[ESCH_MTX_C]*s;
+    m[1] = orient.mtx[ESCH_MTX_D]*c + orient.mtx[ESCH_MTX_F]*s;
+    m[2] = orient.mtx[ESCH_MTX_G]*c + orient.mtx[ESCH_MTX_I]*s;
     
-    orient.mtx[ESCH_MTX_C].flx  = flx_16mul16(orient.mtx[ESCH_MTX_C],c).flx
-                                  - flx_16mul16(orient.mtx[ESCH_MTX_A],s).flx;
-    orient.mtx[ESCH_MTX_F].flx  = flx_16mul16(orient.mtx[ESCH_MTX_F],c).flx
-                                  - flx_16mul16(orient.mtx[ESCH_MTX_D],s).flx;
-    orient.mtx[ESCH_MTX_I].flx = flx_16mul16(orient.mtx[ESCH_MTX_I],c).flx
-                                 - flx_16mul16(orient.mtx[ESCH_MTX_G],s).flx;
+    orient.mtx[ESCH_MTX_C] = orient.mtx[ESCH_MTX_C]*c
+                             - orient.mtx[ESCH_MTX_A]*s;
+    orient.mtx[ESCH_MTX_F] = orient.mtx[ESCH_MTX_F]*c
+                             - orient.mtx[ESCH_MTX_D]*s;
+    orient.mtx[ESCH_MTX_I]= orient.mtx[ESCH_MTX_I]*c
+                            - orient.mtx[ESCH_MTX_G]*s;
     
     orient.mtx[ESCH_MTX_A] = m[0];
     orient.mtx[ESCH_MTX_D] = m[1];
@@ -188,8 +255,57 @@ void EschFrameRef::rotatey(const Flx16 degrees, dword update)
         orthogonalize(update);
         ortho_count=0;
     }
+//ÄÄÄ Update inverse transform
     else if (update & ESCH_UPD_INVERSE)
+    {
+#ifdef INCREMENTAL_INVERSE
+        float n[3];
+
+        // [1  0  0  0]   [c  0 s 0]   [1 0 0 0]   [A B C 0]
+        // [0  1  0  0] * [0  1 0 0] * [0 1 0 0] * [D E F 0]
+        // [0  0  1  0]   [-s 0 c 0]   [0 0 1 0]   [G H I 0]
+        // [-j -k -l 1]   [0  0 0 1]   [j k l 1]   [J K L 1]
+        //
+        //   [Ac+Gs        Bc+Hs        Cc+Is       0]
+        // = [D            E            F           0]
+        //   [Gc-As        Hc-Bs        Ic-Cs       0]
+        //   [A(j-jc+ls)   B(j-jc+ls)   C(j-jc+ls)  1]
+        //    +G(l-js-lc)  +H(l-js-lc)  +I(l-js-lc)
+        //    +J           +K           +L
+
+        float t1 = orient.mtx[ESCH_MTX_J]
+                   - orient.mtx[ESCH_MTX_J]*c + orient.mtx[ESCH_MTX_L]*s;
+
+        float t2 = orient.mtx[ESCH_MTX_L]
+                   - orient.mtx[ESCH_MTX_J]*s - orient.mtx[ESCH_MTX_L]*c;
+
+        m[0] = iorient.mtx[ESCH_MTX_A]*c + iorient.mtx[ESCH_MTX_G]*s;
+        n[0] = iorient.mtx[ESCH_MTX_G]*c - iorient.mtx[ESCH_MTX_A]*s;
+
+        m[1] = iorient.mtx[ESCH_MTX_B]*c + iorient.mtx[ESCH_MTX_H]*s;
+        n[1] = iorient.mtx[ESCH_MTX_H]*c - iorient.mtx[ESCH_MTX_B]*s;
+
+        m[2] = iorient.mtx[ESCH_MTX_C]*c + iorient.mtx[ESCH_MTX_I]*s;
+        n[2] = iorient.mtx[ESCH_MTX_I]*c - iorient.mtx[ESCH_MTX_C]*s;
+
+        iorient.mtx[ESCH_MTX_J] += iorient.mtx[ESCH_MTX_A]*t1
+                                   + iorient.mtx[ESCH_MTX_G]*t2;
+        iorient.mtx[ESCH_MTX_K] += iorient.mtx[ESCH_MTX_B]*t1
+                                   + iorient.mtx[ESCH_MTX_H]*t2;
+        iorient.mtx[ESCH_MTX_L] += iorient.mtx[ESCH_MTX_C]*t1
+                                   + iorient.mtx[ESCH_MTX_I]*t2;
+
+        iorient.mtx[ESCH_MTX_A] = m[0];
+        iorient.mtx[ESCH_MTX_B] = m[1];
+        iorient.mtx[ESCH_MTX_C] = m[2];
+
+        iorient.mtx[ESCH_MTX_G] = n[0];
+        iorient.mtx[ESCH_MTX_H] = n[1];
+        iorient.mtx[ESCH_MTX_I] = n[2];
+#else
         orient.inverse(&iorient);
+#endif
+    }
 }
 
 
@@ -198,15 +314,12 @@ void EschFrameRef::rotatey(const Flx16 degrees, dword update)
 //                                                                          ³
 // Appends a rotation about Z to the frame of reference.                    ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void EschFrameRef::rotatez(const Flx16 degrees, dword update)
+void EschFrameRef::rotatez(const float degrees, dword update)
 {
-    Flx16   s,c;
-    Flx16   a,b;
-    Flx16   m[3];
-    Flx16   n[3];
+    float   m[3];
 
-    s=degrees.sin();
-    c=degrees.cos();
+    float s=esch_sin(degrees);
+    float c=esch_cos(degrees);
 
 //ÄÄÄ Append transform
 
@@ -215,19 +328,16 @@ void EschFrameRef::rotatez(const Flx16 degrees, dword update)
     // [G H I 0]   [0  0  1  0]   [0  0 1 0]   [0 0 1 0]   [Gc-Hs Gs+Hc I 0]
     // [J K L 1]   [-J -K -L 1]   [0  0 0 1]   [J K L 1]   [J     K     L 1]
 
-    m[0].flx = flx_16mul16(orient.mtx[ESCH_MTX_A],c).flx
-               - flx_16mul16(orient.mtx[ESCH_MTX_B],s).flx;
-    m[1].flx = flx_16mul16(orient.mtx[ESCH_MTX_D],c).flx
-               - flx_16mul16(orient.mtx[ESCH_MTX_E],s).flx;
-    m[2].flx = flx_16mul16(orient.mtx[ESCH_MTX_G],c).flx
-               - flx_16mul16(orient.mtx[ESCH_MTX_H],s).flx;
+    m[0] = orient.mtx[ESCH_MTX_A]*c - orient.mtx[ESCH_MTX_B]*s;
+    m[1] = orient.mtx[ESCH_MTX_D]*c - orient.mtx[ESCH_MTX_E]*s;
+    m[2] = orient.mtx[ESCH_MTX_G]*c - orient.mtx[ESCH_MTX_H]*s;
     
-    orient.mtx[ESCH_MTX_B].flx = flx_16mul16(orient.mtx[ESCH_MTX_A],s).flx
-                                 + flx_16mul16(orient.mtx[ESCH_MTX_B],c).flx;
-    orient.mtx[ESCH_MTX_E].flx = flx_16mul16(orient.mtx[ESCH_MTX_D],s).flx
-                                 + flx_16mul16(orient.mtx[ESCH_MTX_E],c).flx;
-    orient.mtx[ESCH_MTX_H].flx = flx_16mul16(orient.mtx[ESCH_MTX_G],s).flx
-                                 + flx_16mul16(orient.mtx[ESCH_MTX_H],c).flx;
+    orient.mtx[ESCH_MTX_B]= orient.mtx[ESCH_MTX_A]*s
+                            + orient.mtx[ESCH_MTX_B]*c;
+    orient.mtx[ESCH_MTX_E]= orient.mtx[ESCH_MTX_D]*s
+                            + orient.mtx[ESCH_MTX_E]*c;
+    orient.mtx[ESCH_MTX_H]= orient.mtx[ESCH_MTX_G]*s
+                            + orient.mtx[ESCH_MTX_H]*c;
     
     orient.mtx[ESCH_MTX_A] = m[0];
     orient.mtx[ESCH_MTX_D] = m[1];
@@ -244,8 +354,59 @@ void EschFrameRef::rotatez(const Flx16 degrees, dword update)
         orthogonalize(update);
         ortho_count=0;
     }
+//ÄÄÄ Update inverse transform
     else if (update & ESCH_UPD_INVERSE)
+    {
+#ifdef INCREMENTAL_INVERSE
+        float n[3];
+
+        // [1  0  0  0]   [c -s 0 0]   [1 0 0 0]   [A B C 0]
+        // [0  1  0  0] * [s c  0 0] * [0 1 0 0] * [D E F 0]
+        // [0  0  1  0]   [0 0  1 0]   [0 0 1 0]   [G H I 0]
+        // [-j -k -l 1]   [0 0  0 1]   [j k l 1]   [J K L 1]
+        //
+        //   [Ac-Ds       Bc-Es       Cc-Fs       0]
+        // = [As+Dc       Bs+Es       Cs+Fs       0]
+        //   [G           H           I           0]
+        //   [A(j-jc-ks)  B(j-jc-ks)  C(j-jc-ks)  1]
+        //    +D(k+js-kc) +E(k+js-kc) +F(k+js-kc)
+        //    +J          +K          +L
+
+        float t1 = orient.mtx[ESCH_MTX_J]
+                   - orient.mtx[ESCH_MTX_J]*c - orient.mtx[ESCH_MTX_K]*s;
+
+        float t2 = orient.mtx[ESCH_MTX_K]
+                   + orient.mtx[ESCH_MTX_J]*s - orient.mtx[ESCH_MTX_K]*c;
+
+        m[0] = iorient.mtx[ESCH_MTX_A]*c - iorient.mtx[ESCH_MTX_D]*s;
+        n[0] = iorient.mtx[ESCH_MTX_A]*s + iorient.mtx[ESCH_MTX_D]*c;
+
+        m[1] = iorient.mtx[ESCH_MTX_B]*c - iorient.mtx[ESCH_MTX_E]*s;
+        n[1] = iorient.mtx[ESCH_MTX_B]*s + iorient.mtx[ESCH_MTX_E]*c;
+
+        m[2] = iorient.mtx[ESCH_MTX_C]*c - iorient.mtx[ESCH_MTX_F]*s;
+        n[2] = iorient.mtx[ESCH_MTX_C]*s + iorient.mtx[ESCH_MTX_F]*c;
+
+        iorient.mtx[ESCH_MTX_J] += iorient.mtx[ESCH_MTX_A]*t1
+                                   + iorient.mtx[ESCH_MTX_D]*t2;
+
+        iorient.mtx[ESCH_MTX_K] += iorient.mtx[ESCH_MTX_B]*t1
+                                   + iorient.mtx[ESCH_MTX_E]*t2;
+
+        iorient.mtx[ESCH_MTX_L] += iorient.mtx[ESCH_MTX_C]*t1
+                                   + iorient.mtx[ESCH_MTX_F]*t2;
+
+        iorient.mtx[ESCH_MTX_A] = m[0];
+        iorient.mtx[ESCH_MTX_B] = m[1];
+        iorient.mtx[ESCH_MTX_C] = m[2];
+
+        iorient.mtx[ESCH_MTX_D] = n[0];
+        iorient.mtx[ESCH_MTX_E] = n[1];
+        iorient.mtx[ESCH_MTX_F] = n[2];
+#else
         orient.inverse(&iorient);
+#endif
+    }
 }
 
 
@@ -262,16 +423,40 @@ void EschFrameRef::translate(const EschVector *v, dword update)
     // [G H I 0]   [0 0 1 0]   [G   H   I   0]
     // [J K L 1]   [x y z 1]   [J+x K+y L+z 1]
 
-    orient.mtx[ESCH_MTX_J].flx  = orient.mtx[ESCH_MTX_J].flx + v->i.flx;
-    orient.mtx[ESCH_MTX_K].flx  = orient.mtx[ESCH_MTX_K].flx + v->j.flx;
-    orient.mtx[ESCH_MTX_L].flx = orient.mtx[ESCH_MTX_L].flx + v->k.flx;
+    orient.mtx[ESCH_MTX_J] = orient.mtx[ESCH_MTX_J] + v->i;
+    orient.mtx[ESCH_MTX_K] = orient.mtx[ESCH_MTX_K] + v->j;
+    orient.mtx[ESCH_MTX_L] = orient.mtx[ESCH_MTX_L] + v->k;
 
 //ÄÄÄ Update inverse transform
     if (update & ESCH_UPD_INVERSE)
+    {
+#ifdef INCREMENTAL_INVERSE
+        // [ 1  0  0 0]   [A B C 0]   [A           B           C           0]
+        // [ 0  1  0 0] * [D E F 0] = [D           E           F           0]
+        // [ 0  0  1 0]   [G H I 0]   [G           H           I           0]
+        // [-x -y -z 1]   [J K L 1]   [-xA-Dy-Gz+J -xB-yE-zH+K -xC-yF-zI+L 1]
+
+        iorient.mtx[ESCH_MTX_J] = iorient.mtx[ESCH_MTX_J]
+                                  - iorient.mtx[ESCH_MTX_A]*v->i
+                                  - iorient.mtx[ESCH_MTX_D]*v->j
+                                  - iorient.mtx[ESCH_MTX_G]*v->k;
+
+        iorient.mtx[ESCH_MTX_K] = iorient.mtx[ESCH_MTX_K]
+                                  - iorient.mtx[ESCH_MTX_B]*v->i
+                                  - iorient.mtx[ESCH_MTX_E]*v->j
+                                  - iorient.mtx[ESCH_MTX_H]*v->k;
+
+        iorient.mtx[ESCH_MTX_L] = iorient.mtx[ESCH_MTX_L]
+                                  - iorient.mtx[ESCH_MTX_C]*v->i
+                                  - iorient.mtx[ESCH_MTX_F]*v->j
+                                  - iorient.mtx[ESCH_MTX_I]*v->k;
+#else
         orient.inverse(&iorient);
+#endif
+    }
 }
 
-void EschFrameRef::translate(const Flx16 idx, const Flx16 idy, const Flx16 idz,
+void EschFrameRef::translate(const float idx, const float idy, const float idz,
                              dword update)
 {
 //ÄÄÄ Append transform
@@ -280,13 +465,37 @@ void EschFrameRef::translate(const Flx16 idx, const Flx16 idy, const Flx16 idz,
     // [G H I 0]   [0 0 1 0]   [G   H   I   0]
     // [J K L 1]   [x y z 1]   [J+x K+y L+z 1]
 
-    orient.mtx[ESCH_MTX_J].flx  = orient.mtx[ESCH_MTX_J].flx + idx.flx;
-    orient.mtx[ESCH_MTX_K].flx  = orient.mtx[ESCH_MTX_K].flx + idy.flx;
-    orient.mtx[ESCH_MTX_L].flx = orient.mtx[ESCH_MTX_L].flx + idz.flx;
+    orient.mtx[ESCH_MTX_J] = orient.mtx[ESCH_MTX_J] + idx;
+    orient.mtx[ESCH_MTX_K] = orient.mtx[ESCH_MTX_K] + idy;
+    orient.mtx[ESCH_MTX_L] = orient.mtx[ESCH_MTX_L] + idz;
 
 //ÄÄÄ Update inverse transform
     if (update & ESCH_UPD_INVERSE)
+    {
+#ifdef INCREMENTAL_INVERSE
+        // [ 1  0  0 0]   [A B C 0]   [A           B           C           0]
+        // [ 0  1  0 0] * [D E F 0] = [D           E           F           0]
+        // [ 0  0  1 0]   [G H I 0]   [G           H           I           0]
+        // [-x -y -z 1]   [J K L 1]   [-xA-Dy-Gz+J -xB-yE-zH+K -xC-yF-zI+L 1]
+
+        iorient.mtx[ESCH_MTX_J] = iorient.mtx[ESCH_MTX_J]
+                                  - iorient.mtx[ESCH_MTX_A]*idx
+                                  - iorient.mtx[ESCH_MTX_D]*idy
+                                  - iorient.mtx[ESCH_MTX_G]*idz;
+
+        iorient.mtx[ESCH_MTX_K] = iorient.mtx[ESCH_MTX_K]
+                                  - iorient.mtx[ESCH_MTX_B]*idx
+                                  - iorient.mtx[ESCH_MTX_E]*idy
+                                  - iorient.mtx[ESCH_MTX_H]*idz;
+
+        iorient.mtx[ESCH_MTX_L] = iorient.mtx[ESCH_MTX_L]
+                                  - iorient.mtx[ESCH_MTX_C]*idx
+                                  - iorient.mtx[ESCH_MTX_F]*idy
+                                  - iorient.mtx[ESCH_MTX_I]*idz;
+#else
         orient.inverse(&iorient);
+#endif
+    }
 }
 
 
@@ -304,7 +513,7 @@ void EschFrameRef::move(const EschVector *v, dword update)
     translate(t.i, t.j, t.k, update);
 }
 
-void EschFrameRef::move(const Flx16 idx, const Flx16 idy, const Flx16 idz,
+void EschFrameRef::move(const float idx, const float idy, const float idz,
                         dword update)
 {
     EschVector   t(idx,idy,idz);
@@ -320,34 +529,76 @@ void EschFrameRef::move(const Flx16 idx, const Flx16 idy, const Flx16 idz,
 //                                                                          ³
 // Appends a 3D scale factor to the frame of reference.                     ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void EschFrameRef::scale(const Flx16 is, dword update)
+void EschFrameRef::scale(const float is, dword update)
 {
-    Flx16   a,b,c;
-    Flx16   n[3];
+    assertMyth("EschFrameRef::scale must be positive", is > 0);
 
     scalef = scalef * is;
 
 //ÄÄÄ Append transform
-    // [A B C 0]   [1  0  0  0]   [s  0 0 0]   [1 0 0 0]   [As Bs Cs 0]
-    // [D E F 0] * [0  1  0  0] * [0  s 0 0] * [0 1 0 0] = [Ds Es Fs 0]
-    // [G H I 0]   [0  0  1  0]   [0  0 s 0]   [0 0 1 0]   [Gs Hs Is 0]
-    // [J K L 1]   [-J -K -L 1]   [0  0 0 1]   [J K L 1]   [J  K  L  1]
+    // [A B C 0]   [1  0  0  0]   [s 0 0 0]   [1 0 0 0]   [As Bs Cs 0]
+    // [D E F 0] * [0  1  0  0] * [0 s 0 0] * [0 1 0 0] = [Ds Es Fs 0]
+    // [G H I 0]   [0  0  1  0]   [0 0 s 0]   [0 0 1 0]   [Gs Hs Is 0]
+    // [J K L 1]   [-J -K -L 1]   [0 0 0 1]   [J K L 1]   [J  K  L  1]
 
-    orient.mtx[ESCH_MTX_A].flx = flx_16mul16(orient.mtx[ESCH_MTX_A],is).flx;
-    orient.mtx[ESCH_MTX_D].flx = flx_16mul16(orient.mtx[ESCH_MTX_D],is).flx;
-    orient.mtx[ESCH_MTX_G].flx = flx_16mul16(orient.mtx[ESCH_MTX_G],is).flx;
-              
-    orient.mtx[ESCH_MTX_B].flx = flx_16mul16(orient.mtx[ESCH_MTX_B],is).flx;
-    orient.mtx[ESCH_MTX_E].flx = flx_16mul16(orient.mtx[ESCH_MTX_E],is).flx;
-    orient.mtx[ESCH_MTX_H].flx = flx_16mul16(orient.mtx[ESCH_MTX_H],is).flx;
-
-    orient.mtx[ESCH_MTX_C].flx  = flx_16mul16(orient.mtx[ESCH_MTX_C],is).flx;
-    orient.mtx[ESCH_MTX_F].flx  = flx_16mul16(orient.mtx[ESCH_MTX_F],is).flx;
-    orient.mtx[ESCH_MTX_I].flx = flx_16mul16(orient.mtx[ESCH_MTX_I],is).flx;
+    orient.mtx[ESCH_MTX_A] *= is;
+    orient.mtx[ESCH_MTX_B] *= is;
+    orient.mtx[ESCH_MTX_C] *= is;
+    orient.mtx[ESCH_MTX_D] *= is;
+    orient.mtx[ESCH_MTX_E] *= is;
+    orient.mtx[ESCH_MTX_F] *= is;
+    orient.mtx[ESCH_MTX_G] *= is;
+    orient.mtx[ESCH_MTX_H] *= is;
+    orient.mtx[ESCH_MTX_I] *= is;
 
 //ÄÄÄ Update inverse transform
     if (update & ESCH_UPD_INVERSE)
+    {
+#ifdef INCREMENTAL_INVERSE
+        float sp = 1.0f / is;
+
+        // [1  0  0  0]   [s' 0  0  0]   [1 0 0 0]   [A B C 0]
+        // [0  1  0  0] * [0  s' 0  0] * [0 1 0 0] * [D E F 0]
+        // [0  0  1  0]   [0  0  s' 0]   [0 0 1 0]   [G H I 0]
+        // [-j -k -l 1]   [0  0  0  1]   [j k l 1]   [J K L 1]
+        //
+        //   [As'       Bs'       Cs'       0]
+        // = [Ds'       Es'       Fs'       0]
+        //   [G's       Hs'       Is'       0]
+        //   [A(j-js')  B(j-js')  C(j-js')  1]
+        //    +D(k-ks') +E(k-ks') F(k-ks')
+        //    +G(l-ls') +H(l-ls') I(l-ls')
+        //    +J        +K        +L
+
+        float t1 = orient.mtx[ESCH_MTX_J] - orient.mtx[ESCH_MTX_J]*sp;
+        float t2 = orient.mtx[ESCH_MTX_K] - orient.mtx[ESCH_MTX_K]*sp;
+        float t3 = orient.mtx[ESCH_MTX_L] - orient.mtx[ESCH_MTX_L]*sp;
+
+        iorient.mtx[ESCH_MTX_J] += iorient.mtx[ESCH_MTX_A]*t1
+                                   + iorient.mtx[ESCH_MTX_D]*t2
+                                   + iorient.mtx[ESCH_MTX_G]*t3;
+
+        iorient.mtx[ESCH_MTX_K] += iorient.mtx[ESCH_MTX_B]*t1
+                                   + iorient.mtx[ESCH_MTX_E]*t2
+                                   + iorient.mtx[ESCH_MTX_H]*t3;
+
+        iorient.mtx[ESCH_MTX_L] += iorient.mtx[ESCH_MTX_C]*t1
+                                   + iorient.mtx[ESCH_MTX_F]*t2
+                                   + iorient.mtx[ESCH_MTX_I]*t3;
+
+        iorient.mtx[ESCH_MTX_A] *= sp;
+        iorient.mtx[ESCH_MTX_B] *= sp;
+        iorient.mtx[ESCH_MTX_C] *= sp;
+        iorient.mtx[ESCH_MTX_D] *= sp;
+        iorient.mtx[ESCH_MTX_E] *= sp;
+        iorient.mtx[ESCH_MTX_F] *= sp;
+        iorient.mtx[ESCH_MTX_G] *= sp;
+        iorient.mtx[ESCH_MTX_H] *= sp;
+        iorient.mtx[ESCH_MTX_I] *= sp;
+#else
         orient.inverse(&iorient);
+#endif
+    }
 }
 
 
@@ -362,7 +613,7 @@ void EschFrameRef::orthogonalize(dword update)
 {
 //ÄÄÄ Get vectors to form into orthonormal basis
     // dir is already a normalized copy of mtx[G,H,I], so use dir as v1
-    Flx16 mag;
+    float mag;
     EschVector right(orient.mtx[ESCH_MTX_A],
                      orient.mtx[ESCH_MTX_B],
                      orient.mtx[ESCH_MTX_C]);
@@ -403,17 +654,17 @@ void EschFrameRef::orthogonalize(dword update)
     }
 
 //ÄÄÄ Put new vectors into matrix
-    orient.mtx[ESCH_MTX_A].flx = flx_16mul16(right.i,scalef).flx;
-    orient.mtx[ESCH_MTX_B].flx = flx_16mul16(right.j,scalef).flx;
-    orient.mtx[ESCH_MTX_C].flx = flx_16mul16(right.k,scalef).flx;
+    orient.mtx[ESCH_MTX_A] = right.i * scalef;
+    orient.mtx[ESCH_MTX_B] = right.j * scalef;
+    orient.mtx[ESCH_MTX_C] = right.k * scalef;
 
-    orient.mtx[ESCH_MTX_D].flx = flx_16mul16(top.i,scalef).flx;
-    orient.mtx[ESCH_MTX_E].flx = flx_16mul16(top.j,scalef).flx;
-    orient.mtx[ESCH_MTX_F].flx = flx_16mul16(top.k,scalef).flx;
+    orient.mtx[ESCH_MTX_D] = top.i * scalef;
+    orient.mtx[ESCH_MTX_E] = top.j * scalef;
+    orient.mtx[ESCH_MTX_F] = top.k * scalef;
 
-    orient.mtx[ESCH_MTX_G].flx = flx_16mul16(dir.i,scalef).flx;
-    orient.mtx[ESCH_MTX_H].flx = flx_16mul16(dir.j,scalef).flx;
-    orient.mtx[ESCH_MTX_I].flx = flx_16mul16(dir.k,scalef).flx;
+    orient.mtx[ESCH_MTX_G] = dir.i * scalef;
+    orient.mtx[ESCH_MTX_H] = dir.j * scalef;
+    orient.mtx[ESCH_MTX_I] = dir.k * scalef;
 
 //ÄÄÄ Update inverse transform
     if (update & ESCH_UPD_INVERSE)
@@ -433,7 +684,7 @@ void EschFrameRef::orthogonalize_top(dword update)
 //ÄÄÄ Get vectors to form into orthonormal basis
     // dir is already a normalized copy of mtx[G,H,I], so use dir as v1
 
-    Flx16 mag;
+    float mag;
     EschVector right(orient.mtx[ESCH_MTX_A],
                      orient.mtx[ESCH_MTX_B],
                      orient.mtx[ESCH_MTX_C]);
@@ -479,17 +730,17 @@ void EschFrameRef::orthogonalize_top(dword update)
     }
 
 //ÄÄÄ Put new vectors into matrix
-    orient.mtx[ESCH_MTX_A].flx = flx_16mul16(right.i,scalef).flx;
-    orient.mtx[ESCH_MTX_B].flx = flx_16mul16(right.j,scalef).flx;
-    orient.mtx[ESCH_MTX_C].flx = flx_16mul16(right.k,scalef).flx;
+    orient.mtx[ESCH_MTX_A] = right.i * scalef;
+    orient.mtx[ESCH_MTX_B] = right.j * scalef;
+    orient.mtx[ESCH_MTX_C] = right.k * scalef;
 
-    orient.mtx[ESCH_MTX_D].flx = flx_16mul16(top.i,scalef).flx;
-    orient.mtx[ESCH_MTX_E].flx = flx_16mul16(top.j,scalef).flx;
-    orient.mtx[ESCH_MTX_F].flx = flx_16mul16(top.k,scalef).flx;
+    orient.mtx[ESCH_MTX_D] = top.i * scalef;
+    orient.mtx[ESCH_MTX_E] = top.j * scalef;
+    orient.mtx[ESCH_MTX_F] = top.k * scalef;
 
-    orient.mtx[ESCH_MTX_G].flx = flx_16mul16(dir.i,scalef).flx;
-    orient.mtx[ESCH_MTX_H].flx = flx_16mul16(dir.j,scalef).flx;
-    orient.mtx[ESCH_MTX_I].flx = flx_16mul16(dir.k,scalef).flx;
+    orient.mtx[ESCH_MTX_G] = dir.i * scalef;
+    orient.mtx[ESCH_MTX_H] = dir.j * scalef;
+    orient.mtx[ESCH_MTX_I] = dir.k * scalef;
 
 //ÄÄÄ Update inverse transform
     if (update & ESCH_UPD_INVERSE)
@@ -509,7 +760,7 @@ void EschFrameRef::orthogonalize_right(dword update)
 //ÄÄÄ Get vectors to form into orthonormal basis
     // dir is already a normalized copy of mtx[G,H,I], so use dir as v1
 
-    Flx16 mag;
+    float mag;
     EschVector right(orient.mtx[ESCH_MTX_A],
                      orient.mtx[ESCH_MTX_B],
                      orient.mtx[ESCH_MTX_C]);
@@ -555,17 +806,17 @@ void EschFrameRef::orthogonalize_right(dword update)
     }
 
 //ÄÄÄ Put new vectors into matrix
-    orient.mtx[ESCH_MTX_A].flx = flx_16mul16(right.i,scalef).flx;
-    orient.mtx[ESCH_MTX_B].flx = flx_16mul16(right.j,scalef).flx;
-    orient.mtx[ESCH_MTX_C].flx = flx_16mul16(right.k,scalef).flx;
+    orient.mtx[ESCH_MTX_A] = right.i * scalef;
+    orient.mtx[ESCH_MTX_B] = right.j * scalef;
+    orient.mtx[ESCH_MTX_C] = right.k * scalef;
 
-    orient.mtx[ESCH_MTX_D].flx = flx_16mul16(top.i,scalef).flx;
-    orient.mtx[ESCH_MTX_E].flx = flx_16mul16(top.j,scalef).flx;
-    orient.mtx[ESCH_MTX_F].flx = flx_16mul16(top.k,scalef).flx;
+    orient.mtx[ESCH_MTX_D] = top.i * scalef;
+    orient.mtx[ESCH_MTX_E] = top.j * scalef;
+    orient.mtx[ESCH_MTX_F] = top.k * scalef;
 
-    orient.mtx[ESCH_MTX_G].flx = flx_16mul16(dir.i,scalef).flx;
-    orient.mtx[ESCH_MTX_H].flx = flx_16mul16(dir.j,scalef).flx;
-    orient.mtx[ESCH_MTX_I].flx = flx_16mul16(dir.k,scalef).flx;
+    orient.mtx[ESCH_MTX_G] = dir.i * scalef;
+    orient.mtx[ESCH_MTX_H] = dir.j * scalef;
+    orient.mtx[ESCH_MTX_I] = dir.k * scalef;
 
 //ÄÄÄ Update inverse transform
     if (update & ESCH_UPD_INVERSE)

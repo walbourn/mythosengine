@@ -88,35 +88,35 @@ void EschLineDraw::draw()
 //ÄÄÄ Clip against view volume
 
     // Near/far clipping
-    if (pnt[0].z.flx > cam->yon.flx
-        || pnt[1].z.flx > cam->yon.flx)
+    if (pnt[0].z > cam->yon
+        || pnt[1].z > cam->yon)
         return;
 
-    if (pnt[0].z.flx < cam->hither.flx
-        || pnt[1].z.flx < cam->hither.flx)
+    if (pnt[0].z < cam->hither
+        || pnt[1].z < cam->hither)
         return;
 
     // Left/right/top/bottom plane clipping
-    Flx16 zx1 = flx_16mul16(pnt[0].z,cam->xsize);
-    Flx16 zx2 = flx_16mul16(pnt[1].z,cam->xsize);
+    float zx1 = pnt[0].z * cam->xsize;
+    float zx2 = pnt[1].z * cam->xsize;
 
-    Flx16 zy1 = flx_16mul16(pnt[0].z,cam->ysize);
-    Flx16 zy2 = flx_16mul16(pnt[1].z,cam->ysize);
+    float zy1 = pnt[0].z * cam->ysize;
+    float zy2 = pnt[1].z * cam->ysize;
 
-    if (pnt[0].x.flx < -zx1.flx
-        && pnt[1].x.flx < -zx2.flx)
+    if (pnt[0].x < -zx1
+        && pnt[1].x < -zx2)
         return;
 
-    if (pnt[0].x.flx > zx1.flx
-        && pnt[1].x.flx > zx2.flx)
+    if (pnt[0].x > zx1
+        && pnt[1].x > zx2)
         return;
 
-    if (pnt[0].y.flx < -zy1.flx
-        && pnt[1].y.flx < -zy2.flx)
+    if (pnt[0].y < -zy1
+        && pnt[1].y < -zy2)
         return;
 
-    if (pnt[0].y.flx > zy1.flx
-        && pnt[1].y.flx > zy2.flx)
+    if (pnt[0].y > zy1
+        && pnt[1].y > zy2)
         return;
 
     flags |= ESCH_DRW_VISIBLE;
@@ -131,14 +131,11 @@ void EschLineDraw::draw()
 
     for(int i=0; i < 2; i++)
     {
-        vpt[i].x = (flx_muldiv(pnt[i].x, cam->xscalar,
-                               pnt[i].z).flx
-                               + (cam->vport->vbuff.width<<15)) >> 16;
-        vpt[i].y = ((cam->vport->vbuff.height<<15)
-                     - flx_muldiv(pnt[i].y,
-                                  cam->yscalar,
-                                  pnt[i].z).flx) >> 16;
-        vpt[i].z = flx_16mul16(pnt[i].z,cam->z_factor).flx << 1;
+        vpt[i].x = long((pnt[i].x * cam->xscalar) / pnt[i].z)
+                   + (cam->vport->vbuff.width >> 1);
+        vpt[i].y = (cam->vport->vbuff.height >> 1)
+                   - long((pnt[i].y * cam->yscalar) / pnt[i].z);
+        vpt[i].z = ulong(pnt[i].z * cam->z_factor);
         vpt[i].clr = color;
         vpt[i].shade = mp;
     }

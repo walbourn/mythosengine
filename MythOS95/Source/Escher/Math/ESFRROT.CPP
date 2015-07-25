@@ -47,6 +47,14 @@
 
 #include "escher.hpp"
 
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//
+//                                Equates
+//
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+#define INCREMENTAL_INVERSE
+
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
 //                                 Code
@@ -62,59 +70,44 @@
 //                                                                          ³
 // Appends a rotation about an arbitrary axis to frame of reference.        ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void EschFrameRef::rotate(const EschVector *v, const Flx16 degrees, dword update)
+void EschFrameRef::rotate(const EschVector *v, const float degrees, dword update)
 {
-    Flx16       s,c,t;
-    Flx16       j,k,l;
-    Flx16       r0, r1, r2;
-    Flx16       r3, r4, r5;
-    Flx16       r6, r7, r8;
-    EschVector  u;
-
 //ÄÄÄ Compute rotation values
 
-    s=degrees.sin();
-    c=degrees.cos();
-    t.flx = (1<<16) - c.flx;
+    float s = esch_sin(degrees);
+    float c = esch_cos(degrees);
+    float t = 1.0f - c;
 
     // r0 = ti^2 + c
-    r0.flx = flx_16mul16(t,flx_16mul16(v->i,v->i)).flx + c.flx;
+    float r0 = t*v->i*v->i + c;
 
     // r1 = tij + sk
-    r1.flx = flx_16mul16(t,flx_16mul16(v->i,v->j)).flx
-             + flx_16mul16(s,v->k).flx;
+    float r1 = t*v->i*v->j + s*v->k;
 
     // r2 = tik - sj
-    r2.flx = flx_16mul16(t,flx_16mul16(v->i,v->k)).flx
-             - flx_16mul16(s,v->j).flx;
+    float r2 = t*v->i*v->k - s*v->j;
 
     // r3 = tij - sk
-    r3.flx = flx_16mul16(t,flx_16mul16(v->i,v->j)).flx
-             - flx_16mul16(s,v->k).flx;
+    float r3 = t*v->i*v->j - s*v->k;
 
     // r4 = tj^2 + c
-    r4.flx = flx_16mul16(t,flx_16mul16(v->j,v->j)).flx + c.flx;
+    float r4 = t*v->j*v->j + c;
 
     // r5 = tjk + si
-    r5.flx = flx_16mul16(t,flx_16mul16(v->j,v->k)).flx
-             + flx_16mul16(s,v->i).flx;
+    float r5 = t*v->j*v->k + s*v->i;
 
     // r6 = tik + sj
-    r6.flx = flx_16mul16(t,flx_16mul16(v->i,v->k)).flx
-             + flx_16mul16(s,v->j).flx;
+    float r6 = t*v->i*v->k + s*v->j;
 
     // r7 = tjk - si
-    r7.flx = flx_16mul16(t,flx_16mul16(v->j,v->k)).flx
-             - flx_16mul16(s,v->i).flx;
+    float r7 = t*v->j*v->k - s*v->i;
 
     // r8 = tk^2 + c
-    r8.flx = flx_16mul16(t,flx_16mul16(v->k,v->k)).flx + c.flx;
+    float r8 = t*v->k*v->k + c;
 
     // Normalize rotation constants
 
-    u.i = r0;
-    u.j = r3;
-    u.k = r6;
+    EschVector u(r0,r3,r6);
     u.normalize();
     r0 = u.i;
     r3 = u.j;
@@ -150,49 +143,49 @@ void EschFrameRef::rotate(const EschVector *v, const Flx16 degrees, dword update
     EschMatrix  m = orient;
 
     // Ar0+Br3+Cr6
-    orient.mtx[ESCH_MTX_A].flx = flx_16mul16(m.mtx[ESCH_MTX_A],r0).flx
-                        + flx_16mul16(m.mtx[ESCH_MTX_B],r3).flx
-                        + flx_16mul16(m.mtx[ESCH_MTX_C],r6).flx;
+    orient.mtx[ESCH_MTX_A] = m.mtx[ESCH_MTX_A]*r0
+                             + m.mtx[ESCH_MTX_B]*r3
+                             + m.mtx[ESCH_MTX_C]*r6;
 
     // Dr0+Er3+Fr6
-    orient.mtx[ESCH_MTX_D].flx = flx_16mul16(m.mtx[ESCH_MTX_D],r0).flx
-                        + flx_16mul16(m.mtx[ESCH_MTX_E],r3).flx
-                        + flx_16mul16(m.mtx[ESCH_MTX_F],r6).flx;
+    orient.mtx[ESCH_MTX_D] = m.mtx[ESCH_MTX_D]*r0
+                             + m.mtx[ESCH_MTX_E]*r3
+                             + m.mtx[ESCH_MTX_F]*r6;
 
     // Gr0+Hr3+Ir6
-    orient.mtx[ESCH_MTX_G].flx = flx_16mul16(m.mtx[ESCH_MTX_G],r0).flx
-                        + flx_16mul16(m.mtx[ESCH_MTX_H],r3).flx
-                        + flx_16mul16(m.mtx[ESCH_MTX_I],r6).flx;
+    orient.mtx[ESCH_MTX_G] = m.mtx[ESCH_MTX_G]*r0
+                             + m.mtx[ESCH_MTX_H]*r3
+                             + m.mtx[ESCH_MTX_I]*r6;
 
     // Ar1+Br4+Cr7
-    orient.mtx[ESCH_MTX_B].flx = flx_16mul16(m.mtx[ESCH_MTX_A],r1).flx
-                        + flx_16mul16(m.mtx[ESCH_MTX_B],r4).flx
-                        + flx_16mul16(m.mtx[ESCH_MTX_C],r7).flx;
+    orient.mtx[ESCH_MTX_B] = m.mtx[ESCH_MTX_A]*r1
+                             + m.mtx[ESCH_MTX_B]*r4
+                             + m.mtx[ESCH_MTX_C]*r7;
 
     // Dr1+Er4+Fr7
-    orient.mtx[ESCH_MTX_E].flx = flx_16mul16(m.mtx[ESCH_MTX_D],r1).flx
-                        + flx_16mul16(m.mtx[ESCH_MTX_E],r4).flx
-                        + flx_16mul16(m.mtx[ESCH_MTX_F],r7).flx;
+    orient.mtx[ESCH_MTX_E] = m.mtx[ESCH_MTX_D]*r1
+                             + m.mtx[ESCH_MTX_E]*r4
+                             + m.mtx[ESCH_MTX_F]*r7;
 
     // Gr1+Hr4+Ir7
-    orient.mtx[ESCH_MTX_H].flx = flx_16mul16(m.mtx[ESCH_MTX_G],r1).flx
-                        + flx_16mul16(m.mtx[ESCH_MTX_H],r4).flx
-                        + flx_16mul16(m.mtx[ESCH_MTX_I],r7).flx;
+    orient.mtx[ESCH_MTX_H] = m.mtx[ESCH_MTX_G]*r1
+                             + m.mtx[ESCH_MTX_H]*r4
+                             + m.mtx[ESCH_MTX_I]*r7;
 
     // Ar2+Br5+Cr8
-    orient.mtx[ESCH_MTX_C].flx = flx_16mul16(m.mtx[ESCH_MTX_A],r2).flx
-                        + flx_16mul16(m.mtx[ESCH_MTX_B],r5).flx
-                        + flx_16mul16(m.mtx[ESCH_MTX_C],r8).flx;
+    orient.mtx[ESCH_MTX_C] = m.mtx[ESCH_MTX_A]*r2
+                             + m.mtx[ESCH_MTX_B]*r5
+                             + m.mtx[ESCH_MTX_C]*r8;
 
     // Dr2+Er5+Fr8
-    orient.mtx[ESCH_MTX_F].flx = flx_16mul16(m.mtx[ESCH_MTX_D],r2).flx
-                        + flx_16mul16(m.mtx[ESCH_MTX_E],r5).flx
-                        + flx_16mul16(m.mtx[ESCH_MTX_F],r8).flx;
+    orient.mtx[ESCH_MTX_F] = m.mtx[ESCH_MTX_D]*r2
+                             + m.mtx[ESCH_MTX_E]*r5
+                             + m.mtx[ESCH_MTX_F]*r8;
 
     // Gr2+Hr5+Ir8
-    orient.mtx[ESCH_MTX_I].flx = flx_16mul16(m.mtx[ESCH_MTX_G],r2).flx
-                         + flx_16mul16(m.mtx[ESCH_MTX_H],r5).flx
-                         + flx_16mul16(m.mtx[ESCH_MTX_I],r8).flx;
+    orient.mtx[ESCH_MTX_I] = m.mtx[ESCH_MTX_G]*r2
+                             + m.mtx[ESCH_MTX_H]*r5
+                             + m.mtx[ESCH_MTX_I]*r8;
 
     dir.i = orient.mtx[ESCH_MTX_G];
     dir.j = orient.mtx[ESCH_MTX_H];
@@ -205,8 +198,107 @@ void EschFrameRef::rotate(const EschVector *v, const Flx16 degrees, dword update
         orthogonalize(update);
         ortho_count=0;
     }
+//ÄÄÄ Update inverse transform
     else if (update & ESCH_UPD_INVERSE)
+    {
+#ifdef INCREMENTAL_INVERSE
+        // [1  0  0  0]   [r0 r3 r6 0]   [1 0 0 0]   [A B C 0]
+        // [0  1  0  0] * [r1 r4 r7 0] * [0 1 0 0] * [D E F 0]
+        // [0  0  1  0]   [r2 r5 r8 0]   [0 0 1 0]   [G H I 0]
+        // [-j -k -l 1]   [0  0  0  1]   [j k l 1]   [J K L 1]
+        //
+        //   [Ar0+Dr3+Gr6  Br0+Er3+Hr6  Cr0+Fr3+Ir6  0]
+        // = [Ar1+Dr4+Gr7  Br1+Er4+Hr7  Cr1+Fr4+Ir7  0]
+        //   [Ar2+Dr5+Gr8  Br2+Er5+Hr8  Cr2+Fr5+Ir8  0]
+        //   [AX+DY+GZ+J   BX+EY+HZ+K   CX+FY+IZ+L   1]
+        //
+        //  X = j-jr0-kr1-lr2 
+        //  Y = k-jr3-kr4-lr5
+        //  Z = l-jr6-kr7-lr8
+
+        float x = m.mtx[ESCH_MTX_J]
+                  - m.mtx[ESCH_MTX_J]*r0
+                  - m.mtx[ESCH_MTX_K]*r1
+                  - m.mtx[ESCH_MTX_L]*r2;
+
+        float y = m.mtx[ESCH_MTX_K]
+                  - m.mtx[ESCH_MTX_J]*r3
+                  - m.mtx[ESCH_MTX_K]*r4
+                  - m.mtx[ESCH_MTX_L]*r5;
+
+        float z = m.mtx[ESCH_MTX_L]
+                  - m.mtx[ESCH_MTX_J]*r6
+                  - m.mtx[ESCH_MTX_K]*r7
+                  - m.mtx[ESCH_MTX_L]*r8;
+
+        m = iorient;
+
+        // Ar0+Dr3+Gr6
+        iorient.mtx[ESCH_MTX_A] = m.mtx[ESCH_MTX_A]*r0
+                                  + m.mtx[ESCH_MTX_D]*r3
+                                  + m.mtx[ESCH_MTX_G]*r6;
+
+        // Br0+Er3+Hr6
+        iorient.mtx[ESCH_MTX_B] = m.mtx[ESCH_MTX_B]*r0
+                                  + m.mtx[ESCH_MTX_E]*r3
+                                  + m.mtx[ESCH_MTX_H]*r6;
+
+        // Cr0+Fr3+Ir6
+        iorient.mtx[ESCH_MTX_C] = m.mtx[ESCH_MTX_C]*r0
+                                  + m.mtx[ESCH_MTX_F]*r3
+                                  + m.mtx[ESCH_MTX_I]*r6;
+
+        // Ar1+Dr4+Gr7
+        iorient.mtx[ESCH_MTX_D] = m.mtx[ESCH_MTX_A]*r1
+                                  + m.mtx[ESCH_MTX_D]*r4
+                                  + m.mtx[ESCH_MTX_G]*r7;
+        
+        // Br1+Er4+Hr7
+        iorient.mtx[ESCH_MTX_E] = m.mtx[ESCH_MTX_B]*r1
+                                  + m.mtx[ESCH_MTX_E]*r4
+                                  + m.mtx[ESCH_MTX_H]*r7;
+        
+        // Cr1+Fr4+Ir7
+        iorient.mtx[ESCH_MTX_F] = m.mtx[ESCH_MTX_C]*r1
+                                  + m.mtx[ESCH_MTX_F]*r4
+                                  + m.mtx[ESCH_MTX_I]*r7;
+
+        // Ar2+Dr5+Gr8
+        iorient.mtx[ESCH_MTX_G] = m.mtx[ESCH_MTX_A]*r2
+                                  + m.mtx[ESCH_MTX_D]*r5
+                                  + m.mtx[ESCH_MTX_G]*r8;
+
+        // Br2+Er5+Hr8
+        iorient.mtx[ESCH_MTX_H] = m.mtx[ESCH_MTX_B]*r2
+                                  + m.mtx[ESCH_MTX_E]*r5
+                                  + m.mtx[ESCH_MTX_H]*r8;
+
+        // Cr2+Fr5+Ir8
+        iorient.mtx[ESCH_MTX_I] = m.mtx[ESCH_MTX_C]*r2
+                                  + m.mtx[ESCH_MTX_F]*r5
+                                  + m.mtx[ESCH_MTX_I]*r8;
+
+        // AX+DY+GZ+J
+        iorient.mtx[ESCH_MTX_J] = m.mtx[ESCH_MTX_A]*x
+                                  + m.mtx[ESCH_MTX_D]*y
+                                  + m.mtx[ESCH_MTX_G]*z
+                                  + m.mtx[ESCH_MTX_J];
+
+        // BX+EY+HZ+K
+        iorient.mtx[ESCH_MTX_K] = m.mtx[ESCH_MTX_B]*x
+                                  + m.mtx[ESCH_MTX_E]*y
+                                  + m.mtx[ESCH_MTX_H]*z
+                                  + m.mtx[ESCH_MTX_K];
+
+        // CX+FY+IZ+L
+        iorient.mtx[ESCH_MTX_L] = m.mtx[ESCH_MTX_C]*x
+                                  + m.mtx[ESCH_MTX_F]*y
+                                  + m.mtx[ESCH_MTX_I]*z
+                                  + m.mtx[ESCH_MTX_L];
+#else
         orient.inverse(&iorient);
+#endif
+    }
 }
 
 
@@ -215,7 +307,7 @@ void EschFrameRef::rotate(const EschVector *v, const Flx16 degrees, dword update
 //                                                                          ³
 // Appends a rotation about the frame's current I axis.                     ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void EschFrameRef::pitch(const Flx16 degrees, dword update)
+void EschFrameRef::pitch(const float degrees, dword update)
 {
     EschVector   axis(orient.mtx[ESCH_MTX_A],
                       orient.mtx[ESCH_MTX_B],
@@ -232,7 +324,7 @@ void EschFrameRef::pitch(const Flx16 degrees, dword update)
 //                                                                          ³
 // Appends a rotation about the frame's current K axis.                     ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void EschFrameRef::roll(const Flx16 degrees, dword update)
+void EschFrameRef::roll(const float degrees, dword update)
 {
     rotate(&dir,degrees,update);
 }
@@ -243,7 +335,7 @@ void EschFrameRef::roll(const Flx16 degrees, dword update)
 //                                                                          ³
 // Appends a rotation about the frame's current J axis.                     ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void EschFrameRef::yaw(const Flx16 degrees, dword update)
+void EschFrameRef::yaw(const float degrees, dword update)
 {
     EschVector   axis(orient.mtx[ESCH_MTX_D],
                       orient.mtx[ESCH_MTX_E],

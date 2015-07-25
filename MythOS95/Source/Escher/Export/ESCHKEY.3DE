@@ -1,0 +1,33 @@
+
+/* Tree Dialog: EschKey */
+
+Dialog EschKey[]=
+{
+{ -1, 1, -1, -1, 0, 5, 5, 408, 160, NULL, NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
+{ 0, -1, -1, 2, 4, 8, 16, 392, 18, "Escher Keyframe Exporter", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
+{ 0, -1, 1, 3, 4, 8, 64, 66, 18, "Target:", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
+{ 0, -1, 2, 4, 1, 88, 64, 98, 18, "TARGET11.IFF", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
+{ 0, -1, 3, 5, 4, 8, 96, 98, 18, "Motion Type:", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
+{ 0, -1, 4, 6, 1, 88, 128, 66, 18, "OK", NULL, 0, 0, 13, 9, FNULL, FNULL, 0 },
+{ 0, -1, 5, 7, 1, 248, 128, 66, 18, "Cancel", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
+{ 0, -1, 6, 8, 5, 120, 96, 267, 18, (void *)0, NULL, 0, 0, 0, 5, FNULL, FNULL, 0 },
+{ 0, -1, 7, -1, 1, 296, 64, 66, 18, " Flags ", NULL, 0, 0, 102, 0, FNULL, FNULL, 0 },
+};
+
+/* Tree Identifiers: EschKey */
+
+#define STR_TITL                        1
+#define STR_TARG                        2
+#define KEY_TARG                        3
+#define STR_MTYP                        4
+#define OK                              5
+#define CANCEL                          6
+#define KEY_MTYP                        7
+#define KEY_FLAG                        8
+
+/* Editables */
+
+Editable EschKey_edit[]=
+{
+{ 32, 32, 0, "DDDDDDDDDDDDDDDDDDDDDDDDDDDDDDDD", 5, 0, 0, NULL, NULL },
+};

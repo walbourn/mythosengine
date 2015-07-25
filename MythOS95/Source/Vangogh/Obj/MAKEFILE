@@ -2,9 +2,9 @@
 #
 #                                                            %__________%
 #                                                           %/ . .  .   \%
-#            Van Gogh 2D-Display Library                     |  . .  o. | 
+#            Van Gogh 2D-Display Library                     |  . .  o. |
 #                                                            |. _  .   .|
-#           Microsoft Windows '95 Version                    | / \   .  | 
+#           Microsoft Windows '95 Version                    | / \   .  |
 #                                                            |_|_|_._._.|
 #  Copyright (c) 1994 - 1997 by Charybdis Enterprises, Inc.  |.-.-.-.-..|
 #               All rights reserved.                        %\__________/%
@@ -32,11 +32,15 @@
 #°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 #
 #                               Variables
-#                                
+#
 #°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 !if "$(DEBUG)" == ""
 DEBUG = NO
+!endif
+
+!if "$(THREAD)" == ""
+THREAD=YES
 !endif
 
 !if "$(MYTH95ROOT)" == ""
@@ -52,10 +56,11 @@ LIBPATH = $(MYTH95ROOT)\lib;
 
 LIB = VanGogh
 
-
-OBJS=vngclip.obj\
+OBJS=\
+vngpch.obj\
 vngitrns.obj\
 vngzrect.obj\
+vngglob.obj\
 vngpcalc.obj\
 vngpal.obj\
 vngcolor.obj\
@@ -95,16 +100,73 @@ pttri8.obj\
 zpttri8.obj\
 pgttri8.obj\
 zpgttri8.obj\
+apttri8.obj\
+azpttri8.obj\
+apgttri8.obj\
+azpgttr8.obj\
 vngvpdd8.obj\
 vngvpdb8.obj\
 vngsblt8.obj\
 vngvvp8.obj\
 vngpoly8.obj\
 vngitns8.obj\
-vngrct16.obj\
-vngpix16.obj\
-ddrwscrn.obj\
 zpghlin8.obj\
+vgitrn16.obj\
+vngvvp16.obj\
+vgvpdb16.obj\
+vgvpdd16.obj\
+vngitn16.obj\
+vgpoly16.obj\
+vngtri16.obj\
+vnggtr16.obj\
+vgttri16.obj\
+vngptr16.obj\
+vggrtr16.obj\
+vgrect16.obj\
+tri16.obj\
+ztri16.obj\
+gtri16.obj\
+zgtri16.obj\
+lttri16.obj\
+zlttri16.obj\
+lgttri16.obj\
+zlgttr16.obj\
+grtri16.obj\
+zgrtri16.obj\
+pttr16.obj\
+zpttr16.obj\
+pgttr16.obj\
+zpgttr16.obj\
+agtri16.obj\
+tagtri16.obj\
+algtt16.obj\
+altt16.obj\
+apgttr16.obj\
+apttri16.obj\
+atri16.obj\
+tatri16.obj\
+azgtri16.obj\
+tazgtr16.obj\
+azlgtt16.obj\
+azltt16.obj\
+tazltt16.obj\
+taltt16.obj\
+azpgtt16.obj\
+azpttr16.obj\
+aztri16.obj\
+taztri16.obj\
+vng3dfx.obj\
+vngd3d.obj\
+vngcl3d.obj\
+vngMSI.obj\
+ddrwscrn.obj\
+hybrscrn.obj\
+3dfxscrn.obj\
+d3dscrn.obj\
+d3dtex.obj\
+cl3dscrn.obj\
+cl3dtex.obj\
+MSIscrn.obj\
 dibscrn.obj
 
 #pttri8.obj\
@@ -122,7 +184,7 @@ dibscrn.obj
 # First target                                                             ³
 #ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
-all: setstden $(LIB).lib
+all: setstden $(LIB).pch $(LIB).lib
 
 #ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 # Standard make include                                                    ³
@@ -136,54 +198,42 @@ all: setstden $(LIB).lib
 #
 #°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
-# define how we compile a .ASM file
+#--- .c, .cpp, .asm setup in standard include ---
+
+#ÄÄÄ Assembly
 {..\8bpp\}.asm{}.obj:
    $(ASM) $(ASMOPTS) $<
 
-# define how we compile a .C file
-{..\8bpp\}.c{}.obj:
-	$(CC) $(CCOPTIONS) $<
-
-# define how we compile a .CPP file
-{..\8bpp}.cpp{}.obj:
-	$(CPP) $(CCOPTIONS) $<
-
-# define how we compile a .ASM file
 {..\16bpp\}.asm{}.obj:
    $(ASM) $(ASMOPTS) $<
 
-# define how we compile a .C file
-{..\16bpp\}.c{}.obj:
-	$(CC) $(CCOPTIONS) $<
-
-# define how we compile a .CPP file
-{..\16bpp\}.cpp{}.obj:
-	$(CPP) $(CCOPTIONS) $<
-
-# define how we compile a .ASM file
 {..\24bpp\}.asm{}.obj:
    $(ASM) $(ASMOPTS) $<
 
-# define how we compile a .C file
-{..\24bpp\}.c{}.obj:
-	$(CC) $(CCOPTIONS) $<
-
-# define how we compile a .CPP file
-{..\24bpp\}.cpp{}.obj:
-	$(CPP) $(CCOPTIONS) $<
-
-# define how we compile a .ASM file
 {..\screen\}.asm{}.obj:
    $(ASM) $(ASMOPTS) $<
 
-# define how we compile a .C file
-{..\screen\}.c{}.obj:
-	$(CC) $(CCOPTIONS) $<
+{..\boards\}.asm{}.obj:
+   $(ASM) $(ASMOPTS) $<
 
-# define how we compile a .CPP file
+#ÄÄÄ C++
+{..\}.cpp{}.obj:
+	$(CPP) $(CCOPTIONS) /Yuvangogh.hpp /Fp$(LIB).pch  $<
+
+{..\8bpp}.cpp{}.obj:
+        $(CPP) $(CCOPTIONS) /Yuvangogh.hpp /Fp$(LIB).pch $<
+
+{..\16bpp\}.cpp{}.obj:
+        $(CPP) $(CCOPTIONS) /Yuvangogh.hpp /Fp$(LIB).pch $<
+
+{..\24bpp\}.cpp{}.obj:
+        $(CPP) $(CCOPTIONS) /Yuvangogh.hpp /Fp$(LIB).pch $<
+
 {..\screen}.cpp{}.obj:
-	$(CPP) $(CCOPTIONS) $<
+        $(CPP) $(CCOPTIONS) $<
 
+{..\boards\}.cpp{}.obj:
+        $(CPP) $(CCOPTIONS) $<
 
 #±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 #
@@ -191,7 +241,10 @@ all: setstden $(LIB).lib
 #
 #±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 
-#--- .c, .cpp, .asm setup in standard include ---
+$(LIB).pch : vngpch.obj
+
+vngpch.obj : ..\vngpch.cpp
+    $(CPP) /Ycvangogh.hpp /Fp$(LIB).pch $(CCOPTIONS) ..\$*.cpp
 
 #ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 # Library                                                                  ³
@@ -209,12 +262,13 @@ release: all
     copy $(LIB).lib $(MYTH95ROOT)\lib
 
 clean:
-    del *.obj
-    del *.res
-    del *.err
-    del *.lst
-    del *.ilk
-    del *.pdb
+    @del *.obj
+    @del *.res
+    @del *.err
+    @del *.lst
+    @del *.ilk
+    @del *.pdb
+    @del *.pch
 
 #°±² End of makefile ²±°
 

@@ -71,7 +71,7 @@ HWND        hWndClient;
 const char  szAppName[] = "Gutenberg";
 GameState   *game;
 
-MaxDevices  Devs;
+MaxDevices  *Devs=0;
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
@@ -132,7 +132,16 @@ int APIENTRY WinMain (HINSTANCE hInstance,
     if (load_strings("TEST.IFF"))
         return FALSE;
 
-    // Initialize any "DirectX" services
+    Devs = new MaxDevicesWin32(hWndClient);
+    if (!Devs)
+    {
+        MessageBeep (0);
+        MessageBox(hWndClient,
+                   "Could not create Max devices",
+                   "Fatal Error",
+                   MB_OK);
+        return FALSE;
+    }
 
     game = new GameState (Devs);
     game->LoadEvents ("gframe.iff");
@@ -150,7 +159,7 @@ int APIENTRY WinMain (HINSTANCE hInstance,
     while (game->PumpWindows())
     {
         // Do per-frame processing here
-        Devs.update ();
+        Devs->update ();
         game->GetEvents();
         game->ProcessEvents();
         game->Render();
@@ -160,6 +169,9 @@ int APIENTRY WinMain (HINSTANCE hInstance,
     // Clean up the game here
     // (destructors get most of it)
     delete game;
+
+    delete Devs;
+    Devs=0;
 
 	return 0;
 

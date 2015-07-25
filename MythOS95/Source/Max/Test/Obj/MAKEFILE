@@ -1,11 +1,11 @@
 #อออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออ
-#                  ooo        ooooo                       
-#                  `88.       .888'                       
-#                   888b     d'888   .oooo.   oooo    ooo 
-#                   8 Y88. .P  888  `P  )88b   `88b..8P'  
-#                   8  `888'   888   .oP"888     Y888'    
-#                   8    Y     888  d8(  888   .o8"'88b   
-#                  o8o        o888o `Y888""8o o88'   888o 
+#                  ooo        ooooo
+#                  `88.       .888'
+#                   888b     d'888   .oooo.   oooo    ooo
+#                   8 Y88. .P  888  `P  )88b   `88b..8P'
+#                   8  `888'   888   .oP"888     Y888'
+#                   8    Y     888  d8(  888   .o8"'88b
+#                  o8o        o888o `Y888""8o o88'   888o
 #
 #                          Across the event horizon...
 #
@@ -34,11 +34,15 @@
 #ฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐ
 #
 #                               Variables
-#                                
+#
 #ฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐ
 
 !if "$(DEBUG)" == ""
 DEBUG = NO
+!endif
+
+!if "$(THREAD)" == ""
+THREAD=YES
 !endif
 
 !if "$(MYTH95ROOT)" == ""
@@ -57,7 +61,13 @@ LIBPATH = ..\..\obj;$(MYTH95ROOT)\lib;
 
 EXE = test
 
-LIBS = max.lib ivory.lib xfile.lib user32.lib winmm.lib
+LIBS = max.lib\
+ivory.lib\
+xfile.lib\
+user32.lib\
+winmm.lib\
+dinput.lib\
+dxguid.lib
 
 #ฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
 # First target                                                             ณ

@@ -77,6 +77,7 @@
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 TurnerNetwork::TurnerNetwork (GUID _guid, const char *_name, int _players):
     is_opened (FALSE),
+    creator (FALSE),
     hMessageEvent (NULL),
     pIDP (0)
 {
@@ -178,6 +179,7 @@ int TurnerNetwork::create_game (BOOL bCreateEvent)
     Sleep(100);
 
     is_opened = (res == DP_OK);
+    creator = is_opened;
 
 #if 0
     // Allow for an event to signal packet arrival (more efficient, but possibly undesirable)
@@ -278,22 +280,6 @@ BOOL CALLBACK _player_callback (DPID id, DWORD dwType, LPCDPNAME lpcName, DWORD 
     return TRUE;
 }
 
-#if 0
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-// TurnerNetwork - static _group_callback
-//  This is the enumeration function for TurnerNetwork::connect_game
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-BOOL CALLBACK _group_callback (DPID id, char *short_name, char *long_name, DWORD flags, LPVOID context)
-{
-    // Add the player to the internal list of players
-    TurnerNetwork  *net = (TurnerNetwork *)context;
-
-    net->sys_newgroup (id, short_name, long_name);
-
-    return TRUE;
-}
-#endif
-
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 // TurnerNetwork - connect_game
@@ -311,6 +297,7 @@ int TurnerNetwork::connect_game (GUID guidSession, BOOL bCreateEvent)
     Sleep(100);
 
     is_opened = (res == DP_OK);
+    creator = FALSE;
 
     // Allow for an event to signal packet arrival (more efficient, but possibly undesirable)
 #if 0
@@ -479,10 +466,10 @@ int TurnerNetwork::handle_sysmsg (DPMSG_GENERIC *pmsg, size_t msg_len)
 
             if (msg->dwPlayerType == DPPLAYERTYPE_PLAYER)
                 return sys_newplayer (msg->dpId, msg->dpnName.lpszShortNameA,
-												 msg->dpnName.lpszLongNameA);
+                                                                                                 msg->dpnName.lpszLongNameA);
             else
                 return sys_newgroup  (msg->dpId, msg->dpnName.lpszShortNameA,
-												 msg->dpnName.lpszLongNameA);
+                                                                                                 msg->dpnName.lpszLongNameA);
         }
         break;
 
@@ -506,9 +493,9 @@ int TurnerNetwork::handle_sysmsg (DPMSG_GENERIC *pmsg, size_t msg_len)
             DPMSG_DESTROYPLAYERORGROUP *msg = (DPMSG_DESTROYPLAYERORGROUP *)pmsg;
 
             if (msg->dwPlayerType == DPPLAYERTYPE_PLAYER)
-	            return sys_delplayer (msg->dpId);
-			else
-	            return sys_delgroup (msg->dpId);
+                    return sys_delplayer (msg->dpId);
+                        else
+                    return sys_delgroup (msg->dpId);
         }
         break;
 

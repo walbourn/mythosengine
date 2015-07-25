@@ -223,8 +223,8 @@ class EschMultiFrameTexture : public EschTexture
 protected:
     ulong       base;
     ulong       size;
-    Flx16       interval;
-    Flx16       time;
+    float       interval;
+    float       time;
 
 public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
@@ -233,7 +233,7 @@ public:
     ushort      index;                  // Current frame of texture
     ushort      max;                    // Max number of frames
     IvoryHandle handle;                 // Handle to bitmaps
-    Flx16       rate;
+    float       rate;
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Constructor/Destructors                                              ³
@@ -255,9 +255,9 @@ public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
     void reset() { index=0;  time=0; }
     
-    void set_interval(Flx16 i) { interval=i; }
+    void set_interval(float i) { interval=i; }
 
-    void set_rate(Flx16 r) { flags |= ESCH_MFTXT_TIMEBASED;  rate=r; }
+    void set_rate(float r) { flags |= ESCH_MFTXT_TIMEBASED;  rate=r; }
 
     void set_size(ushort w, ushort h)
     {

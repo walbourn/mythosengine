@@ -85,12 +85,12 @@ struct PacketData
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 struct LanderPositionData: public PacketData
 {
-    Flx16   xpos;
-    Flx16   ypos;
-    Flx16   xvelocity;
-    Flx16   yvelocity;
-    Flx16   xacceleration;
-    Flx16   yacceleration;
+    float   xpos;
+    float   ypos;
+    float   xvelocity;
+    float   yvelocity;
+    float   xacceleration;
+    float   yacceleration;
     DWORD   time;
 
     LanderPositionData (const Lander &l, DWORD _time=0):
@@ -284,7 +284,7 @@ void Lander::run ()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 // Lander - reset
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-void Lander::reset (Flx16 x, Flx16 y)
+void Lander::reset (float x, float y)
 {
     xpos            = x;
     ypos            = y;
@@ -305,7 +305,7 @@ void Lander::reset (Flx16 x, Flx16 y)
         // Adjust for joystick position
 
         if ((CmdFlags & CMDFLAGS_JOYSTICK)
-            && Devs->theJoystick.joy_present)
+            && Devs->is_joystick_enabled())
         {
                 JOYINFOEX   j;
                 evt->get_joystick (&j);
@@ -337,7 +337,7 @@ void Lander::process_events ()
 
         // Adjust for joystick position
         if ((CmdFlags & CMDFLAGS_JOYSTICK)
-            && Devs->theJoystick.joy_present)
+            && Devs->is_joystick_enabled())
             evt->get_joystick (&j);
 
         if (evts.check (UP))
@@ -345,9 +345,9 @@ void Lander::process_events ()
         else if (evts.check (DOWN))
             yacceleration = -40;
         else if ((CmdFlags & CMDFLAGS_JOYSTICK)
-                 && Devs->theJoystick.joy_present
+                 && Devs->is_joystick_enabled()
                  && j.dwYpos < jcentery - 2048)
-            yacceleration = Flx16 (long (j.dwYpos - jcenterx) / 512);
+            yacceleration = float (long (j.dwYpos - jcenterx) / 512);
         else
             yacceleration = 0;
 
@@ -356,9 +356,9 @@ void Lander::process_events ()
         else if (evts.check (RIGHT))
             xacceleration = 10;
         else if ((CmdFlags & CMDFLAGS_JOYSTICK)
-                 && Devs->theJoystick.joy_present
+                 && Devs->is_joystick_enabled()
                  && abs (j.dwXpos - jcenterx) > 4096)
-            xacceleration = long (j.dwXpos - jcenterx) / 2048;
+            xacceleration = float (long (j.dwXpos - jcenterx) / 2048);
         else
             xacceleration = 0;
     }
@@ -371,14 +371,14 @@ void Lander::process_events ()
 void Lander::update_model ()
 {
     clock_t now     (chronos_time_now ());
-    Flx16   elapsed (long (now - last_update));
+    float   elapsed (float(now - last_update));
 
     if (elapsed > 0)
     {
         last_update = now;
 
         // Make this a fraction of a second
-        elapsed /= Flx16 (1000);
+        elapsed /= float (1000);
 
         // How much acceleration so far?
         xvelocity += xacceleration * elapsed;
@@ -393,7 +393,7 @@ void Lander::update_model ()
             ypos = 0;
 
         if (xpos < 0)
-            xpos = Flx16 (Screen->width - LANDER_ISIZE);
+            xpos = float (Screen->width - LANDER_ISIZE);
         else if (xpos > Screen->width - LANDER_ISIZE)
             xpos = 0;
     }

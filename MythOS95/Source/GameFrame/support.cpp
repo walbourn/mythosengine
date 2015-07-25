@@ -285,24 +285,28 @@ LRESULT CALLBACK ClientWndProc (HWND hWnd, UINT message, WPARAM wParam, LPARAM l
         //컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴� Keyboard Events
         case WM_SYSKEYDOWN:
             if (Devs)
-                Devs->theKeyboard.wm_keydown (wParam);
+                Devs->theKeyboard->wm_keydown (wParam);
             return DefWindowProc (hWnd, message, wParam, lParam);
 
         case WM_KEYDOWN:
             if (Devs)
-                Devs->theKeyboard.wm_keydown (wParam);
+                Devs->theKeyboard->wm_keydown (wParam);
             return 0;
 
         case WM_SYSKEYUP:
         case WM_KEYUP:
             if (Devs)
-                Devs->theKeyboard.wm_keyup (wParam);
+                Devs->theKeyboard->wm_keyup (wParam);
             return 0;
 
         case WM_SETFOCUS:
+            if (Devs)
+                Devs->init();
+            return 0;
+
         case WM_KILLFOCUS:
             if (Devs)
-                Devs->theKeyboard.init();
+                Devs->uninit();
             return 0;
 
         //컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴 Application Events

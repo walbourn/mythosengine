@@ -257,7 +257,7 @@ void HeightToolDlg::DoDataExchange(CDataExchange* pDX)
                 pDX->Fail();
             }
             prev_value = m_height0;
-            heights[count] = Flx16(m_height0);
+            heights[count] = m_height0;
             istxt[count] = (m_tc0.GetCurSel() > pDoc->txtNumb) ? 0 : 1;
             tc[count] = m_tc0.GetCurSel()-1-(istxt[count] ? 0 : pDoc->txtNumb);
             count++;
@@ -279,7 +279,7 @@ void HeightToolDlg::DoDataExchange(CDataExchange* pDX)
                 pDX->Fail();
             }
             prev_value = m_height1;
-            heights[count] = Flx16(m_height1);
+            heights[count] = m_height1;
             istxt[count] = (m_tc1.GetCurSel() > pDoc->txtNumb) ? 0 : 1;
             tc[count] = m_tc1.GetCurSel()-1-(istxt[count] ? 0 : pDoc->txtNumb);
             count++;
@@ -301,7 +301,7 @@ void HeightToolDlg::DoDataExchange(CDataExchange* pDX)
                 pDX->Fail();
             }
             prev_value = m_height2;
-            heights[count] = Flx16(m_height2);
+            heights[count] = m_height2;
             istxt[count] = (m_tc2.GetCurSel() > pDoc->txtNumb) ? 0 : 1;
             tc[count] = m_tc2.GetCurSel()-1-(istxt[count] ? 0 : pDoc->txtNumb);
             count++;
@@ -323,7 +323,7 @@ void HeightToolDlg::DoDataExchange(CDataExchange* pDX)
                 pDX->Fail();
             }
             prev_value = m_height3;
-            heights[count] = Flx16(m_height3);
+            heights[count] = m_height3;
             istxt[count] = (m_tc3.GetCurSel() > pDoc->txtNumb) ? 0 : 1;
             tc[count] = m_tc3.GetCurSel()-1-(istxt[count] ? 0 : pDoc->txtNumb);
             count++;
@@ -345,7 +345,7 @@ void HeightToolDlg::DoDataExchange(CDataExchange* pDX)
                 pDX->Fail();
             }
             prev_value = m_height4;
-            heights[count] = Flx16(m_height4);
+            heights[count] = m_height4;
             istxt[count] = (m_tc4.GetCurSel() > pDoc->txtNumb) ? 0 : 1;
             tc[count] = m_tc4.GetCurSel()-1-(istxt[count] ? 0 : pDoc->txtNumb);
             count++;
@@ -367,7 +367,7 @@ void HeightToolDlg::DoDataExchange(CDataExchange* pDX)
                 pDX->Fail();
             }
             prev_value = m_height5;
-            heights[count] = Flx16(m_height5);
+            heights[count] = m_height5;
             istxt[count] = (m_tc5.GetCurSel() > pDoc->txtNumb) ? 0 : 1;
             tc[count] = m_tc5.GetCurSel()-1-(istxt[count] ? 0 : pDoc->txtNumb);
             count++;
@@ -389,7 +389,7 @@ void HeightToolDlg::DoDataExchange(CDataExchange* pDX)
                 pDX->Fail();
             }
             prev_value = m_height6;
-            heights[count] = Flx16(m_height6);
+            heights[count] = m_height6;
             istxt[count] = (m_tc6.GetCurSel() > pDoc->txtNumb) ? 0 : 1;
             tc[count] = m_tc6.GetCurSel()-1-(istxt[count] ? 0 : pDoc->txtNumb);
             count++;
@@ -411,7 +411,7 @@ void HeightToolDlg::DoDataExchange(CDataExchange* pDX)
                 pDX->Fail();
             }
             prev_value = m_height7;
-            heights[count] = Flx16(m_height7);
+            heights[count] = m_height7;
             istxt[count] = (m_tc7.GetCurSel() > pDoc->txtNumb) ? 0 : 1;
             tc[count] = m_tc7.GetCurSel()-1-(istxt[count] ? 0 : pDoc->txtNumb);
             count++;
@@ -1054,7 +1054,7 @@ void AngleToolDlg::DoDataExchange(CDataExchange* pDX)
                 pDX->Fail();
             }
             prev_value = m_angle0;
-            angles[count] = Flx16(m_angle0);
+            angles[count] = m_angle0;
             istxt[count] = (m_tc0.GetCurSel() > pDoc->txtNumb) ? 0 : 1;
             tc[count] = m_tc0.GetCurSel()-1-(istxt[count] ? 0 : pDoc->txtNumb);
             count++;
@@ -1076,7 +1076,7 @@ void AngleToolDlg::DoDataExchange(CDataExchange* pDX)
                 pDX->Fail();
             }
             prev_value = m_angle1;
-            angles[count] = Flx16(m_angle1);
+            angles[count] = m_angle1;
             istxt[count] = (m_tc1.GetCurSel() > pDoc->txtNumb) ? 0 : 1;
             tc[count] = m_tc1.GetCurSel()-1-(istxt[count] ? 0 : pDoc->txtNumb);
             count++;
@@ -1098,7 +1098,7 @@ void AngleToolDlg::DoDataExchange(CDataExchange* pDX)
                 pDX->Fail();
             }
             prev_value = m_angle2;
-            angles[count] = Flx16(m_angle2);
+            angles[count] = m_angle2;
             istxt[count] = (m_tc2.GetCurSel() > pDoc->txtNumb) ? 0 : 1;
             tc[count] = m_tc2.GetCurSel()-1-(istxt[count] ? 0 : pDoc->txtNumb);
             count++;
@@ -1120,7 +1120,7 @@ void AngleToolDlg::DoDataExchange(CDataExchange* pDX)
                 pDX->Fail();
             }
             prev_value = m_angle3;
-            angles[count] = Flx16(m_angle3);
+            angles[count] = m_angle3;
             istxt[count] = (m_tc3.GetCurSel() > pDoc->txtNumb) ? 0 : 1;
             tc[count] = m_tc3.GetCurSel()-1-(istxt[count] ? 0 : pDoc->txtNumb);
             count++;
@@ -1142,7 +1142,7 @@ void AngleToolDlg::DoDataExchange(CDataExchange* pDX)
                 pDX->Fail();
             }
             prev_value = m_angle4;
-            angles[count] = Flx16(m_angle4);
+            angles[count] = m_angle4;
             istxt[count] = (m_tc4.GetCurSel() > pDoc->txtNumb) ? 0 : 1;
             tc[count] = m_tc4.GetCurSel()-1-(istxt[count] ? 0 : pDoc->txtNumb);
             count++;
@@ -1164,7 +1164,7 @@ void AngleToolDlg::DoDataExchange(CDataExchange* pDX)
                 pDX->Fail();
             }
             prev_value = m_angle5;
-            angles[count] = Flx16(m_angle5);
+            angles[count] = m_angle5;
             istxt[count] = (m_tc5.GetCurSel() > pDoc->txtNumb) ? 0 : 1;
             tc[count] = m_tc5.GetCurSel()-1-(istxt[count] ? 0 : pDoc->txtNumb);
             count++;
@@ -1186,7 +1186,7 @@ void AngleToolDlg::DoDataExchange(CDataExchange* pDX)
                 pDX->Fail();
             }
             prev_value = m_angle6;
-            angles[count] = Flx16(m_angle6);
+            angles[count] = m_angle6;
             istxt[count] = (m_tc6.GetCurSel() > pDoc->txtNumb) ? 0 : 1;
             tc[count] = m_tc6.GetCurSel()-1-(istxt[count] ? 0 : pDoc->txtNumb);
             count++;
@@ -1208,7 +1208,7 @@ void AngleToolDlg::DoDataExchange(CDataExchange* pDX)
                 pDX->Fail();
             }
             prev_value = m_angle7;
-            angles[count] = Flx16(m_angle7);
+            angles[count] = m_angle7;
             istxt[count] = (m_tc7.GetCurSel() > pDoc->txtNumb) ? 0 : 1;
             tc[count] = m_tc7.GetCurSel()-1-(istxt[count] ? 0 : pDoc->txtNumb);
             count++;

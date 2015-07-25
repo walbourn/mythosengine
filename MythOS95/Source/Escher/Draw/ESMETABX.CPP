@@ -65,15 +65,15 @@ EschMetabox::EschMetabox() :
     for(int i=0; i < (sizeof(txt) / sizeof(EschTexture*)); i++)
         txt[i];
 
-    u[0] = Flx16(0.01);
-    u[1] = Flx16(0.90);
-    u[2] = Flx16(0.01);
-    u[3] = Flx16(0.90);
+    u[0] = float(0.01);
+    u[1] = float(0.90);
+    u[2] = float(0.01);
+    u[3] = float(0.90);
 
-    v[0] = Flx16(0.01);
-    v[1] = Flx16(0.01);
-    v[2] = Flx16(0.90);
-    v[3] = Flx16(0.90);
+    v[0] = float(0.01);
+    v[1] = float(0.01);
+    v[2] = float(0.90);
+    v[3] = float(0.90);
 }
 
 
@@ -207,7 +207,7 @@ void EschMetabox::draw()
         ec.verts[i].z = corner[i].z;
 
         vflags[i] = ESCH_VVERT_TRANSFORMED;
-        ec.verts[i].transform(&frame,(EschPoint*)&vpt[i]);
+        ec.verts[i].transform(&frame,(EschPoint*)(&vpt[i]));
         vpt[i].shade=mp;
     }
 
@@ -473,7 +473,7 @@ void EschMetabox::release()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // EschMetabox - set_top                                                    ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void EschMetabox::set_top(Flx16 ii, Flx16 ij, Flx16 ik, dword update)
+void EschMetabox::set_top(float ii, float ij, float ik, dword update)
 {
     EschVector v(ii,ij,ik);
     v.normalize();
@@ -488,13 +488,13 @@ void EschMetabox::set_top(Flx16 ii, Flx16 ij, Flx16 ik, dword update)
 //ÄÄÄ Fill in matrix for ortho rotation
 
     //ÄÄÄ Transform
-    world.orient.mtx[ESCH_MTX_A].flx = right.i.flx;
-    world.orient.mtx[ESCH_MTX_B].flx = right.j.flx;
-    world.orient.mtx[ESCH_MTX_C].flx = right.k.flx;
+    world.orient.mtx[ESCH_MTX_A] = right.i;
+    world.orient.mtx[ESCH_MTX_B] = right.j;
+    world.orient.mtx[ESCH_MTX_C] = right.k;
 
-    world.orient.mtx[ESCH_MTX_D].flx = v.i.flx;
-    world.orient.mtx[ESCH_MTX_E].flx = v.j.flx;
-    world.orient.mtx[ESCH_MTX_F].flx = v.k.flx;
+    world.orient.mtx[ESCH_MTX_D] = v.i;
+    world.orient.mtx[ESCH_MTX_E] = v.j;
+    world.orient.mtx[ESCH_MTX_F] = v.k;
 
     //ÄÄÄ Inverse Transform
     if (update & ESCH_UPD_INVERSE)
@@ -505,7 +505,7 @@ void EschMetabox::set_top(Flx16 ii, Flx16 ij, Flx16 ik, dword update)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // EschMetabox - set_direction                                              ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void EschMetabox::set_direction(Flx16 ii, Flx16 ij, Flx16 ik, dword update)
+void EschMetabox::set_direction(float ii, float ij, float ik, dword update)
 {
     world.dir.i = ii;
     world.dir.j = ij;
@@ -525,9 +525,9 @@ void EschMetabox::set_direction(Flx16 ii, Flx16 ij, Flx16 ik, dword update)
 //ÄÄÄ Fill in matrix for ortho rotation
 
     //ÄÄÄ Transform
-    world.orient.mtx[ESCH_MTX_A].flx = right.i.flx;
-    world.orient.mtx[ESCH_MTX_B].flx = right.j.flx;
-    world.orient.mtx[ESCH_MTX_C].flx = right.k.flx;
+    world.orient.mtx[ESCH_MTX_A] = right.i;
+    world.orient.mtx[ESCH_MTX_B] = right.j;
+    world.orient.mtx[ESCH_MTX_C] = right.k;
 
     world.orient.mtx[ESCH_MTX_G] = world.dir.i;
     world.orient.mtx[ESCH_MTX_H] = world.dir.j;
@@ -584,7 +584,7 @@ void EschMetabox::set_texture(EschTexture *t, int face)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // EschMetabox - create_cube                                                ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void EschMetabox::create_cube(Flx16 size)
+void EschMetabox::create_cube(float size)
 {
     flags |= ESCH_MBOX_TOP   
              | ESCH_MBOX_BOTTOM
@@ -593,7 +593,7 @@ void EschMetabox::create_cube(Flx16 size)
              | ESCH_MBOX_LEFT  
              | ESCH_MBOX_RIGHT;
 
-    Flx16 s = Flx16(size.flx>>1,0);
+    float s = size / 2;
 
     corner[0].x = -s;
     corner[0].y = s;

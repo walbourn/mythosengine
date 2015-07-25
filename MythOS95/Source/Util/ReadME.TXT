@@ -36,18 +36,22 @@
                                   _Status_
 
  Notes by: Chuck Walbourn
- Updated: September 3, 1996
+ Updated: July 31, 1997
 
  Changes for this release --------------------------------------------------
 
-    o Added some flush calls so that prompts are visible on command-line.
+    o Added support for new bitdepths.
 
+    o Added -2/-3 bytes/pixel conversion routines.
 
 
  Pending changes -----------------------------------------------------------
 
     o PIC will be expanded to a full Windows app for interactive recoloring
       and viewing of bitmaps.
+
+    o A new XTOOL MFC-based IFF file viewer is under development for quickly
+      viewing and editing the contents of IFF files.
 
 *** END OF FILE ***
 

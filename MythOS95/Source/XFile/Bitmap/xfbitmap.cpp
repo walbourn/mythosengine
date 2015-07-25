@@ -29,7 +29,7 @@
 //
 // xfbitmap.cpp
 //
-// Contains the code for the XFBitmap class
+// Contains the code for the XFBitmap container class
 //
 //อออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออ
 
@@ -147,16 +147,29 @@ xf_error_codes XFBitmap::create(ushort w, ushort h, byte _bpp, int clear)
 {
     release();
 
-    if ((_bpp != 1 && _bpp != 3)
-        || !w || !h)
+//ฤฤฤ Verify input
+    if (!w || !h)
         return XF_ERR_NOTSUPPORTED;
+
+    switch (_bpp)
+    {
+        case XFBM_BPP_MONO:
+        case XFBM_BPP_8BIT:
+        case XFBM_BPP_15BIT:
+        case XFBM_BPP_24BIT:
+        case XFBM_BPP_32BIT:
+            break;
+        default:
+            return XF_ERR_NOTSUPPORTED;
+    }
 
     width=w;
     height=h;
     bpp=_bpp;
 
+//ฤฤฤ Create palette if needed
     pal=0;
-    if (_bpp == 1)
+    if (_bpp == XFBM_BPP_8BIT)
     {
         palhandle = ivory_halloc(sizeof(dword)*256);
         if (!palhandle)
@@ -170,7 +183,12 @@ xf_error_codes XFBitmap::create(ushort w, ushort h, byte _bpp, int clear)
             memset(pal,0,sizeof(dword)*256);
     }
 
-    handle = ivory_halloc(w * h * _bpp);
+//ฤฤฤ Allocate bitmap and possibly clear it
+    ulong size = (_bpp == XFBM_BPP_MONO)
+                 ? (((w + 7) >> 3) * h)
+                 : (w * h * _bpp);
+
+    handle = ivory_halloc(size);
     if (!handle)
     {
         release();
@@ -185,7 +203,7 @@ xf_error_codes XFBitmap::create(ushort w, ushort h, byte _bpp, int clear)
     }
 
     if (clear)
-        memset(data,0,w * h * _bpp);
+        memset(data,0,size);
 
     return XF_ERR_NONE;
 }
@@ -197,7 +215,7 @@ xf_error_codes XFBitmap::create(ushort w, ushort h, byte _bpp, int clear)
 byte *XFBitmap::generate_mono(dword bgcolor)
 {
 //ฤฤฤ Verify input
-    if (bpp != 1 || !width || !height)
+    if (bpp != XFBM_BPP_8BIT || !width || !height)
         return 0;
 
 //ฤฤฤ Allocate result space

@@ -43,6 +43,8 @@
 //                                
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
+#include <float.h>
+
 #include "escher.hpp"
 #include "esfile.hpp"
 
@@ -263,39 +265,106 @@ esch_error_codes EschBuildMesh::save(XFParseIFF *iff, dword ctrlfl,
 //ÄÄÄ Write matrix
     if (ctrlfl & ESCH_MBLD_MATRIX)
     {
-        if (iff->write(iff->makeid('M','T','R','X'),
-                       &orient.orient.mtx,sizeof(orient.orient.mtx)))
-            return ESCH_ERR_FILEERROR;
+        if (ctrlfl & ESCH_MBLD_FIXED)
+        {
+            EschMatrixV1    v1;
+
+            for(int i=0; i < ESCH_MTX_NUM; i++)
+                v1.mtx[i] = long(orient.orient.mtx[i] * 65536.0f);
+
+            if (iff->write(iff->makeid('M','T','R','X'),
+                           &v1,sizeof(v1)))
+                return ESCH_ERR_FILEERROR;
+        }
+        else
+        {
+            if (iff->write(iff->makeid('M','T','R','1'),
+                           &orient.orient.mtx,sizeof(orient.orient.mtx)))
+                return ESCH_ERR_FILEERROR;
+        }
     }
 
 //ÄÄÄ Write extents
     if (ctrlfl & ESCH_MBLD_EXTENTS)
     {
-        EschFileMeshEXNT    exts;
-        memset(&exts,0,sizeof(exts));
+        if (ctrlfl & ESCH_MBLD_FIXED)
+        {
+            EschFileMeshEXNTV1  exts;
+            memset(&exts,0,sizeof(exts));
 
-        exts.cenx = sphere.center.x;
-        exts.ceny = sphere.center.y;
-        exts.cenz = sphere.center.z;
-        exts.extent_radius = sphere.radius;
-        exts.minx = box.mins[0];
-        exts.miny = box.mins[1];
-        exts.minz = box.mins[2];
-        exts.maxx = box.maxs[0];
-        exts.maxy = box.maxs[1];
-        exts.maxz = box.maxs[2];
+            exts.cenx = long(sphere.center.x * 65536.0f);
+            exts.ceny = long(sphere.center.y * 65536.0f);
+            exts.cenz = long(sphere.center.z * 65536.0f);
+            exts.extent_radius = long(sphere.radius * 65536.0f);
+            exts.minx = long(box.mins[0] * 65536.0f);
+            exts.miny = long(box.mins[1] * 65536.0f);
+            exts.minz = long(box.mins[2] * 65536.0f);
+            exts.maxx = long(box.maxs[0] * 65536.0f);
+            exts.maxy = long(box.maxs[1] * 65536.0f);
+            exts.maxz = long(box.maxs[2] * 65536.0f);
 
-        if (iff->write(iff->makeid('E','X','N','T'),
-                       &exts,sizeof(exts)))
-            return ESCH_ERR_FILEERROR;
+            if (iff->write(iff->makeid('E','X','N','T'),
+                           &exts,sizeof(exts)))
+                return ESCH_ERR_FILEERROR;
+        }
+        else
+        {
+            EschFileMeshEXNT    exts;
+            memset(&exts,0,sizeof(exts));
+
+            exts.cenx = sphere.center.x;
+            exts.ceny = sphere.center.y;
+            exts.cenz = sphere.center.z;
+            exts.extent_radius = sphere.radius;
+            exts.minx = box.mins[0];
+            exts.miny = box.mins[1];
+            exts.minz = box.mins[2];
+            exts.maxx = box.maxs[0];
+            exts.maxy = box.maxs[1];
+            exts.maxz = box.maxs[2];
+
+            if (iff->write(iff->makeid('E','X','N','1'),
+                           &exts,sizeof(exts)))
+                return ESCH_ERR_FILEERROR;
+        }
     }
 
 //ÄÄÄ Write heirarchy
 
 //ÄÄÄ Write verticies
-    if (iff->write(iff->makeid('V','E','R','T'),
-                   v,sizeof(EschVertex) * nverts))
-        return ESCH_ERR_FILEERROR;
+    if (ctrlfl & ESCH_MBLD_FIXED)
+    {
+        EschVertexV1 *vtemp = new EschVertexV1[nverts];
+        if (!vtemp)
+            return ESCH_ERR_NOMEMORY;
+
+        EschVertex *tptr = v;
+        EschVertexV1 *tmpptr = vtemp;
+        for(ulong i=0; i < nverts; i++, tptr++, tmpptr++)
+        {
+            tmpptr->x = long(tptr->x * 65536.0f);
+            tmpptr->y = long(tptr->y * 65536.0f);
+            tmpptr->z = long(tptr->z * 65536.0f);
+            tmpptr->normal.i = long(tptr->normal.i * 65536.0f);
+            tmpptr->normal.j = long(tptr->normal.j * 65536.0f);
+            tmpptr->normal.k = long(tptr->normal.k * 65536.0f);
+        }
+
+        if (iff->write(iff->makeid('V','E','R','T'),
+                       vtemp,sizeof(EschVertexV1) * nverts))
+        {
+            delete [] vtemp;
+            return ESCH_ERR_FILEERROR;
+        }
+
+        delete [] vtemp;
+    }
+    else
+    {
+        if (iff->write(iff->makeid('V','E','R','1'),
+                       v,sizeof(EschVertex) * nverts))
+            return ESCH_ERR_FILEERROR;
+    }
 
 //ÄÄÄ Write material names
     if (txt && ntxts)
@@ -321,9 +390,48 @@ esch_error_codes EschBuildMesh::save(XFParseIFF *iff, dword ctrlfl,
     }
 
 //ÄÄÄ Write faces
-    if (iff->write(iff->makeid('F','A','C','E'),
-                   f,sizeof(EschFace) * nfaces))
-        return ESCH_ERR_FILEERROR;
+    if (ctrlfl & ESCH_MBLD_FIXED)
+    {
+        EschFaceV1 *ftemp = new EschFaceV1[nfaces];
+        if (!ftemp)
+            return ESCH_ERR_NOMEMORY;
+
+        EschFace *tptr = f;
+        EschFaceV1 *tmpptr = ftemp;
+        for(ulong i=0; i < nfaces; i++, tptr++, tmpptr++)
+        {
+            tmpptr->flags = tptr->flags;
+            tmpptr->a = tptr->a;
+            tmpptr->b = tptr->b;
+            tmpptr->c = tptr->c;
+            tmpptr->txt = tptr->txt;
+            tmpptr->u[0] = long(tptr->u[0] * 65536.0f);
+            tmpptr->u[1] = long(tptr->u[1] * 65536.0f);
+            tmpptr->u[2] = long(tptr->u[2] * 65536.0f);
+            tmpptr->v[0] = long(tptr->v[0] * 65536.0f);
+            tmpptr->v[1] = long(tptr->v[1] * 65536.0f);
+            tmpptr->v[2] = long(tptr->v[2] * 65536.0f);
+            tmpptr->color = tptr->color;
+            tmpptr->normal.i = long(tptr->normal.i * 65536.0f);
+            tmpptr->normal.j = long(tptr->normal.j * 65536.0f);
+            tmpptr->normal.k = long(tptr->normal.k * 65536.0f);
+        }
+
+        if (iff->write(iff->makeid('F','A','C','E'),
+                       ftemp,sizeof(EschFaceV1) * nfaces))
+        {
+            delete [] ftemp;
+            return ESCH_ERR_FILEERROR;
+        }
+
+        delete [] ftemp;
+    }
+    else
+    {
+        if (iff->write(iff->makeid('F','A','C','1'),
+                       f,sizeof(EschFace) * nfaces))
+            return ESCH_ERR_FILEERROR;
+    }
 
 //ÄÄÄ Write materials
     if (txt && ntxts)
@@ -492,7 +600,7 @@ esch_error_codes EschBuildMesh::compute_extents(int optimal, int sph_only)
         EschPoint dia1(0,0,0);
         EschPoint dia2(0,0,0);
 
-        Flx16 maxd = -Flx16(0x7ffffff,0);
+        float maxd = 0.0;
         for(ulong i=0; i < nverts; i++)
         {
             EschVertex *vtx = &v[i];
@@ -501,7 +609,7 @@ esch_error_codes EschBuildMesh::compute_extents(int optimal, int sph_only)
             {
                 EschVertex *vtx2 = &v[j];
 
-                Flx16 dist = EschVector( vtx->x - vtx2->x,
+                float dist = EschVector( vtx->x - vtx2->x,
                                          vtx->y - vtx2->y,
                                          vtx->z - vtx2->z ).magnitude();
                 if (dist > maxd)
@@ -519,24 +627,24 @@ esch_error_codes EschBuildMesh::compute_extents(int optimal, int sph_only)
             }
         }
 
-        EschPoint center( Flx16((dia1.x + dia2.x).flx >> 1,0),
-                          Flx16((dia1.y + dia2.y).flx >> 1,0),
-                          Flx16((dia1.z + dia2.z).flx >> 1,0) );
+        EschPoint center( (dia1.x + dia2.x) / 2,
+                          (dia1.y + dia2.y) / 2,
+                          (dia1.z + dia2.z) / 2 );
 
         sphere.center = center;
-        sphere.radius = Flx16(maxd.flx >> 1,0);
+        sphere.radius = maxd / 2;
     }
     else
     {
-        EschPoint   xmin(Flx16(0x7ffffff,0),
-                         Flx16(0x7ffffff,0),
-                         Flx16(0x7ffffff,0));
+        EschPoint   xmin(FLT_MAX,
+                         FLT_MAX,
+                         FLT_MAX);
         EschPoint   ymin(xmin);
         EschPoint   zmin(xmin);
 
-        EschPoint   xmax(-Flx16(0x7ffffff,0),
-                         -Flx16(0x7ffffff,0),
-                         -Flx16(0x7ffffff,0));
+        EschPoint   xmax(-FLT_MAX,
+                         -FLT_MAX,
+                         -FLT_MAX);
         EschPoint   ymax(xmax);
         EschPoint   zmax(xmax);
     
@@ -586,13 +694,13 @@ esch_error_codes EschBuildMesh::compute_extents(int optimal, int sph_only)
         }
 
         // Compute spans
-        Flx16 xspan = (xmax.x - xmin.x)*(xmax.x - xmin.x)
+        float xspan = (xmax.x - xmin.x)*(xmax.x - xmin.x)
                       + (xmax.y - xmin.y)*(xmax.y - xmin.y)
                       + (xmax.z - xmin.z)*(xmax.z - xmin.z);
-        Flx16 yspan = (ymax.x - ymin.x)*(ymax.x - ymin.x)
+        float yspan = (ymax.x - ymin.x)*(ymax.x - ymin.x)
                       + (ymax.y - ymin.y)*(ymax.y - ymin.y)
                       + (ymax.z - ymin.z)*(ymax.z - ymin.z);
-        Flx16 zspan = (zmax.x - zmin.x)*(zmax.x - zmin.x)
+        float zspan = (zmax.x - zmin.x)*(zmax.x - zmin.x)
                       + (zmax.y - zmin.y)*(zmax.y - zmin.y)
                       + (zmax.z - zmin.z)*(zmax.z - zmin.z);
 
@@ -600,7 +708,7 @@ esch_error_codes EschBuildMesh::compute_extents(int optimal, int sph_only)
         EschPoint dia1(xmin);
         EschPoint dia2(xmax);
 
-        Flx16 maxspan = xspan;
+        float maxspan = xspan;
         if (yspan > maxspan)
         {
             maxspan = yspan;
@@ -612,11 +720,11 @@ esch_error_codes EschBuildMesh::compute_extents(int optimal, int sph_only)
         }
 
         // Compute values from initial diameter guess
-        EschPoint center( Flx16((dia1.x + dia2.x).flx >> 1,0),
-                          Flx16((dia1.y + dia2.y).flx >> 1,0),
-                          Flx16((dia1.z + dia2.z).flx >> 1,0) );
+        EschPoint center( (dia1.x + dia2.x) / 2,
+                          (dia1.y + dia2.y) / 2,
+                          (dia1.z + dia2.z) / 2 );
 
-        Flx16 radius = EschVector( (dia2.x - center.x),
+        float radius = EschVector( (dia2.x - center.x),
                                    (dia2.y - center.y),
                                    (dia2.z - center.z) ).magnitude();
 
@@ -625,16 +733,16 @@ esch_error_codes EschBuildMesh::compute_extents(int optimal, int sph_only)
         {
             EschVertex *vtx = &v[i];
 
-            Flx16 old_to_p = EschVector( vtx->x - center.x,
+            float old_to_p = EschVector( vtx->x - center.x,
                                          vtx->y - center.y,
                                          vtx->z - center.z ).magnitude();
             
             if (old_to_p > radius)
             {
                 // Calc new radius
-                radius = Flx16((radius + old_to_p).flx >> 1,0);
+                radius = (radius + old_to_p) / 2;
 
-                Flx16 old_to_new = old_to_p - radius;
+                float old_to_new = old_to_p - radius;
 
                 // Calc new center
                 center.x = (radius*center.x + old_to_new*vtx->x) / old_to_p;
@@ -652,27 +760,27 @@ esch_error_codes EschBuildMesh::compute_extents(int optimal, int sph_only)
     {
         box.mins[0] =
         box.mins[1] =
-        box.mins[2] = Flx16(0x7ffffff,0);
+        box.mins[2] = FLT_MAX;
 
         box.maxs[0] =
         box.maxs[1] =
-        box.maxs[2] = -Flx16(0x7ffffff,0);
+        box.maxs[2] = -FLT_MAX;
 
         for(ulong i=0; i < nverts; i++)
         {
-            Flx16 x = v[i].x;
+            float x = v[i].x;
             if (x < box.mins[0])
                 box.mins[0] = x;
             if (x > box.maxs[0])
                 box.maxs[0] = x;
 
-            Flx16 y = v[i].y;
+            float y = v[i].y;
             if (y < box.mins[1])
                 box.mins[1] = y;
             if (y > box.maxs[1])
                 box.maxs[1] = y;
 
-            Flx16 z = v[i].z;
+            float z = v[i].z;
             if (z < box.mins[2])
                 box.mins[2] = z;
             if (z > box.maxs[2])
@@ -720,8 +828,6 @@ esch_error_codes EschBuildMesh::compute_normals(int vtx_only)
 
 //ÄÄÄ Compute vertex normals
     {
-        ulong count=0;
-
         for(ulong i=0; i < nverts; i++)
         {
             EschVector  normal(0,0,0);
@@ -736,17 +842,10 @@ esch_error_codes EschBuildMesh::compute_normals(int vtx_only)
                     normal.i += face->normal.i;
                     normal.j += face->normal.j;
                     normal.k += face->normal.k;
-
-                    if (++count > 1024)
-                    {
-                        count=0;
-                        normal.normalize();
-                    }
                 }
             }
 
-            if (count)
-                normal.normalize();
+            normal.normalize();
 
             v[i].normal = normal;
         }

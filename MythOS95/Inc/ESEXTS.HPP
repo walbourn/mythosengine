@@ -61,20 +61,6 @@
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
-//                               Prototypes
-//
-//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-
-extern "C" long asm_esch_raySphere(const EschPoint *point, const EschVector *ray,
-                                   const EschPoint *center, const Flx16 radius);
-inline Flx16 esch_raySphere(const EschPoint *point, const EschVector *ray,
-                            const EschPoint *center, const Flx16 radius)
-{
-    return Flx16(asm_esch_raySphere(point,ray,center,radius),0);
-}
-
-//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-//
 //                                Classes
 //
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
@@ -89,7 +75,7 @@ public:
     // Public data members                                                  ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
     EschPoint       center;
-    Flx16           radius;
+    float           radius;
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Constructor/Destructors                                              ³
@@ -103,12 +89,9 @@ public:
     void draw(const EschFrameRef *fr, dword clr) const;
 
     int hit(const EschPoint *pt) const;
-    int hit(const EschPoint *pt, const Flx16 r) const;
+    int hit(const EschPoint *pt, const float r) const;
 
-    Flx16 ray(const EschPoint *pt, const EschVector *v) const
-    {
-        return esch_raySphere(pt,v,&center,radius);
-    }
+    float ray(const EschPoint *pt, const EschVector *v) const;
 };
 
 
@@ -121,8 +104,8 @@ public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Public data members                                                  ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-    Flx16           mins[3];
-    Flx16           maxs[3];
+    float           mins[3];
+    float           maxs[3];
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Constructor/Destructors                                              ³
@@ -136,9 +119,9 @@ public:
     void draw(const EschFrameRef *fr, dword clr) const;
 
     int hit(const EschPoint *pt) const;
-    int hit(const EschPoint *pt, const Flx16 r) const;
+    int hit(const EschPoint *pt, const float r) const;
 
-    Flx16 ray(const EschPoint *pt, const EschVector *v) const;
+    float ray(const EschPoint *pt, const EschVector *v) const;
 };
 
 #ifdef __WATCOMC__

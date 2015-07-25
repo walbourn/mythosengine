@@ -131,9 +131,9 @@ public:
 
     virtual int get_extents(EschSphereExtents *sp) const;
 
-    virtual Flx16 ray(const EschPoint *pt, const EschVector *v, int coarse=0) const;
+    virtual float ray(const EschPoint *pt, const EschVector *v, int coarse=0) const;
 
-    virtual int hit(const EschPoint *pt, const Flx16 r, int coarse=0) const;
+    virtual int hit(const EschPoint *pt, const float r, int coarse=0) const;
 
     virtual esch_error_codes pick(EschPicking *data) const;
     virtual esch_error_codes collide(EschCollision *data) const;
@@ -158,51 +158,51 @@ public:
         local.set_position(pt,update);
         if (update & ESCH_UPD_WORLD)  compute_world(update);
     }
-    void set_position(const Flx16 ix, const Flx16 iy, const Flx16 iz, dword update=ESCH_UPD_ALL)
+    void set_position(const float ix, const float iy, const float iz, dword update=ESCH_UPD_ALL)
     {
         local.set_position(ix,iy,iz,update);
         if (update & ESCH_UPD_WORLD)  compute_world(update);
     }
 
-    void rotatex(const Flx16 degrees, dword update=ESCH_UPD_ALL)
+    void rotatex(const float degrees, dword update=ESCH_UPD_ALL)
     {
         local.rotatex(degrees,update);
         if (update & ESCH_UPD_WORLD)  compute_world(update);
     }
-    void rotatey(const Flx16 degrees, dword update=ESCH_UPD_ALL)
+    void rotatey(const float degrees, dword update=ESCH_UPD_ALL)
     {
         local.rotatey(degrees,update);
         if (update & ESCH_UPD_WORLD)  compute_world(update);
     }
-    void rotatez(const Flx16 degrees, dword update=ESCH_UPD_ALL)
+    void rotatez(const float degrees, dword update=ESCH_UPD_ALL)
     {
         local.rotatez(degrees,update);
         if (update & ESCH_UPD_WORLD)  compute_world(update);
     }
 
-    void rotate(const EschVector *v, const Flx16 degrees, dword update=ESCH_UPD_ALL)
+    void rotate(const EschVector *v, const float degrees, dword update=ESCH_UPD_ALL)
     {
         local.rotate(v,degrees,update);
         if (update & ESCH_UPD_WORLD)  compute_world(update);
     }
 
-    void pitch(const Flx16 degrees, dword update=ESCH_UPD_ALL)
+    void pitch(const float degrees, dword update=ESCH_UPD_ALL)
     {
         local.pitch(degrees,update);
         if (update & ESCH_UPD_WORLD)  compute_world(update);
     }
-    void roll(const Flx16 degrees, dword update=ESCH_UPD_ALL)
+    void roll(const float degrees, dword update=ESCH_UPD_ALL)
     {
         local.roll(degrees,update);
         if (update & ESCH_UPD_WORLD)  compute_world(update);
     }
-    void yaw(const Flx16 degrees, dword update=ESCH_UPD_ALL)
+    void yaw(const float degrees, dword update=ESCH_UPD_ALL)
     {
         local.yaw(degrees,update);
         if (update & ESCH_UPD_WORLD)  compute_world(update);
     }
 
-    void translate(const Flx16 idx, const Flx16 idy, const Flx16 idz, dword update=ESCH_UPD_ALL)
+    void translate(const float idx, const float idy, const float idz, dword update=ESCH_UPD_ALL)
     {
         local.translate(idx,idy,idz,update);
         if (update & ESCH_UPD_WORLD)  compute_world(update);
@@ -213,7 +213,7 @@ public:
         if (update & ESCH_UPD_WORLD)  compute_world(update);
     }
 
-    void move(const Flx16 idx, const Flx16 idy, const Flx16 idz, dword update=ESCH_UPD_ALL)
+    void move(const float idx, const float idy, const float idz, dword update=ESCH_UPD_ALL)
     {
         local.move(idx,idy,idz,update);
         if (update & ESCH_UPD_WORLD)  compute_world(update);
@@ -224,7 +224,7 @@ public:
         if (update & ESCH_UPD_WORLD)  compute_world(update);
     }
 
-    void scale(const Flx16 is, dword update=ESCH_UPD_ALL)
+    void scale(const float is, dword update=ESCH_UPD_ALL)
     {
         local.scale(is,update);
         if (update & ESCH_UPD_WORLD)  compute_world(update);
@@ -274,8 +274,8 @@ public:
     word            b;
     word            c;
     word            txt;                    // Texture index (0 for none).
-    Flx16           u[3];                   // Texture map coords.
-    Flx16           v[3];
+    float           u[3];                   // Texture map coords.
+    float           v[3];
     dword           color;                  // Base-color
     EschVector      normal;                 // Face normal.
 
@@ -284,9 +284,9 @@ public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
     EschFace() {}
     EschFace(dword _f, word _a, word _b, word _c, word _txt,
-             Flx16 _u0, Flx16 _u1, Flx16 _u2,
-             Flx16 _v0, Flx16 _v1, Flx16 _v2,
-             dword _clr, Flx16 _i, Flx16 _j, Flx16 _k) :
+             float _u0, float _u1, float _u2,
+             float _v0, float _v1, float _v2,
+             dword _clr, float _i, float _j, float _k) :
         flags(_f),
         a(_a), b(_b), c(_c),
         txt(_txt),
@@ -322,6 +322,8 @@ public:
     }
 };
 
+
+class EschTexture;
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // EschMesh - Container object for a mesh of triangular faces.              ³
@@ -416,9 +418,9 @@ public:
 
     virtual void draw();
 
-    virtual Flx16 ray(const EschPoint *pt, const EschVector *v, int coarse=0) const;
+    virtual float ray(const EschPoint *pt, const EschVector *v, int coarse=0) const;
 
-    virtual int hit(const EschPoint *pt, const Flx16 r, int coarse=0) const;
+    virtual int hit(const EschPoint *pt, const float r, int coarse=0) const;
 
     virtual void animate();
 
@@ -463,7 +465,7 @@ int esch_rotate_check(ulong count,VngoPoint2 *pts);
 
 extern "C" void esch_clipdraw_face(ulong ind, dword ctrlfl=ESCH_CDF_CLIP);
 extern "C" void esch_clip_poly(VngoVbuffer *vport,VngoPoint *points, ulong *n_vertices);
-extern "C" void esch_zclip_poly(Flx16 hither, Flx16 yon,VngoPoint *points, ulong *n_vertices);
+extern "C" void esch_zclip_poly(float hither, float yon,VngoPoint *points, ulong *n_vertices);
 extern "C" void esch_clip_x_line(long p,VngoPoint *s, VngoPoint *f, VngoPoint *out_put);
 extern "C" void esch_clip_y_line(long p,VngoPoint *s, VngoPoint *f, VngoPoint *out_put);
 extern "C" void esch_clip_z_line(long p,VngoPoint *s, VngoPoint *f, VngoPoint *out_put);

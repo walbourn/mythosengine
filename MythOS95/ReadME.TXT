@@ -41,11 +41,11 @@
 
  ---------------------------------------------------------------------------
 
-                         *** Version 1.3 Release ***
+                         *** Version 1.4 Release ***
 
-                                March 11, 1997
+                                July 31, 1997
 
- This is the fourth full release of the MythOS collection.  Usage of this 
+ This is the fifth full release of the MythOS collection.  Usage of this 
  library is subject to your license agreement.  All materials herein 
  should be treated as confidential information.
 
@@ -56,7 +56,7 @@
  
  
  ---------------------------------------------------------------------------
- Installation
+ INSTALLATION
 
  Select Start/Run... and select 'setup.exe'.  Follow the instructions
  given in the setup program.
@@ -64,6 +64,8 @@
 
 
  ---------------------------------------------------------------------------
+ DIRECTORIES
+
  The following structure will be placed onto the destination drive:
 
  \MythOS95
@@ -71,8 +73,10 @@
  |
  +--Bin                             Utility programs
  |
- +--Lib                             Production Libraries
- |  +--Assert                       Assert version of libraries
+ +--Lib                             Production Libraries (multi-threaded)
+ |  +--Assert                       Assert version of libraries (multi-threaded)
+ |  +--Assert.NMT                   Assert version libraries (non multi-threaded)
+ |  +--NMT                          Production Libraries (non multi-threaded)
  |
  +--Source
     +--Bach                         Bach (Sound library)
@@ -99,11 +103,23 @@
     +--Escher                       Escher (3D Graphics System)
     |  +--Inc (source only)
     |  |
+    |  +--Build (source only)
+    |  |
+    |  +--Draw (source only)
+    |  |
+    |  +--Light (source only)
+    |  |
+    |  +--Math (source only)
+    |  |
+    |  +--Motion (source only)
+    |  |
+    |  +--Texture (source only)
+    |  |
+    |  +--Obj (source only)
+    |  |
     |  +--Edit
     |  |
     |  +--Tool
-    |  |
-    |  +--Obj (source only)
     |  |
     |  +--Test
     |  |  +--Obj
@@ -166,7 +182,15 @@
     |  |
     |  +--Obj (source only)
     |
-    +--System                       MythOS System (Full Source)
+    +--SimGine                      SimGine Framework (Source)
+    |  +--Inc
+    |  |
+    |  +--Obj
+    |  |
+    |  +--Test
+    |     +--Obj
+    |
+    +--System                       MythOS System (Source)
     |  +--Inc
     |  |
     |  +--Obj
@@ -189,12 +213,27 @@
     |  |
     |  +--16BPP (source only)
     |  |
-    |  +--PalTool
+    |  +--Boards (source only)
+    |  |
+    |  +--Screen (source only)
     |  |
     |  +--Obj (source only)
+    |  |
+    |  +--PalTool
+    |  |
+    |  +--Test
+    |     +--Obj
     |
     +--XFile                        XFile (File system)
        +--Inc (source only)
+       |
+       +--IFF (source only)
+       |
+       +--INI (source only)
+       |
+       +--IO (source only)
+       |
+       +--Bitmap (source only)
        |
        +--Obj (source only)
        |
@@ -216,23 +255,27 @@
 
  
  ---------------------------------------------------------------------------
- Release Notes
+ RELEASE NOTES
+
+    See the WHATSNEW.TXT for a list of major changes since the last
+    release.
 
     README.TXT's are in each of the library component directories with
     current status and work notes.
 
-    This version of MythOS was built with Microsoft Visual C++ v4.2.  The
+    This version of MythOS was built with Microsoft Visual C++ v5.0.  The
     MFC-based tools will therefore not compile with v2.x MSVC.
+
+    The .libs have been built using the multi-threaded version of the C
+    run-time library.  Non multi-threaded versions have been provided
+    for those who want to use the non multi-threaded run-time libraries.
 
     Note: The Escher Exporter must be built using Watcom v10 and the 
           Autodesk IPAS4 Toolkit, since it is a 3D Studio Plug-In module.
           It also uses the Autodesk Animation Support Libraries R2.0.
 
-    MFC Version 4.x support DLLs are installed as part of the MythOS
+    MFC Version 5.x support DLLs are installed as part of the MythOS
     installation procedure since they are required by the MFC-based tools.
-
-    The Van Gogh library documentation is not complete.  Van Gogh v2 is
-    under development and is being documented as part of this effort.
 
     The Bach library has been included with this release, although this
     is still under development.  The documentation is only a basic
@@ -246,7 +289,7 @@
   
     
  ---------------------------------------------------------------------------
- Problems/Bugs
+ PROBLEMS/BUGS
 
     If you have problems or find bugs working with MythOS, we would 
     like to hear about them.  E-mail or FAX is the preferred method 

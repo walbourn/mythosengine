@@ -26,11 +26,12 @@
 #
 #
 #      This standard make include file is setup for compling with 
-#      Microsoft Visual C/C++ v4.x and MASM 6.11.
+#      Microsoft Visual C/C++ v5.x and MASM 6.11.
 #
 #      It assumes that INCPATH is setup to be a PATH-style variable of
 #      include paths, DEBUG is set to NO, ASSERT, or YES for debug
-#      compilation
+#      compilation, and THREAD is set to NO or YES for multi-threaded
+#      vs. non multi-threaded run-time library use.
 #
 #      Also, the first target should be defined BEFORE this include.
 #
@@ -47,7 +48,7 @@
 #°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-# Microsoft Visual C/C++ v4.x                                              ³
+# Microsoft Visual C/C++ v5.x                                              ³
 #ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
 !message ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
@@ -60,6 +61,12 @@
 !message °°°°°°°°°°°°°°°°°°°°°°°°±² Debugging version ²±°°°°°°°°°°°°°°°°°°°°°°°°°
 !endif
 
+!if "$(THREAD)" != "YES"
+!message °°°°°°°°°°°°°°°°°°°°±² Non Multi-Threaded version ²±°°°°°°°°°°°°°°°°°°°°
+!else
+!message °°°°°°°°°°°°°°°°°°°°°°±² Multi-Threaded version ²±°°°°°°°°°°°°°°°°°°°°°°
+!endif
+
 MSVCDIR = $(MSVC)
 !if "$(INCLUDE)" == ""
 INCLUDE = $(MSVC)\include;$(MSVC)\mfc\include
@@ -69,6 +76,7 @@ INCLUDE = $(MSVC)\include;$(MSVC)\mfc\include
 LIBVARS = $(MSVC)\lib;$(MSVC)\mfc\lib
 !endif
 
+#ÄÄÄ Assembly
 ASM = ml
 !if "$(DEBUG)" == "NO"
 ASMOPTS = /nologo /c /DNDEBUG /Zp1 /coff
@@ -78,20 +86,29 @@ ASMOPTS = /nologo /c /Zp1 /coff
 ASMOPTS = /nologo /c /DDEBUG /Zi /Zp1 /Fl /coff
 !endif
 
+#ÄÄÄ C/C++
 CPP = cl
 CC = cl
 
-!if "$(DEBUG)" == "NO"
+!if ("$(DEBUG)" == "NO") && ("$(THREAD)" == "YES")
+CCOPTIONS = /c /G5 -Ze -Zp1 /MT /nologo -W3 /Ox -DNDEBUG /DWIN32 /D_WINDOWS
+!else if "$(DEBUG)" == "NO"
 CCOPTIONS = /c /G5 -Ze -Zp1 /nologo -W3 /Ox -DNDEBUG /DWIN32 /D_WINDOWS
+!else if ("$(DEBUG)" == "ASSERT") && ("$(THREAD)" == "YES")
+CCOPTIONS = /c /G5 -Ze -Zp1 /MT /nologo -W3 /Ox /DWIN32 /D_WINDOWS
 !else if "$(DEBUG)" == "ASSERT"
 CCOPTIONS = /c /G5 -Ze -Zp1 /nologo -W3 /Ox /DWIN32 /D_WINDOWS
+!else if "$(THREAD)" == "YES"
+CCOPTIONS = /c /G5 -Ze -Zp1 /MTd /nologo -W3 /Zi /Od -DDEBUG /DWIN32 /D_WINDOWS
 !else
 CCOPTIONS = /c /G5 -Ze -Zp1 /nologo -W3 /Zi /Od -DDEBUG /DWIN32 /D_WINDOWS
 !endif
 
+#ÄÄÄ Librarian
 LB = lib
 LBOPTS = /nologo
 
+#ÄÄÄ Link
 LINK = link
 !if ("$(DEBUG)" == "NO") || ("$(DEBUG)" == "ASSERT")
 LINKOPTS = /NOLOGO
@@ -99,6 +116,7 @@ LINKOPTS = /NOLOGO
 LINKOPTS = /DEBUG /NOLOGO
 !endif
 
+#ÄÄÄ Resource
 RC = rc
 RCOPTS = /r
 

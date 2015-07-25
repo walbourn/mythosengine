@@ -344,16 +344,16 @@ VNGError VngoVVport8::pixel(VngoPoint *pt, VngoColor24bit *rgb_val)
 }
 
 
-VNGError VngoVVport8::clip_pixel (VngoPoint2 *pt, VngoColor24bit *rgb_val, VngoRect *clip_rect)
+VNGError VngoVVport8::clip_pixel (VngoPointF *pt, VngoColor24bit *rgb_val, VngoRect *clip_rect)
 {
     VngoRect vprect(0,0,vbuff.width,vbuff.height);
 
     VngoPoint   tpt;
-    tpt.x = (pt->x + 0x8000) >> 16;
-    tpt.x = (pt->y + 0x8000) >> 16;
-    tpt.z = pt->z;
+    tpt.x = long(pt->x + .5f);
+    tpt.y = long(pt->y + .5f);
+    tpt.z = dword(pt->z * float(0xffffffff));
     tpt.clr = pt->clr;
-    tpt.shade = pt->shade;
+    tpt.shade = long(pt->shade);
 
     if (clip_rect)
     {
@@ -365,14 +365,14 @@ VNGError VngoVVport8::clip_pixel (VngoPoint2 *pt, VngoColor24bit *rgb_val, VngoR
     return VNGO_NO_ERROR;
 }
 
-VNGError VngoVVport8::pixel(VngoPoint2 *pt, VngoColor24bit *rgb_val)
+VNGError VngoVVport8::pixel(VngoPointF *pt, VngoColor24bit *rgb_val)
 {
     VngoPoint   tpt;
-    tpt.x = (pt->x + 0x8000) >> 16;
-    tpt.x = (pt->y + 0x8000) >> 16;
-    tpt.z = pt->z;
+    tpt.x = long(pt->x + .5f);
+    tpt.y = long(pt->y + .5f);
+    tpt.z = dword(pt->z * float(0xffffffff));
     tpt.clr = pt->clr;
-    tpt.shade = pt->shade;
+    tpt.shade = long(pt->shade);
 
     return pixel(&tpt,rgb_val);
 }
@@ -471,42 +471,42 @@ VNGError VngoVVport8::line(VngoPoint *p1,VngoPoint *p2, VngoColor24bit *rgb_val)
 }
 
 
-VNGError VngoVVport8::line(VngoPoint2 *p1,VngoPoint2 *p2, VngoColor24bit *rgb_val)
+VNGError VngoVVport8::line(VngoPointF *p1,VngoPointF *p2, VngoColor24bit *rgb_val)
 {
     VngoPoint tp1,tp2;
 
-    tp1.x = (p1->x + 0x8000) >> 16;
-    tp1.y = (p1->y + 0x8000) >> 16;
-    tp1.z = p1->z;
+    tp1.x = long(p1->x + .5f);
+    tp1.y = long(p1->y + .5f);
+    tp1.z = dword(p1->z * float(0xffffffff));
     tp1.clr = p1->clr;
-    tp1.shade = p1->clr;
+    tp1.shade = long(p1->shade);
 
-    tp2.x = (p2->x + 0x8000) >> 16;
-    tp2.y = (p2->y + 0x8000) >> 16;
-    tp2.z = p2->z;
+    tp2.x = long(p2->x + .5f);
+    tp2.y = long(p2->y + .5f);
+    tp2.z = dword(p2->z * float(0xffffffff));
     tp2.clr = p2->clr;
-    tp2.shade = p2->clr;
+    tp2.shade = long(p2->shade);
 
     return line(&tp1,&tp2,rgb_val);
 }
 
-VNGError VngoVVport8::clip_line(VngoPoint2 *p1,VngoPoint2 *p2,
+VNGError VngoVVport8::clip_line(VngoPointF *p1,VngoPointF *p2,
                                 VngoColor24bit *rgb_val,
                                 VngoRect *clip_rect)
 {
     VngoPoint tp1,tp2;
 
-    tp1.x = (p1->x + 0x8000) >> 16;
-    tp1.y = (p1->y + 0x8000) >> 16;
-    tp1.z = p1->z;
+    tp1.x = long(p1->x + .5f);
+    tp1.y = long(p1->y + .5f);
+    tp1.z = dword (p1->z * float(0xffffffff));
     tp1.clr = p1->clr;
-    tp1.shade = p1->clr;
+    tp1.shade = long(p1->shade);
 
-    tp2.x = (p2->x + 0x8000) >> 16;
-    tp2.y = (p2->y + 0x8000) >> 16;
-    tp2.z = p2->z;
+    tp2.x = long(p2->x + .5f);
+    tp2.y = long(p2->y + .5f);
+    tp2.z = dword (p2->z * float(0xffffffff));
     tp2.clr = p2->clr;
-    tp2.shade = p2->clr;
+    tp2.shade = long(p2->shade);
 
     return clip_line(&tp1,&tp2,rgb_val,clip_rect);
 }
@@ -719,41 +719,41 @@ VNGError VngoVVport8::gline(VngoPoint *p1,VngoPoint *p2)
     return VNGO_NO_ERROR;
 }
 
-VNGError VngoVVport8::gline(VngoPoint2 *p1,VngoPoint2 *p2)
+VNGError VngoVVport8::gline(VngoPointF *p1,VngoPointF *p2)
 {
     VngoPoint tp1,tp2;
 
-    tp1.x = (p1->x + 0x8000) >> 16;
-    tp1.y = (p1->y + 0x8000) >> 16;
-    tp1.z = p1->z;
+    tp1.x = long(p1->x + .5f);
+    tp1.y = long(p1->y + .5f);
+    tp1.z = dword(p1->z * float(0xffffffff));
     tp1.clr = p1->clr;
-    tp1.shade = p1->clr;
+    tp1.shade = long(p1->shade);
 
-    tp2.x = (p2->x + 0x8000) >> 16;
-    tp2.y = (p2->y + 0x8000) >> 16;
-    tp2.z = p2->z;
+    tp2.x = long(p2->x + .5f);
+    tp2.y = long(p2->y + .5f);
+    tp2.z = dword(p2->z * float(0xffffffff));
     tp2.clr = p2->clr;
-    tp2.shade = p2->clr;
+    tp2.shade = long(p2->shade);
 
     return gline(&tp1,&tp2);
 }
 
-VNGError VngoVVport8::clip_gline(VngoPoint2 *p1,VngoPoint2 *p2,
+VNGError VngoVVport8::clip_gline(VngoPointF *p1,VngoPointF *p2,
                                 VngoRect *clip_rect)
 {
     VngoPoint tp1,tp2;
 
-    tp1.x = (p1->x + 0x8000) >> 16;
-    tp1.y = (p1->y + 0x8000) >> 16;
-    tp1.z = p1->z;
+    tp1.x = long(p1->x + .5f);
+    tp1.y = long(p1->y + .5f);
+    tp1.z = dword(p1->z * float(0xffffffff));
     tp1.clr = p1->clr;
-    tp1.shade = p1->clr;
+    tp1.shade = long(p1->shade);
 
-    tp2.x = (p2->x + 0x8000) >> 16;
-    tp2.y = (p2->y + 0x8000) >> 16;
-    tp2.z = p2->z;
+    tp2.x = long(p2->x + .5f);
+    tp2.y = long(p2->y + .5f);
+    tp2.z = dword(p2->z * float(0xffffffff));
     tp2.clr = p2->clr;
-    tp2.shade = p2->clr;
+    tp2.shade = long(p2->shade);
 
     return clip_gline(&tp1,&tp2,clip_rect);
 }
@@ -967,40 +967,40 @@ VNGError VngoVVport8::clip_gline_persp(VngoPoint *p1,VngoPoint *p2,VngoRect *cli
     return VNGO_NOT_SUPPORTED;
 }
 
-VNGError VngoVVport8::gline_persp(VngoPoint2 *p1,VngoPoint2 *p2)
+VNGError VngoVVport8::gline_persp(VngoPointF *p1,VngoPointF *p2)
 {
     VngoPoint tp1,tp2;
 
-    tp1.x = (p1->x + 0x8000) >> 16;
-    tp1.y = (p1->y + 0x8000) >> 16;
-    tp1.z = p1->z;
+    tp1.x = long(p1->x + .5f);
+    tp1.y = long(p1->y + .5f);
+    tp1.z = dword(p1->z * float(0xffffffff));
     tp1.clr = p1->clr;
-    tp1.shade = p1->clr;
+    tp1.shade = long(p1->shade);
 
-    tp2.x = (p2->x + 0x8000) >> 16;
-    tp2.y = (p2->y + 0x8000) >> 16;
-    tp2.z = p2->z;
+    tp2.x = long(p2->x + .5f);
+    tp2.y = long(p2->y + .5f);
+    tp2.z = dword(p2->z * float(0xffffffff));
     tp2.clr = p2->clr;
-    tp2.shade = p2->clr;
+    tp2.shade = long(p2->shade);
 
     return gline_persp(&tp1,&tp2);
 }
 
-VNGError VngoVVport8::clip_gline_persp(VngoPoint2 *p1,VngoPoint2 *p2,VngoRect *clip_rect)
+VNGError VngoVVport8::clip_gline_persp(VngoPointF *p1,VngoPointF *p2,VngoRect *clip_rect)
 {
     VngoPoint tp1,tp2;
 
-    tp1.x = (p1->x + 0x8000) >> 16;
-    tp1.y = (p1->y + 0x8000) >> 16;
-    tp1.z = p1->z;
+    tp1.x = long(p1->x + .5f);
+    tp1.y = long(p1->y + .5f);
+    tp1.z = dword(p1->z * float(0xffffffff));
     tp1.clr = p1->clr;
-    tp1.shade = p1->clr;
+    tp1.shade = long(p1->shade);
 
-    tp2.x = (p2->x + 0x8000) >> 16;
-    tp2.y = (p2->y + 0x8000) >> 16;
-    tp2.z = p2->z;
+    tp2.x = long(p2->x + .5f);
+    tp2.y = long(p2->y + .5f);
+    tp2.z = dword(p2->z * float(0xffffffff));
     tp2.clr = p2->clr;
-    tp2.shade = p2->clr;
+    tp2.shade = long(p2->shade);
 
     return clip_gline_persp(&tp1,&tp2,clip_rect);
 }

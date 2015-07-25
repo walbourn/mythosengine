@@ -109,8 +109,10 @@ protected:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
     EschLight   *inext;
     EschLight   *iprev;
-    Flx16       _intensity;                 // Normal intensity
-    Flx16       _hintensity;                // Highlight intensity
+    float       _intensity;                 // Normal intensity
+    float       _hintensity;                // Highlight intensity
+
+    long        mp;                         // Palette-midpoint
 
     word        ltyp;                       // Run-time type
 
@@ -191,7 +193,7 @@ public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
     EschVectorLight(const char *fname=0, const char *lname=0);
     EschVectorLight(const EschVector *vec);
-    EschVectorLight(Flx16 ix, Flx16 iy, Flx16 iz);
+    EschVectorLight(float ix, float iy, float iz);
 
     virtual ~EschVectorLight() {};
 
@@ -210,7 +212,7 @@ public:
         dir = *d;
         dir.normalize();
     }
-    void set_direction(Flx16 ii, Flx16 ij, Flx16 ik)
+    void set_direction(float ii, float ij, float ik)
     {
         dir.i = ii;
         dir.j = ij;
@@ -218,17 +220,17 @@ public:
         dir.normalize();
     }
 
-    void rotatex(const Flx16 degrees)
+    void rotatex(const float degrees)
     {
         dir.rotatex(degrees);
         dir.normalize();
     }
-    void rotatey(const Flx16 degrees)
+    void rotatey(const float degrees)
     {
         dir.rotatey(degrees);
         dir.normalize();
     }
-    void rotatez(const Flx16 degrees)
+    void rotatez(const float degrees)
     {
         dir.rotatez(degrees);
         dir.normalize();
@@ -264,7 +266,7 @@ public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
     EschFastPointLight(const char *fname=0, const char *lname=0);
     EschFastPointLight(const EschPoint *pnt);
-    EschFastPointLight(Flx16 ix, Flx16 iy, Flx16 iz);
+    EschFastPointLight(float ix, float iy, float iz);
 
     virtual ~EschFastPointLight() {};
 
@@ -282,24 +284,24 @@ public:
     {
         pos = *pnt;
     }
-    void set_position(Flx16 ix, Flx16 iy, Flx16 iz)
+    void set_position(float ix, float iy, float iz)
     {
         pos.x = ix;
         pos.y = iy;
         pos.z = iz;
     }
 
-    void translate(Flx16 tx, Flx16 ty, Flx16 tz)
+    void translate(float tx, float ty, float tz)
     {
-        pos.x.flx = pos.x.flx + tx.flx;
-        pos.y.flx = pos.y.flx + ty.flx;
-        pos.z.flx = pos.z.flx + tz.flx;
+        pos.x = pos.x + tx;
+        pos.y = pos.y + ty;
+        pos.z = pos.z + tz;
     }
     void translate(const EschVector *v)
     {
-        pos.x.flx = pos.x.flx + v->i.flx;
-        pos.y.flx = pos.y.flx + v->j.flx;
-        pos.z.flx = pos.z.flx + v->k.flx;
+        pos.x = pos.x + v->i;
+        pos.y = pos.y + v->j;
+        pos.z = pos.z + v->k;
     }
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
@@ -319,15 +321,15 @@ public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Public data members                                                  ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-    Flx16       inner;
-    Flx16       outer;
+    float       inner;
+    float       outer;
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Constructor/Destructors                                              ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
     EschFastAttenLight(const char *fname=0, const char *lname=0);
-    EschFastAttenLight(const EschPoint *pnt, Flx16 i, Flx16 o);
-    EschFastAttenLight(Flx16 ix, Flx16 iy, Flx16 iz, Flx16 i, Flx16 o);
+    EschFastAttenLight(const EschPoint *pnt, float i, float o);
+    EschFastAttenLight(float ix, float iy, float iz, float i, float o);
 
     virtual ~EschFastAttenLight() {};
 
@@ -339,8 +341,8 @@ public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Utility routines.                                                    ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-    void set_inner(Flx16 i) { inner=i; }
-    void set_outer(Flx16 o) { outer=o; }
+    void set_inner(float i) { inner=i; }
+    void set_outer(float o) { outer=o; }
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // I/O routines.                                                        ³
@@ -360,8 +362,8 @@ public:
     // Public data members                                                  ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
     EschVector  dir;
-    Flx16       hotspot;
-    Flx16       falloff;
+    float       hotspot;
+    float       falloff;
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Constructor/Destructors                                              ³
@@ -369,10 +371,10 @@ public:
     EschFastSpotLight(const char *fname=0, const char *lname=0);
     EschFastSpotLight(const EschPoint *pnt,
                       const EschVector *d,
-                      Flx16 h, Flx16 f, Flx16 i=0, Flx16 o=0x1000);
-    EschFastSpotLight(Flx16 ix, Flx16 iy, Flx16 iz,
-                      Flx16 ii, Flx16 ij, Flx16 ik,
-                      Flx16 h, Flx16 f, Flx16 i=0, Flx16 o=0x1000);
+                      float h, float f, float i=0, float o=0x1000);
+    EschFastSpotLight(float ix, float iy, float iz,
+                      float ii, float ij, float ik,
+                      float h, float f, float i=0, float o=0x1000);
 
     virtual ~EschFastSpotLight() {};
 
@@ -389,7 +391,7 @@ public:
         dir = *d;
         dir.normalize();
     }
-    void set_direction(Flx16 ii, Flx16 ij, Flx16 ik)
+    void set_direction(float ii, float ij, float ik)
     {
         dir.i = ii;
         dir.j = ij;
@@ -397,24 +399,24 @@ public:
         dir.normalize();
     }
 
-    void rotatex(const Flx16 degrees)
+    void rotatex(const float degrees)
     {
         dir.rotatex(degrees);
         dir.normalize();
     }
-    void rotatey(const Flx16 degrees)
+    void rotatey(const float degrees)
     {
         dir.rotatey(degrees);
         dir.normalize();
     }
-    void rotatez(const Flx16 degrees)
+    void rotatez(const float degrees)
     {
         dir.rotatez(degrees);
         dir.normalize();
     }
 
-    void set_hotspot(Flx16 degrees) { hotspot=degrees; }
-    void set_falloff(Flx16 degrees) { falloff=degrees; }
+    void set_hotspot(float degrees) { hotspot=degrees; }
+    void set_falloff(float degrees) { falloff=degrees; }
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // I/O routines.                                                        ³
@@ -446,7 +448,7 @@ public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
     EschPointLight(const char *fname=0, const char *lname=0);
     EschPointLight(const EschPoint *pnt);
-    EschPointLight(Flx16 ix, Flx16 iy, Flx16 iz);
+    EschPointLight(float ix, float iy, float iz);
 
     virtual ~EschPointLight() {};
 
@@ -464,24 +466,24 @@ public:
     {
         pos = *pnt;
     }
-    void set_position(Flx16 ix, Flx16 iy, Flx16 iz)
+    void set_position(float ix, float iy, float iz)
     {
         pos.x = ix;
         pos.y = iy;
         pos.z = iz;
     }
 
-    void translate(Flx16 tx, Flx16 ty, Flx16 tz)
+    void translate(float tx, float ty, float tz)
     {
-        pos.x.flx = pos.x.flx + tx.flx;
-        pos.y.flx = pos.y.flx + ty.flx;
-        pos.z.flx = pos.z.flx + tz.flx;
+        pos.x = pos.x + tx;
+        pos.y = pos.y + ty;
+        pos.z = pos.z + tz;
     }
     void translate(const EschVector *v)
     {
-        pos.x.flx = pos.x.flx + v->i.flx;
-        pos.y.flx = pos.y.flx + v->j.flx;
-        pos.z.flx = pos.z.flx + v->k.flx;
+        pos.x = pos.x + v->i;
+        pos.y = pos.y + v->j;
+        pos.z = pos.z + v->k;
     }
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
@@ -501,24 +503,24 @@ protected:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Protected data members                                               ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-    Flx16       tinner;                     // Setup data
-    Flx16       touter;
-    Flx16       arate;
-    Flx16       harate;
+    float       tinner;                     // Setup data
+    float       touter;
+    float       arate;
+    float       harate;
 
 public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Public data members                                                  ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-    Flx16       inner;
-    Flx16       outer;
+    float       inner;
+    float       outer;
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Constructor/Destructors                                              ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
     EschAttenLight(const char *fname=0, const char *lname=0);
-    EschAttenLight(const EschPoint *pnt, Flx16 i, Flx16 o);
-    EschAttenLight(Flx16 ix, Flx16 iy, Flx16 iz, Flx16 i, Flx16 o);
+    EschAttenLight(const EschPoint *pnt, float i, float o);
+    EschAttenLight(float ix, float iy, float iz, float i, float o);
 
     virtual ~EschAttenLight() {};
 
@@ -532,8 +534,8 @@ public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Utility routines.                                                    ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-    void set_inner(Flx16 i) { inner=i; }
-    void set_outer(Flx16 o) { outer=o; }
+    void set_inner(float i) { inner=i; }
+    void set_outer(float o) { outer=o; }
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // I/O routines.                                                        ³
@@ -553,18 +555,18 @@ protected:
     // Protected data members                                               ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
     EschVector  tdir;                       // Setup data
-    Flx16       hotcos;
-    Flx16       fallcos;
-    Flx16       frate;
-    Flx16       hfrate;
+    float       hotcos;
+    float       fallcos;
+    float       frate;
+    float       hfrate;
 
 public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Public data members                                                  ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
     EschVector  dir;
-    Flx16       hotspot;
-    Flx16       falloff;
+    float       hotspot;
+    float       falloff;
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Constructor/Destructors                                              ³
@@ -572,10 +574,10 @@ public:
     EschSpotLight(const char *fname=0, const char *lname=0);
     EschSpotLight(const EschPoint *pnt,
                   const EschVector *d,
-                  Flx16 h, Flx16 f, Flx16 i=0, Flx16 o=0x1000);
-    EschSpotLight(Flx16 ix, Flx16 iy, Flx16 iz,
-                  Flx16 ii, Flx16 ij, Flx16 ik,
-                  Flx16 h, Flx16 f, Flx16 i=0, Flx16 o=0x1000);
+                  float h, float f, float i=0, float o=0x1000);
+    EschSpotLight(float ix, float iy, float iz,
+                  float ii, float ij, float ik,
+                  float h, float f, float i=0, float o=0x1000);
 
     virtual ~EschSpotLight() {};
 
@@ -594,7 +596,7 @@ public:
         dir = *d;
         dir.normalize();
     }
-    void set_direction(Flx16 ii, Flx16 ij, Flx16 ik)
+    void set_direction(float ii, float ij, float ik)
     {
         dir.i = ii;
         dir.j = ij;
@@ -602,24 +604,24 @@ public:
         dir.normalize();
     }
 
-    void rotatex(const Flx16 degrees)
+    void rotatex(const float degrees)
     {
         dir.rotatex(degrees);
         dir.normalize();
     }
-    void rotatey(const Flx16 degrees)
+    void rotatey(const float degrees)
     {
         dir.rotatey(degrees);
         dir.normalize();
     }
-    void rotatez(const Flx16 degrees)
+    void rotatez(const float degrees)
     {
         dir.rotatez(degrees);
         dir.normalize();
     }
 
-    void set_hotspot(Flx16 degrees) { hotspot=degrees; }
-    void set_falloff(Flx16 degrees) { falloff=degrees; }
+    void set_hotspot(float degrees) { hotspot=degrees; }
+    void set_falloff(float degrees) { falloff=degrees; }
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // I/O routines.                                                        ³

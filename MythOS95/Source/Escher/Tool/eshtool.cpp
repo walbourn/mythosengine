@@ -60,7 +60,7 @@
 //
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
-#define VERSION "1.10"
+#define VERSION "2.00"
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
@@ -94,7 +94,7 @@ ToolApp theApp;
 MythosSystem    *MythOS=NULL;
 
 dword           AutoRotate=0;
-Flx16           AutoRotateSpeed=Flx16(AUTOROTATE_SLOW);
+float           AutoRotateSpeed=float(AUTOROTATE_SLOW);
 Chronometer     Clock;
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±

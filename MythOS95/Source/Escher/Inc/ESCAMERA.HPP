@@ -103,18 +103,18 @@ public:
     EschVector      top;                    // Top of head vector
     dword           flags;                  // Camera flags
     VngoVport       *vport;                 // VanGogh viewport for output
-    Flx16           xscalar;                // 2D scale factor in X
-    Flx16           yscalar;                // 2D scale factor in Y
-    Flx16           xsize;                  // Projection-plane size in X
-    Flx16           ysize;                  // Projection-plane size in Y
-    Flx16           aspect_ratio;           // Aspect ratio (X:Y)
-    Flx16           factor;                 // User scale factor
-    Flx16           hither;                 // Distance to near clip plane
-    Flx16           yon;                    // Distance to far clip plane
-    Flx16           fov;                    // Field of view (degrees)
+    float           xscalar;                // 2D scale factor in X
+    float           yscalar;                // 2D scale factor in Y
+    float           xsize;                  // Projection-plane size in X
+    float           ysize;                  // Projection-plane size in Y
+    float           aspect_ratio;           // Aspect ratio (X:Y)
+    float           factor;                 // User scale factor
+    float           hither;                 // Distance to near clip plane
+    float           yon;                    // Distance to far clip plane
+    float           fov;                    // Field of view (degrees)
     dword           bcolor;                 // Background color for clear
-    Flx16           radius_factor;          // Extent radius factor
-    Flx16           z_factor;               // scale to appropriate z range
+    float           radius_factor;          // Extent radius factor
+    float           z_factor;               // scale to appropriate z range
     EschPlane       frustrum[6];            // View frustrum planes
     char            name[ESCH_MAX_NAME];    // Camera name
 
@@ -215,59 +215,59 @@ public:
     // Utility functions.                                                   ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
     void set_top(const EschVector *t, dword update=ESCH_UPD_ALL);
-    void set_top(const Flx16 ii, const Flx16 ij, const Flx16 ik,
+    void set_top(const float ii, const float ij, const float ik,
                  dword update=ESCH_UPD_ALL);
 
     void set_dir(const EschVector *d, dword update=ESCH_UPD_ALL);
-    void set_dir(const Flx16 ii, const Flx16 ij, const Flx16 ik,
+    void set_dir(const float ii, const float ij, const float ik,
                  dword update=ESCH_UPD_ALL);
 
     void set_vects(const EschVector *t,const EschVector *d,
                    dword update=ESCH_UPD_ALL);
-    void set_vects(const Flx16 ti, const Flx16 tj, const Flx16 tk,
-                   const Flx16 di, const Flx16 dj, const Flx16 dk,
+    void set_vects(const float ti, const float tj, const float tk,
+                   const float di, const float dj, const float dk,
                    dword update=ESCH_UPD_ALL);
 
     void get_position(EschPoint *pt) const
     {
-        pt->x.flx = eye.orient.mtx[ESCH_MTX_J].flx;
-        pt->y.flx = eye.orient.mtx[ESCH_MTX_K].flx;
-        pt->z.flx = eye.orient.mtx[ESCH_MTX_L].flx;
+        pt->x = eye.orient.mtx[ESCH_MTX_J];
+        pt->y = eye.orient.mtx[ESCH_MTX_K];
+        pt->z = eye.orient.mtx[ESCH_MTX_L];
     }
 
     void set_position(const EschPoint *pt, dword update=ESCH_UPD_ALL)
          { eye.set_position(pt,update); }
-    void set_position(const Flx16 ix, const Flx16 iy, const Flx16 iz, dword update=ESCH_UPD_ALL)
+    void set_position(const float ix, const float iy, const float iz, dword update=ESCH_UPD_ALL)
          { eye.set_position(ix,iy,iz,update); }
 
     void set_lookat(const EschPoint *pt, dword update=ESCH_UPD_ALL);
-    void set_lookat(const Flx16 ix, const Flx16 iy, const Flx16 iz,
+    void set_lookat(const float ix, const float iy, const float iz,
                     dword update=ESCH_UPD_ALL);
 
-    void rotatex(const Flx16 degrees, dword update=ESCH_UPD_ALL);
-    void rotatey(const Flx16 degrees, dword update=ESCH_UPD_ALL);
-    void rotatez(const Flx16 degrees, dword update=ESCH_UPD_ALL);
+    void rotatex(const float degrees, dword update=ESCH_UPD_ALL);
+    void rotatey(const float degrees, dword update=ESCH_UPD_ALL);
+    void rotatez(const float degrees, dword update=ESCH_UPD_ALL);
 
-    void pitch(const Flx16 degrees, dword update=ESCH_UPD_ALL);
-    void yaw(const Flx16 degrees, dword update=ESCH_UPD_ALL);
-    void roll(const Flx16 degrees, dword update=ESCH_UPD_ALL);
+    void pitch(const float degrees, dword update=ESCH_UPD_ALL);
+    void yaw(const float degrees, dword update=ESCH_UPD_ALL);
+    void roll(const float degrees, dword update=ESCH_UPD_ALL);
 
     void translate(const EschVector *v, dword update=ESCH_UPD_ALL)
          { eye.translate(v->i,v->j,v->k,update); }
-    void translate(const Flx16 ii, const Flx16 ij, const Flx16 ik,
+    void translate(const float ii, const float ij, const float ik,
                    dword update=ESCH_UPD_ALL)
          { eye.translate(ii,ij,ik,update); }
 
     void move(const EschVector *v, dword update=ESCH_UPD_ALL)
          { eye.move(v->i,v->j,v->k,update); }
-    void move(const Flx16 ii, const Flx16 ij, const Flx16 ik,
+    void move(const float ii, const float ij, const float ik,
               dword update=ESCH_UPD_ALL)
          { eye.move(ii,ij,ik,update); }
 
     void orthogonalize(dword update=ESCH_UPD_ALL);
     void orthogonalize_top(dword update=ESCH_UPD_ALL);
 
-    void set_factor(const Flx16 f, dword update=ESCH_UPD_ALL)
+    void set_factor(const float f, dword update=ESCH_UPD_ALL)
     {
         factor=f;
         if (update & ESCH_UPD_SCALAR)
@@ -277,7 +277,7 @@ public:
         }
     }
 
-    void zoom(const Flx16 f, dword update=ESCH_UPD_ALL)
+    void zoom(const float f, dword update=ESCH_UPD_ALL)
     {
         factor=factor * f;
         if (update & ESCH_UPD_SCALAR)
@@ -287,7 +287,7 @@ public:
         }
     }
 
-    void set_fov(const Flx16 f, dword update=ESCH_UPD_ALL)
+    void set_fov(const float f, dword update=ESCH_UPD_ALL)
     {
         fov=f;
         if (update & ESCH_UPD_SCALAR)
@@ -297,7 +297,7 @@ public:
         }
     }
 
-    void set_hither(const Flx16 h, dword update=ESCH_UPD_ALL)
+    void set_hither(const float h, dword update=ESCH_UPD_ALL)
     {
         hither=h;
         if (update & ESCH_UPD_SCALAR)
@@ -307,7 +307,7 @@ public:
         }
     }
 
-    void set_yon(const Flx16 y, dword update=ESCH_UPD_ALL) 
+    void set_yon(const float y, dword update=ESCH_UPD_ALL) 
     { 
         yon=y; 
         if (update & ESCH_UPD_SCALAR)
@@ -321,7 +321,7 @@ public:
 
     void set_flags(const dword f) { flags=f; }
 
-    void set_aspect_ratio(const Flx16 ar, dword update=ESCH_UPD_ALL)
+    void set_aspect_ratio(const float ar, dword update=ESCH_UPD_ALL)
     {
         aspect_ratio=ar;
         if (update & ESCH_UPD_SCALAR)
@@ -398,12 +398,12 @@ public:
     int set_haze(VngoShadePal *hzp, int owns=1, long startz=0);
     esch_error_codes create_haze(ushort levels,
                                  ushort slevel,
-                                 ushort blevel, Flx16 bpercent,
+                                 ushort blevel, float bpercent,
                                  VngoColor24bit tcolor);
 
     int set_gradient(VngoShadePal *grdp, int owns=1);
     esch_error_codes create_gradient(ushort levels,
-                                     ushort blevel, Flx16 bpercent,
+                                     ushort blevel, float bpercent,
                                      VngoColor24bit color1,
                                      VngoColor24bit color2);
 };

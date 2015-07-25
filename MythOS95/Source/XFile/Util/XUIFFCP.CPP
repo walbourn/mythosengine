@@ -1230,6 +1230,7 @@ STATIC void bitmap(void)
 {
     int err;
     ulong i;
+    char    fname[256];
 
     YY_esc_allowed=0;
     match(YY_BITMAP);
@@ -1238,11 +1239,13 @@ STATIC void bitmap(void)
     if (CurrentToken !=  YY_STRING)
         error("Invalid bitmap command, expecting filename of bitmap file to insert");
 
+    strncpy(fname,yytext,sizeof(fname));
+
     if (!(Flags & FLAGS_QUIET))
     {
         for(i=0; i < IFF->depth; i++)
             cout << "  ";
-        cout << "   inserting bitmap '" << yytext << "' as form ";
+        cout << "   inserting bitmap '" << fname << "' as form ";
         
         if (Flags & FLAGS_XEB)
         {
@@ -1258,7 +1261,7 @@ STATIC void bitmap(void)
     char buff[4];
 
     memset(buff,0,sizeof(buff));
-    for(const char *c=yytext + strlen(yytext) - 1; *c; c--)
+    for(const char *c=fname + strlen(fname) - 1; *c; c--)
     {
         if (*c == '.')
         {
@@ -1275,9 +1278,9 @@ STATIC void bitmap(void)
     {
         XFParseBMP  bmp(&bm);
 
-        if (bmp.nameread(yytext))
+        if (bmp.nameread(fname))
         {
-            cout << " Error inserting bitmap '" << yytext << "'\n";
+            cout << " Error inserting bitmap '" << fname << "'\n";
             error("Failed to read file as Windows BMP format");
         }
     }
@@ -1285,9 +1288,9 @@ STATIC void bitmap(void)
     {
         XFParsePCX  pcx(&bm);
 
-        if (pcx.nameread(yytext))
+        if (pcx.nameread(fname))
         {
-            cout << " Error inserting bitmap '" << yytext << "'\n";
+            cout << " Error inserting bitmap '" << fname << "'\n";
             error("Failed to read file as PCX format");
         }
     }
@@ -1295,9 +1298,9 @@ STATIC void bitmap(void)
     {
         XFParseLBM  lbm(&bm);
 
-        if (lbm.nameread(yytext))
+        if (lbm.nameread(fname))
         {
-            cout << " Error inserting bitmap '" << yytext << "'\n";
+            cout << " Error inserting bitmap '" << fname << "'\n";
             error("Failed to read file as LBM format");
         }
     }
@@ -1305,9 +1308,9 @@ STATIC void bitmap(void)
     {
         XFParseCEL  cel(&bm);
 
-        if (cel.nameread(yytext))
+        if (cel.nameread(fname))
         {
-            cout << " Error inserting bitmap '" << yytext << "'\n";
+            cout << " Error inserting bitmap '" << fname << "'\n";
             error("Failed to read file as CEL format");
         }
     }
@@ -1315,9 +1318,9 @@ STATIC void bitmap(void)
     {
         XFParseTGA  tga(&bm);
 
-        if (tga.nameread(yytext))
+        if (tga.nameread(fname))
         {
-            cout << " Error inserting bitmap '" << yytext << "'\n";
+            cout << " Error inserting bitmap '" << fname << "'\n";
             error("Failed to read file as TGA format");
         }
     }
@@ -1325,15 +1328,15 @@ STATIC void bitmap(void)
     {
         XFParseXEB  xeb(&bm);
 
-        if (xeb.nameread(yytext))
+        if (xeb.nameread(fname))
         {
-            cout << " Error inserting bitmap '" << yytext << "'\n";
+            cout << " Error inserting bitmap '" << fname << "'\n";
             error("Failed to read file as XEB format");
         }
     }
     else
     {
-        cout << " Error inserting bitmap '" << yytext << "'\n";
+        cout << " Error inserting bitmap '" << fname << "'\n";
         error("Unknown bitmap extension");
     }
 
@@ -1346,6 +1349,99 @@ STATIC void bitmap(void)
              << "  " << (int)bm.bpp << " bytes/pixel\n";
     }
 
+    match(YY_STRING);
+
+    if (CurrentToken == YY_BPP)
+    {
+        match(YY_BPP);
+
+        if (CurrentToken != YY_INTEGER)
+            error("Integer expected after BPP");
+
+        if (YY_integer != bm.bpp)
+        {
+            if (bm.bpp == 3 && YY_integer == 2)
+            {
+                if (!(Flags & FLAGS_QUIET))
+                {
+                    for(i=0; i < IFF->depth; i++)
+                        cout << "  ";
+                    cout << "      converted to 2 bytes/pixel\n";
+                }
+
+                IvoryHandle nhandle = ivory_halloc(bm.width * bm.height * 2);
+                if (!nhandle)
+                    error("Out of Memory");
+
+                byte *nptr = (byte*) ivory_hlock(nhandle);
+                if (!nptr)
+                    error("Lock failed");
+
+                byte *sptr=bm.data;
+                byte *dptr=nptr;
+                for(int i=0; i < bm.width*bm.height; i++)
+                {
+                    word pcolor = (((*sptr) >> 3) << 10)
+                                    + (((*(sptr+1)) >> 3) << 5)
+                                    + ((*(sptr+2)) >> 3);
+
+                    *(dptr++) = byte(pcolor & 0xff);
+                    *(dptr++) = byte((pcolor & 0xff00) >> 8);
+
+                    sptr += 3;
+                }
+
+                ivory_hfree(&bm.handle);
+
+                bm.handle = nhandle;
+                bm.data = nptr;
+                bm.bpp = 2;
+            }
+            else if (bm.bpp == 2 && YY_integer == 3)
+            {
+                if (!(Flags & FLAGS_QUIET))
+                {
+                    for(i=0; i < IFF->depth; i++)
+                        cout << "  ";
+                    cout << "      converted to 3 bytes/pixel\n";
+                }
+
+                IvoryHandle nhandle = ivory_halloc(bm.width * bm.height * 3);
+                if (!nhandle)
+                    error("Out Of Memory");
+
+                byte *nptr = (byte*) ivory_hlock(nhandle);
+                if (!nptr)
+                    error("Lock failed");
+
+                byte *sptr=bm.data;
+                byte *dptr=nptr;
+                for(int i=0; i < bm.width*bm.height; i++)
+                {
+                    word pcolor = *sptr | (*(sptr+1) << 8);
+
+                    sptr += 2;
+
+                    *(dptr++) = (pcolor >> 7) & 0xf8;
+                    *(dptr++) = (pcolor >> 2) & 0xf8;
+                    *(dptr++) = (pcolor << 3) & 0xf8;
+                }
+
+                ivory_hfree(&bm.handle);
+
+                bm.handle = nhandle;
+                bm.data = nptr;
+                bm.bpp = 3;
+            }
+            else
+            {
+                error("Specified bpp conversion not supported");
+            }
+        }
+
+        match(YY_INTEGER);
+    }
+
 //ÄÄÄ Insert into current IFF
     if (Flags & FLAGS_XEB)
     {
@@ -1354,12 +1450,12 @@ STATIC void bitmap(void)
         err=xeb.write(IFF);
         if (err == XF_ERR_NOTSUPPORTED)
         {
-            cout << " Error inserting bitmap '" << yytext << "'\n";
+            cout << " Error inserting bitmap '" << fname << "'\n";
             error("Image format not supported for write by XFile as XEB");
         }
         else if (err)
         {
-            cout << " Error inserting bitmap '" << yytext << "'\n";
+            cout << " Error inserting bitmap '" << fname << "'\n";
             error("Failed to insert image as XEB");
         }
     }
@@ -1370,17 +1466,15 @@ STATIC void bitmap(void)
         err=lbm.write(IFF);
         if (err == XF_ERR_NOTSUPPORTED)
         {
-            cout << " Error inserting bitmap '" << yytext << "'\n";
+            cout << " Error inserting bitmap '" << fname << "'\n";
             error("Image format not supported for write by XFile as LBM");
         }
         else if (err)
         {
-            cout << " Error inserting bitmap '" << yytext << "'\n";
+            cout << " Error inserting bitmap '" << fname << "'\n";
             error("Failed to insert image as LBM");
         }
     }
-
-    match(YY_STRING);
 }
 
 

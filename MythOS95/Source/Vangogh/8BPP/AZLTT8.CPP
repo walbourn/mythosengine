@@ -25,10 +25,10 @@
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
-// zlttri8.cpp
+// zlttr8.cpp
 //
-//     The 8bpp specific flat shaded linear texture mapped triangle code for
-//     the VanGogh Draw library.
+//     The flat shaded linearly texture mapped triangle code
+//     for the VanGogh Draw library.
 //
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ Revision History ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
@@ -39,6 +39,7 @@
 //
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 #include <assert.h>
+#include <string.h>
 
 #include "debug.h"
 #include "portable.h"
@@ -63,8 +64,9 @@
 //
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
-extern "C" void vngo_zttriangle8 (VngoVbuffer *vb,VngoPoint2 *pts,
-                                  VngoTextureInfo *tex);
+extern "C" void scan_zlsolid_edge(VngoPoint2 *edge,VngoPoint2 *p1, VngoPoint2 *p2);
+extern "C" void draw_azlhlines(VngoTriangle *tri,long alpha);
+extern "C" void vngo_zttriangle8 (VngoVbuffer *vb,VngoPoint2 *pts,VngoTexture3D *tex);
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
@@ -72,41 +74,35 @@ extern "C" void vngo_zttriangle8 (VngoVbuffer *vb,VngoPoint2 *pts,
 //
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 
+extern long AlphaMatrix[4][4];
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
 //                                 Code
 //
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-//  void vngo_zttriangle8(VngoVbuffer *vb,VngoPoint2 *pts,
-//                       VngoTextureInfo *tex);
-//      This routine draws a linearly texture mapped flat shaded triangle,
-//      making the assumption that it has already been clipped.  It draws
-//      with respect for the Z-buffer.
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//  void vngo_triangle8(VngoVbuffer *vb,VngoPoint2 *pts,dword color)
+//      This routine draws a flat shaded triangle, making the assumption
+//      that it has already been clipped.
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 
 extern "C" void vngo_azttriangle8 (VngoVbuffer *vb,VngoPoint2 *pts,
-                                  VngoTextureInfo *tex, long alpha)
+                                   VngoTexture3D *tex,long alpha)
 {
-    if (alpha < 25) // it is transparent enough to be invisible.
+    long            mid_y;
+    VngoTriangle    tri;
+    int             high_pt_idx = 0;
+    int             low_pt_idx = 2;
+    int             mid_pt_idx = 1;
+    VngoPoint2      *edge1 = vb->edge1;
+    VngoPoint2      *edge2 = vb->edge2;
+
+    if (alpha < 15)
         return;
-    if (alpha > 225) // it is opaque enough to be solid.
-    {
+    else if (alpha >= (15 << 4))
         vngo_zttriangle8(vb,pts,tex);
-        return;
-    }
-
-    int alpha_set=1;
-    if (alpha > 170)
-        alpha_set=2;
-    else if (alpha < 86)
-        alpha_set=0;
-
-    int high_pt_idx = 0;
-    int has_flat_top=0;
-    int low_pt_idx = 2;
-    int mid_pt_idx = 1;
 
     calc_order(high_pt_idx,mid_pt_idx,low_pt_idx,pts);
 
@@ -114,458 +110,148 @@ extern "C" void vngo_azttriangle8 (VngoVbuffer *vb,VngoPoint2 *pts,
     VngoPoint2 *mid_pt = &pts[mid_pt_idx];
     VngoPoint2 *low_pt = &pts[low_pt_idx];
 
-    long    dy1 = ((low_pt->y + 0x8000) >> 16) - ((high_pt->y) >> 16);
-    long    dy2 = ((mid_pt->y + 0x8000) >> 16) - ((high_pt->y) >> 16);
+    long    dy1 = ((low_pt->y + 0x8000) >> 16) - ((high_pt->y + 0x8000) >> 16);
+    long    dy2 = ((mid_pt->y + 0x8000) >> 16) - ((high_pt->y + 0x8000) >> 16);
 
     if (dy1 == 0)
     {   // the triangle is completely flat if this is true.
-        // So we need to do a horizontal line here.....tl
         return;
     }
 
-    long    edge1 = high_pt->x;
-    long    edge2;
-    long    u1 = high_pt->u;
-    long    u2;
-    long    v1 = high_pt->v;
-    long    v2;
-    long    z1 = long(ulong(high_pt->z) >> 1);
-    long    z2;
-    long    xstep1 = (low_pt->x - high_pt->x) / dy1;
-    long    xstep2;
-    long    ustep1;
-    long    ustep2;
-    long    ustep;
-    long    vstep1;
-    long    vstep2;
-    long    vstep;
-    long    zstep1;
-    long    zstep2;
-    long    zstep;
-    int     edge1_on_left;
-    int     line_count;
+    tri.start_y = (high_pt->y + 0x8000) >> 16;
+    tri.color = pts[0].clr;
+    tri.sptr  = vb->scrn_ptr + vb->ytable[tri.start_y];
+    tri.zptr  = (word*)(long(vb->zbuff_ptr) + vb->ztable[tri.start_y]);
 
-    if (dy2 == 0)
-    {   // the triangle has a flat top in this case.
-        edge2 = mid_pt->x;
-        u2 = mid_pt->u;
-        v2 = mid_pt->v;
-        z2 = long(ulong(mid_pt->z) >> 1);
-        xstep2 = (low_pt->x - mid_pt->x) / dy1;
-        dy2 = dy1;
-        has_flat_top = 1;
-        line_count = dy2;
+    scan_zlsolid_edge(edge1,high_pt,low_pt);
+
+    scan_zlsolid_edge(edge2,high_pt,mid_pt);
+
+    scan_zlsolid_edge(&edge2[dy2],mid_pt,low_pt);
+
+    tri.vbuff = vb;
+    tri.pitch = vb->pitch;
+    tri.zpitch = vb->zpitch;
+    tri.height = dy1;
+
+    assert (tex->get_type() == VNGO_MEM_TEX);
+
+    tri.tex = (VngoMemTexture3D*)tex;
+    tri.shade = pts[0].shade;
+
+    if (dy1 > dy2)
+    {
+        mid_y = dy2;
+    }
+    else
+    {
+        mid_y = dy2 - 1;
+    }
+    long mid_dx = ((edge2[mid_y].x + 0x8000) >> 16)
+                  - ((edge1[mid_y].x + 0x8000) >> 16);
 
 
-        if (mid_pt->x > high_pt->x)
+    mid_dx = ((edge2[mid_y].x + 0x8000) >> 16)
+             - ((edge1[mid_y].x + 0x8000) >> 16);
+
+
+    if (mid_dx >= 0)
+    {
+        tri.left_edge = edge1;
+        tri.right_edge = edge2;
+        if (mid_dx)
         {
-            zstep1 = long((ulong(low_pt->z) >> 1) - (ulong(high_pt->z) >> 1)) / dy1;
-            ustep1 = (low_pt->u - high_pt->u) / dy1;
-            vstep1 = (low_pt->v - high_pt->v) / dy1;
-            edge1_on_left = 1;
-            long    dx = ((edge2 + 0x8000) >> 16) - (edge1 >> 16);
-            if (dx)
-            {
-                ustep = (u2 - u1) / dx;
-                vstep = (v2 - v1) / dx;
-                zstep = (z2 - z1) / dx;
-            }
-            else
-            {
-                ustep = 0;
-                vstep = 0;
-                zstep = 0;
-            }
+            tri.zstep_dx1 = (long(edge2[mid_y].z) - long(edge1[mid_y].z)) / mid_dx;
+            tri.ustep_dx1 = ((edge2[mid_y].u - edge1[mid_y].u) / mid_dx) << tri.tex->u_upshift;
+            tri.vstep_dx1 = ((edge2[mid_y].v - edge1[mid_y].v) / mid_dx) << tri.tex->v_upshift;
         }
         else
         {
-            edge1_on_left = 0;
-            ustep2 = (low_pt->u - mid_pt->u) / dy1;
-            vstep2 = (low_pt->v - mid_pt->v) / dy1;
-            zstep2 = long((ulong(low_pt->z) >> 1) - (ulong(mid_pt->z) >> 1)) / dy1;
-
-            long    dx = ((edge1 + 0x8000) >> 16) - (edge2 >> 16);
-            if (dx)
-            {
-                ustep = (u1 - u2) / dx;
-                vstep = (v1 - v2) / dx;
-                zstep = (z1 - z2) / dx;
-            }
-            else
-            {
-                ustep = 0;
-                vstep = 0;
-                zstep = 0;
-            }
+            tri.zstep_dx1 = 0;
+            tri.ustep_dx1 = 0;
+            tri.vstep_dx1 = 0;
         }
     }
     else
     {
-        u2 = u1;
-        v2 = v1;
-        z2 = z1;
-        edge2 = edge1;
+        tri.left_edge = edge2;
+        tri.right_edge = edge1;
 
-        xstep2 = (mid_pt->x - high_pt->x) / dy2;
-        ustep1 = (low_pt->u - high_pt->u) / dy1;
-        vstep1 = (low_pt->v - high_pt->v) / dy1;
-        zstep1 = long((ulong(low_pt->z) >> 1) - (ulong(high_pt->z) >> 1)) / dy1;
-
-        line_count = dy2;
-
-        if (xstep2 > xstep1)
-        {
-            edge1_on_left = 1;
-            long dx = ((mid_pt->x + 0x8000) >> 16) - (((xstep1 * dy2) + edge1) >> 16);
-            long newu = (ustep1 * dy2) + u1;
-            long newv = (vstep1 * dy2) + v1;
-            long newz = (zstep1 * dy2) + z1;
-
-            if (dx)
-            {
-                ustep = (mid_pt->u - newu) / dx;
-                vstep = (mid_pt->v - newv) / dx;
-                zstep = (long(ulong(mid_pt->z) >> 1) - newz) / dx;
-            }
-            else
-            {
-                ustep = 0;
-                vstep = 0;
-                zstep = 0;
-            }
-        }
-        else
-        {
-            edge1_on_left = 0;
-            ustep2 = (mid_pt->u - high_pt->u) / dy2;
-            vstep2 = (mid_pt->v - high_pt->v) / dy2;
-            zstep2 = (long(ulong(mid_pt->z) >> 1) - (long(ulong(high_pt->z) >> 1))) / dy2;
-
-            long dx = (((xstep1 * dy2) + edge1 + 0x8000) >> 16)  - (mid_pt->x >> 16);
-            long newu = (ustep1 * dy2) + u1;
-            long newv = (vstep1 * dy2) + v1;
-            long newz = (zstep1 * dy2) + z1;
-
-            if (dx > 0)
-            {
-                ustep = (newu - mid_pt->u) / dx;
-                vstep = (newv - mid_pt->v) / dx;
-                zstep = (newz - long(ulong(mid_pt->z) >> 1)) / dx;
-            }
-            else
-            {
-                ustep = 0;
-                vstep = 0;
-                zstep = 0;
-            }
-        }
+        tri.zstep_dx1 = (long(edge1[mid_y].z) - long(edge2[mid_y].z)) / -mid_dx;
+        tri.ustep_dx1 = ((edge1[mid_y].u - edge2[mid_y].u) / -mid_dx) << tri.tex->u_upshift;
+        tri.vstep_dx1 = ((edge1[mid_y].v - edge2[mid_y].v) / -mid_dx) << tri.tex->v_upshift;
     }
+    draw_azlhlines(&tri,alpha);
+}
 
-    int             dx;
 
-    VngoShadePal8   *tp = (VngoShadePal8 *)vb->pal->shd_pal;
+extern "C" void draw_azlhlines(VngoTriangle *tri,long alpha)
+{
+    VngoShadePal8   *tp = (VngoShadePal8 *)tri->vbuff->pal->shd_pal;
     VngoColorShade8 *tc = &(*tp)[0];
-    byte            *stble = &tc->shl[pts[0].shade >> 19];
-    long            toffset = (high_pt->y) >> 16;
-    byte            *scrnptr = vb->scrn_ptr + vb->ytable[toffset];
-    word            *zptr = vb->zbuff_ptr + (vb->ztable[toffset] >> 1);
-    long            pitch = vb->pitch;
-    long            zpitch = vb->zpitch >> 1;
-    long            curu;
-    long            curv;
-    long            curz;
+    byte            *stable = &tc->shl[tri->shade >> 19];
+
+    long            count = tri->height;
+    long            pitch = tri->pitch;
+    long            zpitch = tri->zpitch >> 1;
+
+    long            zstep_dx1 = tri->zstep_dx1;
+    long            ustep_dx1 = tri->ustep_dx1;
+    long            vstep_dx1 = tri->vstep_dx1;
+
+    byte            *scrn = (byte*)tri->sptr;
+    word            *zbuff = (word*)tri->zptr;
+    VngoPoint2      *edge1 = tri->left_edge;
+    VngoPoint2      *edge2 = tri->right_edge;
+    long            uup = tri->tex->u_upshift;
+    long            vup = tri->tex->v_upshift;
+    long            udown = tri->tex->u_downshift;
+    long            vdown = tri->tex->v_downshift - tri->tex->widthshift;
+    long            start_y = tri->start_y;
+    byte            *tptr = (byte*)tri->tex->vtxt->tex;
+    long            mask = ~((1 << tri->tex->widthshift) - 1);
     byte            clr;
-    byte            *tptr = tex->vtxt->tex;
-    long            udown = tex->u_downshift;
-    long            vdown = tex->v_downshift - tex->widthshift;
-    long            uup = tex->u_upshift;
-    long            vup = tex->v_upshift;
-    long            mask = ~((1 << tex->widthshift) -1);
-    int             dither;
-    long            ty=high_pt->y >> 16;
-    long            alpha_mask = 0;
 
-    if (alpha_set == 2)
-        alpha_mask = 1;
-
-
-    ustep = ustep << uup;
-    vstep = vstep << vup;
-
-    line_count++;
-
-    while (has_flat_top < 2)
+    for (long y=0;y <= count;y++)
     {
-        if (alpha_set)
+        long tz = edge1->z;
+        long tu = edge1->u << uup;
+        long tv = edge1->v << vup;
+
+        long tx = (edge1->x + 0x8000) >> 16;
+        byte *ptr = scrn + tx;
+        word *zptr = zbuff + tx;
+        int dx = ((edge2->x + 0x8000) >> 16);
+        long *amatrix = &AlphaMatrix[(start_y+y)&3][0];
+
+        for (int x = tx;x <= dx; x++)
         {
-            if (edge1_on_left)
-            {   // edge 1 is on the left;
-                while (line_count)
-                {
-                    long    t = edge1 >> 16;
-                    byte    *tscrn = scrnptr + t;
-                    word    *tzptr = zptr + t;
-
-                    dither = (t ^ ty) & 1;
-                    dx = ((edge2 + 0x8000) >> 16) - t;
-                    curu = u1 << uup;
-                    curv = v1 << vup;
-                    curz = z1;
-                    for (int i=0;i <= dx;i++)
-                    {
-                        if (dither || (ty & alpha_mask))
-                        {
-                            word tz = word(curz >> 15);
-                            if (tz < *tzptr)
-                            {
-                                clr = tptr[(((dword)curv >> vdown) & mask) + ((dword)curu >> udown)];
-                                if (clr != VNGO_TRANSPARENT_COLOR)
-                                {
-                                    *tzptr = tz;
-                                    clr = stble[clr << 5];
-                                    *tscrn = clr;
-                                }
-                            }
-                        }
-                        dither ^= 1;
-                        tscrn++;
-                        tzptr++;
-                        curu += ustep;
-                        curv += vstep;
-                        curz += zstep;
-                    }
-                    ty++;
-                    edge1 += xstep1;
-                    edge2 += xstep2;
-                    u1 += ustep1;
-                    v1 += vstep1;
-                    z1 += zstep1;
-                    line_count--;
-                    scrnptr += pitch;
-                    zptr += zpitch;
-                }
-            }
-            else
-            {   // edge 2 is on the left;
-                while (line_count)
-                {
-                    long t = edge2 >> 16;
-                    byte *tscrn = scrnptr + t;
-                    word *tzptr = zptr + t;
-
-                    dx = ((edge1 + 0x8000) >> 16)- t;
-
-                    dither = (ty ^ t) & 1;
-                    curu = u2 << uup;
-                    curv = v2 << vup;
-                    curz = z2;
-                    for (int i=0;i <= dx;i++)
-                    {
-                        if (dither || (ty & alpha_mask))
-                        {
-                            word tz = word(curz >> 15);
-                            if (tz < *tzptr)
-                            {
-                                clr = tptr[(((dword)curv >> vdown) & mask) + ((dword)curu >> udown)];
-                                if (clr != VNGO_TRANSPARENT_COLOR)
-                                {
-                                    *tzptr = tz;
-                                    clr = stble[clr << 5];
-                                    *tscrn = clr;
-                                }
-                            }
-                        }
-                        dither ^= 1;
-                        tscrn++;
-                        tzptr++;
-                        curz += zstep;
-                        curu += ustep;
-                        curv += vstep;
-                    }
-                    ty++;
-                    edge1 += xstep1;
-                    edge2 += xstep2;
-                    u2 += ustep2;
-                    v2 += vstep2;
-                    z2 += zstep2;
-                    line_count--;
-                    scrnptr += pitch;
-                    zptr += zpitch;
-                }
-            }
-        }
-        else
-        {
-            if (edge1_on_left)
-            {   // edge 1 is on the left;
-                if (!(ty & 1))
-                {
-                    ty++;
-                    line_count --;
-                    edge1 += xstep1;
-                    edge2 += xstep2;
-                    scrnptr += pitch;
-                    zptr += zpitch;
-                    u1 += ustep1;
-                    v1 += vstep1;
-                    z1 += zstep1;
-                }
-                long    tustep1 = ustep1 << 1;
-                long    tvstep1 = vstep1 << 1;
-                long    tzstep1 = zstep1 << 1;
-                long    txstep1 = xstep1 << 1;
-                long    txstep2 = xstep2 << 1;
-                long    tzpitch = zpitch << 1;
-                long    tpitch  = pitch << 1;
-
-                while (line_count > 0)
-                {
-                    long    t = edge1 >> 16;
-                    byte    *tscrn = scrnptr + t;
-                    word    *tzptr = zptr + t;
-
-                    dither = (t ^ ty) & 1;
-                    dx = ((edge2 + 0x8000) >> 16) - t;
-                    curu = u1 << uup;
-                    curv = v1 << vup;
-                    curz = z1;
-                    for (int i=0;i <= dx;i++)
-                    {
-                        if (dither)
-                        {
-                            word tz = word(curz >> 15);
-                            if (tz < *tzptr)
-                            {
-                                clr = tptr[(((dword)curv >> vdown) & mask) + ((dword)curu >> udown)];
-                                if (clr != VNGO_TRANSPARENT_COLOR)
-                                {
-                                    *tzptr = tz;
-                                    clr = stble[clr << 5];
-                                    *tscrn = clr;
-                                }
-                            }
-                        }
-                        dither ^= 1;
-                        tscrn++;
-                        tzptr++;
-                        curu += ustep;
-                        curv += vstep;
-                        curz += zstep;
-                    }
-                    ty+=2;
-                    edge1 += txstep1;
-                    edge2 += txstep2;
-                    u1 += tustep1;
-                    v1 += tvstep1;
-                    z1 += tzstep1;
-                    line_count-=2;
-                    scrnptr += tpitch;
-                    zptr += tzpitch;
-                }
-            }
-            else
-            {   // edge 2 is on the left;
-                if (!(ty & 1))
-                {
-                    ty++;
-                    line_count --;
-                    edge1 += xstep1;
-                    edge2 += xstep2;
-                    scrnptr += pitch;
-                    zptr += zpitch;
-                    u2 += ustep2;
-                    v2 += vstep2;
-                    z2 += zstep2;
-                }
-                long    tustep2 = ustep2 << 1;
-                long    tvstep2 = vstep2 << 1;
-                long    tzstep2 = zstep2 << 1;
-                long    txstep1 = xstep1 << 1;
-                long    txstep2 = xstep2 << 1;
-                long    tzpitch = zpitch << 1;
-                long    tpitch  = pitch << 1;
-
-                while (line_count > 0)
-                {
-                    long t = edge2 >> 16;
-                    byte *tscrn = scrnptr + t;
-                    word *tzptr = zptr + t;
-
-                    dx = ((edge1 + 0x8000) >> 16)- t;
-
-                    dither = (ty ^ t) & 1;
-                    curu = u2 << uup;
-                    curv = v2 << vup;
-                    curz = z2;
-                    for (int i=0;i <= dx;i++)
-                    {
-                        if (dither)
-                        {
-                            word tz = word(curz >> 15);
-                            if (tz < *tzptr)
-                            {
-                                clr = tptr[(((dword)curv >> vdown) & mask) + ((dword)curu >> udown)];
-                                if (clr != VNGO_TRANSPARENT_COLOR)
-                                {
-                                    *tzptr = tz;
-                                    clr = stble[clr << 5];
-                                    *tscrn = clr;
-                                }
-                            }
-                        }
-                        dither ^= 1;
-                        tscrn++;
-                        tzptr++;
-                        curz += zstep;
-                        curu += ustep;
-                        curv += vstep;
-                    }
-                    ty+=2;
-                    edge1 += txstep1;
-                    edge2 += txstep2;
-                    u2 += tustep2;
-                    v2 += tvstep2;
-                    z2 += tzstep2;
-                    line_count-=2;
-                    scrnptr += tpitch;
-                    zptr += tzpitch;
-                }
-            }
-        }
-        if (!has_flat_top)
-        {
-            dy2 = ((low_pt->y + 0x8000) >> 16) - ((mid_pt->y + 0x8000)>> 16);
-
-            if (dy2 > 0)
+            if ((amatrix[x&3] + alpha) >=255)
             {
-                xstep2 = (low_pt->x - mid_pt->x) / dy2;
-                if (!edge1_on_left)
+                word wz = word(tz >> 15);
+                if (wz < *zptr)
                 {
-                    zstep2 = long((ulong(low_pt->z) >> 1) - (ulong(mid_pt->z) >> 1)) / dy2;
-                    z2 = long(ulong(mid_pt->z) >> 1);
-                    z2 += zstep2;
-                    ustep2 = (low_pt->u - mid_pt->u)  / dy2;
-                    u2 = mid_pt->u;
-                    u2 += ustep2;
-                    vstep2 = (low_pt->v - mid_pt->v)  / dy2;
-                    v2 = mid_pt->v;
-                    v2 += vstep2;
+                    clr = tptr[(((dword)tv >> vdown) & mask)
+                               + ((dword)tu >> udown)];
+
+                    if (clr != VNGO_TRANSPARENT_COLOR)
+                    {
+                        *zptr = wz;
+                        *ptr = stable[(clr << 5)];
+                    }
                 }
-                edge2 = mid_pt->x + xstep2;
-                line_count = dy2;
-                has_flat_top++;
             }
-            else
-            {
-                return;
-            }
+            ptr++;
+            zptr++;
+            tz += zstep_dx1;
+            tu += ustep_dx1;
+            tv += vstep_dx1;
         }
-        else
-        {
-            return;
-        }
+        scrn += pitch;
+        zbuff += zpitch;
+        edge1++;
+        edge2++;
     }
-    return;
 }
 
 //°±² End of module - zlttri8.cpp ²±°

@@ -35,26 +35,21 @@
                              _Library Status_
 
  Notes by: Chuck Walbourn
- Updated: Febuary 2, 1997
+ Updated: July 31, 1997
 
  Changes for this release --------------------------------------------------
 
-   o General cleanup and rearrangement of source tree.
+   o Added full bitdepth support to XFBitmap::create
 
-   o Changed XFParseXEB to expose the supporting compression routines
-     for use by other classes and added support for 16-bit, 24-bit,
-     and 32-bit compressed images and uncompressed usage if compressed
-     information larger than original.
+   o Added monochrome reader/writer support to the XFParseBMP, XFParseLBM,
+     and XFParseXEB classes.
 
-   o XFParseIFF::topofcontext now accepts a donext flag to control the
-     call of next() after resetting the top of context.
+   o XFParseTGA now reads/writes 15/16/24/32-bit TGAs and reads RLE
+     compressed TGAs.  Note that previously 32-bit TGAs were converted
+     to 24-bit on read/write.
 
-   o Added XFParseCEL::read/write routines to access the x- and y-coordinate
-     information in the CEL header.
-
-   o Changed IFFC so that merge/binary chunks open the file with read share
-     priviledges.
-
+   o Added new 'bpp' keyword to 'bitmap' function in IFFC to convert
+     2 bpp <=> 3 bpp images.
 
 
  Proposed changes ----------------------------------------------------------
@@ -67,16 +62,7 @@
    o XFParse classes will need changes to take advantage of XFileX classes,
      but they will only require that all code be recompiled.
 
-   o XFileCD direct CD control and input class, as well as local disk
-     caching
-
-   o XFParseText class for generic parsing of ASCII files--lexical
-     scanner
-
    o XFile compression support
-
-   o XFParse bitmap writer objects to output compressed images and support
-     for 2bpp and 4bpp.
 
    o Additional XFParse bitmaps objects for new formats.
 

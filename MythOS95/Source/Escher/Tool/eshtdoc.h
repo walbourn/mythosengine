@@ -77,6 +77,7 @@ public:
     {
         COMPRESS    =0x1,
         TRUECOLOR   =0x2,
+        FLOATING    =0x4,
     };
 
     dword           flags;

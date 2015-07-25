@@ -121,14 +121,42 @@ VNGError VngoVVport8::image_trans (VngoRect *dest_rect,VngoTexture *img,dword fl
     dr.dx = w;
     dr.dy = h;
 
-    if (((dest_rect->x + w) < vbuff.width) &&
-        ((dest_rect->y + h) < vbuff.height) &&
+    if (((dest_rect->x + w) <= vbuff.width) &&
+        ((dest_rect->y + h) <= vbuff.height) &&
         (dest_rect->x >= 0) && (dest_rect->y >= 0))
     {
-        vngo_itrans8 (&vbuff,&dr,img,flags);
+        if (img->flags & VNGO_TEXTURE_COMPRESSED)
+        {
+            for (int y=0;y < img->height;y++)
+            {
+                byte *ptr = &(((byte*)img->tex)[((VngoCTexture*)img)->ytable[y]]);
+                long cnt = *((short *)ptr);
+                ptr += 2;
+                byte *destptr = vbuff.scrn_ptr + vbuff.ytable[dest_rect->y + y] + dest_rect->x;
+                long dcount = 0;
+                while (dcount < img->width)
+                {
+                    memcpy(destptr,ptr,cnt);
+                    dcount += cnt;
+                    ptr += cnt;
+                    destptr += cnt;
+                    cnt = *((short *)ptr);
+                    ptr +=2;
+                    destptr += cnt;
+                    dcount += cnt;
+                    cnt = *((short *)ptr);
+                    ptr +=2;
+                }
+            }
+        }
+        else
+            vngo_itrans8 (&vbuff,&dr,img,flags);
     }
     else
     {
+        if (img->flags & VNGO_TEXTURE_COMPRESSED)
+            return VNGO_UNSUPPORTED_TEXTURE;
+
         if ((dest_rect->x < vbuff.width) && (dest_rect->y < vbuff.height) &&
             (dest_rect->x + w >= 0) && (dest_rect->y + h >= 0))
         {
@@ -143,7 +171,7 @@ VNGError VngoVVport8::image_trans (VngoRect *dest_rect,VngoTexture *img,dword fl
                 if ((dest_rect->y + h) < vbuff.height)
                     ycount = h;
                 else
-                    ycount = vbuff.height - dest_rect->y;
+                    ycount = (vbuff.height-1) - dest_rect->y;
             }
             else        // starting Y is negative in this case.
             {
@@ -151,7 +179,7 @@ VNGError VngoVVport8::image_trans (VngoRect *dest_rect,VngoTexture *img,dword fl
                 t = vbuff.ytable[0];
                 if ((dest_rect->y + h) > vbuff.height)
                 {
-                    ycount = vbuff.height;
+                    ycount = vbuff.height-1;
                 }
                 else
                 {
@@ -170,14 +198,14 @@ VNGError VngoVVport8::image_trans (VngoRect *dest_rect,VngoTexture *img,dword fl
                 if ((dest_rect->x + w) < vbuff.width)
                     xcount = w;
                 else
-                    xcount = vbuff.width - dest_rect->x;
+                    xcount = (vbuff.width-1) - dest_rect->x;
             }
             else        // starting X is negative in this case.
             {
                 tx = -dest_rect->x;
                 if ((dest_rect->x + w) > vbuff.width)
                 {
-                    xcount = vbuff.width;
+                    xcount = (vbuff.width-1);
                 }
                 else
                 {
@@ -198,6 +226,7 @@ VNGError VngoVVport8::image_trans (VngoRect *dest_rect,VngoTexture *img,dword fl
     return VNGO_NO_ERROR;
 }
 
+#if 0
 VNGError VngoVVport8::image_trans_s (VngoRect *dest_rect,VngoTexture *img,
                                  dword shade, dword flags)
 {
@@ -423,7 +452,7 @@ VNGError VngoVVport8::image_trans_zs (VngoRect *dest_rect,VngoTexture *img,
 
     return VNGO_NOT_SUPPORTED;
 }
-
+#endif
 
 
 VNGError VngoVVport8::zblit_mono (VngoRect *dest_rect,VngoZMap *img,dword fgcol,dword bgcol)
@@ -502,7 +531,7 @@ VNGError VngoVVport8::zblit_mono (VngoRect *dest_rect,VngoZMap *img,dword fgcol,
             h = h - (dest_rect->y - vbuff.height);
         }
 
-        ptr = img->zmap.tex;
+        ptr = (byte*)img->zmap.tex;
         ptr += (yskip * pitch);
         t = t + (dword)vbuff.zbuff_ptr;
         while (h > 0)
@@ -579,11 +608,11 @@ VNGError VngoVVport8::image_trans_mono (VngoRect *dest_rect,VngoTexture *img,dwo
         // Clip to positive conditions.
         if ((y + h) >= vbuff.height)
         {
-            h = vbuff.height - y - 1;
+            h = vbuff.height - y;
         }
         if ((x + w) >= vbuff.width)
         {
-            w = vbuff.width - x - 1;
+            w = vbuff.width - x;
         }
 
         t += x;
@@ -597,9 +626,10 @@ VNGError VngoVVport8::image_trans_mono (VngoRect *dest_rect,VngoTexture *img,dwo
             h = h - (dest_rect->y - vbuff.height);
         }
 
-        ptr = img->tex;
-        ptr += (yskip * pitch);
+        ptr = (byte*)img->tex;
+        ptr += (yskip * pitch + ((xskip - (xskip & 0x7)) >> 3));
         t += (dword)vbuff.scrn_ptr;
+        xskip &= 0x7;
         while (h > 0)
         {
             vngo_ilinemono8((byte *)t,ptr,w,xskip,fgcol,bgcol);
@@ -613,7 +643,7 @@ VNGError VngoVVport8::image_trans_mono (VngoRect *dest_rect,VngoTexture *img,dwo
 }
 
 
-VNGError VngoVVport8::vpcopy(int destx,int desty,VngoBaseDev *vp)
+VNGError VngoVVport8::vpcopy(int destx,int desty,VngoVport *vp)
 {
     assert(lock_status);
 

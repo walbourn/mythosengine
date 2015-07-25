@@ -70,15 +70,15 @@ EschParticleSprite::EschParticleSprite(EschSprite *s, ulong l) :
                s != 0);
 
     pos = s->pos;
-    alpha = Flx16(s->get_alpha());
+    alpha = float(s->get_alpha());
     life = l;
-    alpha_rate = alpha / Flx16((long)l);
+    alpha_rate = alpha / float((long)l);
     velocity.i = 0;  velocity.j = 0;  velocity.k = 0;
     acceleration.i = 0;  acceleration.j = 0;  acceleration.k = 0;
 }
 
 EschParticleSprite::EschParticleSprite(EschSprite *s,
-                                       Flx16 ii, Flx16 ij, Flx16 ik,
+                                       float ii, float ij, float ik,
                                        ulong l) :
     EschParticle(),
     sprite(s)
@@ -88,9 +88,9 @@ EschParticleSprite::EschParticleSprite(EschSprite *s,
     assertMyth("EschParticleSprite needs a valid sprite pointer",
                s != 0);
     pos = s->pos;
-    alpha = Flx16(s->get_alpha());
+    alpha = float(s->get_alpha());
     life = l;
-    alpha_rate = alpha / Flx16((long)l);
+    alpha_rate = alpha / float((long)l);
     velocity.i = ii;  velocity.j = ij;  velocity.k = ik;
     acceleration.i = 0;  acceleration.j = 0;  acceleration.k = 0;
 }
@@ -106,9 +106,9 @@ EschParticleSprite::EschParticleSprite(EschSprite *s,
     assertMyth("EschParticleSprite needs a valid sprite pointer",
                s != 0);
     pos = s->pos;
-    alpha = Flx16(s->get_alpha());
+    alpha = float(s->get_alpha());
     life = l;
-    alpha_rate = alpha / Flx16((long)l);
+    alpha_rate = alpha / float((long)l);
     velocity = *v;
     acceleration.i = 0;  acceleration.j = 0;  acceleration.k = 0;
 }
@@ -213,7 +213,7 @@ void EschParticleSprite::release()
 //дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
 // EschParticleSprite - set_position                                        Ё
 //дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
-void EschParticleSprite::set_position(Flx16 ix, Flx16 iy, Flx16 iz)
+void EschParticleSprite::set_position(float ix, float iy, float iz)
 {
     pos.x = ix;
     pos.y = iy;

@@ -32,13 +32,15 @@
                              _Library Status_
 
  Notes by: Chuck Walbourn
- Updated: March 10, 1997
+ Updated: July 29, 1997
 
  Changes for this release ---------------------------------------------------
 
-    o Minor change for new Van Gogh release
+    o Added variable-pitch font support
 
-    o Added extended monochrome format for 256 character fonts.
+    o Added TrueType font capture to GFONT.EXE
+
+    o Added vertical-write versions of GBergText routines
 
 
   Proposed changes ----------------------------------------------------------
@@ -46,7 +48,7 @@
     o Faster string 'search' for loadstring by having compiler build a
       binary search tree and having loadstring use it.
 
-    o Four color font support (3x6 font needs this to be readable).
+    o Color font support.
 
 *** END OF FILE ***
 

@@ -2,9 +2,9 @@
 //
 //                                                           %__________%
 //                                                          %/ . .  .   \%
-//           Van Gogh 2D-Display Library                     |  . .  o. | 
+//           Van Gogh 2D-Display Library                     |  . .  o. |
 //                                                           |. _  .   .|
-//          Microsoft Windows '95 Version                    | / \   .  | 
+//          Microsoft Windows '95 Version                    | / \   .  |
 //                                                           |_|_|_._._.|
 // Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
 //              All rights reserved.                        %\__________/%
@@ -36,9 +36,9 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-//#include <assert.h>
+#include <assert.h>
 #include <string.h>
 
 #include "debug.h"
@@ -64,7 +64,7 @@
 //
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
-extern "C" void scan_zpsolid_edge(VngoPoint2 *edge,VngoPointF *p1, VngoPointF *p2);
+extern "C" void scan_zpsolid_edge(VngoPoint2 *edge,VngoPointF2 *p1, VngoPointF2 *p2);
 extern "C" void draw_zphlines(VngoTriangle *tri);
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
@@ -80,7 +80,7 @@ extern "C" void draw_zphlines(VngoTriangle *tri);
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 
 
-inline void find_quadratic(long dx, float pq0, float q0, float q2, 
+inline void find_quadratic(long dx, float pq0, float q0, float q2,
                            float w0, float w2,long *d1,long *d2,
                            long upscale)
 {
@@ -109,7 +109,7 @@ inline void find_quadratic(long dx, float pq0, float q0, float q2,
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 
 extern "C" void vngo_zttriangle8_persp (VngoVbuffer *vb,VngoPoint2 *pts,
-                                        VngoTextureInfo *tex)
+                                        VngoTexture3D *tex)
 {
     long            mid_y;
     VngoTriangle    tri;
@@ -122,7 +122,7 @@ extern "C" void vngo_zttriangle8_persp (VngoVbuffer *vb,VngoPoint2 *pts,
     calc_order(high_pt_idx,mid_pt_idx,low_pt_idx,pts);
 
     float       flxconv = 1.f / 65536.f;
-    VngoPointF  high_pt;
+    VngoPointF2  high_pt;
     high_pt.x = pts[high_pt_idx].x;
     high_pt.y = pts[high_pt_idx].y;
     high_pt.z = pts[high_pt_idx].z;
@@ -130,7 +130,7 @@ extern "C" void vngo_zttriangle8_persp (VngoVbuffer *vb,VngoPoint2 *pts,
     high_pt.u = (float(pts[high_pt_idx].u) * flxconv) * high_pt.w;
     high_pt.v = (float(pts[high_pt_idx].v) * flxconv) * high_pt.w;
 
-    VngoPointF  mid_pt;
+    VngoPointF2  mid_pt;
     mid_pt.x = pts[mid_pt_idx].x;
     mid_pt.y = pts[mid_pt_idx].y;
     mid_pt.z = pts[mid_pt_idx].z;
@@ -138,7 +138,7 @@ extern "C" void vngo_zttriangle8_persp (VngoVbuffer *vb,VngoPoint2 *pts,
     mid_pt.u = (float(pts[mid_pt_idx].u) * flxconv) * mid_pt.w;
     mid_pt.v = (float(pts[mid_pt_idx].v) * flxconv) * mid_pt.w;
 
-    VngoPointF  low_pt;
+    VngoPointF2  low_pt;
     low_pt.x = pts[low_pt_idx].x;
     low_pt.y = pts[low_pt_idx].y;
     low_pt.z = pts[low_pt_idx].z;
@@ -151,7 +151,7 @@ extern "C" void vngo_zttriangle8_persp (VngoVbuffer *vb,VngoPoint2 *pts,
 
     if (dy1 == 0)
     {   // the triangle is completely flat if this is true.
-        return;    
+        return;
     }
 
     tri.start_y = (high_pt.y + 0x8000) >> 16;
@@ -169,7 +169,9 @@ extern "C" void vngo_zttriangle8_persp (VngoVbuffer *vb,VngoPoint2 *pts,
     tri.pitch = vb->pitch;
     tri.zpitch = vb->zpitch;
     tri.height = dy1;
-    tri.tex = tex;
+
+    assert (tex->get_type() == VNGO_MEM_TEX);
+    tri.tex = (VngoMemTexture3D*)tex;
     tri.shade = pts[0].shade;
 
     if (dy1 > dy2)
@@ -180,11 +182,11 @@ extern "C" void vngo_zttriangle8_persp (VngoVbuffer *vb,VngoPoint2 *pts,
     {
         mid_y = dy2 - 1;
     }
-    long mid_dx = ((edge2[mid_y].x + 0x8000) >> 16) 
+    long mid_dx = ((edge2[mid_y].x + 0x8000) >> 16)
                   - ((edge1[mid_y].x + 0x8000) >> 16);
 
 
-    mid_dx = ((edge2[mid_y].x + 0x8000) >> 16) 
+    mid_dx = ((edge2[mid_y].x + 0x8000) >> 16)
              - ((edge1[mid_y].x + 0x8000) >> 16);
 
 
@@ -212,7 +214,7 @@ extern "C" void vngo_zttriangle8_persp (VngoVbuffer *vb,VngoPoint2 *pts,
     draw_zphlines(&tri);
 }
 
-extern "C" void scan_zpsolid_edge(VngoPoint2 *edge,VngoPointF *p1, VngoPointF *p2)
+extern "C" void scan_zpsolid_edge(VngoPoint2 *edge,VngoPointF2 *p1, VngoPointF2 *p2)
 {
     Flx16 xstep;
     Flx16 zstep;
@@ -298,7 +300,7 @@ extern "C" void draw_zphlines(VngoTriangle *tri)
     long            udown = tri->tex->u_downshift;
     long            vdown = tri->tex->v_downshift - tri->tex->widthshift;
     long            start_y = tri->start_y;
-    byte            *tptr = tri->tex->vtxt->tex;
+    byte            *tptr = (byte*)tri->tex->vtxt->tex;
     long            mask = ~((1 << tri->tex->widthshift) - 1);
     byte            clr;
 

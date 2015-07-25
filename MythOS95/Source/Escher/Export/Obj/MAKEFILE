@@ -8,7 +8,7 @@
 #ששששש²±²ששששששש²±²שששש²±²ש²±²שששש²±²ש²±²שששש²±²ש²±²שששששששש²±²שששש²±²שששששש
 #שששש²²²²²²²²²²ש²²²²²²²²ששש²²²²²²²²שש²²²שששש²²²ש²²²²²²²²²²ש²²²שששש²²²ששששששש
 #ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-#שששששששששששCopyrightש(c)ש1994-1997שbyשCharybdisשEnterprises,שInc.שששששששששש
+#שששששששששששCopyrightש(c)ש1994-1996שbyשCharybdisשEnterprises,שInc.שששששששששש
 #ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
 #ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
 #ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
@@ -48,7 +48,7 @@
 #°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 #
 #                               Variables
-#                                
+#
 #°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 # Compiling with debug results in unresolved refs.
@@ -61,7 +61,7 @@ MYTH95ROOT = \mythos95
 !endif
 
 !if "$(3DSDIR)" == ""
-3DSDIR = \3ds4
+3DSDIR = d:\3ds4
 !endif
 
 INCPATH   = ;..\inc;..\ipas;..\fliclib;..\..\inc;$(MYTH95ROOT)\inc;
@@ -84,6 +84,8 @@ ui.obj\
 uilight.obj\
 uimtl.obj\
 uiquery.obj\
+uikey.obj\
+uikeyflg.obj\
 vngcolor.obj\
 vngpal.obj
 
@@ -103,7 +105,7 @@ all: setstden setexten $(PXP).pxp
 
 !include make.inc
 
-CCOPTIONS = -5s -ze -zp1 -zq -w1 -oatx -s -j -ez -fpi87 -DNDEBUG  
+CCOPTIONS = -5s -ze -zp1 -zq -w1 -oatx -s -j -ez -fpi87 -DNDEBUG
 
 LINKOPTS = op q libp $(LIBPATH)
 
@@ -117,7 +119,7 @@ LINKOPTS = op q libp $(LIBPATH)
 
 #--- extended environment variables
 setexten:
-	@set LIB=$(LIB);$(WATCOM)\lib386;$(WATCOM)\lib386\dos
+        @set LIB=$(LIB);$(WATCOM)\lib386;$(WATCOM)\lib386\dos
 
 #±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 #
@@ -148,6 +150,10 @@ clean:
    del *.lst
 
 ui.obj: ..\escher.3de
+
+uikey.obj: ..\eschkey.3de
+
+uikeyflg.obj: ..\eschkeyf.3de
 
 uilight.obj: ..\eschlgt.3de
 

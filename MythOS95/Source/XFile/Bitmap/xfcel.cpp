@@ -118,7 +118,7 @@ xf_error_codes XFParseCEL::read(ushort &xcoord, ushort &ycoord, XFBitmap *b)
     b->clrinuse=255;
     b->width = (ushort) header.width;
     b->height = (ushort) header.height;
-    b->bpp = 1;
+    b->bpp = XFBM_BPP_8BIT;
 
     xcoord = header.xcoord;
     ycoord = header.ycoord;
@@ -207,8 +207,9 @@ xf_error_codes XFParseCEL::write(ushort xcoord, ushort ycoord, XFBitmap *b)
     if (!b)
         b = bm;
 
-    if (b->bpp != 1 || !b->width || !b->height)
-        return XF_ERR_NOTSUPPORTED;
+    if (b->bpp != XFBM_BPP_8BIT
+        || !b->width || !b->height)
+        return (errorn=XF_ERR_NOTSUPPORTED);
 
 //ÄÄÄ Create/write file header ÄÄÄ
     memset(&header,0,sizeof(Header));

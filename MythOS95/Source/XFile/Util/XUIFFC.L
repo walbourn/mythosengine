@@ -140,6 +140,8 @@ chunk                           return(YY_CHUNK);
 merge                           return(YY_MERGE);
 
 bitmap                          return(YY_BITMAP);
+
+bpp                             return(YY_BPP);
                                 
 intel                           return(YY_INTEL);
 

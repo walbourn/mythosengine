@@ -27,9 +27,8 @@
 //
 // vngstrct.hpp
 //
-//      This is the definition of the vngo_vbuffer.
+// Contains the general structure definitions
 //
-//ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ Revision History ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
 
 #ifndef __VNGSTRCT_HPP
@@ -40,43 +39,46 @@
 //                                Includes
 //
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
 #include <string.h>
 #include "vngpal.hpp"
+#include "vngtxtr.hpp"
+
+#ifdef __WATCOMC__
+#pragma pack(1);
+#endif
+
+#ifdef _MSC_VER
+#pragma pack(push,1)
+#endif
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
-//                                Equates
-//
-//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-
-
-//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-//
-//                                Macros
-//
-//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-
-//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-//
-//                               Structures
+//                                Classes
 //
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 struct VngoVbuffer;
-class VngoTextureInfo;
+class VngoTexture3D;
+class VngoMemTexture3D;
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// vngo_point is a 2D draw point, it contains all of the needed information ³
+// VngoPoint is a 2D draw point, it contains all of the needed information  ³
 // needed to draw into the view port for most drawing types.                ³
 // This structure is intentionaly 48 BYTES long.                            ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-
 class VngoPoint
 {
 public:
+#if 1
+    float   wx;
+    float   wy;
+    float   wz;
+#else
     long    wx;
     long    wy;
     long    wz;
+#endif
     long    x;
     long    y;
     long    z;
@@ -101,13 +103,9 @@ public:
 };
 
 
-
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// VngoPoint2 is a 2D draw point, it contains all of the needed information ³
-// needed to draw into the view port for most drawing types.                ³
-// This structure is intentionaly 32 BYTES long.                            ³
+// VngoPoint2 is an internal version of VngoPoint                           ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-
 class VngoPoint2
 {
 public:
@@ -120,37 +118,32 @@ public:
     long    v;
     long    w;
 
-    VngoPoint2 () {}
-    VngoPoint2 (int _x, int _y, dword _clr) {x = _x; y = _y; clr = _clr;}
-    VngoPoint2 (int _x, int _y, int _z, dword _clr,int _shade)
-    {
-        x = _x;
-        y = _y;
-        z = _z;
-        clr = _clr;
-        shade = _shade;
-    }
-    VngoPoint2 (VngoPoint pt)
-    {   // This doen't copy the U and V coord info, since it needs to know
-        // the size of the VngoTexture to scale them.
-        x       = pt.x << 20;
-        y       = pt.y << 20;
-        z       = pt.z;
-        clr     = pt.clr;
-        shade   = pt.shade;
-        w       = pt.w;
-    }
-
 };
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // VngoPointF is a 2D draw point, it contains all of the needed information ³
 // needed to draw into the view port for most drawing types.                ³
-// This structure is intentionaly 32 BYTES long.  Uses floating point (u,v) ³
+// This structure is intentionaly 32 BYTES long.                            ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-
 class VngoPointF
+{
+public:
+    float   x;
+    float   y;
+    float   z;
+    dword   clr;
+    float   shade;
+    float   u;
+    float   v;
+    float   w;
+};
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// VngoPointF2 is an internal version of VngoPointF                         ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+class VngoPointF2
 {
 public:
     long    x;
@@ -163,6 +156,10 @@ public:
     float   w;
 };
 
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// VngoTriangle is an internal structure                                    ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 struct VngoTriangle
 {
     // Info pointers.
@@ -172,7 +169,7 @@ struct VngoTriangle
     VngoPoint2      *left_edge;
     VngoPoint2      *right_edge;
 
-    VngoTextureInfo *tex;
+    VngoMemTexture3D *tex;
 
     // Raw info.
     long            start_y;
@@ -213,7 +210,7 @@ struct VngoTriangle
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// vngo_rect is a 2D filled rectangle, which has its uper left hand corner  ³
+// VngoRect is a 2D filled rectangle, which has its uper left hand corner   ³
 // defined by the point (x,y), it's width in dx, and it's height in dy.     ³
 // This structure is intentionaly 16 BYTES long.                            ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
@@ -248,13 +245,10 @@ struct VngoRect
 };
 
 
-
-
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// vngo_vbuffer is a view port structure which contains all of the info     ³
+// VngoVbuffer is a view port structure which contains all of the info      ³
 // needed to draw into the view port.                                       ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-
 struct VngoVbuffer
 {
     long        width;      // width of actual buffer.
@@ -273,86 +267,13 @@ struct VngoVbuffer
     VngoPoint2  *edge2;     // Edge arrays for the scan converters to use.
 };
 
+#ifdef __WATCOMC__
+#pragma pack();
+#endif
 
-
-struct VngoTexture
-{
-    short   width;
-    short   height;
-    byte    *tex;
-    dword   flags;
-
-    VngoTexture() {flags = VNGO_TEXTURE_8BIT;}
-    VngoTexture(dword _flags) {flags = _flags;}
-    VngoTexture (short _width, short _height, byte *_tex, dword _flags = VNGO_TEXTURE_8BIT)
-    {
-        width   = _width;
-        height  = _height;
-        tex     = _tex;
-        flags   = _flags;
-    }
-};
-
-class VngoTextureInfo
-{
-    dword       iflags;
-public:
-    VngoTexture *vtxt;
-    long        widthshift;
-    long        heightshift;
-    long        u_upshift;
-    long        v_upshift;
-    long        u_downshift;
-    long        v_downshift;
-};
-
-class VngoZMap
-{
-    dword       flags;
-public:
-    int         color;          // This is the color that all Zeros in
-                                // the map should be drawn.
-    dword       depth;          // This is the depth that should be
-                                // assigned to all Zeros in the map.
-    char        name[16];
-    VngoTexture zmap;
-
-    // This is the "persistant" format header.
-    struct HDR
-    {
-        dword           ver;
-        dword           size;
-        short           width;
-        short           height;
-        int             color;
-        dword           depth;
-        char            name[16];
-    };
-
-    VngoZMap()
-    {
-        flags = 0;
-        zmap.flags = VNGO_TEXTURE_MONO | VNGO_TEXTURE_ZMAP;
-        strncpy (name,"Default",16);
-    };
-
-    ~VngoZMap()
-    {
-        if (zmap.tex && (flags & VNGO_MYMEM_ZMAP))
-            delete [] zmap.tex;
-    }
-
-    void set_name(const char *n)
-    {
-        strncpy (name,n,16);
-    }
-
-
-    virtual int load(const char *fn);
-    virtual int load(XFParseIFF *iffp);
-    virtual int save(const char *fn);
-    virtual int save(XFParseIFF *iffp);
-};
+#ifdef _MSC_VER
+#pragma pack(pop)
+#endif
 
 #endif          // __VNGSTRCT_HPP
 

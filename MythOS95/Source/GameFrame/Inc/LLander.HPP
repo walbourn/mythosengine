@@ -86,7 +86,7 @@ public:
 public:
     void        run ();
 
-    void        reset (Flx16 x = 0, Flx16 y = 10);
+    void        reset (float x = 0, float y = 10);
 
     void        process_events ();
     void        update_model ();
@@ -106,19 +106,19 @@ public:
     time_t      last_update;
     DWORD       jcenterx;
     DWORD       jcentery;
-    Flx16       gravity;
-    Flx16       xacceleration;
-    Flx16       yacceleration;
-    Flx16       xvelocity;
-    Flx16       yvelocity;
-    Flx16       xpos;
-    Flx16       ypos;
+    float       gravity;
+    float       xacceleration;
+    float       yacceleration;
+    float       xvelocity;
+    float       yvelocity;
+    float       xpos;
+    float       ypos;
     BOOL        remote;
     BOOL        active;
     DPID        player_id;
     RECT        damage;
 
-    Flx16       get_thrust () const
+    float       get_thrust () const
                 { return flx_abs (yacceleration) + flx_abs (xacceleration); }
 
     BOOL        too_fast () const

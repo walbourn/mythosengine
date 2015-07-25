@@ -35,7 +35,7 @@
 //같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같�
 //
 //                                Includes
-//                                
+//
 //같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같�
 
 #define WIN32_LEAN_AND_MEAN
@@ -66,7 +66,7 @@ HWND        hWndClient;
 const char  szAppName[] = "Escher";
 EscherTest  *mode;
 
-MaxDevices  Devs;
+MaxDevices  *Devs=0;
 
 extern ulong EschProposedTris;
 extern ulong EschDrawnTris;
@@ -122,6 +122,17 @@ int APIENTRY WinMain (HINSTANCE hInstance,
         MessageBeep(0);
         MessageBox(hWndClient,
                    "Failed to initalize Escher",
+                   "Fatal Error",
+                   MB_OK);
+        return FALSE;
+    }
+
+    Devs = new MaxDevicesWin32(hWndClient);
+    if (!Devs)
+    {
+        MessageBeep(0);
+        MessageBox(hWndClient,
+                   "Failed to create max devices",
                    "Fatal Error",
                    MB_OK);
         return FALSE;
@@ -212,6 +223,11 @@ int APIENTRY WinMain (HINSTANCE hInstance,
             return FALSE;
     }
 
+    if (!ini.read("TreeTops",buff))
+    {
+        if (!mode->LoadTreeTops(buff))
+            return FALSE;
+    }
     if (!ini.read("TerrainFile",buff))
     {
         if (!mode->LoadTerrain(buff))
@@ -282,7 +298,7 @@ int APIENTRY WinMain (HINSTANCE hInstance,
     while (mode->PumpWindows())
     {
         // Do per-frame processing here
-        Devs.update ();
+        Devs->update ();
         mode->GetEvents();
         mode->ProcessEvents();
         EschProposedTris = 0;
@@ -301,9 +317,12 @@ int APIENTRY WinMain (HINSTANCE hInstance,
     MessageBox(hWndClient, buff,szAppName,
                MB_OK | MB_ICONINFORMATION);
 
+    delete Devs;
+    Devs=0;
+
     delete esys;
 
-        return 0;
+    return 0;
 
     // This shuts up the compiler
     lpCmdLine;

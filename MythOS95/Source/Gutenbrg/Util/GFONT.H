@@ -63,8 +63,15 @@
 #define YY_STRING               101
 
 
-#define FLAGS_QUIET     0x1
-#define FLAGS_INVERSE   0x2
+#define FLAGS_QUIET             0x1
+#define FLAGS_INVERSE           0x2
+
+#define FLAGS_TT_BOLD           0x10000
+#define FLAGS_TT_ITALIC         0x20000
+#define FLAGS_TT_UNDERLINE      0x40000
+#define FLAGS_TT_STRIKEOUT      0x80000
+#define FLAGS_TT_OEMCHARSET     0x100000
+#define FLAGS_TT_CP850          0x200000
 
 #endif
 

@@ -93,7 +93,7 @@ public:
     ulong   count;
     ushort  tc[8];
     ushort  istxt[8];
-    Flx16   heights[8];
+    float   heights[8];
 
     void setup(TerrEditDoc *pd) { pDoc=pd; }
 
@@ -255,7 +255,7 @@ public:
     ulong   count;
     ushort  tc[8];
     ushort  istxt[8];
-    Flx16   angles[8];
+    float   angles[8];
 
     void setup(TerrEditDoc *pd) { pDoc=pd; }
 

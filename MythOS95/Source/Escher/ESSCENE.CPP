@@ -41,7 +41,7 @@
 //같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같�
 //
 //                                Includes
-//                                
+//
 //같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같�
 
 #include "escher.hpp"
@@ -238,7 +238,7 @@ esch_error_codes EschScene::load(const char *fname, const char *sname,
         }
 
         if (iff.chunkid == iff.makeid('F','O','R','M')
-                 && iff.formid == iff.makeid('E','S','E','N'))
+            && iff.formid == iff.makeid('E','S','E','N'))
         {
             err=load(&iff,sname,pal,flgs);
             if (!err
@@ -271,8 +271,10 @@ esch_error_codes EschScene::load(XFParseIFF *iff, const char *sname,
 
 //컴 Verify correct form
     if (iff->chunkid != iff->makeid('F','O','R','M')
-             || iff->formid != iff->makeid('E','S','E','N'))
+        || iff->formid != iff->makeid('E','S','E','N'))
+    {
         return ESCH_ERR_NOTFOUND;
+    }
 
 //컴 Enter FORM, find header, verify name if any.
     iff->enterform();
@@ -303,7 +305,7 @@ esch_error_codes EschScene::load(XFParseIFF *iff, const char *sname,
     flags |= ESCH_SCENE_OWNSDATA;
 
     //컴 Setup counters
-    if (flgs & ESCH_SCENELD_MESHES && header.nobjects) 
+    if (flgs & (ESCH_SCENELD_MESHES|ESCH_SCENELD_SKELETON) && header.nobjects)
     {
         nmeshes = header.nobjects;
 
@@ -338,11 +340,59 @@ esch_error_codes EschScene::load(XFParseIFF *iff, const char *sname,
     //컴 Scan and load chunks in form
     while (iff->next() == XF_ERR_NONE)
     {
-        
+
         //컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴 Meshes
-        if (iff->chunkid == iff->makeid('F','O','R','M') 
-            && iff->formid == iff->makeid('E','M','S','H') 
-            && flgs & ESCH_SCENELD_MESHES)
+        if (iff->chunkid == iff->makeid('F','O','R','M')
+            && iff->formid == iff->makeid('E','M','S','H')
+            && (flgs & ESCH_SCENELD_SKELETON))
+        {
+            EschKeyframeDraw    *m;
+
+            m = new EschKeyframeDraw;
+            if (!m)
+            {
+                err=ESCH_ERR_NOMEMORY;
+                goto error_exit;
+            }
+
+
+            dword ctrlfl = ESCH_MSHLD_ALL;
+
+            if (flgs & ESCH_SCENELD_NOMFTXT)
+                ctrlfl &= ~ESCH_MSHLD_USEMFTXT;
+
+            if (flgs & ESCH_SCENELD_NOSHARETXT)
+                ctrlfl &= ~ESCH_MSHLD_SHARETXT;
+
+            err=m->load(iff,0,pal,0,pname,ctrlfl);
+            if (err)
+            {
+                delete m;
+                goto error_exit;
+            }
+
+            if (!*pname || !hier)
+            {
+                // Root object or not using hierarchies
+
+                if (meshes)
+                    m->sibling(meshes);
+                else
+                    meshes=m;
+            }
+            else
+            {
+                // Need to save for later patchup
+
+                strncpy(hier[nmshs].pname,pname,ESCH_MAX_NAME);
+                hier[nmshs].m = m;
+            }
+
+            nmshs++;
+        }
+        else if (iff->chunkid == iff->makeid('F','O','R','M')
+                 && iff->formid == iff->makeid('E','M','S','H')
+                 && flgs & ESCH_SCENELD_MESHES)
         {
             EschMeshDraw    *m;
 
@@ -390,11 +440,12 @@ esch_error_codes EschScene::load(XFParseIFF *iff, const char *sname,
         }
 
         //컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴� Cameras
-        else if (iff->chunkid == iff->makeid('E','C','A','M')
+        else if ((iff->chunkid == iff->makeid('E','C','A','M')
+                  || iff->chunkid == iff->makeid('E','C','A','1'))
                  && flgs & ESCH_SCENELD_CAMERAS)
         {
             EschCamera  *c;
-            
+
             if (flgs & ESCH_SCENELD_CAMSEX)
                 c = new EschCameraEx;
             else
@@ -422,32 +473,62 @@ esch_error_codes EschScene::load(XFParseIFF *iff, const char *sname,
         //컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴 Lights
         else if (( iff->chunkid == iff->makeid('E','A','M','B')
                    || iff->chunkid == iff->makeid('E','V','E','C')
+                   || iff->chunkid == iff->makeid('E','V','E','1')
                    || iff->chunkid == iff->makeid('E','F','P','T')
+                   || iff->chunkid == iff->makeid('E','F','P','1')
                    || iff->chunkid == iff->makeid('E','F','A','T')
+                   || iff->chunkid == iff->makeid('E','F','A','1')
                    || iff->chunkid == iff->makeid('E','F','S','P')
+                   || iff->chunkid == iff->makeid('E','F','S','1')
                    || iff->chunkid == iff->makeid('E','P','N','T')
+                   || iff->chunkid == iff->makeid('E','P','N','1')
                    || iff->chunkid == iff->makeid('E','A','T','N')
-                   || iff->chunkid == iff->makeid('E','S','P','T') )
+                   || iff->chunkid == iff->makeid('E','A','T','1')
+                   || iff->chunkid == iff->makeid('E','S','P','T')
+                   || iff->chunkid == iff->makeid('E','S','P','1') )
                  && flgs & ESCH_SCENELD_LIGHTS)
         {
             EschLight   *l=0;
-            
+
             if (iff->chunkid == iff->makeid('E','A','M','B'))
+            {
                 l = new EschLight;
-            else if (iff->chunkid == iff->makeid('E','V','E','C'))
+            }
+            else if (iff->chunkid == iff->makeid('E','V','E','C')
+                     || iff->chunkid == iff->makeid('E','V','E','1'))
+            {
                 l = (EschLight*)new EschVectorLight;
-            else if (iff->chunkid == iff->makeid('E','F','P','T'))
+            }
+            else if (iff->chunkid == iff->makeid('E','F','P','T')
+                     || iff->chunkid == iff->makeid('E','F','P','1'))
+            {
                 l = (EschLight*)new EschFastPointLight;
-            else if (iff->chunkid == iff->makeid('E','F','A','T'))
+            }
+            else if (iff->chunkid == iff->makeid('E','F','A','T')
+                     || iff->chunkid == iff->makeid('E','F','A','1'))
+            {
                 l = (EschLight*)new EschFastAttenLight;
-            else if (iff->chunkid == iff->makeid('E','F','S','P'))
+            }
+            else if (iff->chunkid == iff->makeid('E','F','S','P')
+                     || iff->chunkid == iff->makeid('E','F','S','1'))
+            {
                l = (EschLight*)new EschFastSpotLight;
-            else if (iff->chunkid == iff->makeid('E','P','N','T'))
+            }
+            else if (iff->chunkid == iff->makeid('E','P','N','T')
+                     || iff->chunkid == iff->makeid('E','P','N','1'))
+            {
                 l = (EschLight*)new EschPointLight;
-            else if (iff->chunkid == iff->makeid('E','A','T','N'))
+            }
+            else if (iff->chunkid == iff->makeid('E','A','T','N')
+                     || iff->chunkid == iff->makeid('E','A','T','1'))
+            {
                 l = (EschLight*)new EschAttenLight;
-            else if (iff->chunkid == iff->makeid('E','S','P','T'))
+            }
+            else if (iff->chunkid == iff->makeid('E','S','P','T')
+                     || iff->chunkid == iff->makeid('E','S','P','1'))
+            {
                 l = (EschLight*)new EschSpotLight;
+            }
 
             if (!l)
             {
@@ -468,6 +549,18 @@ esch_error_codes EschScene::load(XFParseIFF *iff, const char *sname,
 
             if (iff->chunkid != iff->makeid('E','A','M','B'))
                 nlgts++;
+        }
+        else if (iff->chunkid == iff->makeid('F','O','R','M')
+                 && iff->formid == iff->makeid('K','E','Y','F'))
+        {
+            if (EschKeyframeMan)
+            {
+                err=EschKeyframeMan->load(iff);
+                if (err)
+                {
+                    goto error_exit;
+                }
+            }
         }
     }
 
@@ -521,7 +614,7 @@ esch_error_codes EschScene::load(XFParseIFF *iff, const char *sname,
     //컴 Verify counts are as expected
     if (ncams != ncameras || nmshs != nmeshes || nlgts != nlights)
         return ESCH_ERR_MISSINGITEMS;
-               
+
     return ESCH_ERR_NONE;
 
     // Handle error return during load, must free partial data

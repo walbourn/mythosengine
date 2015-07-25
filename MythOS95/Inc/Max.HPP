@@ -53,6 +53,9 @@
 
 #include "maxevt.hpp"
 #include "maxdevs.hpp"
+#include "maxjoy.hpp"
+#include "maxkb.hpp"
+#include "maxmouse.hpp"
 #include "maxesrc.hpp"
 #include "maxvmap.hpp"
 

@@ -13,6 +13,10 @@ if %1.==courier. goto courier
 if %1.==timesnr. goto timesnr
 if %1.==oldstyle. goto oldstyle
 if %1.==scrawl. goto scrawl
+if %1.==ttarial. goto ttarial
+if %1.==ttcourier. goto ttcourier
+if %1.==tttimesnr. goto tttimesnr
+if %1.==ttfreehand. goto ttfreehand
 goto error
 rem 컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴 UNIX BDF
 :bdf
@@ -52,6 +56,42 @@ rem 컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴 Scrawl
 obj\gfont -q scrawl.bmp 7x12.iff -n 7x12 -w7 -h12 -x1 -y83 -p1 -s33 -c94 -r47 
 obj\gfont -q scrawl.bmp 9x15.iff -n 9x15 -w9 -h15 -x1 -y130 -p1 -s33 -c94 -r47 
 obj\gfont -q scrawl.bmp 12x24.iff -n 12x24 -w12 -h24 -x1 -y183 -p1 -s33 -c94 -r47 
+goto done
+rem 컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴 TrueType Arial
+:ttarial
+obj\gfont -q "Arial" 3x6.iff -n 3x6 -h6
+obj\gfont -q "Arial" 5x8.iff -n 5x8 -h8
+obj\gfont -q "Arial" 7x12.iff -n 7x12 -h12
+obj\gfont -q "Arial" 8x13.iff -n 8x13 -h13
+obj\gfont -q "Arial" 9x15.iff -n 9x15 -h15
+obj\gfont -q "Arial" 12x24.iff -n 12x24 -h24
+goto done
+rem 컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴 TrueType Courier New
+:ttcourier
+obj\gfont -q "Courier New" 3x6.iff -n 3x6 -h6
+obj\gfont -q "Courier New" 5x8.iff -n 5x8 -h8
+obj\gfont -q "Courier New" 7x12.iff -n 7x12 -h12
+obj\gfont -q "Courier New" 8x13.iff -n 8x13 -h13
+obj\gfont -q "Courier New" 9x15.iff -n 9x15 -h15
+obj\gfont -q "Courier New" 12x24.iff -n 12x24 -h24
+goto done
+rem 컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴 TrueType Times New Roman
+:tttimesnr
+obj\gfont -q "Times New Roman" 3x6.iff -n 3x6 -h6
+obj\gfont -q "Times New Roman" 5x8.iff -n 5x8 -h8
+obj\gfont -q "Times New Roman" 7x12.iff -n 7x12 -h12
+obj\gfont -q "Times New Roman" 8x13.iff -n 8x13 -h13
+obj\gfont -q "Times New Roman" 9x15.iff -n 9x15 -h15
+obj\gfont -q "Times New Roman" 12x24.iff -n 12x24 -h24
+goto done
+rem 컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴 TrueType Freehand 521 BT
+:ttfreehand
+obj\gfont -q "Freehand 521 BT" 3x6.iff -n 3x6 -h6
+obj\gfont -q "Freehand 521 BT" 5x8.iff -n 5x8 -h8
+obj\gfont -q "Freehand 521 BT" 7x12.iff -n 7x12 -h12
+obj\gfont -q "Freehand 521 BT" 8x13.iff -n 8x13 -h13
+obj\gfont -q "Freehand 521 BT" 9x15.iff -n 9x15 -h15
+obj\gfont -q "Freehand 521 BT" 12x24.iff -n 12x24 -h24
 goto done
 :done
 obj\gstring -q test.cst

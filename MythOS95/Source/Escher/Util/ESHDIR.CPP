@@ -354,7 +354,7 @@ STATIC void directory(XFParseIFF &iff)
         }
         //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Mesh
         else if ((iff.makeid('F','O','R','M') == iff.chunkid)
-            && (iff.makeid('E','M','S','H') == iff.formid))
+                 && (iff.makeid('E','M','S','H') == iff.formid))
         {
             EschFileMeshHDR     mheader;
 
@@ -372,7 +372,7 @@ STATIC void directory(XFParseIFF &iff)
 
                 while (iff.next() == XF_ERR_NONE)
                 {
-
+                    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Header
                     if (iff.makeid('H','D','R',' ') == iff.chunkid)
                     {
                         if (iff.chunkSize != sizeof(EschFileMeshHDR))
@@ -393,68 +393,119 @@ STATIC void directory(XFParseIFF &iff)
                             pause();
                         }
                     }
-                    else if (iff.makeid('E','X','N','T') == iff.chunkid)
+                    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Extents
+                    else if (iff.makeid('E','X','N','T') == iff.chunkid
+                             || iff.makeid('E','X','N','1') == iff.chunkid)
                     {
                         EschFileMeshEXNT    mextents;
 
-                        if (iff.chunkSize != sizeof(EschFileMeshEXNT))
+                        if (iff.makeid('E','X','N','1') == iff.chunkid)
                         {
-                            print_error(iff,"Object extents chunk not valid, incorrect size");
-                        }
-                        else if (iff.read(&mextents))
-                        {
-                            print_error(iff,"Problem reading object extents");
+                            if (iff.chunkSize != sizeof(mextents))
+                            {
+                                print_error(iff,"Object extents chunk not valid, incorrect size");
+                            }
+                            else if (iff.read(&mextents))
+                            {
+                                print_error(iff,"Problem reading object extents");
+                            }
                         }
                         else
-                        {  
-                            cout << "³  CEN: "  << (float)mextents.cenx << " "
-                                                << (float)mextents.ceny << " "
-                                                << (float)mextents.cenz << "\n";
-                            pause();
-                            cout << "³  RAD: " << (float)mextents.extent_radius << "\n";
-                            pause();
-                            cout << "³  MIN: " << (float)mextents.minx << " "
-                                               << (float)mextents.miny << " "
-                                               << (float)mextents.minz << "\n";
-                            pause();
-                            cout << "³  MAX: " << (float)mextents.maxx << " "
-                                               << (float)mextents.maxy << " "
-                                               << (float)mextents.maxz << "\n";
-                            pause();
+                        {
+                            EschFileMeshEXNTV1  v1;
+
+                            if (iff.chunkSize != sizeof(v1))
+                            {
+                                print_error(iff,"Object extents chunk not valid, incorrect size");
+                            }
+                            else if (iff.read(&v1))
+                            {
+                                print_error(iff,"Problem reading object extents");
+                            }
+                            else
+                            {
+                                mextents.cenx = v1.cenx / 65536.0f;
+                                mextents.ceny = v1.ceny / 65536.0f;
+                                mextents.cenz = v1.cenz / 65536.0f;
+                                mextents.extent_radius = v1.extent_radius / 65536.0f;
+                                mextents.minx = v1.minx / 65536.0f;
+                                mextents.miny = v1.miny / 65536.0f;
+                                mextents.minz = v1.minz / 65536.0f;
+                                mextents.maxx = v1.maxx / 65536.0f;
+                                mextents.maxy = v1.maxy / 65536.0f;
+                                mextents.maxz = v1.maxz / 65536.0f;
+                            }
                         }
+
+                        cout << "³  CEN: " << mextents.cenx << " "
+                                           << mextents.ceny << " "
+                                           << mextents.cenz << "\n";
+                        pause();
+                        cout << "³  RAD: " << mextents.extent_radius << "\n";
+                        pause();
+                        cout << "³  MIN: " << mextents.minx << " "
+                                           << mextents.miny << " "
+                                           << mextents.minz << "\n";
+                        pause();
+                        cout << "³  MAX: " << mextents.maxx << " "
+                                           << mextents.maxy << " "
+                                           << mextents.maxz << "\n";
+                        pause();
                     }
-                    else if (iff.makeid('M','T','R','X') == iff.chunkid)
+                    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Matrix
+                    else if (iff.makeid('M','T','R','X') == iff.chunkid
+                             || iff.makeid('M','T','R','1') == iff.chunkid)
                     {
                         EschMatrix          mtx;
 
-                        if (iff.chunkSize != sizeof(EschMatrix))
+                        if (iff.makeid('M','T','R','1') == iff.chunkid)
                         {
-                            print_error(iff,"Matrix chunk not valid, incorrect size");
-                        }
-                        else if (iff.read(&mtx))
-                        {
-                            print_error(iff,"Problem reading matrix");
+                            if (iff.chunkSize != sizeof(mtx))
+                            {
+                                print_error(iff,"Matrix chunk not valid, incorrect size");
+                            }
+                            else if (iff.read(&mtx))
+                            {
+                                print_error(iff,"Problem reading matrix");
+                            }
                         }
                         else
-                        {  
-                            cout << "³ MTRX: " << (float)mtx.mtx[ESCH_MTX_A] << " "
-                                               << (float)mtx.mtx[ESCH_MTX_B] << " "
-                                               << (float)mtx.mtx[ESCH_MTX_C] << "\n";
-                            pause();
-                            cout << "³       " << (float)mtx.mtx[ESCH_MTX_D] << " "
-                                               << (float)mtx.mtx[ESCH_MTX_E] << " "
-                                               << (float)mtx.mtx[ESCH_MTX_F] << "\n";
-                            pause();
-                            cout << "³       " << (float)mtx.mtx[ESCH_MTX_G] << " "
-                                               << (float)mtx.mtx[ESCH_MTX_H] << " "
-                                               << (float)mtx.mtx[ESCH_MTX_I] << "\n";
-                            pause();
-                            cout << "³       " << (float)mtx.mtx[ESCH_MTX_J] << " "
-                                               << (float)mtx.mtx[ESCH_MTX_K] << " "
-                                               << (float)mtx.mtx[ESCH_MTX_L] << "\n";
-                            pause();
+                        {
+                            EschMatrixV1    v1;
+
+                            if (iff.chunkSize != sizeof(v1))
+                            {
+                                print_error(iff,"Matrix chunk not valid, incorrect size");
+                            }
+                            else if (iff.read(&v1))
+                            {
+                                print_error(iff,"Problem reading matrix");
+                            }
+                            else
+                            {
+                                for(int i=0; i < ESCH_MTX_NUM; i++)
+                                    mtx.mtx[i] = v1.mtx[i] / 65536.0f;
+                            }
                         }
+
+                        cout << "³ MTRX: " << mtx.mtx[ESCH_MTX_A] << " "
+                                           << mtx.mtx[ESCH_MTX_B] << " "
+                                           << mtx.mtx[ESCH_MTX_C] << "\n";
+                        pause();
+                        cout << "³       " << mtx.mtx[ESCH_MTX_D] << " "
+                                           << mtx.mtx[ESCH_MTX_E] << " "
+                                           << mtx.mtx[ESCH_MTX_F] << "\n";
+                        pause();
+                        cout << "³       " << mtx.mtx[ESCH_MTX_G] << " "
+                                           << mtx.mtx[ESCH_MTX_H] << " "
+                                           << mtx.mtx[ESCH_MTX_I] << "\n";
+                        pause();
+                        cout << "³       " << mtx.mtx[ESCH_MTX_J] << " "
+                                           << mtx.mtx[ESCH_MTX_K] << " "
+                                           << mtx.mtx[ESCH_MTX_L] << "\n";
+                        pause();
                     }
+                    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Hierarchy
                     else if (iff.makeid('H','I','E','R') == iff.chunkid)
                     {
                         EschFileMeshHIER    ehier;
@@ -473,6 +524,7 @@ STATIC void directory(XFParseIFF &iff)
                             pause();
                         }
                     }
+                    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Materials
                     else if (iff.makeid('M','T','L',' ') == iff.chunkid)
                     {
                         if (iff.chunkSize != (sizeof(EschFileMeshMTL) * mheader.nmtls))
@@ -522,49 +574,89 @@ STATIC void directory(XFParseIFF &iff)
             }
         }
         //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Camera
-        else if (iff.makeid('E','C','A','M') == iff.chunkid)
+        else if (iff.makeid('E','C','A','M') == iff.chunkid
+                 || iff.makeid('E','C','A','1') == iff.chunkid)
         {
             EschFileCamera      cdata;
 
-            if (iff.chunkSize != sizeof(EschFileCamera))
+            if (iff.makeid('E','C','A','1') == iff.chunkid)
             {
-                print_error(iff,"Camera chunk not valid, incorrect size");
-            }
-            else if (iff.read(&cdata))
-            {
-                print_error(iff,"Problem reading camera chunk");
+                if (iff.chunkSize != sizeof(cdata))
+                {
+                    print_error(iff,"Camera chunk not valid, incorrect size");
+                }
+                else if (iff.read(&cdata))
+                {
+                    print_error(iff,"Problem reading camera chunk");
+                }
             }
             else
             {
-                cout << "Camera";
-                for(i=sizeof("Camera")-1; i < MAXCOLUMN; i++)
-                    cout << "Ä";
-                cout << "\n";
-                pause();
+                EschFileCameraV1    v1;
 
-                cout << "³" << cdata.name << "\n";
-                pause();
-                cout << "³   POS: " << (float) cdata.x;
-                cout << " " << (float) cdata.y;
-                cout << " " << (float) cdata.z << "\n";
-                pause();
-                cout << "³   DIR: " << (float) cdata.diri;
-                cout << " " << (float) cdata.dirj;
-                cout << " " << (float) cdata.dirk << "\n";
-                pause();
-                cout << "³   TOP: " << (float) cdata.topi;
-                cout << " " << (float) cdata.topj;
-                cout << " " << (float) cdata.topk << "\n";
-                pause();
-                cout << "³   FOV: " << (float) cdata.fov << "\n";
-                pause();
+                if (iff.chunkSize != sizeof(v1))
+                {
+                    print_error(iff,"Camera chunk not valid, incorrect size");
+                }
+                else if (iff.read(&v1))
+                {
+                    print_error(iff,"Problem reading camera chunk");
+                }
+                else
+                {
+                    strncpy(cdata.name,v1.name,sizeof(v1.name));
+                    cdata.flags = v1.flags;
 
-                cout << "À";
-                for(i=1; i < MAXCOLUMN; i++)
-                    cout << "Ä";
-                cout << "\n";
-                pause();
+                    cdata.x = v1.x / 65536.0f;
+                    cdata.y = v1.y / 65536.0f;
+                    cdata.z = v1.z / 65536.0f;
+
+                    cdata.diri = v1.diri / 65536.0f;
+                    cdata.dirj = v1.dirj / 65536.0f;
+                    cdata.dirk = v1.dirk / 65536.0f;
+
+                    cdata.topi = v1.topi / 65536.0f;
+                    cdata.topj = v1.topj / 65536.0f;
+                    cdata.topk = v1.topk / 65536.0f;
+
+                    cdata.fov = v1.fov / 65536.0f;
+                }
             }
+
+            cout << "Camera";
+            for(i=sizeof("Camera")-1; i < MAXCOLUMN; i++)
+                cout << "Ä";
+            cout << "\n";
+            pause();
+
+            cout << "³" << cdata.name;
+            cout.flush();
+            printf( "\tFLAGS: %x\n",cdata.flags);
+            pause();
+
+            cout << "³   POS: " << cdata.x
+                 << " " << cdata.y
+                 << " " << cdata.z << "\n";
+
+            pause();
+            cout << "³   DIR: " << (float) cdata.diri
+                 << " " << (float) cdata.dirj
+                 << " " << (float) cdata.dirk << "\n";
+            pause();
+
+            cout << "³   TOP: " << (float) cdata.topi
+                 << " " << (float) cdata.topj
+                 << " " << (float) cdata.topk << "\n";
+            pause();
+
+            cout << "³   FOV: " << (float) cdata.fov << "\n";
+            pause();
+
+            cout << "À";
+            for(i=1; i < MAXCOLUMN; i++)
+                cout << "Ä";
+            cout << "\n";
+            pause();
         }
         //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Ambient Light
         else if (iff.makeid('E','A','M','B') == iff.chunkid)
@@ -604,211 +696,339 @@ STATIC void directory(XFParseIFF &iff)
             }
         }
         //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Vector Light
-        else if (iff.makeid('E','V','E','C') == iff.chunkid)
+        else if (iff.makeid('E','V','E','C') == iff.chunkid
+                 || iff.makeid('E','V','E','1') == iff.chunkid)
         {
             EschFileLightVect   vdata;
 
-            if (iff.chunkSize != sizeof(EschFileLightVect))
+            if (iff.makeid('E','V','E','1') == iff.chunkid)
             {
-                print_error(iff,"Vector light chunk not valid, incorrect size");
-            }
-            else if (iff.read(&vdata))
-            {
-                print_error(iff,"Problem reading vector light chunk");
+                if (iff.chunkSize != sizeof(vdata))
+                {
+                    print_error(iff,"Vector light chunk not valid, incorrect size");
+                }
+                else if (iff.read(&vdata))
+                {
+                    print_error(iff,"Problem reading vector light chunk");
+                }
             }
             else
             {
-                cout << "Vector Light";
-                for(i=sizeof("Vector Light")-1; i < MAXCOLUMN; i++)
-                    cout << "Ä";
-                cout << "\n";
-                pause();
-               
-                cout << "³" << vdata.name;
-                cout.flush();
-                printf( "\tFLAGS: %x\n",vdata.flags);
-                pause();
-                cout << "³COLOR: " << (vdata.color & 0xff) << " "
-                                   << ((vdata.color >> 8) & 0xff) << " "
-                                   << ((vdata.color >> 16) & 0xff) << "\n";
-                pause();
-                cout << "³  DIR: " << (float)vdata.i << " ";
-                cout << (float)vdata.j << " ";
-                cout << (float)vdata.k << "\n";
-                pause();
-               
-                cout << "À";
-                for(i=1; i < MAXCOLUMN; i++)
-                    cout << "Ä";
-                cout << "\n";
-                pause();
+                EschFileLightVectV1 v1;
+
+                if (iff.chunkSize != sizeof(v1))
+                {
+                    print_error(iff,"Vector light chunk not valid, incorrect size");
+                }
+                else if (iff.read(&v1))
+                {
+                    print_error(iff,"Problem reading vector light chunk");
+                }
+                else
+                {
+                    strncpy(vdata.name,v1.name,sizeof(v1.name));
+                    vdata.flags = v1.flags;
+                    vdata.color = v1.color;
+
+                    vdata.i = v1.i / 65536.0f;
+                    vdata.j = v1.j / 65536.0f;
+                    vdata.k = v1.k / 65536.0f;
+                }
             }
+
+            cout << "Vector Light";
+            for(i=sizeof("Vector Light")-1; i < MAXCOLUMN; i++)
+                cout << "Ä";
+            cout << "\n";
+            pause();
+        
+            cout << "³" << vdata.name;
+            cout.flush();
+            printf( "\tFLAGS: %x\n",vdata.flags);
+            pause();
+            cout << "³COLOR: " << (vdata.color & 0xff) << " "
+                               << ((vdata.color >> 8) & 0xff) << " "
+                               << ((vdata.color >> 16) & 0xff) << "\n";
+            pause();
+            cout << "³  DIR: " << vdata.i << " "
+                 << vdata.j << " "
+                 << vdata.k << "\n";
+            pause();
+        
+            cout << "À";
+            for(i=1; i < MAXCOLUMN; i++)
+                cout << "Ä";
+            cout << "\n";
+            pause();
         }
         //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ (Fast) Point Light
         else if (iff.makeid('E','P','N','T') == iff.chunkid
-                 || iff.makeid('E','F','P','T') == iff.chunkid)
+                 || iff.makeid('E','P','N','1') == iff.chunkid
+                 || iff.makeid('E','F','P','T') == iff.chunkid
+                 || iff.makeid('E','F','P','1') == iff.chunkid)
         {
             EschFileLightPoint  pdata;
 
-            if (iff.chunkSize != sizeof(EschFileLightPoint))
+            if (iff.makeid('E','P','N','1') == iff.chunkid
+                || iff.makeid('E','F','P','1') == iff.chunkid)
             {
-                print_error(iff,"Point light chunk not valid, incorrect size");
-            }
-            else if (iff.read(&pdata))
-            {
-                print_error(iff,"Problem reading point light chunk");
+                if (iff.chunkSize != sizeof(pdata))
+                {
+                    print_error(iff,"Point light chunk not valid, incorrect size");
+                }
+                else if (iff.read(&pdata))
+                {
+                    print_error(iff,"Problem reading point light chunk");
+                }
             }
             else
             {
-                if (iff.makeid('E','F','P','T') == iff.chunkid)
+                EschFileLightPointV1    v1;
+
+                if (iff.chunkSize != sizeof(v1))
                 {
-                    cout << "Fast Point Light";
-                    for(i=sizeof("Fast Point Light")-1; i < MAXCOLUMN; i++)
-                        cout << "Ä";
+                    print_error(iff,"Point light chunk not valid, incorrect size");
+                }
+                else if (iff.read(&v1))
+                {
+                    print_error(iff,"Problem reading point light chunk");
                 }
                 else
                 {
-                    cout << "Point Light";
-                    for(i=sizeof("Point Light")-1; i < MAXCOLUMN; i++)
-                        cout << "Ä";
+                    strncpy(pdata.name,v1.name,sizeof(v1.name));
+                    pdata.flags = v1.flags;
+                    pdata.color = v1.color;
+
+                    pdata.x = v1.x / 65536.0f;
+                    pdata.y = v1.y / 65536.0f;
+                    pdata.z = v1.z / 65536.0f;
                 }
-                cout << "\n";
-                pause();
-               
-                cout << "³" << pdata.name;
-                cout.flush();
-                printf( "\tFLAGS: %x\n",pdata.flags);
-                pause();
-                cout << "³COLOR: " << (pdata.color & 0xff) << " "
-                                   << ((pdata.color >> 8) & 0xff) << " "
-                                   << ((pdata.color >> 16) & 0xff) << "\n";
-                pause();
-                cout << "³  POS: " << (float)pdata.x << " ";
-                cout << (float)pdata.y << " ";
-                cout << (float)pdata.z << "\n";
-                pause();
-               
-                cout << "À";
-                for(i=1; i < MAXCOLUMN; i++)
-                    cout << "Ä";
-                cout << "\n";
-                pause();
             }
+
+            if (iff.makeid('E','F','P','T') == iff.chunkid
+                || iff.makeid('E','F','P','1') == iff.chunkid)
+            {
+                cout << "Fast Point Light";
+                for(i=sizeof("Fast Point Light")-1; i < MAXCOLUMN; i++)
+                    cout << "Ä";
+            }
+            else
+            {
+                cout << "Point Light";
+                for(i=sizeof("Point Light")-1; i < MAXCOLUMN; i++)
+                    cout << "Ä";
+            }
+            cout << "\n";
+            pause();
+            
+            cout << "³" << pdata.name;
+            cout.flush();
+            printf( "\tFLAGS: %x\n",pdata.flags);
+            pause();
+            cout << "³COLOR: " << (pdata.color & 0xff) << " "
+                               << ((pdata.color >> 8) & 0xff) << " "
+                               << ((pdata.color >> 16) & 0xff) << "\n";
+            pause();
+
+            cout << "³  POS: " << (float)pdata.x << " "
+                 << pdata.y << " "
+                 << pdata.z << "\n";
+            pause();
+            
+            cout << "À";
+            for(i=1; i < MAXCOLUMN; i++)
+                cout << "Ä";
+            cout << "\n";
+            pause();
         }
         //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ (Fast) Attenuated Light
-        else if (iff.makeid('E','A','T','N') == iff.chunkid
-                 || iff.makeid('E','F','A','T') == iff.chunkid)
+        else if (iff.makeid('E','A','T','N') == iff.chunkid 
+                 || iff.makeid('E','A','T','1') == iff.chunkid
+                 || iff.makeid('E','F','A','T') == iff.chunkid
+                 || iff.makeid('E','F','A','1') == iff.chunkid)
         {
             EschFileLightAtten  adata;
 
-            if (iff.chunkSize != sizeof(EschFileLightAtten))
+            if (iff.makeid('E','A','T','1') == iff.chunkid
+                || iff.makeid('E','F','A','1') == iff.chunkid)
             {
-                print_error(iff,"Attenuated light chunk not valid, incorrect size");
-            }
-            else if (iff.read(&adata))
-            {
-                print_error(iff,"Problem reading attenuated light chunk");
+                if (iff.chunkSize != sizeof(adata))
+                {
+                    print_error(iff,"Attenuated light chunk not valid, incorrect size");
+                }
+                else if (iff.read(&adata))
+                {
+                    print_error(iff,"Problem reading attenuated light chunk");
+                }
             }
             else
             {
-                if (iff.makeid('E','F','A','T') == iff.chunkid)
+                EschFileLightAttenV1    v1;
+
+                if (iff.chunkSize != sizeof(v1))
                 {
-                    cout << "Fast Atten Light";
-                    for(i=sizeof("Fast Atten Light")-1; i < MAXCOLUMN; i++)
-                        cout << "Ä";
+                    print_error(iff,"Attenuated light chunk not valid, incorrect size");
+                }
+                else if (iff.read(&v1))
+                {
+                    print_error(iff,"Problem reading attenuated light chunk");
                 }
                 else
                 {
-                    cout << "Atten Light";
-                    for(i=sizeof("Atten Light")-1; i < MAXCOLUMN; i++)
-                        cout << "Ä";
+                    strncpy(adata.name,v1.name,sizeof(v1.name));
+                    adata.flags = v1.flags;
+                    adata.color = v1.color;
+
+                    adata.x = v1.x / 65536.0f;
+                    adata.y = v1.y / 65536.0f;
+                    adata.z = v1.z / 65536.0f;
+
+                    adata.inner = v1.inner / 65536.0f;
+                    adata.outer = v1.outer / 65536.0f;
                 }
-                cout << "\n";
-                pause();
-               
-                cout << "³" << adata.name;
-                cout.flush();
-                printf( "\tFLAGS: %x\n",adata.flags);
-                pause();
-                cout << "³COLOR: " << (adata.color & 0xff) << " "
-                                   << ((adata.color >> 8) & 0xff) << " "
-                                   << ((adata.color >> 16) & 0xff) << "\n";
-                pause();
-                cout << "³  POS: " << (float)adata.x << " ";
-                cout << (float)adata.y << " ";
-                cout << (float)adata.z << "\n";
-                pause();
-                cout << "³ RNGS: " << (float)adata.inner << " ";
-                cout << (float)adata.outer << "\n";
-                pause();
-               
-                cout << "À";
-                for(i=1; i < MAXCOLUMN; i++)
-                    cout << "Ä";
-                cout << "\n";
-                pause();
             }
+
+            if (iff.makeid('E','F','A','T') == iff.chunkid
+                || iff.makeid('E','F','A','1') == iff.chunkid)
+            {
+                cout << "Fast Atten Light";
+                for(i=sizeof("Fast Atten Light")-1; i < MAXCOLUMN; i++)
+                    cout << "Ä";
+            }
+            else
+            {
+                cout << "Atten Light";
+                for(i=sizeof("Atten Light")-1; i < MAXCOLUMN; i++)
+                    cout << "Ä";
+            }
+            cout << "\n";
+            pause();
+            
+            cout << "³" << adata.name;
+            cout.flush();
+            printf( "\tFLAGS: %x\n",adata.flags);
+            pause();
+
+            cout << "³COLOR: " << (adata.color & 0xff) << " "
+                                << ((adata.color >> 8) & 0xff) << " "
+                                << ((adata.color >> 16) & 0xff) << "\n";
+            pause();
+            cout << "³  POS: " << adata.x << " "
+                 << adata.y << " "
+                 << adata.z << "\n";
+            pause();
+
+            cout << "³ RNGS: " << adata.inner << " "
+                 << adata.outer << "\n";
+            pause();
+            
+            cout << "À";
+            for(i=1; i < MAXCOLUMN; i++)
+                cout << "Ä";
+            cout << "\n";
+            pause();
         }
         //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Spot Light
         else if (iff.makeid('E','S','P','T') == iff.chunkid
-                 || iff.makeid('E','F','S','P') == iff.chunkid)
+                 || iff.makeid('E','S','P','1') == iff.chunkid 
+                 || iff.makeid('E','F','S','P') == iff.chunkid
+                 || iff.makeid('E','F','S','1') == iff.chunkid)
         {
             EschFileLightSpot   sdata;
 
-            if (iff.chunkSize != sizeof(EschFileLightSpot))
+            if (iff.makeid('E','S','P','1') == iff.chunkid 
+                || iff.makeid('E','F','S','1') == iff.chunkid)
             {
-                print_error(iff,"Spot light chunk not valid, incorrect size");
-            }
-            else if (iff.read(&sdata))
-            {
-                print_error(iff,"Problem reading spot light chunk");
+                if (iff.chunkSize != sizeof(sdata))
+                {
+                    print_error(iff,"Spot light chunk not valid, incorrect size");
+                }
+                else if (iff.read(&sdata))
+                {
+                    print_error(iff,"Problem reading spot light chunk");
+                }
             }
             else
             {
-                if (iff.makeid('E','F','S','P') == iff.chunkid)
+                EschFileLightSpotV1 v1;
+
+                if (iff.chunkSize != sizeof(v1))
                 {
-                    cout << "Fast Spot Light";
-                    for(i=sizeof("Fast Spot Light")-1; i < MAXCOLUMN; i++)
-                        cout << "Ä";
+                    print_error(iff,"Spot light chunk not valid, incorrect size");
+                }
+                else if (iff.read(&v1))
+                {
+                    print_error(iff,"Problem reading spot light chunk");
                 }
                 else
                 {
-                    cout << "Spot Light";
-                    for(i=sizeof("Spot Light")-1; i < MAXCOLUMN; i++)
-                        cout << "Ä";
+                    strncpy(sdata.name,v1.name,sizeof(v1.name));
+                    sdata.flags = v1.flags;
+                    sdata.color = v1.color;
+
+                    sdata.x = v1.x / 65536.0f;
+                    sdata.y = v1.y / 65536.0f;
+                    sdata.z = v1.z / 65536.0f;
+
+                    sdata.i = v1.i / 65536.0f;
+                    sdata.j = v1.j / 65536.0f;
+                    sdata.k = v1.k / 65536.0f;
+
+                    sdata.hotspot = v1.hotspot / 65536.0f;
+                    sdata.falloff = v1.falloff / 65536.0f;
+
+                    sdata.inner = v1.inner / 65536.0f;
+                    sdata.outer = v1.outer / 65536.0f;
                 }
-                cout << "\n";
-                pause();
-               
-                cout << "³" << sdata.name;
-                cout.flush();
-                printf( "\tFLAGS: %x\n",sdata.flags);
-                pause();
-                cout << "³COLOR: " << (sdata.color & 0xff) << " "
-                                   << ((sdata.color >> 8) & 0xff) << " "
-                                   << ((sdata.color >> 16) & 0xff) << "\n";
-                pause();
-                cout << "³  POS: " << (float)sdata.x << " ";
-                cout << (float)sdata.y << " ";
-                cout << (float)sdata.z << "\n";
-                pause();
-                cout << "³  DIR: " << (float)sdata.i << " ";
-                cout << (float)sdata.j << " ";
-                cout << (float)sdata.k << "\n";
-                pause();
-                cout << "³HSPOT: " << (float)sdata.hotspot;
-                cout << "\tFALLOFF: " << (float)sdata.falloff << "\n";
-                pause();
-                cout << "³ RNGS: " << (float)sdata.inner << " ";
-                cout << (float)sdata.outer << "\n";
-                pause();
-               
-                cout << "À";
-                for(i=1; i < MAXCOLUMN; i++)
-                    cout << "Ä";
-                cout << "\n";
-                pause();
             }
+
+            if (iff.makeid('E','F','S','P') == iff.chunkid
+                || iff.makeid('E','F','S','1') == iff.chunkid)
+            {
+                cout << "Fast Spot Light";
+                for(i=sizeof("Fast Spot Light")-1; i < MAXCOLUMN; i++)
+                    cout << "Ä";
+            }
+            else
+            {
+                cout << "Spot Light";
+                for(i=sizeof("Spot Light")-1; i < MAXCOLUMN; i++)
+                    cout << "Ä";
+            }
+            cout << "\n";
+            pause();
+            
+            cout << "³" << sdata.name;
+            cout.flush();
+            printf( "\tFLAGS: %x\n",sdata.flags);
+            pause();
+            cout << "³COLOR: " << (sdata.color & 0xff) << " "
+                                << ((sdata.color >> 8) & 0xff) << " "
+                                << ((sdata.color >> 16) & 0xff) << "\n";
+            pause();
+            cout << "³  POS: " << sdata.x << " "
+                 << sdata.y << " "
+                 << sdata.z << "\n";
+            pause();
+
+            cout << "³  DIR: " << sdata.i << " "
+                 << sdata.j << " "
+                 << sdata.k << "\n";
+            pause();
+
+            cout << "³HSPOT: " << sdata.hotspot
+                 << "\tFALLOFF: " << sdata.falloff << "\n";
+            pause();
+
+            cout << "³ RNGS: " << sdata.inner << " "
+                 << sdata.outer << "\n";
+            pause();
+            
+            cout << "À";
+            for(i=1; i < MAXCOLUMN; i++)
+                cout << "Ä";
+            cout << "\n";
+            pause();
         }
         //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Terrain
         else if ((iff.makeid('F','O','R','M') == iff.chunkid)
@@ -832,32 +1052,65 @@ STATIC void directory(XFParseIFF &iff)
                 while (iff.next() == XF_ERR_NONE)
                 {
 
-                    if (iff.makeid('H','D','R',' ') == iff.chunkid)
+                    if (iff.makeid('H','D','R',' ') == iff.chunkid
+                        || iff.makeid('H','D','R','1') == iff.chunkid)
                     {
-                        if (iff.chunkSize != sizeof(EschFileTerrHDR))
+                        if (iff.makeid('H','D','R','1') == iff.chunkid)
                         {
-                            print_error(iff,"Terrain header chunk not valid, incorrect size");
+                            if (iff.chunkSize != sizeof(theader))
+                            {
+                                print_error(iff,"Terrain header chunk not valid, incorrect size");
+                            }
+                            else if (iff.read(&theader))
+                            {
+                                print_error(iff,"Problem reading terrain header");
+                            }
                         }
-                        else if (iff.read(&theader))
+                        else
                         {
-                            print_error(iff,"Problem reading terrain header");
+                            EschFileTerrHDRV1   v1;
+
+                            if (iff.chunkSize != sizeof(v1))
+                            {
+                                print_error(iff,"Terrain header chunk not valid, incorrect size");
+                            }
+                            else if (iff.read(&v1))
+                            {
+                                print_error(iff,"Problem reading terrain header");
+                            }
+                            else
+                            {
+                                strncpy(theader.name,v1.name,sizeof(v1.name));
+                                theader.flags = v1.flags;
+
+                                theader.width = v1.width;
+                                theader.depth = v1.depth;
+
+                                theader.wscale = v1.wscale / 65536.0f;
+                                theader.dscale = v1.dscale / 65536.0f;
+                                theader.hscale = v1.hscale / 65536.0f;
+
+                                strncpy(theader.palname,v1.palname,
+                                        sizeof(v1.palname));
+                            }
                         }
-                        else 
-                        {  
-                            cout << "³" << theader.name;
-                            cout.flush();
-                            printf( "\tFLAGS: %x\n",theader.flags);
-                            pause();
-                            cout << "³  SIZE: " << theader.width << " by "
-                                               << theader.depth << endl;
-                            pause();
-                            cout << "³ SCALE: X:" << (float)theader.wscale;
-                            cout << " D:" << (float)theader.dscale;
-                            cout << " H:" << (float)theader.hscale << endl;
-                            pause();
-                            cout << "³ PNAME: " << theader.palname << endl;
-                            pause();
-                        }
+
+                        cout << "³" << theader.name;
+                        cout.flush();
+                        printf( "\tFLAGS: %x\n",theader.flags);
+                        pause();
+
+                        cout << "³  SIZE: " << theader.width << " by "
+                                            << theader.depth << endl;
+                        pause();
+
+                        cout << "³ SCALE: X:" << theader.wscale
+                             << " D:" << theader.dscale
+                             << " H:" << theader.hscale << endl;
+                        pause();
+
+                        cout << "³ PNAME: " << theader.palname << endl;
+                        pause();
                     }
                     else if (iff.makeid('D','E','S','C') == iff.chunkid)
                     {
@@ -939,7 +1192,8 @@ STATIC void directory(XFParseIFF &iff)
                             pause();
                         }
                     }
-                    else if (iff.makeid('H','T','B','L') == iff.chunkid)
+                    else if (iff.makeid('H','T','B','L') == iff.chunkid
+                             || iff.makeid('H','T','B','1') == iff.chunkid)
                     {
                         cout << "³ Contains height-table" << endl;
                     }
@@ -947,7 +1201,8 @@ STATIC void directory(XFParseIFF &iff)
                     {
                         cout << "³ Contains surface information" << endl;
                     }
-                    else if (iff.makeid('N','R','M','L') == iff.chunkid)
+                    else if (iff.makeid('N','R','M','L') == iff.chunkid
+                             || iff.makeid('N','R','M','2') == iff.chunkid)
                     {
                         cout << "³ Contains normals" << endl;
                     }

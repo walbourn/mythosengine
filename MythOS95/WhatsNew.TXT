@@ -1,0 +1,104 @@
+
+                                 /\    /\
+                                /  \  /  \
+                               /    \/    \
+                              /  /\    /\  \
+                             /  /  \  /  Y T H O S
+                            /  /    \/    \  \
+                           /  /            \  \
+                          /__/              \__\
+ 
+             Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.
+                            All Rights Reserved.
+
+                            Windows '95 Version
+
+ ---------------------------------------------------------------------------
+
+                            W H A T ' S   N E W
+
+                         *** Version 1.4 Release ***
+                                July 31, 1997
+
+ ---------------------------------------------------------------------------
+ FLOATING POINT MATH
+
+ With Pentium-class computers being the standard, we have redone our routines
+ to use single-precision floating-point instead of 16.16 fixed-point integer
+ math.  That means that most routines which took a 'Flx16' now take a
+ 'float'.  Changing your use of Flx16 to float and recompiling is all that
+ is needed in most cases, although the Micrsoft compiler will generate
+ warnings for float constants if they aren't forced to be single-precision
+ using the 'f' postfix.
+
+ Felix has remained in place as it is useful for DDA algorithms and other
+ places where fixed-point is more suitable.  Also, since Flx16 has a
+ conversion operator to float, they can be used interchangable, although
+ using pure floats is recommended.
+
+ This will mean that your products built with MythOS will run slower on
+ 486 class machines, but much faster on Pentium and higher class CPUs.
+
+
+ ---------------------------------------------------------------------------
+ 3D HARDWARE
+
+ Van Gogh now includes support for Microsoft's Direct3D via the DrawPrimitive
+ interface and will include direct support for 3Dfx, Cirrus Clear3D,
+ and possibly Matrox Simple interface boards.
+
+
+ ---------------------------------------------------------------------------
+ DIRECTX V5
+
+ With the release of DirectX V5, we have added support for Direct3D to
+ Van Gogh and the new DirectInput interface to Max.  This required a change
+ to MaxDevices which will cause current code to break, although the
+ change over is relatively simple.  See Max's ReadME.TXT for detailed
+ instructions.
+
+
+ ---------------------------------------------------------------------------
+ 15/16-BIT COLOR
+
+ Van Gogh now has support for 15/16-bit color video modes.  XFile has been
+ updated to support working with 15-bit graphic files.
+
+
+ ---------------------------------------------------------------------------
+ HIGH-PRECISION TIMER
+
+ Chronos will now use the Pentium timer register instead of the Windows
+ multi-media timer routines on Pentium or higher-class CPUs.  This results
+ in low-overhead timer checking and much greater precision.  A new class
+ was added to use the new timer services for code profiling.
+
+
+ ---------------------------------------------------------------------------
+ TRUE TYPE FONTS
+
+ Gutenberg now has support for variable-width fonts and has a new capture
+ mechanism so that TrueType fonts can be rasterized and used with Van
+ Gogh viewports.
+
+
+ ---------------------------------------------------------------------------
+ BITMAP FORMATS
+
+ XFile has been updated to support some monochrome formats since this is
+ useful for Van Gogh's image_trans_mono and other tricks.  Also updated
+ TGA reader to handle 15-, 16-, and 32-bit file formats.  A change was
+ made to the IFFC compiler to handle conversion of 24-bit to 15-bit on the
+ fly during .CIF file compiles.  PIC has been updated to support the
+ new formats.
+
+
+ ---------------------------------------------------------------------------
+ SIMGINE
+
+ A new framework has been introduced into the release, SimGine, which
+ will be used as the basis for our Windows 95 games in-house.  It is
+ written to be a pure C++ framework for developing full-screen applications.
+
+END OF DOCUMENT
+

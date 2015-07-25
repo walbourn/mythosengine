@@ -579,6 +579,7 @@ LightPropGeneralPage::LightPropGeneralPage() : CPropertyPage(LightPropGeneralPag
 	m_yjValue = 0.0f;
 	m_zkValue = 0.0f;
 	m_atten = FALSE;
+	m_dark = FALSE;
 	//}}AFX_DATA_INIT
 
     m_type = 0;
@@ -608,6 +609,7 @@ void LightPropGeneralPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Text(pDX, IDC_LPROP_ZK, m_zkValue);
 	DDV_MinMaxFloat(pDX, m_zkValue, -32768.f, 32768.f);
 	DDX_Check(pDX, IDC_LPROP_ATTEN, m_atten);
+	DDX_Check(pDX, IDC_LPROP_DARK, m_dark);
 	//}}AFX_DATA_MAP
 
     if (!pDX->m_bSaveAndValidate)
@@ -1460,9 +1462,9 @@ void MeshPropFacePage::ui_face_properties()
             if (sh.DoModal() == IDOK)
             {
                 //ÄÄÄ General
-                face->normal.i = Flx16(gdlg.m_i);
-                face->normal.j = Flx16(gdlg.m_j);
-                face->normal.k = Flx16(gdlg.m_k);
+                face->normal.i = gdlg.m_i;
+                face->normal.j = gdlg.m_j;
+                face->normal.k = gdlg.m_k;
                 face->normal.normalize();
 
                 if (gdlg.tind)
@@ -1476,13 +1478,13 @@ void MeshPropFacePage::ui_face_properties()
                     face->txt = 0;
                 }
 
-                face->u[0] = Flx16(gdlg.m_u0);
-                face->u[1] = Flx16(gdlg.m_u1);
-                face->u[2] = Flx16(gdlg.m_u2);
+                face->u[0] = gdlg.m_u0;
+                face->u[1] = gdlg.m_u1;
+                face->u[2] = gdlg.m_u2;
 
-                face->v[0] = Flx16(gdlg.m_v0);
-                face->v[1] = Flx16(gdlg.m_v1);
-                face->v[2] = Flx16(gdlg.m_v2);
+                face->v[0] = gdlg.m_v0;
+                face->v[1] = gdlg.m_v1;
+                face->v[2] = gdlg.m_v2;
 
                 dword flags = face->flags;
 

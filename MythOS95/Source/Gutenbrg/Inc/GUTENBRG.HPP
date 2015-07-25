@@ -72,10 +72,10 @@
 
 // these must be C++ since Van Gogh is not C-callable
 
-long gberg_outc(VngoVport *vp, long x, long y, char c);
+long gberg_outc(VngoVport *vp, long x, long y, char c, BOOL vert=FALSE);
 
 long gberg_widthc(char c);
-long gberg_heightc(char c);
+long gberg_heightc();
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
@@ -136,14 +136,21 @@ public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
     void outc(char c);
     void outc(long x, long y, char c) { curx=x; cury=y; outc(c); }
+    void outc_vert(char c);
+    void outc_vert(long x, long y, char c) { curx=x; cury=y; outc_vert(c); }
 
     void out(const char *str);
     void out(long x, long y, const char *str) { curx=x; cury=y; out(str); }
+    void out_vert(const char *str);
+    void out_vert(long x, long y, const char *str) { curx=x; cury=y; out_vert(str); }
 
     void out(long num);
     void out(long x, long y, long num) { curx=x; cury=y; out(num); }
+    void out_vert(long num);
+    void out_vert(long x, long y, long num) { curx=x; cury=y; out_vert(num); }
 
     void outf(const char *fmt, ...);
+    void outf_vert (const char *fmt, ...);
 
     void out_wrap(const char *, const VngoRect * = 0);
 

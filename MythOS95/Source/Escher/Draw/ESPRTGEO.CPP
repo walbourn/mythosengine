@@ -78,7 +78,7 @@ EschParticleGeometry::EschParticleGeometry(EschGeometry *g, ulong l) :
 }
 
 EschParticleGeometry::EschParticleGeometry(EschGeometry *g,
-                                           Flx16 ii, Flx16 ij, Flx16 ik,
+                                           float ii, float ij, float ik,
                                            ulong l) :
     EschParticle(),
     geom(g),
@@ -219,7 +219,7 @@ void EschParticleGeometry::release()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // EschParticleGeometry - set_position                                      ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void EschParticleGeometry::set_position(Flx16 ix, Flx16 iy, Flx16 iz)
+void EschParticleGeometry::set_position(float ix, float iy, float iz)
 {
     pos.x = ix;
     pos.y = iy;

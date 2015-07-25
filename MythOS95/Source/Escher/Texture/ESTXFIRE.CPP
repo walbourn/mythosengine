@@ -39,7 +39,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include "escher.hpp"
@@ -50,8 +50,8 @@
 //
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
-#define PI                  Flx16(3.14157)
-#define RADIAN_2_DEGREES    Flx16(57.29577)
+#define PI                  3.14157f
+#define RADIAN_2_DEGREES    57.29577f
 #define SMOOTH              1
 #define FIRE_INCREASE       3
 #define MAX_COLOR           110
@@ -246,7 +246,7 @@ esch_error_codes EschFireTexture::init(ushort w, ushort h,
 
     for (i=0; i < (txt.height << u_shift); i++)
     {
-        txt.tex[i] = 255;
+        ((byte*)txt.tex)[i] = 255;
     }
 
     memset(txt.tex,255,txt.height << u_shift);
@@ -283,8 +283,8 @@ void EschFireTexture::generate()
         for (int y = 1; y < txt.height; y++)
         {
             int V = get(x,y);
-            if ((V < decay) || 
-                (x == 0) || 
+            if ((V < decay) ||
+                (x == 0) ||
                 (x == txt.width-1))
             {
                 put(x,y-1,0);
@@ -467,7 +467,7 @@ esch_error_codes EschFireTexture::setup_local_tables()
         flame_bytes[i] = 0;
 
     // Spark the initial flame!   Always put it in the middle.
-    {                             
+    {
         int t = txt.width >> 3;
         i = (txt.width >> 1) - (t >> 1);
         for (int j = 0; j < t; j++)
@@ -527,9 +527,9 @@ void EschFireTexture::make_lut(VngoPal *vpal)
     }
     for (i = 0; i < MAX_COLOR; i++)
     {
-        pal[i] = to_RGB( Flx16(4.6) - Flx16(1.5)*Flx16(i) / Flx16(MAX_COLOR),
-                         Flx16(i)/Flx16(MAX_COLOR),
-                         Flx16(i)/Flx16(MAX_COLOR) );
+        pal[i] = to_RGB( 4.6f - 1.5f*float(i) / float(MAX_COLOR),
+                         float(i)/float(MAX_COLOR),
+                         float(i)/float(MAX_COLOR) );
     }
 
     // Ramp up to maximum Red, almost maximum Green, and maximum Blue.
@@ -569,13 +569,13 @@ void EschFireTexture::make_lut(VngoPal *vpal)
 //                           °°° Private °°°                                ³
 // EschFireTexture - to_RGB                                                 ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-VngoColor24bit EschFireTexture::to_RGB(Flx16 h, Flx16 s, Flx16 i)
+VngoColor24bit EschFireTexture::to_RGB(float h, float s, float i)
 {
-   Flx16 Rv = Flx16(1) + s * flx_sin ((h - Flx16(2) * PI / Flx16(3)) * RADIAN_2_DEGREES);
-   Flx16 Gv = Flx16(1) + s * flx_sin (h * RADIAN_2_DEGREES);
-   Flx16 Bv = Flx16(1) + s * flx_sin ((h + Flx16(2) * PI / Flx16(3)) * RADIAN_2_DEGREES);
+   float Rv = 1.0f + s * esch_sin ((h - 2.0f * PI / 3.0f) * RADIAN_2_DEGREES);
+   float Gv = 1.0f + s * esch_sin (h * RADIAN_2_DEGREES);
+   float Bv = 1.0f + s * esch_sin ((h + 2.0f * PI / 3.0f) * RADIAN_2_DEGREES);
 
-   Flx16 t = Flx16(63.999) * i / Flx16(2);
+   float t = 63.999f * i / 2.0f;
    return VngoColor24bit ( (byte)(int)(Rv * t),
                            (byte)(int)(Gv * t),
                            (byte)(int)(Bv * t) );

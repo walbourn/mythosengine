@@ -75,6 +75,7 @@
 #define CMDFLAGS_DIRECTDRAW     0x1     // Use DirectDraw instead of GDI
 #define CMDFLAGS_DIBSWITCH      0x2     // Allow mode switch for DIB mode
 #define CMDFLAGS_JOYSTICK       0x4     // Allow joystick usage
+#define CMDFLAGS_DIRECTINPUT    0x8     // Use DirectInput
 
 //같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같�
 //

@@ -35,7 +35,7 @@
                                    _Status_
 
  Notes by: Chuck Walbourn
- Updated: March 11, 1997
+ Updated: May 22, 1997
 
  Release Notes --------------------------------------------------------------
 
@@ -61,6 +61,6 @@
  as an "outline" for initializing other games.  All other data files
  are LLander-specific as well.
 
- This library is likely to be supplanted by SimGine.
+ This portion of MythOS is likely to be supplanted by SimGine.
 
 *** END OF FILE ***

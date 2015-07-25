@@ -12,50 +12,54 @@ Dialog Escher[]=
 { 0, -1, 5, 7, 1, 362, 56, 116, 20, "EXPORT.IFF", NULL, 0, 0, 84, 0, FNULL, FNULL, 0 },
 { 0, -1, 6, 8, 4, 292, 84, 66, 20, "Scene:", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
 { 0, -1, 7, 9, 5, 362, 84, 139, 18, (void *)0, NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
-{ 0, -1, 8, 10, 4, 28, 92, 210, 18, " Object Local Coordinates ", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
-{ 0, -1, 9, 11, 1, 84, 116, 82, 18, " Local ", NULL, 0, 0, 76, 0, FNULL, FNULL, 0 },
-{ 0, -1, 10, 12, 4, 314, 116, 114, 18, " Scale Factor ", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
-{ 0, -1, 11, 13, 1, 84, 140, 82, 18, " World ", NULL, 0, 0, 87, 0, FNULL, FNULL, 0 },
-{ 0, -1, 12, 14, 5, 284, 140, 75, 18, (void *)1, NULL, 0, 0, 0, 4, FNULL, FNULL, 0 },
-{ 0, -1, 13, 15, 4, 364, 140, 20, 20, "=", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
-{ 0, -1, 14, 16, 5, 388, 140, 75, 18, (void *)2, NULL, 0, 0, 0, 4, FNULL, FNULL, 0 },
-{ 0, -1, 15, 17, 4, 278, 164, 82, 18, " 3DS Units", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
-{ 0, -1, 16, 18, 4, 372, 164, 106, 18, " Escher Units", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
-{ 0, -1, 17, 19, 4, 58, 172, 130, 18, " Object Extents ", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
-{ 0, -1, 18, 20, 1, 84, 196, 82, 18, " Quick ", NULL, 0, 0, 81, 0, FNULL, FNULL, 0 },
-{ 0, -1, 19, 21, 4, 308, 200, 114, 18, " Object Flags ", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
-{ 0, -1, 20, 22, 1, 84, 220, 82, 18, " Optimal ", NULL, 0, 0, 79, 0, FNULL, FNULL, 0 },
-{ 0, -1, 21, 23, 1, 278, 224, 20, 20, "7", NULL, 0, 0, 55, 0, FNULL, FNULL, 0 },
-{ 0, -1, 22, 24, 1, 302, 224, 20, 20, "6", NULL, 0, 0, 54, 0, FNULL, FNULL, 0 },
-{ 0, -1, 23, 25, 1, 326, 224, 20, 20, "5", NULL, 0, 0, 53, 0, FNULL, FNULL, 0 },
-{ 0, -1, 24, 26, 1, 350, 224, 20, 20, "4", NULL, 0, 0, 52, 0, FNULL, FNULL, 0 },
-{ 0, -1, 25, 27, 1, 374, 224, 20, 20, "3", NULL, 0, 0, 51, 0, FNULL, FNULL, 0 },
-{ 0, -1, 26, 28, 1, 398, 224, 20, 20, "2", NULL, 0, 0, 50, 0, FNULL, FNULL, 0 },
-{ 0, -1, 27, 29, 1, 422, 224, 20, 20, "1", NULL, 0, 0, 49, 0, FNULL, FNULL, 0 },
-{ 0, -1, 28, 30, 1, 446, 224, 20, 20, "0", NULL, 0, 0, 48, 0, FNULL, FNULL, 0 },
-{ 0, -1, 29, 31, 1, 278, 248, 20, 20, "F", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
-{ 0, -1, 30, 32, 1, 302, 248, 20, 20, "E", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
-{ 0, -1, 31, 33, 1, 326, 248, 20, 20, "D", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
-{ 0, -1, 32, 34, 1, 350, 248, 20, 20, "C", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
-{ 0, -1, 33, 35, 1, 374, 248, 20, 20, "B", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
-{ 0, -1, 34, 36, 1, 398, 248, 20, 20, "A", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
-{ 0, -1, 35, 37, 1, 422, 248, 20, 20, "9", NULL, 0, 0, 57, 0, FNULL, FNULL, 0 },
-{ 0, -1, 36, 38, 1, 446, 248, 20, 20, "8", NULL, 0, 0, 56, 0, FNULL, FNULL, 0 },
-{ 0, -1, 37, 39, 4, 52, 256, 146, 18, " Object Hierarchy ", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
-{ 0, -1, 38, 40, 1, 82, 280, 82, 18, " None ", NULL, 0, 0, 78, 0, FNULL, FNULL, 0 },
-{ 0, -1, 39, 41, 4, 224, 288, 122, 18, " Material Data ", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
-{ 0, -1, 40, 42, 4, 372, 288, 122, 18, " Include ", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
-{ 0, -1, 41, 43, 1, 82, 304, 82, 18, " Links ", NULL, 0, 0, 73, 0, FNULL, FNULL, 0 },
-{ 0, -1, 42, 44, 1, 244, 312, 82, 18, " Partial ", NULL, 0, 0, 80, 0, FNULL, FNULL, 0 },
-{ 0, -1, 43, 45, 1, 390, 312, 90, 18, " Camera(s) ", NULL, 0, 0, 3, 0, FNULL, FNULL, 0 },
-{ 0, -1, 44, 46, 4, 42, 336, 162, 18, " Object Orientation ", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
-{ 0, -1, 45, 47, 1, 244, 336, 82, 18, " Complete ", NULL, 0, 0, 67, 0, FNULL, FNULL, 0 },
-{ 0, -1, 46, 48, 1, 390, 336, 90, 18, " Lights(s) ", NULL, 0, 0, 12, 0, FNULL, FNULL, 0 },
-{ 0, -1, 47, 49, 1, 82, 360, 82, 18, " Default ", NULL, 0, 0, 68, 0, FNULL, FNULL, 0 },
-{ 0, -1, 48, 50, 1, 82, 384, 82, 18, " Matrix ", NULL, 0, 0, 77, 0, FNULL, FNULL, 0 },
-{ 0, -1, 49, 51, 1, 242, 392, 66, 20, " OK ", NULL, 0, 0, 13, 0, FNULL, FNULL, 0 },
-{ 0, -1, 50, 52, 1, 346, 392, 66, 20, " Cancel ", NULL, 0, 0, 27, 0, FNULL, FNULL, 0 },
-{ 0, -1, 51, -1, 3, 462, 392, 26, 20, " ! ", NULL, 0, 0, 33, 0, FNULL, FNULL, 0 },
+{ 0, -1, 8, 10, 4, 26, 92, 210, 18, " Object Local Coordinates ", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
+{ 0, -1, 9, 11, 1, 44, 112, 82, 18, " Local ", NULL, 0, 0, 76, 0, FNULL, FNULL, 0 },
+{ 0, -1, 10, 12, 1, 128, 112, 82, 18, " World ", NULL, 0, 0, 87, 0, FNULL, FNULL, 0 },
+{ 0, -1, 11, 13, 4, 318, 124, 114, 18, " Scale Factor ", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
+{ 0, -1, 12, 14, 5, 286, 151, 75, 18, (void *)1, NULL, 0, 0, 0, 4, FNULL, FNULL, 0 },
+{ 0, -1, 13, 15, 4, 366, 151, 20, 20, "=", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
+{ 0, -1, 14, 16, 5, 390, 151, 75, 18, (void *)2, NULL, 0, 0, 0, 4, FNULL, FNULL, 0 },
+{ 0, -1, 15, 17, 4, 60, 155, 130, 18, " Object Extents ", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
+{ 0, -1, 16, 18, 4, 278, 167, 82, 18, " 3DS Units", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
+{ 0, -1, 17, 19, 4, 374, 167, 106, 18, " Escher Units", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
+{ 0, -1, 18, 20, 1, 44, 176, 82, 18, " Quick ", NULL, 0, 0, 81, 0, FNULL, FNULL, 0 },
+{ 0, -1, 19, 21, 1, 128, 176, 82, 18, " Optimal ", NULL, 0, 0, 79, 0, FNULL, FNULL, 0 },
+{ 0, -1, 20, 22, 4, 315, 217, 114, 18, " Object Flags ", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
+{ 0, -1, 21, 23, 4, 44, 219, 160, 18, " Object Hierarchy ", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
+{ 0, -1, 22, 24, 1, 128, 239, 82, 18, " LInks ", NULL, 0, 0, 73, 0, FNULL, FNULL, 0 },
+{ 0, -1, 23, 25, 1, 40, 240, 82, 18, " None ", NULL, 0, 0, 78, 0, FNULL, FNULL, 0 },
+{ 0, -1, 24, 26, 1, 280, 240, 20, 20, "7", NULL, 0, 0, 55, 0, FNULL, FNULL, 0 },
+{ 0, -1, 25, 27, 1, 304, 240, 20, 20, "6", NULL, 0, 0, 54, 0, FNULL, FNULL, 0 },
+{ 0, -1, 26, 28, 1, 328, 240, 20, 20, "5", NULL, 0, 0, 53, 0, FNULL, FNULL, 0 },
+{ 0, -1, 27, 29, 1, 352, 240, 20, 20, "4", NULL, 0, 0, 52, 0, FNULL, FNULL, 0 },
+{ 0, -1, 28, 30, 1, 376, 240, 20, 20, "3", NULL, 0, 0, 51, 0, FNULL, FNULL, 0 },
+{ 0, -1, 29, 31, 1, 400, 240, 20, 20, "2", NULL, 0, 0, 50, 0, FNULL, FNULL, 0 },
+{ 0, -1, 30, 32, 1, 424, 240, 20, 20, "1", NULL, 0, 0, 49, 0, FNULL, FNULL, 0 },
+{ 0, -1, 31, 33, 1, 448, 240, 20, 20, "0", NULL, 0, 0, 48, 0, FNULL, FNULL, 0 },
+{ 0, -1, 32, 34, 1, 280, 256, 20, 20, "F", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
+{ 0, -1, 33, 35, 1, 304, 256, 20, 20, "E", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
+{ 0, -1, 34, 36, 1, 328, 256, 20, 20, "D", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
+{ 0, -1, 35, 37, 1, 352, 256, 20, 20, "C", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
+{ 0, -1, 36, 38, 1, 376, 256, 20, 20, "B", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
+{ 0, -1, 37, 39, 1, 400, 256, 20, 20, "A", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
+{ 0, -1, 38, 40, 1, 424, 256, 20, 20, "9", NULL, 0, 0, 57, 0, FNULL, FNULL, 0 },
+{ 0, -1, 39, 41, 1, 448, 256, 20, 20, "8", NULL, 0, 0, 56, 0, FNULL, FNULL, 0 },
+{ 0, -1, 40, 42, 4, 46, 283, 162, 18, " Object Orientation ", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
+{ 0, -1, 41, 43, 4, 372, 290, 122, 18, " Include ", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
+{ 0, -1, 42, 44, 1, 40, 304, 82, 18, " Default ", NULL, 0, 0, 68, 0, FNULL, FNULL, 0 },
+{ 0, -1, 43, 45, 1, 128, 304, 82, 18, " Matrix ", NULL, 0, 0, 77, 0, FNULL, FNULL, 0 },
+{ 0, -1, 44, 46, 4, 225, 307, 122, 18, " Material Data ", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
+{ 0, -1, 45, 47, 1, 390, 313, 92, 18, " Camera(s) ", NULL, 0, 0, 3, 0, FNULL, FNULL, 0 },
+{ 0, -1, 46, 48, 1, 245, 330, 82, 18, " Partial ", NULL, 0, 0, 80, 0, FNULL, FNULL, 0 },
+{ 0, -1, 47, 49, 1, 390, 337, 92, 18, " Lights(s) ", NULL, 0, 0, 12, 0, FNULL, FNULL, 0 },
+{ 0, -1, 48, 50, 4, 72, 347, 106, 18, " Data Format ", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
+{ 0, -1, 49, 51, 1, 245, 354, 82, 18, " Complete ", NULL, 0, 0, 67, 0, FNULL, FNULL, 0 },
+{ 0, -1, 50, 52, 1, 390, 363, 92, 18, "Keyframes", NULL, 0, 0, 75, 0, FNULL, FNULL, 0 },
+{ 0, -1, 51, 53, 1, 40, 368, 80, 18, " Float ", NULL, 0, 0, 0, 1, FNULL, FNULL, 0 },
+{ 0, -1, 52, 54, 1, 128, 368, 80, 18, " Fixed ", NULL, 0, 0, 0, 2, FNULL, FNULL, 0 },
+{ 0, -1, 53, 55, 1, 242, 392, 66, 20, " OK ", NULL, 0, 0, 13, 0, FNULL, FNULL, 0 },
+{ 0, -1, 54, 56, 1, 346, 392, 66, 20, " Cancel ", NULL, 0, 0, 27, 0, FNULL, FNULL, 0 },
+{ 0, -1, 55, -1, 3, 462, 392, 26, 20, " ! ", NULL, 0, 0, 33, 0, FNULL, FNULL, 0 },
 };
 
 /* Tree Identifiers: Escher */
@@ -65,44 +69,47 @@ Dialog Escher[]=
 #define TARGET                          6
 #define SCN_NAME                        8
 #define CORD_LOC                        10
-#define CORD_WRD                        12
+#define CORD_WRD                        11
 #define SCAL_3DS                        13
 #define SCAL_ESH                        15
 #define EXT_QUIK                        19
-#define EXT_OPT                         21
-#define FLAGS_7                         22
-#define FLAGS_6                         23
-#define FLAGS_5                         24
-#define FLAGS_4                         25
-#define FLAGS_3                         26
-#define FLAGS_2                         27
-#define FLAGS_1                         28
-#define FLAGS_0                         29
-#define FLAGS_F                         30
-#define FLAGS_E                         31
-#define FLAGS_D                         32
-#define FLAGS_C                         33
-#define FLAGS_B                         34
-#define FLAGS_A                         35
-#define FLAGS_9                         36
-#define FLAGS_8                         37
-#define HIER_NON                        39
-#define HIER_LNK                        42
-#define MAT_PART                        43
-#define INC_CAMS                        44
-#define MAT_COMP                        46
-#define INC_LGTS                        47
-#define ORI_DEF                         48
-#define ORI_MTX                         49
-#define OK                              50
-#define CANCEL                          51
-#define ABOUT                           52
+#define EXT_OPT                         20
+#define HIER_LNK                        23
+#define HIER_NON                        24
+#define FLAGS_7                         25
+#define FLAGS_6                         26
+#define FLAGS_5                         27
+#define FLAGS_4                         28
+#define FLAGS_3                         29
+#define FLAGS_2                         30
+#define FLAGS_1                         31
+#define FLAGS_0                         32
+#define FLAGS_F                         33
+#define FLAGS_E                         34
+#define FLAGS_D                         35
+#define FLAGS_C                         36
+#define FLAGS_B                         37
+#define FLAGS_A                         38
+#define FLAGS_9                         39
+#define FLAGS_8                         40
+#define ORI_DEF                         43
+#define ORI_MTX                         44
+#define INC_CAMS                        46
+#define MAT_PART                        47
+#define INC_LGTS                        48
+#define MAT_COMP                        50
+#define KEYFRAME                        51
+#define FMT_FLT                         52
+#define FMT_FIX                         53
+#define OK                              54
+#define CANCEL                          55
+#define ABOUT                           56
 
 /* Editables */
 
 Editable Escher_edit[]=
 {
-{ 16, 16, 0, "DUMMY00000000003", 0, 0, 0, NULL, NULL },
-{ 8, 8, 0, "DUMMY001", 4, 0, 0, NULL, NULL },
-{ 8, 8, 0, "DUMMY002", 4, 0, 0, NULL, NULL },
+{ 16, 16, 0, "AAAAAAAAAAAAAAAA", 0, 0, 0, NULL, NULL },
+{ 8, 8, 0, "BBBBBBBB", 4, 0, 0, NULL, NULL },
+{ 8, 8, 0, "CCCCCCCC", 4, 0, 0, NULL, NULL },
 };

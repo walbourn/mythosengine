@@ -246,83 +246,83 @@ int EschCameraEx::pre_rend()
             vport->reset();
 #if 0
 #if 0
-            Flx16 pitch_sin = eye.dir.j;
+            float pitch_sin = eye.dir.j;
 
-            Flx16 pitch = flx_asin(pitch_sin);
+            float pitch = esch_asin(pitch_sin);
 
             if (top.j.flx < 0)
             {
-                pitch = pitch-Flx16(180);
+                pitch = pitch-180.0f;
             }
 
-            Flx16 c_pitch = flx_cos(pitch);
+            float c_pitch = esch_cos(pitch);
 
-            Flx16 roll_sin = top.i;
+            float roll_sin = top.i;
 
 
-            Flx16 c_roll = Flx16(1);
+            float c_roll = 1.0f;
 
-            Flx16 c_tilt = c_roll;
-            Flx16 c = c_pitch;
+            float c_tilt = c_roll;
+            float c = c_pitch;
 
 #else
             //ÄÄÄ Compute view angle
-            Flx16 ti = top.i;
-            Flx16 tj = top.j;
-            Flx16 tk = top.k;
+            float ti = top.i;
+            float tj = top.j;
+            float tk = top.k;
 
-            Flx16 c = tj / flx_sqrt(ti*ti + tj*tj);
-            if (c > Flx16(1))
-                c = Flx16(1);
-            if (c < Flx16(-1))
-                c = Flx16(-1);
+            float c = tj / esch_sqrt(ti*ti + tj*tj);
+            if (c > float(1))
+                c = float(1);
+            if (c < float(-1))
+                c = float(-1);
 
-            Flx16 c_tilt = tk / flx_sqrt(tj*tj + tk*tk);
-            if (c_tilt > Flx16(1))
-                c_tilt = Flx16(1);
-            if (c_tilt < Flx16(-1))
-                c_tilt = Flx16(-1);
+            float c_tilt = tk / esch_sqrt(tj*tj + tk*tk);
+            if (c_tilt > float(1))
+                c_tilt = float(1);
+            if (c_tilt < float(-1))
+                c_tilt = float(-1);
 #endif
 #else
             EschVector rv1;
             EschVector rv2 = top;
-            rv1.i = Flx16(1);
+            rv1.i = 1.0f;
             rv1.j = 0;
             rv1.k = 0;
             rv1.transform(&eye.orient);
 
-            Flx16 roll = rv2.i.asin();
+            float roll = esch_asin(rv2.i);
 
             if (rv2.j < 0)
             {
                 if (rv2.i < 0)
                 {
-                    roll = (Flx16(-180) - roll);
+                    roll = (-180.0f - roll);
                 }
                 else
                 {
-                    roll = (Flx16(180) - roll);
+                    roll = (180.0f - roll);
                 }
             }
-            Flx16 c_roll = roll.cos();
-            Flx16 s_roll = roll.sin();
+            float c_roll = esch_cos(roll);
+            float s_roll = esch_sin(roll);
 
 
             EschVector pv1 = top;
             EschVector pv2 = eye.dir;
 
-            Flx16 pitch = pv2.j.asin();
+            float pitch = esch_asin(pv2.j);
 
             if (pv1.j < 0)
-                pitch = Flx16(180)-pitch;
+                pitch = 180.0f-pitch;
 
-            if (pitch > Flx16(180))
+            if (pitch > 180.0f)
             {
-                pitch = -(Flx16(180) - (pitch - Flx16(180)));
+                pitch = -(180.0f - (pitch - 180.0f));
             }
 
-            Flx16 c_pitch = pitch.cos();
-            Flx16 s_pitch = pitch.sin();
+            float c_pitch = esch_cos(pitch);
+            float s_pitch = esch_sin(pitch);
 
 #endif
             //ÄÄÄ Compute shades for gradient polygon
@@ -332,18 +332,18 @@ int EschCameraEx::pre_rend()
 
             if (pitch < 0)
             {
-                sh_top = Flx16(255) * (-s_pitch);
+                sh_top = long(255.0f * (-s_pitch));
             }
             else
             {
-                sh_bottom = Flx16(255) * (Flx16(1) - s_pitch);
+                sh_bottom = long(255.0f * (1.0f - s_pitch));
             }
 /*
             long sh_top = (pitch < 0)
-                          ? long(Flx16(255)*(Flx16(1)-c_pitch)) : 0;
+                          ? long(float(255)*(float(1)-c_pitch)) : 0;
 
             long sh_bottom = (pitch > 0)
-                             ? long(Flx16(255)*c_pitch)
+                             ? long(float(255)*c_pitch)
                              : 255;
 */
 #else
@@ -367,14 +367,14 @@ int EschCameraEx::pre_rend()
             {
                 vpt[0].shade = (c_roll > 0)
                                ? sh_top
-                               : (long(Flx16(sh_bottom-sh_top)*(-c_roll))
+                               : (long(float(sh_bottom-sh_top)*(-c_roll))
                                   + sh_top);
             }
             else
             {
                 vpt[0].shade = (c_roll < 0)
                                ? sh_bottom
-                               : (long(Flx16(sh_bottom-sh_top)*(Flx16(1)-c_roll))
+                               : (long(float(sh_bottom-sh_top)*(float(1)-c_roll))
                                   + sh_top);
             }
 
@@ -385,14 +385,14 @@ int EschCameraEx::pre_rend()
             if (top.i >= 0)
             {
                 vpt[1].shade = (c_roll > 0)
-                               ? (long(Flx16(sh_bottom-sh_top)*(Flx16(1)-c_roll))
+                               ? (long(float(sh_bottom-sh_top)*(float(1)-c_roll))
                                   + sh_top)
                                : sh_bottom;
             }
             else
             {
                 vpt[1].shade = (c_roll < 0)
-                               ? (long(Flx16(sh_bottom-sh_top)*(-c_roll))
+                               ? (long(float(sh_bottom-sh_top)*(-c_roll))
                                   + sh_top)
                                : sh_top;
             }
@@ -405,14 +405,14 @@ int EschCameraEx::pre_rend()
             {
                 vpt[2].shade = (c_roll > 0)
                                ? sh_bottom
-                               : (long(Flx16(sh_bottom-sh_top)*(Flx16(1)+c_roll))
+                               : (long(float(sh_bottom-sh_top)*(float(1)+c_roll))
                                   + sh_top);
             }
             else
             {
                 vpt[2].shade = (c_roll < 0)
                                ? sh_top
-                               : (long(Flx16(sh_bottom-sh_top)*c_roll)
+                               : (long(float(sh_bottom-sh_top)*c_roll)
                                   + sh_top);
             }
 
@@ -423,14 +423,14 @@ int EschCameraEx::pre_rend()
             if (top.i >= 0)
             {
                 vpt[3].shade = (c_roll > 0)
-                               ? (long(Flx16(sh_bottom-sh_top)*c_roll)
+                               ? (long(float(sh_bottom-sh_top)*c_roll)
                                   + sh_top)
                                : sh_top;
             }
             else
             {
                 vpt[3].shade = (c_roll < 0)
-                               ? (long(Flx16(sh_bottom-sh_top)*(Flx16(1)+c_roll))
+                               ? (long(float(sh_bottom-sh_top)*(float(1)+c_roll))
                                   + sh_top)
                                : sh_bottom;
             }
@@ -620,7 +620,7 @@ int EschCameraEx::set_haze(VngoShadePal *hzp, int owns, long startz)
 //       HLS space, which results in 'strange' changes in hues.             ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 esch_error_codes EschCameraEx::create_haze(ushort levels, ushort slevel,
-                                           ushort blevel, Flx16 bpercent,
+                                           ushort blevel, float bpercent,
                                            VngoColor24bit tcolor)
 {
 //ÄÄÄ Verify input
@@ -643,7 +643,7 @@ esch_error_codes EschCameraEx::create_haze(ushort levels, ushort slevel,
         || blevel >= levels
         || blevel <= slevel
         || bpercent <= 0
-        || bpercent >= Flx16(1.0))
+        || bpercent >= float(1.0))
         return ESCH_ERR_INVALIDPARMS;
 
 //ÄÄÄ Free old haze palette, if owned by Camera
@@ -678,20 +678,20 @@ esch_error_codes EschCameraEx::create_haze(ushort levels, ushort slevel,
         }
 
         VngoColor24bit color = pal->get_RGB(qt);
-        Flx16 colorr = Flx16(color.r);
-        Flx16 colorg = Flx16(color.g);
-        Flx16 colorb = Flx16(color.b);
+        float colorr = float(color.r);
+        float colorg = float(color.g);
+        float colorb = float(color.b);
 
         VngoColor24bit bcolor
-            ((byte)(long)(colorr + (Flx16(tcolor.r - color.r) * bpercent)),
-             (byte)(long)(colorg + (Flx16(tcolor.g - color.g) * bpercent)),
-             (byte)(long)(colorb + (Flx16(tcolor.b - color.b) * bpercent)));
+            ((byte)(long)(colorr + (float(tcolor.r - color.r) * bpercent)),
+             (byte)(long)(colorg + (float(tcolor.g - color.g) * bpercent)),
+             (byte)(long)(colorb + (float(tcolor.b - color.b) * bpercent)));
 
         //ÄÄÄ Haze out to break point
         {
-            Flx16 rstep = Flx16(bcolor.r - color.r) / Flx16(blevel - slevel);
-            Flx16 gstep = Flx16(bcolor.g - color.g) / Flx16(blevel - slevel);
-            Flx16 bstep = Flx16(bcolor.b - color.b) / Flx16(blevel - slevel);
+            float rstep = float(bcolor.r - color.r) / float(blevel - slevel);
+            float gstep = float(bcolor.g - color.g) / float(blevel - slevel);
+            float bstep = float(bcolor.b - color.b) / float(blevel - slevel);
 
             for(; lvl < blevel; lvl++)
             {
@@ -708,9 +708,9 @@ esch_error_codes EschCameraEx::create_haze(ushort levels, ushort slevel,
 
         //ÄÄÄ Haze out to target color
         {
-            Flx16 rstep = Flx16(tcolor.r - bcolor.r) / Flx16(levels - blevel);
-            Flx16 gstep = Flx16(tcolor.g - bcolor.g) / Flx16(levels - blevel);
-            Flx16 bstep = Flx16(tcolor.b - bcolor.b) / Flx16(levels - blevel);
+            float rstep = float(tcolor.r - bcolor.r) / float(levels - blevel);
+            float gstep = float(tcolor.g - bcolor.g) / float(levels - blevel);
+            float bstep = float(tcolor.b - bcolor.b) / float(levels - blevel);
 
             for(; lvl < levels; lvl++)
             {
@@ -772,7 +772,7 @@ int EschCameraEx::set_gradient(VngoShadePal *grdp, int owns)
 //       HLS space, which results in 'strange' changes in hues.             ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 esch_error_codes EschCameraEx::create_gradient(ushort levels,
-                                               ushort blevel, Flx16 bpercent,
+                                               ushort blevel, float bpercent,
                                                VngoColor24bit color1,
                                                VngoColor24bit color2)
 {
@@ -815,22 +815,22 @@ esch_error_codes EschCameraEx::create_gradient(ushort levels,
     {
         byte *shl = &(*((VngoShadePal8*)grd_pal))[qt].shl[0];
 
-        Flx16 colorr = Flx16(color1.r);
-        Flx16 colorg = Flx16(color1.g);
-        Flx16 colorb = Flx16(color1.b);
+        float colorr = float(color1.r);
+        float colorg = float(color1.g);
+        float colorb = float(color1.b);
 
         VngoColor24bit bcolor
-            ((byte)(long)(colorr + (Flx16(color2.r - color1.r) * bpercent)),
-             (byte)(long)(colorg + (Flx16(color2.g - color1.g) * bpercent)),
-             (byte)(long)(colorb + (Flx16(color2.b - color1.b) * bpercent)));
+            ((byte)(long)(colorr + (float(color2.r - color1.r) * bpercent)),
+             (byte)(long)(colorg + (float(color2.g - color1.g) * bpercent)),
+             (byte)(long)(colorb + (float(color2.b - color1.b) * bpercent)));
 
         int lvl=0;
 
         //ÄÄÄ Linear from color 1 to break point
         {
-            Flx16 rstep = Flx16(bcolor.r - color1.r) / Flx16(blevel);
-            Flx16 gstep = Flx16(bcolor.g - color1.g) / Flx16(blevel);
-            Flx16 bstep = Flx16(bcolor.b - color1.b) / Flx16(blevel);
+            float rstep = float(bcolor.r - color1.r) / float(blevel);
+            float gstep = float(bcolor.g - color1.g) / float(blevel);
+            float bstep = float(bcolor.b - color1.b) / float(blevel);
 
             for(; lvl < blevel; lvl++)
             {
@@ -847,9 +847,9 @@ esch_error_codes EschCameraEx::create_gradient(ushort levels,
 
         //ÄÄÄ Linear from break point to color 2
         {
-            Flx16 rstep = Flx16(color2.r - bcolor.r) / Flx16(levels - blevel);
-            Flx16 gstep = Flx16(color2.g - bcolor.g) / Flx16(levels - blevel);
-            Flx16 bstep = Flx16(color2.b - bcolor.b) / Flx16(levels - blevel);
+            float rstep = float(color2.r - bcolor.r) / float(levels - blevel);
+            float gstep = float(color2.g - bcolor.g) / float(levels - blevel);
+            float bstep = float(color2.b - bcolor.b) / float(levels - blevel);
 
             for(; lvl < levels; lvl++)
             {

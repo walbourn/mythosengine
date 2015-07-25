@@ -73,6 +73,7 @@
 #define FLAGS_FORCE_1SIDED  0x20
 #define FLAGS_FORCE_2SIDED  0x40
 #define FLAGS_QUICK_EXTS    0x80
+#define FLAGS_FIXED         0x100
 
 #define LW_SURF_FLAG_LUMINOUS           0x1
 #define LW_SURF_FLAG_OUTLINE            0x2
@@ -224,10 +225,16 @@ void main(int argc, char *argv[])
                     Flags |= FLAGS_FORCE_2SIDED;
                     break;
                     
-                //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Force two-sided
+                //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Quick extents
                 case 'k':
                 case 'K':
                     Flags |= FLAGS_QUICK_EXTS;
+                    break;
+                    
+                //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Fixed-point
+                case 'f':
+                case 'F':
+                    Flags |= FLAGS_FIXED;
                     break;
                     
                 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Output file
@@ -402,7 +409,7 @@ STATIC void print_help(int full)
 {
     cout << Util_name;
     cout << "   Usage: eshlw [-q] [-i] [-d] <filename.lw>" << endl;
-    cout << "                [-s] [-1 | -2] [-k] [-n \"name\"]" << endl;
+    cout << "                [-s] [-1 | -2] [-k] [-f] [-n \"name\"]" << endl;
     cout << "                [-o <filename.iff>]" << endl;
     if (full)
     {
@@ -416,6 +423,7 @@ STATIC void print_help(int full)
         cout << "          -1 = Force polygons to be one-sided" << endl;
         cout << "          -2 = Force polygons to be two-sided" << endl;
         cout << "          -k = Use quick extents computation (default is optimal)" << endl;
+        cout << "          -f = Used fixed-point data format (default is floating-point)" << endl;
         cout << "          -n = Specifies output object name" << endl;
         cout << "          -o = Output to Escher IFF file" << endl;
     }
@@ -1136,9 +1144,9 @@ STATIC void generate(const char *name,
         Point *ptr = points;
         for(ulong i=0; i < maxpoints; i++, ptr++)
         {
-            EschPoint pnt(Flx16(ptr->x),
-                          Flx16(ptr->y),
-                          Flx16(ptr->z));
+            EschPoint pnt(float(ptr->x),
+                          float(ptr->y),
+                          float(ptr->z));
             if ((err=mbld.add_vertex(&pnt))!=0)
             {
                 cout << "±±± Failed to add vertex " << i+1 << " to mesh, error #"
@@ -1218,7 +1226,8 @@ STATIC void generate(const char *name,
     }
 
     if ((err=mbld.save(&IFF, ESCH_MBLD_EXTENTS
-                             | ((Flags & FLAGS_SCENE) ? ESCH_MBLD_INSCENE : 0)))!=0)
+                             | ((Flags & FLAGS_SCENE) ? ESCH_MBLD_INSCENE : 0)
+                             | ((Flags & FLAGS_FIXED) ? ESCH_MBLD_FIXED : 0)))!=0)
     {
         cout << "±±± Failed write of mesh, error #" << (int)err << endl;
         return;

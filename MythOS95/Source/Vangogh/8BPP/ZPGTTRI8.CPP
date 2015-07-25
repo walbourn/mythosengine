@@ -38,7 +38,7 @@
 //                                Includes
 //
 //같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같�
-//#include <assert.h>
+#include <assert.h>
 #include <string.h>
 
 #include "debug.h"
@@ -64,7 +64,7 @@
 //
 //같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같�
 
-extern "C" void scan_zpgouraud_edge(VngoPoint2 *edge,VngoPointF *p1, VngoPointF *p2);
+extern "C" void scan_zpgouraud_edge(VngoPoint2 *edge,VngoPointF2 *p1, VngoPointF2 *p2);
 extern "C" void draw_zpghlines(VngoTriangle *tri);
 extern "C" void draw_zpghlines_256x256_ntrans(VngoTriangle *tri);
 extern "C" void draw_zpghlines_128x128_ntrans(VngoTriangle *tri);
@@ -88,7 +88,7 @@ extern "C" void draw_zpghlines_128x128_ntrans(VngoTriangle *tri);
 //컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
 
 extern "C" void vngo_ztgtriangle8_persp (VngoVbuffer *vb,VngoPoint2 *pts,
-                                        VngoTextureInfo *tex)
+                                        VngoTexture3D *tex)
 {
     long            mid_y;
     VngoTriangle    tri;
@@ -101,7 +101,7 @@ extern "C" void vngo_ztgtriangle8_persp (VngoVbuffer *vb,VngoPoint2 *pts,
     calc_order(high_pt_idx,mid_pt_idx,low_pt_idx,pts);
 
     float       flxconv = 1.f / 65536.f;
-    VngoPointF  high_pt;
+    VngoPointF2  high_pt;
     high_pt.x = pts[high_pt_idx].x;
     high_pt.y = pts[high_pt_idx].y;
     high_pt.z = pts[high_pt_idx].z;
@@ -110,7 +110,7 @@ extern "C" void vngo_ztgtriangle8_persp (VngoVbuffer *vb,VngoPoint2 *pts,
     high_pt.u = (float(pts[high_pt_idx].u) * flxconv) * high_pt.w;
     high_pt.v = (float(pts[high_pt_idx].v) * flxconv) * high_pt.w;
 
-    VngoPointF  mid_pt;
+    VngoPointF2  mid_pt;
     mid_pt.x = pts[mid_pt_idx].x;
     mid_pt.y = pts[mid_pt_idx].y;
     mid_pt.z = pts[mid_pt_idx].z;
@@ -119,7 +119,7 @@ extern "C" void vngo_ztgtriangle8_persp (VngoVbuffer *vb,VngoPoint2 *pts,
     mid_pt.u = (float(pts[mid_pt_idx].u) * flxconv) * mid_pt.w;
     mid_pt.v = (float(pts[mid_pt_idx].v) * flxconv) * mid_pt.w;
 
-    VngoPointF  low_pt;
+    VngoPointF2  low_pt;
     low_pt.x = pts[low_pt_idx].x;
     low_pt.y = pts[low_pt_idx].y;
     low_pt.z = pts[low_pt_idx].z;
@@ -151,7 +151,9 @@ extern "C" void vngo_ztgtriangle8_persp (VngoVbuffer *vb,VngoPoint2 *pts,
     tri.pitch = vb->pitch;
     tri.zpitch = vb->zpitch;
     tri.height = dy1;
-    tri.tex = tex;
+
+    assert (tex->get_type()==VNGO_MEM_TEX);
+    tri.tex = (VngoMemTexture3D*)tex;
     tri.shade = pts[0].shade;
 
     if (dy1 > dy2)
@@ -194,14 +196,14 @@ extern "C" void vngo_ztgtriangle8_persp (VngoVbuffer *vb,VngoPoint2 *pts,
         tri.sstep_dx1 = (long(edge1[mid_y].shade) - long(edge2[mid_y].shade)) / -mid_dx;
     }
 
-    if (tex->vtxt->width == tex->vtxt->height)
+    if (tri.tex->vtxt->width == tri.tex->vtxt->height)
     {
 
-        if (tex->vtxt->width == 128 && !(tex->vtxt->flags & VNGO_TEXTURE_TRANSPARENT))
+        if (tri.tex->vtxt->width == 128 && !(tri.tex->vtxt->flags & VNGO_TEXTURE_TRANSPARENT))
         {
             draw_zpghlines_128x128_ntrans(&tri);
         }
-        else if (tex->vtxt->width == 256 && !(tex->vtxt->flags & VNGO_TEXTURE_TRANSPARENT))
+        else if (tri.tex->vtxt->width == 256 && !(tri.tex->vtxt->flags & VNGO_TEXTURE_TRANSPARENT))
         {
             draw_zpghlines_256x256_ntrans(&tri);
         }
@@ -216,7 +218,7 @@ extern "C" void vngo_ztgtriangle8_persp (VngoVbuffer *vb,VngoPoint2 *pts,
     }
 }
 
-extern "C" void scan_zpgouraud_edge(VngoPoint2 *edge,VngoPointF *p1, VngoPointF *p2)
+extern "C" void scan_zpgouraud_edge(VngoPoint2 *edge,VngoPointF2 *p1, VngoPointF2 *p2)
 {
     Flx16 xstep;
     Flx16 zstep;
@@ -313,7 +315,7 @@ extern "C" void draw_zpghlines(VngoTriangle *tri)
     long            udown = tri->tex->u_downshift;
     long            vdown = tri->tex->v_downshift - tri->tex->widthshift;
     long            start_y = tri->start_y;
-    byte            *tptr = tri->tex->vtxt->tex;
+    byte            *tptr = (byte*)tri->tex->vtxt->tex;
     long            mask = ~((1 << tri->tex->widthshift) - 1);
     byte            clr;
 
@@ -407,7 +409,7 @@ extern "C" void draw_zpghlines_256x256_ntrans(VngoTriangle *tri)
     long            uup = tri->tex->u_upshift;
     long            vup = tri->tex->v_upshift;
     long            start_y = tri->start_y;
-    byte            *tptr = tri->tex->vtxt->tex;
+    byte            *tptr = (byte*)tri->tex->vtxt->tex;
     byte            clr;
 
     for (long y=0;y <= count;y++)
@@ -497,7 +499,7 @@ extern "C" void draw_zpghlines_128x128_ntrans(VngoTriangle *tri)
     long            uup = tri->tex->u_upshift;
     long            vup = tri->tex->v_upshift;
     long            start_y = tri->start_y;
-    byte            *tptr = tri->tex->vtxt->tex;
+    byte            *tptr = (byte*)tri->tex->vtxt->tex;
     byte            clr;
 
     for (long y=0;y <= count;y++)

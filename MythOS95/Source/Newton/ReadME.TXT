@@ -52,11 +52,11 @@
 
                              _Library Status_
 
- Notes by: Dan Higdon
- Updated: Febuary 2, 1997
+ Notes by: Chuck Walbourn
+ Updated: May 22, 1997
 
  Changes for this release --------------------------------------------------
 
- o Fixed problems with NewtObject step routine.
+ o Converted to use float instead of Flx16.
 
 *** END OF FILE ***

@@ -66,7 +66,6 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include <portable.h>
-#include <felix.hpp>
 #include <assert.h>
 
 #include "newtmath.hpp"                 // class NewtVector
@@ -97,15 +96,15 @@ public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Public data members                                                  ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-    Flx16       mass;               // mass (acceleration resistance)
-    Flx16       drag;               // drag coefficient (velocity resistance)
+    float       mass;               // mass (acceleration resistance)
+    float       drag;               // drag coefficient (velocity resistance)
     
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Constructor/Destructors                                              ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-    NewtObject (Flx16 m, const NewtVector &_pos, const NewtVector &_vel);
-    NewtObject (Flx16 m, Flx16 x, Flx16 y, Flx16 z, const NewtVector &_vel);
-    NewtObject (Flx16 m, Flx16 x, Flx16 y, Flx16 z);
+    NewtObject (float m, const NewtVector &_pos, const NewtVector &_vel);
+    NewtObject (float m, float x, float y, float z, const NewtVector &_vel);
+    NewtObject (float m, float x, float y, float z);
     NewtObject ();
 
     virtual ~NewtObject ();
@@ -116,31 +115,31 @@ public:
     void get_last_position (NewtVector *) const;
     void get_position (NewtVector *) const;
     void set_position (const NewtVector &pos);
-    void set_position (Flx16 x, Flx16 y, Flx16 z);
+    void set_position (float x, float y, float z);
 
     void get_velocity (NewtVector *) const;
     void set_velocity (const NewtVector &vel);
-    void set_velocity (Flx16 x, Flx16 y, Flx16 z);
+    void set_velocity (float x, float y, float z);
 
     void get_temp_velocity (NewtVector *) const;
     void set_temp_velocity (const NewtVector &vel);
-    void set_temp_velocity (Flx16 x, Flx16 y, Flx16 z);
+    void set_temp_velocity (float x, float y, float z);
 
     void get_acceleration (NewtVector *) const;
     void set_acceleration (const NewtVector &acc);
-    void set_acceleration (Flx16 x, Flx16 y, Flx16 z);
+    void set_acceleration (float x, float y, float z);
 
     void get_temp_acceleration (NewtVector *) const;
     void set_temp_acceleration (const NewtVector &acc);
-    void set_temp_acceleration (Flx16 x, Flx16 y, Flx16 z);
+    void set_temp_acceleration (float x, float y, float z);
 
-    void set_mass (Flx16);
-    void set_drag (Flx16);
+    void set_mass (float);
+    void set_drag (float);
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Operations                                                           ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-    virtual void step (Flx16 time_interval);
+    virtual void step (float time_interval);
 };
 
 
@@ -161,7 +160,7 @@ public:
     // Constructor/Destructors                                              ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
     NewtForce (const NewtVector &_vector);
-    NewtForce (Flx16 i, Flx16 j, Flx16 k);
+    NewtForce (float i, float j, float k);
     NewtForce ();
 
     virtual ~NewtForce ();
@@ -170,7 +169,7 @@ public:
     // Accessor functions (inlined below)                                   ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
     void set_vector(const NewtVector &_vector);
-    void set_vector(Flx16 i, Flx16 j, Flx16 k);
+    void set_vector(float i, float j, float k);
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Operations                                                           ³
@@ -213,7 +212,7 @@ inline void NewtObject::set_position (const NewtVector &pos)
     position = pos;
 }
 
-inline void NewtObject::set_position (Flx16 x, Flx16 y, Flx16 z)
+inline void NewtObject::set_position (float x, float y, float z)
 {
     position.i=x;
     position.j=y;
@@ -239,7 +238,7 @@ inline void NewtObject::set_velocity (const NewtVector &vel)
     velocity = vel;
 }
 
-inline void NewtObject::set_velocity (Flx16 x, Flx16 y, Flx16 z)
+inline void NewtObject::set_velocity (float x, float y, float z)
 {
     velocity.i = x;
     velocity.j = y;
@@ -265,7 +264,7 @@ inline void NewtObject::set_temp_velocity (const NewtVector &vel)
     temp_velocity = vel;
 }
 
-inline void NewtObject::set_temp_velocity (Flx16 x, Flx16 y, Flx16 z)
+inline void NewtObject::set_temp_velocity (float x, float y, float z)
 {
     temp_velocity.i = x;
     temp_velocity.j = y;
@@ -291,7 +290,7 @@ inline void NewtObject::set_acceleration (const NewtVector &acc)
     acceleration = acc;
 }
 
-inline void NewtObject::set_acceleration (Flx16 x, Flx16 y, Flx16 z)
+inline void NewtObject::set_acceleration (float x, float y, float z)
 {
     acceleration.i = x;
     acceleration.j = y;
@@ -317,7 +316,7 @@ inline void NewtObject::set_temp_acceleration (const NewtVector &acc)
     temp_acceleration = acc;
 }
 
-inline void NewtObject::set_temp_acceleration (Flx16 x, Flx16 y, Flx16 z)
+inline void NewtObject::set_temp_acceleration (float x, float y, float z)
 {
     temp_acceleration.i = x;
     temp_acceleration.j = y;
@@ -328,7 +327,7 @@ inline void NewtObject::set_temp_acceleration (Flx16 x, Flx16 y, Flx16 z)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //  NewtObject - set_mass
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-inline void NewtObject::set_mass (Flx16 m)
+inline void NewtObject::set_mass (float m)
 {
     mass = m;
 }
@@ -337,7 +336,7 @@ inline void NewtObject::set_mass (Flx16 m)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //  NewtObject - set_drag
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-inline void NewtObject::set_drag (Flx16 d)
+inline void NewtObject::set_drag (float d)
 {
     drag = d;
 }
@@ -351,7 +350,7 @@ inline void NewtForce::set_vector(const NewtVector &_vector)
     vector = _vector;
 }
 
-inline void NewtForce::set_vector(Flx16 i, Flx16 j, Flx16 k)
+inline void NewtForce::set_vector(float i, float j, float k)
 {
     vector.i = i;
     vector.j = j;

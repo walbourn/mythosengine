@@ -32,32 +32,18 @@
 //
 // esdrface.cpp
 //
-// Contains the C++ implementation of the clip/draw function for faces
+// Contains the implementation of the clip support functions
 //
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include "escher.hpp"
 #include <limits.h>
-
-//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-//
-//                                 Data
-//
-//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-
-//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-//
-//                                Equates
-//
-//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-
-#define ES_MAX_VERTS 9
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
@@ -73,31 +59,30 @@ extern "C" int esch_clip_to_plane(int *count, VngoPoint *in, VngoPoint *out,
 //                                 Code
 //
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// esch_clipdraw_face                                                       ³
-//                                                                          ³
-// Draws a face using the current object information in the context.        ³
+// esch_clip_to_frustrum                                                    ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 extern "C" int esch_clip_to_frustrum (ulong *rcount, VngoPoint *pts,
-                                       VngoPoint *outpts,
-                                       EschCamera *cam, dword flags)
+                                      VngoPoint *outpts,
+                                      EschCamera *cam, dword flags)
 {
-    int i;
-    int modified=0;
-    int ycount=0;
-    int hcount=0;
-    int count = int(*rcount);
-    int cstate;
-    VngoPoint *work1;
-    VngoPoint *work2;
-    VngoPoint *t;
+    int         i;
+    int         modified=0;
+    int         ycount=0;
+    int         hcount=0;
+    int         count = int(*rcount);
+    int         cstate;
+    VngoPoint   *work1;
+    VngoPoint   *work2;
+    VngoPoint   *t;
 
-    // Trivialy accept/reject of near/far first.
+//ÄÄÄ Trivialy accept/reject of near/far first.
     for (i=0;i < count;i++)
     {
-        if (pts[i].wz > cam->yon.flx)
+        if (((const EschPoint*)(&pts[i]))->z > cam->yon)
             ycount++;
-        if (pts[i].wz < cam->hither.flx)
+        if (((const EschPoint*)(&pts[i]))->z < cam->hither)
             hcount++;
     }
     if ((ycount >= count) || (hcount >= count))
@@ -105,38 +90,36 @@ extern "C" int esch_clip_to_frustrum (ulong *rcount, VngoPoint *pts,
         return 0;
     }
 
-    Flx16 tx;
-    Flx16 ty;
-
+//ÄÄÄ Determine clip flags
     dword lclip_flags=0;
 
     for(i=0; i < count; i++)
     {
-        tx.flx = flx_16mul16( Flx16(pts[i].wz,1) , cam->xsize ).flx;
-        ty.flx = flx_16mul16( Flx16(pts[i].wz,1) , cam->ysize ).flx;
+        float tx = ((const EschPoint*)(&pts[i]))->z * cam->xsize;
+        float ty = ((const EschPoint*)(&pts[i]))->z * cam->ysize;
 
-        long x = pts[i].wx;
-
-        if (x < -tx.flx)
+        float x = ((const EschPoint*)(&pts[i]))->x;
+        if (x < -tx)
         {
             lclip_flags |= 0x1 << (4*i);
         }
-        else if (x > tx.flx)
+        else if (x > tx)
         {
             lclip_flags |= 0x2 << (4*i);
         }
 
-        long y = pts[i].wy;
-        if (y < -ty.flx)
+        float y = ((const EschPoint*)(&pts[i]))->y;
+        if (y < -ty)
         {
             lclip_flags |= 0x4 << (4*i);
         }
-        else if (y > ty.flx)
+        else if (y > ty)
         {
             lclip_flags |= 0x8 << (4*i);
         }
     }
-    // if any of the bits are set, then it is off the screen.
+
+//ÄÄÄ If any of the bits are set, then it is off the screen.
     if (lclip_flags)
     {
         i=0;
@@ -156,11 +139,10 @@ extern "C" int esch_clip_to_frustrum (ulong *rcount, VngoPoint *pts,
 
     lclip_flags = 0xf;
 
-
     work1 = pts;
     work2 = outpts;
 
-    // Clip to the YON plane.
+//ÄÄÄ Clip to the YON plane.
     if (ycount)
     {
         cstate = esch_clip_to_plane(&count,work1,work2,
@@ -177,7 +159,8 @@ extern "C" int esch_clip_to_frustrum (ulong *rcount, VngoPoint *pts,
             work2 = t;
         }
     }
-    // Clip to the HITHER plane.
+
+//ÄÄÄ Clip to the HITHER plane.
     if (hcount)
     {
         cstate = esch_clip_to_plane(&count,work1,work2,
@@ -195,12 +178,12 @@ extern "C" int esch_clip_to_frustrum (ulong *rcount, VngoPoint *pts,
         }
     }
 
-    // Clip to the TOP plane.
+//ÄÄÄ Clip to the TOP plane.
     if (lclip_flags & 0x44444444)
     {
         cstate = esch_clip_to_plane(&count,work1,work2,
-                                        &cam->frustrum[ESCH_CAM_FRUSTRUM_TOP],
-                                        flags);
+                                    &cam->frustrum[ESCH_CAM_FRUSTRUM_TOP],
+                                    flags);
         if (!cstate)
             return 0;
         else if (cstate == 1)
@@ -212,7 +195,7 @@ extern "C" int esch_clip_to_frustrum (ulong *rcount, VngoPoint *pts,
         }
     }
 
-    // Clip to the BOTTOM plane.
+//ÄÄÄ Clip to the BOTTOM plane.
     if (lclip_flags & 0x88888888)
     {
         cstate = esch_clip_to_plane(&count,work1,work2,
@@ -229,7 +212,7 @@ extern "C" int esch_clip_to_frustrum (ulong *rcount, VngoPoint *pts,
         }
     }
 
-    // Clip to the RIGHT plane.
+//ÄÄÄ Clip to the RIGHT plane.
     if (lclip_flags & 0x11111111)
     {
         cstate = esch_clip_to_plane(&count,work1,work2,
@@ -246,7 +229,7 @@ extern "C" int esch_clip_to_frustrum (ulong *rcount, VngoPoint *pts,
         }
     }
 
-    // Clip to the LEFT plane.
+//ÄÄÄ Clip to the LEFT plane.
     if (lclip_flags & 0x22222222)
     {
         cstate = esch_clip_to_plane(&count,work1,work2,
@@ -273,15 +256,18 @@ extern "C" int esch_clip_to_frustrum (ulong *rcount, VngoPoint *pts,
 }
 
 
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// esch_clip_to_plane                                                       ³
+//                                                                          ³
+// This code is take from Abrash's 3D-clipping example                      ³
+// DDJ Source Book March/April '95                                          ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 extern "C" int esch_clip_to_plane(int *count, VngoPoint *in, VngoPoint *out,
                                   EschPlane *plane, dword flags)
 {
-// This code is take from Abrash's 3D-clipping example 
-// DDJ Source Book March/April '95
-
     int         i,curin,nextin;
     int         modified = -1;
-    Flx16       curdot,nextdot,scale;
+    float       curdot,nextdot,scale;
     VngoPoint   *cvert,*nvert;
     int         local_count=0;
 
@@ -304,27 +290,37 @@ extern "C" int esch_clip_to_plane(int *count, VngoPoint *in, VngoPoint *out,
         nextin = (nextdot >= plane->dist);
 
         if (curin != nextin)
-        {   // It crossed the plane.
+        {
+            // It crossed the plane.
             scale = (plane->dist - curdot) / (nextdot - curdot);
 
             // Calc the new components.
-            out->wx = (Flx16(cvert->wx,0) + (Flx16(nvert->wx - cvert->wx,0) * scale)).flx;
-            out->wy = (Flx16(cvert->wy,0) + (Flx16(nvert->wy - cvert->wy,0) * scale)).flx;
-            out->wz = (Flx16(cvert->wz,0) + (Flx16(nvert->wz - cvert->wz,0) * scale)).flx;
+            ((EschPoint*)out)->x = ((const EschPoint*)cvert)->x
+                                   + ( ( ((const EschPoint*)nvert)->x
+                                         - ((const EschPoint*)cvert)->x ) * scale );
+            ((EschPoint*)out)->y = ((const EschPoint*)cvert)->y
+                                   + ( ( ((const EschPoint*)nvert)->y
+                                         - ((const EschPoint*)cvert)->y ) * scale );
+            ((EschPoint*)out)->z = ((const EschPoint*)cvert)->z
+                                   + ( ( ((const EschPoint*)nvert)->z
+                                         - ((const EschPoint*)cvert)->z ) * scale );
 
             if (flags & ESCH_CAM_TEXTURED)
             {
-                out->u = (Flx16(cvert->u,0) + (Flx16(nvert->u - cvert->u,0) * scale)).flx;
-                out->v = (Flx16(cvert->v,0) + (Flx16(nvert->v - cvert->v,0) * scale)).flx;
+                //!!! u/v are still fixed point!
+                out->u = (Flx16(cvert->u,0) + (Flx16(nvert->u - cvert->u,0) * Flx16(scale))).flx;
+                out->v = (Flx16(cvert->v,0) + (Flx16(nvert->v - cvert->v,0) * Flx16(scale))).flx;
             }
             if (flags & ESCH_CAM_SHADE_SMOOTH)
             {
-                out->shade = (Flx16(cvert->shade) + (Flx16(nvert->shade - cvert->shade) * scale)); 
+                out->shade = long(float(cvert->shade)
+                                  + (float(nvert->shade - cvert->shade) * scale));
             }
             else
             {
                 out->shade = cvert->shade;
             }
+
             out->clr = cvert->clr;
             out++;
             modified = 1;
@@ -343,6 +339,9 @@ extern "C" int esch_clip_to_plane(int *count, VngoPoint *in, VngoPoint *out,
 }
 
 
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// esch_rotate_check                                                        ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 int esch_rotate_check(ulong count, VngoPoint2 *pts)
 {
     if (count < 3)
@@ -388,64 +387,64 @@ int esch_rotate_check(ulong count, VngoPoint *pts, EschCamera *cam)
     }
     else
     {
-#if 1
-        static double flxcnv = (1. / 65536.);
-
-        // for now we need to normalize all 3 vectors 
+#if 0
+        // for now we need to normalize all 3 vectors
         // to make sure they stay in range.
-        double vi = double(pts[0].wx) * flxcnv;
-        double vj = double(pts[0].wy) * flxcnv;
-        double vk = double(pts[0].wz) * flxcnv;
+        float vi = ((const EschPoint*)(&pts[0]))->x;
+        float vj = ((const EschPoint*)(&pts[0]))->y;
+        float vk = ((const EschPoint*)(&pts[0]))->z;
 
         // For Abrams, we can assume that the vectors of the polygon are always less than
         // 128 units big.  That ensures that the cross product will not overflow.
-        double ai = double(pts[0].wx - pts[1].wx) * flxcnv;
-        double aj = double(pts[0].wy - pts[1].wy) * flxcnv;
-        double ak = double(pts[0].wz - pts[1].wz) * flxcnv;
+        float ai = ((const EschPoint*)(&pts[0]))->x - ((const EschPoint*)(&pts[1]))->x;
+        float aj = ((const EschPoint*)(&pts[0]))->y - ((const EschPoint*)(&pts[1]))->y;
+        float ak = ((const EschPoint*)(&pts[0]))->z - ((const EschPoint*)(&pts[1]))->z;
 
-        double bi = double(pts[2].wx - pts[1].wx) * flxcnv;
-        double bj = double(pts[2].wy - pts[1].wy) * flxcnv;
-        double bk = double(pts[2].wz - pts[1].wz) * flxcnv;
+        float bi = ((const EschPoint*)(&pts[2]))->x - ((const EschPoint*)(&pts[1]))->x;
+        float bj = ((const EschPoint*)(&pts[2]))->y - ((const EschPoint*)(&pts[1]))->y;
+        float bk = ((const EschPoint*)(&pts[2]))->z - ((const EschPoint*)(&pts[1]))->z;
 
-        double fi = (aj * bk) - (ak * bj);
-        double fj = (ak * bi) - (ai * bk);
-        double fk = (ai * bj) - (aj * bi);
+        float fi = (aj * bk) - (ak * bj);
+        float fj = (ak * bi) - (ai * bk);
+        float fk = (ai * bj) - (aj * bi);
 
-        double dir = (vi * fi) + (vj * fj) + (vk * fk);
+        float dir = (vi * fi) + (vj * fj) + (vk * fk);
 
         if (dir < 0)
             return 0;
         else
             return 1;
 #else
-        // for now we need to normalize all 3 vectors 
+        // for now we need to normalize all 3 vectors
         // to make sure they stay in range.
         EschVector  view;
-        view.i.flx = pts[0].wx;
-        view.j.flx = pts[0].wy;
-        view.k.flx = pts[0].wz;
+        view.i = pts[0].wx;
+        view.j = pts[0].wy;
+        view.k = pts[0].wz;
 
         view.normalize();
 
         // For Abrams, we can assume that the vectors of the polygon are always less than
         // 128 units big.  That ensures that the cross product will not overflow.
         EschVector  a,b;
-        a.i.flx = pts[0].wx - pts[1].wx;
-        a.j.flx = pts[0].wy - pts[1].wy;
-        a.k.flx = pts[0].wz - pts[1].wz;
+        a.i = pts[0].wx - pts[1].wx;
+        a.j = pts[0].wy - pts[1].wy;
+        a.k = pts[0].wz - pts[1].wz;
         a.normalize();
 
-        b.i.flx = pts[2].wx - pts[1].wx;
-        b.j.flx = pts[2].wy - pts[1].wy;
-        b.k.flx = pts[2].wz - pts[1].wz;
+        b.i = pts[2].wx - pts[1].wx;
+        b.j = pts[2].wy - pts[1].wy;
+        b.k = pts[2].wz - pts[1].wz;
         b.normalize();
 
         EschVector f = b CROSS a;
 
-        if ((view DOT f).flx > 0)
+        if ((view DOT f) > 0.075f)
             return 0;
         else
             return 1;
 #endif
     }
 }
+
+//°±² End of module - esclip.cpp ²±°

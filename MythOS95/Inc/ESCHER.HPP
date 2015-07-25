@@ -42,14 +42,15 @@
 #define __ESCHER_HPP    1
 
 //같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같�
-//             
+//
 //                                Includes
-//                                
+//
 //같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같�
 
 //컴 Standard includes
 #include <assert.h>
 #include <string.h>
+#include <math.h>
 
 #include <portable.h>
 
@@ -74,8 +75,10 @@
 #include "espartik.hpp"                 // EschParticle and associated classes
 #include "esgeom.hpp"                   // EschGeometry and associated classes
 
-#include "esterran.hpp"                 // EschTerrain
-#include "esternex.hpp"                 // EschTerrainEx
+#include "eslimb.hpp"                   // EschLimbSegment & associated classes
+#include "eskeyfrm.hpp"                 // EschKeyframer and associated classes
+#include "esterran.hpp"                 // EschTerrain and derived classes
+#include "estrtop.hpp"                  // EschTerrainTreeTop class
 
 #include "espartn.hpp"                  // EschParition and associated classes
 

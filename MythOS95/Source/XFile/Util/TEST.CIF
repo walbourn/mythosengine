@@ -89,6 +89,11 @@ form "IFFC"
     bitmap "ape.cel"
 }
 
+form "IFFC"
+{
+    bitmap "test.tga" bpp 2
+}
+
 chunk "endF"
 {
     text "*EOF*"

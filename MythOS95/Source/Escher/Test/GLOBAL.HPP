@@ -36,9 +36,9 @@
 #define __GLOBAL_HPP    1
 
 //같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같�
-//             
+//
 //                                Includes
-//                                
+//
 //같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같�
 
 // NOTE: the including file must define any Windows control defines
@@ -89,7 +89,7 @@ class EscherTest
 protected:
     TCHAR   szFileName[MAX_PATH];
 
-    MaxDevices      &devs;  // Just a reference, so we can process events
+    MaxDevices      *devs;
     MaxEventSource  *evt;           // Source of our events
     MaxEventListOneshot oneshot;    // Track events for single_events
     MaxEventListToggle  toggles;
@@ -115,7 +115,7 @@ public:     // Construction/Destruction
     int             map_xsize;
     int             map_ysize;
 
-    EscherTest (MaxDevices &);
+    EscherTest (MaxDevices *);
     ~EscherTest ();
 
     BOOL    active;
@@ -124,7 +124,7 @@ public:     // Construction/Destruction
     BOOL    pick_test;
     BOOL    collide_test;
     BOOL    use_new_terrain;
-    Flx16   mbox_size;
+    float   mbox_size;
     long    alpha;
 
     EschCameraEx            *cam;
@@ -141,10 +141,11 @@ public:     // Construction/Destruction
     EschSprite              *sprite;
     EschMetabox             *metabox;
     EschMultiFrameTexture   *mtxt;
+    EschTerrainTreeTop      *trees;
     int                     drawexts;
     dword                   exts_color;
-    Flx16                   RotateDegrees;
-    Flx16                   ScriptRotateDegrees;
+    float                   RotateDegrees;
+    float                   ScriptRotateDegrees;
 
     enum
     {
@@ -169,6 +170,7 @@ public:     // Construction/Destruction
     BOOL SetupSprite(const char *name);
 
     BOOL LoadScene(char *fn);
+    BOOL LoadTreeTops(const char *buff);
     BOOL LoadTerrain(char *fn);
     BOOL SetupParticleSystem(const char *name);
     BOOL SetupStarfield(BOOL fixed, BOOL brights);

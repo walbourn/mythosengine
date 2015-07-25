@@ -70,6 +70,8 @@
 //                                
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
+#include <math.h>
+
 #include <portable.h>
 #include <felix.hpp>
 
@@ -117,9 +119,9 @@ class EschMatrix;
 class EschFrameRef;
 
 //ÄÄ Point and vector operations
-extern "C" void esch_rotatex(const void *s,const Flx16 deg, void *d);
-extern "C" void esch_rotatey(const void *s,const Flx16 deg, void *d);
-extern "C" void esch_rotatez(const void *s,const Flx16 deg, void *d);
+extern "C" void esch_rotatex(const void *s,const float deg, void *d);
+extern "C" void esch_rotatey(const void *s,const float deg, void *d);
+extern "C" void esch_rotatez(const void *s,const float deg, void *d);
 extern "C" void esch_transform(const void *s,const EschMatrix *m, void *d);
 extern "C" void esch_transform_notran(const void *s,const EschMatrix *m,
                                       void *d);
@@ -127,43 +129,25 @@ extern "C" void esch_transform_notran(const void *s,const EschMatrix *m,
 //ÄÄ Vector functions
 extern "C" EschVector *esch_cross(const EschVector *v1,const EschVector *v2,
                                   EschVector *dest);
-
-extern "C" long asm_esch_dot(const EschVector *v1,const EschVector *v2);
-inline Flx16 esch_dot(const EschVector *v1,const EschVector *v2)
-{
-    return Flx16(asm_esch_dot(v1,v2),0);
-}
-
-extern "C" long asm_esch_magnitude(const EschVector *vect);
-inline Flx16 esch_magnitude(const EschVector *vect)
-{
-    return Flx16(asm_esch_magnitude(vect),0);
-}
+extern "C" float esch_dot(const EschVector *v1,const EschVector *v2);
+extern "C" float esch_magnitude(const EschVector *vect);
 
 //ÄÄ Matrix functions
 extern "C" void esch_concatmatrix(const EschMatrix *s, const EschMatrix *m,
                                   EschMatrix *d);
 extern "C" int esch_inversematrix(const EschMatrix *m, EschMatrix *d);
+extern "C" float esch_detmatrix(const EschMatrix *m);
 
-extern "C" long asm_esch_detmatrix(const EschMatrix *m);
-inline Flx16 esch_detmatrix(const EschMatrix *m)
-{
-    return Flx16(esch_detmatrix(m),0);
-}
+//ÄÄ Trig functions
+inline float esch_sin(float degrees) { return float(sin(degrees * 0.017453292f)); }
+inline float esch_cos(float degrees) { return float(cos(degrees * 0.017453292f)); }
+inline float esch_tan(float degrees) { return float(tan(degrees * 0.017453292f)); }
+inline float esch_asin(float n) { return (float(asin(n)) * 57.29577951f); }
+inline float esch_acos(float n) { return (float(acos(n)) * 57.29577951f); }
+inline float esch_atan(float n) { return (float(atan(n)) * 57.29577951f); }
 
-#ifdef __WATCOMC__
-#pragma aux (_ASMSTKCALL_) esch_rotatex;
-#pragma aux (_ASMSTKCALL_) esch_rotatey;
-#pragma aux (_ASMSTKCALL_) esch_rotatez;
-#pragma aux (_ASMSTKCALL_) esch_transform;
-#pragma aux (_ASMSTKCALL_) esch_transform_notran;
-#pragma aux (_ASMSTKCALL_) esch_cross;
-#pragma aux (_ASMSTKCALL_) asm_esch_dot;
-#pragma aux (_ASMSTKCALL_) asm_esch_magnitude;
-#pragma aux (_ASMSTKCALL_) esch_concatmatrix;
-#pragma aux (_ASMSTKCALL_) asm_esch_detmatrix;
-#pragma aux (_ASMSTKCALL_) esch_inversematrix;
-#endif
+//ÄÄ Misc functions
+inline float esch_sqrt(float n) { return float(sqrt(n)); }
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
@@ -180,16 +164,16 @@ public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Public data members                                                  ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-    Flx16   x;                          // Must match VngoPoint.wx
-    Flx16   y;                          // Must match VngoPoint.wy
-    Flx16   z;                          // Must match VngoPoint.wz
+    float   x;                          // Must match VngoPoint.wx
+    float   y;                          // Must match VngoPoint.wy
+    float   z;                          // Must match VngoPoint.wz
     dword   na;
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Constructor/Destructors                                              ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
     EschPoint() {}
-    EschPoint(Flx16 ix, Flx16 iy, Flx16 iz) : x(ix), y(iy), z(iz) {}
+    EschPoint(float ix, float iy, float iz) : x(ix), y(iy), z(iz) {}
 
     ~EschPoint() {}
 
@@ -207,9 +191,9 @@ public:
 
     EschPoint operator += (const EschPoint &b)
     {   
-        x.flx = x.flx + b.x.flx;
-        y.flx = y.flx + b.y.flx;
-        z.flx = z.flx + b.z.flx;
+        x = x + b.x;
+        y = y + b.y;
+        z = z + b.z;
         return (*this);
     }
 
@@ -222,9 +206,9 @@ public:
 
     EschPoint operator -= (const EschPoint &b)
     {
-        x.flx = x.flx - b.x.flx;
-        y.flx = y.flx - b.y.flx;
-        z.flx = z.flx - b.z.flx;
+        x = x - b.x;
+        y = y - b.y;
+        z = z - b.z;
         return (*this);
     }
 
@@ -255,29 +239,29 @@ public:
         ::esch_transform(this,(EschMatrix *)m,result);
     }
 
-    void rotatex(const Flx16 degrees)
+    void rotatex(const float degrees)
     {
         ::esch_rotatex(this,degrees,this);
     }
-    void rotatex(const Flx16 degrees, EschPoint *result) const
+    void rotatex(const float degrees, EschPoint *result) const
     {
         ::esch_rotatex(this,degrees,result);
     }
 
-    void rotatey(const Flx16 degrees)
+    void rotatey(const float degrees)
     {
         ::esch_rotatey(this,degrees,this);
     }
-    void rotatey(const Flx16 degrees, EschPoint *result) const
+    void rotatey(const float degrees, EschPoint *result) const
     {
         ::esch_rotatey(this,degrees,result);
     }
 
-    void rotatez(const Flx16 degrees)
+    void rotatez(const float degrees)
     {
         ::esch_rotatez(this,degrees,this);
     }
-    void rotatez(const Flx16 degrees, EschPoint *result) const
+    void rotatez(const float degrees, EschPoint *result) const
     {
         ::esch_rotatez(this,degrees,result);
     }
@@ -293,16 +277,16 @@ public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Public data members                                                  ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-    Flx16   i;
-    Flx16   j;
-    Flx16   k;
+    float   i;
+    float   j;
+    float   k;
     dword   na;
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Constructor/Destructors                                              ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
     EschVector() {}
-    EschVector(Flx16 ii, Flx16 ij, Flx16 ik) : i(ii), j(ij), k(ik) {}
+    EschVector(float ii, float ij, float ik) : i(ii), j(ij), k(ik) {}
 
     ~EschVector() {}
 
@@ -319,9 +303,9 @@ public:
     }
     EschVector operator += (const EschVector &b)
     {   
-        i.flx = i.flx + b.i.flx;
-        j.flx = j.flx + b.j.flx;
-        k.flx = k.flx + b.k.flx;
+        i = i + b.i;
+        j = j + b.j;
+        k = k + b.k;
         return (*this);
     }
 
@@ -333,9 +317,9 @@ public:
     }
     EschVector operator -= (const EschVector &b)
     {   
-        i.flx = i.flx - b.i.flx;
-        j.flx = j.flx - b.j.flx;
-        k.flx = k.flx - b.k.flx;
+        i = i - b.i;
+        j = j - b.j;
+        k = k - b.k;
         return (*this);
     }
 
@@ -346,62 +330,62 @@ public:
     }
 
     //ÄÄÄ Addition/Subtraction with a scalar.
-    EschVector operator + (const Flx16 scalar) const
+    EschVector operator + (const float scalar) const
     {
         return EschVector(i + scalar,
                           j + scalar,
                           k + scalar);
     }
-    EschVector operator += (const Flx16 scalar)
+    EschVector operator += (const float scalar)
     {   
-        i.flx = i.flx + scalar.flx;
-        j.flx = j.flx + scalar.flx;
-        k.flx = k.flx + scalar.flx;
+        i = i + scalar;
+        j = j + scalar;
+        k = k + scalar;
         return (*this);
     }
 
-    EschVector operator - (const Flx16 scalar) const
+    EschVector operator - (const float scalar) const
     {
         return EschVector(i - scalar,
                           j - scalar,
                           k - scalar);
     }
-    EschVector operator -= (const Flx16 scalar)
+    EschVector operator -= (const float scalar)
     {   
-        i.flx = i.flx - scalar.flx;
-        j.flx = j.flx - scalar.flx;
-        k.flx = k.flx - scalar.flx;
+        i = i - scalar;
+        j = j - scalar;
+        k = k - scalar;
         return (*this);
     }
 
     //ÄÄÄ Multiplication/Division by a scalar.
-    EschVector operator * (const Flx16 scalar) const
+    EschVector operator * (const float scalar) const
     {
-        return EschVector(flx_16mul16(i,scalar),
-                          flx_16mul16(j,scalar),
-                          flx_16mul16(k,scalar));
+        return EschVector(i * scalar,
+                          j * scalar,
+                          k * scalar);
     }
 
-    EschVector operator *= (const Flx16 scalar)
+    EschVector operator *= (const float scalar)
     {
-        i.flx = flx_16mul16(i,scalar).flx;
-        j.flx = flx_16mul16(j,scalar).flx;
-        k.flx = flx_16mul16(k,scalar).flx;
+        i = i * scalar;
+        j = j * scalar;
+        k = k * scalar;
         return (*this);
     }
 
-    EschVector operator / (const Flx16 scalar) const
+    EschVector operator / (const float scalar) const
     {
-        return EschVector(flx_16div16(i,scalar),
-                          flx_16div16(j,scalar),
-                          flx_16div16(k,scalar));
+        return EschVector(i / scalar,
+                          j / scalar,
+                          k / scalar);
     }
 
-    EschVector operator /= (const Flx16 scalar)
+    EschVector operator /= (const float scalar)
     {
-        i.flx = flx_16div16(i,scalar).flx;
-        j.flx = flx_16div16(j,scalar).flx;
-        k.flx = flx_16div16(k,scalar).flx;
+        i = i / scalar;
+        j = j / scalar;
+        k = k / scalar;
         return (*this);
     }
 
@@ -415,28 +399,28 @@ public:
         return (*::esch_cross(this,&v,&result));
     }
 
-    Flx16 operator DOT (const EschVector &v) const
+    float operator DOT (const EschVector &v) const
     {
         return (::esch_dot(this,&v));
     }
 
-    Flx16 magnitude() const { return (esch_magnitude(this));}
+    float magnitude() const { return (esch_magnitude(this));}
 
     void normalize() 
     {
-        Flx16   mag;
+        float   mag;
         mag = magnitude();
 
 #ifdef assertMyth
         assertMyth("EschVector::normalize found magnitude of zero",
-                   mag.flx);
+                   mag > 0);
 #endif
 
-        if (mag.flx)    // can't normalize a vector of magnitude 0.
+        if (mag)    // can't normalize a vector of magnitude 0.
         {
-            i.flx = flx_16div16(i,mag).flx;
-            j.flx = flx_16div16(j,mag).flx;
-            k.flx = flx_16div16(k,mag).flx;
+            i = i / mag;
+            j = j / mag;
+            k = k / mag;
         }
     }
 
@@ -445,25 +429,25 @@ public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
     //ÄÄÄ Scale vector
-    void scale(Flx16 scale)
+    void scale(float scale)
     {
-        i.flx = flx_16mul16(i,scale).flx;
-        j.flx = flx_16mul16(j,scale).flx;
-        k.flx = flx_16mul16(k,scale).flx;
+        i = i * scale;
+        j = j * scale;
+        k = k * scale;
     }        
 
     //ÄÄÄ Translate vector
-    void translate(Flx16 ix, Flx16 iy, Flx16 iz)
+    void translate(float ix, float iy, float iz)
     {
-        i.flx = i.flx + ix.flx;
-        j.flx = j.flx + iy.flx;
-        k.flx = k.flx + iz.flx; 
+        i = i + ix;
+        j = j + iy;
+        k = k + iz; 
     }
     void translate(const EschVector *v)
     {
-        i.flx = i.flx + v->i.flx;
-        j.flx = j.flx + v->j.flx;
-        k.flx = k.flx + v->k.flx; 
+        i = i + v->i;
+        j = j + v->j;
+        k = k + v->k; 
     }
 
     //ÄÄÄ Transform by a matrix
@@ -486,29 +470,29 @@ public:
     }
 
     //ÄÄÄ Rotate vector
-    void rotatex(const Flx16 degrees)
+    void rotatex(const float degrees)
     {
         ::esch_rotatex(this,degrees,this);
     }
-    void rotatex(const Flx16 degrees, EschVector *result) const
+    void rotatex(const float degrees, EschVector *result) const
     {
         ::esch_rotatex(this,degrees,result);
     }
 
-    void rotatey(const Flx16 degrees)
+    void rotatey(const float degrees)
     {
         ::esch_rotatey(this,degrees,this);
     }
-    void rotatey(const Flx16 degrees, EschVector *result) const
+    void rotatey(const float degrees, EschVector *result) const
     {
         ::esch_rotatey(this,degrees,result);
     }
 
-    void rotatez(const Flx16 degrees)
+    void rotatez(const float degrees)
     {
         ::esch_rotatez(this,degrees,this);
     }
-    void rotatez(const Flx16 degrees, EschVector *result) const
+    void rotatez(const float degrees, EschVector *result) const
     {
         ::esch_rotatez(this,degrees,result);
     }
@@ -525,13 +509,13 @@ public:
     // Public data members                                                  ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
     EschVector  normal;
-    Flx16       dist;
+    float       dist;
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Constructor/Destructors                                              ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
     EschPlane() {}
-    EschPlane(Flx16 ia, Flx16 ib, Flx16 ic, Flx16 id) :
+    EschPlane(float ia, float ib, float ic, float id) :
         normal(ia,ib,ic), dist(id) {}
 
     ~EschPlane() {}
@@ -553,14 +537,14 @@ public:
     // Constructor/Destructors                                              ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
     EschVertex() {}
-    EschVertex(Flx16 ix, Flx16 iy, Flx16 iz,
-               Flx16 ii, Flx16 ij, Flx16 ik)
+    EschVertex(float ix, float iy, float iz,
+               float ii, float ij, float ik)
                : EschPoint(ix,iy,iz), normal(ii,ij,ik) {}
-    EschVertex(Flx16 ix, Flx16 iy, Flx16 iz, const EschVector *n)
+    EschVertex(float ix, float iy, float iz, const EschVector *n)
                : EschPoint(ix,iy,iz) { normal=*n; }
     EschVertex(const EschPoint *p, const EschVector *n)
                : EschPoint(*p) { normal=*n; }
-    EschVertex(const EschPoint *p, Flx16 ii, Flx16 ij, Flx16 ik)
+    EschVertex(const EschPoint *p, float ii, float ij, float ik)
                : EschPoint(*p), normal(ii,ij,ik) {}
 
     ~EschVertex() {}
@@ -581,21 +565,38 @@ public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Public data member                                                   ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-    Flx16   mtx[3*4];
+    float   mtx[3*4];
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Constructor/Destructors                                              ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
     EschMatrix() { reset(); }
     EschMatrix(int dummy) {}
-    EschMatrix(Flx16 a, Flx16 b, Flx16 c, Flx16 d, Flx16 e, Flx16 f,
-               Flx16 g, Flx16 h, Flx16 i, Flx16 j, Flx16 k, Flx16 l)
+    EschMatrix(float a, float b, float c, float d, float e, float f,
+               float g, float h, float i, float j, float k, float l)
                { mtx[ESCH_MTX_A]=a; mtx[ESCH_MTX_B]=b; mtx[ESCH_MTX_C]=c;
                  mtx[ESCH_MTX_D]=d; mtx[ESCH_MTX_E]=e; mtx[ESCH_MTX_F]=f;
                  mtx[ESCH_MTX_G]=g; mtx[ESCH_MTX_H]=h; mtx[ESCH_MTX_I]=i;
                  mtx[ESCH_MTX_J]=j; mtx[ESCH_MTX_K]=k; mtx[ESCH_MTX_L]=l; }
 
     ~EschMatrix() {}
+
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    // Arthimetic operations on matricies                                   ³
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+    //ÄÄÄ Multiplication by a matrix.
+    EschMatrix operator * (const EschMatrix &b) const
+    {
+        EschMatrix m;
+        ::esch_concatmatrix(this,&b,&m);
+        return m;
+    }
+    EschMatrix operator *= (const EschMatrix &b)
+    {
+        ::esch_concatmatrix(this,&b,this);
+        return (*this);
+    }
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Operations on matrix objects.                                        ³
@@ -611,7 +612,7 @@ public:
         ::esch_concatmatrix(this,m,result);
     }
 
-    Flx16 det() { return (esch_detmatrix(this)); }
+    float det() { return (esch_detmatrix(this)); }
 
     int inverse() { return ::esch_inversematrix(this,this); }
     int inverse(EschMatrix *result) const
@@ -641,7 +642,7 @@ public:
     EschMatrix      orient;                 // Transform matrix
     EschVector      dir;
     EschMatrix      iorient;                // Inverse matrix
-    Flx16           scalef;                 // Scale factor (saved for
+    float           scalef;                 // Scale factor (saved for
                                             // orthogonalization)
     dword           ortho_count;
 
@@ -651,9 +652,9 @@ public:
     EschFrameRef() : orient(), iorient(), dir(0,0,1),
                      scalef(1), ortho_count(0) {}
     EschFrameRef(int dummy) : orient(0), iorient(0) {};
-    EschFrameRef(Flx16 a, Flx16 b, Flx16 c, Flx16 d, Flx16 e, Flx16 f,
-                 Flx16 g, Flx16 h, Flx16 i, Flx16 j, Flx16 k, Flx16 l,
-                 Flx16 s=1) :
+    EschFrameRef(float a, float b, float c, float d, float e, float f,
+                 float g, float h, float i, float j, float k, float l,
+                 float s=1) :
                 dir(g,h,i), scalef(s), ortho_count(0)
     {
         orient.mtx[ESCH_MTX_A]=a; orient.mtx[ESCH_MTX_D]=d;
@@ -664,7 +665,7 @@ public:
         orient.mtx[ESCH_MTX_I]=i; orient.mtx[ESCH_MTX_L]=l; 
         compute_inverse();
     }
-    EschFrameRef(EschMatrix *m, Flx16 s=1) :
+    EschFrameRef(EschMatrix *m, float s=1) :
                 scalef(s), ortho_count(0)
     {
         orient=*m;
@@ -685,7 +686,7 @@ public:
         pt->y = orient.mtx[ESCH_MTX_K];
         pt->z = orient.mtx[ESCH_MTX_L];
     }
-    void get_position(Flx16 *ix, Flx16 *iy, Flx16 *iz) const
+    void get_position(float *ix, float *iy, float *iz) const
     {
         *ix = orient.mtx[ESCH_MTX_J];
         *iy = orient.mtx[ESCH_MTX_K];
@@ -693,29 +694,29 @@ public:
     }
 
     void set_position(const EschPoint *pt, dword update=ESCH_UPD_ALL);
-    void set_position(const Flx16 ix, const Flx16 iy, const Flx16 iz,
+    void set_position(const float ix, const float iy, const float iz,
                       dword update=ESCH_UPD_ALL);
 
-    void rotatex(const Flx16 degrees, dword update=ESCH_UPD_ALL);
-    void rotatey(const Flx16 degrees, dword update=ESCH_UPD_ALL);
-    void rotatez(const Flx16 degrees, dword update=ESCH_UPD_ALL);
+    void rotatex(const float degrees, dword update=ESCH_UPD_ALL);
+    void rotatey(const float degrees, dword update=ESCH_UPD_ALL);
+    void rotatez(const float degrees, dword update=ESCH_UPD_ALL);
 
-    void rotate(const EschVector *v, const Flx16 degrees,
+    void rotate(const EschVector *v, const float degrees,
                 dword update=ESCH_UPD_ALL);
 
-    void pitch(const Flx16 degrees, dword update=ESCH_UPD_ALL);
-    void roll(const Flx16 degrees, dword update=ESCH_UPD_ALL);
-    void yaw(const Flx16 degrees, dword update=ESCH_UPD_ALL);
+    void pitch(const float degrees, dword update=ESCH_UPD_ALL);
+    void roll(const float degrees, dword update=ESCH_UPD_ALL);
+    void yaw(const float degrees, dword update=ESCH_UPD_ALL);
 
     void translate(const EschVector *v, dword update=ESCH_UPD_ALL);
-    void translate(const Flx16 idx, const Flx16 idy, const Flx16 idz,
+    void translate(const float idx, const float idy, const float idz,
                    dword update=ESCH_UPD_ALL);
 
     void move(const EschVector *v, dword update=ESCH_UPD_ALL);
-    void move(const Flx16 idx, const Flx16 idy, const Flx16 idz,
+    void move(const float idx, const float idy, const float idz,
               dword update=ESCH_UPD_ALL);
 
-    void scale(const Flx16 is, dword update=ESCH_UPD_ALL);
+    void scale(const float is, dword update=ESCH_UPD_ALL);
 
     void orthogonalize(dword update=ESCH_UPD_ALL);
     void orthogonalize_top(dword update=ESCH_UPD_ALL);

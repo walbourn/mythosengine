@@ -39,7 +39,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include <stdlib.h>
@@ -72,6 +72,7 @@ extern "C" int extent_mode;
 extern "C" int material_mode;
 extern "C" int hierarchy_mode;
 extern "C" int orientation_mode;
+extern "C" int format_mode;
 
 // Material export information
 
@@ -107,6 +108,13 @@ extern "C" int lgt_spotas;
 extern "C" int lgt_ambient;
 extern "C" int lgt_atten;
 
+// Keyframe export information
+
+extern "C" int key_apnd;
+extern "C" int key_loop;
+extern "C" int key_ping;
+extern "C" int key_mtyp;
+
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
 //                                 Code
@@ -126,7 +134,7 @@ extern "C" void load_from_ini(char *inifname)
 //ÄÄÄ Open INI file...
     if (ini.open(inifname,XF_OPEN_READ))
         return;
-    
+
 //ÄÄÄ Read startup section
     if (!ini.section("StartUp"))
     {
@@ -241,6 +249,16 @@ extern "C" void load_from_ini(char *inifname)
             else if (!strcmp(buff,"yes"))
                 lights_flag=1;
         }
+
+        // DataFormat: 'float' or 'fixed'
+        if (!ini.read("DataFormat",buff))
+        {
+            strlwr(buff);
+            if (!strcmp(buff,"float"))
+                format_mode=1;
+            else if (!strcmp(buff,"fixed"))
+                format_mode=2;
+        }
     }
 
 //ÄÄÄ Read material section
@@ -256,10 +274,10 @@ extern "C" void load_from_ini(char *inifname)
 
             strupr(buff);
             _splitpath(buff,drive,dir,fname,ext);
-            
+
             strcpy(mtl_palpath,drive);
             strcat(mtl_palpath,dir);
-            
+
             strcpy(mtl_palname,fname);
             strcat(mtl_palname,ext);
         }
@@ -402,7 +420,40 @@ extern "C" void load_from_ini(char *inifname)
                 lgt_atten=0;
         }
     }
+
+    if (!ini.section("Keyframe"))
+    {
+        key_apnd=1;
+        if (!ini.read("Append",buff))
+        {
+            strlwr(buff);
+            if (!strcmp(buff,"overwrite"))
+                key_apnd=0;
+        }
+
+        key_ping=1;
+        if (!ini.read("PingPong",buff))
+        {
+            strlwr(buff);
+            if (!strcmp(buff,"no"))
+                key_ping=0;
+        }
+
+        key_loop=1;
+        if (!ini.read("Loop",buff))
+        {
+            strlwr(buff);
+            if (!strcmp(buff,"no"))
+                key_loop=0;
+        }
+
+        if (!ini.read("MotionType",buff))
+        {
+            key_mtyp=atoi(buff);
+        }
+
+    }
 }
 
-//°±² End of module - export.cpp ²±°
+//°±² End of module - init.cpp ²±°
 

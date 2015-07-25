@@ -76,6 +76,11 @@ cd system
 call mk %1
 if ERRORLEVEL 1 goto error
 cd ..
+rem 컴컴 SimGine 컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+cd simgine
+call mk %1
+if ERRORLEVEL 1 goto error
+cd ..
 goto exit
 rem *************************************************************************
 rem *************************** Tools ***************************************
@@ -154,6 +159,11 @@ call mk
 if ERRORLEVEL 1 goto error
 cd ..\..
 rem 컴컴 Van Gogh '95 컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
+cd vangogh\test
+call mk clean
+call mk
+if ERRORLEVEL 1 goto error
+cd ..\..
 rem 컴컴 Escher '95 컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
 cd escher\test
 call mk clean
@@ -181,4 +191,11 @@ call mk clean
 call mk
 if ERRORLEVEL 1 goto error
 cd ..
+rem 컴컴 SimGine 컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+cd simgine\test
+call mk clean
+call mk
+if ERRORLEVEL 1 goto error
+cd ..\..
+:error
 :exit

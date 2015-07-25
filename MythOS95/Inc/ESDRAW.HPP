@@ -79,7 +79,7 @@ struct EschDrawList
 {
     EschDrawable    *item;
     EschDrawList    *next;
-    Flx16           dist;           // Used for picking
+    float           dist;           // Used for picking
 };
 
 
@@ -123,7 +123,7 @@ struct EschPicking
     EschCamera      *camera;        // Camera to use for picking
     EschPoint       start;          // World start point for picking
     EschVector      direction;      // World direction vector for picking
-    Flx16           maxdist;        // Maximum distance to check
+    float           maxdist;        // Maximum distance to check
 
     //컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
     // Constructor/Destructors                                              �
@@ -143,8 +143,8 @@ struct EschPicking
     EschPicking(EschCamera *cam,
                 long x, long y,
                 EschDrawable *i,
-                Flx16 maxd,
-                ulong mcount=1) :
+                float maxd,
+                ulong mcount) :
         flags(ESCH_PICK_ILIST | ESCH_PICK_MAXCOUNT
               | ESCH_PICK_CAMERA | ESCH_PICK_VPORT | ESCH_PICK_MAXDIST),
         ilist(i),
@@ -165,8 +165,8 @@ struct EschPicking
     EschPicking(EschPoint &s,
                 EschVector &dir,
                 EschDrawable *i,
-                Flx16 maxd,
-                ulong mcount=1) :
+                float maxd,
+                ulong mcount) :
         flags(ESCH_PICK_ILIST | ESCH_PICK_MAXCOUNT
               | ESCH_PICK_WORLD | ESCH_PICK_MAXDIST),
         ilist(i),
@@ -238,9 +238,9 @@ public:
 
     virtual int get_extents(EschSphereExtents *sp) const;
 
-    virtual Flx16 ray(const EschPoint *pt, const EschVector *v, int coarse=0) const;
+    virtual float ray(const EschPoint *pt, const EschVector *v, int coarse=0) const;
 
-    virtual int hit(const EschPoint *pt, const Flx16 r, int coarse=0) const;
+    virtual int hit(const EschPoint *pt, const float r, int coarse=0) const;
 
     virtual esch_error_codes pick(EschPicking *data) const;
     virtual esch_error_codes collide(EschCollision *data) const;

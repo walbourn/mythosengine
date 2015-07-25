@@ -84,8 +84,8 @@ void EschBoxExtents::draw(const EschFrameRef *fr, dword clr) const
         frame.orient = cam->eye.iorient;
 
 //ÄÄÄ Setup for compare
-    Flx16 yon = cam->yon;
-    Flx16 hither = cam->hither;
+    float yon = cam->yon;
+    float hither = cam->hither;
 
 //ÄÄÄ Box
     int mp = vp->vbuff.pal->shd_pal->mid_point;
@@ -142,10 +142,10 @@ void EschBoxExtents::draw(const EschFrameRef *fr, dword clr) const
         if (p.z < hither || p.z > yon)
             return;
 
-        vpt[i].x = (flx_muldiv(p.x, cam->xscalar, p.z).flx
-                   + (cam->vport->get_vbuff()->width<<15)) >> 16;
-        vpt[i].y = ((cam->vport->get_vbuff()->height<<15)
-                    - flx_muldiv(p.y, cam->yscalar, p.z).flx) >> 16;
+        vpt[i].x = long((p.x * cam->xscalar) / p.z)
+                   + (cam->vport->vbuff.width >> 1);
+        vpt[i].y = (cam->vport->vbuff.height >> 1)
+                   - long((p.y * cam->yscalar) / p.z);
         vpt[i].z = 0;
         vpt[i].clr = clr;
         vpt[i].shade = mp;
@@ -178,25 +178,25 @@ int EschBoxExtents::hit(const EschPoint *pt) const
     assertMyth("EschBoxExtents::hit needs point",
                pt != 0);
 
-    return ( (pt->x.flx < mins[0].flx)
-              || (pt->x.flx > maxs[0].flx)
-              || (pt->z.flx < mins[2].flx)
-              || (pt->z.flx > maxs[2].flx)
-              || (pt->y.flx < mins[1].flx)
-              || (pt->y.flx > maxs[1].flx) ) ? 0 : 1;
+    return ( (pt->x < mins[0])
+              || (pt->x > maxs[0])
+              || (pt->z < mins[2])
+              || (pt->z > maxs[2])
+              || (pt->y < mins[1])
+              || (pt->y > maxs[1]) ) ? 0 : 1;
 }
 
-int EschBoxExtents::hit(const EschPoint *pt, const Flx16 r) const
+int EschBoxExtents::hit(const EschPoint *pt, const float r) const
 {
     assertMyth("EschBoxExtents::hit needs point and radius",
                pt != 0 && r >= 0);
 
-    return ( (mins[0].flx > (pt->x.flx + r.flx))
-              || (maxs[0].flx < (pt->x.flx - r.flx))
-              || (mins[2].flx > (pt->z.flx + r.flx)) 
-              || (maxs[2].flx < (pt->z.flx - r.flx))
-              || (mins[1].flx > (pt->y.flx + r.flx)) 
-              || (maxs[1].flx < (pt->y.flx - r.flx)) ) ? 0 : 1;
+    return ( (mins[0] > (pt->x + r))
+              || (maxs[0] < (pt->x - r))
+              || (mins[2] > (pt->z + r)) 
+              || (maxs[2] < (pt->z - r))
+              || (mins[1] > (pt->y + r)) 
+              || (maxs[1] < (pt->y - r)) ) ? 0 : 1;
 }
 
 
@@ -206,11 +206,10 @@ int EschBoxExtents::hit(const EschPoint *pt, const Flx16 r) const
 // Performs a box/ray intersection test with input in the same coordinate   ³
 // system of the extents.                                                   ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-Flx16 EschBoxExtents::ray(const EschPoint *pt, const EschVector *v) const
+float EschBoxExtents::ray(const EschPoint *pt, const EschVector *v) const
 {
     assertMyth("EschBoxExtents::ray needs point and vector",
                pt != 0 && v != 0);
-
 
     int     i;
     int     inside = 1;
@@ -220,28 +219,28 @@ Flx16 EschBoxExtents::ray(const EschPoint *pt, const EschVector *v) const
         LEFT=1,
         MIDDLE=2
     }       quad[3];
-    Flx16   candidate[3];
-    Flx16   origin[3] = { pt->x, pt->y, pt->z };
-    Flx16   dir[3] = { v->i, v->j, v->k };
+    float   candidate[3];
+    float   origin[3] = { pt->x, pt->y, pt->z };
+    float   dir[3] = { v->i, v->j, v->k };
 
 //ÄÄÄ Find canidate planes
     for(i=0; i < 3 ; i++)
     {
-        if (origin[i].flx < mins[i].flx)
+        if (origin[i] < mins[i])
         {
             quad[i] = LEFT;
-            if (dir[i].flx <= 0)
+            if (dir[i] <= 0)
                 return 0;
 
-            candidate[i].flx = mins[i].flx;
+            candidate[i] = mins[i];
             inside = 0;
         }
-        else if (origin[i].flx > maxs[i].flx)
+        else if (origin[i] > maxs[i])
         {
-            if (dir[i].flx >= 0)
+            if (dir[i] >= 0)
                 return 0;
             quad[i] = RIGHT;
-            candidate[i].flx = maxs[i].flx;
+            candidate[i] = maxs[i];
             inside = 0;
         }
         else
@@ -254,49 +253,49 @@ Flx16 EschBoxExtents::ray(const EschPoint *pt, const EschVector *v) const
     if (inside)
     {
         // Compute distance from ray origin to center of box as distance
-        EschVector p(pt->x - mins[0] - Flx16((maxs[0] - mins[0]).flx >> 1,0),
-                     pt->y - mins[1] - Flx16((maxs[1] - mins[1]).flx >> 1,0),
-                     pt->z - mins[2] - Flx16((maxs[2] - mins[2]).flx >> 1,0));
+        EschVector p(pt->x - mins[0] - ((maxs[0] - mins[0]) / 2.0f),
+                     pt->y - mins[1] - ((maxs[1] - mins[1]) / 2.0f),
+                     pt->z - mins[2] - ((maxs[2] - mins[2]) / 2.0f));
 
         return p.magnitude();
     }
 
 //ÄÄÄ Calc T distances to candidate planes and find max
-    Flx16 dist = -1;
+    float dist = -1;
 
     int whichplane = 0;
     for(i=0; i < 3; i++)
     {
-        if (quad[i] != MIDDLE && dir[i].flx != 0)
+        if (quad[i] != MIDDLE && dir[i] != 0)
         {
-            Flx16 m = (candidate[i] - origin[i]) / dir[i];
+            float m = (candidate[i] - origin[i]) / dir[i];
 
-            if (dist.flx < m.flx)
+            if (dist < m)
             {
                 whichplane = i;
-                dist.flx = m.flx;
+                dist = m;
             }
         }
     }
 
-    if (dist.flx < 0)
+    if (dist < 0)
         return 0;
 
-    Flx16   coord[3];
+    float   coord[3];
 
     for (i=0; i < 3; i++)
     {
         if (whichplane != i)
         {
             coord[i] = origin[i] + dist * dir[i];
-            if ((coord[i].flx < mins[i].flx)
-                || (coord[i].flx > maxs[i].flx))
+            if ((coord[i] < mins[i])
+                || (coord[i] > maxs[i]))
             {
                 return 0;
             }
             else
             {
-                coord[i].flx = candidate[i].flx;
+                coord[i] = candidate[i];
             }
         }
     }

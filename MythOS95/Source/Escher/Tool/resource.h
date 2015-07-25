@@ -52,6 +52,7 @@
 #define IDC_CPROP_FLAGS_APP4            1010
 #define IDC_MPROP_CHKEXT                1010
 #define IDC_SPROP_COPY                  1010
+#define IDC_LPROP_DARK                  1010
 #define IDC_LPROP_FLAGS_APP1            1011
 #define IDC_MPROP_FLAGS_APP9            1011
 #define IDC_LPROP_FLAGS_APP2            1012
@@ -208,6 +209,7 @@
 #define ID_VIEW_SHOW_BOXEXTS            32798
 #define ID_FILE_COMPRESS                32799
 #define ID_FILE_TRUECOLOR               32800
+#define ID_FILE_FLOATING                32801
 #define ID_VIEW_REFRESH                 32809
 #define ID_VIEW_RND_SPECULAR            32816
 #define ID_VIEW_RND_WIREFRAME           32820
@@ -230,7 +232,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        143
-#define _APS_NEXT_COMMAND_VALUE         32801
+#define _APS_NEXT_COMMAND_VALUE         32802
 #define _APS_NEXT_CONTROL_VALUE         1081
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

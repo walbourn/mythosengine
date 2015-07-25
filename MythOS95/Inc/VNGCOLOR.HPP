@@ -25,11 +25,10 @@
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
-// Vngcolor.hpp
+// vngcolor.hpp
 //
-//     This file has all of the various color definitions.
+// This file has all of the various color definitions
 //
-//ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ Revision History ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
 
 #ifndef __VNGCOLOR_HPP
@@ -44,13 +43,22 @@
 #include "portable.h"
 #include "felix.hpp"
 
+#ifdef __WATCOMC__
+#pragma pack(1);
+#endif
+
+#ifdef _MSC_VER
+#pragma pack(push,1)
+#endif
+
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
-//                               Prototypes
+//                                Equates
 //
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 typedef dword VngoColorIndex;
+
 #define VNGO_COLOR_HLS_INVALID  0x1
 #define VNGO_SHADE_FLAT         191
 #define PURE_COLOR_CONVERT      1
@@ -59,12 +67,20 @@ typedef dword VngoColorIndex;
 // make this intensionaly small.
 #define VNGO_SHADE_FULL         (30 << 3) // for 5.3 shade levels.
 
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//
+//                                Classes
+//
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
 class VngoHwPal;
 class VngoPal;
 class VngoPal8;
 class VngoColor24bit;
 
-
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// Color classes
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 class Vngo24to8bit
 {
 public:
@@ -73,7 +89,6 @@ public:
     VngoColorIndex get_index(VngoColor24bit clr);
     void init(VngoPal *my_pal);
 };
-
 
 class VngoColorHLS
 {
@@ -117,7 +132,6 @@ public:
     int compress() {return (((r>>3) << 10) + ((g>>3) << 5) + (b>>3)); }
     int compress16() {return (((r>>3) << 11) + ((g>>2) << 5) + (b>>3)); }
 };
-
 
 class VngoColor16bit
 {
@@ -196,6 +210,10 @@ public:
     }
 };
 
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// Color Convert Class
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 class VngoClrConvert
 {
 public:
@@ -209,14 +227,15 @@ public:
 };
 
 
-
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// Color Shade Classes
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 class VngoColorShade
 {
 public:
 
     VngoColorShade() {}
 };
-
 
 class VngoColorShadeHLS : public VngoColorShade
 {
@@ -225,7 +244,6 @@ public:
 
     VngoColorShadeHLS() {}
 };
-
 
 class VngoColorShade8
 {
@@ -236,7 +254,6 @@ public:
     byte    shl[1]; //[VNGO_SHADE_TABLE_SIZE];
 };
 
-
 class VngoColorShade15 : public VngoColorShade
 {
     VngoColorShade15() {}
@@ -245,7 +262,6 @@ public:
     word    shl[1]; //[VNGO_SHADE_TABLE_SIZE];
 
 };
-
 
 class VngoColorShade16 : public VngoColorShade
 {
@@ -256,7 +272,6 @@ public:
 
 };
 
-
 class VngoColorShade24 : public VngoColorShade
 {
     VngoColorShade24() {}
@@ -266,9 +281,16 @@ public:
 
 };
 
+#ifdef __WATCOMC__
+#pragma pack();
+#endif
 
+#ifdef _MSC_VER
+#pragma pack(pop)
+#endif
 
 #endif         // __VNGCOLOR_HPP
-//°±² End of header - VNGCOLOR.hpp ²±°
+
+//°±² End of header - vngcolor.hpp ²±°
 
 

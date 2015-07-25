@@ -53,7 +53,7 @@ const int COLORS = 256;
 
 const int MAXPAGES = 3;
 
-extern MaxDevices Devs;
+extern MaxDevices *Devs;
 extern ulong EschProposedTris;
 extern ulong EschDrawnTris;
 
@@ -70,7 +70,7 @@ extern ulong EschDrawnTris;
 //컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
 // EscherTest - Constructor
 //컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
-EscherTest::EscherTest (MaxDevices &d):
+EscherTest::EscherTest (MaxDevices *d):
     devs (d),
     evt (0),
     hpal (0),
@@ -110,6 +110,7 @@ EscherTest::EscherTest (MaxDevices &d):
     int use_zbuffer=TRUE;
     char buff[128];
     char palname[128];
+    int bpp = 8;
     XFParseINI  ini;
 
     if (ini.open(".\\ET.INI",XF_OPEN_READ) == XF_ERR_NONE)
@@ -139,8 +140,43 @@ EscherTest::EscherTest (MaxDevices &d):
             if (strstr(buff,"yes") || strstr(buff,"on"))
             {
                 screen = new VngoDirectDraw (hWndClient);
+//                use_fullscreen |= VNGO_ALLOC_ZBUFFER;
             }
         }
+#ifdef _OEMS
+#ifdef _MSI
+        if (!ini.read("UseMSI",buff))
+        {
+            strlwr(buff);
+            if (strstr(buff,"yes") || strstr(buff,"on"))
+            {
+                screen = new VngoMSI (ClientWndProc);
+            }
+        }
+#endif
+#ifdef _3DFX
+        if (!ini.read("Use3DFX",buff))
+        {
+            strlwr(buff);
+            if (strstr(buff,"yes") || strstr(buff,"on"))
+            {
+                screen = new Vngo3Dfx ();
+            }
+        }
+#endif
+#endif
+#ifdef _D3D
+        if (!ini.read("UseD3D",buff))
+        {
+            strlwr(buff);
+            if (strstr(buff,"yes") || strstr(buff,"on"))
+            {
+                screen = new VngoDirect3D (hWndClient);
+                use_fullscreen |= VNGO_3DDEVICE | VNGO_ALLOC_ZBUFFER;
+            }
+        }
+#endif
+
 
         if (!ini.read("Resolution",buff))
         {
@@ -184,6 +220,19 @@ EscherTest::EscherTest (MaxDevices &d):
             }
         }
 
+        if (!ini.read("ColorDepth",buff))
+        {
+            strlwr(buff);
+            if (strstr(buff,"16"))
+            {
+                bpp = 16;
+            }
+            else if (strstr(buff,"15"))
+            {
+                bpp = 15;
+            }
+        }
+
         if (!ini.read("Palette",palname))
         {
             strlwr(buff);
@@ -197,22 +246,29 @@ EscherTest::EscherTest (MaxDevices &d):
         // If we did not want a DDraw screen then use a DIB.
         if (screen == NULL)
         {
-            screen = new VngoDIB8 (hWndClient);
+            screen = new VngoDIB (hWndClient);
         }
         else if (screen->get_initstate() == FALSE)
         {
             delete screen;
-            screen = new VngoDIB8 (hWndClient);
+            screen = new VngoDIB (hWndClient);
         }
     }
     else
     {
-        screen = new VngoDIB8 (hWndClient);
+        screen = new VngoDIB (hWndClient);
     }
 
     assert(screen != NULL);
     assert(screen->get_initstate() != FALSE);
-    mypal = new VngoPal8;
+
+
+    if (bpp == 8)
+        mypal = new VngoPal8;
+    else if (bpp == 15)
+        mypal = new VngoPal15;
+    else if (bpp == 16)
+        mypal = new VngoPal16;
 
     if (mypal)
     {
@@ -224,20 +280,65 @@ EscherTest::EscherTest (MaxDevices &d):
     }
     if (mypal)
     {
-        screen->set_mode (map_xsize, map_ysize, 8 , mypal, use_fullscreen);
+        if (bpp == 8)
+            screen->set_mode (map_xsize, map_ysize, 8 , mypal, use_fullscreen);
+        else
+            screen->set_mode (map_xsize, map_ysize, 16 , mypal, use_fullscreen);
 
 
         if (screen->get_type() == VngoScreenManager::SCREENTYPE_DDRAW)
         {
             VngoDirectDraw *ldd = (VngoDirectDraw *)screen;
-            gvp = new VngoVportDD8(ldd->SurfaceManager, NULL, mypal,
-                                   VNGO_ZBUFFER_DEV);
+            if (bpp == 8)
+            {
+                gvp = new VngoVportDD8(ldd->SurfaceManager, NULL, mypal,
+                                       VNGO_ZBUFFER_DEV);
+            }
+            else
+            {
+                gvp = new VngoVportDD16(ldd->SurfaceManager, NULL, mypal,
+                                        VNGO_ZBUFFER_DEV);
+            }
         }
         else if (screen->get_type() == VngoScreenManager::SCREENTYPE_DIB)
         {
-            VngoDIB8 *ldib = (VngoDIB8 *)screen;
-            gvp = new VngoVportDB8(map_xsize,map_ysize,ldib->gmap,NULL,mypal,
-                                   VNGO_ZBUFFER_DEV);
+            VngoDIB *ldib = (VngoDIB *)screen;
+            if (bpp == 8)
+            {
+                gvp = new VngoVportDB8(map_xsize,map_ysize,ldib->gmap,NULL,mypal,
+                                       VNGO_ZBUFFER_DEV);
+            }
+            else
+            {
+                gvp = new VngoVportDB16(map_xsize,map_ysize,ldib->gmap,NULL,mypal,
+                                       VNGO_ZBUFFER_DEV);
+            }
+        }
+#ifdef _OEMS
+#ifdef _3DFX
+        else if (screen->get_type() == VngoScreenManager::SCREENTYPE_3DFX)
+        {
+            gvp = new VngoVport3Dfx(map_xsize,map_ysize,0,0,mypal,VNGO_ZBUFFER_DEV);
+        }
+#endif
+#ifdef _MSI
+        else if (screen->get_type() == VngoScreenManager::SCREENTYPE_MSI)
+        {
+            VngoMSI *msi = (VngoMSI *)screen;
+            gvp = new VngoVportMSI(map_xsize,map_ysize,0,0,mypal,VNGO_ZBUFFER_DEV,msi);
+              gvp = NULL;
+        }
+#endif
+#endif
+#ifdef _D3D
+        else if (screen->get_type() == VngoScreenManager::SCREENTYPE_D3D)
+        {
+            gvp = new VngoVportD3D(0,0,map_xsize,map_ysize,mypal,VNGO_ZBUFFER_DEV,screen);
+        }
+#endif
+        else
+        {
+            gvp = new VngoVVport8(0,0,map_xsize,map_ysize,mypal,VNGO_ZBUFFER_DEV);
         }
 
         if (!use_zbuffer)
@@ -248,71 +349,6 @@ EscherTest::EscherTest (MaxDevices &d):
         gberg_color(gvp->vbuff.pal->get_index(VngoColor24bit(255,255,255)),
                     VNGO_TRANSPARENT);
     }
-
-#if 0
-    hdc = GetDC (hWndClient);
-
-    bmi = (LPBITMAPINFO)ivory_alloc (sizeof (BITMAPINFOHEADER) + COLORS*sizeof(WORD));
-    if (bmi)
-    {
-        memset (bmi, 0, sizeof (*bmi));
-        bmi->bmiHeader.biSize        = sizeof (BITMAPINFOHEADER);
-        bmi->bmiHeader.biWidth       = MAP_XSIZE;
-        bmi->bmiHeader.biHeight      = -MAP_YSIZE;
-        bmi->bmiHeader.biPlanes      = 1;
-        bmi->bmiHeader.biBitCount    = 8;
-        bmi->bmiHeader.biCompression = BI_RGB;
-        bmi->bmiHeader.biClrUsed     = COLORS;
-        bmi->bmiHeader.biClrImportant= COLORS;
-
-        gmap = new BYTE [MAP_XSIZE * MAP_YSIZE];
-        // Init viewport?
-        mypal = new VngoPal8;
-        if (mypal)
-        {
-            if (mypal->init(0,".\\default.pal") != 0)
-            {
-                delete mypal;
-                mypal = NULL;
-            }
-        }
-        if (mypal)
-        {
-            VngoPal8 *t=(VngoPal8 *)mypal;
-            LOGPALETTE *lpal = (LOGPALETTE *)ivory_alloc(sizeof(LOGPALETTE)+256*sizeof(PALETTEENTRY));
-            lpal->palVersion = 0x300;
-            lpal->palNumEntries = 256;
-
-            for (int i=0; i < COLORS; i++)
-            {
-                ((WORD *)bmi->bmiColors)[i] = i;
-                lpal->palPalEntry[i].peRed  = t->hw_pal.p[i].r;
-                lpal->palPalEntry[i].peGreen= t->hw_pal.p[i].g;
-                lpal->palPalEntry[i].peBlue = t->hw_pal.p[i].b;
-                lpal->palPalEntry[i].peFlags= PC_NOCOLLAPSE;
-            }
-
-            // Force our palette into Windows
-
-            // This should be a global; free it with DeleteObject (hpal);
-            hpal = CreatePalette (lpal);
-
-            SelectPalette (hdc, hpal, FALSE);
-            RealizePalette (hdc);
-
-            ivory_free ((void **)&lpal);
-
-            gvp = new VngoVportDB8(MAP_XSIZE,MAP_YSIZE,gmap,NULL,mypal,
-//                                   0);
-                                   VNGO_ZBUFFER_DEV);
-
-            exts_color = mypal->get_index(VngoColor24bit(0,0,0));
-
-            gberg_color(gvp->vbuff.pal->get_index(VngoColor24bit(255,255,255)),
-                        VNGO_TRANSPARENT);
-        }
-    }
-#endif
 }
 
 
@@ -321,9 +357,6 @@ EscherTest::EscherTest (MaxDevices &d):
 //컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
 EscherTest::~EscherTest ()
 {
-    if (screen)
-        delete screen;
-
     if (hpal)
         DeleteObject(hpal);
 
@@ -332,19 +365,85 @@ EscherTest::~EscherTest ()
     {
         evt->uninstall();
         delete evt;
+        evt = 0;
     }
 
     if (fire)
+    {
         delete fire;
+        fire = 0;
+    }
 
     if (partn)
+    {
         delete partn;
+        partn = 0;
+    }
 
     if (mtxt)
+    {
         delete mtxt;
+        mtxt = 0;
+    }
 
     if (backgrnd)
+    {
         delete backgrnd;
+        backgrnd = 0;
+    }
+
+    if (terrain)
+    {
+        delete terrain;
+        terrain = 0;
+    }
+
+    if (trees)
+    {
+        if (trees->txt)
+        {
+            for (ulong i=0; i < trees->tmax; i++)
+            {
+                if (trees->txt[i])
+                    delete trees->txt[i];
+            }
+            delete trees->txt;
+        }
+        delete trees;
+        trees = 0;
+    }
+
+    if (gvp)
+    {
+        delete gvp;
+        gvp = 0;
+    }
+
+    if (scene)
+    {
+        delete scene;
+        scene = 0;
+    }
+
+    if (mypal)
+    {
+        delete mypal;
+        mypal = 0;
+    }
+
+    if (cam)
+    {
+        delete cam;
+        cam = 0;
+    }
+
+    if (screen)
+    {
+        delete screen;
+        screen = 0;
+    }
+
+
 }
 
 
@@ -369,7 +468,7 @@ void EscherTest::LoadEvents (LPCSTR lpszFile)
     }
 
     // Create a new system
-    evt = new MaxEventUser (devs, szFileName);
+    evt = new MaxEventUser (*devs, szFileName);
 
     // Verify the event system matches our set of events?
 
@@ -430,7 +529,7 @@ BOOL EscherTest::SetupMultiTest(const char *name)
     XFBitmap    bm[16];
 
     ushort count=0;
-    Flx16 rate=0;
+    float rate=0;
     for (const char *s=name, *c=name; ; c++)
     {
         if (!*c || *c == ',')
@@ -440,7 +539,7 @@ BOOL EscherTest::SetupMultiTest(const char *name)
                 char value[128];
                 memset(value,0,sizeof(value));
                 strncpy(value,s,c-s);
-                rate = Flx16(atof(value));
+                rate = float(atof(value));
             }
             else
             {
@@ -591,8 +690,8 @@ BOOL EscherTest::LoadScene(char *fn)
                         | ESCH_CAM_SHADE_WIRE
                         | ESCH_CAM_BACKCULL
                         | ESCH_CAM_MODELSPACE
-                        | ESCH_CAM_PERSPECTIVE
-                        | ESCH_CAM_TEXTURED
+//                        | ESCH_CAM_PERSPECTIVE
+//                        | ESCH_CAM_TEXTURED
                         | ESCH_CAM_ALPHA
                         );
 
@@ -660,6 +759,130 @@ BOOL EscherTest::LoadScene(char *fn)
 
 
 //컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
+// EscherTest - LoadTreeTops
+//컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
+BOOL EscherTest::LoadTreeTops(const char *buff)
+{
+    // parameters (all required)
+    //  terrain filename
+    //  left x value
+    //  top y(z) value
+    //  right x value
+    //  bottom y(z) value
+
+    int count=0;
+    int coords[4];
+    float hgt;
+    int i=0, bmpcount=0;
+
+    if (!use_new_terrain)
+    {
+        MessageBox ("TreeTops require new terrain",
+                    MB_OK | MB_ICONEXCLAMATION);
+        return FALSE;
+    }
+
+    // parse the command line for the filename
+    for (const char *s=buff, *c=buff; ; c++)
+    {
+        if (!*c || *c == ',')
+        {
+            // if s is still the start of the list, its the filename
+            if (count >= 10)
+            {
+                MessageBox ("Too many parameters found for TreeTops",
+                            MB_OK | MB_ICONEXCLAMATION);
+                return FALSE;
+            }
+            else if (count >= 6)
+            {
+                char fname[128];
+                memset (fname, 0, sizeof (fname));
+                strncpy(fname, s, c-s);
+
+                XFParseBMP bmp;
+                xf_error_codes tree_err;
+
+                if (bmp.nameread(fname))
+                {
+                    tree_err = bmp.error();
+                    char err_str[128];
+                    sprintf (err_str, "BMP load failed %s %d", fname, bmpcount);
+                    MessageBox (err_str, MB_OK | MB_ICONEXCLAMATION);
+                    return FALSE;
+                }
+                else
+                {
+                    trees->txt[bmpcount] = new EschStaticTexture;
+                    ((EschStaticTexture *)trees->txt[bmpcount])->create(bmp.bm,1);
+                }
+                bmpcount ++;
+            }
+            else if (count == 5)
+            {
+                char value[128];
+                memset (value,0, sizeof(value));
+                strncpy(value, s, c-s);
+
+                hgt = (float)atof(value);
+                trees = new EschTerrainTreeTop ((EschTerrainEx*)terrain,
+                                                coords[0], coords[1], coords[2], coords[3], hgt);
+                if (!trees)
+                {
+                    MessageBox ("Failed to allocate memory for TreeTops",
+                                MB_OK | MB_ICONEXCLAMATION);
+                    return FALSE;
+                }
+                trees->txt = new EschTexture *[trees->tmax];
+                trees->set_start_lod(0);
+                trees->set_texture_lod(3);
+                trees->set_perspective_lod(0);
+                trees->set_smooth_lod(3);
+            }
+            else if (count >= 1)
+            {
+                char value[128];
+                memset (value,0,sizeof(value));
+                strncpy(value,s,c-s);
+
+                coords[i] = atoi (value);
+                i ++;
+            }
+            else
+            {
+                char *fname = new char [128];
+                memset(fname, 0, sizeof(fname));
+                strncpy (fname, s, c-s);
+                if (!LoadTerrain(fname))
+                {
+                    MessageBox ("Failed to initialize terrain for TreeTops",
+                                MB_OK | MB_ICONEXCLAMATION);
+                    return FALSE;
+                }
+                delete fname;
+            }
+            count ++;
+            if (!*c)
+                break;
+
+            s=c+1;
+        }
+    }
+
+    if (draws)
+        trees->sibling(draws);
+    else
+    {
+        MessageBox ("TreeTops cannot draw by themselves",
+                    MB_OK | MB_ICONEXCLAMATION);
+        return FALSE;
+    }
+
+    return TRUE;
+}
+
+
+//컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
 // EscherTest - LoadTerrain
 //컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
 BOOL EscherTest::LoadTerrain(char *fn)
@@ -688,7 +911,7 @@ BOOL EscherTest::LoadTerrain(char *fn)
     if (!cam)
     {
         cam = new EschCameraEx(gvp);
-        cam->set_position(0,terrain->get_height(0,0) + Flx16(2),0);  // only two meters above the ground.
+        cam->set_position(0,terrain->get_height(0,0) + 2.0f,0);  // only two meters above the ground.
         cam->set_flags(cam->flags | ESCH_CAM_SHADE_SMOOTH
                                 | ESCH_CAM_SHADE_FLAT
                                 | ESCH_CAM_SHADE_SOLID
@@ -703,7 +926,7 @@ BOOL EscherTest::LoadTerrain(char *fn)
         cam->set_bg_bitmap(backgrnd);
     }
 //    cam->set_fov(27);
-//    cam->set_factor(Flx16(7.5));
+//    cam->set_factor(7.5f);
     cam->set_yon(2500);
 
     if (!use_new_terrain)
@@ -713,10 +936,11 @@ BOOL EscherTest::LoadTerrain(char *fn)
     else
     {
         EschTerrainEx   *tt=(EschTerrainEx*)terrain;
-        tt->set_lod(3,Flx16(350),Flx16(750));
+        tt->set_lod(2,250.0f);
+//        tt->set_lod(3,350.0f,750.0f);
         tt->set_perspective_lod(0);
-        tt->set_texture_lod(5);
-        tt->set_smooth_lod(5);
+        tt->set_texture_lod(3);
+        tt->set_smooth_lod(3);
     }
 
     if (!light)
@@ -872,7 +1096,7 @@ BOOL EscherTest::SetupExplosion(const char *buff)
     else if (strstr(buff,"triangular"))
         explosion->set_flags(explosion->flags | ESCH_PLSN_TRIANGULAR);
 
-    explosion->set_step(Flx16(0.02));
+    explosion->set_step(0.02f);
     explosion->set_alpha(alpha);
 
     if (!cam)
@@ -1021,7 +1245,7 @@ BOOL EscherTest::PumpWindows ()
 {
     MSG msg;
 
-    Devs.wm_clear();
+    Devs->wm_clear();
     while (PeekMessage (&msg, NULL, 0, 0, PM_NOREMOVE))
     {
         if (GetMessage (&msg, 0, 0, 0) == 0)
@@ -1058,12 +1282,12 @@ void EscherTest::ProcessEvents()
     if (events.check (FASTER))
     {
         if (ScriptRotateDegrees < 180)
-            ScriptRotateDegrees = ScriptRotateDegrees + (Flx16)1;
+            ScriptRotateDegrees = ScriptRotateDegrees + 1.0f;
     }
     else if (events.check (SLOWER))
     {
         if (ScriptRotateDegrees > 1)
-            ScriptRotateDegrees = ScriptRotateDegrees - (Flx16)1;
+            ScriptRotateDegrees = ScriptRotateDegrees - 1.0f;
     }
 
     if (curmesh && scene)
@@ -1090,12 +1314,12 @@ void EscherTest::ProcessEvents()
         {
             if (events.check (MOVEXY))
             {
-                curmesh->rotatex (-dy);
-                curmesh->rotatey (-dx);
+                curmesh->rotatex (float(-dy));
+                curmesh->rotatey (float(-dx));
             }
 
             if (events.check (MOVEZ))
-                curmesh->rotatez (-dx);
+                curmesh->rotatez (float(-dx));
 
             if (events.check (UP))
                 curmesh->rotatex (RotateDegrees);
@@ -1114,7 +1338,7 @@ void EscherTest::ProcessEvents()
         {
             if (events.check (MOVEXY))
             {
-                EschVector v(dx, -dy, FLX16_ZERO);
+                EschVector v(float(dx), float(-dy), 0.0f);
 
                 v.transform(&cam->eye.orient);
 
@@ -1123,7 +1347,7 @@ void EscherTest::ProcessEvents()
 
             if (events.check (MOVEZ))
             {
-                EschVector v(FLX16_ZERO, FLX16_ZERO, -dy);
+                EschVector v(0.0f, 0.0f, float(-dy));
 
                 v.transform(&cam->eye.orient);
 
@@ -1132,7 +1356,7 @@ void EscherTest::ProcessEvents()
 
             if (events.check (UP))
             {
-                EschVector v(FLX16_ZERO, 1, FLX16_ZERO);
+                EschVector v(0.0f, 1.0f, 0.0f);
 
                 v.transform(&cam->eye.orient);
 
@@ -1141,7 +1365,7 @@ void EscherTest::ProcessEvents()
 
             if (events.check (DOWN))
             {
-                EschVector v(FLX16_ZERO, -1, FLX16_ZERO);
+                EschVector v(0.0f, -1, 0.0f);
 
                 v.transform(&cam->eye.orient);
 
@@ -1150,7 +1374,7 @@ void EscherTest::ProcessEvents()
 
             if (events.check (LEFT))
             {
-                EschVector v(-1, FLX16_ZERO, FLX16_ZERO);
+                EschVector v(-1, 0.0f, 0.0f);
 
                 v.transform(&cam->eye.orient);
 
@@ -1159,7 +1383,7 @@ void EscherTest::ProcessEvents()
 
             if (events.check (RIGHT))
             {
-                EschVector v(1, FLX16_ZERO, FLX16_ZERO);
+                EschVector v(1, 0.0f, 0.0f);
 
                 v.transform(&cam->eye.orient);
 
@@ -1175,12 +1399,12 @@ void EscherTest::ProcessEvents()
     {
         if (events.check (MOVEXY))
         {
-            cam->yaw (-dx);
-            cam->pitch (-dy);
+            cam->yaw (float(-dx));
+            cam->pitch (float(-dy));
         }
 
         if (events.check (MOVEZ))
-            cam->roll (-dx);
+            cam->roll (float(-dx));
 
         if (events.check (UP))
             cam->pitch (RotateDegrees);
@@ -1200,38 +1424,38 @@ void EscherTest::ProcessEvents()
     {
         if (events.check (MOVEXY))
         {
-            cam->move(-dx, dy, FLX16_ZERO);
+            cam->move(float(-dx), float(dy), 0.0f);
         }
 
         if (events.check (MOVEZ))
         {
-            cam->move(FLX16_ZERO, FLX16_ZERO, dy);
+            cam->move(0.0f, 0.0f, float(dy));
         }
 
         if (events.check (UP))
         {
-            cam->move(FLX16_ZERO, 1, FLX16_ZERO);
+            cam->move(0.0f, 1, 0.0f);
         }
 
         if (events.check (DOWN))
         {
-            cam->move(FLX16_ZERO, -1, FLX16_ZERO);
+            cam->move(0.0f, -1, 0.0f);
         }
 
         if (events.check (LEFT))
         {
-            cam->move(-1, FLX16_ZERO, FLX16_ZERO);
+            cam->move(-1, 0.0f, 0.0f);
         }
 
         if (events.check (RIGHT))
         {
-            cam->move(1, FLX16_ZERO, FLX16_ZERO);
+            cam->move(1, 0.0f, 0.0f);
         }
         if ((cam->flags & ESCH_CAM_APP0) && terrain)
         {
             EschPoint tp;
             cam->get_position(&tp);
-            cam->set_position(tp.x,terrain->get_height(tp.x,tp.z) + Flx16(2.5),tp.z);  // only two meters above the ground.
+            cam->set_position(tp.x,terrain->get_height(tp.x,tp.z) + 2.5f,tp.z);  // only two meters above the ground.
 
         }
     }
@@ -1240,15 +1464,15 @@ void EscherTest::ProcessEvents()
     {
         if (events.check (MOVEXY))
         {
-            Flx16 fov = cam->fov;
+            float fov = cam->fov;
 
-            fov.flx += dy << 16;
+            fov += float(dy);
 
-            if (fov < Flx16(1))
-                fov = Flx16(1);
+            if (fov < 1.0f)
+                fov = 1.0f;
 
-            if (fov > Flx16(175))
-                fov = Flx16(175);
+            if (fov > 175.0f)
+                fov = 175.0f;
 
             cam->set_fov(fov);
         }
@@ -1279,13 +1503,13 @@ void EscherTest::ProcessEvents()
     {
         if (events.check (MOVEXY))
         {
-            mbox_size.flx -= dy << 12;
+            mbox_size -= float(dy) / 16.0f;
 
-            if (mbox_size < Flx16(1))
-                mbox_size = Flx16(1);
+            if (mbox_size < 1.0f)
+                mbox_size = 1.0f;
 
-            if (mbox_size > Flx16(500))
-                mbox_size = Flx16(500);
+            if (mbox_size > 500.0f)
+                mbox_size = 500.0f;
 
             metabox->create_cube(mbox_size);
         }
@@ -1295,15 +1519,15 @@ void EscherTest::ProcessEvents()
     {
         if (events.check (MOVEXY))
         {
-            Flx16 factor = cam->factor;
+            float factor = cam->factor;
 
-            factor.flx += dy << 16;
+            factor += float(dy);
 
-            if (factor < Flx16(1))
-                factor = Flx16(1);
+            if (factor < 1.0f)
+                factor = 1.0f;
 
-            if (factor > Flx16(12))
-                factor = Flx16(12);
+            if (factor > 12.0f)
+                factor = 12.0f;
 
             cam->set_factor(factor);
         }
@@ -1446,7 +1670,7 @@ void EscherTest::ProcessEvents()
         }
         else
         {
-            cam->create_haze(64, 16, 48, Flx16(0.5), VngoColor24bit(0,0,128));
+            cam->create_haze(64, 16, 48, 0.5f, VngoColor24bit(0,0,128));
         }
     }
 
@@ -1459,7 +1683,7 @@ void EscherTest::ProcessEvents()
         else
         {
             cam->create_gradient(32,
-                                 24, Flx16(0.5),
+                                 24, 0.5f,
                                  VngoColor24bit(0,0,128),
                                  VngoColor24bit(255,255,255));
         }
@@ -1550,22 +1774,22 @@ void EscherTest::ProcessEvents()
             {
 
                 if (events.check (MOVEXY))
-                    ((EschFastPointLight*)l)->translate (dx, -dy, FLX16_ZERO);
+                    ((EschFastPointLight*)l)->translate (float(dx), float(-dy), 0.0f);
 
                 if (events.check (MOVEZ))
-                    ((EschFastPointLight*)l)->translate (FLX16_ZERO, FLX16_ZERO, -dx);
+                    ((EschFastPointLight*)l)->translate (0.0f, 0.0f, float(-dx));
 
                 if (events.check (UP))
-                    ((EschFastPointLight*)l)->translate (FLX16_ZERO, 1, FLX16_ZERO);
+                    ((EschFastPointLight*)l)->translate (0.0f, 1, 0.0f);
 
                 if (events.check (DOWN))
-                    ((EschFastPointLight*)l)->translate (FLX16_ZERO, -1, FLX16_ZERO);
+                    ((EschFastPointLight*)l)->translate (0.0f, -1, 0.0f);
 
                 if (events.check (LEFT))
-                    ((EschFastPointLight*)l)->translate (-1, FLX16_ZERO, FLX16_ZERO);
+                    ((EschFastPointLight*)l)->translate (-1, 0.0f, 0.0f);
 
                 if (events.check (RIGHT))
-                    ((EschFastPointLight*)l)->translate (1, FLX16_ZERO, FLX16_ZERO);
+                    ((EschFastPointLight*)l)->translate (1, 0.0f, 0.0f);
 
             }
             else if (l->get_type() == ESCH_LGTT_POINT
@@ -1574,22 +1798,22 @@ void EscherTest::ProcessEvents()
             {
 
                 if (events.check (MOVEXY))
-                    ((EschPointLight*)l)->translate (dx, -dy, FLX16_ZERO);
+                    ((EschPointLight*)l)->translate (float(dx), float(-dy), 0.0f);
 
                 if (events.check (MOVEZ))
-                    ((EschPointLight*)l)->translate (FLX16_ZERO, FLX16_ZERO, -dx);
+                    ((EschPointLight*)l)->translate (0.0f, 0.0f, float(-dx));
 
                 if (events.check (UP))
-                    ((EschPointLight*)l)->translate (FLX16_ZERO, 1, FLX16_ZERO);
+                    ((EschPointLight*)l)->translate (0.0f, 1, 0.0f);
 
                 if (events.check (DOWN))
-                    ((EschPointLight*)l)->translate (FLX16_ZERO, -1, FLX16_ZERO);
+                    ((EschPointLight*)l)->translate (0.0f, -1, 0.0f);
 
                 if (events.check (LEFT))
-                    ((EschPointLight*)l)->translate (-1, FLX16_ZERO, FLX16_ZERO);
+                    ((EschPointLight*)l)->translate (-1, 0.0f, 0.0f);
 
                 if (events.check (RIGHT))
-                    ((EschPointLight*)l)->translate (1, FLX16_ZERO, FLX16_ZERO);
+                    ((EschPointLight*)l)->translate (1, 0.0f, 0.0f);
 
             }
             doreshade=1;
@@ -1647,14 +1871,14 @@ void EscherTest::ProcessEvents()
                     }
                     break;
                 case PYRAMIDS:
-                    particle = new EschParticlePyramid(1 + (flx_rand().flx & 0x3),
-                                                    0,0,0,
+                    particle = new EschParticlePyramid(float(1 + (flx_rand().flx & 0x3)),
+                                                    0.0f,0.0f,0.0f,
                                                     mypal->get_index(VngoColor24bit((byte)(255 - (c*2)),0,0)),
                                                     10 + (flx_rand().flx & 0x4f));
 
-                    ((EschParticlePyramid*)particle)->set_rotate_i(Flx16(flx_rand().flx >> 24));
-                    ((EschParticlePyramid*)particle)->set_rotate_j(Flx16(flx_rand().flx >> 24));
-                    ((EschParticlePyramid*)particle)->set_rotate_k(Flx16(flx_rand().flx >> 24));
+                    ((EschParticlePyramid*)particle)->set_rotate_i(float(flx_rand().flx >> 24));
+                    ((EschParticlePyramid*)particle)->set_rotate_j(float(flx_rand().flx >> 24));
+                    ((EschParticlePyramid*)particle)->set_rotate_k(float(flx_rand().flx >> 24));
                     break;
                 default:
                     particle = new EschParticle(0,0,0,
@@ -1663,9 +1887,9 @@ void EscherTest::ProcessEvents()
                     break;
             }
 
-            particle->set_velocity(Flx16(flx_rand().flx >> 12,0),
-                                   Flx16(flx_rand().flx & 0x1fffff,0),
-                                   Flx16(flx_rand().flx >> 12,0));
+            particle->set_velocity(float(Flx16(flx_rand().flx >> 12,0)),
+                                   float(Flx16(flx_rand().flx & 0x1fffff,0)),
+                                   float(Flx16(flx_rand().flx >> 12,0)));
 
             if (particle)
                 prtsystem->add(particle);
@@ -1759,7 +1983,7 @@ void EscherTest::Render()
         clock_t clk = fps_clock.check();
 
         sprintf (buff, "FPS:%5.2f\n\n", (float)( (clk)
-                                                ? ((Flx16)frames / (Flx16)clk) * Flx16(1000)
+                                                ? ((float)frames / (float)clk) * 1000.0f
                                                 : 0) );
 
         gt.out (buff);
@@ -1784,12 +2008,12 @@ void EscherTest::Render()
         v.k=0;
         v.normalize();
 
-        Flx16 c_roll = v.i;
+        float c_roll = v.i;
 
         sprintf(buff," C_roll: %5.3f",float(c_roll));
         gt.out(buff);
 
-        Flx16 roll = c_roll.acos();
+        float roll = esch_acos(c_roll);
         if (v.j < 0)
             roll = -roll;
 
@@ -1805,12 +2029,12 @@ void EscherTest::Render()
         v.i=0;
         v.normalize();
 
-        Flx16 c_pitch = v.k;
+        float c_pitch = v.k;
 
         sprintf(buff," C_pitch: %5.3f",float(c_pitch));
         gt.out(buff);
 
-        Flx16 pitch = c_pitch.acos();
+        float pitch = esch_acos(c_pitch);
         if (v.j < 0)
             pitch = -pitch;
 
@@ -1820,12 +2044,12 @@ void EscherTest::Render()
         v2.j=0;
         v2.normalize();
 
-        Flx16 c_yaw = v2.k;
+        float c_yaw = v2.k;
 
         sprintf(buff," C_yaw: %5.3f",float(c_yaw));
         gt.out(buff);
 
-        Flx16 yaw = c_yaw.acos();
+        float yaw = esch_acos(c_yaw);
         if (v2.i < 0)
             yaw = -yaw;
 
@@ -1868,7 +2092,7 @@ void EscherTest::Render()
         wsprintf(buff,"Mouse: %d, %d\n",(int)x,(int)y);
         gt.out(buff);
 
-        EschPicking pick(cam, x, y, draws, 16);
+        EschPicking pick(cam, x, y, draws, 16U);
 
         esch_error_codes err;
         err=draws->pick(&pick);

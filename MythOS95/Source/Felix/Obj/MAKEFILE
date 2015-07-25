@@ -3,13 +3,13 @@
 #
 #            _,'|             _.-''``-...___..--';)
 #           /_ \'.      __..-' ,      ,--...--'''
-#          <\    .`--'''       `     /'     
+#          <\    .`--'''       `     /'
 #           `-';'               ;   ; ;  Felix the Fixed-point Library
 #     __...--''     ___...--_..'  .;.'
 #    (,__....----'''       (,..--''
 #
 #                      Microsoft Windows '95 Version
-#   
+#
 #           Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.
 #                           All Rights Reserved.
 #
@@ -35,11 +35,15 @@
 #같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같�
 #
 #                               Variables
-#                                
+#
 #같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같�
 
 !if "$(DEBUG)" == ""
 DEBUG = NO
+!endif
+
+!if "$(THREAD)" == ""
+THREAD = YES
 !endif
 
 !if "$(MYTH95ROOT)" == ""

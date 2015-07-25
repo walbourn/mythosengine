@@ -31,17 +31,11 @@
                              _Library Status_
 
  Notes by: Dan Higdon
- Updated: November 19, 1996
+ Updated: July 22, 1997
 
  Changes for this release 컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
 
- o Added optional paramter to stop that lets you keep the sample
-   from "rewinding" when you stop it.  By default, stop followed by
-   play will play the sample over again.  (Before, it didn't, and that
-   lead to some unpredictable behavior.)
-
- o The Wave Sequencer stuff does NOT appear to work - I have not gutted
-   it only because I have hopes of making it work some day.
+ o Changed for DX5
 
  Proposed changes 컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
 

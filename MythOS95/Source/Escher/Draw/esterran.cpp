@@ -189,17 +189,17 @@ const EschTerrain &EschTerrain::operator = (const EschTerrain &t)
 // area.  Returns 0 if degenerate case (end and start are equal or end is   ³
 // greater than start.                                                      ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-int EschTerrain::compute_area(Flx16 lox, Flx16 loz, Flx16 hix, Flx16 hiz,
+int EschTerrain::compute_area(float lox, float loz, float hix, float hiz,
                               int *sw, int *ew, int *sd, int *ed, int bits)
 {
     assertMyth("EschTerrain:compute_area needs positive scale",
-               scale.flx > 0);
+               scale > 0);
 
     //ÄÄÄÄ Adjust to origin
-    lox.flx = lox.flx - origin.x.flx;
-    loz.flx = loz.flx - origin.z.flx;
-    hix.flx = hix.flx - origin.x.flx;
-    hiz.flx = hiz.flx - origin.z.flx;
+    lox = lox - origin.x;
+    loz = loz - origin.z;
+    hix = hix - origin.x;
+    hiz = hiz - origin.z;
 
     //ÄÄÄÄ Convert to index
     lox -= scale;
@@ -208,7 +208,7 @@ int EschTerrain::compute_area(Flx16 lox, Flx16 loz, Flx16 hix, Flx16 hiz,
     hiz += scale;
 
     // Width start
-    if (lox.flx <= 0)  *sw = 0;
+    if (lox <= 0)  *sw = 0;
     else
     {
         *sw = (int)lox >> scaleshift;
@@ -217,7 +217,7 @@ int EschTerrain::compute_area(Flx16 lox, Flx16 loz, Flx16 hix, Flx16 hiz,
     }
 
     // Depth start
-    if (loz.flx <= 0)  *sd = 0;
+    if (loz <= 0)  *sd = 0;
     else
     {
         *sd = (int)loz >> scaleshift;
@@ -226,7 +226,7 @@ int EschTerrain::compute_area(Flx16 lox, Flx16 loz, Flx16 hix, Flx16 hiz,
     }
 
     // Width end
-    if (hix.flx <= 0)  *ew = 0;
+    if (hix <= 0)  *ew = 0;
     else
     {
         *ew = ((int)hix >> scaleshift) + 1;
@@ -236,7 +236,7 @@ int EschTerrain::compute_area(Flx16 lox, Flx16 loz, Flx16 hix, Flx16 hiz,
     }
 
     // Depth end
-    if (hiz.flx <= 0)  *ed = 0;
+    if (hiz <= 0)  *ed = 0;
     else
     {
         *ed = ((int)hiz >> scaleshift) + 1;
@@ -297,60 +297,64 @@ int EschTerrain::compute_shift_value(ulong x, ulong *shift)
 //                          °°° Protected °°°                               ³
 // EschTerrain - compute_texture_uv                                         ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void EschTerrain::compute_texture_uv(Flx16 &u_left, Flx16 &u_right,
-                                     Flx16 &v_top, Flx16 &v_bottom,
+void EschTerrain::compute_texture_uv(float &u_left, float &u_right,
+                                     float &v_top, float &v_bottom,
                                      dword flags,
                                      int w, int d,
                                      ulong shift)
 {
-    static Flx16 tile_lookup[8] = { 1,
-                                    2,
-                                    4,
-                                    8,
-                                    12,
-                                    16,
-                                    32,
-                                    64
-                                  };
+    static long tile_lookup[8] = { 1,
+                                   2,
+                                   4,
+                                   8,
+                                   12,
+                                   16,
+                                   32,
+                                   64
+                                 };
 
     dword mask = (1 << surfshift) - 1;
     int doff = d & mask;
     int woff = w & mask;
 
     assert(ESCH_SURF_TILE1 == 0x10 && ESCH_SURF_TILE2 == 0x20 && ESCH_SURF_TILE3 == 0x40);
-    Flx16 tile_factor = tile_lookup[(flags & (ESCH_SURF_TILE1 
-                                              | ESCH_SURF_TILE2 
-                                              | ESCH_SURF_TILE3)) >> 4];
-    Flx16 rate(tile_factor.flx >> surfshift,1);
-    Flx16 t((int)mask);
+    long tile = tile_lookup[(flags & (ESCH_SURF_TILE1 
+                                      | ESCH_SURF_TILE2 
+                                      | ESCH_SURF_TILE3)) >> 4];
+
+    float tile_factor = float(tile);
+    float rate = float(tile >> surfshift);
+    float t = float(mask);
 
     if (flags & ESCH_SURF_FLIPU)
     {
-        u_left = tile_factor - (Flx16(woff) * rate);
-        u_right = (t - Flx16(woff)) * rate;
+        u_left = tile_factor - (float(woff) * rate);
+        u_right = (t - float(woff)) * rate;
     }
     else
     {
-        u_left = Flx16(woff) * rate;
-        u_right = tile_factor - ((t - Flx16(woff)) * rate);
+        u_left = float(woff) * rate;
+        u_right = tile_factor - ((t - float(woff)) * rate);
     }
 
     if (flags & ESCH_SURF_FLIPV)
     {
-        v_top = tile_factor - ((t - Flx16(doff)) * rate);
-        v_bottom = Flx16(doff) * rate;
+        v_top = tile_factor - ((t - float(doff)) * rate);
+        v_bottom = float(doff) * rate;
     }
     else
     {             
-        v_top = tile_factor - (Flx16(doff+1) * rate);
-        v_bottom = tile_factor - (Flx16(doff) * rate);
+        v_top = tile_factor - (float(doff+1) * rate);
+        v_bottom = tile_factor - (float(doff) * rate);
     }
     if (shift)
     {
-        u_left.flx <<= shift;
-        u_right.flx <<= shift;
-        v_top.flx <<= shift;
-        v_bottom.flx <<= shift;
+        float sfactor = float(1 << shift);
+
+        u_left *= sfactor;
+        u_right *= sfactor;
+        v_top *= sfactor;
+        v_bottom *= sfactor;
     }
 }
 
@@ -366,18 +370,18 @@ void EschTerrain::draw_block(int w, int d, int i, int j,
     dword test = (1 << (shift+1)) - 1;
 
 //ÄÄÄ Get texturing parameters
-    Flx16 u_left(0);
-    Flx16 u_right(1);
-    Flx16 v_top(0);
-    Flx16 v_bottom(1);
+    float u_left(0);
+    float u_right(1);
+    float v_top(0);
+    float v_bottom(1);
     if (sptr->flags & ESCH_SURF_CINDISTXT
         && (!shift
             || !(sptr->flags & ESCH_SURF_NOTILE)))
     {
         compute_texture_uv(u_left, u_right,
-                        v_top, v_bottom,
-                        sptr->flags,
-                        w, d, shift);
+                           v_top, v_bottom,
+                           sptr->flags,
+                           w, d, shift);
         Face.txt = sptr->cind;
         Face.flags = FACE_FLAGS
                     | ESCH_FACE_TEXTURED
@@ -503,12 +507,12 @@ void EschTerrain::draw_transitions(int w, int d, int i, int j,
     dword test = (1 << (shift+1)) - 1;
 
 //ÄÄÄ Get texturing parameters
-    Flx16 u_left(0);
-    Flx16 u_half(0.5);
-    Flx16 u_right(1);
-    Flx16 v_top(0);
-    Flx16 v_half(0.5);
-    Flx16 v_bottom(1);
+    float u_left(0);
+    float u_half(0.5);
+    float u_right(1);
+    float v_top(0);
+    float v_half(0.5);
+    float v_bottom(1);
 
     if (sptr->flags & ESCH_SURF_CINDISTXT
         && (!shift
@@ -518,8 +522,8 @@ void EschTerrain::draw_transitions(int w, int d, int i, int j,
                            v_top, v_bottom,
                            sptr->flags,
                            w, d, shift);
-        u_half.flx = (u_left.flx + u_right.flx) >> 1;
-        v_half.flx = (v_top.flx + v_bottom.flx) >> 1;
+        u_half = (u_left + u_right) / 2;
+        v_half = (v_top + v_bottom) / 2;
 
         Face.txt = sptr->cind;
         Face.flags = FACE_FLAGS
@@ -817,10 +821,10 @@ void EschTerrain::draw()
     int                     swm, ewm, sdm, edm;     // Medium detail indecies
     int                     swl, ewl, sdl, edl;     // Low detail indecies
     ulong                   needed;
-    Flx16                   tx, ty;                 // Temp values
-    Flx16                   minx, minz, maxx, maxz; // Bounding area (far/yon)
-    Flx16                   mlox, mloz, mhix, mhiz; // Medium detail area
-    Flx16                   llox, lloz, lhix, lhiz; // Low detail area
+    float                   tx, ty;                 // Temp values
+    float                   minx, minz, maxx, maxz; // Bounding area (far/yon)
+    float                   mlox, mloz, mhix, mhiz; // Medium detail area
+    float                   llox, lloz, lhix, lhiz; // Low detail area
     static EschPoint        po, pd, pw;             // Workspace
 
     assertMyth("EschTerrain::draw needs height-field information",
@@ -860,159 +864,159 @@ void EschTerrain::draw()
     {
         EschVector  tvect;
         tvect = cam->eye.dir;
-        tvect = tvect * scale * Flx16(2);
+        tvect = tvect * scale * float(2);
 
         pos.x = (pos.x - tvect.i);
         pos.y = (pos.y - tvect.j);
         pos.z = (pos.z - tvect.k);
     }
 
-    mlox.flx = llox.flx = minx.flx = pos.x.flx;
-    mloz.flx = lloz.flx = minz.flx = pos.z.flx;
-    mhix.flx = lhix.flx = maxx.flx = pos.x.flx;
-    mhiz.flx = lhiz.flx = maxz.flx = pos.z.flx;
+    mlox = llox = minx = pos.x;
+    mloz = lloz = minz = pos.z;
+    mhix = lhix = maxx = pos.x;
+    mhiz = lhiz = maxz = pos.z;
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Level of Detail
     if (flags & ESCH_TRN_LOD)
     {
-        if (lodmedium.flx > cam->hither.flx)
+        if (lodmedium > cam->hither)
         {
             //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Medium
-            tx.flx = flx_16mul16(lodmedium, cam->xsize).flx;
-            ty.flx = flx_16mul16(lodmedium, cam->ysize).flx;
+            tx = lodmedium * cam->xsize;
+            ty = lodmedium * cam->ysize;
 
             // -tx, ty
-            po.x.flx = -tx.flx;
-            po.y.flx = ty.flx;
-            po.z.flx = lodmedium.flx;
+            po.x = -tx;
+            po.y = ty;
+            po.z = lodmedium;
             po.transform(&cam->eye.orient);
-            if (mlox.flx > po.x.flx)  mlox.flx = po.x.flx;
-            if (mloz.flx > po.z.flx)  mloz.flx = po.z.flx;
-            if (mhix.flx < po.x.flx)  mhix.flx = po.x.flx;
-            if (mhiz.flx < po.z.flx)  mhiz.flx = po.z.flx;
+            if (mlox > po.x)  mlox = po.x;
+            if (mloz > po.z)  mloz = po.z;
+            if (mhix < po.x)  mhix = po.x;
+            if (mhiz < po.z)  mhiz = po.z;
 
             // tx, ty
-            po.x.flx = tx.flx;
-            po.y.flx = ty.flx;
-            po.z.flx = lodmedium.flx;
+            po.x = tx;
+            po.y = ty;
+            po.z = lodmedium;
             po.transform(&cam->eye.orient);
-            if (mlox.flx > po.x.flx)  mlox.flx = po.x.flx;
-            if (mloz.flx > po.z.flx)  mloz.flx = po.z.flx;
-            if (mhix.flx < po.x.flx)  mhix.flx = po.x.flx;
-            if (mhiz.flx < po.z.flx)  mhiz.flx = po.z.flx;
+            if (mlox > po.x)  mlox = po.x;
+            if (mloz > po.z)  mloz = po.z;
+            if (mhix < po.x)  mhix = po.x;
+            if (mhiz < po.z)  mhiz = po.z;
 
             // -tx, -ty
-            po.x.flx = -tx.flx;
-            po.y.flx = -ty.flx;
-            po.z.flx = lodmedium.flx;
+            po.x = -tx;
+            po.y = -ty;
+            po.z = lodmedium;
             po.transform(&cam->eye.orient);
-            if (mlox.flx > po.x.flx)  mlox.flx = po.x.flx;
-            if (mloz.flx > po.z.flx)  mloz.flx = po.z.flx;
-            if (mhix.flx < po.x.flx)  mhix.flx = po.x.flx;
-            if (mhiz.flx < po.z.flx)  mhiz.flx = po.z.flx;
+            if (mlox > po.x)  mlox = po.x;
+            if (mloz > po.z)  mloz = po.z;
+            if (mhix < po.x)  mhix = po.x;
+            if (mhiz < po.z)  mhiz = po.z;
 
             // tx, -ty
-            po.x.flx = tx.flx;
-            po.y.flx = -ty.flx;
-            po.z.flx = lodmedium.flx;
+            po.x = tx;
+            po.y = -ty;
+            po.z = lodmedium;
             po.transform(&cam->eye.orient);
-            if (mlox.flx > po.x.flx)  mlox.flx = po.x.flx;
-            if (mloz.flx > po.z.flx)  mloz.flx = po.z.flx;
-            if (mhix.flx < po.x.flx)  mhix.flx = po.x.flx;
-            if (mhiz.flx < po.z.flx)  mhiz.flx = po.z.flx;
+            if (mlox > po.x)  mlox = po.x;
+            if (mloz > po.z)  mloz = po.z;
+            if (mhix < po.x)  mhix = po.x;
+            if (mhiz < po.z)  mhiz = po.z;
         }
 
-        if (lodlow.flx > cam->hither.flx)
+        if (lodlow > cam->hither)
         {
             //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Low
-            tx.flx = flx_16mul16(lodlow, cam->xsize).flx;
-            ty.flx = flx_16mul16(lodlow, cam->ysize).flx;
+            tx = lodlow * cam->xsize;
+            ty = lodlow * cam->ysize;
 
             // -tx, ty
-            po.x.flx = -tx.flx;
-            po.y.flx = ty.flx;
-            po.z.flx = lodlow.flx;
+            po.x = -tx;
+            po.y = ty;
+            po.z = lodlow;
             po.transform(&cam->eye.orient);
-            if (llox.flx > po.x.flx)  llox.flx = po.x.flx;
-            if (lloz.flx > po.z.flx)  lloz.flx = po.z.flx;
-            if (lhix.flx < po.x.flx)  lhix.flx = po.x.flx;
-            if (lhiz.flx < po.z.flx)  lhiz.flx = po.z.flx;
+            if (llox > po.x)  llox = po.x;
+            if (lloz > po.z)  lloz = po.z;
+            if (lhix < po.x)  lhix = po.x;
+            if (lhiz < po.z)  lhiz = po.z;
 
             // tx, ty
-            po.x.flx = tx.flx;
-            po.y.flx = ty.flx;
-            po.z.flx = lodlow.flx;
+            po.x = tx;
+            po.y = ty;
+            po.z = lodlow;
             po.transform(&cam->eye.orient);
-            if (llox.flx > po.x.flx)  llox.flx = po.x.flx;
-            if (lloz.flx > po.z.flx)  lloz.flx = po.z.flx;
-            if (lhix.flx < po.x.flx)  lhix.flx = po.x.flx;
-            if (lhiz.flx < po.z.flx)  lhiz.flx = po.z.flx;
+            if (llox > po.x)  llox = po.x;
+            if (lloz > po.z)  lloz = po.z;
+            if (lhix < po.x)  lhix = po.x;
+            if (lhiz < po.z)  lhiz = po.z;
 
             // -tx, -ty
-            po.x.flx = -tx.flx;
-            po.y.flx = -ty.flx;
-            po.z.flx = lodlow.flx;
+            po.x = -tx;
+            po.y = -ty;
+            po.z = lodlow;
             po.transform(&cam->eye.orient);
-            if (llox.flx > po.x.flx)  llox.flx = po.x.flx;
-            if (lloz.flx > po.z.flx)  lloz.flx = po.z.flx;
-            if (lhix.flx < po.x.flx)  lhix.flx = po.x.flx;
-            if (lhiz.flx < po.z.flx)  lhiz.flx = po.z.flx;
+            if (llox > po.x)  llox = po.x;
+            if (lloz > po.z)  lloz = po.z;
+            if (lhix < po.x)  lhix = po.x;
+            if (lhiz < po.z)  lhiz = po.z;
 
             // tx, -ty
-            po.x.flx = tx.flx;
-            po.y.flx = -ty.flx;
-            po.z.flx = lodlow.flx;
+            po.x = tx;
+            po.y = -ty;
+            po.z = lodlow;
             po.transform(&cam->eye.orient);
-            if (llox.flx > po.x.flx)  llox.flx = po.x.flx;
-            if (lloz.flx > po.z.flx)  lloz.flx = po.z.flx;
-            if (lhix.flx < po.x.flx)  lhix.flx = po.x.flx;
-            if (lhiz.flx < po.z.flx)  lhiz.flx = po.z.flx;
+            if (llox > po.x)  llox = po.x;
+            if (lloz > po.z)  lloz = po.z;
+            if (lhix < po.x)  lhix = po.x;
+            if (lhiz < po.z)  lhiz = po.z;
         }
     }
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Far points 
-    tx.flx = flx_16mul16(cam->yon, cam->xsize).flx;
-    ty.flx = flx_16mul16(cam->yon, cam->ysize).flx;
+    tx = cam->yon * cam->xsize;
+    ty = cam->yon * cam->ysize;
 
     // -tx, ty
-    po.x.flx = -tx.flx;
-    po.y.flx = ty.flx;
-    po.z.flx = cam->yon.flx;
+    po.x = -tx;
+    po.y = ty;
+    po.z = cam->yon;
     po.transform(&cam->eye.orient);
-    if (minx.flx > po.x.flx)  minx.flx = po.x.flx;
-    if (minz.flx > po.z.flx)  minz.flx = po.z.flx;
-    if (maxx.flx < po.x.flx)  maxx.flx = po.x.flx;
-    if (maxz.flx < po.z.flx)  maxz.flx = po.z.flx;
+    if (minx > po.x)  minx = po.x;
+    if (minz > po.z)  minz = po.z;
+    if (maxx < po.x)  maxx = po.x;
+    if (maxz < po.z)  maxz = po.z;
 
     // tx, ty
-    po.x.flx = tx.flx;
-    po.y.flx = ty.flx;
-    po.z.flx = cam->yon.flx;
+    po.x = tx;
+    po.y = ty;
+    po.z = cam->yon;
     po.transform(&cam->eye.orient);
-    if (minx.flx > po.x.flx)  minx.flx = po.x.flx;
-    if (minz.flx > po.z.flx)  minz.flx = po.z.flx;
-    if (maxx.flx < po.x.flx)  maxx.flx = po.x.flx;
-    if (maxz.flx < po.z.flx)  maxz.flx = po.z.flx;
+    if (minx > po.x)  minx = po.x;
+    if (minz > po.z)  minz = po.z;
+    if (maxx < po.x)  maxx = po.x;
+    if (maxz < po.z)  maxz = po.z;
 
     // -tx, -ty
-    po.x.flx = -tx.flx;
-    po.y.flx = -ty.flx;
-    po.z.flx = cam->yon.flx;
+    po.x = -tx;
+    po.y = -ty;
+    po.z = cam->yon;
     po.transform(&cam->eye.orient);
-    if (minx.flx > po.x.flx)  minx.flx = po.x.flx;
-    if (minz.flx > po.z.flx)  minz.flx = po.z.flx;
-    if (maxx.flx < po.x.flx)  maxx.flx = po.x.flx;
-    if (maxz.flx < po.z.flx)  maxz.flx = po.z.flx;
+    if (minx > po.x)  minx = po.x;
+    if (minz > po.z)  minz = po.z;
+    if (maxx < po.x)  maxx = po.x;
+    if (maxz < po.z)  maxz = po.z;
 
     // tx, -ty
-    po.x.flx = tx.flx;
-    po.y.flx = -ty.flx;
-    po.z.flx = cam->yon.flx;
+    po.x = tx;
+    po.y = -ty;
+    po.z = cam->yon;
     po.transform(&cam->eye.orient);
-    if (minx.flx > po.x.flx)  minx.flx = po.x.flx;
-    if (minz.flx > po.z.flx)  minz.flx = po.z.flx;
-    if (maxx.flx < po.x.flx)  maxx.flx = po.x.flx;
-    if (maxz.flx < po.z.flx)  maxz.flx = po.z.flx;
+    if (minx > po.x)  minx = po.x;
+    if (minz > po.z)  minz = po.z;
+    if (maxx < po.x)  maxx = po.x;
+    if (maxz < po.z)  maxz = po.z;
 
     // minx,minz to maxx, maxz is now the bounding area on the XZ plane
 
@@ -1090,7 +1094,7 @@ void EschTerrain::draw()
 //ÄÄÄ Compute orientation factors for terrain grid.  These are used
 //ÄÄÄ during the transform of the height field into the camera's view.
     assertMyth("EschTerrain::draw needs positive scale factors",
-               scale.flx > 0 && htable != 0);
+               scale > 0 && htable != 0);
 
     EschVector wvec(scale,0,0);
     wvec.transform(&cam->eye.iorient);
@@ -1125,17 +1129,17 @@ void EschTerrain::draw()
     ec.push();
 
 //ÄÄÄ Draw grid sw->ew by sd->ed
-    pd.x.flx = po.x.flx + (dvec.i.flx*sd);
-    pd.y.flx = po.y.flx + (dvec.j.flx*sd);
-    pd.z.flx = po.z.flx + (dvec.k.flx*sd);
+    pd.x = po.x + (dvec.i*sd);
+    pd.y = po.y + (dvec.j*sd);
+    pd.z = po.z + (dvec.k*sd);
 
     // Depth loop
     for(d=sd, k=0; d < ed; k = !k)
     {
         ptr = hfield + (d*width) + sw;
-        pw.x.flx = pd.x.flx + (wvec.i.flx*sw);
-        pw.y.flx = pd.y.flx + (wvec.j.flx*sw);
-        pw.z.flx = pd.z.flx + (wvec.k.flx*sw);
+        pw.x = pd.x + (wvec.i*sw);
+        pw.y = pd.y + (wvec.j*sw);
+        pw.z = pd.z + (wvec.k*sw);
 
         // Determine this row (i) vs. last row (j) counters
         if (k)
@@ -1176,9 +1180,9 @@ void EschTerrain::draw()
 
                     w += 4;
                     ptr += 4;
-                    pw.x.flx += wvec.i.flx << 2;
-                    pw.y.flx += wvec.j.flx << 2;
-                    pw.z.flx += wvec.k.flx << 2;
+                    pw.x += wvec.i * 4;
+                    pw.y += wvec.j * 4;
+                    pw.z += wvec.k * 4;
                     continue;
                 }
                 else
@@ -1201,18 +1205,18 @@ void EschTerrain::draw()
 
                     w += 2;
                     ptr += 2;
-                    pw.x.flx += wvec.i.flx << 1;
-                    pw.y.flx += wvec.j.flx << 1;
-                    pw.z.flx += wvec.k.flx << 1;
+                    pw.x += wvec.i * 2;
+                    pw.y += wvec.j * 2;
+                    pw.z += wvec.k * 2;
                     continue;
                 }
             }
 
             // Compute height-field point for current width and depth
-            Flx16 h = htable[*ptr];
-            ((EschPoint*)v)->x.flx = pw.x.flx + (h * hvec.i).flx;
-            ((EschPoint*)v)->y.flx = pw.y.flx + (h * hvec.j).flx;
-            ((EschPoint*)v)->z.flx = pw.z.flx + (h * hvec.k).flx;
+            float h = htable[*ptr];
+            ((EschPoint*)v)->x = pw.x + (h * hvec.i);
+            ((EschPoint*)v)->y = pw.y + (h * hvec.j);
+            ((EschPoint*)v)->z = pw.z + (h * hvec.k);
 
             // Setup surface colors and lighting
             sptr = surfinfo;
@@ -1243,32 +1247,27 @@ void EschTerrain::draw()
                 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Dots
                 //ÄÄÄ Clip against view volume
                 // Near/far clip plane
-                if (((EschPoint*)v)->z.flx <= cam->yon.flx
-                    && ((EschPoint*)v)->z.flx >= cam->hither.flx)
+                if (((EschPoint*)v)->z <= cam->yon
+                    && ((EschPoint*)v)->z >= cam->hither)
                 {
                     // Left/right/top/bottom plane clippdng
-                    Flx16 zx = flx_16mul16(((EschPoint*)v)->z,cam->xsize);
-                    Flx16 zy = flx_16mul16(((EschPoint*)v)->z,cam->ysize);
+                    float zx = ((EschPoint*)v)->z * cam->xsize;
+                    float zy = ((EschPoint*)v)->z * cam->ysize;
 
-                    if (((EschPoint*)v)->x.flx >= -zx.flx
-                        && ((EschPoint*)v)->x.flx <= zx.flx
-                        && ((EschPoint*)v)->y.flx >= -zy.flx
-                        && ((EschPoint*)v)->y.flx <= zy.flx)
+                    if (((EschPoint*)v)->x >= -zx
+                        && ((EschPoint*)v)->x <= zx
+                        && ((EschPoint*)v)->y >= -zy
+                        && ((EschPoint*)v)->y <= zy)
                     {
-                        //ÄÄÄ Project pdxel
-                        v->x = (flx_muldiv(((EschPoint*)v)->x,
-                                        cam->xscalar,
-                                        ((EschPoint*)v)->z).flx
-                            + (cam->vport->vbuff.width<<15)) >> 16;
-                        v->y = ((cam->vport->vbuff.height<<15)
-                            - flx_muldiv(((EschPoint*)v)->y,
-                                            cam->yscalar,
-                                            ((EschPoint*)v)->z).flx) >> 16;
-                        v->z = flx_16mul16(((EschPoint*)v)->z,
-                                        cam->z_factor).flx << 1;
+                        //ÄÄÄ Project pixel
+                        v->x = long((((EschPoint*)v)->x * cam->xscalar) / ((EschPoint*)v)->z)
+                               + (cam->vport->vbuff.width >> 1);
+                        v->y = (cam->vport->vbuff.height >> 1)
+                               - long((((EschPoint*)v)->y * cam->yscalar) / ((EschPoint*)v)->z);
+                        v->z = ulong(((EschPoint*)v)->z * cam->z_factor);
                         vflags[i] |= ESCH_VVERT_PROJECTED;
 
-                        //ÄÄÄ Draw pdxel
+                        //ÄÄÄ Draw pixel
                         cam->vport->pixel(v);
                     }
                 }
@@ -1447,9 +1446,9 @@ void EschTerrain::draw()
             {
                 w += 4;
                 ptr += 4;
-                pw.x.flx += wvec.i.flx << 2;
-                pw.y.flx += wvec.j.flx << 2;
-                pw.z.flx += wvec.k.flx << 2;
+                pw.x += wvec.i * 4;
+                pw.y += wvec.j * 4;
+                pw.z += wvec.k * 4;
             }
             else
 #endif
@@ -1458,17 +1457,17 @@ void EschTerrain::draw()
             {
                 w += 2;
                 ptr += 2;
-                pw.x.flx += wvec.i.flx << 1;
-                pw.y.flx += wvec.j.flx << 1;
-                pw.z.flx += wvec.k.flx << 1;
+                pw.x += wvec.i * 2;
+                pw.y += wvec.j * 2;
+                pw.z += wvec.k * 2;
             }
             else
             {
                 w++;
                 ptr++;
-                pw.x.flx += wvec.i.flx;
-                pw.y.flx += wvec.j.flx;
-                pw.z.flx += wvec.k.flx;
+                pw.x += wvec.i;
+                pw.y += wvec.j;
+                pw.z += wvec.k;
             }
         }
 
@@ -1477,9 +1476,9 @@ void EschTerrain::draw()
             && (d < sdl-3 || d > edl+3))
         { 
             d += 4;
-            pd.x.flx += dvec.i.flx << 2;
-            pd.y.flx += dvec.j.flx << 2;
-            pd.z.flx += dvec.k.flx << 2;
+            pd.x += dvec.i * 4;
+            pd.y += dvec.j * 4;
+            pd.z += dvec.k * 4;
         }
         else
 #endif
@@ -1487,16 +1486,16 @@ void EschTerrain::draw()
             && (d < sdm-1 || d > edm+1))
         { 
             d += 2;
-            pd.x.flx += dvec.i.flx << 1;
-            pd.y.flx += dvec.j.flx << 1;
-            pd.z.flx += dvec.k.flx << 1;
+            pd.x += dvec.i * 2;
+            pd.y += dvec.j * 2;
+            pd.z += dvec.k * 2;
         }
         else
         {
             d++;
-            pd.x.flx += dvec.i.flx;
-            pd.y.flx += dvec.j.flx;
-            pd.z.flx += dvec.k.flx;
+            pd.x += dvec.i;
+            pd.y += dvec.j;
+            pd.z += dvec.k;
         }
     }
 //
@@ -1597,28 +1596,28 @@ void EschTerrain::compute_shades(EschCamera *cam, EschLight *lgts)
 
 //ÄÄÄ Main transform and shade loops
     assertMyth("EschTerrain::compute_shades needs positive scale factors",
-               scale.flx > 0 && htable != 0);
+               scale > 0 && htable != 0);
 
-    pd.x.flx = origin.x.flx;
-    pd.y.flx = origin.y.flx;
-    pd.z.flx = origin.z.flx;
+    pd.x = origin.x;
+    pd.y = origin.y;
+    pd.z = origin.z;
     for(d=0, sptr=surfinfo;
         d < (depth >> surfshift);
-        d++, pd.z.flx += Flx16((long)surfratio << scaleshift).flx)
+        d++, pd.z += float((long)surfratio << scaleshift))
     {
         ptr = hfield + ((d << surfshift)*width);
 
-        pw.x.flx = pd.x.flx;
-        pw.y.flx = pd.y.flx;
-        pw.z.flx = pd.z.flx;
+        pw.x = pd.x;
+        pw.y = pd.y;
+        pw.z = pd.z;
 
         for(w=0; w < (width >> surfshift);
-            w++, pw.x.flx += Flx16((long)surfratio << scaleshift).flx,
+            w++, pw.x += float((long)surfratio << scaleshift),
             ptr += surfratio)
         {
-            vert.x.flx = pw.x.flx;
-            vert.y.flx = pw.y.flx + htable[*ptr].flx;
-            vert.z.flx = pw.z.flx;
+            vert.x = pw.x;
+            vert.y = pw.y + htable[*ptr];
+            vert.z = pw.z;
 
             vert.normal.i = nptr->i;
             vert.normal.j = nptr->j;
@@ -1706,24 +1705,24 @@ void EschTerrain::release()
 // Return the world y value on the terrain surface at the givne x,z world   ³
 // location.                                                                ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-Flx16 EschTerrain::get_height(Flx16 x, Flx16 z) const
+float EschTerrain::get_height(float x, float z) const
 {
-    Flx16   x0,y0,z0,a1,a2,b1,b2,c1,c2,t1,t2,y;
+    float   x0,y0,z0,a1,a2,b1,b2,c1,c2,t1,t2,y;
 
-    Flx16 _x = x - origin.x;
-    Flx16 _z = z - origin.z;
+    float _x = x - origin.x;
+    float _z = z - origin.z;
 
     assertMyth("EschTerrain::get_height needs height-field information",
                hfield && htable);
 
     assertMyth("EschTerrain:get_height needs positive scales",
-               scale.flx > 0);
+               scale > 0);
 
     int     lx = (int)_x >> scaleshift;
     int     lz = (int)_z >> scaleshift;
 
-    Flx16   wx = Flx16(lx << scaleshift);
-    Flx16   wz = Flx16(lz << scaleshift);
+    float   wx = float(lx << scaleshift);
+    float   wz = float(lz << scaleshift);
 
     x = _x - wx;
     z = _z - wz;
@@ -1827,10 +1826,10 @@ Flx16 EschTerrain::get_height(Flx16 x, Flx16 z) const
 //                                                                          ³
 // Return the surface flags associated with the given x,z world location.   ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-ushort EschTerrain::get_surface_flags(Flx16 x, Flx16 z) const
+ushort EschTerrain::get_surface_flags(float x, float z) const
 {
-    Flx16 _x = x - origin.x;
-    Flx16 _z = z - origin.z;
+    float _x = x - origin.x;
+    float _z = z - origin.z;
           
     assertMyth("EschTerrain::get_surface_flags needs surface information",
                surfinfo);
@@ -1860,36 +1859,36 @@ ushort EschTerrain::get_surface_flags(Flx16 x, Flx16 z) const
 // points.                                                                  ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 int EschTerrain::check_LOS (EschPoint *pt1, EschPoint *pt2, 
-                           int precision,Flx16 *ndist) const
+                           int precision,float *ndist) const
 {
 //ÄÄÄ Form vector
     EschVector  temp (pt1->x - pt2->x, pt1->y - pt2->y, pt1->z - pt2->z);
-    Flx16       dist = temp.magnitude();
+    float       dist = temp.magnitude();
 
 //ÄÄÄ Determine step count and size
     long count;
     if (precision > 0)
     {
-        count = (long)(dist / Flx16(precision)) + 1;
+        count = (long)(dist / float(precision)) + 1;
     }
     else
     {
         count = (long)(dist / scale) + 1;
     }
 
-    Flx16 xstep = (pt2->x - pt1->x) / Flx16(count);
-    Flx16 ystep = (pt2->y - pt1->y) / Flx16(count);
-    Flx16 zstep = (pt2->z - pt1->z) / Flx16(count);
+    float xstep = (pt2->x - pt1->x) / float(count);
+    float ystep = (pt2->y - pt1->y) / float(count);
+    float zstep = (pt2->z - pt1->z) / float(count);
 
 //ÄÄÄ Perform checks
-    Flx16 curx = pt1->x;
-    Flx16 cury = pt1->y;
-    Flx16 curz = pt1->z;
+    float curx = pt1->x;
+    float cury = pt1->y;
+    float curz = pt1->z;
 
     for (long i=0; i < count; i++)
     {
-        Flx16 nheight = get_height(curx,curz);
-        if (nheight.flx > cury.flx)
+        float nheight = get_height(curx,curz);
+        if (nheight > cury)
         {
             if (ndist != NULL)
             {
@@ -1914,10 +1913,10 @@ int EschTerrain::check_LOS (EschPoint *pt1, EschPoint *pt2,
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // EschTerrain - set_scale                                                  ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void EschTerrain::set_scale(const Flx16 i)
+void EschTerrain::set_scale(const float i)
 {
     assertMyth("EschTerrain:set_scale requires positive scale value",
-               i.flx > 0);
+               i > 0);
 
     if (!compute_shift_value((ulong)(long)i,&scaleshift))
         return;
@@ -1984,7 +1983,8 @@ esch_error_codes EschTerrain::load(XFParseIFF *iff, const char *tname, ushort *h
 {
     ulong               nt=0;
     esch_error_codes    err;
-    EschFileTerrHDR     header;
+    float               hscale;
+    ulong               ntxts=0;
 
     assertMyth("EschTerrain::load requires an iff pointer",
                iff);
@@ -1999,91 +1999,175 @@ esch_error_codes EschTerrain::load(XFParseIFF *iff, const char *tname, ushort *h
 //ÄÄ Enter FORM, find header, verify name if any.
     iff->enterform();
 
-    if (iff->seekchunk(iff->makeid('H','D','R',' '))
-        || iff->chunkSize != sizeof(EschFileTerrHDR))
+    for(;;)
     {
-        iff->leaveform();
-        return ESCH_ERR_INVALIDDATA;
-    }
+        if (iff->next())
+        {
+            iff->leaveform();
+            return ESCH_ERR_INVALIDDATA;
+        }
 
-    if (iff->read(&header))
-    {
-        iff->leaveform();
-        return ESCH_ERR_FILEERROR;
-    }
+        if (iff->chunkid == iff->makeid('H','D','R','1'))
+        {
+            //ÄÄ Floating-point data
+            EschFileTerrHDR     header;
 
-    if (tname && strncmp(tname,header.name,ESCH_MAX_NAME))
-    {
-        iff->leaveform();
-        return ESCH_ERR_NOTFOUND;
-    }
+            if (iff->chunkSize != sizeof(header))
+            {
+                iff->leaveform();
+                return ESCH_ERR_INVALIDDATA;
+            }
 
-    if (!header.width || !header.depth || !header.surfratio)
-    {
-        iff->leaveform();
-        return ESCH_ERR_INVALIDDATA;
+            if (iff->read(&header))
+            {
+                iff->leaveform();
+                return ESCH_ERR_FILEERROR;
+            }
+
+            if (tname && strncmp(tname,header.name,ESCH_MAX_NAME))
+            {
+                iff->leaveform();
+                return ESCH_ERR_NOTFOUND;
+            }
+
+            if (!header.width || !header.depth || !header.surfratio)
+            {
+                iff->leaveform();
+                return ESCH_ERR_INVALIDDATA;
+            }
+
+            // Check for valid header options
+            if (header.compression)
+            {
+                iff->leaveform();
+                return ESCH_ERR_NOTSUPPORTED;
+            }
+
+            // Copy header initial data
+            strncpy(name,header.name,ESCH_MAX_NAME);
+            flags = header.flags | ESCH_DRW_OWNSDATA;
+            width = header.width;
+            depth = header.depth;
+            surfratio = header.surfratio;
+            ntxts = header.ntxts;
+            hscale = header.hscale;
+            origin.x = header.origin_x;
+            origin.y = header.origin_y;
+            origin.z = header.origin_z;
+
+            if (header.wscale > 0 || header.dscale > 0)
+            {
+                scale = 32;
+                scaleshift = 5;
+            }
+            else
+            {
+                scale = header.scale;
+                if (!compute_shift_value((ulong)(long)scale,&scaleshift))
+                {
+                    iff->leaveform();
+                    return ESCH_ERR_NOTSUPPORTED;
+                }
+            }
+
+            break;
+        }
+        else if (iff->chunkid == iff->makeid('H','D','R',' '))
+        {
+            //ÄÄ Fixed-point data
+            EschFileTerrHDRV1   header;
+
+            if (iff->chunkSize != sizeof(header))
+            {
+                iff->leaveform();
+                return ESCH_ERR_INVALIDDATA;
+            }
+
+            if (iff->read(&header))
+            {
+                iff->leaveform();
+                return ESCH_ERR_FILEERROR;
+            }
+
+            if (tname && strncmp(tname,header.name,ESCH_MAX_NAME))
+            {
+                iff->leaveform();
+                return ESCH_ERR_NOTFOUND;
+            }
+
+            if (!header.width || !header.depth || !header.surfratio)
+            {
+                iff->leaveform();
+                return ESCH_ERR_INVALIDDATA;
+            }
+
+            // Check for valid header options
+            if (header.compression)
+            {
+                iff->leaveform();
+                return ESCH_ERR_NOTSUPPORTED;
+            }
+
+            // Copy header initial data
+            strncpy(name,header.name,ESCH_MAX_NAME);
+            flags = header.flags | ESCH_DRW_OWNSDATA;
+            width = header.width;
+            depth = header.depth;
+            surfratio = header.surfratio;
+            ntxts = header.ntxts;
+            hscale = header.hscale / 65536.0f;
+            origin.x = header.origin_x / 65536.0f;
+            origin.y = header.origin_y / 65536.0f;
+            origin.z = header.origin_z / 65536.0f;
+
+            if (header.wscale > 0 || header.dscale > 0)
+            {
+                scale = 32;
+                scaleshift = 5;
+            }
+            else
+            {
+                scale = header.scale / 65536.0f;
+                if (!compute_shift_value((ulong)(long)scale,&scaleshift))
+                {
+                    iff->leaveform();
+                    return ESCH_ERR_NOTSUPPORTED;
+                }
+            } 
+
+            break;
+        }
     }
 
 //ÄÄ Found, so setup terrain
-
-    // Check for valid header options
-    if (header.compression)
-    {
-        iff->leaveform();
-        return ESCH_ERR_NOTSUPPORTED;
-    }
-
-    // Copy header initial data
-    strncpy(name,header.name,ESCH_MAX_NAME);
-    flags = header.flags | ESCH_DRW_OWNSDATA;
-    width = header.width;
-    depth = header.depth;
-    surfratio = header.surfratio;
-    origin.x = header.origin_x;
-    origin.y = header.origin_y;
-    origin.z = header.origin_z;
 
     if (!compute_shift_value(surfratio,(&surfshift)))
     {
         iff->leaveform();
         return ESCH_ERR_NOTSUPPORTED;
     }
-    if (header.wscale.flx > 0 || header.dscale.flx > 0)
-    {
-        scale = 32;
-        scaleshift = 5;
-    }
-    else
-    {
-        scale = header.scale;
-        if (!compute_shift_value((ulong)(long)scale,&scaleshift))
-        {
-            iff->leaveform();
-            return ESCH_ERR_NOTSUPPORTED;
-        }
-    }
 
     ulong surfsize = (width*depth) >> (surfshift*2);
 
-    //ÄÄ If height scale is given, must create height table
-    if (header.hscale.flx)
+//ÄÄ If height scale is given, must create height table
+    if (hscale)
     {
-        htable = new Flx16[256];
+        htable = new float[256];
         if (!htable)
         {
             err=ESCH_ERR_NOMEMORY;
             goto error_exit;
         }
 
-        Flx16 hs=0;
+        float hs=0;
         for(ulong i=0; i < 256; i++)
         {
             htable[i] = hs;
-            hs += header.hscale;
+            hs += hscale;
         }
     }
 
-    //ÄÄ Scan and load chunks in form
+//ÄÄ Scan and load chunks in form
     while (!iff->next())
     {
         //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Height Field
@@ -2109,17 +2193,19 @@ esch_error_codes EschTerrain::load(XFParseIFF *iff, const char *tname, ushort *h
                 goto error_exit;
             }
         }
+
         //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Height Table
-        else if (iff->chunkid == iff->makeid('H','T','B','L'))
+        else if (iff->chunkid == iff->makeid('H','T','B','1'))
         {
+            //ÄÄ Floating-point data
             if (htable
-                || iff->chunkSize != sizeof(Flx16)*256)
+                || iff->chunkSize != sizeof(float)*256)
             {
                 err=ESCH_ERR_INVALIDHGTDATA;
                 goto error_exit;
             }
 
-            htable = new Flx16[256];
+            htable = new float[256];
             if (!htable)
             {
                 err=ESCH_ERR_NOMEMORY;
@@ -2132,6 +2218,35 @@ esch_error_codes EschTerrain::load(XFParseIFF *iff, const char *tname, ushort *h
                 goto error_exit;
             }
         }
+        else if (iff->chunkid == iff->makeid('H','T','B','L'))
+        {
+            //ÄÄ Fixed-point data
+            if (htable
+                || iff->chunkSize != sizeof(long)*256)
+            {
+                err=ESCH_ERR_INVALIDHGTDATA;
+                goto error_exit;
+            }
+
+            htable = new float[256];
+            if (!htable)
+            {
+                err=ESCH_ERR_NOMEMORY;
+                goto error_exit;
+            }
+
+            long ht[256];
+
+            if (iff->read(ht))
+            {
+                err=ESCH_ERR_FILEERROR;
+                goto error_exit;
+            }
+
+            for(int i=0; i < 256; i++)
+                htable[i] = ht[i] / 65536.0f;
+        }
+
         //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Surface Info
         else if (iff->chunkid == iff->makeid('S','U','R','F'))
         {
@@ -2157,8 +2272,9 @@ esch_error_codes EschTerrain::load(XFParseIFF *iff, const char *tname, ushort *h
             }
         }
         //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Surface Normals
-        else if ((iff->chunkid == iff->makeid('N','R','M','1')
-                 || iff->chunkid == iff->makeid('N','R','M','L')))
+        else if (iff->chunkid == iff->makeid('N','R','M','2')
+                 || iff->chunkid == iff->makeid('N','R','M','1')
+                 || iff->chunkid == iff->makeid('N','R','M','L'))
         {   
             if (hsurfnorml)
             {
@@ -2180,9 +2296,23 @@ esch_error_codes EschTerrain::load(XFParseIFF *iff, const char *tname, ushort *h
                 goto error_exit;
             }
 
-            if (iff->chunkid == iff->makeid('N','R','M','1'))
+            if (iff->chunkid == iff->makeid('N','R','M','2'))
             {
-                //ÄÄÄ Compressed normals
+                //ÄÄÄ Floating-point (uncompressed) data
+                if (iff->chunkSize != (ulong)(surfsize * sizeof(EschVector)))
+                {
+                    err=ESCH_ERR_INVALIDSRFDATA;
+                    goto error_exit;
+                }
+                if (iff->read(ptr))
+                {
+                    err=ESCH_ERR_FILEERROR;
+                    goto error_exit;
+                }
+            }
+            else if (iff->chunkid == iff->makeid('N','R','M','1'))
+            {
+                //ÄÄÄ Fixed-point (compressed) data
                 if (iff->chunkSize != (ulong)(surfsize * 4 * sizeof(ushort)))
                 {
                     err=ESCH_ERR_INVALIDSRFDATA;
@@ -2205,41 +2335,65 @@ esch_error_codes EschTerrain::load(XFParseIFF *iff, const char *tname, ushort *h
                 ushort *sptr = cnrmls;
                 for(ulong i=0; i < surfsize; i++, ptr++)
                 {
-                    ptr->i.flx = (ulong)*(sptr++);
-                    ptr->j.flx = (ulong)*(sptr++);
-                    ptr->k.flx = (ulong)*(sptr++);
+                    long i = (long)*(sptr++);
+                    long j = (long)*(sptr++);
+                    long k = (long)*(sptr++);
 
                     if (*sptr & 0x1)
-                        ptr->i.flx |= 0x00010000;
+                        i |= 0x00010000;
                     if (*sptr & 0x2)
-                        ptr->j.flx |= 0x00010000;
+                        j |= 0x00010000;
                     if (*sptr & 0x4)
-                        ptr->k.flx |= 0x00010000;
+                        k |= 0x00010000;
 
                     if (*sptr & 0x8)
-                        ptr->i.flx = -ptr->i.flx;
+                        i = -i;
                     if (*sptr & 0x10)
-                        ptr->j.flx = -ptr->j.flx;
+                        j = -j;
                     if (*sptr & 0x20)
-                        ptr->k.flx = -ptr->k.flx;
+                        k = -k;
                     sptr++;
+
+                    ptr->i = i / 65536.0f;
+                    ptr->j = j / 65536.0f; 
+                    ptr->k = k / 65536.0f;
                 }
 
-                delete cnrmls;
+                delete [] cnrmls;
             }
             else
             {
-                //ÄÄÄ Uncompressed normals
-                if (iff->chunkSize != (ulong)(surfsize * sizeof(EschVector)))
+                //ÄÄÄ Fixed-point (uncompressed) data
+                if (iff->chunkSize != (ulong)(surfsize * sizeof(EschVectorV1)))
                 {
                     err=ESCH_ERR_INVALIDSRFDATA;
                     goto error_exit;
                 }
-                if (iff->read(ptr))
+
+                EschVectorV1 *temp = new EschVectorV1[surfsize];
+                if (!temp)
                 {
+                    err=ESCH_ERR_NOMEMORY;
+                    goto error_exit;
+                }
+
+                if (iff->read(temp))
+                {
+                    delete [] temp;
                     err=ESCH_ERR_FILEERROR;
                     goto error_exit;
                 }
+
+                EschVector *tptr = ptr;
+                EschVectorV1 *tmpptr = temp;
+                for(ulong i=0; i < surfsize; i++, tptr++, tmpptr++)
+                {
+                    tptr->i = tmpptr->i / 65536.0f;
+                    tptr->j = tmpptr->j / 65536.0f;
+                    tptr->k = tmpptr->k / 65536.0f;
+                }
+
+                delete [] temp;
             }
 
             ivory_hunlock(hsurfnorml);
@@ -2275,17 +2429,17 @@ esch_error_codes EschTerrain::load(XFParseIFF *iff, const char *tname, ushort *h
             hclr[10] = hcolor.red;
         }
         //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Texture Colors
-        else if (header.ntxts
+        else if (ntxts
                  && (iff->chunkid == iff->makeid('C','O','L','R')))
         {
             if (txtcolor
-                || iff->chunkSize != header.ntxts)
+                || iff->chunkSize != ntxts)
             {
                 err=ESCH_ERR_INVALIDDATA;
                 goto error_exit;
             }
 
-            txtcolor = new byte[header.ntxts];
+            txtcolor = new byte[ntxts];
             if (!txtcolor)
             {
                 err=ESCH_ERR_NOMEMORY;
@@ -2299,20 +2453,20 @@ esch_error_codes EschTerrain::load(XFParseIFF *iff, const char *tname, ushort *h
             }
         }
         //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Material Form
-        else if (header.ntxts
+        else if (ntxts
                  && (iff->chunkid == iff->makeid('F','O','R','M'))
                  && (iff->formid == iff->makeid('E','M','T','L')))
         {
             // Allocate texture memory, if not already allocated.
             if (!txt)
             {
-                txt = new EschTexture*[header.ntxts];
+                txt = new EschTexture*[ntxts];
                 if (!txt)
                 {
                     err=ESCH_ERR_NOMEMORY;
                     goto error_exit;
                 }
-                tmax = header.ntxts;
+                tmax = ntxts;
             }
 
             if (nt < tmax)

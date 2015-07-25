@@ -4,8 +4,8 @@
 //         °°                °°
 //          °°              °°
 //           °°        ÚÄÄÄÄÄ  ³   ³ ÚÄÄÄ¿ ÚÄÄÄ¿ ³   ³ ÚÄÄÄ¿  ÚÄÄÄ¿
-//            °°       ³  °°   ³   ³ ³   ³ ³   ³ ³   ³ ³   ³  ³   
-//             °°±± ± ²³±°°    ³   ³ ³   ³ ³   ³ ³\  ³ ³   ³  ³   
+//            °°       ³  °°   ³   ³ ³   ³ ³   ³ ³   ³ ³   ³  ³
+//             °°±± ± ²³±°°    ³   ³ ³   ³ ³   ³ ³\  ³ ³   ³  ³
 //              °°² ²±±³°°     ÃÄÄÄ´ ÃÄÄÄÙ ³   ³ ³\\ ³ ³   ³  ÀÄÄÄ¿
 //               °°±±² ³°      ³   ³ ³\    ³   ³ ³ \\³ ³   ³      ³
 //               °°    ³°      ³   ³ ³ \   ³   ³ ³  \³ ³   ³      ³
@@ -54,9 +54,9 @@
 
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-//             
+//
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include <portable.h>
@@ -96,6 +96,7 @@ void    chronos_clear_callbacks ();
 
 // Time management interfaces
 clock_t chronos_time_now ();
+double  chronos_time_now_precise ();
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
@@ -111,56 +112,74 @@ clock_t chronos_time_now ();
 class ChronosSystem
 {
 public:
-        ChronosSystem ()    { }
-        ~ChronosSystem ()   { }
+    ChronosSystem ()    { }
+    ~ChronosSystem ()   { }
 
 // Initialization (separate from construction)
-void    init ()             { chronos_init(); }
-void    term ()             { chronos_term(); }
+    void init ()        { chronos_init(); }
+    void term ()        { chronos_term(); }
 
 // Timer programming
-int     interval_hz (dword tick_millihz)
-        { return chronos_interval_hz (tick_millihz); }
+    int interval_hz (dword tick_millihz)    { return chronos_interval_hz (tick_millihz); }
 
-int     interval (word tick_interval)
-        { return chronos_interval (tick_interval); }
+    int interval (word tick_interval)       { return chronos_interval (tick_interval); }
 
 // Callback management interfaces
-void    add_callback (ChronosCallback c, dword t, void *p)
-        { chronos_add_callback (c, t, p); }
+    void add_callback (ChronosCallback c, dword t, void *p) { chronos_add_callback (c, t, p); }
 
-void    clear_callbacks ()
-        { chronos_clear_callbacks (); }
+    void clear_callbacks () { chronos_clear_callbacks (); }
 
 // Time management interfaces
-clock_t time_now () const
-        { return chronos_time_now (); }
+    clock_t time_now () const           { return chronos_time_now (); }
+    double  time_now_precise () const   { return chronos_time_now_precise (); }
 };
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 // A timer class, used as a stopwatch.
-// For a more precise timer (such as for joystick calibration/reading),
-// use the Timer0 services.
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+class AtomicChronometer
+{
+    double  elapsed_time;
+    double  start_time;
+
+public:
+    AtomicChronometer ()  { clear (); }
+
+    void   clear ()     { elapsed_time = 0.0;
+                          start_time = chronos_time_now_precise (); }
+
+    double start ()     { return (start_time = chronos_time_now_precise ()); }
+    double stop ()      { return (elapsed_time += chronos_time_now_precise() - start_time); }
+
+    double check () const { return chronos_time_now_precise() - start_time; }
+    double check_elapsed () const { return elapsed_time; }
+};
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// A less precise timer class, used as a stopwatch.
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 class Chronometer
 {
-        clock_t start_time;
+    clock_t start_time;
 
 public:
-        Chronometer ()  { clear (); }
+    Chronometer ()      { clear (); }
 
-void    clear ()        { start_time = chronos_time_now (); }
-clock_t check () const;
+    void    clear ()    { start_time = chronos_time_now (); }
+    clock_t check () const;
 };
+
 
 // The check routine, inlined.
 inline clock_t Chronometer::check () const
 {
-    clock_t stop_time = chronos_time_now();
+    clock_t stop_time (chronos_time_now ());
 
+    // Handle wrap around
     if (stop_time < start_time)
-        return clock_t(-1) - (start_time - stop_time);
+        return clock_t (-1) - (start_time - stop_time);
     else
         return stop_time - start_time;
 }

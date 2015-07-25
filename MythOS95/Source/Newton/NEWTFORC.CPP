@@ -82,7 +82,7 @@ NewtForce::NewtForce (const NewtVector &_vector) :
 //컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
 //  NewtForce - Constructor alternative
 //컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
-NewtForce::NewtForce (Flx16 i, Flx16 j, Flx16 k) :
+NewtForce::NewtForce (float i, float j, float k) :
     vector (i, j, k)
 {
 }

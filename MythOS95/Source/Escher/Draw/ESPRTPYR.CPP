@@ -60,7 +60,7 @@
 //                                                                          ³
 // Initializes the particle.                                                ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-EschParticlePyramid::EschParticlePyramid(Flx16 s, Flx16 ix, Flx16 iy, Flx16 iz,
+EschParticlePyramid::EschParticlePyramid(float s, float ix, float iy, float iz,
                            dword c, ulong l) :
     EschParticle(ix,iy,iz,c,l),
     size(s),
@@ -72,8 +72,8 @@ EschParticlePyramid::EschParticlePyramid(Flx16 s, Flx16 ix, Flx16 iy, Flx16 iz,
     check_workspace();
 }
 
-EschParticlePyramid::EschParticlePyramid(Flx16 s, Flx16 ix, Flx16 iy, Flx16 iz,
-                           Flx16 ii, Flx16 ij, Flx16 ik,
+EschParticlePyramid::EschParticlePyramid(float s, float ix, float iy, float iz,
+                           float ii, float ij, float ik,
                            dword c, ulong l) :
     EschParticle(ix,iy,iz,ii,ij,ik,c,l),
     size(s),
@@ -85,7 +85,7 @@ EschParticlePyramid::EschParticlePyramid(Flx16 s, Flx16 ix, Flx16 iy, Flx16 iz,
     check_workspace();
 }
 
-EschParticlePyramid::EschParticlePyramid(Flx16 s, const EschPoint *p,
+EschParticlePyramid::EschParticlePyramid(float s, const EschPoint *p,
                            const EschVector *v,
                            dword c, ulong l) :
     EschParticle(p,v,c,l),
@@ -163,21 +163,18 @@ void EschParticlePyramid::draw()
     p.transform(&cam->eye.iorient);
     
     // Scale radius
-    Flx16 r = flx_16mul16( size, 
-              flx_16mul16( world.scalef, 
-                           cam->radius_factor ) );
-    r = flx_16mul16(r,Flx16(1.05));
+    float r = size * world.scalef * cam->radius_factor * 1.05f;
 
     assertMyth("EschParticlePyramid::draw radius scale resulted in negative radius",
-               r.flx >= 0);
+               r >= 0);
     
     // Setup for compare
-    Flx16 yon = cam->yon;
-    Flx16 hither = cam->hither;
+    float yon = cam->yon;
+    float hither = cam->hither;
     
     // Check for fully invisible against hither/yon
-    if ( ((p.z.flx + r.flx) < hither.flx)
-         || ((p.z.flx - r.flx) > yon.flx) )
+    if ( ((p.z + r) < hither)
+         || ((p.z - r) > yon) )
     {
         // Since the extents are inclusive of children, don't
         // need to do anything for children meshes.
@@ -189,25 +186,25 @@ void EschParticlePyramid::draw()
     // case)
     if (p.z > 0)
     {
-        Flx16 tx = flx_16mul16(p.z , cam->xsize);
-        Flx16 ty = flx_16mul16(p.z , cam->ysize);
+        float tx = p.z * cam->xsize;
+        float ty = p.z * cam->ysize;
         
         // Check for fully invisible against left/right/top/bottom
-        if ( ((p.x.flx + r.flx) < -tx.flx)
-             || ((p.x.flx - r.flx) > tx.flx)
-             || ((p.y.flx + r.flx) < -ty.flx)
-             || ((p.y.flx - r.flx) > ty.flx) )
+        if ( ((p.x + r) < -tx)
+             || ((p.x - r) > tx)
+             || ((p.y + r) < -ty)
+             || ((p.y - r) > ty) )
         {
             return;
         }
         
         // See if fully visible or needs clipping
-        ctrlfl = ( ((p.z.flx - r.flx) > hither.flx)
-                    && ((p.z.flx + r.flx) < yon.flx)
-                    && ((p.x.flx - r.flx) > -tx.flx)
-                    && ((p.x.flx + r.flx) < tx.flx)
-                    && ((p.y.flx - r.flx) > -ty.flx)
-                    && ((p.y.flx + r.flx) < ty.flx) ) ? 0 : ESCH_CDF_CLIP;
+        ctrlfl = ( ((p.z - r) > hither)
+                    && ((p.z + r) < yon)
+                    && ((p.x - r) > -tx)
+                    && ((p.x + r) < tx)
+                    && ((p.y - r) > -ty)
+                    && ((p.y + r) < ty) ) ? 0 : ESCH_CDF_CLIP;
 
     }
     else ctrlfl = ESCH_CDF_CLIP;
@@ -275,35 +272,35 @@ void EschParticlePyramid::draw()
 //      1
 //
 
-    Flx16 size_half = Flx16(size.flx >> 1,0);
+    float size_half = size / 2;;
 
     ec.verts[0].x = -size_half;
     ec.verts[0].y = size_half;
     ec.verts[0].z = -size_half;
-    ec.verts[0].normal.i = Flx16(0.440094);
-    ec.verts[0].normal.j = Flx16(-0.838745);
-    ec.verts[0].normal.k = Flx16(0.321503);
+    ec.verts[0].normal.i = float(0.440094);
+    ec.verts[0].normal.j = float(-0.838745);
+    ec.verts[0].normal.k = float(0.321503);
 
     ec.verts[1].x = -size_half;
     ec.verts[1].y = -size_half;
     ec.verts[1].z = -size_half;
-    ec.verts[1].normal.i = Flx16(0.440094);
-    ec.verts[1].normal.j = Flx16(0.838745);
-    ec.verts[1].normal.k = Flx16(0.321503);
+    ec.verts[1].normal.i = float(0.440094);
+    ec.verts[1].normal.j = float(0.838745);
+    ec.verts[1].normal.k = float(0.321503);
 
     ec.verts[2].x = size_half;
     ec.verts[2].y = 0;
     ec.verts[2].z = -size_half;
-    ec.verts[2].normal.i = Flx16(-0.840271);
-    ec.verts[2].normal.j = Flx16(0);
-    ec.verts[2].normal.k = Flx16(0.542511);
+    ec.verts[2].normal.i = float(-0.840271);
+    ec.verts[2].normal.j = float(0);
+    ec.verts[2].normal.k = float(0.542511);
 
     ec.verts[3].x = 0;
     ec.verts[3].y = 0;
     ec.verts[3].z = size_half;
-    ec.verts[3].normal.i = Flx16(0.024384);
-    ec.verts[3].normal.j = Flx16(0);
-    ec.verts[3].normal.k = Flx16(-0.999710);
+    ec.verts[3].normal.i = float(0.024384);
+    ec.verts[3].normal.j = float(0);
+    ec.verts[3].normal.k = float(-0.999710);
 
 //ÄÄÄ Create 4 faces
     dword fflags = (limits & (ESCH_FACE_WIRE
@@ -321,42 +318,42 @@ void EschParticlePyramid::draw()
     ec.faces[0].a = 0;
     ec.faces[0].b = 1;
     ec.faces[0].c = 2;
-    ec.faces[0].normal.i = Flx16(0);
-    ec.faces[0].normal.j = Flx16(0);
-    ec.faces[0].normal.k = Flx16(1);
+    ec.faces[0].normal.i = float(0);
+    ec.faces[0].normal.j = float(0);
+    ec.faces[0].normal.k = float(1);
 
     ec.faces[1].color = color;
     ec.faces[1].flags = fflags;
     ec.faces[1].a = 3;
     ec.faces[1].b = 0;
     ec.faces[1].c = 2;
-    ec.faces[1].normal.i = Flx16(-0.436432);
-    ec.faces[1].normal.j = Flx16(-0.872864);
-    ec.faces[1].normal.k = Flx16(-0.218216);
+    ec.faces[1].normal.i = float(-0.436432);
+    ec.faces[1].normal.j = float(-0.872864);
+    ec.faces[1].normal.k = float(-0.218216);
 
     ec.faces[2].color = color;
     ec.faces[2].flags = fflags;
     ec.faces[2].a = 3;
     ec.faces[2].b = 2;
     ec.faces[2].c = 1;
-    ec.faces[2].normal.i = Flx16(-0.436432);
-    ec.faces[2].normal.j = Flx16(0.872864);
-    ec.faces[2].normal.k = Flx16(-0.218216);
+    ec.faces[2].normal.i = float(-0.436432);
+    ec.faces[2].normal.j = float(0.872864);
+    ec.faces[2].normal.k = float(-0.218216);
 
     ec.faces[3].color = color;
     ec.faces[3].flags = fflags;
     ec.faces[3].a = 3;
     ec.faces[3].b = 1;
     ec.faces[3].c = 0;
-    ec.faces[3].normal.i = Flx16(0.894424);
-    ec.faces[3].normal.j = Flx16(0);
-    ec.faces[3].normal.k = Flx16(-0.447205);
+    ec.faces[3].normal.i = float(0.894424);
+    ec.faces[3].normal.j = float(0);
+    ec.faces[3].normal.k = float(-0.447205);
 
 //ÄÄÄ Transform and light (if possible) the verticies
     for(i=0; i < 4; i++)
     {
         vflags[i] = ESCH_VVERT_TRANSFORMED;
-        ec.verts[i].transform(&frame,(EschPoint*)&vpt[i]);
+        ec.verts[i].transform(&frame,(EschPoint*)(&vpt[i]));
         vpt[i].clr=color;
         vpt[i].shade=mp;
         
@@ -366,7 +363,7 @@ void EschParticlePyramid::draw()
         {
             ec.verts[i].transform(&world,&vn[i]);
             ec.verts[i].normal.transform(&world,&vn[i].normal);
-            if (world.scalef.flx != (1<<16))
+            if (world.scalef != 1.0)
                 vn[i].normal.normalize();
         }
 
@@ -406,11 +403,11 @@ void EschParticlePyramid::draw()
         if (level & ESCH_CAM_BACKCULL)
         {
             EschVector fview;
-            fview.i.flx = ec.verts[face->a].x.flx - eyep.x.flx;
-            fview.j.flx = ec.verts[face->a].y.flx - eyep.y.flx;
-            fview.k.flx = ec.verts[face->a].z.flx - eyep.z.flx;
+            fview.i = ec.verts[face->a].x - eyep.x;
+            fview.j = ec.verts[face->a].y - eyep.y;
+            fview.k = ec.verts[face->a].z - eyep.z;
 
-            if ((fview DOT face->normal).flx > 0)
+            if ((fview DOT face->normal) > 0)
                 continue;
         }
 

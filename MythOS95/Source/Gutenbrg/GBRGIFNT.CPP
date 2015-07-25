@@ -197,9 +197,19 @@ STATIC gberg_error_codes igberg_install_font(XFParseIFF *iff, const char *fntnam
         return GBERG_ERR_NOMEMORY;
 
 //ÄÄ Verify header
-    if ( (header.type != GBERG_FNT_MONOFIXED 
-          && header.type != GBERG_FNT_MONOFIXEDEX)
-         || header.compression)
+    switch (header.type)
+    {
+        case GBERG_FNT_MONOFIXED:
+        case GBERG_FNT_MONOFIXEDEX:
+        case GBERG_FNT_MONOVARIABLE:
+        case GBERG_FNT_MONOVARIABLEEX:
+            break;
+        default:
+            iff->leaveform();
+            return GBERG_ERR_NOTSUPPORTED;
+    }
+
+    if (header.compression)
     {
         iff->leaveform();
         return GBERG_ERR_NOTSUPPORTED;
@@ -218,8 +228,14 @@ STATIC gberg_error_codes igberg_install_font(XFParseIFF *iff, const char *fntnam
         return GBERG_ERR_INVALIDDATA;
     }
 
-
-    int numchars = (header.type == GBERG_FNT_MONOFIXEDEX) ? 256 : 128;
+    int numchars = 128;
+    switch (header.type)
+    {
+        case GBERG_FNT_MONOFIXEDEX:
+        case GBERG_FNT_MONOVARIABLEEX:
+            numchars = 256;
+            break;
+    }
 
     if ((fnt->data=ivory_halloc(numchars*fnt->bpc))==0)
     {
@@ -240,9 +256,6 @@ STATIC gberg_error_codes igberg_install_font(XFParseIFF *iff, const char *fntnam
 
         if (iff->chunkid == iff->makeid('B','O','D','Y'))
         {
-            assertMyth("igberg_install_font only loads monochrome fonts",
-                       header.type == GBERG_FNT_MONOFIXED);
-
             if (iff->chunkSize != (ulong)(numchars * fnt->bpc))
             {
                 err=GBERG_ERR_INVALIDDATA;
@@ -334,19 +347,36 @@ long gberg_widthc(char c)
 {
     assertMyth("Gutenberg must be initialized",GBergInstance);
 
-    return (GBergInstance->font_active) ?
-                            GBergInstance->font_active->width
-                            : 0;
+    GBergFontInfo   *fnt=GBergInstance->font_active;
+
+    if (!fnt)
+        return 0;
+
+    switch (fnt->type)
+    {
+        case GBERG_FNT_MONOFIXED:
+        case GBERG_FNT_MONOFIXEDEX:
+            return GBergInstance->font_active->width;
+
+        case GBERG_FNT_MONOVARIABLE:
+        case GBERG_FNT_MONOVARIABLEEX:
+            {
+                byte *ptr = (byte *)((byte *)fnt->ptr + (c*fnt->bpc));
+                return *ptr;
+            }
+
+        default:
+            return 0;
+    }
 }
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // gberg_heightc                                                            ³
 //                                                                          ³
-// Returns the height of the given character in the current font, or 0 if   ³
-// no font is selected.                                                     ³
+// Returns the height of the current font, or 0 if no font is selected.     ³                                                ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-long gberg_heightc(char c)
+long gberg_heightc()
 {
     assertMyth("Gutenberg must be initialized",GBergInstance);
 

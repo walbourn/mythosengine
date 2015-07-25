@@ -29,9 +29,9 @@
 //
 // xfbmp.cpp
 //
-// Contains code for working with Windows 3 BMP files.  OS/2 1.x,
-// and monochrome BMPs are not supported by this code.  The writer
-// always outputs a 256 or true color image uncompressed.
+// Contains code for working with Windows 3 BMP files.  OS/2 1.x
+// format BMPs are not supported by this code.  The writer always
+// outputs monochrome, 8-bit, or 24-bit uncompressed images.
 //
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
 
@@ -67,7 +67,7 @@ struct Info_header
     ulong   biWidth;                // Image width in pixels
     ulong   biHeight;               // Image height in pixels
     ushort  biPlanes;               // Number of image planes (always 1)
-    ushort  biBitCount;             // BIts per pixel (1,4,8, or 24)
+    ushort  biBitCount;             // Bits per pixel (1,4,8, or 24)
     ulong   biCompression;          // Compression type
     ulong   biSizeImage;            // Size in bytes of compressed image
     ulong   biXPelsPerMeter;        // Horiz. resolution in pixels/meter
@@ -91,7 +91,7 @@ struct Info_header
 //                                                                          ³
 // Reads a BMP format bitmap from the file object.                          ³
 //                                                                          ³
-// Doesn't handle OS/2 v1, monochrome, or compression.                      ³
+// Doesn't handle OS/2 v1 format.                                           ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 xf_error_codes XFParseBMP::read(XFBitmap *b)
 {
@@ -126,23 +126,20 @@ xf_error_codes XFParseBMP::read(XFBitmap *b)
 //ÄÄÄ Verify valid info header  ÄÄÄ
     if ( iheader.biSize != 40
          || iheader.biPlanes != 1
-         || (iheader.biBitCount != 1 &&
-             iheader.biBitCount != 4 &&
-             iheader.biBitCount != 8 &&
-             iheader.biBitCount != 24)
+         || (iheader.biBitCount != 1
+             && iheader.biBitCount != 4
+             && iheader.biBitCount != 8
+             && iheader.biBitCount != 24)
          || !iheader.biWidth
          || !iheader.biHeight
          || iheader.biWidth >= XF_MAX_WIDTH
          || iheader.biHeight >= XF_MAX_HEIGHT )
         return (errorn=XF_ERR_NOTSUPPORTED);
 
-               // What are the valid values for biCompression?
-
 //ÄÄÄ Check for unsupported formats ÄÄÄ
-    if ( iheader.biBitCount == 1
-         || (iheader.biCompression != 0
-             && iheader.biCompression != 1
-             && iheader.biCompression != 2 ) )
+    if ( (iheader.biCompression != 0
+          && iheader.biCompression != 1
+          && iheader.biCompression != 2 ) )
         return (errorn=XF_ERR_NOTSUPPORTED);
 
 //ÄÄÄ Setup bitmap object ÄÄÄ
@@ -152,12 +149,23 @@ xf_error_codes XFParseBMP::read(XFBitmap *b)
     b->clrinuse=0;
     b->width = (ushort) iheader.biWidth;
     b->height = (ushort) iheader.biHeight;
-    b->bpp = (iheader.biBitCount == 24) ? 3 : 1;
+
+    if (iheader.biBitCount == 1)
+    {
+        b->bpp = XFBM_BPP_MONO;
+    }
+    else if (iheader.biBitCount == 24)
+    {
+        b->bpp = XFBM_BPP_24BIT;
+    }
+    else
+    {
+        b->bpp = XFBM_BPP_8BIT;
+    }
  
 //ÄÄÄ Get palette data ÄÄÄ
-    if (iheader.biBitCount != 24)
+    if (iheader.biBitCount == 4 || iheader.biBitCount == 8)
     {
-
         // Allocate memory
         b->palhandle = ivory_halloc(sizeof(dword)*256);
         if (!b->palhandle)
@@ -178,9 +186,6 @@ xf_error_codes XFParseBMP::read(XFBitmap *b)
         {
             switch (iheader.biBitCount)
             {
-                case 1:
-                    ncolors = 2;
-                    break;
                 case 4:
                     ncolors = 16;
                     break;
@@ -209,11 +214,26 @@ xf_error_codes XFParseBMP::read(XFBitmap *b)
 
         b->clrinuse=ncolors-1;
     }
+    else if (iheader.biBitCount == 1)
+    {
+        ncolors = (!iheader.biClrUsed) ? 2 : iheader.biClrUsed;
 
-//ÄÄÄ Load image data ÄÄÄ
+        // Skip palette entries
+        if (xf->read (work, 4*ncolors) != ulong(4*ncolors))
+        {
+            b->release();
+            return (errorn=XF_ERR_INVALIDPALETTE);
+        }
+        b->clrinuse=1;
+    }
+
+//ÄÄÄ Setup bitmap memory
+    ulong size = (iheader.biBitCount == 1)
+                 ? (((b->width + 7) >> 3) * b->height)
+                 : (b->width * b->height * b->bpp);
 
     // Allocate memory
-    b->handle = ivory_halloc(b->width * b->height * b->bpp);
+    b->handle = ivory_halloc(size);
     if (!b->handle)
     {
         b->release();
@@ -227,10 +247,36 @@ xf_error_codes XFParseBMP::read(XFBitmap *b)
         return (errorn=XF_ERR_LOCKFAILED);
     }
 
+//ÄÄÄ Load image data ÄÄÄ
     switch (iheader.biBitCount)
     {
+        //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ 1 Bits per Pixel
+        case 1:
+            w = ((b->width+7) >> 3);
+ 
+            for (ptr=b->data+(w*(b->height-1)), y=0;
+                 y < b->height; y++, ptr -= w)
+            {
+                if (xf->read(ptr,w) != w)
+                {
+                    b->release();
+                    return (errorn=XF_ERR_INVALIDIMAGE);
+                }
+ 
+                // Skip any padding
+                i = (w & 0x3);
+                if (i)
+                {
+                    if (xf->read(work,4-i) != ulong (4-i))
+                    {
+                        b->release();
+                        return (errorn=XF_ERR_INVALIDIMAGE);
+                    }
+                }
+            }
+            break;
 
-                                       //ÄÄÄ 4 Bits per Pixel
+        //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ 4 Bits per Pixel
         case 4:
             if (!iheader.biCompression)
             {
@@ -368,7 +414,7 @@ rle4_end:;
             }
             break;
  
-                                        //ÄÄÄ 8 Bits per Pixel
+        //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ 8 Bits per Pixel
         case 8:
             if (!iheader.biCompression)
             {
@@ -376,7 +422,6 @@ rle4_end:;
                     y < b->height;
                     y++, ptr -= b->width)
                 {
-                    
                     if (xf->read(ptr,b->width) != b->width)
                     {
                         b->release();
@@ -484,7 +529,7 @@ rle8_end:;
             }
             break;
  
-                                        //ÄÄÄ 24 Bits per Pixel
+        //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ 24 Bits per Pixel
         case 24:
             w = b->width * 3;
  
@@ -548,13 +593,22 @@ xf_error_codes XFParseBMP::write(XFBitmap *b)
  
     if (!b)
         b = bm;
- 
-    if ((b->bpp != 1 && b->bpp != 3)
-        || !b->width || !b->height)
+
+//ÄÄÄ Check for unsupported formats ÄÄÄ
+    if (!b->width || !b->height)
         return XF_ERR_NOTSUPPORTED;
  
-//ÄÄÄ Create/write file header ÄÄÄ
+    switch (b->bpp)
+    {
+        case XFBM_BPP_MONO:
+        case XFBM_BPP_8BIT:
+        case XFBM_BPP_24BIT:
+            break;
+        default:
+            return XF_ERR_NOTSUPPORTED;
+    }
  
+//ÄÄÄ Create/write file header ÄÄÄ
     // Save to later write out Size and OffBits...
     headerpos=xf->tell();
     memset(&fheader,0,sizeof(File_header));
@@ -573,10 +627,22 @@ xf_error_codes XFParseBMP::write(XFBitmap *b)
     iheader.biWidth=(ulong)b->width;
     iheader.biHeight=(ulong)b->height;
     iheader.biPlanes=1;
-    iheader.biBitCount = (b->bpp == 3) ? 24 : 8;
-                                            //ÄÄÄ Doesn't compress
+
+    switch (b->bpp)
+    {
+        case XFBM_BPP_MONO:
+            iheader.biBitCount = 1;
+            break;
+        case XFBM_BPP_8BIT:
+            iheader.biBitCount = 8;
+            break;
+        case XFBM_BPP_24BIT:
+            iheader.biBitCount = 24;
+            break;
+    }
+
+                                            //ÄÄÄ Doesn't compress on output
     iheader.biCompression=0;
-    iheader.biSizeImage=0;
  
     if (xf->write(&iheader,sizeof(Info_header)) != sizeof(Info_header))
     {
@@ -600,9 +666,8 @@ xf_error_codes XFParseBMP::write(XFBitmap *b)
     }
 
 //ÄÄÄ Write out palette, if any ÄÄÄ
-    if (iheader.biBitCount != 24)
+    if (iheader.biBitCount == 8)
     {
-
         if (!b->pal)
         {
             if (!locked)
@@ -627,6 +692,21 @@ xf_error_codes XFParseBMP::write(XFBitmap *b)
             return errorn;
         }
     }
+    else if (iheader.biBitCount == 1)
+    {
+        memset(work,0,8);
+        work[4+2] = 255;
+        work[4+1] = 255;
+        work[4+0] = 255;
+
+        if (xf->write(work,4*2) != 4*2)
+        {
+            if (!locked)
+                b->unlock();
+            errorn=xf->error();
+            return errorn;
+        }
+    }
  
 //ÄÄÄ Write out image ÄÄÄ
     if (!b->data)
@@ -640,70 +720,89 @@ xf_error_codes XFParseBMP::write(XFBitmap *b)
  
     work[0]=work[1]=work[2]=0;
  
-    if (iheader.biBitCount == 8)
+    switch (iheader.biBitCount)
     {
-        //ÄÄÄ Handles 8-bit
-        for(ptr=b->data+(b->width*(b->height-1)), y=0;
-            y < b->height; y++, ptr -= b->width)
-        {
- 
-            if (xf->write(ptr,b->width) != b->width)
+        //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ 1 Bits per Pixel
+        case 1:
+            w = (b->width+7) >> 3;
+
+            for(ptr=b->data+(w*(b->height-1)), y=0;
+                y < b->height; y++, ptr -= w)
             {
-                if (!locked)
-                    b->unlock();
-                errorn=xf->error();
-                return errorn;
-            }
- 
-            // Pad, if needed.
-            i=b->width & 0x3;
-            if (i)
-            {
-                if (xf->write(work,4-i) != ulong (4-i))
+                if (xf->write (ptr, w) != ulong (w))
                 {
-                    errorn=xf->error();
                     if (!locked)
                         b->unlock();
+                    errorn=xf->error();
                     return errorn;
                 }
-            }
-        }
-    }
-    else
-    {
-        //ÄÄÄ Handles 24-bit
-        w= b->width*3;
-
-        tmp = new byte[w];
-        if (!tmp)
-            return XF_ERR_NOMEMORY;
  
-        for(ptr=b->data+(w*(b->height-1)), y=0;
-            y < b->height; y++, ptr -= w)
-        {
-            // Swap RGB to BGR for line
-            for(sptr=ptr, dptr=tmp, i=0; i < b->width; i++)
-            {
-                *(dptr++) = *(sptr+2);
-                *(dptr++) = *(sptr+1);
-                *(dptr++) = *(sptr);
-                sptr += 3;
+                // Pad, if needed.
+                i=(w & 0x3);
+                if (i)
+                {
+                    if (xf->write(work,4-i) != ulong (4-i))
+                    {
+                        if (!locked)
+                            b->unlock();
+                        errorn=xf->error();
+                        return errorn;
+                    }
+                    
+                }
             }
+            break;
 
-            if (xf->write (tmp, w) != ulong (w))
+        //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ 8 Bits per Pixel
+        case 8:
+            for(ptr=b->data+(b->width*(b->height-1)), y=0;
+                y < b->height; y++, ptr -= b->width)
             {
-                if (!locked)
-                    b->unlock();
-                errorn=xf->error();
-                delete [] tmp;
-                return errorn;
-            }
  
-            // Pad, if needed.
-            i=(w & 0x3);
-            if (i)
+                if (xf->write(ptr,b->width) != b->width)
+                {
+                    if (!locked)
+                        b->unlock();
+                    errorn=xf->error();
+                    return errorn;
+                }
+ 
+                // Pad, if needed.
+                i=b->width & 0x3;
+                if (i)
+                {
+                    if (xf->write(work,4-i) != ulong (4-i))
+                    {
+                        errorn=xf->error();
+                        if (!locked)
+                            b->unlock();
+                        return errorn;
+                    }
+                }
+            }
+            break;
+
+        //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ 24 Bits per Pixel
+        case 24:
+            w= b->width*3;
+
+            tmp = new byte[w];
+            if (!tmp)
+                return XF_ERR_NOMEMORY;
+ 
+            for(ptr=b->data+(w*(b->height-1)), y=0;
+                y < b->height; y++, ptr -= w)
             {
-                if (xf->write(work,4-i) != ulong (4-i))
+                // Swap RGB to BGR for line
+                for(sptr=ptr, dptr=tmp, i=0; i < b->width; i++)
+                {
+                    *(dptr++) = *(sptr+2);
+                    *(dptr++) = *(sptr+1);
+                    *(dptr++) = *(sptr);
+                    sptr += 3;
+                }
+
+                if (xf->write (tmp, w) != ulong (w))
                 {
                     if (!locked)
                         b->unlock();
@@ -711,13 +810,27 @@ xf_error_codes XFParseBMP::write(XFBitmap *b)
                     delete [] tmp;
                     return errorn;
                 }
-                    
-            }
-        }
-
-        delete [] tmp;
-    }
  
+                // Pad, if needed.
+                i=(w & 0x3);
+                if (i)
+                {
+                    if (xf->write(work,4-i) != ulong (4-i))
+                    {
+                        if (!locked)
+                            b->unlock();
+                        errorn=xf->error();
+                        delete [] tmp;
+                        return errorn;
+                    }
+                    
+                }
+            }
+
+            delete [] tmp;
+            break;
+    }
+
     if (!locked)
         b->unlock();
 

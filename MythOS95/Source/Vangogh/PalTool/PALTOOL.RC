@@ -69,6 +69,8 @@ IDR_PTOOLTYPE           ICON    DISCARDABLE     "res\\PalTodoc.ico"
 //
 
 IDR_MAINFRAME           BITMAP  MOVEABLE PURE   "res\\toolbar.bmp"
+IDB_LOGO                BITMAP  DISCARDABLE     "RES\\logo.bmp"
+IDB_ABOUT               BITMAP  DISCARDABLE     "RES\\about.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -205,25 +207,6 @@ BEGIN
                     8,9,106,12
 END
 
-IDD_ABOUTBOX DIALOG DISCARDABLE  34, 22, 269, 138
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "About Palette Tool"
-FONT 8, "MS Sans Serif"
-BEGIN
-    ICON            IDR_MAINFRAME,IDC_STATIC,11,17,18,20
-    CONTROL         "Van Gogh Palette Tool",IDC_STATIC,"Static",SS_SIMPLE | 
-                    WS_GROUP,55,30,119,8
-    CONTROL         "Version X.X\tMon DD YYYY",IDC_ABOUT_VERSION,"Static",
-                    SS_SIMPLE | WS_GROUP,55,45,111,8
-    CONTROL         "Copyright © 1995-1997 by Charybdis Enterprises, Inc.",
-                    IDC_STATIC,"Static",SS_SIMPLE | WS_GROUP,55,60,181,8
-    CTEXT           "Van Gogh is a component of the MythOS collection",
-                    IDC_STATIC,45,100,185,11
-    CTEXT           "MythOS is a trademark of Charybdis Enterprises, Inc.",
-                    IDC_STATIC,55,115,175,14
-    DEFPUSHBUTTON   "OK",IDOK,219,11,32,14,WS_GROUP
-END
-
 IDD_PROPA DIALOG DISCARDABLE  0, 0, 270, 130
 STYLE WS_CHILD | WS_VISIBLE | WS_DISABLED | WS_CAPTION
 CAPTION "General"
@@ -289,6 +272,25 @@ BEGIN
     EDITTEXT        IDC_PROP_COPY,60,75,192,12,ES_AUTOHSCROLL
 END
 
+IDD_ABOUTBOX DIALOG DISCARDABLE  34, 22, 269, 151
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "About PalTool"
+FONT 8, "MS Sans Serif"
+BEGIN
+    CONTROL         168,IDC_STATIC,"Static",SS_BITMAP,5,5,180,47
+    CONTROL         169,IDC_STATIC,"Static",SS_BITMAP,10,65,256,46
+    CONTROL         "Version X.X\tMon DD YYYY",IDC_ABOUT_VERSION,"Static",
+                    SS_SIMPLE | WS_GROUP,120,65,111,8
+    CONTROL         "Copyright © 1995-1997",IDC_STATIC,"Static",SS_SIMPLE | 
+                    WS_GROUP,120,75,80,8
+    DEFPUSHBUTTON   "OK",IDOK,219,11,32,14,WS_GROUP
+    GROUPBOX        "",IDC_STATIC,5,110,255,9
+    CTEXT           "Van Gogh is a component of the MythOS collection",
+                    IDC_STATIC,42,120,185,11
+    CTEXT           "MythOS is a trademark of Charybdis Enterprises, Inc.",
+                    IDC_STATIC,47,135,175,14
+END
+
 
 #ifndef _MAC
 /////////////////////////////////////////////////////////////////////////////
@@ -297,8 +299,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,0,0,1
- PRODUCTVERSION 1,0,0,1
+ FILEVERSION 1,1,0,0
+ PRODUCTVERSION 1,1,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -316,13 +318,13 @@ BEGIN
             VALUE "Comments", "by Dan Higdon and Chuck Walbourn\0"
             VALUE "CompanyName", "Charybdis Enterprises, Inc.\0"
             VALUE "FileDescription", "Van Gogh Palette Tool MFC Application\0"
-            VALUE "FileVersion", "1, 0, 0, 1\0"
+            VALUE "FileVersion", "1.1\0"
             VALUE "InternalName", "PALTOOL\0"
-            VALUE "LegalCopyright", "Copyright © 1995\0"
+            VALUE "LegalCopyright", "Copyright © 1995-1997\0"
             VALUE "LegalTrademarks", "MythOS is a trademark of Charybdis Enterprises, Inc.\0"
             VALUE "OriginalFilename", "PALTOOL.EXE\0"
             VALUE "ProductName", "Van Gogh Palette Tool\0"
-            VALUE "ProductVersion", "1, 0, 0, 1\0"
+            VALUE "ProductVersion", "1.1\0"
         END
     END
     BLOCK "VarFileInfo"

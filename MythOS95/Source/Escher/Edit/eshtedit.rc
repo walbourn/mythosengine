@@ -88,6 +88,9 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "&Export...\tShift+E",         ID_FILE_EXPORT
         MENUITEM SEPARATOR
+        MENUITEM "Use &compression",            IDS_FILE_COMPRESS
+        MENUITEM "Use &floating-point",         IDS_FILE_FLOATING
+        MENUITEM SEPARATOR
         MENUITEM "Recent File",                 ID_FILE_MRU_FILE1, GRAYED
         MENUITEM SEPARATOR
         MENUITEM "E&xit\tAlt+X",                ID_APP_EXIT
@@ -662,8 +665,8 @@ BEGIN
                     160,10
     CONTROL         "Uniform height distribution",IDC_DEM_UNIFORM,"Button",
                     BS_AUTORADIOBUTTON,21,20,100,10
-    CONTROL         "Average-compressed height table",IDC_DEM_AVERAGE,
-                    "Button",BS_AUTORADIOBUTTON,21,42,120,10
+    CONTROL         "Average-compressed height table",IDC_DEM_AVERAGE,"Button",
+                    BS_AUTORADIOBUTTON,21,42,120,10
     GROUPBOX        "",IDC_STATIC,15,30,135,45
     LTEXT           "Max distance:",IDC_STATIC,40,58,45,8
     EDITTEXT        IDC_DEM_AVGMAXD,90,55,40,15,ES_AUTOHSCROLL
@@ -991,8 +994,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,4,1,0
- PRODUCTVERSION 1,4,1,0
+ FILEVERSION 2,0,0,0
+ PRODUCTVERSION 2,0,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -1010,13 +1013,13 @@ BEGIN
             VALUE "Comments", "by Chuck Walbourn\0"
             VALUE "CompanyName", "Charybdis Enterprises, Inc.\0"
             VALUE "FileDescription", "Escher Terrain Editor MFC Application\0"
-            VALUE "FileVersion", "1.41\0"
+            VALUE "FileVersion", "2.00\0"
             VALUE "InternalName", "Terrain Edit\0"
             VALUE "LegalCopyright", "Copyright © 1995-1997\0"
             VALUE "LegalTrademarks", "MythOS is a trademark of Charybdis Enterprises, Inc.\0"
             VALUE "OriginalFilename", "ESHTEDIT.EXE\0"
             VALUE "ProductName", "Escher Terrain Editor\0"
-            VALUE "ProductVersion", "1.41\0"
+            VALUE "ProductVersion", "2.00\0"
         END
     END
     BLOCK "VarFileInfo"
@@ -1476,6 +1479,8 @@ BEGIN
     ID_EDIT_ASSIGN_ANGLE    "Assign textures/colors based on surface angles\nAngle-based"
     ID_TERR_SETBASE         "Sets a new base elevation value for the heights table\nSet Base"
     ID_SURF_REMTXT          "Removes the texture definition for any texture that hasn't been applied to the terrain\nRemove Unused"
+    IDS_FILE_FLOATING       "When exporting files, this controls the use of fixed-point vs. floating-point data formats.\nFloating-point"
+    IDS_FILE_COMPRESS       "When exporting files, this controls the use of compression.\nComrpession"
 END
 
 #endif    // English (U.S.) resources

@@ -38,27 +38,19 @@
 
  Notes by: Chuck Walbourn
 
- Last Updated: September 17, 1996
+ Last Updated: May 21, 1997
 
  Escher Exporter - 3D Studio R4 IPAS PXP Routine
 
  Changes for this release --------------------------------------------------
 
- Version 1.50
+ Version 2.00
 
-    o Exports FLI/FLC animated textures.
+    o Updated for floating-point data formats
 
-    o Options for controlling the use of the ALLOWPERSP bit were added.
+    o Added 'darklight' export, indicated by a negative light
+      multiplier.
 
-    o Expanded Texture Resize Query dialog to include number of frames
-      for FLI/FLCs and interactive texture size indicator.
-
-    o Added materials format options for 8-bit or Truecolor optionally
-      RLE compressed data.
-
-    o Fixed problem with lights control dialog preventing YES/NO from
-      being selected.
-
-    o Cleaned up code
+    o Added keyframe data exporting
 
  *** END OF FILE ***
