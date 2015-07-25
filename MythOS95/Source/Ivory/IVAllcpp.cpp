@@ -48,7 +48,6 @@
 #include <windows.h>
 #include <malloc.h>
 
-#include <iostream.h>
 #include <assert.h>
 
 #include "ivory.hpp"

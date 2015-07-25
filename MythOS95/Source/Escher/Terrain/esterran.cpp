@@ -2549,7 +2549,7 @@ esch_error_codes EschTerrain::load(XFParseIFF *iff, const char *tname,
                 }
 
                 ushort *sptr = cnrmls;
-                for(ulong i=0; i < surfsize; i++, ptr++)
+                for(ulong l=0; l < surfsize; l++, ptr++)
                 {
                     long i = (long)*(sptr++);
                     long j = (long)*(sptr++);

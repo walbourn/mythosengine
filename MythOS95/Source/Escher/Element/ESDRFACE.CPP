@@ -309,7 +309,7 @@ extern "C" void esch_clipdraw_face(ulong ind, dword ctrlfl)
         vpoly2[i].x      = vpt[i]->x;
         vpoly2[i].y      = vpt[i]->y;
         vpoly2[i].z      = vpt[i]->z;
-        vpoly2[i].shade  = vpt[i]->shade;
+        vpoly2[i].shade  = (float)vpt[i]->shade;
         vpoly2[i].u      = vpt[i]->u;
         vpoly2[i].v      = vpt[i]->v;
 

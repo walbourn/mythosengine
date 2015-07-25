@@ -122,7 +122,7 @@ STATIC int load_pal(VngoPal *pal,char *infile);
 //
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 
-char Util_name[] = "± MythOS Pic Image Utility - (C) 1994-9 by D. Higdon, T. Little, C. Walbourn ±\n"
+char Util_name[] = "°± MythOS Pic Image Utility - (C) 1994-1999 by D. Higdon, T. Little, and C. Walbourn ±°\n"
                    "                              Subject to terms of GNU LGPL " __DATE__ "\n";
 
 
