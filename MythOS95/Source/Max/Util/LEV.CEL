@@ -1,0 +1,39 @@
+;
+;                             M A X I M I L L I A N
+;
+
+;-----------------------------
+; Example event declaration
+;-----------------------------
+
+event Lev_up
+{
+    [ key 0x48  ]
+    [ not key 0x148 
+      mouseb 1 ]
+    [ not key 0x148 
+      joyb 1 ]
+}
+
+event Lev_down
+{
+    [ key 0x50  mouserange 1, 2, 0x100, 0x200 ]
+    [ key 0x150 mouseb 1 ]
+}
+
+event help
+{
+    [ key #f1 ]
+    [ key '1' ]
+    [ key #lalt key 'h' ]
+    [ key #ralt key 'H' ]
+}
+
+; Complier will output a .hpp containing Events...
+;
+; const MaxEvent Lev_up (xxx)
+;
+; Compiler will also generate an .IFF with a FORM 'Mevt' or something...
+;
+
+;--- end of source file

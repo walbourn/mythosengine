@@ -1,0 +1,80 @@
+;อออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออ
+;
+;             LLander -- A Lunar Lander game based on GameFrame
+;
+;                         For Microsoft Windows '95
+;
+;               Copyright (c) 1995 by Charybdis Enterprises, Inc.
+;                           All Rights Reserved.
+;
+;ฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤ
+;
+;           *** Charybdis Enterprises, Inc. Company Confidential ***
+;
+;  This file and all associated files are the company proprietary property
+;        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+;
+; CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
+; TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
+; IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
+; AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
+; INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+;
+;ฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤ
+;
+; landevt.cel
+;
+; Events for the Lunar Lander example game
+;
+;อออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออ
+
+; Max Text events
+
+event LEFT
+{
+    [ key #left ]
+    [ key #grayleft ]
+}
+
+event RIGHT
+{
+    [ key #right ]
+    [ key #grayright ]
+}
+
+event UP
+{
+    [ key #up ]
+    [ key #grayup ]
+}
+
+event DOWN
+{
+    [ key #down ]
+    [ key #graydown ]
+}
+
+event FIRE
+{
+    [ joyb 1 ]
+    [ key #space ]
+}
+
+event QUIT
+{
+    [ key #esc ]
+}
+
+event HOVER
+{
+    [ key 'h' 
+      not key #lshift ]
+}
+
+event DROP
+{
+    [ key 'h'
+      key #lshift ]
+}
+
+;ฐฑฒ eof - landevt.cel ฒฑฐ

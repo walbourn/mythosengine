@@ -1,0 +1,124 @@
+#ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
+#                oooooooooo.                                 
+#                `888'   `Y8b                                
+#                 888     888  .ooooo.    oooooooo  .ooooo.  
+#                 888oooo888' d88' `88b  d'""7d8P  d88' `88b 
+#                 888    `88b 888   888    .d8P'   888   888 
+#                 888    .88P 888   888  .d8P'  .P 888   888 
+#                o888bood8P'  `Y8bod8P' d8888888P  `Y8bod8P' 
+#                           _                       
+#                          /_\     |    _  _ | _ ._ 
+#                         /   \  \_||_|(_|(_||(/_|  
+#                                       _| _|       
+#
+#
+#            Copyright (c) 1994, 1995 by Charybdis Enterprises, Inc.
+#                            All Rights Reserved.
+#
+#ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+#
+#           *** Charybdis Enterprises, Inc. Company Confidential ***
+#
+#  This file and all associated files are the company proprietary property
+#        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+#
+# CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
+# TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
+# IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
+# AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
+# INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+#
+#ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+#
+# makefile - Bozo
+#
+#ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
+
+#°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+#
+#                               Variables
+#                                
+#°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+!if "$(DEBUG)" == ""
+DEBUG = NO
+!endif
+
+!if "$(MYTH95ROOT)" == ""
+MYTH95ROOT = \MythOS95
+!endif
+
+INCPATH = ;..\inc;$(MYTH95ROOT)\inc;
+LIBPATH = $(MYTH95ROOT)\lib;
+
+#ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+# File specific variables                                                  ³
+#ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+LIB = bozo
+
+OBJS = \
+bzartn.obj\
+bztask.obj\
+bzqueue.obj\
+bzsemap.obj\
+bzjump.obj\
+bzwrap.obj
+
+#ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+# First target                                                             ³
+#ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+all: setstden $(LIB).lib
+
+#ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+# Standard make include                                                    ³
+#ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+!include $(MYTH95ROOT)\inc\make.inc
+
+# CCOPTIONS = $(CCOPTIONS) /DUSE_SETJMP
+
+#°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+#
+#                                 Rules
+#
+#°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+#±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+#
+#                              Dependencies
+#
+#±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+
+#--- .c, .cpp, .asm setup in standard include ---
+bzartn.obj : ..\inc\bzartn.h ..\bzartn.c
+bztask.obj : ..\inc\bztask.h ..\bztask.c
+bzsemap.obj : ..\inc\bzsemap.h ..\bzsemap.c
+bzqueue.obj : ..\inc\bzqueue.h ..\bzqueue.c
+
+#ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+# Library                                                                  ³
+#ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+$(LIB).lib:   $(OBJS)
+    -del $(LIB).lib
+    $(LB) $(LBOPTS) /out:$(LIB).lib @<<
+    $(OBJS: =
+)
+<<
+
+release: all
+    copy ..\inc\*.* $(MYTH95ROOT)\inc
+    copy $(LIB).lib $(MYTH95ROOT)\lib
+
+clean:
+    del *.obj
+    del *.res
+    del *.err
+    del *.lst
+    del *.ilk
+    del *.pdb
+
+#°±² End of makefile ²±°
+

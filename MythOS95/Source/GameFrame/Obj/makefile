@@ -1,0 +1,137 @@
+#ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
+#
+#                        _/_/_/           _/_/_/_/
+#                      _/                _/
+#                     _/  _/_/          _/_/_/
+#                    _/    _/  A M E   _/      R A M  E
+#                     _/_/_/          _/
+#
+# A Framework for Microsoft Windows '95 Entertainment Software Using MythOS
+#
+#              Copyright (c) 1995 by Charybdis Enterprises, Inc.
+#                           All Rights Reserved
+#
+#ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+#
+#           *** Charybdis Enterprises, Inc. Company Confidential ***
+#
+#  This file and all associated files are the company proprietary property
+#        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+#
+# CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
+# TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
+# IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
+# AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
+# INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+#
+#ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+#
+# makefile
+#
+#ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
+
+#°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+#
+#                               Variables
+#                                
+#°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+!if "$(DEBUG)" == ""
+DEBUG = NO
+!endif
+
+!if "$(MYTH95ROOT)" == ""
+MYTH95ROOT = \MythOS95
+!endif
+
+INCPATH = ;..\inc;$(MYTH95ROOT)\inc
+
+#ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+# File specific variables                                                  ³
+#ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+LIBPATH = $(MYTH95ROOT)\lib;
+
+EXE = llander
+
+OBJS=\
+    main.obj\
+    llander.obj\
+    resource.res\
+    support.obj
+
+LIBPATH = ..\..\obj;$(MYTH95ROOT)\lib;
+
+LIBS=\
+    max.lib\
+    ivory.lib\
+    xfile.lib\
+    felix.lib\
+    chronos.lib\
+    bozo.lib\
+    vangogh.lib\
+    mythos.lib\
+    escher.lib\
+    gutenbrg.lib\
+    version.lib\
+    gdi32.lib\
+    winmm.lib\
+    dplay.lib\
+    turner.lib
+
+#ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+# First target                                                             ³
+#ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+all: setstden $(EXE).exe
+
+#ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+# Standard make include                                                    ³
+#ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+!include $(MYTH95ROOT)\inc\make.inc
+
+#°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+#
+#                                 Rules
+#
+#°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+#--- .c, .cpp, .asm setup in standard include ---
+
+#±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+#
+#                              Dependencies
+#
+#±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+
+#ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+# Executable                                                               ³
+#ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+$(EXE).exe: ..\landevt.iff ..\llander.iff $(OBJS)
+    $(LINK) $(LINKOPTS) /OUT:$*.exe /subsystem:windows,4 @<<
+    $(OBJS) $(LIBS)
+<<
+
+..\landevt.iff : ..\landevt.hpp
+
+..\landevt.hpp:  ..\landevt.cel
+   $(MYTH95ROOT)\bin\maxc ..\landevt.cel 
+
+..\llander.iff: ..\llander.cif ..\landevt.iff ..\lltitle.iff
+   $(MYTH95ROOT)\bin\iffc -q ..\llander.cif
+
+clean:
+    del *.obj
+    del *.res
+    del *.err
+    del *.lst
+    del *.ilk
+    del *.pdb
+    del *.vcp
+    del *.bak
+    del b.rst
+
+#°±² End of makefile ²±°
+

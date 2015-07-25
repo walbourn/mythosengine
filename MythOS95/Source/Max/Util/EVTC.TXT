@@ -1,0 +1,44 @@
+                            
+           Copyright (c) 1994, 1995 by Charybdis Enterprises, Inc.
+
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
+
+           *** Charybdis Enterprises, Inc. Company Confidential ***
+
+  This file and all associated files are the company proprietary property
+        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+
+ CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
+ TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
+ IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
+ AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
+ INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+
+컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
+
+                   
+                    *** IFF Event Compiler Grammar ***
+
+    This is the compiler for the Max event library's IFF format trigger
+ file.
+
+
+ Note: Assembly style comments  ';' to <end-of-line>
+
+ <event>        := 'event' <id> '{' <trigger> '}'
+ <trigger>      := '[' <constraint> * ']'
+ <constraint>   := <key> | <mouseb> | <mousepos> | <mouserange>
+ <key>          := 'key' <expr>
+ <mouseb>       := 'mouseb' <expr>
+ <mousepos>     := 'mousepos' <expr> <expr>
+ <mouserange>   := 'mouserange' <expr> <expr>
+
+ <expr> maps to a standard arithmetic rule set for +, -, *, / with longs
+
+ <id> maps to a standard C-style identifier.
+
+ The numbers in an <expr> can be character constants with C-style '?'
+ and hex numbers may begin with 0x.
+               
+
+

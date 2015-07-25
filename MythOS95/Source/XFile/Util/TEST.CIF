@@ -1,0 +1,78 @@
+;อออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออ
+;                            
+;           ^           **   **   **** ***** *    ****     ^      Take me to
+;          (_)            * *     *      *   *    *       (_)    / your
+;     ^                    *      **     *   *    **            ^  leader...
+;    (_)       ^          * *     *      *   *    *            (_)
+;             (_)       **   **   *    ***** **** ****
+;
+;            Copyright (c) 1994,1995 by Charybdis Enterprises, Inc.
+;                              All Rights Reserved.
+;
+;ฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤ
+;
+;           *** Charybdis Enterprises, Inc. Company Confidential ***
+;
+;  This file and all associated files are the company proprietary property
+;        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+;
+; CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
+; TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
+; IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
+; AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
+; INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+;
+;ฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤ
+;
+;                            ** IFF Compiler ***
+;
+; Created by Chuck Walbourn
+;
+; test.cif
+;
+;อออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออ
+
+
+form "IFFC"
+{
+   chunk "(C) " {
+       text "Copyright (C) 1994, 1995 by Charybdis Enterprises, Inc.  All Rights Reserved"
+   }
+   chunk "DATA" size 7 {
+       byte    -1
+       word    10+2
+       dword   16-1
+   }
+
+   form "SUBF" { 
+       chunk "AUTH" {
+           text "CLW"
+       }
+       form "DEEP" {
+           chunk "DATA" {
+               byte    { 'd','a','t','a' }
+           }
+       }
+   }
+
+}
+
+form "IFFC" {
+   chunk "AUTH" {
+       text "Chuck Walbourn\n"
+   }
+   chunk "DATA" {
+       ubyte    0xfe
+       uword    0xfdec
+       udword   0xfdecba89
+       text "This is a \0 test\n"
+       text "EOF"
+   }
+}
+
+include ".\testinc.cif"
+
+chunk "endF"
+{
+   text "*EOF*"
+}

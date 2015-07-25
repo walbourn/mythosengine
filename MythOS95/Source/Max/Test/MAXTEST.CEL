@@ -1,0 +1,112 @@
+;อออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออ
+;                  ooo        ooooo                       
+;                  `88.       .888'                       
+;                   888b     d'888   .oooo.   oooo    ooo 
+;                   8 Y88. .P  888  `P  )88b   `88b..8P'  
+;                   8  `888'   888   .oP"888     Y888'    
+;                   8    Y     888  d8(  888   .o8"'88b   
+;                  o8o        o888o `Y888""8o o88'   888o 
+;
+;                          Across the event horizon...
+;
+;            Copyright (c) 1994, 1995 by Charybdis Enterprises, Inc.
+;                           All Rights Reserved.
+;
+;ฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤ
+;
+;           *** Charybdis Enterprises, Inc. Company Confidential ***
+;
+;  This file and all associated files are the company proprietary property
+;        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+;
+; CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
+; TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
+; IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
+; AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
+; INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+;
+;ฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤ
+;
+; maxtest.cel
+;
+;  Event tester event description file.
+;
+;อออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออ
+
+; Max Text events
+
+event left
+{
+    [ key #left ]
+    [ key #grayleft ]
+}
+
+event fire
+{
+    [ joyb 1 ]
+    [ key #space ]
+}
+
+event hello
+{
+    [ key '2' ]
+    [ key '?' ]
+;    [ key 'h' key #lalt ]
+;    [ key 'h' key #ralt ]
+;    [ key #grayenter key #del ]
+}
+
+event right
+{
+    [ key #right ]
+    [ key #grayright ]
+}
+
+event up
+{
+    [ key #up ]
+    [ key #grayup ]
+}
+
+event down
+{
+    [ key #down ]
+    [ key #graydown ]
+}
+
+event mmove
+{
+    [ mouserange 0, 0, 1000, 1000
+      mouseb 1 ]
+}
+
+event done
+{
+    [ key #esc ]
+    [ mouseb 2 key #lshift ]
+}
+
+;event prompt
+;{
+;    [ key 'p' ]
+;}
+
+;event scanprompt
+;{
+;    [ key 's' ]
+;}
+
+event targselect
+{
+    [ joyb 2 ]
+}
+
+event wepselect
+{
+    [ joyb 3 ]
+}
+
+event otherselect
+{
+    [ joyb 4 ]
+}

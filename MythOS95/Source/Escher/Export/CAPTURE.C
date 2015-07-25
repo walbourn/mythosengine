@@ -1,0 +1,751 @@
+//ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
+//ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
+//ùùùùùùùùùù°°°°°°°°°°ù°°°°°°°°ùùù°°°°°°°°ùù°°°ùùùù°°°ù°°°°°°°°°°ù°°°°°°°°°ùù
+//ùùùùùùùùù°±°ùùùùùùù°±°ùùùù°±°ù°±°ùùùù°±°ù°±°ùùùù°±°ù°±°ùùùùùùùù°±°ùùùù°±°ùù
+//ùùùùùùùù±°±ùùùùùùù±°±ùùùùùùùù±°±ùùùùùùùù±°±ùùùù±°±ù±°±ùùùùùùùù±°±ùùùù±°±ùùù
+//ùùùùùùù±²±±°±±²ùù±²±±°±±²±±ù±²±ùùùùùùùù±²±±°±±²±±ù±²±±°±±²ùùù±²±±°±±²°ùùùùù
+//ùùùùùù±²±ùùùùùùùùùùùùùù±²±ù±²±ùùùùùùùù±²±ùùùù±²±ù±²±ùùùùùùùù±²±ùùùù±²±ùùùùù
+//ùùùùù²±²ùùùùùùù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùùùùùù²±²ùùùù²±²ùùùùùù
+//ùùùù²²²²²²²²²²ù²²²²²²²²ùùù²²²²²²²²ùù²²²ùùùù²²²ù²²²²²²²²²²ù²²²ùùùù²²²ùùùùùùù
+//ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
+//ùùùùùùùùùùCopyrightù(c)ù1994,ù1995ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
+//ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
+//ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//
+//           *** Charybdis Enterprises, Inc. Company Confidential ***
+//
+//  This file and all associated files are the company proprietary property
+//        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+//
+// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
+// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
+// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
+// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
+// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+//
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//
+// Created by Tim Little & Chuck Walbourn
+//
+//                       *** IPAS Mesh Data Exporter ***
+//
+// capture.c
+//
+// Contains the code for capturing data from 3D Studio.
+//
+//ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
+
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//
+//                                Includes
+//                                
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+#include <io.h>
+#include <stdlib.h>
+#include <string.h>
+#include <i86.h>
+#include <float.h>
+
+#include "debug.h"
+
+#include "pxp.h"
+
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//
+//                               Structures
+//
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+#define NMAPTYPES   8
+
+#define NTEX1       0
+#define NTEX2       1
+#define NOPAC       2
+#define NBUMP       3
+#define NSPEC       4
+#define NSHIN       5
+#define NSELFI      6
+#define NRELF       7
+
+typedef struct {
+        uchar       type;
+        ushort      texflags;
+        void        *sxp_data;
+        void        *bm;
+        float       texblur;
+        float       uscale, vscale;
+        float       uoffset, voffset;
+        float       ang_sin, ang_cos;
+        Color_24    col1, col2;
+        Color_24    rcol, gcol, bcol;
+} MapParams;
+
+typedef struct {    
+        uchar       ok;
+        uchar       kind;
+        char        name[13];
+        MapParams   tex;
+} MapData;
+
+typedef struct {
+        uchar                       use;
+        union { float f; int pct; } amt;
+        MapData                     map;
+        MapData                     mask;
+} Mapping;
+
+typedef struct mtl
+{
+    char name[17];	/* Material's 16-char name */
+    BXPColor amb;	/* 0-255 triplets */
+    BXPColor diff;	/* 0-255 triplets */
+    BXPColor spec;	/* 0-255 triplets */
+    short transparency;	/* 0-100 */
+    short shading;	/* 0=WIRE 1=FLAT 2=GOURAUD 3=PHONG 4=METAL */
+    unsigned long flags; /* Material flags */
+    unsigned short use;	/* Use flags */
+    short shininess;	/* 0-100 */
+    short shin2pct;	/* 0-100 */
+    short shin3pct;	/* 0-100 - Not Used  */
+    short xpfall;	/* 0-100 */
+    short refblur;	/* 0-100 */
+    short selfipct;	/* 0-100 */
+    float wiresize;	/* size of wire frame */
+        
+    Mapping *map[NMAPTYPES];
+    void *appdata;
+} Mtl;
+
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//
+//                               Routines
+//
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+int inverse_mtx(float *m, float *inv);
+void concat_mtx(float *ina, float *b, float *res);
+
+//±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+//
+//                                 Data
+//
+//±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+
+extern int source_mode;
+extern int coord_mode;
+extern int extent_mode;
+extern int material_mode;
+extern int hierarchy_mode;
+
+extern int cameras_flag;
+extern int lights_flag;
+
+extern int mtl_sizemode;                    // 1=just to power of 2,
+                                            // 2=force to mtl_sizex/y
+extern int mtl_sizex;
+extern int mtl_sizey;
+
+int count_camera=0;
+int count_vectlights=0;
+int count_pointlights=0;
+int count_objects=0;
+
+STATIC int         capture_numb=0;
+STATIC int         capture_cur=0;
+
+STATIC ItemData    *capture_idata=NULL;
+
+STATIC struct MtlCapture
+{
+    MtlData     mtl;
+    Mtl _far    *ptr;
+} *capture_mtl=NULL;
+       
+//±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+//
+//                                 Code
+//
+//±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// capture_setup                                                            ³
+//                                                                          ³
+// This sets up to perform capture operations.  Returns 0 if ok, non-zero   ³
+// for error conditions.                                                    ³
+// 0=ok, 1=no objects to capture, 2=error during capture                    ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+int capture_setup()
+{
+    int         i;
+    int         status;
+    int         count;
+    ItemData    idata;
+
+    kxp_init_keyframer();
+
+//ÄÄ Get object information
+    pxp_get_item_count(count);
+
+    if (!count)
+        return 1;
+
+    count_camera=0;
+    count_vectlights=0;
+    count_pointlights=0;
+    count_objects=0;
+
+//ÄÄ Count numbers of desired tri-mesh objects
+    for(i=0, capture_numb=0; i < count; i++)
+    {
+        pxp_get_item(i,&idata,status);
+        if (!status)
+            return 2;
+        switch (idata.type)
+        {
+            case PXPCAMERA:
+                if (cameras_flag)
+                {
+                    capture_numb++;
+                    count_camera++;
+                }
+                break;
+
+            case PXPAMBIENT:
+                if (lights_flag)
+                {
+                    capture_numb++;
+                }
+                break;
+
+            case PXPLIGHT:
+                if (lights_flag && (idata.item.l.flags & LIGHT_ON))
+                {
+                    capture_numb++;
+                    if (idata.item.l.hotsize != 360.0 || idata.item.l.fallsize != 360.0 )
+                        count_vectlights++;
+                    else
+                        count_pointlights++;
+                }
+                break;
+
+            case PXPMESH:
+                if ((idata.item.m.flags & MESH_HIDDEN)
+                   || (source_mode==2
+                       && !(idata.item.m.flags & MESH_SELECTED)))
+                {
+                    break;
+                }
+                count_objects++;
+                capture_numb++;
+                break;
+        }
+    }
+
+    if (!capture_numb)
+        return 1;
+
+//ÄÄ Get ItemData for valid objects
+    if (capture_idata)
+    {
+        free(capture_idata);
+        capture_idata=NULL;
+    }
+
+    capture_idata = malloc(capture_numb * sizeof(ItemData));
+
+    for(i=0, capture_numb=0; i < count; i++)
+    {
+        pxp_get_item(i,&idata,status);
+        if (status)
+        {
+            switch (idata.type)
+            {
+                case PXPCAMERA:
+                    if (cameras_flag)
+                    {
+                        memcpy(&capture_idata[capture_numb++],&idata,sizeof(ItemData));
+                    }
+                    break;
+               
+                case PXPAMBIENT:
+                    if (lights_flag)
+                    {
+                        memcpy(&capture_idata[capture_numb++],&idata,sizeof(ItemData));
+                    }
+                    break;
+               
+                case PXPLIGHT:
+                    if (lights_flag && (idata.item.l.flags & LIGHT_ON))
+                    {
+                        memcpy(&capture_idata[capture_numb++],&idata,sizeof(ItemData));
+                    }
+                    break;
+
+                case PXPMESH:
+                    if ((idata.item.m.flags & MESH_HIDDEN)
+                        || (source_mode==2
+                           && !(idata.item.m.flags & MESH_SELECTED)))
+                    {
+                        break;
+                    }
+
+                    memcpy(&capture_idata[capture_numb++],&idata,sizeof(ItemData));
+                    break;
+            }
+        }
+    }
+
+    capture_cur=0;
+
+//ÄÄ Get Material data
+    if (capture_mtl)
+    {
+        free(capture_mtl);
+        capture_mtl=NULL;
+    }
+
+    capture_mtl = malloc(256 * sizeof(struct MtlCapture));
+    memset(capture_mtl,0,256 * sizeof(struct MtlCapture));
+
+    pxp_material_count(count);
+
+    for(i=0; i < count; i++)
+    {
+        pxp_get_material(i,&capture_mtl[i].mtl,status);
+        capture_mtl[i].ptr = (Mtl _far *)PC->ptr1;
+    }
+
+    strcpy(capture_mtl[255].mtl.name,"default");
+    capture_mtl[255].mtl.diff.r=128;
+    capture_mtl[255].mtl.diff.g=128;
+    capture_mtl[255].mtl.diff.b=128;
+    capture_mtl[255].mtl.shading=4;
+    
+    return 0;
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// capture_get                                                              ³
+//                                                                          ³
+// Downloads data for the current data object, then increments the data     ³
+// object index.  Returns 0 for ok, non-zero for error.  verts & faces is   ³
+// unaffected for PXPLIGHT, PXPCAMERA, and PXPAMBIENT objects.              ³
+// 0=ok, 1=no more, 2=error during download.                                ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+void set_to_NaN(float *a)
+{
+    *a = FLT_MAX;
+}
+
+int is_NaN(float a)
+{
+    return ((a == FLT_MAX) ? 1 : 0);
+}
+
+int capture_get(ItemData **item, XVData **verts, XFData **faces)
+{
+    int     status;
+    int     nverts;
+    int     nfaces;
+
+    *verts = 0;
+    *faces = 0;
+
+    if (capture_cur >= capture_numb)
+        return 1;
+
+    *item = &capture_idata[capture_cur++];
+
+    if ((*item)->type != PXPMESH)
+        return 0;
+
+    nverts = (*item)->item.m.verts;
+    nfaces = (*item)->item.m.faces;
+
+    *verts = malloc(nverts * sizeof(XVData));
+    if (!*verts)
+        goto error_exit;
+
+    *faces = malloc(nfaces * sizeof(XFData));
+    if (!*faces)
+        goto error_exit;
+
+    pxp_get_verts((*item)->name, 0, nverts, *verts, status);
+    
+    if (!status)
+        goto error_exit;
+    
+    pxp_get_faces((*item)->name, 0, nfaces, *faces, status);
+    
+    if (!status)
+        goto error_exit;
+
+    return 0;
+
+error_exit :;
+    if (*verts)
+    {
+        free (*verts);
+        *verts=0;
+    }
+    if (*faces)
+    {
+        free (*faces);
+        *faces=0;
+    }
+
+    return 2;
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// capture_gethier                                                          ³
+//                                                                          ³
+// Returns information on parent of object in hiearchy, if any.             ³
+// If desired, the orientation matrix for the object, relative to the       ³
+// hierarchy, may be returned in 'm'.                                       ³
+// 0 if no parent.                                                          ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+int capture_gethier(ItemData *idata, char *name, float *m)
+{
+    int     i, t;
+    float   pm[4][3];
+    float   mtx[4][3];
+
+//ÄÄÄ Get node ID for object
+    kxp_get_node_number(idata->name,i,t);
+
+    if (t != OBJECT_NODE)
+        return 0;
+
+    memcpy(mtx,idata->item.m.matrix,12*sizeof(float));
+    mtx[0][0] = 1.0;                    // Already captured in get_verts, but
+    mtx[0][1] = 0.0;                    // Needs to be I for computation to
+    mtx[0][2] = 0.0;                    // work below
+    mtx[1][0] = 0.0;
+    mtx[1][1] = 1.0;
+    mtx[1][2] = 0.0;
+    mtx[2][0] = 0.0;
+    mtx[2][1] = 0.0;
+    mtx[2][2] = 1.0;
+
+//ÄÄÄ Get node ID for parent of object
+    kxp_get_parent(i,t);
+   
+    if (t <= -1)
+    {
+        if (m)
+        {
+            memcpy(m,mtx,sizeof(float)*12);
+        }
+        return 0;
+    }
+
+    kxp_get_node_name(t,name,t);
+
+    if (t != OBJECT_NODE)
+    {
+        if (m)
+        {
+            memcpy(m,mtx,sizeof(float)*12);
+        }
+        return 0;
+    }
+
+//ÄÄÄ Get parent matrix
+    for(i=0; i < capture_numb; i++)
+    {
+        if (capture_idata[i].type == PXPMESH
+            && !strcmp(name,capture_idata[i].name))
+        {
+            memcpy(pm,capture_idata[i].item.m.matrix,12*sizeof(float));
+            pm[0][0] = 1.0;                 // Already captured in get_verts, but
+            pm[0][1] = 0.0;                 // Needs to be I for computation to
+            pm[0][2] = 0.0;                 // work below
+            pm[1][0] = 0.0;                 
+            pm[1][1] = 1.0;
+            pm[1][2] = 0.0;
+            pm[2][0] = 0.0;
+            pm[2][1] = 0.0;
+            pm[2][2] = 1.0;
+            break;
+        }
+    }
+    if (i >= capture_numb)
+    {
+        if (m)
+        {
+            memcpy(m,mtx,sizeof(float)*12);
+        }
+        return 0;
+    }
+
+//ÄÄÄ Need to compute relative transform from objects' and parent's
+//ÄÄÄ xform, if requested
+    if (m)
+    {
+        // O(R->P) = O(R->W) * Pi(W->P)
+        
+        inverse_mtx(pm,pm);
+        concat_mtx(mtx,pm,m);
+    }
+    
+    return 1;
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// capture_mtlget                                                           ³
+//                                                                          ³
+// Returns information on materials captureb before.                        ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+MtlData *capture_mtlget(int ind)
+{
+    if (!capture_mtl || ind < 0 || ind > 255)
+        return NULL;
+
+    return &capture_mtl[ind].mtl;
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// capture_mtlfile                                                          ³
+//                                                                          ³
+// Returns the texture1 name, if any, associated with the material.         ³
+// The opacity name is also returned if set.                                ³
+// The int result is 0 if no map exists, 1 if ok, greater if has unknown    ³
+// maps.                                                                    ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+int capture_mtlfile(int ind, char *fname, char *tfname)
+{
+    int             i;
+    int             ret=0;
+    Mapping _far    *map;
+
+    if (!capture_mtl || ind < 0 || ind > 255)
+        return 0;
+
+    if (fname)
+        *fname=0;
+    if (tfname)
+        *tfname=0;
+
+//ÄÄ Use material's backdoor...
+    if (capture_mtl[ind].ptr)
+    {
+        //ÄÄ See if there is a Texture1 defined and set it.
+        if (capture_mtl[ind].ptr->map[NTEX1])
+        {
+            map = MK_FP( FP_SEG(capture_mtl[ind].ptr), capture_mtl[ind].ptr->map[NTEX1]);
+            if (map && map->use)
+            {
+                ret=1;
+                if (fname)
+                {
+                    fnstrcpy(fname,map->map.name);
+                    strupr(fname);
+                }
+            }
+        }
+
+        //ÄÄ See if there is a Opacity defined and set it.
+        if (tfname && capture_mtl[ind].ptr->map[NOPAC])
+        {
+            map = MK_FP( FP_SEG(capture_mtl[ind].ptr), capture_mtl[ind].ptr->map[NOPAC]);
+            if (map && map->use)
+            {
+                if (tfname)
+                {
+                    fnstrcpy(tfname,map->map.name);
+                    strupr(tfname);
+                }
+            }
+        }
+
+        //ÄÄ Check to see if other maps are in use for material.
+        for(i=0; i < NMAPTYPES; i++)
+        {
+            if (i == NTEX1 || i == NOPAC)
+                    continue;
+
+            if (capture_mtl[ind].ptr->map[i])
+            {
+                map = MK_FP( FP_SEG(capture_mtl[ind].ptr), capture_mtl[ind].ptr->map[i]);
+
+                if (map && map->use)
+                {
+                    ret=2;
+                    break;
+                }
+            }
+        }
+    }
+
+    return ret;
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// capture_mtlbitmap                                                        ³
+//                                                                          ³
+// Attempts to locate and load the map bitmap file given.                   ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+BXPColor *capture_mtlbitmap(char *fname, ushort *xs, ushort *ys, ushort *nf,
+                            int forcesize)
+{
+    int         i;
+    int         desirex;
+    int         desirey;
+    BXPColor    *bm;
+    BXPColor    *tbm;
+    BitmapInfo  binfo;
+    char        path[128];
+    char        fullname[128];
+
+    // Search image path
+    gfx_get_paths(GFX_IMG_PATH,0,path,fullname);
+    strcpy(fullname,path);
+    strcat(fullname,"\\");
+    strcat(fullname,fname);
+
+    if (access(fullname,0) == 0)
+        goto found;
+
+    // Search map paths
+    for(i=0; i < 250; i++)
+    {
+        gfx_get_paths(GFX_MAP_PATH,i,path,fullname);
+        if (!*path)
+            return NULL;
+
+        strcpy(fullname,path);
+        strcat(fullname,"\\");
+        strcat(fullname,fname);
+
+        if (access(fullname,0) == 0)
+            goto found;
+    }
+
+    return NULL;
+
+    // Load image
+found: ;
+    gfx_bitmap_info(fullname,&binfo, i);
+
+    if (i != 1)
+        return NULL;
+
+    if ((bm=malloc(binfo.width * binfo.height * sizeof(BXPColor)))==0)
+        return NULL;
+
+    gfx_load_bitmap(fullname, binfo.width, binfo.height, bm, i);
+
+    if (i < 1)
+    {
+        free(bm);
+        return NULL;
+    }
+
+    // Resize, if needed
+
+    if (forcesize)
+    {
+        desirex = *xs;
+        desirey = *ys;
+    }
+    else if (mtl_sizemode == 2)
+    {
+        desirex = mtl_sizex;
+        desirey = mtl_sizey;
+    }
+    else
+    {
+
+        // Must set size to 16, 32, 64, 128, or 256
+        desirex=16;
+        desirey=16;
+
+        if (binfo.width > desirex)
+            desirex=32;
+        if (binfo.height > desirey)
+            desirey=32;
+
+        if (binfo.width > desirex)
+            desirex=64;
+        if (binfo.height > desirey)
+            desirey=64;
+
+        if (binfo.width > desirex)
+            desirex=128;
+        if (binfo.height > desirey)
+            desirey=128;
+
+        if (binfo.width > desirex)
+            desirex=256;
+        if (binfo.height > desirey)
+            desirey=256;
+    }
+    
+    if (desirex != binfo.width
+        || desirey != binfo.height)
+    {
+        tbm = bm;
+
+        if ((bm = malloc(desirex * desirey * sizeof(BXPColor)))==0)
+        {
+            free(tbm);
+            return 0;
+        }
+        
+        gfx_resize_bitmap(tbm, binfo.width, binfo.height,
+                          bm, desirex, desirey, i);
+
+        free(tbm);
+        
+        if (i < 1)
+        {
+            free(bm);
+            return 0;
+        }
+    }
+
+    // Return final image
+    *xs = desirex;
+    *ys = desirey;
+
+    if (nf)
+    {
+        *nf = 1;
+    }
+
+    return bm;
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// capture_terminate                                                        ³
+//                                                                          ³
+// Terminates capture process by freeing any allocated memory.              ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+void capture_terminate()
+{
+    if (capture_idata)
+    {
+        free(capture_idata);
+        capture_idata=NULL;
+    }
+
+    if (capture_mtl)
+    {
+        free(capture_mtl);
+        capture_mtl=NULL;
+    }
+    
+    capture_numb=0;
+}
+
+//°±² End of module - capture.c ²±°
+

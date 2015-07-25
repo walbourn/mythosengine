@@ -1,0 +1,705 @@
+//Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#include ""res\\eshtedit.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
+    "\r\n"
+    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "#include ""afxres.rc""  \011// Standard components\r\n"
+    "\0"
+END
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+IDR_MAINFRAME           ICON    DISCARDABLE     "res\\eshtedit.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDR_MAINFRAME           BITMAP  MOVEABLE PURE   "res\\toolbar.bmp"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_MAINFRAME MENU PRELOAD DISCARDABLE 
+BEGIN
+    POPUP "&File"
+    BEGIN
+        MENUITEM "&New\tCtrl+N",                ID_FILE_NEW
+        MENUITEM "&Open...\tCtrl+O",            ID_FILE_OPEN
+        MENUITEM "&Save\tCtrl+S",               ID_FILE_SAVE
+        MENUITEM "Save &As...\tF12",            ID_FILE_SAVE_AS
+        MENUITEM SEPARATOR
+        MENUITEM "&Export...\tShift+E",         ID_FILE_EXPORT
+        MENUITEM SEPARATOR
+        MENUITEM "Recent File",                 ID_FILE_MRU_FILE1, GRAYED
+        MENUITEM SEPARATOR
+        MENUITEM "E&xit\tAlt+X",                ID_APP_EXIT
+    END
+    POPUP "&View"
+    BEGIN
+        MENUITEM "&Toolbar",                    ID_VIEW_TOOLBAR
+        MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
+        MENUITEM "R&ender View",                ID_VIEW_RENDER
+        MENUITEM SEPARATOR
+        POPUP "Z&oom"
+        BEGIN
+            MENUITEM "&Normal Size\t1",             ID_VIEW_ZOOM_NORM
+            MENUITEM "&Medium Size\t2",             ID_VIEW_ZOOM_MED
+            MENUITEM "&Large Size\t3",              ID_VIEW_ZOOM_LARGE
+            MENUITEM "E&xtra Large Size\t4",        ID_VIEW_ZOOM_XLARGE
+            MENUITEM "M&ega Size\t5",               ID_VIEW_ZOOM_MEGA
+        END
+        MENUITEM "Re&fresh",                    ID_VIEW_REFRESH
+        MENUITEM SEPARATOR
+        POPUP "Re&nder"
+        BEGIN
+            MENUITEM "&Dots\tD",                    ID_VIEW_RND_DOTS
+            MENUITEM "&Wireframe\tF4",              ID_VIEW_RND_WIREFRAME
+            MENUITEM "&Solid\tF5",                  ID_VIEW_RND_SOLID
+            MENUITEM "&Flat\tF6",                   ID_VIEW_RND_FLAT
+            MENUITEM "S&mooth\tF7",                 ID_VIEW_RND_SMOOTH
+            MENUITEM "S&pecular\tF8",               ID_VIEW_RND_SPECULAR
+            MENUITEM SEPARATOR
+            MENUITEM "&Backface\tF3",               ID_VIEW_RND_BACKFACE
+            MENUITEM "&Textures\tF9",               ID_VIEW_RND_TEXTURES
+            MENUITEM "Perspecti&ve\tF10",           ID_VIEW_RND_PERSPECTIVE
+        END
+        MENUITEM SEPARATOR
+        MENUITEM "&Rotate X/Y\tQ",              ID_VIEW_ROTXY
+        MENUITEM "&Move X/Y\tA",                ID_VIEW_MOVEXY
+        MENUITEM "Rotate &Z/Move Z\tZ",         ID_VIEW_ROTMOVEZ
+        MENUITEM SEPARATOR
+        MENUITEM "Properties...\tCtrl+Enter",   ID_VIEW_PROP
+    END
+    POPUP "&Terrain"
+    BEGIN
+        MENUITEM "&Import...\tShift+T",         ID_TERR_IMPORT
+        MENUITEM SEPARATOR
+        MENUITEM "&Properties...\tAlt+Enter",   ID_TERR_PROP
+    END
+    POPUP "&Surface"
+    BEGIN
+        MENUITEM "&Import...\tShift+S",         ID_SURF_IMPORT
+        MENUITEM SEPARATOR
+        MENUITEM "De&fine Texture...\tKeypad +", ID_SURF_DEFINETXT
+        MENUITEM "&Edit Texture...\tKeypad /",  ID_SURF_EDITTXT
+        MENUITEM "&Delete Texture\tKeypad -",   ID_SURF_DELETETXT
+        MENUITEM SEPARATOR
+        MENUITEM "&Palette...\tShift+P",        ID_SURF_PALETTE
+    END
+    POPUP "&Lighting"
+    BEGIN
+        MENUITEM "&Adjust X/Y\tE",              ID_LGT_ADJUSTXY
+        MENUITEM "Adjust &Intensity\tI",        ID_LGT_ABRIGHT
+    END
+    POPUP "&Help"
+    BEGIN
+        MENUITEM "&About Terrain Editor...\t?", ID_APP_ABOUT
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Accelerator
+//
+
+IDR_MAINFRAME ACCELERATORS PRELOAD MOVEABLE PURE 
+BEGIN
+    "1",            ID_VIEW_ZOOM_NORM,      VIRTKEY, NOINVERT
+    "2",            ID_VIEW_ZOOM_MED,       VIRTKEY, NOINVERT
+    "3",            ID_VIEW_ZOOM_LARGE,     VIRTKEY, NOINVERT
+    "4",            ID_VIEW_ZOOM_XLARGE,    VIRTKEY, NOINVERT
+    "5",            ID_VIEW_ZOOM_MEGA,      VIRTKEY, NOINVERT
+    "?",            ID_APP_ABOUT,           ASCII,  NOINVERT
+    "A",            ID_VIEW_MOVEXY,         VIRTKEY, NOINVERT
+    "C",            ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
+    "D",            ID_VIEW_RND_DOTS,       VIRTKEY, NOINVERT
+    "E",            ID_LGT_ADJUSTXY,        VIRTKEY, NOINVERT
+    "E",            ID_FILE_EXPORT,         VIRTKEY, SHIFT, NOINVERT
+    "I",            ID_LGT_ABRIGHT,         VIRTKEY, NOINVERT
+    "N",            ID_FILE_NEW,            VIRTKEY, CONTROL, NOINVERT
+    "O",            ID_FILE_OPEN,           VIRTKEY, CONTROL, NOINVERT
+    "P",            ID_SURF_PALETTE,        VIRTKEY, SHIFT, NOINVERT
+    "Q",            ID_VIEW_ROTXY,          VIRTKEY, NOINVERT
+    "S",            ID_FILE_SAVE,           VIRTKEY, CONTROL, NOINVERT
+    "S",            ID_SURF_IMPORT,         VIRTKEY, SHIFT, NOINVERT
+    "T",            ID_TERR_IMPORT,         VIRTKEY, SHIFT, NOINVERT
+    "V",            ID_EDIT_PASTE,          VIRTKEY, CONTROL, NOINVERT
+    VK_ADD,         ID_SURF_DEFINETXT,      VIRTKEY, NOINVERT
+    VK_BACK,        ID_EDIT_UNDO,           VIRTKEY, ALT, NOINVERT
+    VK_DELETE,      ID_EDIT_CUT,            VIRTKEY, SHIFT, NOINVERT
+    VK_DIVIDE,      ID_SURF_EDITTXT,        VIRTKEY, NOINVERT
+    VK_F10,         ID_VIEW_RND_PERSPECTIVE, VIRTKEY, NOINVERT
+    VK_F12,         ID_FILE_SAVE_AS,        VIRTKEY, NOINVERT
+    VK_F3,          ID_VIEW_RND_BACKFACE,   VIRTKEY, NOINVERT
+    VK_F4,          ID_VIEW_RND_WIREFRAME,  VIRTKEY, NOINVERT
+    VK_F5,          ID_VIEW_RND_SOLID,      VIRTKEY, NOINVERT
+    VK_F6,          ID_VIEW_RND_FLAT,       VIRTKEY, NOINVERT
+    VK_F7,          ID_VIEW_RND_SMOOTH,     VIRTKEY, NOINVERT
+    VK_F8,          ID_VIEW_RND_SPECULAR,   VIRTKEY, NOINVERT
+    VK_F9,          ID_VIEW_RND_TEXTURES,   VIRTKEY, NOINVERT
+    VK_INSERT,      ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
+    VK_INSERT,      ID_EDIT_PASTE,          VIRTKEY, SHIFT, NOINVERT
+    VK_RETURN,      ID_VIEW_PROP,           VIRTKEY, CONTROL, NOINVERT
+    VK_RETURN,      ID_TERR_PROP,           VIRTKEY, ALT, NOINVERT
+    VK_SUBTRACT,    ID_SURF_DELETETXT,      VIRTKEY, NOINVERT
+    "X",            ID_EDIT_CUT,            VIRTKEY, CONTROL, NOINVERT
+    "X",            ID_APP_EXIT,            VIRTKEY, ALT, NOINVERT
+    "Z",            ID_VIEW_ROTMOVEZ,       VIRTKEY, NOINVERT
+    "Z",            ID_EDIT_UNDO,           VIRTKEY, CONTROL, NOINVERT
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_ABOUTBOX DIALOG DISCARDABLE  34, 22, 269, 138
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "About Terrain Editor"
+FONT 8, "MS Sans Serif"
+BEGIN
+    ICON            IDR_MAINFRAME,IDC_STATIC,11,17,19,20
+    CONTROL         "Escher Terrain Editor",IDC_STATIC,"Static",SS_SIMPLE | 
+                    WS_GROUP,55,30,119,8
+    CONTROL         "Copyright \251 1995 by Charybdis Enterprises, Inc.",
+                    IDC_STATIC,"Static",SS_SIMPLE | WS_GROUP,55,60,181,8
+    DEFPUSHBUTTON   "OK",IDOK,219,11,32,14,WS_GROUP
+    CONTROL         "Version X.X\tMon DD YYYY",IDC_ABOUT_VERSION,"Static",
+                    SS_SIMPLE | WS_GROUP,55,45,111,8
+    CTEXT           "Escher is a component of the MythOS collection",
+                    IDC_STATIC,50,100,185,11
+    CTEXT           "MythOS is a trademark of Charybdis Enterprises, Inc.",
+                    IDC_STATIC,55,115,175,14
+END
+
+IDD_TERRPROPA DIALOG DISCARDABLE  0, 0, 270, 128
+STYLE WS_CHILD | WS_VISIBLE | WS_DISABLED | WS_CAPTION
+CAPTION "General"
+FONT 8, "MS Sans Serif"
+BEGIN
+    RTEXT           "Name",IDC_STATIC,50,10,44,8
+    EDITTEXT        IDC_TPROP_NAME,100,10,82,12,ES_AUTOHSCROLL
+    RTEXT           "Width",IDC_STATIC,20,52,29,8
+    EDITTEXT        IDC_TPROP_WIDTH,53,50,32,12,ES_AUTOHSCROLL
+    RTEXT           "Depth",IDC_STATIC,104,52,29,8
+    EDITTEXT        IDC_TPROP_DEPTH,137,50,32,12,ES_AUTOHSCROLL
+    RTEXT           "Surface Ratio",IDC_STATIC,179,52,44,8
+    COMBOBOX        IDC_TPROP_SURFRATIO,230,50,32,35,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    RTEXT           "Width Scale",IDC_STATIC,5,92,44,8
+    EDITTEXT        IDC_TPROP_WSCALE,53,90,32,12,ES_AUTOHSCROLL
+    RTEXT           "Depth Scale",IDC_STATIC,90,93,44,8
+    EDITTEXT        IDC_TPROP_DSCALE,138,90,32,12,ES_AUTOHSCROLL
+    RTEXT           "Height Scale",IDC_STATIC,180,92,44,8
+    EDITTEXT        IDC_TPROP_HSCALE,228,90,32,12,ES_AUTOHSCROLL
+END
+
+IDD_TERRPROPB DIALOG DISCARDABLE  0, 0, 268, 126
+STYLE WS_CHILD | WS_VISIBLE | WS_DISABLED | WS_CAPTION
+CAPTION "Misc"
+FONT 8, "MS Sans Serif"
+BEGIN
+    RTEXT           "Description",IDC_STATIC,10,25,44,8
+    EDITTEXT        IDC_TPROP_DESC,60,25,192,12,ES_AUTOHSCROLL
+    RTEXT           "Author",IDC_STATIC,10,50,44,8
+    EDITTEXT        IDC_TPROP_AUTH,60,50,192,12,ES_AUTOHSCROLL
+    RTEXT           "Copyright",IDC_STATIC,10,75,44,8
+    EDITTEXT        IDC_TPROP_COPY,60,75,192,12,ES_AUTOHSCROLL
+END
+
+IDD_COMPNRML DIALOG DISCARDABLE  0, 0, 188, 29
+STYLE WS_POPUP | WS_CAPTION
+CAPTION "Computing Normals"
+FONT 8, "MS Sans Serif"
+BEGIN
+    CONTROL         "Generic1",IDC_CNRML_PROG,"msctls_progress32",WS_BORDER,
+                    15,5,160,15
+END
+
+IDD_COMPSCLRS DIALOG DISCARDABLE  0, 0, 188, 31
+STYLE WS_POPUP | WS_CAPTION
+CAPTION "Computing surface colors"
+FONT 8, "MS Sans Serif"
+BEGIN
+    CONTROL         "Generic1",IDC_CSURF_PROG,"msctls_progress32",WS_BORDER,
+                    15,5,160,15
+END
+
+IDD_EXPORTSTAT DIALOG DISCARDABLE  0, 0, 232, 146
+STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION "Export Status"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,91,126,50,14
+    LTEXT           "Header information",IDC_EST_HDR,25,40,190,10,
+                    WS_DISABLED
+    LTEXT           "Height field terrain data",IDC_EST_HGTS,25,57,190,10,
+                    WS_DISABLED
+    LTEXT           "Surface information",IDC_EST_SURF,25,74,190,10,
+                    WS_DISABLED
+    LTEXT           "Surface normals",IDC_EST_NRML,25,91,190,10,WS_DISABLED
+    LTEXT           "Texture bitmaps",IDC_EST_TXTS,25,108,190,10,WS_DISABLED
+    CTEXT           "Export process complete",IDC_STATIC,10,5,210,10
+    CTEXT           "The following data chunks have been output:",IDC_STATIC,
+                    10,20,210,10
+END
+
+IDD_SURFPROP DIALOG DISCARDABLE  0, 0, 287, 126
+STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION "Surface Information Properities"
+FONT 8, "MS Sans Serif"
+BEGIN
+    RTEXT           "Surface Grid Location:",IDC_STATIC,60,10,75,10
+    EDITTEXT        IDC_SPROP_XLOC,140,10,25,12,ES_AUTOHSCROLL | WS_DISABLED
+    LTEXT           "by",IDC_STATIC,170,10,10,10
+    EDITTEXT        IDC_SPROP_DLOC,185,10,25,12,ES_AUTOHSCROLL | WS_DISABLED
+    CONTROL         "Control bit 1",IDC_SPROP_CBIT1,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,25,35,55,10
+    CONTROL         "Control bit 2",IDC_SPROP_CBIT2,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,25,50,55,10
+    CONTROL         "Index is texture",IDC_SPROP_CBIT3,"Button",
+                    BS_AUTOCHECKBOX | WS_DISABLED | WS_TABSTOP,25,65,60,10
+    CONTROL         "Control bit 4",IDC_SPROP_CBIT4,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,25,80,55,10
+    RTEXT           "Water Bits:",IDC_STATIC,101,35,45,10
+    COMBOBOX        IDC_SPROP_WATER,151,35,35,35,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    RTEXT           "Fire Bits:",IDC_STATIC,101,55,45,10
+    COMBOBOX        IDC_SPROP_FIRE,151,55,35,35,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    RTEXT           "Smoke Bits:",IDC_STATIC,101,75,45,10
+    COMBOBOX        IDC_SPROP_SMOKE,151,75,35,35,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    CTEXT           "Texture",IDC_STATIC,200,40,80,8
+    COMBOBOX        IDC_SPROP_TXT,200,50,80,40,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    PUSHBUTTON      "&Color...",IDC_SPROP_COLR,215,80,50,15
+    DEFPUSHBUTTON   "OK",IDOK,85,106,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,151,106,50,14
+END
+
+IDD_CAMPROP DIALOG DISCARDABLE  0, 0, 257, 101
+STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION "Camera Properties"
+FONT 8, "MS Sans Serif"
+BEGIN
+    RTEXT           "Position:  X ",IDC_STATIC,5,5,45,10
+    EDITTEXT        IDC_CPROP_XPOS,55,5,50,12,ES_AUTOHSCROLL
+    LTEXT           "Y",IDC_STATIC,115,5,8,10
+    EDITTEXT        IDC_CPROP_YPOS,125,5,50,12,ES_AUTOHSCROLL
+    LTEXT           "Z",IDC_STATIC,185,5,8,10
+    EDITTEXT        IDC_CPROP_ZPOS,195,5,50,12,ES_AUTOHSCROLL
+    RTEXT           "Hither Plane:",IDC_STATIC,15,30,45,10
+    EDITTEXT        IDC_CPROP_HITHER,65,30,50,12,ES_AUTOHSCROLL
+    RTEXT           "Yon Plane:",IDC_STATIC,120,30,45,10
+    EDITTEXT        IDC_CPROP_YON,170,30,50,12,ES_AUTOHSCROLL
+    RTEXT           "Field-of-view:",IDC_STATIC,15,55,45,10
+    EDITTEXT        IDC_CPROP_FOV,65,55,50,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "&Background Color...",IDC_CPROP_COLR,155,55,80,15
+    DEFPUSHBUTTON   "OK",IDOK,70,81,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,136,81,50,14
+END
+
+IDD_TEXTUREPROP DIALOG DISCARDABLE  0, 0, 322, 90
+STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION "Texture Properties"
+FONT 8, "MS Sans Serif"
+BEGIN
+    RTEXT           "Name:",IDC_STATIC,15,5,20,10
+    EDITTEXT        IDC_TXPRP_NAME,40,5,70,12,ES_AUTOHSCROLL
+    RTEXT           "File:",IDC_STATIC,20,25,15,10
+    EDITTEXT        IDC_TXTPRP_FILE,40,25,210,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "&Browse...",IDC_TXTPRP_BROWSE,265,25,50,15
+    PUSHBUTTON      "&Color...",IDC_TXTPRP_COLR,40,45,50,15
+    DEFPUSHBUTTON   "OK",IDOK,103,70,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,169,70,50,14
+END
+
+IDD_SCANSURF DIALOG DISCARDABLE  0, 0, 188, 31
+STYLE WS_POPUP | WS_CAPTION
+CAPTION "Scanning surface information"
+FONT 8, "MS Sans Serif"
+BEGIN
+    CONTROL         "Generic1",IDC_SSCAN_PROG,"msctls_progress32",WS_BORDER,
+                    15,5,160,15
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,0,0,1
+ PRODUCTVERSION 1,0,0,1
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904b0"
+        BEGIN
+            VALUE "Comments", "by Chuck Walbourn\0"
+            VALUE "CompanyName", "Charybdis Enterprises, Inc.\0"
+            VALUE "FileDescription", "Escher Terrain Editor MFC Application\0"
+            VALUE "FileVersion", "1, 0, 0, 1\0"
+            VALUE "InternalName", "Terrain Edit\0"
+            VALUE "LegalCopyright", "Copyright \251 1995\0"
+            VALUE "LegalTrademarks", "MythOS is a trademark of Charybdis Enterprises, Inc.\0"
+            VALUE "OriginalFilename", "ESHTEDIT.EXE\0"
+            VALUE "ProductName", "Escher Terrain Editor\0"
+            VALUE "ProductVersion", "1, 0, 0, 1\0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END
+
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog Info
+//
+
+IDD_TERRPROPA DLGINIT
+BEGIN
+    1010, 0x403, 4, 0
+0x3a31, 0x0031, 
+    1010, 0x403, 4, 0
+0x3a32, 0x0031, 
+    1010, 0x403, 4, 0
+0x3a34, 0x0031, 
+    1010, 0x403, 4, 0
+0x3a38, 0x0031, 
+    1010, 0x403, 5, 0
+0x3631, 0x313a, "\000" 
+    0
+END
+
+IDD_SURFPROP DLGINIT
+BEGIN
+    1021, 0x403, 2, 0
+0x0030, 
+    1021, 0x403, 2, 0
+0x0031, 
+    1021, 0x403, 2, 0
+0x0032, 
+    1021, 0x403, 2, 0
+0x0033, 
+    1021, 0x403, 2, 0
+0x0034, 
+    1021, 0x403, 2, 0
+0x0035, 
+    1021, 0x403, 2, 0
+0x0036, 
+    1021, 0x403, 2, 0
+0x0037, 
+    1021, 0x403, 2, 0
+0x0038, 
+    1021, 0x403, 2, 0
+0x0039, 
+    1021, 0x403, 2, 0
+0x0041, 
+    1021, 0x403, 2, 0
+0x0042, 
+    1021, 0x403, 2, 0
+0x0043, 
+    1021, 0x403, 2, 0
+0x0044, 
+    1021, 0x403, 2, 0
+0x0045, 
+    1021, 0x403, 2, 0
+0x0046, 
+    1025, 0x403, 2, 0
+0x0030, 
+    1025, 0x403, 2, 0
+0x0031, 
+    1025, 0x403, 2, 0
+0x0032, 
+    1025, 0x403, 2, 0
+0x0033, 
+    1025, 0x403, 2, 0
+0x0034, 
+    1025, 0x403, 2, 0
+0x0035, 
+    1025, 0x403, 2, 0
+0x0036, 
+    1025, 0x403, 2, 0
+0x0037, 
+    1025, 0x403, 2, 0
+0x0038, 
+    1025, 0x403, 2, 0
+0x0039, 
+    1025, 0x403, 2, 0
+0x0041, 
+    1025, 0x403, 2, 0
+0x0042, 
+    1025, 0x403, 2, 0
+0x0043, 
+    1025, 0x403, 2, 0
+0x0044, 
+    1025, 0x403, 2, 0
+0x0045, 
+    1025, 0x403, 2, 0
+0x0046, 
+    1026, 0x403, 2, 0
+0x0030, 
+    1026, 0x403, 2, 0
+0x0031, 
+    1026, 0x403, 2, 0
+0x0032, 
+    1026, 0x403, 2, 0
+0x0033, 
+    1026, 0x403, 2, 0
+0x0034, 
+    1026, 0x403, 2, 0
+0x0035, 
+    1026, 0x403, 2, 0
+0x0036, 
+    1026, 0x403, 2, 0
+0x0037, 
+    1026, 0x403, 2, 0
+0x0038, 
+    1026, 0x403, 2, 0
+0x0039, 
+    1026, 0x403, 2, 0
+0x0041, 
+    1026, 0x403, 2, 0
+0x0042, 
+    1026, 0x403, 2, 0
+0x0043, 
+    1026, 0x403, 2, 0
+0x0044, 
+    1026, 0x403, 2, 0
+0x0045, 
+    1026, 0x403, 2, 0
+0x0046, 
+    0
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE PRELOAD DISCARDABLE 
+BEGIN
+    IDR_MAINFRAME           "Escher Terrain Editor\n\nEshted\nEscher Terrain Source Files (*.cst)\n.CST\nEshtedit.Document\nEshted Document"
+END
+
+STRINGTABLE PRELOAD DISCARDABLE 
+BEGIN
+    AFX_IDS_APP_TITLE       "Escher Terrain Editor"
+    AFX_IDS_IDLEMESSAGE     "Ready"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_INDICATOR_EXT        "EXT"
+    ID_INDICATOR_CAPS       "CAP"
+    ID_INDICATOR_NUM        "NUM"
+    ID_INDICATOR_SCRL       "SCRL"
+    ID_INDICATOR_OVR        "OVR"
+    ID_INDICATOR_REC        "REC"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_FILE_NEW             "Create a new terrain data set\nNew"
+    ID_FILE_OPEN            "Open an existing terrain data set\nOpen"
+    ID_FILE_CLOSE           "Close the active document\nClose"
+    ID_FILE_SAVE            "Save the active terrain data set\nSave"
+    ID_FILE_SAVE_AS         "Save the active terrain data set with a new name\nSave As"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_APP_ABOUT            "Display program information, version number and copyright\nAbout"
+    ID_APP_EXIT             "Quit the application; prompts to save documents\nExit"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_FILE_MRU_FILE1       "Open this document"
+    ID_FILE_MRU_FILE2       "Open this document"
+    ID_FILE_MRU_FILE3       "Open this document"
+    ID_FILE_MRU_FILE4       "Open this document"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_NEXT_PANE            "Switch to the next window pane\nNext Pane"
+    ID_PREV_PANE            "Switch back to the previous window pane\nPrevious Pane"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_WINDOW_SPLIT         "Split the active window into panes\nSplit"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_EDIT_CLEAR           "Erase the selection\nErase"
+    ID_EDIT_CLEAR_ALL       "Erase everything\nErase All"
+    ID_EDIT_COPY            "Copy the selection and put it on the Clipboard\nCopy"
+    ID_EDIT_CUT             "Cut the selection and put it on the Clipboard\nCut"
+    ID_EDIT_FIND            "Find the specified text\nFind"
+    ID_EDIT_PASTE           "Insert Clipboard contents\nPaste"
+    ID_EDIT_REPEAT          "Repeat the last action\nRepeat"
+    ID_EDIT_REPLACE         "Replace specific text with different text\nReplace"
+    ID_EDIT_SELECT_ALL      "Select the entire document\nSelect All"
+    ID_EDIT_UNDO            "Undo the last action\nUndo"
+    ID_EDIT_REDO            "Redo the previously undone action\nRedo"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_VIEW_TOOLBAR         "Show or hide the toolbar\nToggle ToolBar"
+    ID_VIEW_STATUS_BAR      "Show or hide the status bar\nToggle StatusBar"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    AFX_IDS_SCSIZE          "Change the window size"
+    AFX_IDS_SCMOVE          "Change the window position"
+    AFX_IDS_SCMINIMIZE      "Reduce the window to an icon"
+    AFX_IDS_SCMAXIMIZE      "Enlarge the window to full size"
+    AFX_IDS_SCNEXTWINDOW    "Switch to the next document window"
+    AFX_IDS_SCPREVWINDOW    "Switch to the previous document window"
+    AFX_IDS_SCCLOSE         "Close the active window and prompts to save the documents"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    AFX_IDS_SCRESTORE       "Restore the window to normal size"
+    AFX_IDS_SCTASKLIST      "Activate Task List"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_FILE_EXPORT          "Export current terrain data set to an Escher IFF file\nExport"
+    ID_VIEW_ZOOM            "Adjust display zoom level\nZoom"
+    ID_TERR_IMPORT          "Import height field terrain data\nImport Terrain Height"
+    ID_TERR_PROP            "Edit terrain data set properties\nTerrain Properties"
+    ID_EDIT_PROP            "Edit properities\nEdit Properities"
+    ID_TXT_DEFINE           "Define a new texture\nDefine Texture"
+    ID_TXT_SETPALETTE       "Select Van Gogh palette"
+    ID_TXT_PALETTE          "Select Van Gogh palette for color definition\nSelect Palette"
+    ID_SURF_IMPORT          "Import surface color information\nImport Colors"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_SURF_PALETTE         "Select a Van Gogh palette for color references\nSelect Palette"
+    ID_SURF_EDITTXT         "Edit a texture definition\nEdit Texture"
+    ID_SURF_DEFINETXT       "Define a new texture\nDefine Texture"
+    ID_SURF_DELETETXT       "Removes a texture definition\nDelete Texture"
+    ID_VIEW_RENDER          "Show or hide the render view\nToggle Render"
+    ID_VIEW_REFRESH         "Redraw the current views\nRefresh"
+    ID_VIEW_ZOOM_NORM       "Zooms the surface information grid image to 100%\nZoom Normal"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_VIEW_RND_SPECULAR    "Render using colored, smoothly lit polygons with specular highlight\nSpecular"
+    ID_VIEW_RND_DOTS        "Render using colored dots (fastest, no lighting)\nDots"
+    ID_VIEW_RND_WIREFRAME   "Render using colored wireframe (no lighting)\nWireframe"
+    ID_VIEW_RND_FLAT        "Render using colored, lit polygons\nFlat"
+    ID_VIEW_RND_SMOOTH      "Render using colored, smoothly lit polygons\nSmooth"
+    ID_VIEW_RND_BACKFACE    "Render with back-facing polygons removed\nBackface"
+    ID_VIEW_RND_TEXTURES    "Render using texture maps (if any)\nTextures"
+    ID_VIEW_RND_SOLID       "Render using colored polygons (no lighting)\nSolid"
+    ID_VIEW_RND_PERSPECTIVE "Render using true persepective texture mapping\nPerspective"
+    ID_VIEW_ROTXY           "Render view scroll bars control rotation about X and Y\nRotate X/Y"
+    ID_VIEW_MOVEXY          "Render view scroll bars control translation in X and Y\nMove X/Y"
+    ID_VIEW_ROTMOVEZ        "Render view scroll bars control rotation about and translation in Z\nRotZ/MoveZ"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_LGT_ADJUSTXY         "Render view scroll bars adjust the light source in X and Y\nAdjust X/Y"
+    ID_LGT_ABRIGHT          "Render view scroll bars adjust the light source intensity value\nAdjust Intensity"
+    ID_VIEW_ZOOM_LARGE      "Zooms the surface information grid image to 400%\nZoom Large"
+    ID_VIEW_ZOOM_MED        "Zooms the surface information grid image to 200%\nZoom Medium"
+    ID_VIEW_ZOOM_XLARGE     "Zooms the surface information grid image to 800%\nZoom XLarge"
+    ID_VIEW_PROP            "Edit render view camera properities\nView Properties"
+    ID_VIEW_ZOOM_MEGA       "Zooms the surface information grid image to 1600%\nZoom Mega"
+END
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#include "res\eshtedit.rc2"  // non-Microsoft Visual C++ edited resources
+
+#define _AFX_NO_SPLITTER_RESOURCES
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+#include "afxres.rc"  	// Standard components
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+
