@@ -254,6 +254,7 @@ DEP_CPP_BEZIE=\
 	"..\..\inc\escontxt.hpp"\
 	"..\..\inc\esdefs.h"\
 	"..\..\inc\esdraw.hpp"\
+	"..\..\inc\eselemnt.hpp"\
 	"..\..\inc\esexts.hpp"\
 	"..\..\inc\esgeom.hpp"\
 	"..\..\inc\eskeyfrm.hpp"\
@@ -266,7 +267,6 @@ DEP_CPP_BEZIE=\
 	"..\..\inc\esscene.hpp"\
 	"..\..\inc\essystem.hpp"\
 	"..\..\inc\esterran.hpp"\
-	"..\..\inc\estrtop.hpp"\
 	"..\..\inc\estxture.hpp"\
 	"..\..\inc\felix.hpp"\
 	"..\..\inc\felix.ipp"\
@@ -313,6 +313,7 @@ DEP_CPP_BEZIE=\
 	".\bezier.h"\
 	".\stdafx.h"\
 	{$(INCLUDE)}"dinput.h"\
+	{$(INCLUDE)}"gl\gl.h"\
 	
 
 "$(INTDIR)\bezier.obj" : $(SOURCE) $(DEP_CPP_BEZIE) "$(INTDIR)"\
@@ -337,6 +338,7 @@ DEP_CPP_DIALO=\
 	"..\..\inc\escontxt.hpp"\
 	"..\..\inc\esdefs.h"\
 	"..\..\inc\esdraw.hpp"\
+	"..\..\inc\eselemnt.hpp"\
 	"..\..\inc\esexts.hpp"\
 	"..\..\inc\esgeom.hpp"\
 	"..\..\inc\eskeyfrm.hpp"\
@@ -349,7 +351,6 @@ DEP_CPP_DIALO=\
 	"..\..\inc\esscene.hpp"\
 	"..\..\inc\essystem.hpp"\
 	"..\..\inc\esterran.hpp"\
-	"..\..\inc\estrtop.hpp"\
 	"..\..\inc\estxture.hpp"\
 	"..\..\inc\felix.hpp"\
 	"..\..\inc\felix.ipp"\
@@ -397,6 +398,7 @@ DEP_CPP_DIALO=\
 	".\paltool.h"\
 	".\stdafx.h"\
 	{$(INCLUDE)}"dinput.h"\
+	{$(INCLUDE)}"gl\gl.h"\
 	
 
 "$(INTDIR)\dialog.obj" : $(SOURCE) $(DEP_CPP_DIALO) "$(INTDIR)"\
@@ -421,6 +423,7 @@ DEP_CPP_MAINF=\
 	"..\..\inc\escontxt.hpp"\
 	"..\..\inc\esdefs.h"\
 	"..\..\inc\esdraw.hpp"\
+	"..\..\inc\eselemnt.hpp"\
 	"..\..\inc\esexts.hpp"\
 	"..\..\inc\esgeom.hpp"\
 	"..\..\inc\eskeyfrm.hpp"\
@@ -433,7 +436,6 @@ DEP_CPP_MAINF=\
 	"..\..\inc\esscene.hpp"\
 	"..\..\inc\essystem.hpp"\
 	"..\..\inc\esterran.hpp"\
-	"..\..\inc\estrtop.hpp"\
 	"..\..\inc\estxture.hpp"\
 	"..\..\inc\felix.hpp"\
 	"..\..\inc\felix.ipp"\
@@ -481,6 +483,7 @@ DEP_CPP_MAINF=\
 	".\paltool.h"\
 	".\stdafx.h"\
 	{$(INCLUDE)}"dinput.h"\
+	{$(INCLUDE)}"gl\gl.h"\
 	
 
 "$(INTDIR)\mainfrm.obj" : $(SOURCE) $(DEP_CPP_MAINF) "$(INTDIR)"\
@@ -505,6 +508,7 @@ DEP_CPP_PALTO=\
 	"..\..\inc\escontxt.hpp"\
 	"..\..\inc\esdefs.h"\
 	"..\..\inc\esdraw.hpp"\
+	"..\..\inc\eselemnt.hpp"\
 	"..\..\inc\esexts.hpp"\
 	"..\..\inc\esgeom.hpp"\
 	"..\..\inc\eskeyfrm.hpp"\
@@ -517,7 +521,6 @@ DEP_CPP_PALTO=\
 	"..\..\inc\esscene.hpp"\
 	"..\..\inc\essystem.hpp"\
 	"..\..\inc\esterran.hpp"\
-	"..\..\inc\estrtop.hpp"\
 	"..\..\inc\estxture.hpp"\
 	"..\..\inc\felix.hpp"\
 	"..\..\inc\felix.ipp"\
@@ -566,6 +569,7 @@ DEP_CPP_PALTO=\
 	".\paltool.h"\
 	".\stdafx.h"\
 	{$(INCLUDE)}"dinput.h"\
+	{$(INCLUDE)}"gl\gl.h"\
 	
 
 "$(INTDIR)\paltodoc.obj" : $(SOURCE) $(DEP_CPP_PALTO) "$(INTDIR)"\
@@ -590,6 +594,7 @@ DEP_CPP_PALTOO=\
 	"..\..\inc\escontxt.hpp"\
 	"..\..\inc\esdefs.h"\
 	"..\..\inc\esdraw.hpp"\
+	"..\..\inc\eselemnt.hpp"\
 	"..\..\inc\esexts.hpp"\
 	"..\..\inc\esgeom.hpp"\
 	"..\..\inc\eskeyfrm.hpp"\
@@ -602,7 +607,6 @@ DEP_CPP_PALTOO=\
 	"..\..\inc\esscene.hpp"\
 	"..\..\inc\essystem.hpp"\
 	"..\..\inc\esterran.hpp"\
-	"..\..\inc\estrtop.hpp"\
 	"..\..\inc\estxture.hpp"\
 	"..\..\inc\felix.hpp"\
 	"..\..\inc\felix.ipp"\
@@ -652,6 +656,7 @@ DEP_CPP_PALTOO=\
 	".\paltovw.h"\
 	".\stdafx.h"\
 	{$(INCLUDE)}"dinput.h"\
+	{$(INCLUDE)}"gl\gl.h"\
 	
 
 "$(INTDIR)\paltool.obj" : $(SOURCE) $(DEP_CPP_PALTOO) "$(INTDIR)"\
@@ -690,6 +695,7 @@ DEP_CPP_PALTOV=\
 	"..\..\inc\escontxt.hpp"\
 	"..\..\inc\esdefs.h"\
 	"..\..\inc\esdraw.hpp"\
+	"..\..\inc\eselemnt.hpp"\
 	"..\..\inc\esexts.hpp"\
 	"..\..\inc\esgeom.hpp"\
 	"..\..\inc\eskeyfrm.hpp"\
@@ -702,7 +708,6 @@ DEP_CPP_PALTOV=\
 	"..\..\inc\esscene.hpp"\
 	"..\..\inc\essystem.hpp"\
 	"..\..\inc\esterran.hpp"\
-	"..\..\inc\estrtop.hpp"\
 	"..\..\inc\estxture.hpp"\
 	"..\..\inc\felix.hpp"\
 	"..\..\inc\felix.ipp"\
@@ -753,6 +758,7 @@ DEP_CPP_PALTOV=\
 	".\paltovw.h"\
 	".\stdafx.h"\
 	{$(INCLUDE)}"dinput.h"\
+	{$(INCLUDE)}"gl\gl.h"\
 	
 
 "$(INTDIR)\paltovw.obj" : $(SOURCE) $(DEP_CPP_PALTOV) "$(INTDIR)"\
@@ -777,6 +783,7 @@ DEP_CPP_STDAF=\
 	"..\..\inc\escontxt.hpp"\
 	"..\..\inc\esdefs.h"\
 	"..\..\inc\esdraw.hpp"\
+	"..\..\inc\eselemnt.hpp"\
 	"..\..\inc\esexts.hpp"\
 	"..\..\inc\esgeom.hpp"\
 	"..\..\inc\eskeyfrm.hpp"\
@@ -789,7 +796,6 @@ DEP_CPP_STDAF=\
 	"..\..\inc\esscene.hpp"\
 	"..\..\inc\essystem.hpp"\
 	"..\..\inc\esterran.hpp"\
-	"..\..\inc\estrtop.hpp"\
 	"..\..\inc\estxture.hpp"\
 	"..\..\inc\felix.hpp"\
 	"..\..\inc\felix.ipp"\
@@ -835,6 +841,7 @@ DEP_CPP_STDAF=\
 	"..\..\inc\xfio.h"\
 	".\stdafx.h"\
 	{$(INCLUDE)}"dinput.h"\
+	{$(INCLUDE)}"gl\gl.h"\
 	
 
 !IF  "$(CFG)" == "Paltool - Win32 Debug"

@@ -85,7 +85,7 @@ char EschNoName[] = "NoName";
 // Workspace for a single point.                                            Ё
 //дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
 EschPoint EschTempPoint;
-VngoPoint EschTempVPoint;
+VngoPointF EschTempVPointF;
 
 //╟╠╡ End of module - esdata.cpp ╡╠╟
 

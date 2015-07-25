@@ -61,8 +61,12 @@
 
 //ÄÄ Escher headers
 #include "esdefs.h"
+
+#include "eselemnt.hpp"
+
 #include "esmath.hpp"                   // EschPoint, EschVector, EschVertex,
                                         // EschMatrix, EschFrameRef
+
 #include "escontxt.hpp"                 // EschContext
 #include "estxture.hpp"                 // EschTexture and derived classes
 #include "eslight.hpp"                  // EschLight and derived classes
@@ -77,8 +81,8 @@
 
 #include "eslimb.hpp"                   // EschLimbSegment & associated classes
 #include "eskeyfrm.hpp"                 // EschKeyframer and associated classes
+
 #include "esterran.hpp"                 // EschTerrain and derived classes
-#include "estrtop.hpp"                  // EschTerrainTreeTop class
 
 #include "espartn.hpp"                  // EschParition and associated classes
 

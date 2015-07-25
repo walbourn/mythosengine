@@ -39,20 +39,10 @@
                                _Library Status_
 
   Notes by: Dan Higdon
-  Updated: July 23, 1997
+  Updated: August 19, 1997
 
   Changes for this release --------------------------------------------------
 
-    o Release Version 2.0
-
-    o New code from the (now defunct) Profiler library, enabling Chronos
-      to report very precise times, up to the processor's clock speed.
-      The new members are chronos_time_now_precise(), and the new
-      AtomicChronometer class, which can be used for accumulated code
-      timing/profiling.  Other members work as in Chronos 1.0
-
-  Pending changes -----------------------------------------------------------
-
-    o Load-balancing of timer-callbacks.
+  o Internal routine cleanup.
 
 *** END OF FILE ***

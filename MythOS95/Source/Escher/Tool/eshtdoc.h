@@ -70,7 +70,8 @@ public:
 
     // Support data
     char            pfname[256];
-    VngoPal8        palette;
+    VngoPal         *palette;
+
     HPALETTE        hpal;
 
     enum

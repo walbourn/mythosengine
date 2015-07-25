@@ -308,6 +308,11 @@ public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Utility members                                                      ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+    static ulong compress_rle_mono(ushort w, ushort h,
+                                   byte *data, byte *cdata);
+    static int uncompress_rle_mono(ushort w, ushort h, ulong csize,
+                                   byte *cdata, byte *data);
+
     static ulong compress_rle_8bpp(ushort w, ushort h,
                                    byte *data, byte *cdata);
     static int uncompress_rle_8bpp(ushort w, ushort h, ulong csize,

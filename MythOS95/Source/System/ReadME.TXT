@@ -38,10 +38,13 @@
                              _Library Status_
 
  Notes by: Chuck Walbourn
- Updated: November 14, 1995
+ Updated: August 19, 1997
 
  Changes for this release --------------------------------------------------
 
-    o Changed tester to use IvoryMFC library.
+    *** Note: all older code will break when using this new system library
+        since the init() parameters are different ***
+
+    o Updated for new Escher init() routine.
 
 *** END OF FILE ***

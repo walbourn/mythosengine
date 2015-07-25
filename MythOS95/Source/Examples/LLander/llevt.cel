@@ -1,0 +1,102 @@
+;อออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออ
+;
+;                                /\    /\ 
+;                               /  \  /  \ 
+;                              /    \/    \ 
+;                             /  /\    /\  \ 
+;                            /  /  \  /  Y T H O S
+;                           /  /    \/    \  \ 
+;                          /  /            \  \ 
+;                         /__/              \__\ 
+;
+;                      Microsoft Windows '95 Version
+;
+;            Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.
+;                           All Rights Reserved.
+;
+;ฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤ
+;
+;           *** Charybdis Enterprises, Inc. Company Confidential ***
+;
+;  This file and all associated files are the company proprietary property
+;        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+;
+; CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
+; TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
+; IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
+; AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
+; INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+;
+;ฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤ
+;
+;                          LUNAR LANDER EXAMPLE
+;
+; Created by Chuck Walbourn and Dan Higdon
+;
+; llevt.cel
+;
+;อออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออ
+
+;ฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐ
+;ฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐ General Controls  ฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐ
+;ฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐ
+
+event QUIT
+{
+    [ key #esc ]
+}
+
+event NEXT
+{
+    [ key #space ]
+}
+
+
+
+;ฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐ
+;ฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐ Game Controls  ฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐ
+;ฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐ
+
+event LEFT
+{
+    [ key #left ]
+    [ key #grayleft ]
+}
+
+event RIGHT
+{
+    [ key #right ]
+    [ key #grayright ]
+}
+
+event UP
+{
+    [ key #up ]
+    [ key #grayup ]
+}
+
+event DOWN
+{
+    [ key #down ]
+    [ key #graydown ]
+}
+
+event FIRE
+{
+    [ joyb 1 ]
+    [ key #space ]
+}
+
+event HOVER
+{
+    [ key 'h'
+      not key #shift ]
+}
+
+event DROP
+{
+    [ key 'h'
+      key #shift ]
+}
+
+;ฐฑฒ eof - llevt.cel ฒฑฐ

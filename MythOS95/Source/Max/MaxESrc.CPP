@@ -93,8 +93,6 @@ MaxEventUser::MaxEventUser (MaxDevices &devs, const char *iff_file, const char *
     ntriggers   (0),
     theDevices  (devs)
 {
-    assert (iff_file ? evt_chunk != 0: (evt_chunk == 0));
-
     if (iff_file)
     {
         int res = load (iff_file, evt_chunk);

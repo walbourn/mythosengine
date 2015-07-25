@@ -1367,6 +1367,38 @@ void TerrEditDoc::ExportToIFF(const char *fname)
         status |= EXPSTAT_NRML;
     }
 
+//ÄÄÄ Write materials name list
+    if (txtNumb)
+    {
+        EschFileTerrMTL *mtl = new EschFileTerrMTL[txtNumb];
+        if (!mtl)
+        {
+            MessageBox((AfxGetMainWnd()) ? AfxGetMainWnd()->GetSafeHwnd() : NULL,
+                       "Out of Memory","Export Error",MB_OK | MB_ICONEXCLAMATION);
+            return;
+        }
+        memset(mtl, 0, sizeof(EschFileTerrMTL)*txtNumb);
+
+        for(int i=0; i < txtNumb; i++)
+        {
+            strncpy(mtl[i].name, txtName[i], ESCH_MAX_NAME);
+        }
+
+        if (iff.write(iff.makeid('M','T','L',' '),mtl,sizeof(EschFileTerrMTL)*txtNumb))
+        {
+            char    str[64];
+
+            sprintf(str,"Error #%x while trying to write materials name chunk",
+                        (int)iff.error());
+
+            MessageBox((AfxGetMainWnd()) ? AfxGetMainWnd()->GetSafeHwnd() : NULL,
+                str,"Export Error",MB_OK | MB_ICONEXCLAMATION);
+            return;
+        }
+
+        delete [] mtl;
+    }
+
 //ÄÄÄ Write surface info
     if (surfinfo)
     {
@@ -1404,7 +1436,7 @@ void TerrEditDoc::ExportToIFF(const char *fname)
 
         for(int i=0; i < txtNumb; i++)
         {
-             if (iff.newform(iff.makeid('E','M','T','L')))
+            if (iff.newform(iff.makeid('E','M','T','L')))
             {
                 char    str[128];
 
@@ -2964,12 +2996,11 @@ void TerrEditDoc::UICameraProperties(CWnd *parent, UINT ipage)
 //ÄÄÄ Extended
     CameraPropExPage        xdlg;
     xdlg.setup(this);
-    xdlg.m_haze_active = (cam.hz_pal) ? 1 : 0;
+    xdlg.m_haze_active = (cam.vport->vflags & VNGO_HAZE_ON) ? 1 : 0;
     xdlg.haze_change = FALSE;
     xdlg.haze_color = cam_bcolor;
     xdlg.m_bg_active = (cam.bg_bitmap) ? 1 : 0;
-    xdlg.bg_bm = cam.bg_bitmap;
-    cam.set_flags(cam.flags & ~ESCH_CAM_OWNSBITMAP);
+    xdlg.bg_bm = (XFBitmap*)cam.app_data;
 
 //ÄÄÄ Handle Display
     CPropertySheet sh("Render View Properties",parent,ipage);
@@ -2998,39 +3029,43 @@ void TerrEditDoc::UICameraProperties(CWnd *parent, UINT ipage)
         cam.set_factor(mdlg.m_scalef);
         cam_bcolor = mdlg.m_bcolor;
         hover_offset = mdlg.m_hover;
+        cam.set_bcolor(palette.get_index((VngoColor24bit)cam_bcolor));
 
         //ÄÄÄ Extended
         if (xdlg.m_haze_active)
         {
-            if (xdlg.haze_change || !cam.hz_pal)
-            {
-                cam.create_haze(xdlg.m_levels, xdlg.m_slevels,
-                                 xdlg.m_blevels, xdlg.m_bpercent / 100.0f,
-                                 VngoColor24bit(xdlg.haze_color));
-            }
+            cam.set_haze(xdlg.m_startz, xdlg.m_midz,
+                          VngoColor24bit(xdlg.haze_color));
         }
         else
-            cam.set_haze(0);
+            cam.vport->haze_off();
 
         if (xdlg.m_bg_active && xdlg.bg_bm)
         {
-            if (xdlg.bg_bm != cam.bg_bitmap)
+            cam.app_data = xdlg.bg_bm;
+            if (cam.create_bg_bitmap(xdlg.bg_bm))
             {
-                cam.set_bg_bitmap(xdlg.bg_bm);
+                AfxMessageBox("Create of bitmap background failed",
+                              MB_OK | MB_ICONEXCLAMATION);
             }
-            else
-                cam.set_flags(cam.flags | ESCH_CAM_OWNSBITMAP);
         }
         else
         {
             if (xdlg.bg_bm)
                 delete xdlg.bg_bm;
+            cam.app_data = 0;
             cam.set_bg_bitmap(0);
         }
 
         //ÄÄÄ Update views
-        cam.set_bcolor(palette.get_index((VngoColor24bit)cam_bcolor));
         UpdateAllViews(NULL,HINT_UPDATETERR,NULL);
+        return;
+    }
+
+    if (xdlg.bg_bm != cam.app_data)
+    {
+        if (xdlg.bg_bm)
+            delete xdlg.bg_bm;
     }
 }
 

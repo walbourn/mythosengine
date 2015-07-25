@@ -29,9 +29,9 @@
 //
 //                              *** Utilities ***
 //
-// evtc.cpp
+// By Dan Higdon
 //
-//     This is the main module for the IFF compiler.
+// evtc.cpp
 //
 //อออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออ
 
@@ -88,7 +88,8 @@ extern void compile (const char *evt_name);
 extern "C" FILE *yyin;
 
 STATIC char Util_name[]
-       = "ฐฑ Max CEL Compiler - (C) 1994 - 1997 Charybdis Enterprises, Inc. ฑฐ\n";
+       = "ฐฑ Max CEL Compiler - (C) 1994 - 1997 Charybdis Enterprises, Inc. ฑฐ\n"
+         "                      All Rights Reserved. " __DATE__ "\n";
 
 XFParseIFF  IFF;
 XFileDOS    header;
@@ -276,7 +277,6 @@ extern "C" int mythos_atexit( register void ( *__func )( void ) )
 STATIC void print_help (int full)
 {
     cout << Util_name;
-    cout << "   " __DATE__ "\n";
     cout << "   Usage: maxc <filename.cel> [-oi <filename.iff>] [-oh <filename.hpp>]\n";
     if (full)
     {

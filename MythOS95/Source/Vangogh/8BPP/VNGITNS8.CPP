@@ -171,7 +171,7 @@ VNGError VngoVVport8::image_trans (VngoRect *dest_rect,VngoTexture *img,dword fl
                 if ((dest_rect->y + h) < vbuff.height)
                     ycount = h;
                 else
-                    ycount = (vbuff.height-1) - dest_rect->y;
+                    ycount = (vbuff.height) - dest_rect->y;
             }
             else        // starting Y is negative in this case.
             {
@@ -179,7 +179,7 @@ VNGError VngoVVport8::image_trans (VngoRect *dest_rect,VngoTexture *img,dword fl
                 t = vbuff.ytable[0];
                 if ((dest_rect->y + h) > vbuff.height)
                 {
-                    ycount = vbuff.height-1;
+                    ycount = vbuff.height;
                 }
                 else
                 {
@@ -198,14 +198,14 @@ VNGError VngoVVport8::image_trans (VngoRect *dest_rect,VngoTexture *img,dword fl
                 if ((dest_rect->x + w) < vbuff.width)
                     xcount = w;
                 else
-                    xcount = (vbuff.width-1) - dest_rect->x;
+                    xcount = (vbuff.width) - dest_rect->x;
             }
             else        // starting X is negative in this case.
             {
                 tx = -dest_rect->x;
                 if ((dest_rect->x + w) > vbuff.width)
                 {
-                    xcount = (vbuff.width-1);
+                    xcount = (vbuff.width);
                 }
                 else
                 {

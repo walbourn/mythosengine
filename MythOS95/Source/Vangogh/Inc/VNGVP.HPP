@@ -25,6 +25,8 @@
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
+// Created by Tim Little
+//
 // vngvp.hpp
 //
 // Contains the base viewport class definition
@@ -52,6 +54,8 @@
 #pragma pack(push,1)
 #endif
 
+extern VngoSystem VgSystem;
+
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Classes
@@ -64,21 +68,33 @@ protected:
     dword               size_in_bytes;
     int                 lock_status;
     VNGError            init_status;
-    VngoZMap    *zmap;
+    VngoZMap            *zmap;
 
 public:
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    // Public data members                                                  ³
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
     dword               vflags;
     int                 vzdepth_in_bits;
     VngoVbuffer         vbuff;
-    int         persp_pixcount;
+    int                 persp_pixcount;
 
-    VngoVport() {zmap = NULL; persp_pixcount = VNGO_PERSP_PRECISION;};
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    // Constructor/Destructors                                              ³
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+    VngoVport() :
+        zmap(0),
+        persp_pixcount(VNGO_PERSP_PRECISION)
+    {}
 
-    // Inline functions.
+    virtual ~VngoVport()
+    {}
+
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    // Accessor functions                                                   ³
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
     inline VngoVbuffer *get_vbuff() {return &vbuff;}
-
-
-    inline int  get_zbuffer_precision()
+    inline int get_zbuffer_precision()
     {
         if (vflags &= VNGO_ZBUFFER_ACTIVE)
             return (vzdepth_in_bits);
@@ -86,63 +102,97 @@ public:
             return (0);
     }
 
-    virtual ~VngoVport() {}
+    inline VNGError get_init_state() { return (init_status); }
 
-    // Buffering syncronization call.  (if a ViewPort wants to buffer
-    // output for self sorting etc then it can queue thing up until
-    // the sync call is made at which time all buffered commands must be made.)
+    inline VngoZMap * get_zmap() { return zmap; }
 
-    virtual void sync() {};
-    virtual void zbuffer_on() {if (vflags & VNGO_ZBUFFER_DEV) vflags |= VNGO_ZBUFFER_ACTIVE;}
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    // Utility functions.                                                   ³
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+    inline void clear_screen_on() { vflags &= ~VNGO_NOCLEAR_VBUFFER;}
+    inline void clear_screen_off() { vflags |= VNGO_NOCLEAR_VBUFFER;}
+
+    inline void set_zmap(VngoZMap *_zmap)
+    {
+        zmap = _zmap;
+        vflags |= VNGO_ZMAP_DEV | VNGO_ZMAP_ACTIVE;
+    }
+    inline void zmap_on()
+    {
+        if (vflags & VNGO_ZMAP_DEV)
+            vflags |= VNGO_ZMAP_ACTIVE;
+    }
+    inline void zmap_off() { vflags &= ~VNGO_ZMAP_ACTIVE;}
+    inline void set_perspective (int pcount)
+    {
+        persp_pixcount = pcount;
+    }
+
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    // Operations                                                           ³
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+    virtual void sync() {}
+
+    virtual void zbuffer_on()
+    {
+        if (vflags & VNGO_ZBUFFER_DEV)
+            vflags |= VNGO_ZBUFFER_ACTIVE;
+    }
     virtual void zbuffer_off() {vflags &= ~VNGO_ZBUFFER_ACTIVE;}
+
+    virtual void texture_filter_on() {vflags |= VNGO_TEXTURE_FILTER;}
+    virtual void texture_filter_off() {vflags &= ~VNGO_TEXTURE_FILTER;}
+
+    virtual void true_alpha_on() {vflags |= VNGO_TRUE_ALPHA;}
+    virtual void true_alpha_off() {vflags &= ~VNGO_TRUE_ALPHA;}
+
+    virtual void haze_on() {vflags |= VNGO_HAZE_ON;}
+    virtual void haze_off() {vflags &= ~VNGO_HAZE_ON;}
+
+    virtual void make_current() { VgSystem.cur_vport = this; }
+
+    virtual VNGError capture(XFBitmap *bm);
 
     virtual int  lock()
     {
         int ret_val = lock_status;
         lock_status = 1;
         return (ret_val);
-    };
+    }
     virtual int  unlock()
     {
         int ret_val = lock_status;
         lock_status = 0;
         return (ret_val);
-    };
+    }
 
-    inline void clear_screen_on() { vflags &= ~VNGO_NOCLEAR_VBUFFER;}
-    inline void clear_screen_off() { vflags |= VNGO_NOCLEAR_VBUFFER;}
-    inline VNGError get_init_state() {return (init_status);}
-
-    // Virtual funcitons for drawing.
+    //ÄÄÄ Basic drawing functions
     virtual void reset(dword c=0,dword farz=0xffffffff)=0;
     virtual VNGError vpcopy (int destx,int desty,VngoVport *dest)=0;
+
+    //ÄÄÄ Rectangle drawing functions
     virtual VNGError frect (VngoRect *rect,dword color) = 0;
     virtual VNGError frect (VngoRect *rect,VngoColor24bit *rgb_val = NULL) = 0;
+    virtual VNGError clip_frect (VngoRect *rect,dword color, VngoRect *clip=NULL) = 0;
+    virtual VNGError clip_frect (VngoRect *rect,VngoColor24bit *rgb_val, VngoRect *clip=NULL) = 0;
 
+    //ÄÄÄ Pixel drawing functions
     virtual VNGError pixel (VngoPoint *pt, VngoColor24bit *rgb_val = NULL) = 0;
     virtual VNGError pixel (VngoPointF *pt, VngoColor24bit *rgb_val = NULL) = 0;
     virtual VNGError clip_pixel (VngoPoint *pt, VngoColor24bit *rgb_val = NULL, VngoRect *clip_rect=NULL) = 0;
     virtual VNGError clip_pixel (VngoPointF *pt, VngoColor24bit *rgb_val = NULL, VngoRect *clip_rect=NULL) = 0;
     virtual dword read_pixel (VngoPoint *pt, VngoPoint *dest)=0;
     virtual dword read_pixel (int x, int y, VngoPoint *dest)=0;
-    virtual VNGError clip_frect (VngoRect *rect,dword color, VngoRect *clip=NULL) = 0;
-    virtual VNGError clip_frect (VngoRect *rect,VngoColor24bit *rgb_val, VngoRect *clip=NULL) = 0;
 
-    // virtual functions for transfering data directly to the vport.
+    //ÄÄÄ Image transfer functions
     virtual VNGError image_trans (VngoRect *dest_rect,VngoTexture *img,dword flags=0) = 0;
+    virtual VNGError image_trans_a (VngoRect *dest_rect,VngoTexture *img,
+                                    long alpha=127, dword flags=0) = 0;
 
     virtual VNGError image_trans_mono (VngoRect *dest_rect,VngoTexture *img,dword fgcol,dword bgcol=VNGO_TRANSPARENT) = 0;
     virtual VNGError zblit_mono (VngoRect *dest_rect,VngoZMap *zmp,dword fdist,dword ndist=0) = 0;
 
-    // Inline functions.
-    inline void set_zmap(VngoZMap *_zmap) {zmap = _zmap; vflags |= VNGO_ZMAP_DEV | VNGO_ZMAP_ACTIVE;}
-    inline void zmap_on() {if (vflags & VNGO_ZMAP_DEV) vflags |= VNGO_ZMAP_ACTIVE;}
-    inline void zmap_off() { vflags &= ~VNGO_ZMAP_ACTIVE;}
-    inline VngoZMap * get_zmap() {return zmap;}
-    inline void set_perspective (int pcount) {persp_pixcount = pcount;}
-
-
-    // virtual functions for drawing.
+    //ÄÄÄ Line drawing functions
     virtual VNGError line (VngoPoint *p1,VngoPoint *p2,
                            VngoColor24bit *rgb_val=NULL) = 0;
     virtual VNGError line (VngoPointF *p1,VngoPointF *p2,
@@ -167,6 +217,7 @@ public:
     virtual VNGError clip_gline_persp (VngoPointF *p1,VngoPointF *p2,
                                        VngoRect *clip_rect = NULL) = 0;
 
+    //ÄÄÄ Polygon drawing functions
     virtual VNGError poly (int count,VngoPoint pts[]) = 0;
     virtual VNGError poly (int count,VngoPointF pts[]) = 0;
     virtual VNGError gpoly (int count,VngoPoint pts[]) = 0;
@@ -193,7 +244,7 @@ public:
     virtual VNGError grpoly (int count,VngoPoint pts[])=0;
     virtual VNGError grpoly (int count,VngoPointF pts[])=0;
 
-// Alpha blended versions.
+    //ÄÄÄ Alpha-blended polygon drawing functions
     virtual VNGError poly_a (int count,VngoPoint pts[],
                              long alpha=127) = 0;
     virtual VNGError poly_a (int count,VngoPointF pts[],
@@ -223,11 +274,9 @@ public:
     virtual VNGError gtpoly_persp_a (int count,VngoPointF pts[],
                                      VngoTexture *tex,long alpha=127) = 0;
 
-
-    virtual VNGError image_trans_a (VngoRect *dest_rect,VngoTexture *img,
-                                    long alpha=127, dword flags=0) = 0;
-
-    virtual VNGError haze(VngoShadePal *hazepal,long startZ=0,VngoRect *rect=NULL) = 0;
+    //ÄÄÄ Fogging/hazing functions
+    virtual VNGError set_haze(VngoHazeInfo *haze_info) = 0;
+    virtual VNGError haze() = 0;
 };
 
 #ifdef __WATCOMC__

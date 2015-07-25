@@ -262,7 +262,8 @@ void CreateTextureDlg::release_dib()
 
 void CreateTextureDlg::do_image_background(XFBitmap *bm, XFBitmap *bg_bm, int w, int h)
 {
-    VngoVVport8 *vp = new VngoVVport8(w, h, 0,0, &(pDoc->palette), 0);
+    VngoRect vprect(0, 0, w, h);
+    VngoVVport8 *vp = new VngoVVport8(vprect, &(pDoc->palette), 0);
 
     if (vp) 
     {
@@ -874,7 +875,9 @@ void CreateTextureFromColorDlg::do_image_smoothing(XFBitmap *bm)
     int w = bm->width;
     int h = bm->height;
 
-    VngoVVport8 *vp = new VngoVVport8(w, h, 0,0, &(pDoc->palette), 0);
+    VngoRect vprect(0, 0, w, h);
+
+    VngoVVport8 *vp = new VngoVVport8(vprect, &(pDoc->palette), 0);
 
     if (vp) 
     {

@@ -1,10 +1,10 @@
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // MaxC -- Event and Trigger Definition System                              ³
-// (C) 1995 by Charybdis Enterprises, Inc.  All Rights Reserved.            ³
+// (C) 1995-1997 by Charybdis Enterprises, Inc.  All Rights Reserved.       ³
 //                                                                          ³
 // Event Constants header file for C++                                      ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-const MaxEvent Lev_up(0);
-const MaxEvent Lev_down(1);
-const MaxEvent help(2);
+#define Lev_up MaxEvent (0)
+#define Lev_down MaxEvent (1)
+#define help MaxEvent (2)
 // EOF

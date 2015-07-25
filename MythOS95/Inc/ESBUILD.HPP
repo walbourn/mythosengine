@@ -105,6 +105,9 @@ public:
     esch_error_codes save(const char *fname, dword ctrlfl=ESCH_TBLD_8BIT, VngoPal *pal=0);
     esch_error_codes save(XFParseIFF *iff, dword ctrlfl=ESCH_TBLD_8BIT, VngoPal *pal=0);
 
+    esch_error_codes load(const char *fname, const char *tname=0, VngoPal *pal=0);
+    esch_error_codes load(XFParseIFF *iff, const char *tname=0, VngoPal *pal=0);
+
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Utility routines.                                                    ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
@@ -130,6 +133,11 @@ public:
 
     dword               mflags;
     dword               fflags;
+
+    byte                selfi;
+    byte                alpha_a;
+    byte                alpha_b;
+    byte                alpha_c;
 
     EschFrameRef        orient;
 
@@ -178,6 +186,8 @@ public:
     {
         fflags=f & ~ESCH_FACE_TEXTURED;
     }
+    void set_self_illum(byte s) { selfi = s; }
+    void set_alpha(byte a) { alpha_a = alpha_b = alpha_c = a; }
 
     void set_extents(const EschSphereExtents *s) { sphere=*s; }
     void set_extents(const EschBoxExtents *b) { box=*b; }
@@ -212,7 +222,8 @@ public:
         EschFace   face(fflags,
                         a,b,c,
                         0,0,0,0,0,0,0,
-                        color,0,0,0);
+                        color,0,0,0,
+                        selfi,alpha_a,alpha_b,alpha_c);
         return add_face(&face);
     }
     esch_error_codes add_face(word a, word b, word c, dword color,
@@ -221,7 +232,8 @@ public:
         EschFace   face(fflags | ESCH_FACE_TEXTURED,
                         a,b,c,
                         txt, u[0], u[1], u[2], v[0], v[1], v[2],
-                        color,0,0,0);
+                        color,0,0,0,
+                        selfi,alpha_a,alpha_b,alpha_c);
         return add_face(&face);
     }
 
@@ -231,7 +243,8 @@ public:
         EschFace   face(fflags,
                         a,b,c,
                         0,0,0,0,0,0,0,
-                        color,0,0,0);
+                        color,0,0,0,
+                        selfi,alpha_a,alpha_b,alpha_c);
         return set_face(i, &face);
     }
     esch_error_codes set_face(ulong i, word a, word b, word c, dword color,
@@ -240,7 +253,8 @@ public:
         EschFace   face(fflags | ESCH_FACE_TEXTURED,
                         a,b,c,
                         txt, u[0], u[1], u[2], v[0], v[1], v[2],
-                        color,0,0,0);
+                        color,0,0,0,
+                        selfi,alpha_a,alpha_b,alpha_c);
         return set_face(i, &face);
     }
 

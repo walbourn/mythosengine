@@ -264,19 +264,41 @@ int MaxTrigger::check (const MaxDevices &devs) const
     // First, the keyboard part
     for (int i = 0; Keys[i] != word (-1) && i < max_keys; i++)
     {
-        // Straight compare, or negation?
-        if (Keys[i] & 0x200)
+        const ushort key (Keys[i]);
+        BOOL match = false;
+
+        // Special case of the "generic shift key"
+        if (key & 0x400)
         {
-            // If any keys match, we don't match.
-            if (devs.check_keyboard_key (Keys[i] & 0x1ff))
-                return 0;
+            const ushort mkey (key & 0x4ff);
+            switch (mkey)
+            {
+                case 0x401:
+                    match = devs.check_keyboard_key (DIK_LALT)
+                            || devs.check_keyboard_key (DIK_RALT);
+                    break;
+
+                case 0x402:
+                    match = devs.check_keyboard_key (DIK_LCONTROL)
+                            || devs.check_keyboard_key (DIK_RCONTROL);
+                    break;
+
+                case 0x403:
+                    match = devs.check_keyboard_key (DIK_LSHIFT)
+                            || devs.check_keyboard_key (DIK_RSHIFT);
+                    break;
+            }
         }
         else
-        {
-            // If any keys do NOT match, we don't match either.
-            if (!devs.check_keyboard_key (Keys[i]))
-                return 0;
-        }
+            match = devs.check_keyboard_key (key & 0xff) != 0;
+
+        // Straight compare, or negation?
+        if (key & 0x200)
+            match = !match;
+
+        // If this key doesn't match, then the trigger doesn't match
+        if (!match)
+            return 0;
     }
 
     // Now, check the mouse
@@ -318,4 +340,3 @@ int MaxTrigger::check (const MaxDevices &devs) const
 }
 
 //°±² End of module - maxevt.cpp ²±°
-

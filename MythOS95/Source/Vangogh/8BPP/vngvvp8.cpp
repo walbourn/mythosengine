@@ -86,21 +86,21 @@
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
 
-VngoVVport8::VngoVVport8 (long width,long height,long org_x,long org_y,VngoPal *my_pal,dword flags)
+VngoVVport8::VngoVVport8 (VngoRect &dim,VngoPal *my_pal,dword flags)
 {
-    init_status = init (width,height,org_x,org_y,my_pal,flags);
+    init_status = init (dim,my_pal,flags);
 }
 
-VNGError VngoVVport8::init (long width,long height,long org_x,long org_y,VngoPal *my_pal,dword flags)
+VNGError VngoVVport8::init (VngoRect &dim,VngoPal *my_pal,dword flags)
 {
     persp_pixcount = VNGO_PERSP_PRECISION;
-    vbuff.width = width;
-    vbuff.pitch = width;
-    vbuff.height = height;
+    vbuff.width = dim.dx;
+    vbuff.pitch = dim.dx;
+    vbuff.height = dim.dy;
     vbuff.zpitch = vbuff.pitch << 1;
     vflags = flags;
     vflags |= VNGO_PAL_MAPPED_DEV;
-    size_in_bytes = width * height;
+    size_in_bytes = dim.dx * dim.dy;
     vbuff.zbuff_ptr = NULL;
 
     vbuff.scrn_ptr = (byte *)ivory_alloc (size_in_bytes);
@@ -120,7 +120,7 @@ VNGError VngoVVport8::init (long width,long height,long org_x,long org_y,VngoPal
 
     // allocate all tables.
 
-    vbuff.ytable = (dword *)ivory_alloc(height * sizeof(dword));
+    vbuff.ytable = (dword *)ivory_alloc(dim.dy * sizeof(dword));
     if (!vbuff.ytable)
     {
         if (vflags & VNGO_ZBUFFER_DEV)
@@ -131,7 +131,7 @@ VNGError VngoVVport8::init (long width,long height,long org_x,long org_y,VngoPal
     }
     if (vflags & VNGO_ZBUFFER_DEV)
     {
-        vbuff.ztable = (dword *)ivory_alloc(height * sizeof(dword));
+        vbuff.ztable = (dword *)ivory_alloc(dim.dy * sizeof(dword));
         if (!vbuff.ztable)
         {
             if (vflags & VNGO_ZBUFFER_DEV)
@@ -142,9 +142,9 @@ VNGError VngoVVport8::init (long width,long height,long org_x,long org_y,VngoPal
             return (VNGO_MEMALLOC_ERROR);
         }
     }
-    long max_dem = width;
-    if (height > width)
-        max_dem = height;
+    long max_dem = dim.dx;
+    if (dim.dy > dim.dx)
+        max_dem = dim.dy;
 
     vbuff.edge1 = (VngoPoint2*)ivory_alloc(max_dem * sizeof(VngoPoint2));
     if (vbuff.edge1 == NULL)
@@ -233,6 +233,40 @@ VngoVVport8::~VngoVVport8()
     {
         ivory_free((void **)&vbuff.edge2);
     }
+}
+
+VNGError VngoVVport8::haze()
+{
+    if ((!((vflags & VNGO_ZBUFFER_DEV) && (vflags & VNGO_ZBUFFER_ACTIVE)))
+        || !(vflags & VNGO_HAZE_ON))
+        return VNGO_NOT_SUPPORTED;
+
+    word *zptr=vbuff.zbuff_ptr;
+    byte *sptr=vbuff.scrn_ptr;
+    dword pitch=vbuff.pitch;
+    long width = vbuff.width;
+    long height = vbuff.height;
+    byte *htable = hinfo.htable;
+    word cutoff = word(hinfo.start_depth);
+
+    dword pitch_adj = pitch-width;
+
+    for (int y=0;y<height;y++)
+    {
+        for (int x=0;x<width;x++)
+        {
+            if(*zptr >= cutoff && *zptr < 0xffff)
+            {   // It is in range!
+                dword offset = (*zptr >> 9) << 8;       // Magick!
+                byte  tc = *sptr;
+                *sptr = htable[offset+tc];
+            }
+            sptr++;
+            zptr++;
+        }
+        sptr += pitch_adj;
+    }
+    return VNGO_NO_ERROR;
 }
 
 void VngoVVport8::reset(dword c,dword farz)
@@ -329,7 +363,7 @@ VNGError VngoVVport8::pixel(VngoPoint *pt, VngoColor24bit *rgb_val)
     {
         VngoPoint   tpt = *pt;
         tpt.clr = vbuff.pal->get_index(*rgb_val);
-        tpt.shade = vbuff.pal->shd_pal->mid_point - 1;
+        tpt.shade = vbuff.pal->shd_pal->mid_point;
 
         if (vflags & VNGO_ZBUFFER_ACTIVE)
         {
@@ -384,7 +418,7 @@ dword VngoVVport8::read_pixel(int x, int y, VngoPoint *dest)
     dest->x = x;
     dest->y = y;
     dest->clr = vbuff.scrn_ptr[vbuff.ytable[y] + x];
-    dest->shade = vbuff.pal->shd_pal->mid_point - 1;
+    dest->shade = vbuff.pal->shd_pal->mid_point;
     if (vflags & VNGO_ZBUFFER_ACTIVE)
     {
         dest->z = vbuff.zbuff_ptr[vbuff.ztable[y] + x];
@@ -462,7 +496,7 @@ VNGError VngoVVport8::line(VngoPoint *p1,VngoPoint *p2, VngoColor24bit *rgb_val)
     if (rgb_val)
     {
         tp1.clr = vbuff.pal->get_index(*rgb_val);
-        tp1.shade = vbuff.pal->shd_pal->mid_point - 1;
+        tp1.shade = vbuff.pal->shd_pal->mid_point;
     }
 
     vngo_line(this,&tp1,p2);
@@ -494,8 +528,26 @@ VNGError VngoVVport8::clip_line(VngoPointF *p1,VngoPointF *p2,
                                 VngoColor24bit *rgb_val,
                                 VngoRect *clip_rect)
 {
-    VngoPoint tp1,tp2;
+    VngoPointF tp1,tp2;
 
+    tp1 = *p1;
+    tp2 = *p2;
+
+    VngoRect    crect(0,0,vbuff.width-1,vbuff.height-1);
+
+    if (clip_rect)
+        crect.clip_to(*clip_rect);
+
+    int cflags = 0;
+    if (VNGO_ZBUFFER_ACTIVE & vflags)
+        cflags |= VNGO_CLIP_Z;
+
+    VNGError err = crect.clip_to(&tp1,&tp2,cflags);
+    if (err == VNGO_FULLY_CLIPPED)
+        return VNGO_NO_ERROR;
+    else
+        return line(&tp1,&tp2,rgb_val);
+#if 0
     tp1.x = long(p1->x + .5f);
     tp1.y = long(p1->y + .5f);
     tp1.z = dword (p1->z * float(0xffffffff));
@@ -509,6 +561,7 @@ VNGError VngoVVport8::clip_line(VngoPointF *p1,VngoPointF *p2,
     tp2.shade = long(p2->shade);
 
     return clip_line(&tp1,&tp2,rgb_val,clip_rect);
+#endif
 }
 
 
@@ -519,6 +572,28 @@ VNGError VngoVVport8::clip_line(VngoPoint *p1,VngoPoint *p2,
 {
     assert(lock_status);
 
+
+    VngoPoint tp1,tp2;
+
+    tp1 = *p1;
+    tp2 = *p2;
+
+    VngoRect    crect(0,0,vbuff.width-1,vbuff.height-1);
+
+    if (clip_rect)
+        crect.clip_to(*clip_rect);
+
+    int cflags = 0;
+    if (VNGO_ZBUFFER_ACTIVE & vflags)
+        cflags |= VNGO_CLIP_Z;
+
+    VNGError err = crect.clip_to(&tp1,&tp2,cflags);
+    if (err == VNGO_FULLY_CLIPPED)
+        return VNGO_NO_ERROR;
+    else
+        return line(&tp1,&tp2,rgb_val);
+
+#if 0
     VngoRect    crect(0,0,vbuff.width-1,vbuff.height-1);
 
     if (clip_rect)
@@ -684,13 +759,14 @@ VNGError VngoVVport8::clip_line(VngoPoint *p1,VngoPoint *p2,
     {
         tp1.clr = vbuff.pal->get_index(*rgb_val);
         tp2.clr = tp1.clr;
-        tp1.shade = vbuff.pal->shd_pal->mid_point - 1;
+        tp1.shade = vbuff.pal->shd_pal->mid_point;
         tp2.shade = tp1.shade;
     }
 
     vngo_line(this,&tp1,&tp2);
 
     return VNGO_NO_ERROR;
+#endif
 }
 
 VNGError VngoVVport8::gline(VngoPoint *p1,VngoPoint *p2)
@@ -741,6 +817,27 @@ VNGError VngoVVport8::gline(VngoPointF *p1,VngoPointF *p2)
 VNGError VngoVVport8::clip_gline(VngoPointF *p1,VngoPointF *p2,
                                 VngoRect *clip_rect)
 {
+
+    VngoPointF tp1,tp2;
+
+    tp1 = *p1;
+    tp2 = *p2;
+
+    VngoRect    crect(0,0,vbuff.width-1,vbuff.height-1);
+
+    if (clip_rect)
+        crect.clip_to(*clip_rect);
+
+    int cflags = VNGO_CLIP_SHADE;
+    if (VNGO_ZBUFFER_ACTIVE & vflags)
+        cflags |= VNGO_CLIP_Z;
+
+    VNGError err = crect.clip_to(&tp1,&tp2,cflags);
+    if (err == VNGO_FULLY_CLIPPED)
+        return VNGO_NO_ERROR;
+    else
+        return gline(&tp1,&tp2);
+#if 0
     VngoPoint tp1,tp2;
 
     tp1.x = long(p1->x + .5f);
@@ -756,12 +853,33 @@ VNGError VngoVVport8::clip_gline(VngoPointF *p1,VngoPointF *p2,
     tp2.shade = long(p2->shade);
 
     return clip_gline(&tp1,&tp2,clip_rect);
+#endif
 }
 
 VNGError VngoVVport8::clip_gline(VngoPoint *p1, VngoPoint *p2, VngoRect *clip_rect)
 {
     assert(lock_status);
+    VngoPoint tp1,tp2;
 
+    tp1 = *p1;
+    tp2 = *p2;
+
+    VngoRect    crect(0,0,vbuff.width-1,vbuff.height-1);
+
+    if (clip_rect)
+        crect.clip_to(*clip_rect);
+
+    int cflags = VNGO_CLIP_SHADE;
+    if (VNGO_ZBUFFER_ACTIVE & vflags)
+        cflags |= VNGO_CLIP_Z;
+
+    VNGError err = crect.clip_to(&tp1,&tp2,cflags);
+    if (err == VNGO_FULLY_CLIPPED)
+        return VNGO_NO_ERROR;
+    else
+        return gline(&tp1,&tp2);
+
+#if 0
     VngoRect    crect(0,0,vbuff.width-1,vbuff.height-1);
 
     if (clip_rect)
@@ -949,6 +1067,7 @@ VNGError VngoVVport8::clip_gline(VngoPoint *p1, VngoPoint *p2, VngoRect *clip_re
 
     vngo_gline(this,&tp1,&tp2);
     return VNGO_NO_ERROR;
+#endif
 }
 
 

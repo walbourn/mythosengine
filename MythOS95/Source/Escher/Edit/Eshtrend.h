@@ -75,7 +75,7 @@ public:
 
 // Attributes
 public:
-    EschTerrain         terr;
+    EschTerrainEx       terr;
     VngoPal             *pal;
 
 // Operations

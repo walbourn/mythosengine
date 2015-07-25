@@ -198,7 +198,7 @@ esch_error_codes EschKeyframer::load (const char *filename)
     XFParseIFF          iff;
 
 //ÄÄ Open file
-    if (iff.open(filename,XF_OPEN_READ))
+    if (iff.open(filename,XF_OPEN_READ | XF_OPEN_DENYWRITE))
         return ESCH_ERR_FILEERROR;
 
 //ÄÄ Loop until data found
@@ -211,6 +211,7 @@ esch_error_codes EschKeyframer::load (const char *filename)
             if (!iff.depth)
                 return ESCH_ERR_NOTFOUND;
             iff.leaveform();
+            continue;
         }
 
         if (iff.chunkid == iff.makeid('F','O','R','M')

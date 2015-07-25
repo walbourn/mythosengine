@@ -208,7 +208,10 @@ VNGError VngoVVport16::tpoly (int count,VngoPoint pts[],VngoTexture *tex)
     }
     if (tptr == NULL)
     {
-        tptr = new VngoMemTexture3D(tex);
+        if (tex->pal_ptr == NULL)
+            tex->pal_ptr = vbuff.pal;
+
+        tptr = new VngoMemTexture3D(tex,tex->pal_ptr);
         if (tptr->get_err_status() != VNGO_NO_ERROR)
         {
             delete tptr;
@@ -221,6 +224,9 @@ VNGError VngoVVport16::tpoly (int count,VngoPoint pts[],VngoTexture *tex)
     {
         return (VNGO_UNSUPPORTED_TEXTURE);
     }
+
+    VngoPal *tpal = vbuff.pal;
+    vbuff.pal = tex->pal_ptr;
 
     VngoPoint2 tpts[VNGO_MAX_VERTCOUNT];
     for (int i=0;i < count;i++)
@@ -239,6 +245,9 @@ VNGError VngoVVport16::tpoly (int count,VngoPoint pts[],VngoTexture *tex)
     }
 
     vngo_tpoly16(this,count,tpts,tptr);
+
+    vbuff.pal = tpal;
+
     return VNGO_NO_ERROR;
 }
 
@@ -256,7 +265,10 @@ VNGError VngoVVport16::tpoly (int count,VngoPointF pts[],VngoTexture *tex)
     }
     if (tptr == NULL)
     {
-        tptr = new VngoMemTexture3D(tex);
+        if (tex->pal_ptr == NULL)
+            tex->pal_ptr = vbuff.pal;
+
+        tptr = new VngoMemTexture3D(tex,tex->pal_ptr);
         if (tptr->get_err_status() != VNGO_NO_ERROR)
         {
             delete tptr;
@@ -269,6 +281,9 @@ VNGError VngoVVport16::tpoly (int count,VngoPointF pts[],VngoTexture *tex)
     {
         return (VNGO_UNSUPPORTED_TEXTURE);
     }
+
+    VngoPal *tpal = vbuff.pal;
+    vbuff.pal = tex->pal_ptr;
 
     VngoPoint2 tpts[VNGO_MAX_VERTCOUNT];
     for (int i=0;i < count;i++)
@@ -287,6 +302,8 @@ VNGError VngoVVport16::tpoly (int count,VngoPointF pts[],VngoTexture *tex)
     }
 
     vngo_tpoly16(this,count,tpts,tptr);
+    vbuff.pal = tpal;
+
     return VNGO_NO_ERROR;
 }
 
@@ -303,7 +320,10 @@ VNGError VngoVVport16::tpoly_persp (int count,VngoPoint pts[],VngoTexture *tex)
     }
     if (tptr == NULL)
     {
-        tptr = new VngoMemTexture3D(tex);
+        if (tex->pal_ptr == NULL)
+            tex->pal_ptr = vbuff.pal;
+
+        tptr = new VngoMemTexture3D(tex,tex->pal_ptr);
         if (tptr->get_err_status() != VNGO_NO_ERROR)
         {
             delete tptr;
@@ -316,6 +336,9 @@ VNGError VngoVVport16::tpoly_persp (int count,VngoPoint pts[],VngoTexture *tex)
     {
         return (VNGO_UNSUPPORTED_TEXTURE);
     }
+
+    VngoPal *tpal = vbuff.pal;
+    vbuff.pal = tex->pal_ptr;
 
     VngoPoint2 tpts[VNGO_MAX_VERTCOUNT];
     for (int i=0;i < count;i++)
@@ -334,6 +357,8 @@ VNGError VngoVVport16::tpoly_persp (int count,VngoPoint pts[],VngoTexture *tex)
     }
 
     vngo_tpoly_persp16 (this,count,tpts,tptr);
+    vbuff.pal = tpal;
+
     return VNGO_NO_ERROR;
 }
 
@@ -351,7 +376,10 @@ VNGError VngoVVport16::tpoly_persp (int count,VngoPointF pts[],VngoTexture *tex)
     }
     if (tptr == NULL)
     {
-        tptr = new VngoMemTexture3D(tex);
+        if (tex->pal_ptr == NULL)
+            tex->pal_ptr = vbuff.pal;
+
+        tptr = new VngoMemTexture3D(tex,tex->pal_ptr);
         if (tptr->get_err_status() != VNGO_NO_ERROR)
         {
             delete tptr;
@@ -365,6 +393,8 @@ VNGError VngoVVport16::tpoly_persp (int count,VngoPointF pts[],VngoTexture *tex)
         return (VNGO_UNSUPPORTED_TEXTURE);
     }
 
+    VngoPal *tpal = vbuff.pal;
+    vbuff.pal = tex->pal_ptr;
 
     VngoPoint2 tpts[VNGO_MAX_VERTCOUNT];
     for (int i=0;i < count;i++)
@@ -384,6 +414,8 @@ VNGError VngoVVport16::tpoly_persp (int count,VngoPointF pts[],VngoTexture *tex)
     }
 
     vngo_tpoly_persp16 (this,count,tpts,tptr);
+    vbuff.pal = tpal;
+
     return VNGO_NO_ERROR;
 }
 
@@ -400,7 +432,10 @@ VNGError VngoVVport16::gtpoly (int count,VngoPoint pts[],VngoTexture *tex)
     }
     if (tptr == NULL)
     {
-        tptr = new VngoMemTexture3D(tex);
+        if (tex->pal_ptr == NULL)
+            tex->pal_ptr = vbuff.pal;
+
+        tptr = new VngoMemTexture3D(tex,tex->pal_ptr);
         if (tptr->get_err_status() != VNGO_NO_ERROR)
         {
             delete tptr;
@@ -413,6 +448,9 @@ VNGError VngoVVport16::gtpoly (int count,VngoPoint pts[],VngoTexture *tex)
     {
         return (VNGO_UNSUPPORTED_TEXTURE);
     }
+
+    VngoPal *tpal = vbuff.pal;
+    vbuff.pal = tex->pal_ptr;
 
     VngoPoint2 tpts[VNGO_MAX_VERTCOUNT];
     for (int i=0;i < count;i++)
@@ -430,6 +468,8 @@ VNGError VngoVVport16::gtpoly (int count,VngoPoint pts[],VngoTexture *tex)
         assert (pts[i].y < vbuff.height);
     }
     vngo_tgpoly16(this,count,tpts,tptr);
+    vbuff.pal = tpal;
+
     return VNGO_NO_ERROR;
 }
 
@@ -447,7 +487,10 @@ VNGError VngoVVport16::gtpoly (int count,VngoPointF pts[],VngoTexture *tex)
     }
     if (tptr == NULL)
     {
-        tptr = new VngoMemTexture3D(tex);
+        if (tex->pal_ptr == NULL)
+            tex->pal_ptr = vbuff.pal;
+
+        tptr = new VngoMemTexture3D(tex,tex->pal_ptr);
         if (tptr->get_err_status() != VNGO_NO_ERROR)
         {
             delete tptr;
@@ -461,6 +504,8 @@ VNGError VngoVVport16::gtpoly (int count,VngoPointF pts[],VngoTexture *tex)
         return (VNGO_UNSUPPORTED_TEXTURE);
     }
 
+    VngoPal *tpal = vbuff.pal;
+    vbuff.pal = tex->pal_ptr;
 
     VngoPoint2 tpts[VNGO_MAX_VERTCOUNT];
     for (int i=0;i < count;i++)
@@ -478,6 +523,8 @@ VNGError VngoVVport16::gtpoly (int count,VngoPointF pts[],VngoTexture *tex)
         assert (pts[i].y < vbuff.height << 16);
     }
     vngo_tgpoly16(this,count,tpts,tptr);
+    vbuff.pal = tpal;
+
     return VNGO_NO_ERROR;
 }
 
@@ -494,7 +541,10 @@ VNGError VngoVVport16::gtpoly_persp (int count,VngoPoint pts[],VngoTexture *tex)
     }
     if (tptr == NULL)
     {
-        tptr = new VngoMemTexture3D(tex);
+        if (tex->pal_ptr == NULL)
+            tex->pal_ptr = vbuff.pal;
+
+        tptr = new VngoMemTexture3D(tex,tex->pal_ptr);
         if (tptr->get_err_status() != VNGO_NO_ERROR)
         {
             delete tptr;
@@ -508,6 +558,8 @@ VNGError VngoVVport16::gtpoly_persp (int count,VngoPoint pts[],VngoTexture *tex)
         return (VNGO_UNSUPPORTED_TEXTURE);
     }
 
+    VngoPal *tpal = vbuff.pal;
+    vbuff.pal = tex->pal_ptr;
 
     VngoPoint2 tpts[VNGO_MAX_VERTCOUNT];
     for (int i=0;i < count;i++)
@@ -525,6 +577,8 @@ VNGError VngoVVport16::gtpoly_persp (int count,VngoPoint pts[],VngoTexture *tex)
         assert (pts[i].y < vbuff.height);
     }
     vngo_tgpoly_persp16(this,count,tpts,tptr);
+    vbuff.pal = tpal;
+
     return VNGO_NO_ERROR;
 }
 
@@ -541,7 +595,10 @@ VNGError VngoVVport16::gtpoly_persp (int count,VngoPointF pts[],VngoTexture *tex
     }
     if (tptr == NULL)
     {
-        tptr = new VngoMemTexture3D(tex);
+        if (tex->pal_ptr == NULL)
+            tex->pal_ptr = vbuff.pal;
+
+        tptr = new VngoMemTexture3D(tex,tex->pal_ptr);
         if (tptr->get_err_status() != VNGO_NO_ERROR)
         {
             delete tptr;
@@ -555,6 +612,8 @@ VNGError VngoVVport16::gtpoly_persp (int count,VngoPointF pts[],VngoTexture *tex
         return (VNGO_UNSUPPORTED_TEXTURE);
     }
 
+    VngoPal *tpal = vbuff.pal;
+    vbuff.pal = tex->pal_ptr;
 
     VngoPoint2 tpts[VNGO_MAX_VERTCOUNT];
     for (int i=0;i < count;i++)
@@ -573,6 +632,8 @@ VNGError VngoVVport16::gtpoly_persp (int count,VngoPointF pts[],VngoTexture *tex
         assert (pts[i].y < vbuff.height << 16);
     }
     vngo_tgpoly_persp16 (this,count,tpts,tptr);
+    vbuff.pal = tpal;
+
     return VNGO_NO_ERROR;
 }
 
@@ -769,7 +830,10 @@ VNGError VngoVVport16::tpoly_a (int count,VngoPoint pts[],
     }
     if (tptr == NULL)
     {
-        tptr = new VngoMemTexture3D(tex);
+        if (tex->pal_ptr == NULL)
+            tex->pal_ptr = vbuff.pal;
+
+        tptr = new VngoMemTexture3D(tex,tex->pal_ptr);
         if (tptr->get_err_status() != VNGO_NO_ERROR)
         {
             delete tptr;
@@ -782,6 +846,9 @@ VNGError VngoVVport16::tpoly_a (int count,VngoPoint pts[],
     {
         return (VNGO_UNSUPPORTED_TEXTURE);
     }
+
+    VngoPal *tpal = vbuff.pal;
+    vbuff.pal = tex->pal_ptr;
 
     VngoPoint2 tpts[VNGO_MAX_VERTCOUNT];
     for (int i=0;i < count;i++)
@@ -800,6 +867,8 @@ VNGError VngoVVport16::tpoly_a (int count,VngoPoint pts[],
     }
 
     vngo_atpoly16(this,count,tpts,tptr,alpha);
+    vbuff.pal = tpal;
+
     return VNGO_NO_ERROR;
 }
 
@@ -819,7 +888,10 @@ VNGError VngoVVport16::tpoly_a (int count,VngoPointF pts[],
     }
     if (tptr == NULL)
     {
-        tptr = new VngoMemTexture3D(tex);
+        if (tex->pal_ptr == NULL)
+            tex->pal_ptr = vbuff.pal;
+
+        tptr = new VngoMemTexture3D(tex,tex->pal_ptr);
         if (tptr->get_err_status() != VNGO_NO_ERROR)
         {
             delete tptr;
@@ -832,6 +904,9 @@ VNGError VngoVVport16::tpoly_a (int count,VngoPointF pts[],
     {
         return (VNGO_UNSUPPORTED_TEXTURE);
     }
+
+    VngoPal *tpal = vbuff.pal;
+    vbuff.pal = tex->pal_ptr;
 
     VngoPoint2 tpts[VNGO_MAX_VERTCOUNT];
     for (int i=0;i < count;i++)
@@ -850,6 +925,8 @@ VNGError VngoVVport16::tpoly_a (int count,VngoPointF pts[],
     }
 
     vngo_atpoly16(this,count,tpts,tptr,alpha);
+    vbuff.pal = tpal;
+
     return VNGO_NO_ERROR;
 }
 
@@ -868,7 +945,10 @@ VNGError VngoVVport16::tpoly_persp_a (int count,VngoPoint pts[],
     }
     if (tptr == NULL)
     {
-        tptr = new VngoMemTexture3D(tex);
+        if (tex->pal_ptr == NULL)
+            tex->pal_ptr = vbuff.pal;
+
+        tptr = new VngoMemTexture3D(tex,tex->pal_ptr);
         if (tptr->get_err_status() != VNGO_NO_ERROR)
         {
             delete tptr;
@@ -882,6 +962,8 @@ VNGError VngoVVport16::tpoly_persp_a (int count,VngoPoint pts[],
         return (VNGO_UNSUPPORTED_TEXTURE);
     }
 
+    VngoPal *tpal = vbuff.pal;
+    vbuff.pal = tex->pal_ptr;
 
     VngoPoint2 tpts[VNGO_MAX_VERTCOUNT];
     for (int i=0;i < count;i++)
@@ -900,6 +982,8 @@ VNGError VngoVVport16::tpoly_persp_a (int count,VngoPoint pts[],
     }
 
     vngo_atpoly_persp16(this,count,tpts,tptr,alpha);
+    vbuff.pal = tpal;
+
     return VNGO_NO_ERROR;
 }
 
@@ -919,7 +1003,10 @@ VNGError VngoVVport16::tpoly_persp_a (int count,VngoPointF pts[],
     }
     if (tptr == NULL)
     {
-        tptr = new VngoMemTexture3D(tex);
+        if (tex->pal_ptr == NULL)
+            tex->pal_ptr = vbuff.pal;
+
+        tptr = new VngoMemTexture3D(tex,tex->pal_ptr);
         if (tptr->get_err_status() != VNGO_NO_ERROR)
         {
             delete tptr;
@@ -933,6 +1020,8 @@ VNGError VngoVVport16::tpoly_persp_a (int count,VngoPointF pts[],
         return (VNGO_UNSUPPORTED_TEXTURE);
     }
 
+    VngoPal *tpal = vbuff.pal;
+    vbuff.pal = tex->pal_ptr;
 
     VngoPoint2 tpts[VNGO_MAX_VERTCOUNT];
     for (int i=0;i < count;i++)
@@ -952,6 +1041,8 @@ VNGError VngoVVport16::tpoly_persp_a (int count,VngoPointF pts[],
     }
 
     vngo_atpoly_persp16(this,count,tpts,tptr,alpha);
+    vbuff.pal = tpal;
+
     return VNGO_NO_ERROR;
 }
 
@@ -970,7 +1061,10 @@ VNGError VngoVVport16::gtpoly_a (int count,VngoPoint pts[],
     }
     if (tptr == NULL)
     {
-        tptr = new VngoMemTexture3D(tex);
+        if (tex->pal_ptr == NULL)
+            tex->pal_ptr = vbuff.pal;
+
+        tptr = new VngoMemTexture3D(tex,tex->pal_ptr);
         if (tptr->get_err_status() != VNGO_NO_ERROR)
         {
             delete tptr;
@@ -984,6 +1078,8 @@ VNGError VngoVVport16::gtpoly_a (int count,VngoPoint pts[],
         return (VNGO_UNSUPPORTED_TEXTURE);
     }
 
+    VngoPal *tpal = vbuff.pal;
+    vbuff.pal = tex->pal_ptr;
 
     VngoPoint2 tpts[VNGO_MAX_VERTCOUNT];
     for (int i=0;i < count;i++)
@@ -1001,6 +1097,8 @@ VNGError VngoVVport16::gtpoly_a (int count,VngoPoint pts[],
         assert (pts[i].y < vbuff.height);
     }
     vngo_atgpoly16(this,count,tpts,tptr,alpha);
+    vbuff.pal = tpal;
+
     return VNGO_NO_ERROR;
 }
 
@@ -1020,7 +1118,10 @@ VNGError VngoVVport16::gtpoly_a (int count,VngoPointF pts[],
     }
     if (tptr == NULL)
     {
-        tptr = new VngoMemTexture3D(tex);
+        if (tex->pal_ptr == NULL)
+            tex->pal_ptr = vbuff.pal;
+
+        tptr = new VngoMemTexture3D(tex,tex->pal_ptr);
         if (tptr->get_err_status() != VNGO_NO_ERROR)
         {
             delete tptr;
@@ -1034,6 +1135,9 @@ VNGError VngoVVport16::gtpoly_a (int count,VngoPointF pts[],
         return (VNGO_UNSUPPORTED_TEXTURE);
     }
 
+
+    VngoPal *tpal = vbuff.pal;
+    vbuff.pal = tex->pal_ptr;
 
     VngoPoint2 tpts[VNGO_MAX_VERTCOUNT];
     for (int i=0;i < count;i++)
@@ -1051,6 +1155,8 @@ VNGError VngoVVport16::gtpoly_a (int count,VngoPointF pts[],
         assert (pts[i].y < vbuff.height << 16);
     }
     vngo_atgpoly16(this,count,tpts,tptr,alpha);
+    vbuff.pal = tpal;
+
     return VNGO_NO_ERROR;
 }
 
@@ -1069,7 +1175,10 @@ VNGError VngoVVport16::gtpoly_persp_a (int count,VngoPoint pts[],
     }
     if (tptr == NULL)
     {
-        tptr = new VngoMemTexture3D(tex);
+        if (tex->pal_ptr == NULL)
+            tex->pal_ptr = vbuff.pal;
+
+        tptr = new VngoMemTexture3D(tex,tex->pal_ptr);
         if (tptr->get_err_status() != VNGO_NO_ERROR)
         {
             delete tptr;
@@ -1083,6 +1192,8 @@ VNGError VngoVVport16::gtpoly_persp_a (int count,VngoPoint pts[],
         return (VNGO_UNSUPPORTED_TEXTURE);
     }
 
+    VngoPal *tpal = vbuff.pal;
+    vbuff.pal = tex->pal_ptr;
 
     VngoPoint2 tpts[VNGO_MAX_VERTCOUNT];
     for (int i=0;i < count;i++)
@@ -1100,6 +1211,8 @@ VNGError VngoVVport16::gtpoly_persp_a (int count,VngoPoint pts[],
         assert (pts[i].y < vbuff.height);
     }
     vngo_atgpoly_persp16(this,count,tpts,tptr,alpha);
+    vbuff.pal = tpal;
+
     return VNGO_NO_ERROR;
 }
 
@@ -1118,7 +1231,10 @@ VNGError VngoVVport16::gtpoly_persp_a (int count,VngoPointF pts[],
     }
     if (tptr == NULL)
     {
-        tptr = new VngoMemTexture3D(tex);
+        if (tex->pal_ptr == NULL)
+            tex->pal_ptr = vbuff.pal;
+
+        tptr = new VngoMemTexture3D(tex,tex->pal_ptr);
         if (tptr->get_err_status() != VNGO_NO_ERROR)
         {
             delete tptr;
@@ -1132,6 +1248,8 @@ VNGError VngoVVport16::gtpoly_persp_a (int count,VngoPointF pts[],
         return (VNGO_UNSUPPORTED_TEXTURE);
     }
 
+    VngoPal *tpal = vbuff.pal;
+    vbuff.pal = tex->pal_ptr;
 
     VngoPoint2 tpts[VNGO_MAX_VERTCOUNT];
     for (int i=0;i < count;i++)
@@ -1150,6 +1268,8 @@ VNGError VngoVVport16::gtpoly_persp_a (int count,VngoPointF pts[],
         assert (pts[i].y < vbuff.height << 16);
     }
     vngo_atgpoly_persp16(this,count,tpts,tptr,alpha);
+    vbuff.pal = tpal;
+
     return VNGO_NO_ERROR;
 }
 

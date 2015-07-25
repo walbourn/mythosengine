@@ -193,6 +193,7 @@ protected:
     EschVector      tweens[ESCH_MAX_SIMULTANEOUS];
     EschVector      steps[ESCH_MAX_SIMULTANEOUS];
     BOOL            ping_pong[ESCH_MAX_SIMULTANEOUS];
+    float           fnext_frames[ESCH_MAX_SIMULTANEOUS];
 
     // time stamps for tweening
     float           prev_stamp[ESCH_MAX_SIMULTANEOUS];
@@ -260,6 +261,9 @@ public:
     void reset_keyframes(int num, float time, float interval=0.0f);
     void reset_children (int num, float time, float interval=0.0f);
 
+    float calc_stride (int chain_num);
+    int calc_foot (ulong kt, char *mt, EschVector *ret, EschFrameRef *stride_mtx, int frame_num);
+
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Accessor functions                                                   ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
@@ -313,6 +317,9 @@ public:
 
     void set_yaw_rest (const float degrees) { rest_yaw = degrees; };
     void set_yaw_rest (const dword degrees) { rest_yaw = float((long)degrees); };
+
+    void align_swapping_keys();
+    void align_child(int num, EschKeyframeDraw *root);
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // I/O Routines.                                                        ³

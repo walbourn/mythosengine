@@ -39,7 +39,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include "escher.hpp"
@@ -148,7 +148,7 @@ void EschMetabox::draw()
 
 //ÄÄÄ Clear arena
     ivory_arena_clear(EschSysInstance->wspace);
-    
+
 //ÄÄÄ Setup local pointers to current camera and Van Gogh viewport.
     assertMyth("EschMetabox::draw needs camera in current context",
                EschCurrent != NULL && EschCurrent->camera != NULL);
@@ -279,7 +279,7 @@ void EschMetabox::draw()
         face.c     = 4;
         face.u[2]  = u[2];
         face.v[2]  = v[2];
-        
+
         vpt[face.a].clr = color[ESCH_MBOX_FACE_BOTTOM];
         esch_clipdraw_face(0,ctrlfl);
     }
@@ -471,75 +471,6 @@ void EschMetabox::release()
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// EschMetabox - set_top                                                    ³
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void EschMetabox::set_top(float ii, float ij, float ik, dword update)
-{
-    EschVector v(ii,ij,ik);
-    v.normalize();
-
-    EschVector  right;
-
-    world.ortho_count=0;
-
-//ÄÄÄ Create right vector 
-    right = v CROSS world.dir;
-
-//ÄÄÄ Fill in matrix for ortho rotation
-
-    //ÄÄÄ Transform
-    world.orient.mtx[ESCH_MTX_A] = right.i;
-    world.orient.mtx[ESCH_MTX_B] = right.j;
-    world.orient.mtx[ESCH_MTX_C] = right.k;
-
-    world.orient.mtx[ESCH_MTX_D] = v.i;
-    world.orient.mtx[ESCH_MTX_E] = v.j;
-    world.orient.mtx[ESCH_MTX_F] = v.k;
-
-    //ÄÄÄ Inverse Transform
-    if (update & ESCH_UPD_INVERSE)
-        world.compute_inverse();
-}
-
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// EschMetabox - set_direction                                              ³
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void EschMetabox::set_direction(float ii, float ij, float ik, dword update)
-{
-    world.dir.i = ii;
-    world.dir.j = ij;
-    world.dir.k = ik;
-    world.dir.normalize();
-
-    EschVector  right;
-    EschVector  top(world.orient.mtx[ESCH_MTX_D],
-                    world.orient.mtx[ESCH_MTX_E],
-                    world.orient.mtx[ESCH_MTX_F]);
-
-    world.ortho_count=0;
-
-//ÄÄÄ Create right vector 
-    right = top CROSS world.dir;
-
-//ÄÄÄ Fill in matrix for ortho rotation
-
-    //ÄÄÄ Transform
-    world.orient.mtx[ESCH_MTX_A] = right.i;
-    world.orient.mtx[ESCH_MTX_B] = right.j;
-    world.orient.mtx[ESCH_MTX_C] = right.k;
-
-    world.orient.mtx[ESCH_MTX_G] = world.dir.i;
-    world.orient.mtx[ESCH_MTX_H] = world.dir.j;
-    world.orient.mtx[ESCH_MTX_I] = world.dir.k;
-
-    //ÄÄÄ Inverse Transform
-    if (update & ESCH_UPD_INVERSE)
-        world.compute_inverse();
-}
-
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // EschMetabox - set_color                                                  ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 void EschMetabox::set_color(dword clr, int face)
@@ -586,11 +517,11 @@ void EschMetabox::set_texture(EschTexture *t, int face)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 void EschMetabox::create_cube(float size)
 {
-    flags |= ESCH_MBOX_TOP   
+    flags |= ESCH_MBOX_TOP
              | ESCH_MBOX_BOTTOM
-             | ESCH_MBOX_FRONT 
-             | ESCH_MBOX_BACK  
-             | ESCH_MBOX_LEFT  
+             | ESCH_MBOX_FRONT
+             | ESCH_MBOX_BACK
+             | ESCH_MBOX_LEFT
              | ESCH_MBOX_RIGHT;
 
     float s = size / 2;

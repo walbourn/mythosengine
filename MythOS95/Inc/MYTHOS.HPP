@@ -105,7 +105,9 @@ public:
     //дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
     // Library control                                                      Ё
     //дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
-    int init(ulong esch_arena_size=ESCH_DEFAULT_ARENA, IvorySubAlloc *bozo_alloc = 0);
+    int init(ulong esch_arena_size=ESCH_DEFAULT_ARENA,
+             ulong esch_sort_size=ESCH_DEFAULT_SORT,
+             IvorySubAlloc *bozo_alloc = 0);
 
     //дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
     // Utility routines                                                     Ё

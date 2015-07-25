@@ -121,10 +121,14 @@ all: setstden $(LIB).pch $(LIB).lib
 #
 #±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 
-$(LIB).pch : simpch.obj
+$(LIB).pch :
+    del simpch.obj
 
 simpch.obj : ..\simpch.cpp
     $(CPP) /Ycsimgine.hpp /Fp$(LIB).pch $(CCOPTIONS) ..\$*.cpp
+
+simscl3d.obj : ..\simscl3d.cpp
+    $(CPP) $(CCOPTIONS) ..\$*.cpp
 
 #ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 # Library                                                                  ³

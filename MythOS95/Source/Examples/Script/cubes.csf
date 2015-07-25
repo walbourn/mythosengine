@@ -1,0 +1,179 @@
+//ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
+//
+//                                /\    /\ 
+//                               /  \  /  \ 
+//                              /    \/    \ 
+//                             /  /\    /\  \ 
+//                            /  /  \  /  Y T H O S
+//                           /  /    \/    \  \ 
+//                          /  /            \  \ 
+//                         /__/              \__\ 
+//
+//                      Microsoft Windows '95 Version
+//
+//            Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.
+//                           All Rights Reserved.
+//
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//
+//           *** Charybdis Enterprises, Inc. Company Confidential ***
+//
+//  This file and all associated files are the company proprietary property
+//        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+//
+// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
+// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
+// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
+// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
+// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+//
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//
+//                               3D SCRIPT EXAMPLE
+//
+// Created by Chuck Walbourn
+//
+// cubes.csf
+//
+//ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
+
+create camera="Camera"
+{
+    position=0,0,-100;
+    lookat=0,0,0;
+    shade=smooth;
+    yon=3000;
+    bcolor=0,0,128;
+    haze=0.20,0.85;
+}
+
+create light="Spot" type=spot
+{
+    position=0,0,-100;
+    direction=0,0,1;
+    falloff=15;
+    hotspot=10;
+    intensity=255;
+}
+
+waitkey=1000;
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// Load nine cubes
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+create drawable="Cube01" file="DATA\BOXTEST.IFF"
+{
+    position=1,0,0;
+}
+
+create drawable="Cube02" file="DATA\BOXTEST.IFF"
+{
+    position=0,1,0;
+}
+
+create drawable="Cube03" file="DATA\BOXTEST.IFF"
+{
+    position=1,1,0;
+}
+
+create drawable="Cube04" file="DATA\BOXTEST.IFF"
+{
+    position=0,0,0;
+}
+
+create drawable="Cube05" file="DATA\BOXTEST.IFF"
+{
+    position=0,1,0;
+}
+
+create drawable="Cube06" file="DATA\BOXTEST.IFF"
+{
+    position=1,0,0;
+}
+
+create drawable="Cube07" file="DATA\BOXTEST.IFF"
+{
+    position=0,1,0;
+}
+
+create drawable="Cube08" file="DATA\BOXTEST.IFF"
+{
+    position=1,1,0;
+}
+
+create drawable="Cube09" file="DATA\BOXTEST.IFF"
+{
+    position=0,0,0;
+}
+
+waitkey=1000;
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// Fire them away from the viewer
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+animate drawable="Cube01"
+{
+    velocity=25,0,75;
+    acceleration=0,0,10;
+    rotatex = 180;
+}
+
+animate drawable="Cube02"
+{
+    velocity=0,25,75;
+    acceleration=0,0,10;
+    rotatey = 180;
+}
+
+animate drawable="Cube03"
+{
+    velocity=-25,0,75;
+    acceleration=0,0,10;
+    rotatez = 180;
+}
+
+animate drawable="Cube04"
+{
+    velocity=0,-25,75;
+    acceleration=0,0,10;
+    rotatex = 180;
+}
+
+animate drawable="Cube05"
+{
+    velocity=-25,-25,75;
+    acceleration=0,0,10;
+    rotatey = 180;
+}
+
+animate drawable="Cube06"
+{
+    velocity=25,25,75;
+    acceleration=0,0,10;
+    rotatez = 180;
+}
+
+animate drawable="Cube07"
+{
+    velocity=-25,25,75;
+    acceleration=0,0,10;
+    rotatex = 180;
+}
+
+animate drawable="Cube08"
+{
+    velocity=25,-25,75;
+    acceleration=0,0,10;
+    rotatey = 180;
+}
+
+animate drawable="Cube09"
+{
+    velocity=0,0,75;
+    acceleration=0,0,10;
+    rotatez = 180;
+}
+
+waitkey=10000;
+
+//°±² eof - cubes.csf ²±°

@@ -85,6 +85,9 @@ STATIC dword   Flags=0;
 STATIC ulong   Line=0;
 STATIC ulong   Maxline=24;
 
+char Util_name[] = "°± Escher Directory - (C) 1994-1997 Charybdis Enterprises, Inc. ±°\n"
+                   "                      All Rights Reserved.  " __DATE__ "\n";
+
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
 //                                 Code
@@ -148,16 +151,16 @@ void main(int argc, char *argv[])
     }
 
 //ÄÄÄ Open supplied iff file
-    if (iff.open(fn,XF_OPEN_READ))
+    if (iff.open(fn,XF_OPEN_READ | XF_OPEN_DENYWRITE))
     {
         print_error(iff,"Failed to open file");
         return;
     }
    
 //ÄÄÄ Print outline of file contents
-    cout << "°± Escher Directory - (C) 1994-1997 Charybdis Enterprises, Inc. ±°\n";
+    cout << Util_name;
     cout << "   File: " << fn << "\n";
-    Line=2;
+    Line=3;
     directory(iff);
 
 //ÄÄÄ Close file
@@ -170,8 +173,7 @@ void main(int argc, char *argv[])
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 STATIC void print_help(int full)
 {
-    cout << "°± Escher Directory - (C) 1994-1997 Charybdis Enterprises, Inc. ±°\n";
-    cout << "                      " __DATE__ "\n";
+    cout << Util_name;
     cout << "   Usage: eshdir [-p] <filename.iff>\n";
     if (full)
     {
@@ -352,6 +354,25 @@ STATIC void directory(XFParseIFF &iff)
                 pause();
             }
         }
+        //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Materials
+        else if ((iff.makeid('F','O','R','M') == iff.chunkid)
+                && (iff.makeid('E','M','T','L') == iff.formid
+                    || iff.makeid('E','M','T','1') == iff.formid))
+        {
+            cout << "Material";
+            for(i=sizeof("Material")-1; i < MAXCOLUMN; i++)
+                cout << "Ä";
+            cout << "\n";
+            pause();
+
+            directory_EMTL(iff);
+
+            cout << "À";
+            for(i=1; i < MAXCOLUMN; i++)
+                cout << "Ä";
+            cout << "\n";
+            pause();
+        }
         //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Mesh
         else if ((iff.makeid('F','O','R','M') == iff.chunkid)
                  && (iff.makeid('E','M','S','H') == iff.formid))
@@ -524,6 +545,33 @@ STATIC void directory(XFParseIFF &iff)
                             pause();
                         }
                     }
+                    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Verticies
+                    else if (iff.makeid('V','E','R','T') == iff.chunkid)
+                    {
+                        cout << "³ Contains fixed-point format vertex data\n";
+                        pause();
+                    }
+                    else if (iff.makeid('V','E','R','1') == iff.chunkid)
+                    {
+                        cout << "³ Contains floating-point format vertex data\n";
+                        pause();
+                    }
+                    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Faces
+                    else if (iff.makeid('F','A','C','E') == iff.chunkid)
+                    {
+                        cout << "³ Contains fixed-point format face data\n";
+                        pause();
+                    }
+                    else if (iff.makeid('F','A','C','1') == iff.chunkid)
+                    {
+                        cout << "³ Contains old floating-point format face data\n";
+                        pause();
+                    }
+                    else if (iff.makeid('F','A','C','2') == iff.chunkid)
+                    {
+                        cout << "³ Contains floating-point format face data\n";
+                        pause();
+                    }
                     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Materials
                     else if (iff.makeid('M','T','L',' ') == iff.chunkid)
                     {
@@ -560,6 +608,9 @@ STATIC void directory(XFParseIFF &iff)
                             && (iff.makeid('E','M','T','L') == iff.formid
                                 || iff.makeid('E','M','T','1') == iff.formid))
                     {
+                        cout << "³ MATERIAL:\n";
+                        pause();
+
                         directory_EMTL(iff);
                     }
                 }
@@ -1092,6 +1143,8 @@ STATIC void directory(XFParseIFF &iff)
 
                                 strncpy(theader.palname,v1.palname,
                                         sizeof(v1.palname));
+
+                                theader.ntxts = v1.ntxts;
                             }
                         }
 
@@ -1210,10 +1263,44 @@ STATIC void directory(XFParseIFF &iff)
                     {
                         cout << "³ Contains normals (compressed)" << endl;
                     }
+                    else if (iff.makeid('M','T','L',' ') == iff.chunkid)
+                    {
+                        if (iff.chunkSize != (sizeof(EschFileTerrMTL) * theader.ntxts))
+                        {
+                            print_error(iff,"Terrain materials name chunk not valid, incorrect size");
+                        }
+                        else if (theader.ntxts)
+                        {
+                            EschFileTerrMTL *emtls = new EschFileTerrMTL[theader.ntxts];
+
+                            if (iff.read(emtls))
+                            {
+                                print_error(iff,"Problem reading terrain materials names");
+                            }
+                            else
+                            {  
+                                cout << "³ MTLS:\n";
+                                pause();
+                                for(i=0; i < theader.ntxts; i++)
+                                {
+                                    char name[ESCH_MAX_NAME+1];
+                                    strncpy(name,emtls[i].name,ESCH_MAX_NAME);
+                                    name[ESCH_MAX_NAME] = 0;
+                                    cout << "³       " << name << "\n";
+                                    pause();
+                                }
+                            }
+
+                            delete [] emtls;
+                        }
+                    }
                     else if ((iff.makeid('F','O','R','M') == iff.chunkid)
                             && (iff.makeid('E','M','T','L') == iff.formid
                                 || iff.makeid('E','M','T','1') == iff.formid))
                     {
+                        cout << "³ MATERIAL:\n";
+                        pause();
+
                         directory_EMTL(iff);
                     }
                 }
@@ -1242,9 +1329,6 @@ STATIC void directory(XFParseIFF &iff)
 STATIC void directory_EMTL(XFParseIFF &iff)
 {
     EschFileMtlMHDR mtlhdr;
-
-    cout << "³ MDATA:\n";
-    pause();
 
     iff.enterform();
 

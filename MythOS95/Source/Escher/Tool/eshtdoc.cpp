@@ -107,6 +107,8 @@ public:
 static char BASED_CODE THIS_FILE[] = __FILE__;
 #endif
 
+extern ulong BitDepth;
+
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // ToolDoc                                                                  ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
@@ -163,6 +165,18 @@ ToolDoc::ToolDoc() :
                 break;
         }
     }
+
+    switch (BitDepth)
+    {
+        case 15:
+            palette = new VngoPal15;
+            break;
+        default:
+            palette = new VngoPal8;
+            break;
+    }
+
+    ASSERT(palette);
 }
 
 
@@ -533,19 +547,19 @@ esch_error_codes ToolDoc::serialize_store_mesh(XFParseIFF *iff, EschMeshDraw *ms
         // Convert face color to RGB
         for(i=0; i < (int)msh->mesh->nfaces; i++)
         {
-            VngoColor24bit clr = palette.hw_pal.p[(byte)fptr[i].color];
+            VngoColor24bit clr = palette->hw_pal.p[(byte)fptr[i].color];
             fptr[i].color = (clr.r | (clr.g << 8) | (clr.b << 16));
         }
 
         if (flags & FLOATING)
         {
-            if (iff->write(iff->makeid('F','A','C','1'),
+            if (iff->write(iff->makeid('F','A','C','2'),
                            fptr,msh->mesh->nfaces * sizeof(EschFace)))
             {
                 iff->leaveform();
                 // Convert face color back to index
                 for(i=0; i < (int)msh->mesh->nfaces; i++)
-                    fptr[i].color = (byte)palette.get_index((VngoColor24bit)fptr[i].color);
+                    fptr[i].color = (byte)palette->get_index((VngoColor24bit)fptr[i].color);
                 ivory_hunlock(msh->mesh->f);
                 return ESCH_ERR_FILEERROR;
             }
@@ -558,7 +572,7 @@ esch_error_codes ToolDoc::serialize_store_mesh(XFParseIFF *iff, EschMeshDraw *ms
                 iff->leaveform();
                 // Convert face color back to index
                 for(i=0; i < (int)msh->mesh->nfaces; i++)
-                    fptr[i].color = (byte)palette.get_index((VngoColor24bit)fptr[i].color);
+                    fptr[i].color = (byte)palette->get_index((VngoColor24bit)fptr[i].color);
                 ivory_hunlock(msh->mesh->f);
                 return ESCH_ERR_NOMEMORY;
             }
@@ -567,7 +581,13 @@ esch_error_codes ToolDoc::serialize_store_mesh(XFParseIFF *iff, EschMeshDraw *ms
             EschFaceV1 *tmpptr = ftemp;
             for(ulong i=0; i < msh->mesh->nfaces; i++, tptr++, tmpptr++)
             {
-                tmpptr->flags = tptr->flags;
+                dword flags = tptr->flags;
+                if (tptr->self_illum)
+                    flags |= (tptr->self_illum << 16) & ESCH_FACEV1_SILLUM_MASK;
+                if (flags & ESCH_FACE_ALPHA)
+                    flags |= (tptr->alpha_a << 20) & ESCH_FACEV1_ALPHA_MASK;
+                tmpptr->flags = flags;
+
                 tmpptr->a = tptr->a;
                 tmpptr->b = tptr->b;
                 tmpptr->c = tptr->c;
@@ -590,7 +610,7 @@ esch_error_codes ToolDoc::serialize_store_mesh(XFParseIFF *iff, EschMeshDraw *ms
                 iff->leaveform();
                 // Convert face color back to index
                 for(i=0; i < (int)msh->mesh->nfaces; i++)
-                    fptr[i].color = (byte)palette.get_index((VngoColor24bit)fptr[i].color);
+                    fptr[i].color = (byte)palette->get_index((VngoColor24bit)fptr[i].color);
                 delete [] ftemp;
                 ivory_hunlock(msh->mesh->f);
                 return ESCH_ERR_FILEERROR;
@@ -601,7 +621,7 @@ esch_error_codes ToolDoc::serialize_store_mesh(XFParseIFF *iff, EschMeshDraw *ms
 
         // Convert face color back to index
         for(i=0; i < (int)msh->mesh->nfaces; i++)
-            fptr[i].color = (byte)palette.get_index((VngoColor24bit)fptr[i].color);
+            fptr[i].color = (byte)palette->get_index((VngoColor24bit)fptr[i].color);
         ivory_hunlock(msh->mesh->f);
 
         //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Texture Data
@@ -727,7 +747,7 @@ esch_error_codes ToolDoc::serialize_store_mesh(XFParseIFF *iff, EschMeshDraw *ms
                             }
                             else
                             {
-                                VngoColor24bit clr = palette.hw_pal.p[*sptr];
+                                VngoColor24bit clr = palette->hw_pal.p[*sptr];
                                 *(dptr++) = clr.r;
                                 *(dptr++) = clr.g;
                                 *(dptr++) = clr.b;
@@ -916,8 +936,7 @@ void ToolDoc::Serialize(CArchive& ar)
                 memset(&cdata,0,sizeof(cdata));
 
                 strncpy(cdata.name,cam->name,ESCH_MAX_NAME);
-                cdata.flags = cam->flags & ~(ESCH_CAM_OWNSBITMAP
-                                            | ESCH_CAM_OWNSHAZE);
+                cdata.flags = cam->flags & ~ESCH_CAM_OWNSBITMAP;
 
                 EschPoint  pos;
                 cam->get_position(&pos);
@@ -948,8 +967,7 @@ void ToolDoc::Serialize(CArchive& ar)
                 memset(&cdata,0,sizeof(cdata));
 
                 strncpy(cdata.name,cam->name,ESCH_MAX_NAME);
-                cdata.flags = cam->flags & ~(ESCH_CAM_OWNSBITMAP
-                                            | ESCH_CAM_OWNSHAZE);
+                cdata.flags = cam->flags & ~ESCH_CAM_OWNSBITMAP;
 
                 EschPoint  pos;
                 cam->get_position(&pos);
@@ -1470,7 +1488,7 @@ save_error_exit: ;
                         return;
                     }
 
-                    err=m->load(&iff,0,&palette,0,pname,ESCH_MSHLD_USEMFTXT);
+                    err=m->load(&iff,0,palette,0,pname,ESCH_MSHLD_USEMFTXT);
                     if (err!=ESCH_ERR_NONE)
                     {
                         delete m;
@@ -1520,7 +1538,7 @@ save_error_exit: ;
                     else
                         cameras=c;
 
-                    c->set_bcolor(palette.get_index(VngoColor24bit(20,20,32)));
+                    c->set_bcolor(palette->get_index(VngoColor24bit(20,20,32)));
 
                     ncams++;
                 }
@@ -1687,11 +1705,24 @@ load_error_exit: ;
 BOOL ToolDoc::LoadPalette(const char *fname)
 {
     int             err;
-    VngoPal8        *palptr=&palette;
-    VngoPalIFF8     loadpal(palptr);
 
-    palptr->init(0);
-    err=loadpal.load(fname);
+    switch (BitDepth)
+    {
+        case 15:
+            {
+                VngoPalIFF15 loadpal(palette);
+                ((VngoPal15*)palette)->init(0);
+                err=loadpal.load(fname);
+            }
+            break;
+        default:
+            {
+                VngoPalIFF8 loadpal(palette);
+                ((VngoPal8*)palette)->init(0);
+                err=loadpal.load(fname);
+            }
+            break;
+    }
 
     if (err)
     {
@@ -1716,9 +1747,9 @@ BOOL ToolDoc::LoadPalette(const char *fname)
 
     for (int i=0; i < 256; i++)
     {
-        lpal->palPalEntry[i].peRed  = palptr->hw_pal.p[i].r;
-        lpal->palPalEntry[i].peGreen= palptr->hw_pal.p[i].g;
-        lpal->palPalEntry[i].peBlue = palptr->hw_pal.p[i].b;
+        lpal->palPalEntry[i].peRed  = palette->hw_pal.p[i].r;
+        lpal->palPalEntry[i].peGreen= palette->hw_pal.p[i].g;
+        lpal->palPalEntry[i].peBlue = palette->hw_pal.p[i].b;
         lpal->palPalEntry[i].peFlags= PC_NOCOLLAPSE;
     }
 

@@ -45,7 +45,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include "escher.hpp"
@@ -88,7 +88,8 @@ EschLight::EschLight(const char *fname, const char *lname) :
     iprev(0),
     ltyp(ESCH_LGTT_AMBIENT),
     intensity(16),
-    flags(0)
+    flags(0),
+    app_data(0)
 {
     strcpy(name,EschNoName);
 
@@ -106,7 +107,8 @@ EschLight::EschLight(const EschLight &l) :
     ltyp(l.ltyp),
     intensity(l.intensity),
     na(l.na),
-    flags(l.flags)
+    flags(l.flags),
+    app_data(l.app_data)
 {
     strncpy(name,l.name,ESCH_MAX_NAME);
 }
@@ -143,6 +145,7 @@ const EschLight &EschLight::operator = (const EschLight &l)
         na = l.na;
         flags = l.flags;
         strncpy(name,l.name,ESCH_MAX_NAME);
+        app_data = l.app_data;
     }
     return *this;
 }
@@ -221,7 +224,7 @@ EschLight *EschLight::find(const char *lname) const
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 void EschLight::setup(const EschFrameRef *fr)
 {
-//ÄÄÄ Compute internal intensity scales from intensity and 
+//ÄÄÄ Compute internal intensity scales from intensity and
 //ÄÄÄ current palette's midpoint value.
 
     assertMyth("EschLight::setup needs camera in current context",
@@ -331,7 +334,7 @@ esch_error_codes EschLight::load(const char *fname, const char *lname)
     XFParseIFF          iff;
 
 //ÄÄ Open file
-    if (iff.open(fname,XF_OPEN_READ))
+    if (iff.open(fname,XF_OPEN_READ | XF_OPEN_DENYWRITE))
         return ESCH_ERR_FILEERROR;
 
 //ÄÄ Loop until a header with the correct name is found
@@ -344,6 +347,7 @@ esch_error_codes EschLight::load(const char *fname, const char *lname)
             if (!iff.depth)
                 return ESCH_ERR_NOTFOUND;
             iff.leaveform();
+            continue;
         }
 
         if (iff.chunkid == iff.makeid('E','A','M','B'))

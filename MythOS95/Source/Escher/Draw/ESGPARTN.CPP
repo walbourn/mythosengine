@@ -305,8 +305,9 @@ esch_error_codes EschGridPartition::pick(EschPicking *data) const
         float x = data->start.x - origin.x;
         float z = data->start.z - origin.z;
 
-        assertMyth("EschGridPartition::pick assumes start inside grid...",
-                   x >= 0 && z >= 0);
+        // DDA doesn't work if start point is outside the grid
+        if (x < 0 || z < 0)
+            return ESCH_ERR_NOTSUPPORTED;
 
         long w = long(x) >> sizeshift;
         long d = long(z) >> sizeshift;

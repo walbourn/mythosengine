@@ -202,11 +202,9 @@ public:
 class EschPlosion : public EschDrawable
 {
 protected:
-    EschFrameRef    world;
     EschTexture     *fire;
     float           step;
     float           fv;
-    long            alpha_level;
 
     void check_workspace();
 
@@ -214,8 +212,10 @@ public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Public data members                                                  ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-    float   width;
-    float   height;
+    EschFrameRef    world;
+    float           width;
+    float           height;
+    long            alpha_level;
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Constructor/Destructors                                              ³
@@ -235,10 +235,7 @@ public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Utility functions.                                                   ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-    void get_position(EschPoint *p) const
-    {
-        world.get_position(p);
-    }
+    void get_position(EschPoint *p) const { world.get_position(p); }
 
     void set_position(float ix, float iy, float iz, dword update=ESCH_UPD_ALL)
     {
@@ -246,19 +243,92 @@ public:
     }
     void set_position(const EschPoint *pnt, dword update=ESCH_UPD_ALL)
     {
-        world.set_position(pnt->x, pnt->y, pnt->z, update);
+        world.set_position(pnt, update);
     }
 
-    void set_top(float ii, float ij, float ik, dword update=ESCH_UPD_ALL);
+    void set_top(float ii, float ij, float ik, dword update=ESCH_UPD_ALL)
+    {
+        world.set_top(ii,ij,ik,update);
+    }
     void set_top(const EschVector *v, dword update=ESCH_UPD_ALL)
     {
-        set_top(v->i, v->j, v->k, update);
+        world.set_top(v, update);
     }
 
-    void set_direction(float ii, float ij, float ik, dword update=ESCH_UPD_ALL);
+    void set_direction(float ii, float ij, float ik, dword update=ESCH_UPD_ALL)
+    {
+        world.set_direction(ii, ij, ik, update);
+    }
     void set_direction(const EschVector *v, dword update=ESCH_UPD_ALL)
     {
-        set_direction(v->i, v->j, v->k, update);
+        world.set_direction(v, update);
+    }
+
+    void rotatex(const float degrees, dword update=ESCH_UPD_ALL)
+    {
+        world.rotatex(degrees,update);
+    }
+    void rotatey(const float degrees, dword update=ESCH_UPD_ALL)
+    {
+        world.rotatey(degrees,update);
+    }
+    void rotatez(const float degrees, dword update=ESCH_UPD_ALL)
+    {
+        world.rotatez(degrees,update);
+    }
+
+    void rotate(const EschVector *v, const float degrees, dword update=ESCH_UPD_ALL)
+    {
+        world.rotate(v,degrees,update);
+    }
+
+    void pitch(const float degrees, dword update=ESCH_UPD_ALL)
+    {
+        world.pitch(degrees,update);
+    }
+    void roll(const float degrees, dword update=ESCH_UPD_ALL)
+    {
+        world.roll(degrees,update);
+    }
+    void yaw(const float degrees, dword update=ESCH_UPD_ALL)
+    {
+        world.yaw(degrees,update);
+    }
+
+    void translate(const float idx, const float idy, const float idz, dword update=ESCH_UPD_ALL)
+    {
+        world.translate(idx,idy,idz,update);
+    }
+    void translate(const EschVector *v, dword update=ESCH_UPD_ALL)
+    {
+        world.translate(v,update);
+    }
+
+    void move(const float idx, const float idy, const float idz, dword update=ESCH_UPD_ALL)
+    {
+        world.move(idx,idy,idz,update);
+    }
+    void move(const EschVector *v, dword update=ESCH_UPD_ALL)
+    {
+        world.move(v,update);
+    }
+
+    void scale(const float is, dword update=ESCH_UPD_ALL)
+    {
+        world.scale(is,update);
+    }
+
+    void orthogonalize(dword update=ESCH_UPD_ALL)
+    {
+        world.orthogonalize(update);
+    }
+    void orthogonalize_top(dword update=ESCH_UPD_ALL)
+    {
+        world.orthogonalize_top(update);
+    }
+    void orthogonalize_right(dword update=ESCH_UPD_ALL)
+    {
+        world.orthogonalize_right(update);
     }
 
     void set_size(float w, float h)
@@ -317,10 +387,7 @@ public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Utility functions.                                                   ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-    void get_position(EschPoint *p) const
-    {
-        world.get_position(p);
-    }
+    void get_position(EschPoint *p) const { world.get_position(p); }
 
     void set_position(float ix, float iy, float iz, dword update=ESCH_UPD_ALL)
     {
@@ -331,17 +398,92 @@ public:
         world.set_position(pnt->x, pnt->y, pnt->z, update);
     }
 
-    void set_top(float ii, float ij, float ik, dword update=ESCH_UPD_ALL);
+    void set_top(float ii, float ij, float ik, dword update=ESCH_UPD_ALL)
+    {
+        world.set_top(ii,ij,ik,update);
+    }
     void set_top(const EschVector *v, dword update=ESCH_UPD_ALL)
     {
-        set_top(v->i, v->j, v->k, update);
+        world.set_top(v,update);
     }
 
-    void set_direction(float ii, float ij, float ik, dword update=ESCH_UPD_ALL);
+    void set_direction(float ii, float ij, float ik, dword update=ESCH_UPD_ALL)
+    {
+        world.set_direction(ii, ij, ik, update);
+    }
     void set_direction(const EschVector *v, dword update=ESCH_UPD_ALL)
     {
-        set_direction(v->i, v->j, v->k, update);
+        world.set_direction(v, update);
     }
+
+    void rotatex(const float degrees, dword update=ESCH_UPD_ALL)
+    {
+        world.rotatex(degrees,update);
+    }
+    void rotatey(const float degrees, dword update=ESCH_UPD_ALL)
+    {
+        world.rotatey(degrees,update);
+    }
+    void rotatez(const float degrees, dword update=ESCH_UPD_ALL)
+    {
+        world.rotatez(degrees,update);
+    }
+
+    void rotate(const EschVector *v, const float degrees, dword update=ESCH_UPD_ALL)
+    {
+        world.rotate(v,degrees,update);
+    }
+
+    void pitch(const float degrees, dword update=ESCH_UPD_ALL)
+    {
+        world.pitch(degrees,update);
+    }
+    void roll(const float degrees, dword update=ESCH_UPD_ALL)
+    {
+        world.roll(degrees,update);
+    }
+    void yaw(const float degrees, dword update=ESCH_UPD_ALL)
+    {
+        world.yaw(degrees,update);
+    }
+
+    void translate(const float idx, const float idy, const float idz, dword update=ESCH_UPD_ALL)
+    {
+        world.translate(idx,idy,idz,update);
+    }
+    void translate(const EschVector *v, dword update=ESCH_UPD_ALL)
+    {
+        world.translate(v,update);
+    }
+
+    void move(const float idx, const float idy, const float idz, dword update=ESCH_UPD_ALL)
+    {
+        world.move(idx,idy,idz,update);
+    }
+    void move(const EschVector *v, dword update=ESCH_UPD_ALL)
+    {
+        world.move(v,update);
+    }
+
+    void scale(const float is, dword update=ESCH_UPD_ALL)
+    {
+        world.scale(is,update);
+    }
+
+    void orthogonalize(dword update=ESCH_UPD_ALL)
+    {
+        world.orthogonalize(update);
+    }
+    void orthogonalize_top(dword update=ESCH_UPD_ALL)
+    {
+        world.orthogonalize_top(update);
+    }
+    void orthogonalize_right(dword update=ESCH_UPD_ALL)
+    {
+        world.orthogonalize_right(update);
+    }
+
+    void reset() { world.reset(); }
 
     void set_color(dword clr, int face = -1);
     void set_texture(EschTexture *t, int face = -1);

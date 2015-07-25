@@ -111,18 +111,18 @@
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
 
-VngoVport3Dfx::VngoVport3Dfx (long width,long height,long org_x,long org_y,VngoPal *my_pal,dword flags)
+VngoVport3Dfx::VngoVport3Dfx (VngoRect &dim,VngoPal *my_pal,dword flags)
 {
-    init_status = init (width,height,org_x,org_y,my_pal,flags);
+    init_status = init (dim,my_pal,flags);
 }
 
-VNGError VngoVport3Dfx::init (long width,long height,long org_x,long org_y,VngoPal *my_pal,dword flags)
+VNGError VngoVport3Dfx::init (VngoRect &dim,VngoPal *my_pal,dword flags)
 {
     vbuff.pal = my_pal;
-    vbuff.width = width;
-    vbuff.height = height;
-//    vbuff.left = org_x;
-//    vbuff.top = org_y;
+    vbuff.width = dim.dx;
+    vbuff.height = dim.dy;
+//    vbuff.left = dim.x;
+//    vbuff.top = dim.y;
     vflags = flags;
 
 
@@ -155,8 +155,6 @@ void VngoVport3Dfx::reset(dword c,dword farz)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 //                                                                          ³
 // This is the start of the draw function block of the VngoVport3Dfx class. ³
-// all fucntions in this class draw to a 8 bit device regardless of the size³
-// of the input color information.                                          ³
 //                                                                          ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
@@ -320,9 +318,9 @@ VNGError VngoVport3Dfx::line(VngoPoint *p1,VngoPoint *p2, VngoColor24bit *rgb_va
             tclr.r = ((t >> 7) & 0xf8);
             tclr.g = ((t >> 2) & 0xf8);
             tclr.b = ((t << 3) & 0xf8);
-        }            
-        else         
-        {            
+        }
+        else
+        {
             tclr.r = ((t >> 8) & 0xf8);
             tclr.g = ((t >> 2) & 0xfc);
             tclr.b = ((t << 3) & 0xf8);
@@ -365,7 +363,7 @@ VNGError VngoVport3Dfx::clip_line(VngoPoint *p1,VngoPoint *p2,
 {
     assert(lock_status);
 
-    VngoRect    crect(0/*vbuff.left*/,0/*vbuff.top*/,vbuff.width-1,vbuff.height-1);
+    VngoRect    crect(0,0,vbuff.width-1,vbuff.height-1);
 
     if (clip_rect)
         crect.clip_to(*clip_rect);
@@ -815,29 +813,6 @@ VNGError VngoVport3Dfx::image_trans (VngoRect *dest_rect,VngoTexture *img,dword 
 
 }
 
-VNGError VngoVport3Dfx::image_trans_s (VngoRect *dest_rect,VngoTexture *img,
-                                 dword shade, dword flags)
-{
-    assert(lock_status);
-    return VNGO_NOT_SUPPORTED;
-}
-
-
-VNGError VngoVport3Dfx::image_trans_z (VngoRect *dest_rect,VngoTexture *img,
-                                 dword depth, dword flags)
-{
-    assert(lock_status);
-    return VNGO_NOT_SUPPORTED;
-}
-
-VNGError VngoVport3Dfx::image_trans_zs (VngoRect *dest_rect,VngoTexture *img,
-                                 dword depth, dword shade, dword flags)
-{
-    assert(lock_status);
-    return VNGO_NOT_SUPPORTED;
-}
-
-
 
 VNGError VngoVport3Dfx::zblit_mono (VngoRect *dest_rect,VngoZMap *img,dword fgcol,dword bgcol)
 {
@@ -1058,9 +1033,9 @@ VNGError VngoVport3Dfx::poly (int count,VngoPoint pts[])
             tclr.r = ((t >> 7) & 0xf8);
             tclr.g = ((t >> 2) & 0xf8);
             tclr.b = ((t << 3) & 0xf8);
-        }            
-        else         
-        {            
+        }
+        else
+        {
             tclr.r = ((t >> 8) & 0xf8);
             tclr.g = ((t >> 2) & 0xfc);
             tclr.b = ((t << 3) & 0xf8);
@@ -1116,9 +1091,9 @@ VNGError VngoVport3Dfx::gpoly (int count,VngoPoint pts[])
             tclr.r = ((t >> 7) & 0xf8);
             tclr.g = ((t >> 2) & 0xf8);
             tclr.b = ((t << 3) & 0xf8);
-        }            
-        else         
-        {            
+        }
+        else
+        {
             tclr.r = ((t >> 8) & 0xf8);
             tclr.g = ((t >> 2) & 0xfc);
             tclr.b = ((t << 3) & 0xf8);

@@ -126,10 +126,12 @@
 #define IDC_CPROP_HAZE                  1052
 #define IDC_TPROP_BLUE                  1054
 #define IDC_CPROP_LEVEL                 1054
+#define IDC_CPROP_STARTZ                1054
 #define IDC_TPROP_LBLUE                 1055
 #define IDC_CPROP_BLEVEL                1055
 #define IDC_TPROP_WHITE                 1056
 #define IDC_CPROP_SLEVEL                1056
+#define IDC_CPROP_MIDZ                  1056
 #define IDC_CPROP_BPERC                 1057
 #define IDC_TPROP_GREEN                 1061
 #define IDC_TPROP_LGREEN                1062

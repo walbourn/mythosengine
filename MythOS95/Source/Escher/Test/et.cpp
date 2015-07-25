@@ -56,6 +56,8 @@ const int MAXPAGES = 3;
 extern MaxDevices *Devs;
 extern ulong EschProposedTris;
 extern ulong EschDrawnTris;
+extern ulong EschElementDepth;
+extern ulong EschElementSize;
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
@@ -84,7 +86,7 @@ EscherTest::EscherTest (MaxDevices *d):
     draws(0),
     scene(0),
     terrain(0),
-    prtsystem(0),
+    prtgen(0),
     starfield(0),
     explosion(0),
     sprite(0),
@@ -96,7 +98,6 @@ EscherTest::EscherTest (MaxDevices *d):
     drawexts(0),
     RotateDegrees(1),
     ScriptRotateDegrees(3),
-    kind_of_particles(POINTS),
     backgrnd (0),
     frames (0),
     screen (0),
@@ -110,12 +111,21 @@ EscherTest::EscherTest (MaxDevices *d):
     int use_zbuffer=TRUE;
     char buff[128];
     char palname[128];
+    char targetname[64];
     int bpp = 8;
     XFParseINI  ini;
 
     if (ini.open(".\\ET.INI",XF_OPEN_READ) == XF_ERR_NONE)
     {
         ini.section("Screen");
+        if (!ini.read("TargetName",targetname))
+        {
+            strlwr(targetname);
+        }
+        else
+        {
+            strcpy(targetname,"bsdev (No not this one)");
+        }
         if (!ini.read("FullScreen",buff))
         {
             strlwr(buff);
@@ -164,19 +174,27 @@ EscherTest::EscherTest (MaxDevices *d):
             }
         }
 #endif
+#ifdef _CLEAR_3D
+        if (!ini.read("UseClear3D",buff))
+        {
+            strlwr(buff);
+            if (strstr(buff,"yes") || strstr(buff,"on"))
+            {
+                screen = new VngoClear3D (hWndClient);
+                use_fullscreen |= VNGO_3DDEVICE | VNGO_ALLOC_ZBUFFER;
+            }
+        }
 #endif
-#ifdef _D3D
+#endif
         if (!ini.read("UseD3D",buff))
         {
             strlwr(buff);
             if (strstr(buff,"yes") || strstr(buff,"on"))
             {
-                screen = new VngoDirect3D (hWndClient);
+                screen = new VngoDirect3D (hWndClient,targetname);
                 use_fullscreen |= VNGO_3DDEVICE | VNGO_ALLOC_ZBUFFER;
             }
         }
-#endif
-
 
         if (!ini.read("Resolution",buff))
         {
@@ -235,7 +253,7 @@ EscherTest::EscherTest (MaxDevices *d):
 
         if (!ini.read("Palette",palname))
         {
-            strlwr(buff);
+            strlwr(palname);
         }
         else
         {
@@ -248,7 +266,7 @@ EscherTest::EscherTest (MaxDevices *d):
         {
             screen = new VngoDIB (hWndClient);
         }
-        else if (screen->get_initstate() == FALSE)
+        else if (screen->get_initstate() != VNGO_NO_ERROR)
         {
             delete screen;
             screen = new VngoDIB (hWndClient);
@@ -260,7 +278,7 @@ EscherTest::EscherTest (MaxDevices *d):
     }
 
     assert(screen != NULL);
-    assert(screen->get_initstate() != FALSE);
+    assert(screen->get_initstate() == VNGO_NO_ERROR);
 
 
     if (bpp == 8)
@@ -280,11 +298,66 @@ EscherTest::EscherTest (MaxDevices *d):
     }
     if (mypal)
     {
+        VNGError    vgerr;
         if (bpp == 8)
-            screen->set_mode (map_xsize, map_ysize, 8 , mypal, use_fullscreen);
+            vgerr=screen->set_mode (map_xsize, map_ysize, 8 , mypal, use_fullscreen);
         else
-            screen->set_mode (map_xsize, map_ysize, 16 , mypal, use_fullscreen);
+            vgerr=screen->set_mode (map_xsize, map_ysize, 16 , mypal, use_fullscreen);
 
+        if (vgerr != VNGO_NO_ERROR && bpp != 8)
+        {
+            int type = screen->get_type();
+            delete screen;
+            delete mypal;
+
+            if (vgerr == VNGO_NEEDS_PAL15)
+            {
+                mypal = new VngoPal15;
+            }
+            else if (vgerr == VNGO_NEEDS_PAL16)
+            {
+                mypal = new VngoPal16;
+            }
+
+            if (type == VngoScreenManager::SCREENTYPE_DDRAW)
+            {
+                screen = new VngoDirectDraw(hWndClient);
+            }
+            else if (type == VngoScreenManager::SCREENTYPE_DIB)
+            {
+                screen = new VngoDIB(hWndClient);
+            }
+            else if (type == VngoScreenManager::SCREENTYPE_D3D)
+            {
+                screen = new VngoDirect3D(hWndClient,targetname);
+            }
+            if (mypal)
+            {
+                if (mypal->init(0,palname) != 0)
+                {
+                    delete mypal;
+                    mypal = NULL;
+                }
+            }
+
+            vgerr=screen->set_mode (map_xsize, map_ysize, 16 , mypal, use_fullscreen);
+            if (vgerr != VNGO_NO_ERROR)
+            {
+                delete screen;
+                screen=NULL;
+                delete mypal;
+                mypal = NULL;
+                return; // I can't realy return an error so just return;
+            }
+        }
+        else if (vgerr != VNGO_NO_ERROR)
+        {
+            delete screen;
+            screen = NULL;
+            delete mypal;
+            mypal = NULL;
+            return;
+        }
 
         if (screen->get_type() == VngoScreenManager::SCREENTYPE_DDRAW)
         {
@@ -329,16 +402,24 @@ EscherTest::EscherTest (MaxDevices *d):
               gvp = NULL;
         }
 #endif
-#endif
-#ifdef _D3D
-        else if (screen->get_type() == VngoScreenManager::SCREENTYPE_D3D)
+#ifdef _CLEAR_3D
+        else if (screen->get_type() == VngoScreenManager::SCREENTYPE_CLEAR3D)
         {
-            gvp = new VngoVportD3D(0,0,map_xsize,map_ysize,mypal,VNGO_ZBUFFER_DEV,screen);
+            VngoRect srect(0,0,map_xsize,map_ysize);
+            gvp = new VngoVportCL3D(srect,mypal,VNGO_ZBUFFER_DEV,screen);
         }
 #endif
+
+#endif
+        else if (screen->get_type() == VngoScreenManager::SCREENTYPE_D3D)
+        {
+            VngoRect srect(0,0,map_xsize,map_ysize);
+            gvp = new VngoVportD3D(srect,mypal,VNGO_ZBUFFER_DEV,screen);
+        }
         else
         {
-            gvp = new VngoVVport8(0,0,map_xsize,map_ysize,mypal,VNGO_ZBUFFER_DEV);
+            VngoRect srect(0,0,map_xsize,map_ysize);
+            gvp = new VngoVVport8(srect,mypal,VNGO_ZBUFFER_DEV);
         }
 
         if (!use_zbuffer)
@@ -431,6 +512,36 @@ EscherTest::~EscherTest ()
         mypal = 0;
     }
 
+    if (prtgen)
+    {
+        delete prtgen;
+        prtgen = 0;
+    }
+
+    if (starfield)
+    {
+        delete starfield;
+        starfield = 0;
+    }
+
+    if (explosion)
+    {
+        delete explosion;
+        explosion = 0;
+    }
+
+    if (sprite)
+    {
+        delete sprite;
+        sprite = 0;
+    }
+
+    if (metabox)
+    {
+        delete metabox;
+        metabox = 0;
+    }
+
     if (cam)
     {
         delete cam;
@@ -442,8 +553,6 @@ EscherTest::~EscherTest ()
         delete screen;
         screen = 0;
     }
-
-
 }
 
 
@@ -643,7 +752,7 @@ BOOL EscherTest::SetupSprite(const char *name)
                                 | ESCH_CAM_MODELSPACE
                                 | ESCH_CAM_ALPHA
                                 | ESCH_CAM_TEXTURED);
-        cam->set_bg_bitmap(backgrnd);
+        cam->create_bg_bitmap(backgrnd);
     }
 
     cam->set_bcolor(mypal->get_index(VngoColor24bit(0,0,128)));
@@ -690,14 +799,14 @@ BOOL EscherTest::LoadScene(char *fn)
                         | ESCH_CAM_SHADE_WIRE
                         | ESCH_CAM_BACKCULL
                         | ESCH_CAM_MODELSPACE
-//                        | ESCH_CAM_PERSPECTIVE
-//                        | ESCH_CAM_TEXTURED
+                        | ESCH_CAM_PERSPECTIVE
+                        | ESCH_CAM_TEXTURED
                         | ESCH_CAM_ALPHA
                         );
 
         cam->set_bcolor(mypal->get_index(VngoColor24bit(0,0,128)));
         cam->set_yon(2500);
-        cam->set_bg_bitmap(backgrnd);
+        cam->create_bg_bitmap(backgrnd);
     }
 
     if (!light)
@@ -711,6 +820,7 @@ BOOL EscherTest::LoadScene(char *fn)
         {
             if (curmesh && curmesh->txt)
             {
+                curmesh->set_flags(curmesh->flags | ESCH_MSHD_OWNSNOPRCTXT);
                 curmesh->txt[0] = fire;
             }
             else
@@ -923,11 +1033,11 @@ BOOL EscherTest::LoadTerrain(char *fn)
                                 | ESCH_CAM_ALPHA
                                 );
         cam->set_bcolor(mypal->get_index(VngoColor24bit(0,0,128)));
-        cam->set_bg_bitmap(backgrnd);
+        cam->create_bg_bitmap(backgrnd);
     }
 //    cam->set_fov(27);
 //    cam->set_factor(7.5f);
-    cam->set_yon(2500);
+    cam->set_yon(8000);
 
     if (!use_new_terrain)
     {
@@ -936,8 +1046,8 @@ BOOL EscherTest::LoadTerrain(char *fn)
     else
     {
         EschTerrainEx   *tt=(EschTerrainEx*)terrain;
-        tt->set_lod(2,250.0f);
-//        tt->set_lod(3,350.0f,750.0f);
+//        tt->set_lod(2,250.0f);
+        tt->set_lod(5,350.0f,750.0f,1500.f,3000.f);
         tt->set_perspective_lod(0);
         tt->set_texture_lod(3);
         tt->set_smooth_lod(3);
@@ -962,24 +1072,81 @@ BOOL EscherTest::LoadTerrain(char *fn)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 BOOL EscherTest::SetupParticleSystem(const char *name)
 {
-    if (prtsystem)
+    if (prtgen)
         return FALSE;
 
-    prtsystem = new EschParticleSystem;
-    if (!prtsystem
-        || prtsystem->init(0xff))
+//ÄÄÄ Setup generator
+    prtgen =new EschParticleGenerator;
+    if (!prtgen
+        || prtgen->init(4098))
     {
-        MessageBox("Could not create particle system",
+        MessageBox("Could not create particle generator",
                    MB_OK | MB_ICONEXCLAMATION);
         return FALSE;
     }
 
-    prtsystem->set_acceleration(0,-8,0);
+    if (strstr(name,"gravity"))
+    {
+        prtgen->set_acceleration(0,-8,0);
+    }
 
+    if (strstr(name,"circle"))
+    {
+        prtgen->set_circle(5, 45);
+    }
+    else if (strstr(name,"rect"))
+    {
+        prtgen->set_rectangle(5, 20, 45);
+    }
+    else
+    {
+        prtgen->set_sphere(5);
+    }
+
+    prtgen->set_speed(50);
+    prtgen->set_alpha(255);
+
+    if (strstr(name,"color"))
+    {
+        prtgen->set_color(mypal,
+                          VngoColor24bit(200,0,0),
+                          VngoColor24bit(55,128,0));
+    }
+    else
+    {
+        prtgen->set_color(mypal->get_index(VngoColor24bit(255,0,0)));
+    }
+
+
+    if (strstr(name,"pyramids"))
+    {
+        prtgen->set_parts(100);
+        prtgen->set_lifetime(5);
+        prtgen->set_size(2,7);
+        prtgen->set_callback(esch_generate_pyramid);
+    }
+    else if (strstr(name,"sprites"))
+    {
+        if (!sprite)
+        {
+            MessageBox("Must have Sprite Test enabled",
+                       MB_OK | MB_ICONEXCLAMATION);
+        }
+        prtgen->set_parts(100);
+        prtgen->set_lifetime(5);
+        prtgen->set_callback(esch_generate_sprite,sprite);
+    }
+    else
+    {
+        prtgen->set_parts(500,100);
+        prtgen->set_lifetime(5);
+    }
+
+//ÄÄÄ Create camera/lights if not already defined
     if (!cam)
     {
         cam = new EschCameraEx(gvp);
-        cam->set_position(0,0,-100);
+        cam->set_position(0,0,-500);
         cam->set_flags(cam->flags | ESCH_CAM_SHADE_SMOOTH
                                 | ESCH_CAM_SHADE_FLAT
                                 | ESCH_CAM_SHADE_SOLID
@@ -989,29 +1156,18 @@ BOOL EscherTest::SetupParticleSystem(const char *name)
                                 | ESCH_CAM_TEXTURED
                                 | ESCH_CAM_ALPHA
                                 );
-        cam->set_bcolor(mypal->get_index(VngoColor24bit(0,0,128)));
-        cam->set_bg_bitmap(backgrnd);
+        cam->set_bcolor(mypal->get_index(VngoColor24bit(0,0,0)));
+        cam->create_bg_bitmap(backgrnd);
     }
 
     if (!light)
         light = new EschVectorLight(-1,-1,-1);
 
-    if (strstr(name,"pyramids"))
-        kind_of_particles=PYRAMIDS;
-    else if (strstr(name,"sprites"))
-    {
-        if (!sprite)
-        {
-            MessageBox("Must have Sprite Test enabled",
-                       MB_OK | MB_ICONEXCLAMATION);
-        }
-        kind_of_particles=SPRITES;
-    }
-
+//ÄÄÄ Add to drawlist
     if (draws)
-        prtsystem->sibling(draws);
+        prtgen->sibling(draws);
     else
-        draws = prtsystem;
+        draws = prtgen;
 
     return TRUE;
 }
@@ -1051,7 +1207,7 @@ BOOL EscherTest::SetupStarfield(BOOL fixed, BOOL brights)
                                 | ESCH_CAM_TEXTURED
                                 | ESCH_CAM_ALPHA
                                 );
-        cam->set_bg_bitmap(backgrnd);
+        cam->create_bg_bitmap(backgrnd);
     }
 
     cam->set_bcolor(mypal->get_index(VngoColor24bit(0,0,0)));
@@ -1112,7 +1268,7 @@ BOOL EscherTest::SetupExplosion(const char *buff)
                                 | ESCH_CAM_TEXTURED
                                 | ESCH_CAM_ALPHA
                                 );
-        cam->set_bg_bitmap(backgrnd);
+        cam->create_bg_bitmap(backgrnd);
     }
 
     if (draws)
@@ -1172,7 +1328,7 @@ BOOL EscherTest::SetupMetabox(const char *buff)
                                   | ESCH_CAM_MODELSPACE
                                   | ESCH_CAM_ALPHA
                                   | ESCH_CAM_TEXTURED);
-        cam->set_bg_bitmap(backgrnd);
+        cam->create_bg_bitmap(backgrnd);
     }
 
     cam->set_bcolor(mypal->get_index(VngoColor24bit(0,0,128)));
@@ -1225,16 +1381,11 @@ void EscherTest::End (char *buff)
     total_frames += frames;
     total_time += fps_clock.check();
 
-//    char buff[128];
-
-    sprintf(buff,"%d frames in %d ms, rate=%f",
+    sprintf(buff,"%d frames in %d ms, rate=%f\n sins = 0x%x\n Screen Name = %s\n",
                  total_frames, total_time,
                  (float)( (total_time)
                           ? ((double)total_frames / (double)total_time) * double(1000)
-                          : 0) );
-
-//    MessageBox(buff,
-//               MB_OK | MB_ICONINFORMATION);
+                          : 0), screen->sins, screen->hwName);
 }
 
 
@@ -1274,6 +1425,7 @@ void EscherTest::ProcessEvents()
 
     evt->get_mouse_movement (&dx, &dy);
 
+//ÄÄÄ Check general events
     if (events.check (DONE))
     {
         PostQuitMessage(0);
@@ -1290,6 +1442,12 @@ void EscherTest::ProcessEvents()
             ScriptRotateDegrees = ScriptRotateDegrees - 1.0f;
     }
 
+    if (single_events.check(SHOW_FPS))
+    {
+        show_fps = !show_fps;
+    }
+
+//ÄÄÄ Object hierarchy movement
     if (curmesh && scene)
     {
         if (single_events.check(OBJECT_NEXT))
@@ -1309,92 +1467,198 @@ void EscherTest::ProcessEvents()
             else
                 curmesh = scene->meshes;
         }
+    }
 
-        if (events.check(OBJECT_ROTATE))
+//ÄÄÄ Object rotation
+    if (events.check(OBJECT_ROTATE))
+    {
+        if (events.check (MOVEXY))
         {
-            if (events.check (MOVEXY))
+            if (curmesh)
             {
                 curmesh->rotatex (float(-dy));
                 curmesh->rotatey (float(-dx));
             }
-
-            if (events.check (MOVEZ))
-                curmesh->rotatez (float(-dx));
-
-            if (events.check (UP))
-                curmesh->rotatex (RotateDegrees);
-
-            if (events.check (DOWN))
-                curmesh->rotatex (-RotateDegrees);
-
-            if (events.check (LEFT))
-                curmesh->rotatey (RotateDegrees);
-
-            if (events.check (RIGHT))
-                curmesh->rotatey (-RotateDegrees);
+            if (metabox)
+            {
+                metabox->rotatex (float(-dy));
+                metabox->rotatey (float(-dx));
+            }
+            if (explosion)
+            {
+                explosion->rotatex (float(-dy));
+                explosion->rotatey (float(-dx));
+            }
+            if (prtgen)
+            {
+                prtgen->rotatex (float(-dy));
+                prtgen->rotatey (float(-dx));
+            }
         }
 
-        if (events.check (OBJECT_MOVE))
+        if (events.check (MOVEZ))
         {
-            if (events.check (MOVEXY))
-            {
-                EschVector v(float(dx), float(-dy), 0.0f);
+            if (curmesh)
+                curmesh->rotatez (float(-dx));
+            if (metabox)
+                metabox->rotatez (float(-dx));
+            if (explosion)
+                explosion->rotatez (float(-dx));
+            if (prtgen)
+                prtgen->rotatez (float(-dx));
+        }
 
-                v.transform(&cam->eye.orient);
+        if (events.check (UP))
+        {
+            if (curmesh)
+                curmesh->rotatex (RotateDegrees);
+            if (metabox)
+                metabox->rotatex (RotateDegrees);
+            if (prtgen)
+                prtgen->rotatex (RotateDegrees);
+        }
 
-                curmesh->translate (&v);
-            }
+        if (events.check (DOWN))
+        {
+            if (curmesh)
+                curmesh->rotatex (-RotateDegrees);
+            if (metabox)
+                metabox->rotatex (-RotateDegrees);
+            if (explosion)
+                explosion->rotatex (-RotateDegrees);
+            if (prtgen)
+                prtgen->rotatex (-RotateDegrees);
+        }
 
-            if (events.check (MOVEZ))
-            {
-                EschVector v(0.0f, 0.0f, float(-dy));
+        if (events.check (LEFT))
+        {
+            if (curmesh)
+                curmesh->rotatey (RotateDegrees);
+            if (metabox)
+                metabox->rotatey (RotateDegrees);
+            if (explosion)
+                explosion->rotatey (RotateDegrees);
+            if (prtgen)
+                prtgen->rotatey (RotateDegrees);
+        }
 
-                v.transform(&cam->eye.orient);
-
-                curmesh->translate (&v);
-            }
-
-            if (events.check (UP))
-            {
-                EschVector v(0.0f, 1.0f, 0.0f);
-
-                v.transform(&cam->eye.orient);
-
-                curmesh->translate (&v);
-            }
-
-            if (events.check (DOWN))
-            {
-                EschVector v(0.0f, -1, 0.0f);
-
-                v.transform(&cam->eye.orient);
-
-                curmesh->translate (&v);
-            }
-
-            if (events.check (LEFT))
-            {
-                EschVector v(-1, 0.0f, 0.0f);
-
-                v.transform(&cam->eye.orient);
-
-                curmesh->translate (&v);
-            }
-
-            if (events.check (RIGHT))
-            {
-                EschVector v(1, 0.0f, 0.0f);
-
-                v.transform(&cam->eye.orient);
-
-                curmesh->translate (&v);
-            }
-
-            if (partn)
-                partn->update(curmesh);
+        if (events.check (RIGHT))
+        {
+            if (curmesh)
+                curmesh->rotatey (-RotateDegrees);
+            if (metabox)
+                metabox->rotatey (-RotateDegrees);
+            if (explosion)
+                explosion->rotatey (-RotateDegrees);
+            if (prtgen)
+                prtgen->rotatey (-RotateDegrees);
         }
     }
 
+//ÄÄÄ Object movement
+    if (events.check (OBJECT_MOVE))
+    {
+        if (events.check (MOVEXY))
+        {
+            EschVector v(float(dx), float(-dy), 0.0f);
+
+            v.transform(&cam->eye.orient);
+
+            if (curmesh)
+                curmesh->translate (&v);
+            if (metabox)
+                metabox->translate (&v);
+            if (explosion)
+                explosion->translate (&v);
+            if (prtgen)
+                prtgen->translate (&v);
+        }
+
+        if (events.check (MOVEZ))
+        {
+            EschVector v(0.0f, 0.0f, float(-dy));
+
+            v.transform(&cam->eye.orient);
+
+            if (curmesh)
+                curmesh->translate (&v);
+            if (metabox)
+                metabox->translate (&v);
+            if (explosion)
+                explosion->translate (&v);
+            if (prtgen)
+                prtgen->translate (&v);
+        }
+
+        if (events.check (UP))
+        {
+            EschVector v(0.0f, 1.0f, 0.0f);
+
+            v.transform(&cam->eye.orient);
+
+            if (curmesh)
+                curmesh->translate (&v);
+            if (metabox)
+                metabox->translate (&v);
+            if (explosion)
+                explosion->translate (&v);
+            if (prtgen)
+                prtgen->translate (&v);
+        }
+
+        if (events.check (DOWN))
+        {
+            EschVector v(0.0f, -1, 0.0f);
+
+            v.transform(&cam->eye.orient);
+
+            if (curmesh)
+                curmesh->translate (&v);
+            if (metabox)
+                metabox->translate (&v);
+            if (explosion)
+                explosion->translate (&v);
+            if (prtgen)
+                prtgen->translate (&v);
+        }
+
+        if (events.check (LEFT))
+        {
+            EschVector v(-1, 0.0f, 0.0f);
+
+            v.transform(&cam->eye.orient);
+
+            if (curmesh)
+                curmesh->translate (&v);
+            if (metabox)
+                metabox->translate (&v);
+            if (explosion)
+                explosion->translate (&v);
+            if (prtgen)
+                prtgen->translate (&v);
+        }
+
+        if (events.check (RIGHT))
+        {
+            EschVector v(1, 0.0f, 0.0f);
+
+            v.transform(&cam->eye.orient);
+
+            if (curmesh)
+                curmesh->translate (&v);
+            if (metabox)
+                metabox->translate (&v);
+            if (explosion)
+                explosion->translate (&v);
+            if (prtgen)
+                prtgen->translate (&v);
+        }
+
+        if (partn && curmesh)
+            partn->update(curmesh);
+    }
+
+//ÄÄÄ Camera rotation
     if (events.check (CAMERA_ROTATE))
     {
         if (events.check (MOVEXY))
@@ -1419,7 +1683,7 @@ void EscherTest::ProcessEvents()
             cam->yaw (-RotateDegrees);
     }
 
-    // Check the camera translation options
+//ÄÄÄ Camera movement
     if (events.check (CAMERA_MOVE))
     {
         if (events.check (MOVEXY))
@@ -1460,6 +1724,7 @@ void EscherTest::ProcessEvents()
         }
     }
 
+//ÄÄÄ Camera misc
     if (events.check (ADJUST_FOV))
     {
         if (events.check (MOVEXY))
@@ -1475,43 +1740,6 @@ void EscherTest::ProcessEvents()
                 fov = 175.0f;
 
             cam->set_fov(fov);
-        }
-    }
-
-    if (events.check (ADJUST_ALPHA))
-    {
-        if (events.check (MOVEXY))
-        {
-            alpha += dy;
-
-            if (alpha < 0)
-                alpha = 0;
-
-            if (alpha > 255)
-                alpha = 255;
-
-            if (explosion)
-                explosion->set_alpha(alpha);
-            if (sprite)
-                sprite->set_alpha(alpha);
-            if (metabox)
-                metabox->set_alpha(alpha);
-        }
-    }
-
-    if (events.check (ADJUST_MBOX_SIZE) && metabox)
-    {
-        if (events.check (MOVEXY))
-        {
-            mbox_size -= float(dy) / 16.0f;
-
-            if (mbox_size < 1.0f)
-                mbox_size = 1.0f;
-
-            if (mbox_size > 500.0f)
-                mbox_size = 500.0f;
-
-            metabox->create_cube(mbox_size);
         }
     }
 
@@ -1631,9 +1859,79 @@ void EscherTest::ProcessEvents()
     if (single_events.check (SHADE_PERSPECTIVE))
         cam_flags ^= ESCH_CAM_PERSPECTIVE;
 
+    if (single_events.check (SHADE_ALPHA))
+        cam_flags ^= ESCH_CAM_ALPHA;
+
     // Now, set those flags!
     cam->set_flags (cam_flags);
 
+    if (single_events.check (HAZING))
+    {
+        if (cam->vport->vflags & VNGO_HAZE_ON)
+        {
+            cam->vport->haze_off();
+        }
+        else
+        {
+            cam->set_haze(0.5f, 0.85f);
+        }
+    }
+
+    if (single_events.check (GRADIENT))
+    {
+        if (cam->flags & ESCH_CAM_GRADIENT)
+        {
+            cam->set_gradient(0);
+        }
+        else
+        {
+            cam->create_gradient(32,
+                                 24, 0.5f,
+                                 VngoColor24bit(0,0,128),
+                                 VngoColor24bit(255,255,255));
+        }
+    }
+
+//ÄÄÄ Alpha adjust
+    if (events.check (ADJUST_ALPHA))
+    {
+        if (events.check (MOVEXY))
+        {
+            alpha += dy;
+
+            if (alpha < 0)
+                alpha = 0;
+
+            if (alpha > 255)
+                alpha = 255;
+
+            if (explosion)
+                explosion->set_alpha(alpha);
+            if (sprite)
+                sprite->set_alpha(alpha);
+            if (metabox)
+                metabox->set_alpha(alpha);
+        }
+    }
+
+//ÄÄÄ Metabox adjust
+    if (events.check (ADJUST_MBOX_SIZE) && metabox)
+    {
+        if (events.check (MOVEXY))
+        {
+            mbox_size -= float(dy) / 16.0f;
+
+            if (mbox_size < 1.0f)
+                mbox_size = 1.0f;
+
+            if (mbox_size > 500.0f)
+                mbox_size = 500.0f;
+
+            metabox->create_cube(mbox_size);
+        }
+    }
+
+//ÄÄÄ Terrain adjust
     if (single_events.check (TERRAIN_DOTS) && terrain)
         terrain->flags ^= ESCH_TRN_DOTS;
     if (single_events.check (TERRAIN_LOD) && terrain)
@@ -1642,8 +1940,9 @@ void EscherTest::ProcessEvents()
         terrain->flags ^= ESCH_TRN_DEBUG;
 
     if (single_events.check (CAM_HOVER) && terrain)
-        cam->flags ^= ESCH_CAM_APP0;
+        cam->set_flags(cam->flags ^ ESCH_CAM_APP0);
 
+//ÄÄÄ Misc adjust
     if (single_events.check (SHOW_EXTENTS))
     {
         drawexts++;
@@ -1662,30 +1961,15 @@ void EscherTest::ProcessEvents()
         }
     }
 
-    if (single_events.check (HAZING))
+    if (single_events.check (SORT))
     {
-        if (cam->flags & ESCH_CAM_HAZE)
+        cam->flags ^= ESCH_CAM_SORT;
+        if (cam->vport->vflags & VNGO_ZBUFFER_DEV)
         {
-            cam->set_haze(0);
-        }
-        else
-        {
-            cam->create_haze(64, 16, 48, 0.5f, VngoColor24bit(0,0,128));
-        }
-    }
-
-    if (single_events.check (GRADIENT))
-    {
-        if (cam->flags & ESCH_CAM_GRADIENT)
-        {
-            cam->set_gradient(0);
-        }
-        else
-        {
-            cam->create_gradient(32,
-                                 24, 0.5f,
-                                 VngoColor24bit(0,0,128),
-                                 VngoColor24bit(255,255,255));
+            if (cam->flags & ESCH_CAM_SORT)
+                cam->vport->zbuffer_off();
+            else
+                cam->vport->zbuffer_on();
         }
     }
 
@@ -1713,12 +1997,18 @@ void EscherTest::ProcessEvents()
         }
     }
 
+    if (single_events.check(PARTN_TOGGLE) && partn)
+    {
+        partn->set_flags(partn->flags ^ ESCH_PARTN_OFF);
+    }
+
     if (explosion)
     {
         if (single_events.check(EXPLOSION_RESET))
             explosion->reset();
     }
 
+//ÄÄÄ Light adjust
     if (light)
     {
         EschLight   *l;
@@ -1820,6 +2110,7 @@ void EscherTest::ProcessEvents()
         }
     }
 
+//ÄÄÄ Handle auto rotatation
     if (scene)
     {
         for(EschGeometry *g=scene->meshes; g != NULL; g = g->next())
@@ -1836,65 +2127,63 @@ void EscherTest::ProcessEvents()
             {
                 g->rotatez(ScriptRotateDegrees);
             }
-
         }
     }
 
-    if (terrain)
+    if (metabox)
     {
-        if (doreshade)
-            terrain->compute_shades(cam, light);
-    }
-
-    if (prtsystem)
-    {
-        ulong num;
-
-        prtsystem->set_interval(interval);
-
-        if (kind_of_particles)
-            num = flx_rand().flx & 0x7;
-        else
-            num = flx_rand().flx & 0x7f;
-
-        for(ulong c=0; c < num; c++)
+        if (toggle_events.check(ALLI))
         {
-            EschParticle    *particle;
-
-            switch (kind_of_particles)
-            {
-                case SPRITES:
-                    {
-                        EschSprite *ps = new EschSprite(*sprite);
-                        particle = new EschParticleSprite(ps,
-                                                        10 + (flx_rand().flx & 0x4f));
-                    }
-                    break;
-                case PYRAMIDS:
-                    particle = new EschParticlePyramid(float(1 + (flx_rand().flx & 0x3)),
-                                                    0.0f,0.0f,0.0f,
-                                                    mypal->get_index(VngoColor24bit((byte)(255 - (c*2)),0,0)),
-                                                    10 + (flx_rand().flx & 0x4f));
-
-                    ((EschParticlePyramid*)particle)->set_rotate_i(float(flx_rand().flx >> 24));
-                    ((EschParticlePyramid*)particle)->set_rotate_j(float(flx_rand().flx >> 24));
-                    ((EschParticlePyramid*)particle)->set_rotate_k(float(flx_rand().flx >> 24));
-                    break;
-                default:
-                    particle = new EschParticle(0,0,0,
-                                                mypal->get_index(VngoColor24bit((byte)(255 - (c*2)),0,0)),
-                                                20 + (flx_rand().flx & 0x4f));
-                    break;
-            }
-
-            particle->set_velocity(float(Flx16(flx_rand().flx >> 12,0)),
-                                   float(Flx16(flx_rand().flx & 0x1fffff,0)),
-                                   float(Flx16(flx_rand().flx >> 12,0)));
-
-            if (particle)
-                prtsystem->add(particle);
+            metabox->rotatex(ScriptRotateDegrees);
+        }
+        if (toggle_events.check(ALLJ))
+        {
+            metabox->rotatey(ScriptRotateDegrees);
+        }
+        if (toggle_events.check(ALLK))
+        {
+            metabox->rotatez(ScriptRotateDegrees);
         }
     }
+
+    if (explosion)
+    {
+        if (toggle_events.check(ALLI))
+        {
+            explosion->rotatex(ScriptRotateDegrees);
+        }
+        if (toggle_events.check(ALLJ))
+        {
+            explosion->rotatey(ScriptRotateDegrees);
+        }
+        if (toggle_events.check(ALLK))
+        {
+            explosion->rotatez(ScriptRotateDegrees);
+        }
+    }
+
+    if (prtgen)
+    {
+        if (toggle_events.check(ALLI))
+        {
+            prtgen->rotatex(ScriptRotateDegrees);
+        }
+        if (toggle_events.check(ALLJ))
+        {
+            prtgen->rotatey(ScriptRotateDegrees);
+        }
+        if (toggle_events.check(ALLK))
+        {
+            prtgen->rotatez(ScriptRotateDegrees);
+        }
+    }
+
+//ÄÄÄ Do animates and per frame updates
+    if (terrain && doreshade)
+        terrain->compute_shades(cam, light);
+
+    if (prtgen)
+        prtgen->set_interval(interval);
 
     if (fire)
     {
@@ -1916,16 +2205,6 @@ void EscherTest::ProcessEvents()
     {
         mtxt->set_interval(interval);
         mtxt->animate();
-    }
-
-    if (single_events.check(SHOW_FPS))
-    {
-        show_fps = !show_fps;
-    }
-
-    if (single_events.check(PARTN_TOGGLE) && partn)
-    {
-        partn->set_flags(partn->flags ^ ESCH_PARTN_OFF);
     }
 
     // Perform animation of all drawables!
@@ -1985,14 +2264,32 @@ void EscherTest::Render()
         sprintf (buff, "FPS:%5.2f\n\n", (float)( (clk)
                                                 ? ((float)frames / (float)clk) * 1000.0f
                                                 : 0) );
-
         gt.out (buff);
+
         sprintf (buff, "Proposed %d tris, %d drawn\n", EschProposedTris,EschDrawnTris);
         gt.out (buff);
+
+        sprintf(buff, "Frames count %d\n", total_frames + frames);
+        gt.out(buff);
 
         sprintf (buff, "FOV: %5.3f\n",float(cam->fov));
         gt.out (buff);
 
+
+
+        gt.outc('\n');
+        if (cam->flags & ESCH_CAM_SORT)
+        {
+            gt.out("SORT MODE\n");
+
+            sprintf (buff, "Depth %d\n%d bytes\n",
+                           EschSysInstance->sspace_mdepth,
+                           EschSysInstance->sspace_mbytes);
+            gt.out (buff);
+
+            EschSysInstance->sspace_mdepth=0;
+            EschSysInstance->sspace_mbytes=0;
+        }
 
 #if 0
         EschVector v;

@@ -58,6 +58,7 @@ LIB = VanGogh
 
 OBJS=\
 vngpch.obj\
+vngvp.obj\
 vngitrns.obj\
 vngzrect.obj\
 vngglob.obj\
@@ -69,6 +70,7 @@ vngcircl.obj\
 vngsmth.obj\
 vngzmap.obj\
 vngserv.obj\
+vngtxtr.obj\
 vnggen.obj\
 vngpix8.obj\
 vngrect8.obj\
@@ -218,7 +220,7 @@ all: setstden $(LIB).pch $(LIB).lib
 
 #ÄÄÄ C++
 {..\}.cpp{}.obj:
-	$(CPP) $(CCOPTIONS) /Yuvangogh.hpp /Fp$(LIB).pch  $<
+        $(CPP) $(CCOPTIONS) /Yuvangogh.hpp /Fp$(LIB).pch  $<
 
 {..\8bpp}.cpp{}.obj:
         $(CPP) $(CCOPTIONS) /Yuvangogh.hpp /Fp$(LIB).pch $<
@@ -241,7 +243,8 @@ all: setstden $(LIB).pch $(LIB).lib
 #
 #±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 
-$(LIB).pch : vngpch.obj
+$(LIB).pch :
+    del vngpch.obj
 
 vngpch.obj : ..\vngpch.cpp
     $(CPP) /Ycvangogh.hpp /Fp$(LIB).pch $(CCOPTIONS) ..\$*.cpp

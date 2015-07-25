@@ -80,8 +80,8 @@ extern char EschNoName[];
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // EschTerrainEx - constructor                                              ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-EschTerrainEx::EschTerrainEx(const char *fname, const char *tname) :
-    EschTerrain(fname,tname),
+EschTerrainEx::EschTerrainEx(const char *fname, const char *tname, VngoPal *pal) :
+    EschTerrain(fname,tname,pal),
     dlevels(0),
     left_edge(0),
     right_edge(0),
@@ -673,7 +673,7 @@ void EschTerrainEx::display_pixel_row(VngoPoint *vpt,int count)
                 vpnt->y = (cam->vport->vbuff.height>>1)
                           - long((pnt->y * cam->yscalar) / pnt->z);
 
-                vpnt->z = ulong(pnt->z * cam->z_factor);
+                vpnt->z = ulong(pnt->z * cam->z_factor * float(0xffffffff));
 
                 //ÄÄÄ Draw pdxel
                 cam->vport->pixel(vpnt);

@@ -65,7 +65,8 @@ INCPATH = ;..\inc;$(MYTH95ROOT)\inc;
 
 LIB = chronos
 
-OBJS = chronos.obj prfrdtsc.obj
+OBJS = chronos.obj\
+chrrdtsc.obj
 
 LIBPATH = $(MYTH95ROOT)\lib;
 

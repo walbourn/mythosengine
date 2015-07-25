@@ -116,6 +116,11 @@ STATIC int load_pal(VngoPal *pal,char *infile);
 //
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 
+char Util_name[] = "°± MythOS Pic Image Utility - (C) 1994-1997 Charybdis Enterprises, Inc. ±°\n"
+                   "                              " __DATE__ "   All Rights Reserved.\n";
+
+
+
 IvorySystem     Ivory;
 
 dword           Flags=0;
@@ -284,7 +289,7 @@ void main(int argc, char *argv[])
 //ÄÄÄ Banner
     if (!(Flags & FLAGS_QUIET))
     {
-        cout << "°± MythOS Pic Image Utility - (C) 1994-1997 Charybdis Enterprises, Inc. ±°\n";
+        cout << Util_name;
     }
 
 //ÄÄÄ Check to see if supplied files exist
@@ -701,27 +706,26 @@ error_exit: ;
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 STATIC void print_help(int full)
 {
-   cout << "°± MythOS Pic Image Utility - (C) 1994-1997 Charybdis Enterprises, Inc. ±°\n";
-   cout << "                              " __DATE__ "   All Rights Reserved.\n";
-   cout << "   Usage: pic [-q | -i | -s | -x | -m | -t <fname.pal>]\n";
-   cout << "              [-p | -2 | -3] <fname.xxx>\n";
-   cout << "              [-o <fname.xxx>]\n";
-   if (full)
-   {
-       cout << "\n          xxx can be BMP, CEL, LBM, PCX, TGA, or XEB\n\n";
-       cout << "          -q = Quiet mode.\n";
-       cout << "          -i = Show image information\n";
-       cout << "          -s = Show image palette\n";
-       cout << "          -x = Keep transparent (index 255) in 8-bit images\n";
-       cout << "          -x = Convert color (255,0,255) to transparent\n";
-       cout << "               (index 255) for 24-bit images\n";
-       cout << "          -m = Convert transparent images to a monochrome Zmap\n";
-       cout << "          -t <filename.pal/.vgp> = Palette file to use (default is DEFAULT.PAL)\n";
-       cout << "          -p = Convert to use loaded palette\n";
-       cout << "          -2 = Convert to 2 bytes/pixel\n";
-       cout << "          -3 = Convert to 3 bytes/pixel\n";
-       cout << "          -o = Output resulting image\n";
-   }
+    cout << Util_name;
+    cout << "   Usage: pic [-q | -i | -s | -x | -m | -t <fname.pal>]\n";
+    cout << "              [-p | -2 | -3] <fname.xxx>\n";
+    cout << "              [-o <fname.xxx>]\n";
+    if (full)
+    {
+        cout << "\n          xxx can be BMP, CEL, LBM, PCX, TGA, or XEB\n\n";
+        cout << "          -q = Quiet mode.\n";
+        cout << "          -i = Show image information\n";
+        cout << "          -s = Show image palette\n";
+        cout << "          -x = Keep transparent (index 255) in 8-bit images\n";
+        cout << "          -x = Convert color (255,0,255) to transparent\n";
+        cout << "               (index 255) for 24-bit images\n";
+        cout << "          -m = Convert transparent images to a monochrome Zmap\n";
+        cout << "          -t <filename.pal/.vgp> = Palette file to use (default is DEFAULT.PAL)\n";
+        cout << "          -p = Convert to use loaded palette\n";
+        cout << "          -2 = Convert to 2 bytes/pixel\n";
+        cout << "          -3 = Convert to 3 bytes/pixel\n";
+        cout << "          -o = Output resulting image\n";
+    }
 }
 
 

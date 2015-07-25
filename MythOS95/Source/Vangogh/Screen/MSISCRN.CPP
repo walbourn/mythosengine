@@ -82,55 +82,65 @@ VngoMSI::~VngoMSI()
 }
 
 
-BOOL VngoMSI::init()
+VNGError VngoMSI::init()
 {
     return init(NULL);
 }
 
-BOOL VngoMSI::init( WNDPROC lpWindowProc)
+VNGError VngoMSI::init( WNDPROC lpWindowProc)
 {
     if (!msiQueryInfo(QueryInfoStructMinSize, (LPBYTE)&BoardInfo))
     {
-        return FALSE;
+        return VNGO_INTERNAL_ERROR;
     }
     lpWinProc = lpWindowProc;
     type_info = SCREENTYPE_MSI;
-    return (TRUE);
+    return (VNGO_NO_ERROR);
 }
 
 
-BOOL VngoMSI::set_mode(int width, int height, int bpp, VngoPal *pal, dword flags)
+VNGError VngoMSI::set_mode(int width, int height, int bpp, VngoPal *pal, dword flags)
 {
     bit_depth = bpp;
 
     pInfo = msiInit(width,height,16,1,msiDBG_DumpToFile,lpWinProc);
     if (!pInfo)
-        return FALSE;
+        return VNGO_INTERNAL_ERROR;
 
 // Clear all of the buffers.
     if (!msiStartFrame(1,0.f,0.f,0.f,1,1.f))
-        return FALSE;
+        return VNGO_INTERNAL_ERROR;
 
 
 // Now do a quick flip.
     if (!msiEndFrame(0,0,1))
-        return FALSE;
+        return VNGO_INTERNAL_ERROR;
 
 
-    return TRUE;
+    return VNGO_NO_ERROR;
 }
 
 
-void VngoMSI::flip()
+VNGError VngoMSI::flip()
 {
     if (frame_is_open)
         close_frame(0,0,1);
+
+    return VNGO_NO_ERROR;
 }
 
 
-void VngoMSI::term()
+VNGError VngoMSI::term()
 {
     if (frame_is_open)
         close_frame(0,0,1);
     msiExit();
+
+    return VNGO_NO_ERROR;
 }
+
+VNGError VngoMSI::dump_textures()
+{
+    return VNGO_NO_ERROR;
+}
+

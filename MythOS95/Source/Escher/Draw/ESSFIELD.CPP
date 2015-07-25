@@ -40,7 +40,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include "escher.hpp"
@@ -51,8 +51,7 @@
 //
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 
-extern EschPoint EschTempPoint;
-extern VngoPoint EschTempVPoint;
+extern VngoPointF EschTempVPointF;
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
@@ -126,8 +125,13 @@ void EschStarfield::draw()
     assertMyth("EschStarfield::draw needs palette in viewport",
                vport->vbuff.pal != 0);
 
-    EschTempVPoint.clr = color;
-    EschTempVPoint.shade = vport->vbuff.pal->shd_pal->mid_point;
+    EschTempVPointF.clr = color;
+    EschTempVPointF.shade = float(vport->vbuff.pal->shd_pal->mid_point);
+
+//ÄÄÄ Setup Context
+    EschContext ec(EschCurrent);
+    ec.current = this;
+    ec.push();
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Draw stars
     for(ulong i=0; i < count; i++)
@@ -135,45 +139,23 @@ void EschStarfield::draw()
         //ÄÄÄ Transform into copy of point
         if (flags & ESCH_SFLD_FTL)
         {
-            stars[i].transform(&cam->eye.iorient,&EschTempPoint);
+            stars[i].transform(&cam->eye.iorient,(EschPoint*)&EschTempVPointF);
         }
         else
         {
             ((EschVector*)&stars[i])->transform(&cam->eye.iorient,
-                                                (EschVector*)&EschTempPoint);
+                                                (EschVector*)&EschTempVPointF);
         }
 
-        //ÄÄÄ Clip against view volume
-
-        // Near clipping (stars should ignore far plane)
-        if (EschTempPoint.z < cam->hither)
-            continue;
-
-        // Left/right/top/bottom plane clipping
-        float zx = EschTempPoint.z * cam->xsize;
-        float zy = EschTempPoint.z * cam->ysize;
-
-        if (EschTempPoint.x < -zx
-            || EschTempPoint.x > zx
-            || EschTempPoint.y < -zy
-            || EschTempPoint.y > zy)
-            continue;
-
-        flags |= ESCH_DRW_VISIBLE;
-
-        //ÄÄÄ Project pixel
-        EschTempVPoint.x = long((EschTempPoint.x * cam->xscalar) / EschTempPoint.z)
-                           + (cam->vport->vbuff.width >> 1);
-        EschTempVPoint.y = (cam->vport->vbuff.height >> 1)
-                           - long((EschTempPoint.y * cam->yscalar) / EschTempPoint.z);
-        EschTempVPoint.z = 0xfffeffff;
-
         if (brightness)
-            EschTempVPoint.shade = brightness[i];
+            EschTempVPointF.shade = float(brightness[i]);
 
-        //ÄÄÄ Draw pixel
-        vport->pixel(&EschTempVPoint);
+        //ÄÄÄ Draw
+        esch_clipdraw_point(ESCH_CDF_CLIP | ESCH_CDF_INFINITEZ);
     }
+
+//ÄÄÄ Cleanup
+    ec.pop();
 }
 
 
@@ -186,7 +168,7 @@ void EschStarfield::release()
 {
     if (flags & ESCH_DRW_OWNSDATA)
     {
-        if (stars)  
+        if (stars)
         {
             delete [] stars;
         }

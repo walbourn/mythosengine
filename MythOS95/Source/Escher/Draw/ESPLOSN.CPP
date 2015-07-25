@@ -39,7 +39,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include "escher.hpp"
@@ -114,7 +114,7 @@ void EschPlosion::draw()
 
 //ÄÄÄ Clear arena
     ivory_arena_clear(EschSysInstance->wspace);
-    
+
 //ÄÄÄ Setup local pointers to current camera and Van Gogh viewport.
     assertMyth("EschPlosion::draw needs camera in current context",
                EschCurrent != NULL && EschCurrent->camera != NULL);
@@ -193,19 +193,19 @@ void EschPlosion::draw()
         // (X/Y plane)                (Y/Z plane)
         //
         //          3                          3
-        //        /\                         /\ 
+        //        /\                         /\
         //       /  \                       /  \
         //      /    \                     /    \
         //     /      \                   /      \
         //    /        \                 /        \
         // 4 /    0     \ 2           6 /          \ 5
         //   \          /               \          /
-        //    \        /                 \        / 
-        //     \      /                   \      /  
-        //      \    /                     \    /   
-        //       \  /                       \  /    
+        //    \        /                 \        /
+        //     \      /                   \      /
+        //      \    /                     \    /
+        //       \  /                       \  /
         //        \/                         \/
-        //       1                          1  
+        //       1                          1
         //
 
         float width_half = width / 2;
@@ -343,12 +343,12 @@ void EschPlosion::draw()
         //
         // 2 ____________ 1           4 ____________ 3
         //   \          /               \          /
-        //    \        /                 \        / 
-        //     \      /                   \      /  
-        //      \    /                     \    /   
-        //       \  /                       \  /    
+        //    \        /                 \        /
+        //     \      /                   \      /
+        //      \    /                     \    /
+        //       \  /                       \  /
         //        \/                         \/
-        //       0                          0  
+        //       0                          0
         //
 
         float width_half = width / 2;
@@ -366,11 +366,11 @@ void EschPlosion::draw()
         ec.verts[2].z = 0;
 
         ec.verts[3].x = 0;
-        ec.verts[3].y = height; 
+        ec.verts[3].y = height;
         ec.verts[3].z = width_half;
 
         ec.verts[4].x = 0;
-        ec.verts[4].y = height; 
+        ec.verts[4].y = height;
         ec.verts[4].z = -width_half;
 
         //ÄÄÄ Create 2 faces
@@ -439,11 +439,11 @@ void EschPlosion::draw()
         ec.verts[5].z = width_quarter;
 
         ec.verts[6].x = 0;
-        ec.verts[6].y = height; 
+        ec.verts[6].y = height;
         ec.verts[6].z = width_half;
 
         ec.verts[7].x = 0;
-        ec.verts[7].y = height; 
+        ec.verts[7].y = height;
         ec.verts[7].z = -width_half;
 
         //ÄÄÄ Create 4 faces
@@ -462,7 +462,7 @@ void EschPlosion::draw()
         ec.faces[1].u[0]  = float(0.01);
         ec.faces[1].v[0]  = fv;
         ec.faces[1].b     = 2;
-        ec.faces[1].u[1]  = float(0.90); 
+        ec.faces[1].u[1]  = float(0.90);
         ec.faces[1].v[1]  = float(0.01);
         ec.faces[1].c     = 3;
         ec.faces[1].u[2]  = float(0.01);
@@ -499,7 +499,7 @@ void EschPlosion::draw()
         ec.verts[i].transform(&frame,(EschPoint*)(&vpt[i]));
         vpt[i].shade=mp;
     }
-    
+
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Draw Faces
     for(i=0; i < faces; i++)
     {
@@ -521,80 +521,6 @@ void EschPlosion::animate()
 
     if (fv > float(0.2))
         fv -= step;
-}
-
-
-
-//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-//°°°°°°°°°°°°°°°°°°°°°°°°°°±  Utility Routines  ±°°°°°°°°°°°°°°°°°°°°°°°°°°°
-//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// EschPlosion - set_top                                                    ³
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void EschPlosion::set_top(float ii, float ij, float ik, dword update)
-{
-    EschVector v(ii,ij,ik);
-    v.normalize();
-
-    EschVector  right;
-
-    world.ortho_count=0;
-
-//ÄÄÄ Create right vector 
-    right = v CROSS world.dir;
-
-//ÄÄÄ Fill in matrix for ortho rotation
-
-    //ÄÄÄ Transform
-    world.orient.mtx[ESCH_MTX_A] = right.i;
-    world.orient.mtx[ESCH_MTX_B] = right.j;
-    world.orient.mtx[ESCH_MTX_C] = right.k;
-
-    world.orient.mtx[ESCH_MTX_D] = v.i;
-    world.orient.mtx[ESCH_MTX_E] = v.j;
-    world.orient.mtx[ESCH_MTX_F] = v.k;
-
-    //ÄÄÄ Inverse Transform
-    if (update & ESCH_UPD_INVERSE)
-        world.compute_inverse();
-}
-
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// EschPlosion - set_direction                                              ³
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void EschPlosion::set_direction(float ii, float ij, float ik, dword update)
-{
-    world.dir.i = ii;
-    world.dir.j = ij;
-    world.dir.k = ik;
-    world.dir.normalize();
-
-    EschVector  right;
-    EschVector  top(world.orient.mtx[ESCH_MTX_D],
-                    world.orient.mtx[ESCH_MTX_E],
-                    world.orient.mtx[ESCH_MTX_F]);
-
-    world.ortho_count=0;
-
-//ÄÄÄ Create right vector 
-    right = top CROSS world.dir;
-
-//ÄÄÄ Fill in matrix for ortho rotation
-
-    //ÄÄÄ Transform
-    world.orient.mtx[ESCH_MTX_A] = right.i;
-    world.orient.mtx[ESCH_MTX_B] = right.j;
-    world.orient.mtx[ESCH_MTX_C] = right.k;
-
-    world.orient.mtx[ESCH_MTX_G] = world.dir.i;
-    world.orient.mtx[ESCH_MTX_H] = world.dir.j;
-    world.orient.mtx[ESCH_MTX_I] = world.dir.k;
-
-    //ÄÄÄ Inverse Transform
-    if (update & ESCH_UPD_INVERSE)
-        world.compute_inverse();
 }
 
 //°±² End of module - esplosn.cpp ²±°

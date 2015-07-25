@@ -174,10 +174,10 @@ void EschStaticTexture::unlock()
 //                                                                          ³
 // Creates a texture from an (appropriate) XFile bitmap.                    ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-esch_error_codes EschStaticTexture::create(XFBitmap *bm, int trans)
+esch_error_codes EschStaticTexture::create(XFBitmap *bm, int trans, VngoPal *pal)
 {
 //ÄÄÄ Verify valid input
-    if (!bm || bm->bpp != 1)
+    if (!bm)
         return ESCH_ERR_INVALIDPARMS;
 
     switch (bm->width)
@@ -228,7 +228,8 @@ esch_error_codes EschStaticTexture::create(XFBitmap *bm, int trans)
                                   bm->height,
                                   (byte*)ptr + sizeof(VngoTexture),
                                   VNGO_TEXTURE_8BIT
-                                  | ((trans) ? VNGO_TEXTURE_TRANSPARENT : 0));
+                                  | ((trans) ? VNGO_TEXTURE_TRANSPARENT : 0),
+                                  pal);
 
     int locked=0;
     if (bm->pal || bm->data)
@@ -241,7 +242,8 @@ esch_error_codes EschStaticTexture::create(XFBitmap *bm, int trans)
             return ESCH_ERR_LOCKFAILED;
     }
 
-    memcpy(ptr->tex,bm->data,bm->height*bm->width);
+    if (ptr->convert(bm,pal) != VNGO_NO_ERROR)
+        return ESCH_ERR_NOTSUPPORTED;
 
     if (!locked)
         bm->unlock();
@@ -376,7 +378,7 @@ esch_error_codes EschStaticTexture::load(XFParseIFF *iff, const char *tname,
     ptr->VngoTexture::VngoTexture(header.xsize,
                                   header.ysize,
                                   (byte*)ptr + sizeof(VngoTexture),
-                                  tflags);
+                                  tflags,pal);
 
     esch_error_codes err=load_body(iff,header,pal);
     if (err)

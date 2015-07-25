@@ -25,6 +25,8 @@
 //
 //ฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤ
 //
+// Created by Tim Little
+//
 // vngdefs.h
 //
 //อออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออ
@@ -42,13 +44,6 @@ extern "C" {
 //
 //ฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐ
 
-#define _D3D         // Does not depend on the _OEMS #define
-
-#define _OEMS
-//#define _CLEAR_3D    // Does depend on the _OEMS #define
-//#define _3DFX        // Does depend on the _OEMS #define
-//#define _MSI         // Does depend on the _OEMS #define
-
 #define VNGO_MAX_RESOLUTION     2048
 #define VNGO_PERSP_OFF          VNGO_MAX_RESOLUTION + 1
 #define VNGO_PERSP_PRECISION    VNGO_PERSP_OFF
@@ -64,6 +59,7 @@ extern "C" {
 #define VNGO_FORCE_SYSTEMMEMORY 0x4
 #define VNGO_ALLOC_ZBUFFER      0x8
 #define VNGO_3DDEVICE           0x10
+#define VNGO_USE_PRIMARY        0x1000
 
 // Flags for the ViewPort.
 #define VNGO_PAL_MAPPED_DEV     0x1
@@ -77,11 +73,15 @@ extern "C" {
 #define VNGO_PAL_CALC           0x100
 #define VNGO_ZMAP_DEV           0x200
 #define VNGO_ZMAP_ACTIVE        0x400
+#define VNGO_ACTIVE_HAZE_DEV    0x1000
+#define VNGO_PASSIVE_HAZE_DEV   0x2000
+#define VNGO_HAZE_ON            0x4000
 
 // Flags for the ViewPort Drawing control.
 #define VNGO_DITHER_OFF         0x1000
 #define VNGO_DITHER_4X4         0x2000
 #define VNGO_TRUE_ALPHA         0x4000
+#define VNGO_TEXTURE_FILTER     0x8000
 
 #define VNGO_MYMEM_SHADE        0x10
 #define VNGO_MYMEM_HAZE         0x20
@@ -125,6 +125,13 @@ extern "C" {
 #define VNGO_TEXTURE_COMPRESSED     0x1000
 #define VNGO_TEXTURE_TRANSPARENT    0x2000
 
+// VanGogh Clipping flags
+#define VNGO_CLIP_Z                 0x1
+#define VNGO_CLIP_SHADE             0x2
+#define VNGO_CLIP_VERBOSE           0x10000
+
+// VangoTexture3D flags.
+#define VNGO_TEXTURE3D_DIRTY        0x1
 //ฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐ
 //
 //                                 Types
@@ -138,13 +145,57 @@ enum _vngo_error_codes
    VNGO_MEMALLOC_ERROR          = 2,
    VNGO_WRONG_BITDEPTH          = 3,
    VNGO_FULLY_CLIPPED           = 4,
-   VNGO_UNSUPPORTED_TEXTURE     = 5,
-   VNGO_MEMORY_ERROR            = 6,
-   VNGO_INTERNAL_ERROR          = 7,
-   VNGO_NOSCREEN_ERROR          = 8,
-};
+   VNGO_FULLY_INSIDE            = 5,
+   VNGO_UNSUPPORTED_TEXTURE     = 6,
+   VNGO_MEMORY_ERROR            = 7,
+   VNGO_INTERNAL_ERROR          = 8,
+   VNGO_NOSCREEN_ERROR          = 9,
+   VNGO_MISSING_HARDWARE        = 10,
+   VNGO_MISSING_FUNCTIONALITY   = 11,
+   VNGO_NEEDS_PAL8              = 12,
+   VNGO_NEEDS_PAL15             = 13,
+   VNGO_NEEDS_PAL16             = 14,
+}; 
 
 typedef enum _vngo_error_codes VNGError;
+
+
+enum _vngo_caps_sins
+{
+   VNGO_NO_SINS                 = 0,
+   VNGO_NO_ZBUFFER              = 0x1,
+   VNGO_NO_HWBLIT               = 0x2,
+   VNGO_NO_BLIT                 = 0x4,
+
+   VNGO_NO_8BIT_PAL_TEXTURES    = 0x10,
+   VNGO_NO_CHROMAKEY_TEXTURES   = 0x20,
+   VNGO_NO_TEXTURE_MODULATION   = 0x40,
+   VNGO_NO_TEXTURE_TILE         = 0x80,
+   VNGO_NO_FILTERS              = 0x100,
+   VNGO_NO_PERSPECTIVE          = 0x200,
+   VNGO_INVALID_TEXTURE_SIZES   = 0x400,
+
+   VNGO_NO_CULLING_CONTROL      = 0x1000,
+   VNGO_NO_DITHER               = 0x2000,
+   VNGO_NO_SPECULAR             = 0x4000,
+
+   VNGO_NO_TABLE_FOG            = 0x10000,
+   VNGO_NO_VERTEX_FOG           = 0x20000,
+   VNGO_NO_FOG                  = 0x30000,
+
+   VNGO_NO_STIPPLE_ALPHA        = 0x40000,
+   VNGO_NO_TRUE_ALPHA           = 0x80000,
+   VNGO_NO_ALPHA                = 0xc0000,
+
+   // Critical errors.  These will fail set_mode.
+   VNGO_INVALID_RENDERDEPTH     = 0x10000000,
+   VNGO_INVALID_COLORMODEL      = 0x20000000,
+   VNGO_INVALID_VERTEX_FORMAT   = 0x30000000,
+   VNGO_NOT_3DDEVICE            = 0x40000000,
+   VNGO_NO_3D_2D_INTERLEAVE     = 0x80000000,
+};
+
+typedef enum _vngo_caps_sins VngoSins;
 
 enum _vngo_texture_type
 {

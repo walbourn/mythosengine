@@ -1,0 +1,69 @@
+//อออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออ
+//
+//                                /\    /\ 
+//                               /  \  /  \ 
+//                              /    \/    \ 
+//                             /  /\    /\  \ 
+//                            /  /  \  /  Y T H O S
+//                           /  /    \/    \  \ 
+//                          /  /            \  \ 
+//                         /__/              \__\ 
+//
+//                      Microsoft Windows '95 Version
+//
+//            Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.
+//                           All Rights Reserved.
+//
+//ฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤ
+//
+//           *** Charybdis Enterprises, Inc. Company Confidential ***
+//
+//  This file and all associated files are the company proprietary property
+//        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+//
+// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
+// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
+// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
+// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
+// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+//
+//ฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤ
+//
+//                               3D SCRIPT EXAMPLE
+//
+// Created by Chuck Walbourn
+//
+// test.csf
+//
+//อออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออ
+
+include "export.csf";
+
+create drawable="Shower" type=particle maxcount=4096
+{
+    position=0,0,0;
+    parts=50;
+    life=4;
+    speed=40;
+    circle=5,45;
+    color=255,0,0;
+}
+
+modify drawable="Cube"
+{
+    direction=0,0,1;
+}
+
+animate drawable="Cube"
+{
+    rotatey = 45;
+}
+
+animate drawable="Shower"
+{
+    rotatey = 30;
+}
+
+waitkey=10000; 
+
+//ฐฑฒ eof - test.csf ฒฑฐ

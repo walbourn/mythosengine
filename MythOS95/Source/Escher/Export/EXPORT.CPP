@@ -122,15 +122,18 @@ extern "C" void capture_terminate();
 extern "C" int capture_get(ItemData **item, XVData **verts, XFData **faces);
 extern "C" int capture_gethier(ItemData *idata, char *name, float *m);
 extern "C" int capture_getpivot(ItemData *idata, float *px, float *py, float *pz);
-extern "C" MtlData *capture_mtlget(int ind, ushort *selfi);
+extern "C" MtlData *capture_mtlget(int ind, short *selfi, short *transp);
 extern "C" int capture_mtlfile(int ind, char *fname, char *tfname);
 
-extern "C" BXPColor *capture_mtlbitmap(char *fname, ushort *xs, ushort *ys, int forcesize);
+extern "C" BXPColor *capture_mtlbitmap(char *fname, int locate,
+                                       ushort *xs, ushort *ys, int forcesize);
 extern "C" BXPColor *capture_flcframe(char *fname, Flic *flic,
                                       FlicRaster *raster, byte *pix,
                                       ushort *xs, ushort *ys, int forcesize);
 
 extern "C" char *locate_map(char *fname, char *fullname);
+extern "C" char *get_root_from_fullname(char *fullname);
+extern "C" ulong locate_sequential_maps(char *fname, char **seq_names);
 
 STATIC int export_camera(XFParseIFF &iff, ItemData *idata);
 STATIC int export_ambient(XFParseIFF &iff, ItemData *idata);
@@ -280,8 +283,9 @@ extern "C" void export()
     XFData              *faces;
     VngoPal             *pal=0;
     XFParseIFF          iff;
-    char                buff[128];
+    char                buff[256];
     int i;
+    int keys_only = 0;
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Get initial data information, check for outputable data.
     switch(capture_setup())
@@ -292,6 +296,9 @@ extern "C" void export()
         case 2:
             gfx_continu_line("ERROR:  Failed during pxp_get_item() in setup");
             return;
+        case 3:
+            keys_only = 1;
+            break;
         default:
             break;
     }
@@ -302,48 +309,54 @@ extern "C" void export()
         strcat(buff,"\\");
     strcat(buff,output_name);
 
-    if (iff.create(buff,0))
+    if (!keys_only)
     {
-        sprintf(buff,"ERROR:  Cannot create output file, error #%d",
-                iff.error());
-        gfx_continu_line(buff);
-        capture_terminate();
-        return;
+        if (iff.create(buff,0))
+        {
+            sprintf(buff,"ERROR:  Cannot create output file, error #%d",
+                    iff.error());
+            gfx_continu_line(buff);
+            capture_terminate();
+            return;
+        }
     }
 
     gfx_stand_by("Exporting...");
 
+    if (!keys_only)
+    {
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Create Scene
-    if (iff.newform(iff.makeid('E','S','E','N')))
-    {
-        sprintf(buff,"ERROR:  Cannot create scene form, error #%d",
-                iff.error());
-        gfx_continu_line(buff);
-        goto error_exit;
-    }
-
-    {
-        EschFileSceneHDR    sdata;
-        memset(&sdata,0,sizeof(EschFileSceneHDR));
-
-        strncpy(sdata.name,scene_name,ESCH_MAX_NAME);
-        sdata.ncameras = count_camera;
-        sdata.nobjects = count_objects;
-        sdata.nvectorlights = count_vectlights;
-        sdata.nfpointlights = (ushort) count_fpointlights;
-        sdata.nfattenlights = (ushort) count_fattenlights;
-        sdata.nfspotlights = (ushort) count_fspotlights;
-        sdata.npointlights = count_pointlights;
-        sdata.nattenlights = (ushort) count_attenlights;
-        sdata.nspotlights = (ushort) count_spotlights;
-
-        if (iff.write(iff.makeid('H','D','R',' '),
-                      &sdata,sizeof(sdata)))
+        if (iff.newform(iff.makeid('E','S','E','N')))
         {
-            sprintf(buff,"Error writing HDR chunk, error #%d",
+            sprintf(buff,"ERROR:  Cannot create scene form, error #%d",
                     iff.error());
             gfx_continu_line(buff);
             goto error_exit;
+        }
+
+        {
+            EschFileSceneHDR    sdata;
+            memset(&sdata,0,sizeof(EschFileSceneHDR));
+
+            strncpy(sdata.name,scene_name,ESCH_MAX_NAME);
+            sdata.ncameras = count_camera;
+            sdata.nobjects = count_objects;
+            sdata.nvectorlights = count_vectlights;
+            sdata.nfpointlights = (ushort) count_fpointlights;
+            sdata.nfattenlights = (ushort) count_fattenlights;
+            sdata.nfspotlights = (ushort) count_fspotlights;
+            sdata.npointlights = count_pointlights;
+            sdata.nattenlights = (ushort) count_attenlights;
+            sdata.nspotlights = (ushort) count_spotlights;
+
+            if (iff.write(iff.makeid('H','D','R',' '),
+                          &sdata,sizeof(sdata)))
+            {
+                sprintf(buff,"Error writing HDR chunk, error #%d",
+                        iff.error());
+                gfx_continu_line(buff);
+                goto error_exit;
+            }
         }
     }
 
@@ -357,84 +370,87 @@ extern "C" void export()
         }
     }
 
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Loop through captureable objects, exporting FORM for each
-    while (!capture_get(&idata,&verts,&faces))
+    if (!keys_only)
     {
-        gfx_put_hole();
-        gfx_report("");
-
-        if (check_abort())
-            goto error_exit;
-
-        switch(idata->type)
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Loop through captureable objects, exporting FORM for each
+        while (!capture_get(&idata,&verts,&faces))
         {
+            gfx_put_hole();
+            gfx_report("");
 
-//ÄÄÄ Cameras ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-            case PXPCAMERA:
-                //ÄÄÄ Export camera
-                if (export_camera(iff,idata))
-                    goto error_exit;
-                break;
+            if (check_abort())
+                goto error_exit;
 
-//ÄÄÄ Lights ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-           case PXPAMBIENT:
-                //ÄÄÄ Export ambient light
-                if (lgt_ambient)
-                {
-                    if (export_ambient(iff,idata))
+            switch(idata->type)
+            {
+
+    //ÄÄÄ Cameras ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+                case PXPCAMERA:
+                    //ÄÄÄ Export camera
+                    if (export_camera(iff,idata))
                         goto error_exit;
-                }
-                break;
+                    break;
 
-           case PXPLIGHT:
-                //ÄÄÄ Export light
-                if (idata->item.l.hotsize != 360.0
-                    || idata->item.l.fallsize != 360.0)
-                {
-                    if (export_spot_light(iff,idata))
-                        goto error_exit;
-                }
-                else
-                {
-                    if (export_omni_light(iff,idata))
-                        goto error_exit;
-                }
-                break;
-
-//ÄÄÄ Meshs ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-           case PXPMESH:
-                //ÄÄÄ Load palette, if not already loaded once
-                if (material_mode == 2 && mtl_format == 1 && !pal)
-                {
-                    char pname[256];
-                    pal = new VngoPal8;
-                    if (!pal)
+    //ÄÄÄ Lights ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+               case PXPAMBIENT:
+                    //ÄÄÄ Export ambient light
+                    if (lgt_ambient)
                     {
-                        gfx_continu_line("Out of Memory!");
-                        goto error_exit;
+                        if (export_ambient(iff,idata))
+                            goto error_exit;
+                    }
+                    break;
+
+               case PXPLIGHT:
+                    //ÄÄÄ Export light
+                    if (idata->item.l.hotsize != 360.0
+                        || idata->item.l.fallsize != 360.0)
+                    {
+                        if (export_spot_light(iff,idata))
+                            goto error_exit;
+                    }
+                    else
+                    {
+                        if (export_omni_light(iff,idata))
+                            goto error_exit;
+                    }
+                    break;
+
+    //ÄÄÄ Meshs ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+               case PXPMESH:
+                    //ÄÄÄ Load palette, if not already loaded once
+                    if (material_mode == 2 && mtl_format == 1 && !pal)
+                    {
+                        char pname[256];
+                        pal = new VngoPal8;
+                        if (!pal)
+                        {
+                            gfx_continu_line("Out of Memory!");
+                            goto error_exit;
+                        }
+
+                        strcpy(pname,mtl_palpath);
+                        if (mtl_palpath[strlen(mtl_palpath)-1] != '\\')
+                            strcat(pname,"\\");
+                        strcat(pname,mtl_palname);
+
+                        sprintf(buff,"Loading Van Gogh palette %s...",
+                                pname);
+                        gfx_prompt(buff);
+
+                        int j;
+                        if ((j=load_pal(pal,pname))!=0)
+                        {
+                            sprintf(buff,"ERROR:  Error %d loading palette",j);
+                            gfx_continu_line(buff);
+                            goto error_exit;
+                        }
                     }
 
-                    strcpy(pname,mtl_palpath);
-                    if (mtl_palpath[strlen(mtl_palpath)-1] != '\\')
-                        strcat(pname,"\\");
-                    strcat(pname,mtl_palname);
-
-                    sprintf(buff,"Loading Van Gogh palette %s...",
-                            pname);
-                    gfx_prompt(buff);
-
-                    int j;
-                    if ((j=load_pal(pal,pname))!=0)
-                    {
-                        sprintf(buff,"ERROR:  Error %d loading palette",j);
-                        gfx_continu_line(buff);
+                    //ÄÄÄ Export mesh
+                    if (export_mesh(iff,idata,verts,faces,pal))
                         goto error_exit;
-                    }
-                }
-
-                //ÄÄÄ Export mesh
-                if (export_mesh(iff,idata,verts,faces,pal))
-                    goto error_exit;
+            }
         }
     }
 
@@ -501,10 +517,19 @@ STATIC int export_camera(XFParseIFF &iff, ItemData *idata)
     ty = tx*sn + ty*cs;
 
     // Normalize top vector
-    float mag = esch_sqrt(tx*tx + ty*ty + tz*tz);
-    tx /= mag;
-    ty /= mag;
-    tz /= mag;
+    float sumsq = tx*tx + ty*ty + tz*tz;
+    if (sumsq > 0)
+    {
+        float mag = esch_sqrt(sumsq);
+        tx /= mag;
+        ty /= mag;
+        tz /= mag;
+    }
+    else
+    {
+        gfx_prompt("!!! Error during normalize in camera");
+        tx = 0;  ty = 1;  tz = 0;
+    }
 
     // Create direction vector
     float vr[3];
@@ -513,10 +538,19 @@ STATIC int export_camera(XFParseIFF &iff, ItemData *idata)
     vr[2] = idata->item.c.ty - idata->item.c.y;
 
     // Normalize direction vector
-    mag = esch_sqrt(vr[0]*vr[0] + vr[1]*vr[1] + vr[2]*vr[2]);
-    vr[0] /= mag;
-    vr[1] /= mag;
-    vr[2] /= mag;
+    sumsq = vr[0]*vr[0] + vr[1]*vr[1] + vr[2]*vr[2];
+    if (sumsq > 0)
+    {
+        float mag = esch_sqrt(sumsq);
+        vr[0] /= mag;
+        vr[1] /= mag;
+        vr[2] /= mag;
+    }
+    else
+    {
+        gfx_prompt("!!! Error during normalize in camera");
+        vr[0] = 0;  vr[1] = 0;  vr[2] = 1;
+    }
 
     // Ortho top vs. the direction vector
     //
@@ -529,10 +563,19 @@ STATIC int export_camera(XFParseIFF &iff, ItemData *idata)
     tz -= vr[2]*dot;
 
     // Normalize top vector again
-    mag = esch_sqrt(tx*tx + ty*ty + tz*tz);
-    tx /= mag;
-    ty /= mag;
-    tz /= mag;
+    sumsq = tx*tx + ty*ty + tz*tz;
+    if (sumsq > 0)
+    {
+        float mag = esch_sqrt(sumsq);
+        tx /= mag;
+        ty /= mag;
+        tz /= mag;
+    }
+    else
+    {
+        gfx_prompt("!!! Error during normalize in camera");
+        tx = 1;  ty = 0;  tz = 0;
+    }
 
 //ÄÄÄ Output
     if (format_mode == 1)
@@ -644,7 +687,7 @@ STATIC int export_spot_light(XFParseIFF &iff, ItemData *idata)
 {
     char    buff[128];
     float   vr[3];
-    float   mag;
+    float   mag, sumsq;
 
     sprintf(buff,"Exporting Spot Light: %s",idata->name);
     gfx_stand_by(buff);
@@ -656,11 +699,20 @@ STATIC int export_spot_light(XFParseIFF &iff, ItemData *idata)
         vr[0] = idata->item.l.tx - idata->item.l.x;
         vr[1] = idata->item.l.tz - idata->item.l.z;
         vr[2] = idata->item.l.ty - idata->item.l.y;
-        mag = esch_sqrt(vr[0]*vr[0] + vr[1]*vr[1] + vr[2]*vr[2]);
 
-        vr[0] /= mag;
-        vr[1] /= mag;
-        vr[2] /= mag;
+        sumsq = vr[0]*vr[0] + vr[1]*vr[1] + vr[2]*vr[2];
+        if (sumsq > 0)
+        {
+            mag = esch_sqrt(sumsq);
+            vr[0] /= mag;
+            vr[1] /= mag;
+            vr[2] /= mag;
+        }
+        else
+        {
+            gfx_prompt("!!! Error during normalize in light");
+            vr[0] = 0;  vr[1] = 0;  vr[2] = 1;
+        }
 
         if (format_mode == 1)
         {
@@ -745,11 +797,20 @@ STATIC int export_spot_light(XFParseIFF &iff, ItemData *idata)
         vr[0] = idata->item.l.tx - idata->item.l.x;
         vr[1] = idata->item.l.tz - idata->item.l.z;
         vr[2] = idata->item.l.ty - idata->item.l.y;
-        mag = esch_sqrt(vr[0]*vr[0] + vr[1]*vr[1] + vr[2]*vr[2]);
 
-        vr[0] /= mag;
-        vr[1] /= mag;
-        vr[2] /= mag;
+        sumsq = vr[0]*vr[0] + vr[1]*vr[1] + vr[2]*vr[2];
+        if (sumsq > 0)
+        {
+            mag = esch_sqrt(sumsq);
+            vr[0] /= mag;
+            vr[1] /= mag;
+            vr[2] /= mag;
+        }
+        else
+        {
+            gfx_prompt("!!! Error during normalize in light");
+            vr[0] = 0;  vr[1] = 0;  vr[2] = 1;
+        }
 
         if (format_mode == 1)
         {
@@ -1077,7 +1138,7 @@ STATIC int export_mesh(XFParseIFF &iff, ItemData *idata,
 {
     float   cx, cy, cz;
     float   v1[3],v2[3],vr[3];
-    char    buff[128];
+    char    buff[256];
 
     sprintf(buff,"Exporting Object: %s",idata->name);
     gfx_show_gasgauge(buff);
@@ -1250,11 +1311,23 @@ STATIC int export_mesh(XFParseIFF &iff, ItemData *idata,
         vr[1] = (v1[2] * v2[0]) - (v1[0] * v2[2]);
         vr[2] = (v1[0] * v2[1]) - (v1[1] * v2[0]);
 
-        float mag = esch_sqrt(vr[0]*vr[0] + vr[1]*vr[1] + vr[2]*vr[2]);
+        float sumsq = vr[0]*vr[0] + vr[1]*vr[1] + vr[2]*vr[2];
+        if (sumsq > 0)
+        {
+            float mag = esch_sqrt(sumsq);
+            vr[0] /= mag;
+            vr[1] /= mag;
+            vr[2] /= mag;
+        }
+        else
+        {
+            gfx_prompt("!!! Error during normalize in mesh face");
+            vr[0] = 0;  vr[1] = 1;  vr[2] = 0;
+        }
 
-        efaces[i].normal.i = vr[0] / mag;
-        efaces[i].normal.j = vr[1] / mag;
-        efaces[i].normal.k = vr[2] / mag;
+        efaces[i].normal.i = vr[0];
+        efaces[i].normal.j = vr[1];
+        efaces[i].normal.k = vr[2];
 
         // Fill out vertex mapping parameters
         if (idata->item.m.tverts)
@@ -1278,9 +1351,13 @@ STATIC int export_mesh(XFParseIFF &iff, ItemData *idata,
         if (mtl_perspmode == 3)
             efaces[i].flags |= ESCH_FACE_ALLOWPERSP;
 
+        efaces[i].alpha_a = 
+        efaces[i].alpha_b = 
+        efaces[i].alpha_c = 255;
+
         // Fill out material information
-        ushort selfi;
-        MtlData *mtl = capture_mtlget(faces[i].material,&selfi);
+        short selfi, transp;
+        MtlData *mtl = capture_mtlget(faces[i].material,&selfi,&transp);
         if (mtl)
         {
             // Fill out face associated information
@@ -1295,13 +1372,13 @@ STATIC int export_mesh(XFParseIFF &iff, ItemData *idata,
             if (mtl_perspmode == 2 && *(mtl->name) == '^')
                 efaces[i].flags |= ESCH_FACE_ALLOWPERSP;
 
-            if (selfi)
-            {
-                dword slevel = (dword)( ((float)selfi * 15.0) / 100.0);
+            efaces[i].self_illum = byte((selfi * 255) / 100);
 
-                efaces[i].flags |= (slevel << 20)
-                                    & ESCH_FACE_SELFILUM_MASK;
-            }
+            efaces[i].alpha_a =
+            efaces[i].alpha_b =
+            efaces[i].alpha_c = byte(255 - ((transp * 255) / 100));
+            if (transp)
+                efaces[i].flags |= ESCH_FACE_ALPHA;
 
             if (!(mtl->flags & MTL_WIRE))
             {
@@ -1467,10 +1544,22 @@ STATIC int export_mesh(XFParseIFF &iff, ItemData *idata,
             }
         }
 
-        float mag = esch_sqrt(vr[0]*vr[0] + vr[1]*vr[1] + vr[2]*vr[2]);
-        everts[i].normal.i = vr[0] / mag;
-        everts[i].normal.j = vr[1] / mag;
-        everts[i].normal.k = vr[2] / mag;
+        float sumsq = vr[0]*vr[0] + vr[1]*vr[1] + vr[2]*vr[2];
+        if (sumsq > 0)
+        {
+            float mag = esch_sqrt(sumsq);
+            vr[0] /= mag;
+            vr[1] /= mag;
+            vr[2] /= mag;
+        }
+        else
+        {
+            gfx_prompt("!!! Error during normalize in mesh vertex");
+            vr[0] = 0;  vr[1] = 1;  vr[2] = 0;
+        }
+        everts[i].normal.i = vr[0];
+        everts[i].normal.j = vr[1];
+        everts[i].normal.k = vr[2];
     }
 
 //ÄÄÄ Output Data
@@ -1613,10 +1702,10 @@ STATIC int export_mesh(XFParseIFF &iff, ItemData *idata,
     // Faces
     if (format_mode == 1)
     {
-        if (iff.write(iff.makeid('F','A','C','1'), efaces,
+        if (iff.write(iff.makeid('F','A','C','2'), efaces,
                       idata->item.m.faces * sizeof(EschFace)))
         {
-            sprintf(buff,"ERROR:  Writing FAC1 (face) chunk, error #%d", iff.error());
+            sprintf(buff,"ERROR:  Writing FAC2 (face) chunk, error #%d", iff.error());
             gfx_continu_line(buff);
             goto error_exit;
         }
@@ -1634,7 +1723,12 @@ STATIC int export_mesh(XFParseIFF &iff, ItemData *idata,
         EschFaceV1 *tmpptr = temp;
         for(ulong i=0; i < idata->item.m.faces; i++, tptr++, tmpptr++)
         {
-            tmpptr->flags = tptr->flags;
+            dword flags = tptr->flags;
+            if (tptr->self_illum)
+                flags |= (tptr->self_illum << 16) & ESCH_FACEV1_SILLUM_MASK;
+            if (flags & ESCH_FACE_ALPHA)
+                flags |= (tptr->alpha_a << 20) & ESCH_FACEV1_ALPHA_MASK;
+            tmpptr->flags = flags;
             tmpptr->a = tptr->a;
             tmpptr->b = tptr->b;
             tmpptr->c = tptr->c;
@@ -1711,12 +1805,14 @@ STATIC int export_mesh(XFParseIFF &iff, ItemData *idata,
             Flic flc;
             FlicRaster *raster=0;
             byte *raster_pix=0;
+            ulong seq_count=0;
+            char *seq_names=0;
 
             if (mtl_animatedtxt
                 && strstr(fname,".FLI") || strstr(fname,".FLC"))
             {
                 AnimInfo info;
-                char     path[128];
+                char     path[256];
 
                 if (!locate_map(fname,path)
                     || pj_flic_open_info(path,&flc,&info)
@@ -1750,12 +1846,30 @@ STATIC int export_mesh(XFParseIFF &iff, ItemData *idata,
             }
             else if (strchr(fname,'*'))
             {
-                gfx_continu_line("ERROR: Sequentially numbered bitmaps not yet supported");
-                goto error_exit;
+                seq_count = locate_sequential_maps(fname,&seq_names);
+                if (!seq_count)
+                {
+                    sprintf(buff,"ERROR:  Could not open Texture 1 sequential bitmap '%s'",
+                                 fname);
+                    gfx_continu_line(buff);
+                    goto error_exit;
+                }
+
+                mtlhdr.nframes = ushort((mtl_animatedtxt) ? seq_count : 1);
+
+                bm=capture_mtlbitmap(seq_names, 0,
+                                     &mtlhdr.xsize, &mtlhdr.ysize, 0);
+                if (!bm)
+                {
+                    sprintf(buff,"ERROR:  Error loading Texture 1 sequential bitmap %s",
+                                 get_root_from_fullname(seq_names));
+                    gfx_continu_line(buff);
+                    goto error_exit;
+                }
             }
             else
             {
-                bm=capture_mtlbitmap(fname,
+                bm=capture_mtlbitmap(fname, 1,
                                      &mtlhdr.xsize, &mtlhdr.ysize, 0);
                 if (!bm)
                 {
@@ -1770,6 +1884,8 @@ STATIC int export_mesh(XFParseIFF &iff, ItemData *idata,
             Flic tflc;
             FlicRaster *traster=0;
             byte *traster_pix=0;
+            ulong tseq_count=0;
+            char *tseq_names=0;
 
             if (*tfname)
             {
@@ -1777,7 +1893,7 @@ STATIC int export_mesh(XFParseIFF &iff, ItemData *idata,
                     && strstr(tfname,".FLI") || strstr(tfname,".FLC"))
                 {
                     AnimInfo info;
-                    char     path[128];
+                    char     path[256];
 
                     if (!locate_map(tfname,path)
                         || pj_flic_open_info(path,&tflc,&info)
@@ -1812,16 +1928,37 @@ STATIC int export_mesh(XFParseIFF &iff, ItemData *idata,
                 }
                 else if (strchr(tfname,'*'))
                 {
-                    gfx_continu_line("ERROR: Sequentially numbered bitmaps not yet supported");
-                    goto error_exit;
-                }
-                else
-                {
-                    tbm=capture_mtlbitmap(tfname,
+                    tseq_count = locate_sequential_maps(tfname,&tseq_names);
+                    if (!tseq_count)
+                    {
+                        sprintf(buff,"ERROR:  Could not open Opacity sequential bitmap '%s'",
+                                     tfname);
+                        gfx_continu_line(buff);
+                        goto error_exit;
+                    }
+
+                    if (mtl_animatedtxt
+                        && (tseq_count > (ulong)mtlhdr.nframes))
+                        mtlhdr.nframes = (ushort)tseq_count;
+
+                    tbm=capture_mtlbitmap(tseq_names, 0,
                                           &mtlhdr.xsize, &mtlhdr.ysize, 1);
                     if (!tbm)
                     {
-                        sprintf(buff,"ERROR:  Error loading Opacity bitmap %s",tfname);
+                        sprintf(buff,"ERROR:  Error loading Opacity sequential bitmap %s",
+                                     get_root_from_fullname(tseq_names));
+                        gfx_continu_line(buff);
+                        goto error_exit;
+                    }
+                }
+                else
+                {
+                    tbm=capture_mtlbitmap(tfname, 1,
+                                          &mtlhdr.xsize, &mtlhdr.ysize, 1);
+                    if (!tbm)
+                    {
+                        sprintf(buff,"ERROR:  Error loading Opacity bitmap %s",
+                                     tfname);
                         gfx_continu_line(buff);
                         goto error_exit;
                     }
@@ -1879,6 +2016,7 @@ STATIC int export_mesh(XFParseIFF &iff, ItemData *idata,
                 goto error_exit;
             }
 
+            ushort fnumber=0, tfnumber=0;
             for(ushort frame=0;;)
             {
                 switch (bpp)
@@ -2017,6 +2155,7 @@ STATIC int export_mesh(XFParseIFF &iff, ItemData *idata,
                 if (frame >= mtlhdr.nframes)
                     break;
 
+                //ÄÄÄ Load next Texture 1 frame in sequence
                 if (raster)
                 {
                     free(bm);
@@ -2024,12 +2163,34 @@ STATIC int export_mesh(XFParseIFF &iff, ItemData *idata,
                                           &mtlhdr.xsize, &mtlhdr.ysize, 1);
                     if (!bm)
                     {
-                        sprintf(buff,"ERROR:  Error loading Texture 1 flic '%s'",
+                        sprintf(buff,"ERROR:  Error loading Texture 1 flic %s",
                                      fname);
                         gfx_continu_line(buff);
                         goto error_exit;
                     }
+
+                    fnumber++;
                 }
+                else if (seq_names)
+                {
+                    if (fnumber >= seq_count)
+                        fnumber=0;
+                    else
+                        fnumber++;
+
+                    free(bm);
+                    bm=capture_mtlbitmap(&seq_names[256*fnumber], 0,
+                                         &mtlhdr.xsize, &mtlhdr.ysize, 1);
+                    if (!bm)
+                    {
+                        sprintf(buff,"ERROR:  Error loading Texture 1 sequential bitmap %s",
+                                     get_root_from_fullname(&seq_names[256*fnumber]));
+                        gfx_continu_line(buff);
+                        goto error_exit;
+                    }
+                }
+
+                //ÄÄÄ Load next Opacity frame in sequence
                 if (traster)
                 {
                     free(tbm);
@@ -2039,6 +2200,26 @@ STATIC int export_mesh(XFParseIFF &iff, ItemData *idata,
                     {
                         sprintf(buff,"ERROR:  Error loading Opacity flic '%s'",
                                      tfname);
+                        gfx_continu_line(buff);
+                        goto error_exit;
+                    }
+
+                    tfnumber++;
+                }
+                else if (tseq_names)
+                {
+                    if (tfnumber >= tseq_count)
+                        tfnumber=0;
+                    else
+                        tfnumber++;
+
+                    free(tbm);
+                    tbm=capture_mtlbitmap(&seq_names[256*tfnumber], 0,
+                                          &mtlhdr.xsize, &mtlhdr.ysize, 1);
+                    if (!tbm)
+                    {
+                        sprintf(buff,"ERROR:  Error loading Opacity sequential bitmap %s",
+                                     get_root_from_fullname(&tseq_names[256*tfnumber]));
                         gfx_continu_line(buff);
                         goto error_exit;
                     }
@@ -2072,6 +2253,12 @@ STATIC int export_mesh(XFParseIFF &iff, ItemData *idata,
 
             if (tbm)
                 free(tbm);
+
+            if (seq_names)
+                free(seq_names);
+
+            if (tseq_names)
+                free(tseq_names);
 
             sprintf(buff,"%s written (%d by %d, %d frames) as ",
                          name,mtlhdr.xsize,mtlhdr.ysize,mtlhdr.nframes);
@@ -2340,7 +2527,15 @@ STATIC void compute_quick_extents(  ItemData *idata,
     dy = dia2.y - cen.y;
     dz = dia2.z - cen.z;
     rad_sq = dx*dx + dy*dy + dz*dz;
-    rad = sqrt(rad_sq);
+    if (rad_sq > 0)
+    {
+        rad = sqrt(rad_sq);
+    }
+    else
+    {
+        gfx_prompt("!!! Error during quick extents computation");
+        rad_sq = 1;  rad = 1;
+    }
 
 //ÄÄÄ Pass 2
     gfx_set_gasgauge("",1,2);
@@ -2418,13 +2613,17 @@ STATIC int compute_optimal_extents(  ItemData *idata,
     int                 i, j;
     XVData              *v, *v2;
     double              dx, dy, dz;
-    double              dist_sq, max_sq;
+    double              dist_sq, max_sq=1.0;
     struct FloatPoint   dia1, dia2,
                         cen;
 
     max_sq=-FLT_MAX;
 
     long nverts = idata->item.m.verts;
+    if (nverts <= 1)
+    {
+        return 1;
+    }
 
 //ÄÄÄ Loop through all looking for maximal distance
     for(i=0; i < nverts; i++)
@@ -2494,7 +2693,14 @@ STATIC int compute_optimal_extents(  ItemData *idata,
     mextents->cenx = cen.x * scale_3ds2esch;
     mextents->ceny = cen.y * scale_3ds2esch;
     mextents->cenz = cen.z * scale_3ds2esch;
-    mextents->extent_radius =  (esch_sqrt(max_sq) / 2.0) * scale_3ds2esch;
+
+    if (max_sq > 0)
+        mextents->extent_radius = (esch_sqrt(max_sq) / 2.0) * scale_3ds2esch;
+    else
+    {
+        gfx_prompt("!!! Error during optimal extents computation");
+        mextents->extent_radius = 1;
+    }
 
     return 0;
 }
@@ -2755,7 +2961,7 @@ STATIC ulong compress_rle_32bpp(ushort w, ushort h, byte *data, byte *cdata)
 STATIC int export_keyframes()
 {
     int         i;
-    char        buff[128];
+    char        buff[256];
     XFParseIFF  iff;
 
     sprintf(buff,"Exporting All Keyframes");
@@ -2849,6 +3055,12 @@ STATIC int export_keyframes()
 
             out_key.k_type = get_token(key[i].name);
             out_key.frame_num = key[i].frame_num;
+
+            sprintf (buff, "k_type %d pit %f roll %f yaw %f", out_key.k_type,
+                                                              out_key.rotation[0],
+                                                              out_key.rotation[1],
+                                                              out_key.rotation[2]);
+            gfx_continu_line(buff);
 
             for (int j=0; j<3; j++)
             {

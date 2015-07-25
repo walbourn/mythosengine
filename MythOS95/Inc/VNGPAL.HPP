@@ -25,6 +25,8 @@
 //
 //컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
 //
+// Created by Tim Little
+//
 // vngpal.hpp
 //
 // This file has all of the various palette definitions.
@@ -228,9 +230,10 @@ public:
     dword               flags;
     dword               type;
     char                name[16];
+    IDirectDrawPalette  *ddpal;
 
 
-    VngoPal(): shd_pal(0) { }
+    VngoPal(): shd_pal(0) {ddpal=NULL; }
     virtual ~VngoPal();
 
     void create_ddpal(LPDIRECTDRAW _dd, IDirectDrawPalette **_ddpal);

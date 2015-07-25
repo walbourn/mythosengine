@@ -63,6 +63,7 @@
 #undef _CLEAR_3D
 #endif
 
+// #define RENDER_FRONT
 
 extern VngoSystem   VgSystem;
 
@@ -87,52 +88,79 @@ VngoClear3D::VngoClear3D(HWND hwndclient):
 
 VngoClear3D::~VngoClear3D()
 {
+    if ((lflags & VNGO_SET_RESOLUTION) && dd != NULL)
+        dd->RestoreDisplayMode();
+
     term();
 }
 
 
-BOOL VngoClear3D::init()
+#define DEBUG_ALL      6
+#define DEBUG_WARNINGS 2
+#define DEBUG_ERROR    1
+#define DEBUG_OFF      0
+
+VNGError VngoClear3D::init()
 {
     strcpy(hwName,"Clear3D");
+
+    if (clrInitLib(CLR_INIT_NORMAL | DEBUG_OFF))
+    {
+        term();
+        return VNGO_INTERNAL_ERROR;
+    }
+
     err = DirectDrawCreate(NULL, &dd, NULL);
 
     if (err != DD_OK)
-        return FALSE;
+    {
+        term();
+        return VNGO_INTERNAL_ERROR;
+    }
 
     pContext = clrCreateContext();
 
-    VertPool = (IvoryArena*)ivory_alloc(CLEAR3D_MAX_BATCH_COPROCESSOR * 8 * sizeof (LL_Vert));
+    VertPool = (IvoryArena*)ivory_alloc(CLEAR3D_MAX_BATCH * 8 * sizeof (LL_Vert));
     if (VertPool == NULL)
-        return FALSE;
+    {
+        term();
+        return VNGO_MEMALLOC_ERROR;
+    }
 
-    ivory_arena_initialize(VertPool,CLEAR3D_MAX_BATCH_COPROCESSOR * 8 * sizeof (LL_Vert));
+    ivory_arena_initialize(VertPool,CLEAR3D_MAX_BATCH * 8 * sizeof (LL_Vert));
 
     VgSystem.CL3DTx = new VngoTextureManager;
+    if (VgSystem.CL3DTx == NULL)
+    {
+        term();
+        return VNGO_MEMALLOC_ERROR;
+    }
     VgSystem.CL3DTx->screen = this;
 
     type_info = SCREENTYPE_CLEAR3D;
-    return TRUE;
+    return VNGO_NO_ERROR;
 }
 
 
-void VngoClear3D::reinit(Flx16 brightness)
+VNGError VngoClear3D::reinit(Flx16 brightness)
 {
     if (!pal)
-        return;
+        return VNGO_INTERNAL_ERROR;
 
     set_palette(pal,brightness);
+    return VNGO_NO_ERROR;
 }
 
-BOOL VngoClear3D::check_mode(int _width, int _height, int bpp)
+VNGError VngoClear3D::check_mode(int _width, int _height, int bpp, dword _flags, VngoPixelInfo *pinfo)
 {
     assert (dd != 0);
 
-    return (FALSE);
+    return (VNGO_NOT_SUPPORTED);
 }
 
 
 
-BOOL VngoClear3D::set_mode(int _width, int _height, int bpp, VngoPal *_pal,dword flags)
+VNGError VngoClear3D::set_mode(int _width, int _height, int bpp, VngoPal *_pal,dword flags)
 {
     width = _width;
     height = _height;
@@ -140,6 +168,11 @@ BOOL VngoClear3D::set_mode(int _width, int _height, int bpp, VngoPal *_pal,dword
     startx = 0;
     starty = 0;
     bit_depth = bpp;
+
+    if (!(pal->flags & VNGO_16BIT))
+    {
+        return VNGO_NEEDS_PAL16;
+    }
 
     assert (dd != 0);
 
@@ -156,7 +189,7 @@ BOOL VngoClear3D::set_mode(int _width, int _height, int bpp, VngoPal *_pal,dword
     }
 
     if (err != DD_OK)
-        return FALSE;
+        return VNGO_INTERNAL_ERROR;
 
     // Get rid of any previous surfaces.
     if (BackBuffer)
@@ -180,86 +213,6 @@ BOOL VngoClear3D::set_mode(int _width, int _height, int bpp, VngoPal *_pal,dword
         Palette = NULL;
     }
 
-#if 0
-    // Creat surfaces.
-    ZeroMemory (&ddsd, sizeof(ddsd));
-    ddsd.dwSize = sizeof(ddsd);
-    if (lflags & VNGO_TRUE_FLIP)
-    {
-        ddsd.dwFlags = DDSD_CAPS | DDSD_BACKBUFFERCOUNT;
-        ddsd.dwBackBufferCount = 1;
-        ddsd.ddsCaps.dwCaps = DDSCAPS_PRIMARYSURFACE |
-                              DDSCAPS_FLIP |
-                              DDSCAPS_COMPLEX |
-                              DDSCAPS_VIDEOMEMORY;
-    }
-    else
-    {
-        ddsd.dwFlags = DDSD_CAPS;
-        ddsd.ddsCaps.dwCaps = DDSCAPS_PRIMARYSURFACE
-                              | DDSCAPS_VIDEOMEMORY;
-    }
-
-
-    // try to get a double buffered video memory surface.
-    err = dd->CreateSurface(&ddsd, &Primary, NULL);
-
-    if (err != DD_OK)
-    {
-        return VNGO_INTERNAL_ERROR;
-    }
-
-
-
-
-    if (flags & VNGO_ALLOC_ZBUFFER)
-    {
-        memset( &ddsd, 0, sizeof(ddsd) );
-        ddsd.dwSize = sizeof(ddsd);
-        ddsd.dwFlags           = DDSD_WIDTH
-                               | DDSD_HEIGHT
-                               | DDSD_CAPS
-                               | DDSD_ZBUFFERBITDEPTH;
-        ddsd.dwWidth           = _width;
-        ddsd.dwHeight          = _height;
-        ddsd.ddsCaps.dwCaps    = DDSCAPS_ZBUFFER;
-        ddsd.dwZBufferBitDepth = 16;
-        err = dd->CreateSurface( &ddsd, &ZBuffer, NULL );
-
-        err = Primary->AddAttachedSurface( ZBuffer );
-    }
-
-
-    {
-        ddsd.dwFlags = DDSD_CAPS | DDSD_HEIGHT | DDSD_WIDTH;
-
-        if (lflags & VNGO_FORCE_SYSTEMMEMORY)
-            ddsd.ddsCaps.dwCaps = DDSCAPS_SYSTEMMEMORY;
-        else
-            ddsd.ddsCaps.dwCaps = DDSCAPS_OFFSCREENPLAIN | DDSCAPS_VIDEOMEMORY;
-
-        ddsd.dwHeight = height;
-        ddsd.dwWidth = width;
-        err = dd->CreateSurface (&ddsd, &BackBuffer, NULL);
-
-        FrontBuffer = BackBuffer;
-
-        if (err != DD_OK)
-            return FALSE;
-    }
-    SurfaceManager = new VngoSurfaceManager(BackBuffer,ZBuffer);
-
-    if (SurfaceManager == NULL)
-    {
-        return FALSE;
-    }
-    // set the context.
-
-    pContext->ContextFlags = 0;
-    pContext->lpRSurface = Primary;
-    pContext->lpZSurface = ZBuffer;
-    pContext->SurfaceRect = NULL;
-#else
     // Creat surfaces.
     ZeroMemory (&ddsd, sizeof(ddsd));
     ddsd.dwSize = sizeof(ddsd);
@@ -298,7 +251,7 @@ BOOL VngoClear3D::set_mode(int _width, int _height, int bpp, VngoPal *_pal,dword
         err = Primary->GetAttachedSurface(&caps, &BackBuffer);
 
         if (err != DD_OK)
-            return FALSE;
+            return VNGO_INTERNAL_ERROR;
 
         FrontBuffer = BackBuffer;
     }
@@ -318,7 +271,7 @@ BOOL VngoClear3D::set_mode(int _width, int _height, int bpp, VngoPal *_pal,dword
         FrontBuffer = BackBuffer;
 
         if (err != DD_OK)
-            return FALSE;
+            return VNGO_INTERNAL_ERROR;
     }
 
     if (flags & VNGO_ALLOC_ZBUFFER)
@@ -335,22 +288,34 @@ BOOL VngoClear3D::set_mode(int _width, int _height, int bpp, VngoPal *_pal,dword
         ddsd.dwZBufferBitDepth = 16;
         err = dd->CreateSurface( &ddsd, &ZBuffer, NULL );
 
+#ifndef RENDER_FRONT
         err = BackBuffer->AddAttachedSurface( ZBuffer );
+#else
+        err = Primary->AddAttachedSurface( ZBuffer );
+#endif
     }
 
-    SurfaceManager = new VngoSurfaceManager(FrontBuffer,ZBuffer);
+
+#ifndef RENDER_FRONT
+    SurfaceManager = new VngoSurfaceManager(BackBuffer,ZBuffer);
+#else
+    SurfaceManager = new VngoSurfaceManager(Primary,ZBuffer);
+#endif
 
     if (SurfaceManager == NULL)
     {
-        return FALSE;
+        return VNGO_MEMALLOC_ERROR;
     }
     // set the context.
 
     pContext->ContextFlags = 0;
+#ifndef RENDER_FRONT
     pContext->lpRSurface = BackBuffer;
+#else
+    pContext->lpRSurface = Primary;
+#endif
     pContext->lpZSurface = ZBuffer;
     pContext->SurfaceRect = NULL;
-#endif
 
     clrSetZMode(LL_Z_MODE_NORMAL);
     clrSetZCompareMode(LL_Z_WRITE_LESS_EQUAL);
@@ -359,31 +324,20 @@ BOOL VngoClear3D::set_mode(int _width, int _height, int bpp, VngoPal *_pal,dword
 
     // see control.c for info.
 
-#if 0
-    LL_Color    c;
-
-    c.r = 255;
-    c.g = 0;
-    c.b = 255;
-    c.a = 0;
-    clrSetTextureColorBounds(LL_COLOR_COMPARE_INCLUSIVE,&c,&c);
-#endif
-
-
     ClrErr rc = LL_OK;
 
     rc = clrSetContext(pContext);
 
     if (rc != LL_OK)
-        return FALSE;
+        return VNGO_INTERNAL_ERROR;
 
-    pBatchRef = new LL_Batch [CLEAR3D_MAX_BATCH_COPROCESSOR];
+    pBatchRef = new LL_Batch [CLEAR3D_MAX_BATCH];
     pBatch = pBatchRef;
 
-    return TRUE;
+    return VNGO_NO_ERROR;
 }
 
-void VngoClear3D::flip()
+VNGError VngoClear3D::flip()
 {
 
     if (frame_is_open)
@@ -391,9 +345,9 @@ void VngoClear3D::flip()
 
     flush();
 
-    clrWait3D();
 
-#if 1   // rendering to primary for Bruce.
+#ifndef RENDER_FRONT
+//#if 0   // rendering to primary for Bruce.
     if (FrontBuffer->IsLost() == DDERR_SURFACELOST)
         FrontBuffer->Restore();
 
@@ -436,16 +390,17 @@ void VngoClear3D::flip()
             }
             if (ddrval != DDERR_WASSTILLDRAWING)
             {
-                return;
+                return VNGO_INTERNAL_ERROR;
             }
         }
     }
 #endif
-    VngoScreenManager::flip();
+    return VngoScreenManager::flip();
 }
 
-void VngoClear3D::set_palette(VngoPal *p,Flx16 brightness)
+VNGError VngoClear3D::set_palette(VngoPal *p,Flx16 brightness)
 {
+    return VNGO_NOT_SUPPORTED;
 }
 
 
@@ -467,6 +422,7 @@ void VngoClear3D::close_frame()
 void VngoClear3D::flush()
 {
     run_dl();
+    clrFlush();
     wait_busy();
 }
 void VngoClear3D::run_dl()
@@ -485,11 +441,12 @@ void VngoClear3D::wait_busy()
 {
     // wait until the GP is idle.
     // this is not actualy needed at this time.
+//    clrIdle3D();
 }
 
 LL_Batch *VngoClear3D::get_batch(int num_batches)
 {
-    if ((BatchCount + num_batches) < CLEAR3D_MAX_BATCH_COPROCESSOR - 1)
+    if ((BatchCount + num_batches) < CLEAR3D_MAX_BATCH - 1)
     {
         BatchCount += num_batches;
         LL_Batch *ret_val = pBatch;
@@ -503,7 +460,7 @@ LL_Batch *VngoClear3D::get_batch(int num_batches)
     }
 }
 
-void VngoClear3D::term()
+VNGError VngoClear3D::term()
 {
 
     if (SurfaceManager)
@@ -571,4 +528,19 @@ void VngoClear3D::term()
         ivory_arena_clear(VertPool);
         ivory_free((void **)&VertPool);
     }
+
+    if (pContext != NULL)
+    {
+        clrDeleteContext(pContext);
+        pContext = NULL;
+    }
+    clrCloseLib();
+
+    return VNGO_NO_ERROR;
 }
+
+VNGError VngoClear3D::dump_textures()
+{
+    return VNGO_NO_ERROR;
+}
+

@@ -367,16 +367,12 @@ CameraPropExPage::CameraPropExPage() : CPropertyPage(CameraPropExPage::IDD),
 	//{{AFX_DATA_INIT(CameraPropExPage)
 	m_bg_active = FALSE;
 	m_haze_active = FALSE;
-	m_slevels = 0;
-	m_levels = 0;
-	m_bpercent = 0.0f;
-	m_blevels = 0;
+	m_startz = 0.0f;
+	m_midz = 0.0f;
 	//}}AFX_DATA_INIT
 
-    m_levels = 64;
-    m_slevels = 24;
-    m_blevels = 48;
-    m_bpercent = 50.0f;
+    m_startz = 0.5f;
+    m_midz = 0.85f;
 }
 
 CameraPropExPage::~CameraPropExPage()
@@ -391,11 +387,10 @@ void CameraPropExPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Control(pDX, IDC_CPROP_HAZE, m_haze_activeCtl);
 	DDX_Check(pDX, IDC_CPROP_BMBACK, m_bg_active);
 	DDX_Check(pDX, IDC_CPROP_HAZE, m_haze_active);
-	DDX_Text(pDX, IDC_CPROP_SLEVEL, m_slevels);
-	DDX_Text(pDX, IDC_CPROP_LEVEL, m_levels);
-	DDX_Text(pDX, IDC_CPROP_BPERC, m_bpercent);
-	DDV_MinMaxFloat(pDX, m_bpercent, 1.f, 99.f);
-	DDX_Text(pDX, IDC_CPROP_BLEVEL, m_blevels);
+	DDX_Text(pDX, IDC_CPROP_STARTZ, m_startz);
+	DDV_MinMaxFloat(pDX, m_startz, 0.f, 1.f);
+	DDX_Text(pDX, IDC_CPROP_MIDZ, m_midz);
+	DDV_MinMaxFloat(pDX, m_midz, 0.f, 1.f);
 	//}}AFX_DATA_MAP
 
     if (pDX->m_bSaveAndValidate)
@@ -407,37 +402,10 @@ void CameraPropExPage::DoDataExchange(CDataExchange* pDX)
             pDX->Fail();
         }
 
-        pDX->PrepareEditCtrl(IDC_CPROP_LEVEL);
-        switch(m_levels)
+        pDX->PrepareEditCtrl(IDC_CPROP_MIDZ);
+        if (m_midz < m_startz)
         {
-            case 8:
-            case 16:
-            case 32:
-            case 64:
-            case 128:
-            case 256:
-                break;
-            default:
-                AfxMessageBox("Must be 8, 16, 32, 64, 128, or 256.",MB_OK | MB_ICONEXCLAMATION);
-                pDX->Fail();
-        }
-
-        pDX->PrepareEditCtrl(IDC_CPROP_SLEVEL);
-        if (m_slevels >= m_levels)
-        {
-            AfxMessageBox("Must be less than the number of levels.",MB_OK | MB_ICONEXCLAMATION);
-            pDX->Fail();
-        }
-
-        pDX->PrepareEditCtrl(IDC_CPROP_BLEVEL);
-        if (m_blevels >= m_levels)
-        {
-            AfxMessageBox("Must be less than the number of levels.",MB_OK | MB_ICONEXCLAMATION);
-            pDX->Fail();
-        }
-        if (m_blevels <= m_slevels)
-        {
-            AfxMessageBox("Must be greater than the number of unaffected levels.",MB_OK | MB_ICONEXCLAMATION);
+            AfxMessageBox("Must be greater than the Start Z.",MB_OK | MB_ICONEXCLAMATION);
             pDX->Fail();
         }
     }
@@ -524,10 +492,10 @@ void CameraPropExPage::OnSelectBitmap()
             return;
         }
 
-        if (bm->bpp != 1)
+        if (bm->bpp != 1 && bm->bpp != 2 && bm->bpp != 3)
         {
             delete bm;
-            MessageBox("Must be an 8-bit image",
+            MessageBox("Must be an 8-bit, 15-bit, or 24-bit image",
                        "Escher Tool",
                        MB_OK | MB_ICONEXCLAMATION);
             return;
@@ -890,11 +858,15 @@ FacePropFlagsPage::FacePropFlagsPage() : CPropertyPage(FacePropFlagsPage::IDD)
 	m_bcline = FALSE;
 	m_caline = FALSE;
 	m_flat = FALSE;
-	m_selfi = -1;
 	m_smooth = FALSE;
 	m_solid = FALSE;
 	m_specular = FALSE;
 	m_wire = FALSE;
+	m_alpha = FALSE;
+	m_alpha_a = 0;
+	m_alpha_b = 0;
+	m_alpha_c = 0;
+	m_selfillum = 0;
 	//}}AFX_DATA_INIT
 }
 
@@ -912,11 +884,19 @@ void FacePropFlagsPage::DoDataExchange(CDataExchange* pDX)
 	DDX_Check(pDX, IDC_FPROP_BCLINE, m_bcline);
 	DDX_Check(pDX, IDC_FPROP_CALINE, m_caline);
 	DDX_Check(pDX, IDC_FPROP_FLAT, m_flat);
-	DDX_CBIndex(pDX, IDC_FPROP_SELFILLM, m_selfi);
 	DDX_Check(pDX, IDC_FPROP_SMOOTH, m_smooth);
 	DDX_Check(pDX, IDC_FPROP_SOLID, m_solid);
 	DDX_Check(pDX, IDC_FPROP_SPECULAR, m_specular);
 	DDX_Check(pDX, IDC_FPROP_WIRE, m_wire);
+	DDX_Check(pDX, IDC_FPROP_ALPHA, m_alpha);
+	DDX_Text(pDX, IDC_FPROP_ALPHAA, m_alpha_a);
+	DDV_MinMaxUInt(pDX, m_alpha_a, 0, 255);
+	DDX_Text(pDX, IDC_FPROP_ALPHAB, m_alpha_b);
+	DDV_MinMaxUInt(pDX, m_alpha_b, 0, 255);
+	DDX_Text(pDX, IDC_FPROP_ALPHAC, m_alpha_c);
+	DDV_MinMaxUInt(pDX, m_alpha_c, 0, 255);
+	DDX_Text(pDX, IDC_FPROP_SELFILLUM, m_selfillum);
+	DDV_MinMaxUInt(pDX, m_selfillum, 0, 255);
 	//}}AFX_DATA_MAP
 }
 
@@ -1397,6 +1377,7 @@ void MeshPropFacePage::ui_face_properties()
         assert(f);
 
         EschFace *face = (EschFace*)ivory_hlock(f);
+        face = &face[cursel];
         if (f)
         {
             //ÄÄÄ General
@@ -1431,6 +1412,7 @@ void MeshPropFacePage::ui_face_properties()
             fdlg.m_flat = (face->flags & ESCH_FACE_FLAT) ? 1 : 0;
             fdlg.m_smooth = (face->flags & ESCH_FACE_SMOOTH) ? 1 : 0;
             fdlg.m_specular = (face->flags & ESCH_FACE_SPECULAR) ? 1 : 0;
+            fdlg.m_alpha = (face->flags & ESCH_FACE_ALPHA) ? 1 : 0;
 
             fdlg.m_abline = (face->flags & ESCH_FACE_ABLINE) ? 1 : 0;
             fdlg.m_bcline = (face->flags & ESCH_FACE_BCLINE) ? 1 : 0;
@@ -1440,9 +1422,11 @@ void MeshPropFacePage::ui_face_properties()
 
             fdlg.m_allow_persp = (face->flags & ESCH_FACE_ALLOWPERSP) ? 1 : 0;
 
-            assert(ESCH_FACE_SELFILUM_MASK == 0xf00000);
+            fdlg.m_selfillum = face->self_illum;
 
-            fdlg.m_selfi = (face->flags & ESCH_FACE_SELFILUM_MASK) >> 20;
+            fdlg.m_alpha_a = face->alpha_a;
+            fdlg.m_alpha_b = face->alpha_b;
+            fdlg.m_alpha_c = face->alpha_c;
 
             //ÄÄÄ Application Flags
             FacePropAppFlagsPage   afdlg;
@@ -1494,10 +1478,10 @@ void MeshPropFacePage::ui_face_properties()
                            | ESCH_FACE_FLAT
                            | ESCH_FACE_SMOOTH
                            | ESCH_FACE_SPECULAR
+                           | ESCH_FACE_ALPHA
                            | ESCH_FACE_ABLINE
                            | ESCH_FACE_BCLINE
-                           | ESCH_FACE_ABLINE
-                           | ESCH_FACE_SELFILUM_MASK);
+                           | ESCH_FACE_ABLINE);
 
                 if (fdlg.m_wire)
                     flags |= ESCH_FACE_WIRE;
@@ -1509,6 +1493,8 @@ void MeshPropFacePage::ui_face_properties()
                     flags |= ESCH_FACE_SMOOTH;
                 if (fdlg.m_specular)
                     flags |= ESCH_FACE_SPECULAR;
+                if (fdlg.m_alpha) 
+                    flags |= ESCH_FACE_ALPHA;
 
                 if (fdlg.m_abline)
                     flags |= ESCH_FACE_ABLINE;
@@ -1523,9 +1509,11 @@ void MeshPropFacePage::ui_face_properties()
                 if (fdlg.m_allow_persp)
                     flags |= ESCH_FACE_ALLOWPERSP;
 
-                assert(ESCH_FACE_SELFILUM_MASK == 0xf00000);
+                face->self_illum = byte(fdlg.m_selfillum);
 
-                flags |= (fdlg.m_selfi << 20) & ESCH_FACE_SELFILUM_MASK;
+                face->alpha_a = byte(fdlg.m_alpha_a);
+                face->alpha_b = byte(fdlg.m_alpha_b);
+                face->alpha_c = byte(fdlg.m_alpha_c);
 
                 //ÄÄÄ Application Flags
                 flags &= ~(ESCH_FACE_APP0
@@ -1553,7 +1541,7 @@ void MeshPropFacePage::ui_face_properties()
             ivory_hunlock(f);
         }
         else
-        {
+        { 
             AfxMessageBox("Face Locked Failed",MB_OK | MB_ICONEXCLAMATION);
         }
     }

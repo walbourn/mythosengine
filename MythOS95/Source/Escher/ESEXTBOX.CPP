@@ -39,7 +39,7 @@
 //같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같�
 //
 //                                Includes
-//                                
+//
 //같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같�
 
 #include "escher.hpp"
@@ -193,9 +193,9 @@ int EschBoxExtents::hit(const EschPoint *pt, const float r) const
 
     return ( (mins[0] > (pt->x + r))
               || (maxs[0] < (pt->x - r))
-              || (mins[2] > (pt->z + r)) 
+              || (mins[2] > (pt->z + r))
               || (maxs[2] < (pt->z - r))
-              || (mins[1] > (pt->y + r)) 
+              || (mins[1] > (pt->y + r))
               || (maxs[1] < (pt->y - r)) ) ? 0 : 1;
 }
 

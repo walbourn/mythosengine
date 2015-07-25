@@ -61,7 +61,7 @@
 //
 //같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같�
 
-#define VERSION "2.00"
+#define VERSION "2.01"
 
 //같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같�
 //
@@ -143,6 +143,7 @@ static RadSub Escher_rad[] =
 {
     SOUR_ALL, feel_radio, &source_mode, 1,
     SOUR_SEL, feel_radio, &source_mode, 2,
+    KEY_ONLY, feel_radio, &source_mode, 3,
 
     CORD_LOC, feel_radio, &coord_mode, 1,
     CORD_WRD, feel_radio, &coord_mode, 2,

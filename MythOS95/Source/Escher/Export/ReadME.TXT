@@ -38,19 +38,25 @@
 
  Notes by: Chuck Walbourn
 
- Last Updated: May 21, 1997
+ Last Updated: September 19, 1997
 
  Escher Exporter - 3D Studio R4 IPAS PXP Routine
 
  Changes for this release --------------------------------------------------
 
- Version 2.00
+ Version 2.01
 
-    o Updated for floating-point data formats
+    o Added export of material's transparency percentage as alpha level
 
-    o Added 'darklight' export, indicated by a negative light
-      multiplier.
+    o Texture export now supports numbered sequential image files (fire1.tga,
+      fire2.tga, fire3.tga are frames #1, #2, and #3 of an animated
+      texture when specified as fire*.tga in the material definition)
 
-    o Added keyframe data exporting
+    o Added new EschFace structure usage
+
+    o More changes for keyframe data exporting
+
+    o Added some checks to try to resolve 'domain error in sqrt' problems
+      seen on some systems
 
  *** END OF FILE ***

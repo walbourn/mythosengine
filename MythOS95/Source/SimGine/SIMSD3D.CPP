@@ -46,7 +46,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include "simgine.hpp"
@@ -56,8 +56,6 @@
 //                                 Code
 //
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
-
-#ifdef  _D3D
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //°°°°°°°°°°°°°°°°°°°°°°±  Constructors/Destructors  ±°°°°°°°°°°°°°°°°°°°°°°°
@@ -89,120 +87,123 @@ SimScreenD3D::~SimScreenD3D()
 // SimScreenD3D - init
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 SimScreen::error_codes SimScreenD3D::init (ushort w, ushort h,
-                                            ushort bd, dword flags)
+                                           ushort bd, dword flags)
 {
     assertMyth("SimScreenD3D::init needs SimApp", SimApp != 0);
+
+//ÄÄÄ Verify bit-depth
+    switch (bd)
+    {
+        case 15:
+        case 16:
+            break;
+        default:
+            return ERROR_INVALIDPARMS;
+    }
+
+//ÄÄÄ Determine screen manager init flags
+    dword init_flags = VNGO_3DDEVICE | VNGO_ALLOC_ZBUFFER;
+
+    if (flags & FULLSCREEN)
+    {
+        init_flags |= VNGO_SET_RESOLUTION;
+
+        if (w == 320 && h == 240)
+            init_flags |= VNGO_TRUE_FLIP | VNGO_FORCE_SYSTEMMEMORY;
+    }
+
+    if (flags & TRUEFLIP)
+        init_flags |= VNGO_TRUE_FLIP;
+
+//ÄÄÄ Bit-depth error retry loop
+    for (;;)
+    {
+        release();
+
+        //ÄÄÄ Create screen manager
+        vgs = new VngoDirect3D (SimApp->hWndClient);
+        if (!vgs)
+            return ERROR_NOMEMORY;
+
+        if (vgs->get_initstate())
+        {
+            release();
+            return ERROR_SCNRMNGRINIT;
+        }
+
+        //ÄÄÄ Create palette
+        switch(bd)
+        {
+            case 15:
+                pal = new VngoPal15;
+                if (!pal)
+                {
+                    release();
+                    return ERROR_NOMEMORY;
+                }
+                if (((VngoPal15*)pal)->init(0) != 0)
+                {
+                    release();
+                    return ERROR_PALINIT;
+                }
+                break;
+            case 16:
+                pal = new VngoPal16;
+                if (!pal)
+                {
+                    release();
+                    return ERROR_NOMEMORY;
+                }
+                if (((VngoPal16*)pal)->init(0) != 0)
+                {
+                    release();
+                    return ERROR_PALINIT;
+                }
+                break;
+            default:
+                release();
+                return ERROR_INVALIDPARMS;
+        }
+
+        //ÄÄÄ Setup mode
+        VNGError err = vgs->set_mode (w, h, 16, pal, init_flags);
+        if (err == VNGO_NEEDS_PAL16)
+            bd = 16;
+        else if (err == VNGO_NEEDS_PAL15)
+            bd = 15;
+        else if (err)
+        {
+            release();
+            return ERROR_MODEFAIL;
+        }
+        else
+            break;
+    }
 
 //ÄÄÄ Call base
     error_codes err = SimScreen::init(w,h,bd,flags);
     if (err)
         return err;
 
-//ÄÄÄ Create screen manager
-    vgs = new VngoDirect3D (SimApp->hWndClient);
-    if (!vgs)
-        return ERROR_NOMEMORY;
-
-//ÄÄÄ Create palette
-    switch(bit_depth)
-    {
-        case 8:
-            pal = new VngoPal8;
-            if (!pal)
-            {
-                err = ERROR_NOMEMORY;
-                goto leave_error;
-            }
-            if (((VngoPal8*)pal)->init(0) != 0)
-            {
-                err = ERROR_PALINIT;
-                goto leave_error;
-            }
-            break;
-        case 15:
-            pal = new VngoPal15;
-            if (!pal)
-            {
-                err = ERROR_NOMEMORY;
-                goto leave_error;
-            }
-            if (((VngoPal15*)pal)->init(0) != 0)
-            {
-                err = ERROR_PALINIT;
-                goto leave_error;
-            }
-            break;
-        case 16:
-            pal = new VngoPal16;
-            if (!pal)
-            {
-                err = ERROR_NOMEMORY;
-                goto leave_error;
-            }
-            if (((VngoPal16*)pal)->init(0) != 0)
-            {
-                err = ERROR_PALINIT;
-                goto leave_error;
-            }
-            break;
-        default:
-            err = ERROR_MODENOTSUPP;
-            goto leave_error;
-    }
-
-//ÄÄÄ Setup mode
-    {
-        dword init_flags = VNGO_3DDEVICE | VNGO_ALLOC_ZBUFFER;
-        
-        if (flags & FULLSCREEN)
-            init_flags |= VNGO_SET_RESOLUTION;
-
-        if (w == 320 && h == 240)
-            init_flags |= VNGO_TRUE_FLIP | VNGO_FORCE_SYSTEMMEMORY;
-
-        dword tbd = 16;
-        if (bit_depth == 8)
-            tbd = 8;
-
-        vgs->set_mode (width, height, tbd, pal, init_flags);
-    }
-
 //ÄÄÄ Setup viewport
-    gvport = new VngoVportD3D (0,0,width,height,pal,VNGO_ZBUFFER_DEV,vgs);
+    gvport = new VngoVportD3D (VngoRect(0,0,w,h), pal, VNGO_ZBUFFER_DEV, vgs);
     if (!gvport)
     {
-        err = ERROR_NOMEMORY;
-        goto leave_error;
+        release();
+        return ERROR_NOMEMORY;
     }
 
     if (gvport->get_init_state())
     {
-        err = ERROR_VPORTINIT;
-        goto leave_error;
+        release();
+        return ERROR_VPORTINIT;
     }
+
+    gvport->zbuffer_off();
 
     clear();
 
     return ERROR_NONE;
-
-leave_error: ;
-    if (gvport)
-    {
-        delete gvport;
-        gvport=0;
-    }
-    if (pal)
-    {
-        delete pal;
-        pal=0;
-    }
-    if (vgs)
-    {
-        delete vgs;
-        vgs=0;
-    }
-
-    return err;
 }
 
 
@@ -214,8 +215,11 @@ VngoVport *SimScreenD3D::create_subviewport(VngoRect &srect, dword flags)
     assertMyth("SimScreenD3D::create_subviewport needs screen manager and palette",
                vgs != 0 && pal != 0);
 
-    VngoVport *vport = new VngoVportD3D (srect.x,srect.y,srect.dx,srect.dy,
-                                         pal,flags | VNGO_ZBUFFER_DEV,vgs);
+    // Why always allocate at zbuffer?
+    // Shouldn't the app be able to control this?
+
+    VngoVport *vport = new VngoVportD3D (srect, pal,
+                                         flags | VNGO_ZBUFFER_DEV, vgs);
     if (!vport)
         return 0;
 
@@ -225,7 +229,23 @@ VngoVport *SimScreenD3D::create_subviewport(VngoRect &srect, dword flags)
     return vport;
 }
 
-#endif      // _D3D
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// SimScreenD3D - lock
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+long SimScreenD3D::lock ()
+{
+    return 1;
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// SimScreenD3D - unlock
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+int SimScreenD3D::unlock ()
+{
+    return 0;
+}
 
 //°±² End of module - simsd3d.cpp ²±°
 

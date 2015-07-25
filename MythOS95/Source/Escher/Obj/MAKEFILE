@@ -78,6 +78,9 @@ esclip.obj\
 esdata.obj\
 esdraw.obj\
 esdrface.obj\
+esdrline.obj\
+esdrpnt.obj\
+eselemnt.obj\
 esextbox.obj\
 esextsph.obj\
 esfref.obj\
@@ -106,6 +109,7 @@ esmetabx.obj\
 espartik.obj\
 esplosn.obj\
 espntdrw.obj\
+esprtgen.obj\
 esprtgeo.obj\
 esprtpyr.obj\
 esprtspr.obj\
@@ -117,6 +121,7 @@ essystem.obj\
 estcache.obj\
 esterran.obj\
 esternex.obj\
+estfile.obj\
 estrtop.obj\
 estoken.obj\
 estxfire.obj\
@@ -148,12 +153,18 @@ all: setstden $(LIB).pch $(LIB).lib
 
 #--- .cpp
 {..\}.cpp{}.obj:
-	$(CPP) $(CCOPTIONS) /Yuescher.hpp /Fp$(LIB).pch $<
+        $(CPP) $(CCOPTIONS) /Yuescher.hpp /Fp$(LIB).pch $<
 
 {..\Build\}.cpp{}.obj:
         $(CPP) $(CCOPTIONS) /Yuescher.hpp /Fp$(LIB).pch $<
 
 {..\Draw\}.cpp{}.obj:
+        $(CPP) $(CCOPTIONS) /Yuescher.hpp /Fp$(LIB).pch $<
+
+{..\Element\}.cpp{}.obj:
+        $(CPP) $(CCOPTIONS) /Yuescher.hpp /Fp$(LIB).pch $<
+
+{..\Gravity\}.cpp{}.obj:
         $(CPP) $(CCOPTIONS) /Yuescher.hpp /Fp$(LIB).pch $<
 
 {..\Light\}.cpp{}.obj:
@@ -165,6 +176,9 @@ all: setstden $(LIB).pch $(LIB).lib
 {..\Motion\}.cpp{}.obj:
         $(CPP) $(CCOPTIONS) /Yuescher.hpp /Fp$(LIB).pch $<
 
+{..\Particle\}.cpp{}.obj:
+        $(CPP) $(CCOPTIONS) /Yuescher.hpp /Fp$(LIB).pch $<
+
 {..\Texture\}.cpp{}.obj:
         $(CPP) $(CCOPTIONS) /Yuescher.hpp /Fp$(LIB).pch $<
 
@@ -174,7 +188,8 @@ all: setstden $(LIB).pch $(LIB).lib
 #
 #±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 
-$(LIB).pch : espch.obj
+$(LIB).pch :
+    del espch.obj
 
 espch.obj : ..\espch.cpp
     $(CPP) /Ycescher.hpp /Fp$(LIB).pch $(CCOPTIONS) ..\$*.cpp

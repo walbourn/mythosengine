@@ -40,7 +40,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include "escher.hpp"
@@ -51,8 +51,7 @@
 //
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 
-extern EschPoint EschTempPoint;
-extern VngoPoint EschTempVPoint;
+extern VngoPointF EschTempVPointF;
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
@@ -71,55 +70,35 @@ extern VngoPoint EschTempVPoint;
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 void EschPointDraw::draw()
 {
-    EschCamera          *cam;
-
 //ÄÄÄ Setup local pointers to current camera and Van Gogh viewport.
     assertMyth("EschPointDraw::draw needs camera in current context",
                EschCurrent != NULL && EschCurrent->camera != NULL);
 
-    cam=EschCurrent->camera;
+    EschCamera *cam=EschCurrent->camera;
 
     assertMyth("EschPointDraw::draw needs a viewport in current context's camera",
                cam->vport != NULL);
 
-//ÄÄÄ Transform into copy of point
-    pos.transform(&cam->eye.iorient,&EschTempPoint);
+//ÄÄÄ Setup Context
+    EschContext ec(EschCurrent);
+    ec.current = this;
+    ec.push();
 
-//ÄÄÄ Clip against view volume
+//ÄÄÄ Transform
+    pos.transform(&cam->eye.iorient,(EschPoint*)&EschTempVPointF);
 
-    // Near/far clipping
-    if (EschTempPoint.z > cam->yon
-        || EschTempPoint.z < cam->hither)
-        return;
-
-    // Left/right/top/bottom plane clipping
-    float zx = EschTempPoint.z * cam->xsize;
-    float zy = EschTempPoint.z * cam->ysize;
-
-    if (EschTempPoint.x < -zx 
-        || EschTempPoint.x > zx
-        || EschTempPoint.y < -zy
-        || EschTempPoint.y > zy)
-        return;
-
-    flags |= ESCH_DRW_VISIBLE;
-
-//ÄÄÄ Project pixel
-    EschTempVPoint.x = long((EschTempPoint.x * cam->xscalar) / EschTempPoint.z)
-                       + (cam->vport->vbuff.width >> 1);
-    EschTempVPoint.y = (cam->vport->vbuff.height >> 1)
-                       - long((EschTempPoint.y * cam->yscalar) / EschTempPoint.z);
-    EschTempVPoint.z = ulong(EschTempPoint.z * cam->z_factor);
-    EschTempVPoint.clr = color;
-
-    VngoVport *vport = cam->vport;
-
+//ÄÄÄ Light (normal shade value)
     assertMyth("EschPointDraw::draw needs palette in viewport",
-               vport->vbuff.pal != 0);
-    EschTempVPoint.shade = vport->vbuff.pal->shd_pal->mid_point;
+               cam->vport->vbuff.pal != 0);
 
-//ÄÄÄ Draw pixel
-    vport->pixel(&EschTempVPoint);
+    EschTempVPointF.clr = color;
+    EschTempVPointF.shade = float(cam->vport->vbuff.pal->shd_pal->mid_point);
+
+//ÄÄÄ Draw
+    esch_clipdraw_point(ESCH_CDF_CLIP);
+
+//ÄÄÄ Cleanup
+    ec.pop();
 }
 
 //°±² End of module - espntdrw.cpp ²±°

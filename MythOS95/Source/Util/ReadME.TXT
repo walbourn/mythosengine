@@ -36,14 +36,7 @@
                                   _Status_
 
  Notes by: Chuck Walbourn
- Updated: July 31, 1997
-
- Changes for this release --------------------------------------------------
-
-    o Added support for new bitdepths.
-
-    o Added -2/-3 bytes/pixel conversion routines.
-
+ Updated: September 29, 1997
 
  Pending changes -----------------------------------------------------------
 

@@ -38,17 +38,22 @@
 
  Notes by: Chuck Walbourn
 
- Last Updated: May 21, 1997
+ Last Updated: September 16, 1997
 
  Escher Terrain Editor - MFC Application
 
  Changes for this release --------------------------------------------------
 
- Version 2.00
+ Version 2.11
 
- o Updated for new floating point data formats.
+ o Updated for new EschCameraEx interface for hazing/background bitmaps.
 
- o Fixed import bug with smoothed vs. flat normal computation
+ Version 2.10
+
+ o Added missing 'MTL ' chunk which will be needed for shared texture-file
+   loading.
+
+ o Changed to use EschTerrainEx for render view.
 
 
 

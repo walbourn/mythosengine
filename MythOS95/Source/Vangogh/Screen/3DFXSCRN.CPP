@@ -72,23 +72,23 @@ Vngo3Dfx::~Vngo3Dfx()
 }
 
 
-BOOL Vngo3Dfx::init()
+VNGError Vngo3Dfx::init()
 {
     grGlideInit();
     if (!grSstQueryHardware (&hwconfig))
     {
         term();
-        return (FALSE);
+        return (VNGO_MISSING_HARDWARE);
     }
 
     type_info = SCREENTYPE_3DFX;
 
     grSstSelect(0);
-    return (TRUE);
+    return (VNGO_NO_ERROR);
 }
 
 
-BOOL Vngo3Dfx::set_mode(int width, int height, int bpp, VngoPal *pal, dword flags)
+VNGError Vngo3Dfx::set_mode(int width, int height, int bpp, VngoPal *pal, dword flags)
 {
     bit_depth = bpp;
 
@@ -105,24 +105,31 @@ BOOL Vngo3Dfx::set_mode(int width, int height, int bpp, VngoPal *pal, dword flag
                    2))
     {
         term();
-        return FALSE;
+        return VNGO_INTERNAL_ERROR;
     }
 
     grBufferClear(0,0,GR_WDEPTHVALUE_FARTHEST);
     grBufferSwap(1);
     grBufferClear(0,0,GR_WDEPTHVALUE_FARTHEST);
 
-    return TRUE;
+    return VNGO_NO_ERROR;
 }
 
 
-void Vngo3Dfx::flip()
+VNGError Vngo3Dfx::flip()
 {
     grBufferSwap(1);
+    return VNGO_NO_ERROR;
 }
 
 
-void Vngo3Dfx::term()
+VNGError Vngo3Dfx::term()
 {
     grGlideShutdown();
+    return VNGO_NO_ERROR;
+}
+
+VNGError Vngo3Dfx::dump_textures()
+{
+    return VNGO_NO_ERROR;
 }

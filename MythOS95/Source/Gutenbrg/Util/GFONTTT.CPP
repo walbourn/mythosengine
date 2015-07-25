@@ -331,6 +331,11 @@ void capture_tt(char *name, char *ttname,
                 break;
         }
         cout << endl;
+
+        if ((numchars > 128) && (Flags & FLAGS_TT_CP850))
+        {
+            cout << "   Map special characters to Codepage 850\n";
+        }
     }
 
     if (tm.otmTextMetrics.tmMaxCharWidth > 32)
@@ -410,45 +415,118 @@ void capture_tt(char *name, char *ttname,
         if ((numchars > 128) && (Flags & FLAGS_TT_CP850))
         {
             // Since Windows fonts are in CodePage 1232, we
-            // want to move the German specific characters to their
+            // want to move special characters to their
             // correct positions for Codepage 850.
+
             switch (ch)
             {
-                case 129:  continue;
-                case 252:  ch = 129;  break;
-
-                case 132:  continue;
-                case 228:  ch = 132;  break;
-
-                case 142:  continue;
-                case 196:  ch = 142;  break;
-
-                case 148:  continue;
-                case 246:  ch = 148;  break;
-
-                case 153:  continue;
-                case 214:  ch = 153;  break;
-
-                case 154:  continue;
-                case 220:  ch = 154;  break;
-
-                case 225:  continue;
-                case 223:  ch = 225;  break;
-
-                case 169:  continue;
+                case 131:  ch = 159;  break;
+                case 161:  ch = 173;  break;
+                case 162:  ch = 189;  break;
+                case 163:  ch = 156;  break;
+                case 164:  ch = 207;  break;
+                case 165:  ch = 190;  break;
+                case 167:  ch = 245;  break;
+                case 168:  ch = 249;  break;
+                case 169:  ch = 184;  break;
+                case 170:  ch = 166;  break;
+                case 171:  ch = 174;  break;
+                case 172:  ch = 170;  break;
                 case 174:  ch = 169;  break;
+                case 176:  ch = 248;  break;
+                case 177:  ch = 241;  break;
+                case 178:  ch = 253;  break;
+                case 179:  ch = 252;  break;
+                case 180:  ch = 239;  break;
+                case 181:  ch = 230;  break;
+                case 182:  ch = 244;  break;
+                case 183:  ch = 240;  break;
+                case 186:  ch = 167;  break;
+                case 187:  ch = 175;  break;
+                case 188:  ch = 172;  break;
+                case 189:  ch = 171;  break;
+                case 190:  ch = 243;  break;
+                case 191:  ch = 168;  break;
+                case 192:  ch = 183;  break;
+                case 193:  ch = 181;  break;
+                case 194:  ch = 182;  break;
+                case 195:  ch = 199;  break;
+                case 196:  ch = 142;  break;
+                case 197:  ch = 143;  break;
+                case 198:  ch = 146;  break;
+                case 199:  ch = 128;  break;
+                case 200:  ch = 212;  break;
+                case 201:  ch = 144;  break;
+                case 202:  ch = 210;  break;
+                case 203:  ch = 211;  break;
+                case 204:  ch = 222;  break;
+                case 205:  ch = 214;  break;
+                case 206:  ch = 215;  break;
+                case 207:  ch = 216;  break;
+                case 208:  ch = 209;  break;
+                case 209:  ch = 165;  break;
+                case 210:  ch = 227;  break;
+                case 211:  ch = 224;  break;
+                case 212:  ch = 226;  break;
+                case 213:  ch = 229;  break;
+                case 214:  ch = 153;  break;
+                case 215:  ch = 158;  break;
+                case 216:  ch = 157;  break;
+                case 217:  ch = 235;  break;
+                case 218:  ch = 233;  break;
+                case 219:  ch = 234;  break;
+                case 220:  ch = 154;  break;
+                case 221:  ch = 237;  break;
+                case 222:  ch = 231;  break;
+                case 223:  ch = 225;  break;
+                case 224:  ch = 133;  break;
+                case 225:  ch = 160;  break;
+                case 226:  ch = 131;  break;
+                case 227:  ch = 198;  break;
+                case 228:  ch = 132;  break;
+                case 229:  ch = 134;  break;
+                case 230:  ch = 145;  break;
+                case 231:  ch = 135;  break;
+                case 232:  ch = 138;  break;
+                case 233:  ch = 130;  break;
+                case 234:  ch = 136;  break;
+                case 235:  ch = 137;  break;
+                case 236:  ch = 141;  break;
+                case 237:  ch = 161;  break;
+                case 238:  ch = 140;  break;
+                case 239:  ch = 139;  break;
+                case 240:  ch = 208;  break;
+                case 241:  ch = 164;  break;
+                case 242:  ch = 149;  break;
+                case 243:  ch = 162;  break;
+                case 244:  ch = 147;  break;
+                case 245:  ch = 228;  break;
+                case 246:  ch = 148;  break;
+                case 247:  ch = 246;  break;
+                case 248:  ch = 155;  break;
+                case 249:  ch = 151;  break;
+                case 250:  ch = 163;  break;
+                case 251:  ch = 150;  break;
+                case 252:  ch = 129;  break;
+                case 253:  ch = 236;  break;
+                case 254:  ch = 232;  break;
+                case 255:  ch = 252;  break;
+                default:
+                    if (ch > 128)
+                        continue;
+                    break;
             }
         }
 
         GLYPHMETRICS glyph;
 
-        dword gsize = GetGlyphOutline(hDC,ch,
+        dword gsize = GetGlyphOutline(hDC,chloop,
                                       GGO_BITMAP,
                                       &glyph,sizeof(work),work,&matrix);
 
         if (gsize == GDI_ERROR)
         {
-            cout << "±±± Error: failed to get glyph #" << ch << "\n";
+            cout << "±±± Error: failed to get glyph #" << chloop << "\n";
             SelectObject(hDC,hOldFont);
             DeleteObject(hFont);
             ReleaseDC(hWnd,hDC);

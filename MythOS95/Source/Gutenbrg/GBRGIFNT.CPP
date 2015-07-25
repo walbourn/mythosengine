@@ -359,9 +359,14 @@ long gberg_widthc(char c)
             return GBergInstance->font_active->width;
 
         case GBERG_FNT_MONOVARIABLE:
-        case GBERG_FNT_MONOVARIABLEEX:
             {
                 byte *ptr = (byte *)((byte *)fnt->ptr + (c*fnt->bpc));
+                return *ptr;
+            }
+
+        case GBERG_FNT_MONOVARIABLEEX:
+            {
+                byte *ptr = (byte *)((byte *)fnt->ptr + ((byte)c*fnt->bpc));
                 return *ptr;
             }
 
@@ -383,6 +388,55 @@ long gberg_heightc()
     return (GBergInstance->font_active) ?
                             GBergInstance->font_active->height
                             : 0;
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// gberg_width                                                              ³
+//                                                                          ³
+// Returns the width of the given string in the current font, or 0 if       ³
+// no font is selected.                                                     ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+long gberg_width(const char *str)
+{
+    assertMyth("Gutenberg must be initialized",GBergInstance);
+
+    GBergFontInfo   *fnt=GBergInstance->font_active;
+
+    if (!fnt)
+        return 0;
+
+    switch (fnt->type)
+    {
+        case GBERG_FNT_MONOFIXED:
+        case GBERG_FNT_MONOFIXEDEX:
+            return (GBergInstance->font_active->width * strlen(str));
+
+        case GBERG_FNT_MONOVARIABLE:
+            {
+                long len=0;
+                for(const char *ch = str; *ch != 0; ch++)
+                {
+                    byte *ptr = (byte *)((byte *)fnt->ptr + ((*ch)*fnt->bpc));
+                    len += *ptr;
+                }
+                return len;
+            }
+
+        case GBERG_FNT_MONOVARIABLEEX:
+            {
+                long len=0;
+                for(const byte *ch = (const byte *)str; *ch != 0; ch++)
+                {
+                    byte *ptr = (byte *)((byte *)fnt->ptr + ((*ch)*fnt->bpc));
+                    len += *ptr;
+                }
+                return len;
+            }
+
+        default:
+            return 0;
+    }
 }
 
 //°±² End of module - gbrgifnt.cpp ²±°

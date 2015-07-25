@@ -64,7 +64,9 @@
 //
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
-#define ESCH_DEFAULT_ARENA 65536
+#define ESCH_DEFAULT_ARENA      65536   // Default size of workspace (bytes)
+
+#define ESCH_DEFAULT_SORT       65536   // Default size of sort area (bytes)
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
@@ -86,6 +88,8 @@ extern EschSystem *EschSysInstance;
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 struct EschTextureCache;
+struct EschTextureFile;
+class EschElement;
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // EschSystem - Main control class.                                         ³
@@ -98,32 +102,47 @@ public:
     // Public data members.                                                 ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
     //ÄÄ Workspace information
-    ulong               wspace_mbytes;  // Work-space need by objects.
-    ulong               wspace_sbytes;  // Size of work-space.
+    ulong               wspace_mbytes;  // Work-space needed
+    ulong               wspace_sbytes;  // Size of work-space
     IvoryArena          *wspace;
+
+    //ÄÄ Sort space information
+    ulong               sspace_mdepth;  // Sort area tree depth
+    ulong               sspace_mbytes;  // Sort area needed
+    ulong               sspace_sbytes;  // Size of sort area
+    IvoryArena          *sspace;
+    EschElement         *sroot;         // Root of sort tree
 
     //ÄÄ Diagnostic information
     ulong               diag_faces;     // Count of faces in Meshes
     ulong               diag_verts;     // Count of verts in Meshes
     ulong               diag_ifaces;    // Count of faces in MeshDraws
     ulong               diag_iverts;    // Count of verts in MeshDraws
-    ulong               diag_ntxts;     // Count of texture instances`
+    ulong               diag_ntxts;     // Count of texture instances
 
     //ÄÄ Texture cache
-    ulong               tcache_hi;
-    ulong               tcache_max;
+    ulong               tcache_hi;      // Highest used texture cache entry
+    ulong               tcache_max;     // Maximum texture cache entry
     EschTextureCache    *tcache;
+
+    //ÄÄ Texture file (shared)
+    ulong               tfile_hi;      // Highest used texture file entry
+    ulong               tfile_max;     // Maximum texture file entry
+    EschTextureFile     *tfile;
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Constructor/Destructors                                              ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-    EschSystem(ulong arena_size=0);
+    EschSystem(ulong arena_size=0, ulong sort_size=0);
     virtual ~EschSystem();
+
+    void release();
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Operations                                                           ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-    esch_error_codes init(ulong arena_size=ESCH_DEFAULT_ARENA);
+    esch_error_codes init(ulong arena_size=ESCH_DEFAULT_ARENA,
+                          ulong sort_size=ESCH_DEFAULT_SORT);
 };
 
 #ifdef __WATCOMC__

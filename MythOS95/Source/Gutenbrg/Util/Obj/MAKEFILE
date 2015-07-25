@@ -59,13 +59,16 @@ INCPATH = ;..\;..\..\inc;$(MYTH95ROOT)\inc;
 
 LIBPATH = $(MYTH95ROOT)\lib;
 
+#ддд String
 EXESTR = gstring
 
 OBJSSTR = \
 gflexstr.obj\
 gstring.obj\
-gstringp.obj
+gstringp.obj\
+gstring.res
 
+#ддд Font
 EXEFNT = gfont
 
 OBJSFNT = \
@@ -73,9 +76,14 @@ gflex.obj\
 gfont.obj\
 gfontbm.obj\
 gfontp.obj\
-gfonttt.obj
+gfonttt.obj\
+gfont.res
 
-LIBS = xfile.lib ivory.lib user32.lib gdi32.lib
+LIBS =\
+xfile.lib\
+ivory.lib\
+user32.lib\
+gdi32.lib
 
 #дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
 # First target                                                             Ё
@@ -124,7 +132,7 @@ clean:
 #дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
 
 $(EXESTR).exe:   $(OBJSSTR)
-   $(LINK) $(LINKOPTS) /OUT:$*.exe @<<
+   $(LINK) $(LINKOPTS) /NODEFAULTLIB:LIBCMTD /OUT:$*.exe @<<
    $(OBJSSTR) $(LIBS)
 <<
 
@@ -142,7 +150,7 @@ gflexstr.obj : .\gflexstr.c
 #дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
 
 $(EXEFNT).exe:   $(OBJSFNT)
-   $(LINK) $(LINKOPTS) /OUT:$*.exe @<<
+   $(LINK) $(LINKOPTS) /NODEFAULTLIB:LIBCMTD /OUT:$*.exe @<<
    $(OBJSFNT) $(LIBS)
 <<
 

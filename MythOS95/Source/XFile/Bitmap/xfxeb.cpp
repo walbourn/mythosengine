@@ -140,12 +140,6 @@ xf_error_codes XFParseXEB::read(XFParseIFF *iff, XFBitmap *b)
     switch (header.bpp)
     {
         case XFBM_BPP_MONO:
-            if (header.compress != XF_XEB_COMPRESS_NONE)
-            {
-                err=XF_ERR_NOTSUPPORTED;
-                goto error_exit;
-            }
-            break;
         case XFBM_BPP_8BIT:
         case XFBM_BPP_15BIT:
         case XFBM_BPP_24BIT:
@@ -264,6 +258,15 @@ xf_error_codes XFParseXEB::read(XFParseIFF *iff, XFBitmap *b)
 
             switch (b->bpp)
             {
+                case XFBM_BPP_MONO:
+                    if (uncompress_rle_mono(b->width,b->height,
+                                            iff->chunkSize, work,
+                                            b->data))
+                    {
+                        err=XF_ERR_INVALIDIMAGE;
+                        goto error_exit;
+                    }
+                    break;
                 case XFBM_BPP_15BIT:
                     if (uncompress_rle_16bpp(b->width,b->height,
                                              iff->chunkSize, work,
@@ -410,39 +413,43 @@ xf_error_codes XFParseXEB::write(XFParseIFF *iff, XFBitmap *b)
         return (errorn=XF_ERR_INVALIDIMAGE);
     }
 
-    if (b->bpp != XFBM_BPP_MONO)
+    size = (b->bpp == XFBM_BPP_MONO)
+           ? (((b->width + 7) >> 3) * b->height)
+           : (b->width * b->height * b->bpp);
+
+    work=new byte[size];
+    if (!work)
     {
-        work=new byte[b->width * b->height * b->bpp];
-        if (!work)
-        {
-            err=XF_ERR_NOMEMORY;
-            goto error_exit;
-        }
+        err=XF_ERR_NOMEMORY;
+        goto error_exit;
+    }
 
-        switch (b->bpp)
-        {
-            case XFBM_BPP_8BIT:
-                size=compress_rle_8bpp(b->width,b->height,b->data,work);
-                break;
-            case XFBM_BPP_15BIT:
-                size=compress_rle_16bpp(b->width,b->height,b->data,work);
-                break;
-            case XFBM_BPP_24BIT:
-                size=compress_rle_24bpp(b->width,b->height,b->data,work);
-                break;
-            case XFBM_BPP_32BIT:
-                size=compress_rle_32bpp(b->width,b->height,b->data,work);
-                break;
-            default:
-                size=0;
-                break;
-        }
+    switch (b->bpp)
+    {
+        case XFBM_BPP_MONO:
+            size=compress_rle_mono(b->width,b->height,b->data,work);
+            break;
+        case XFBM_BPP_8BIT:
+            size=compress_rle_8bpp(b->width,b->height,b->data,work);
+            break;
+        case XFBM_BPP_15BIT:
+            size=compress_rle_16bpp(b->width,b->height,b->data,work);
+            break;
+        case XFBM_BPP_24BIT:
+            size=compress_rle_24bpp(b->width,b->height,b->data,work);
+            break;
+        case XFBM_BPP_32BIT:
+            size=compress_rle_32bpp(b->width,b->height,b->data,work);
+            break;
+        default:
+            size=0;
+            break;
+    }
 
-        if (!size)
-        {
-            delete [] work;
-            work=0;
-        }
+    if (!size)
+    {
+        delete [] work;
+        work=0;
     }
 
 //ÄÄÄ Write header ÄÄÄ
@@ -524,6 +531,140 @@ error_exit: ;
 
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°° Monochrome °°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// XFParseXEB - compress_rle_mono                                           ³
+//                                                                          ³
+// Compresses a monochrome pixel data set into a compressed worked buffer.  ³
+// Returns the number of bytes in the compressed result or 0 if the         ³
+// compressed version would take more than the original image size in bytes.³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+ulong XFParseXEB::compress_rle_mono(ushort w, ushort h,
+                                    byte *data, byte *cdata)
+{
+    assert(w > 0 && h > 0 && data && cdata);
+
+    int     rsize = (w+7) >> 3;
+    ulong   size = rsize*h;
+    ulong   count = 0;
+    
+    byte *wptr = cdata;
+    byte *ptr = data;
+
+//ÄÄÄ Byte-based RLE
+    for(int y=0; y < h; y++)
+    {
+        byte *lptr = 0;
+        for(int i=0; i < rsize; ptr++)
+        {
+            //ÄÄÄ Scan for run
+            byte *s=ptr;
+            for(int j=0;
+                (j < 127) && ((j+i+1) < rsize) && (*s == *(ptr+1));
+                j++)
+            {
+                ptr++;
+            }
+
+            //ÄÄÄ Found run
+            if (j > 0)
+            {
+                // Close last literal
+                lptr=0;
+
+                // Add rep run
+                count += 2;
+                if (count >= size)
+                    return 0;
+
+                *(wptr++) = (byte) (-(char)j);
+                *(wptr++) = *ptr;
+
+                i += j+1;
+            }
+            //ÄÄÄ Store literal
+            else
+            {
+                if (lptr && *lptr < 127)
+                {
+                    // Add to literal
+                    (*lptr)++;
+                }
+                else
+                {
+                    // Create new literal
+                    if (++count >= size)
+                        return 0;
+
+                    lptr=wptr++;
+                    *lptr = 0;
+                }
+
+                if (++count >= size)
+                    return 0;
+
+                *(wptr++) = *ptr;
+                i++;
+            }
+        }
+    }
+
+    return count;
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// XFParseXEB - uncompress_rle_mono                                         ³
+//                                                                          ³
+// Decompresses a monochrome compressed data set into a pixel data buffer.  ³
+// Returns 0 if sucessful, or non-zero if an error occured.                 ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+int XFParseXEB::uncompress_rle_mono(ushort w, ushort h, ulong csize,
+                                    byte *cdata, byte *data)
+{
+    assert(w > 0 && h > 0 && csize > 0 && cdata > 0 && data > 0);
+
+    byte *ptr=data;
+    byte *eptr=data + ((w+7)>>3)*h;
+
+//ÄÄÄ Byte-based RLE
+    for(byte *wptr=cdata; wptr < cdata+csize; )
+    {
+        int j = (char) *(wptr++);
+        if (j >= 0)
+        {
+            //ÄÄÄ Literial
+            for(int i=0; i < j+1; i++)
+            {
+                if (ptr >= eptr)
+                    return 1;
+
+                *(ptr++) = *(wptr++);
+            }
+        }
+        else
+        {
+            //ÄÄÄ Run
+            j = -j+1;
+            for(int i=0; i < j; i++)
+            {
+                if (ptr >= eptr)
+                    return 1;
+
+                *(ptr++) = *wptr;
+            }
+            wptr++;
+        }
+    }
+
+    return 0;
+}
+
+
+
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°° 8 Bits Per Pixel °°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
@@ -545,6 +686,7 @@ ulong XFParseXEB::compress_rle_8bpp(ushort w, ushort h,
     byte *wptr = cdata;
     byte *ptr = data;
 
+//ÄÄÄ Byte-based RLE
     for(int y=0; y < h; y++)
     {
         byte *lptr = 0;
@@ -620,6 +762,7 @@ int XFParseXEB::uncompress_rle_8bpp(ushort w, ushort h, ulong csize,
     byte *ptr=data;
     byte *eptr=data + w*h;
 
+//ÄÄÄ Byte-based RLE
     for(byte *wptr=cdata; wptr < cdata+csize; )
     {
         int j = (char) *(wptr++);
@@ -676,6 +819,7 @@ ulong XFParseXEB::compress_rle_16bpp(ushort w, ushort h,
     byte *wptr = cdata;
     byte *ptr = data;
 
+//ÄÄÄ Word-based RLE
     for(int y=0; y < h; y++)
     {
         byte *lptr = 0;
@@ -756,6 +900,7 @@ int XFParseXEB::uncompress_rle_16bpp(ushort w, ushort h, ulong csize,
     byte *ptr=data;
     byte *eptr=data + w*h*2;
 
+//ÄÄÄ Word-based RLE
     for(byte *wptr=cdata; wptr < cdata+csize; )
     {
         int j = (char) *(wptr++);
@@ -814,6 +959,7 @@ ulong XFParseXEB::compress_rle_24bpp(ushort w, ushort h,
     byte *wptr = cdata;
     byte *ptr = data;
 
+//ÄÄÄ 3-byte-based RLE
     for(int y=0; y < h; y++)
     {
         byte *lptr = 0;
@@ -897,6 +1043,7 @@ int XFParseXEB::uncompress_rle_24bpp(ushort w, ushort h, ulong csize,
     byte *ptr=data;
     byte *eptr=data + w*h*3;
 
+//ÄÄÄ 3-byte-based RLE
     for(byte *wptr=cdata; wptr < cdata+csize; )
     {
         int j = (char) *(wptr++);
@@ -957,6 +1104,7 @@ ulong XFParseXEB::compress_rle_32bpp(ushort w, ushort h,
     byte *wptr = cdata;
     dword *ptr = (dword*)data;
 
+//ÄÄÄ Dword-based RLE
     for(int y=0; y < h; y++)
     {
         byte *lptr = 0;
@@ -1040,6 +1188,7 @@ int XFParseXEB::uncompress_rle_32bpp(ushort w, ushort h, ulong csize,
     byte *ptr=data;
     byte *eptr=data + w*h*4;
 
+//ÄÄÄ Dword-based RLE
     for(byte *wptr=cdata; wptr < cdata+csize; )
     {
         int j = (char) *(wptr++);

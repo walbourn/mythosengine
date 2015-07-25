@@ -114,12 +114,12 @@
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
 
-VngoVportMSI::VngoVportMSI (long org_x,long org_y,long width,long height,VngoPal *my_pal,dword flags,VngoScreenManager *_screen)
+VngoVportMSI::VngoVportMSI (VngoRect &dim,VngoPal *my_pal,dword flags,VngoScreenManager *_screen)
 {
-    init_status = init (org_x,org_y,width,height,my_pal,flags,_screen);
+    init_status = init (dim,my_pal,flags,_screen);
 }
 
-VNGError VngoVportMSI::init (long org_x,long org_y,long width,long height,VngoPal *my_pal,dword flags,VngoScreenManager *_screen)
+VNGError VngoVportMSI::init (VngoRect &dim,VngoPal *my_pal,dword flags,VngoScreenManager *_screen)
 {
     screen = (VngoMSI*)_screen;
     vflags = flags;
@@ -152,22 +152,6 @@ VNGError VngoVportMSI::init (long org_x,long org_y,long width,long height,VngoPa
     screen->msiParms.msiColor.Dither                   = TRUE;
     screen->msiParms.msiColor.Protect                  = FALSE;
 
-#if 0
-    if (vflags & VNGO_ZBUFFER_DEV)
-    {
-        screen->msiParms.msiDepth.Enable  = TRUE;
-        screen->msiParms.msiDepth.Compare = msiCMP_LESS;
-        screen->msiParms.msiDepth.Protect = FALSE;
-        zbuffer_on();
-    }
-    else
-    {
-        screen->msiParms.msiDepth.Enable  = FALSE;
-        screen->msiParms.msiDepth.Compare = msiCMP_NEVER;
-        screen->msiParms.msiDepth.Protect = TRUE;
-        zbuffer_on();
-    }
-#endif
 
     if (!msiSetParameters(&screen->msiParms))
         return VNGO_INTERNAL_ERROR;

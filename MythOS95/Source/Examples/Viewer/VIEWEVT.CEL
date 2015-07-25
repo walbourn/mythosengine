@@ -1,0 +1,157 @@
+;ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
+;
+;                                /\    /\ 
+;                               /  \  /  \ 
+;                              /    \/    \ 
+;                             /  /\    /\  \ 
+;                            /  /  \  /  Y T H O S
+;                           /  /    \/    \  \ 
+;                          /  /            \  \ 
+;                         /__/              \__\ 
+;
+;                      Microsoft Windows '95 Version
+;
+;            Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.
+;                           All Rights Reserved.
+;
+;ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+;
+;           *** Charybdis Enterprises, Inc. Company Confidential ***
+;
+;  This file and all associated files are the company proprietary property
+;        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+;
+; CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
+; TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
+; IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
+; AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
+; INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+;
+;ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+;
+;                              3D VIEWER EXAMPLE
+;
+; Created by Chuck Walbourn
+;
+; viewevt.cel
+;
+;ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
+
+;°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+;°°°°°°°°°°°°°°°°°°°°°°°°°°°° Application Controls °°°°°°°°°°°°°°°°°°°°°°°°°
+;°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+event DONE
+{
+    [ key 'Q'
+      key #ralt ]
+    [ key 'Q'
+      key #lalt ]
+    [ key #esc ]
+}
+
+event SHOW_INFO
+{
+    [ key '`' ]
+}
+
+
+
+;°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+;°°°°°°°°°°°°°°°°°°°°°°°°°°°°°° Camera Controls °°°°°°°°°°°°°°°°°°°°°°°°°°°°
+;°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+event ALL_LINES
+{
+   [ key #f1 ]
+}
+
+event MODEL_SPACE
+{
+   [ key #f2 ]
+}
+
+event BACKCULL
+{
+   [ key #f3 ]
+}
+
+event SHADE_WIRE
+{
+   [ key #f4 ]
+}
+
+event SHADE_SOLID
+{
+   [ key #f5 ]
+}
+
+event SHADE_FLAT
+{
+   [ key #f6 ]
+}
+
+event SHADE_SMOOTH
+{
+   [ key #f7 ]
+}
+
+event SHADE_SPECULAR
+{
+   [ key #f8 ]
+}
+
+event TEXTURE_MAP
+{
+   [ key #f9 ]
+}
+
+event SHADE_PERSPECTIVE
+{
+   [ key #f10 ]
+}
+
+event SHADE_ALPHA
+{
+   [ key #f11 ]
+}
+
+event SORT
+{
+   [ key #f12
+     not key #shift ]
+}
+
+event ZBUFFER
+{
+   [ key #f12
+     key #shift ]
+}
+
+event HAZING
+{
+    [ key 'H' ]
+}
+
+
+
+;°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+;°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°° Object Controls °°°°°°°°°°°°°°°°°°°°°°°°°°°
+;°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+event ROTATE
+{
+    [ mouseb 1 ]
+}
+
+event MOVE
+{
+    [ mouseb 2 ]
+}
+
+event SHIFT
+{
+    [ key #shift ]
+}
+
+;°±² eof - viewevt.cel ²±°

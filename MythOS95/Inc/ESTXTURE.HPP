@@ -83,7 +83,16 @@ struct EschTextureCache
     ushort      width;
     ushort      height;
     ushort      max;
-    char        name[ESCH_MAX_NAME];
+    char        *name;
+};
+
+struct EschTextureFile
+{
+    dword           flags;
+    XFParseIFF      *iff;
+    ulong           count;
+    char            *names;
+    char            fname[XF_MAX_PATH];
 };
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
@@ -123,6 +132,7 @@ public:
     char        *name;                  // Texture name pointer
     VngoTexture *ptr;                   // Pointer to Van Gogh texture to use
                                         // (valid when locked).
+    void        *app_data;              // Application data pointer
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Constructor/Destructors                                              ³
@@ -159,10 +169,18 @@ public:
                                            ushort w, ushort h, ushort m,
                                            char **name=0, int inuse=0);
 
+    //ÄÄÄ Texture file management
+    static EschTexture *file_load(const char *n, VngoPal *pal=0,
+                                  dword ctrlfl=ESCH_TXTLD_ALL);
+    static esch_error_codes file_register(const char *fname);
+    static void file_unregister(const char *fname=0);
+
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Utility functions.                                                   ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
     void set_flags(const dword f) { flags = f; }
+
+    void set_app_data(void *p) { app_data = p; }
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // I/O Routines.                                                        ³
@@ -205,7 +223,7 @@ public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Utility functions.                                                   ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-    esch_error_codes create(XFBitmap *bm, int trans=1);
+    esch_error_codes create(XFBitmap *bm, int trans=1, VngoPal *pal=0);
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // I/O Routines.                                                        ³
@@ -265,7 +283,7 @@ public:
         base = max * sizeof(VngoTexture);
     }
 
-    esch_error_codes create(ushort n, XFBitmap *bms, int trans=1);
+    esch_error_codes create(ushort n, XFBitmap *bms, int trans=1, VngoPal *pal=0);
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // I/O Routines.                                                        ³

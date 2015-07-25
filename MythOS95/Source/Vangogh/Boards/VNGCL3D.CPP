@@ -114,21 +114,21 @@ extern "C" void vngo_wordcopy(void *dest,void *src,dword count);
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
 
-VngoVportCL3D::VngoVportCL3D (long width,long height,long org_x,long org_y,VngoPal *my_pal,dword flags,VngoScreenManager *_screen)
+VngoVportCL3D::VngoVportCL3D (VngoRect &dim,VngoPal *my_pal,dword flags,VngoScreenManager *_screen)
 {
-    init_status = init (width,height,org_x,org_y,my_pal,flags,_screen);
+    init_status = init (dim,my_pal,flags,_screen);
 }
 
-VNGError VngoVportCL3D::init (long _left,long _top,long width,long height,VngoPal *my_pal,dword flags,VngoScreenManager *_screen)
+VNGError VngoVportCL3D::init (VngoRect &dim,VngoPal *my_pal,dword flags,VngoScreenManager *_screen)
 {
     screen = (VngoClear3D*)_screen;
 
     vflags = flags;
     vbuff.pal = my_pal;
-    vbuff.width = width;
-    vbuff.height = height;
-    top = _top;
-    left = _left;
+    vbuff.width = dim.dx;
+    vbuff.height = dim.dy;
+    top = dim.y;
+    left = dim.x;
 
     int was_locked = plock();
     if (was_locked == -1)
@@ -246,11 +246,77 @@ VngoVportCL3D::~VngoVportCL3D()
 
 void VngoVportCL3D::reset(dword c,dword farz)
 {
+#if 1
+    HRESULT         ddrval;
+    DDBLTFX         ddbltfx;
+    RECT            destRect;
+    // Use direct draw to clear the screen.
+
+    memset(&ddbltfx, 0,sizeof(ddbltfx));
+    ddbltfx.dwSize = sizeof(ddbltfx);
+
+    VngoColor24bit rgb = vbuff.pal->get_RGB(c);
+    if (vbuff.pal->flags & VNGO_15BIT)
+        ddbltfx.dwFillColor = rgb.compress();
+    else
+        ddbltfx.dwFillColor = rgb.compress16();
+
+    destRect.left   = left;
+    destRect.top    = top;
+    destRect.right  = left + vbuff.width;
+    destRect.bottom = top + vbuff.height;
+
+    int t = punlock();
+
+    int try1=0;
+    if (!(vflags & VNGO_NOCLEAR_VBUFFER))
+    {
+        do
+        {
+            ddrval = screen->SurfaceManager->ddsurf->Blt( &destRect,
+                                              NULL, NULL,
+                                              DDBLT_COLORFILL | DDBLT_WAIT,
+                                              &ddbltfx );
+
+            if( ddrval == DDERR_SURFACELOST ) {
+                ddrval = screen->SurfaceManager->ddsurf->Restore();
+            }
+            try1++;
+
+        } while((ddrval != DD_OK) && (try1 < 150));
+    }
+
+    ddbltfx.dwFillColor = 0;
+    ddbltfx.dwFillDepth = farz >> 16;
+    try1 = 0;
+    if (vflags & VNGO_ZBUFFER_ACTIVE)
+    {
+        if( screen->ZBuffer )
+        {
+            // Use direct draw to clear the ZBuffer.
+            do
+            {
+                ddrval = screen->SurfaceManager->zddsurf->Blt( NULL,
+                                               NULL, NULL,
+                                               DDBLT_DEPTHFILL | DDBLT_WAIT,
+                                               &ddbltfx );
+
+                if( ddrval == DDERR_SURFACELOST )
+                {
+                    ddrval = screen->SurfaceManager->zddsurf->Restore();
+                }
+                try1++;
+            } while( ddrval != DD_OK && try1 < 150 );
+        }
+    }
+    if (t)
+        plock();
+#else
     // Please note that the ZMap is not supported by this device.
 
     // make sure there is nothing pending before
     // we try to use DDraw on the surfaces.
-    screen->flush();
+//    screen->flush();
 
     LL_Batch *pB;
     dword   clear_flags = LL_RECT_LIST;
@@ -277,14 +343,19 @@ void VngoVportCL3D::reset(dword c,dword farz)
 //    if (vflags & VNGO_NOCLEAR_VBUFFER)  // we are not clearing the display buffer.
 //        z_flags |= LL_Z_MODE_ONLY;
 
-    pts[0].x = dword(left) << 16;
-    pts[0].y = dword(top) << 16;
-    pts[0].z = farz;
-    pts[0].dwColor = raw_rgb;
-    pts[1].x = dword(left + vbuff.width) << 16;
-    pts[1].y = dword(top + vbuff.height) << 16;
-    pts[1].z = farz;
-    pts[1].dwColor = raw_rgb;
+    pts[0].x = float(left);
+    pts[0].y = float(top);
+    pts[0].z = float(farz)* (1.f / float(0xffffffff));
+    pts[0].r = float(rgb.r);
+    pts[0].g = float(rgb.g);
+    pts[0].b = float(rgb.b);
+
+    pts[1].x = float(left + vbuff.width);
+    pts[1].y = float(top + vbuff.height);
+    pts[1].z = float(farz)* (1.f / float(0xffffffff));
+    pts[1].r = float(rgb.r);
+    pts[1].g = float(rgb.g);
+    pts[1].b = float(rgb.b);
 
     if (vflags & VNGO_ZBUFFER_ACTIVE)
     {
@@ -293,7 +364,7 @@ void VngoVportCL3D::reset(dword c,dword farz)
         pB++;
     }
 
-    pB->bOp     = LL_RECT;
+    pB->bOp     = LL_RECT2;
     pB->wCount  = 1;
     pB->dwFlags = clear_flags;
     pB->dwBuf   = NULL;
@@ -306,8 +377,8 @@ void VngoVportCL3D::reset(dword c,dword farz)
         pB->dwFlags = LL_Z_MODE_NORMAL;
     }
 
-//    screen->flush();
-
+    screen->flush();
+#endif
 }
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
@@ -320,183 +391,6 @@ void VngoVportCL3D::reset(dword c,dword farz)
 
 VNGError VngoVportCL3D::image_trans (VngoRect *dest_rect,VngoTexture *img,dword flags)
 {
-#if 1
-    long        w,h;
-    VngoRect    dr;
-
-    if (flags & VNGO_STRETCH)
-    {
-        return (VNGO_NOT_SUPPORTED);
-    }
-
-    if ((img->flags & VNGO_TEXTURE_15BIT && vbuff.pal->flags & VNGO_16BIT)
-        || (img->flags & VNGO_TEXTURE_16BIT && vbuff.pal->flags & VNGO_15BIT))
-    {
-        return (VNGO_UNSUPPORTED_TEXTURE);
-    }
-
-    w = MIN(img->width,dest_rect->dx);
-    h = MIN(img->height,dest_rect->dy);
-
-    dr.x = dest_rect->x;
-    dr.y = dest_rect->y;
-    dr.dx = w;
-    dr.dy = h;
-
-    int was_locked = plock();
-    if (was_locked == -1)
-        return VNGO_INTERNAL_ERROR;
-
-    if (((dest_rect->x + w) <= vbuff.width) &&
-        ((dest_rect->y + h) <= vbuff.height) &&
-        (dest_rect->x >= 0) && (dest_rect->y >= 0))
-    {
-        if (img->flags & VNGO_TEXTURE_COMPRESSED && !(img->flags & VNGO_TEXTURE_8BIT))
-        {
-            for (int y=0;y < img->height;y++)
-            {
-                word *ptr = (word*)(ulong(img->tex) + (((VngoCTexture*)img)->ytable[y]));
-//                &(img->tex[((VngoCTexture*)img)->ytable[y]]);
-                long cnt = *ptr;
-                ptr++;
-                word *destptr = (word*)(vbuff.scrn_ptr + vbuff.ytable[dest_rect->y + y]) + dest_rect->x;
-                long dcount = 0;
-                while (dcount < img->width)
-                {
-                    vngo_wordcopy(destptr,ptr,cnt);
-//                    memcpy(destptr,ptr,cnt*sizeof(word));
-                    dcount += cnt;
-                    ptr += cnt;
-                    destptr += cnt;
-                    cnt = *ptr;
-                    ptr++;
-                    destptr += cnt;
-                    dcount += cnt;
-                    cnt = *ptr;
-                    ptr++;
-                }
-            }
-            if (!was_locked)
-                punlock();
-            return VNGO_NO_ERROR;
-        }
-    }
-#if 0       // For now we will clip everything.
-    else
-#endif
-    {
-        if (img->flags & VNGO_TEXTURE_COMPRESSED)
-        {
-            if (!was_locked)
-                punlock();
-            return VNGO_UNSUPPORTED_TEXTURE;
-        }
-
-        if ((dest_rect->x < vbuff.width) && (dest_rect->y < vbuff.height) &&
-            (dest_rect->x + w >= 0) && (dest_rect->y + h >= 0))
-        {
-            word    *lptr,*tptr;
-            dword   t;
-            dword   tx=0,ty=0;
-            long    xcount,ycount;
-
-            if (dest_rect->y >= 0)
-            {
-                t = vbuff.ytable[dest_rect->y];
-                if ((dest_rect->y + h) < vbuff.height)
-                    ycount = h;
-                else
-                    ycount = (vbuff.height) - dest_rect->y;
-//                    ycount = (vbuff.height-1) - dest_rect->y;
-            }
-            else        // starting Y is negative in this case.
-            {
-                ty = -dest_rect->y;
-                t = vbuff.ytable[0];
-                if ((dest_rect->y + h) > vbuff.height)
-                {
-                    ycount = vbuff.height;
-//                    ycount = vbuff.height-1;
-                }
-                else
-                {
-                    ycount = h + dest_rect->y;
-                }
-
-            }
-            t += (dword)(vbuff.scrn_ptr);
-
-            // At this point t = the pointer to the begining of the first
-            // scan line to be drawn.
-
-            if (dest_rect->x >= 0)
-            {
-                t += (dest_rect->x << 1);
-                if ((dest_rect->x + w) < vbuff.width)
-                    xcount = w;
-                else
-                    xcount = (vbuff.width) - dest_rect->x;
-//                    xcount = (vbuff.width-1) - dest_rect->x;
-            }
-            else        // starting X is negative in this case.
-            {
-                tx = -dest_rect->x;
-                if ((dest_rect->x + w) > vbuff.width)
-                {
-                    xcount = vbuff.width;
-//                    xcount = vbuff.width-1;
-                }
-                else
-                {
-                    xcount = w + dest_rect->x;
-                }
-            }
-            if (img->flags & VNGO_TEXTURE_16BIT)
-            {
-                lptr = (word *)t;
-                tptr = (word *)((ty * (img->width << 1)) + (tx << 1) + (dword)img->tex);
-                for (int i=0;i < ycount;i++)
-                {
-                    vngo_iline16(lptr,tptr,xcount,flags);
-                    lptr += (vbuff.pitch >> 1);
-                    tptr += img->width;
-                }
-            }
-            else if (img->flags & VNGO_TEXTURE_15BIT)
-            {
-                lptr = (word *)t;
-                tptr = (word *)((ty * (img->width << 1)) + (tx << 1) + (dword)img->tex);
-                for (int i=0;i < ycount;i++)
-                {
-                    vngo_iline15(lptr,tptr,xcount,flags);
-                    lptr += (vbuff.pitch >> 1);
-                    tptr += img->width;
-                }
-            }
-            else if (img->flags & VNGO_TEXTURE_8BIT)
-            {
-                lptr = (word *)t;
-                byte *btptr = (byte *)((ty * img->width) + tx + (dword)img->tex);
-                VngoShadePal16   *tp = (VngoShadePal16 *)vbuff.pal->shd_pal;
-                VngoColorShade16 *tc = &(*tp)[0];
-                word             *stable = &tc->shl[(vbuff.pal->shd_pal->mid_point-1) >> 3];
-                for (int i=0;i < ycount;i++)
-                {
-                    vngo_iline8to16(lptr,btptr,xcount,stable,flags);
-                    lptr  += (vbuff.pitch >> 1);
-                    btptr += img->width;
-                }
-            }
-
-        }
-        if (!was_locked)
-            punlock();
-    }
-    return VNGO_NO_ERROR;
-
-#else
-    assert(lock_status);
-
     long        w,h;
     VngoRect    dr;
 
@@ -513,7 +407,6 @@ VNGError VngoVportCL3D::image_trans (VngoRect *dest_rect,VngoTexture *img,dword 
 
     int was_locked = plock();
     VNGError retval = VNGO_INTERNAL_ERROR;
-
     if (was_locked != -1)
     {
         w = MIN(img->width,dest_rect->dx);
@@ -533,7 +426,6 @@ VNGError VngoVportCL3D::image_trans (VngoRect *dest_rect,VngoTexture *img,dword 
                 for (int y=0;y < img->height;y++)
                 {
                     word *ptr = (word*)(ulong(img->tex) + (((VngoCTexture*)img)->ytable[y]));
-    //                &(img->tex[((VngoCTexture*)img)->ytable[y]]);
                     long cnt = *ptr;
                     ptr++;
                     word *destptr = (word*)(vbuff.scrn_ptr + vbuff.ytable[dest_rect->y + y]) + dest_rect->x;
@@ -541,7 +433,6 @@ VNGError VngoVportCL3D::image_trans (VngoRect *dest_rect,VngoTexture *img,dword 
                     while (dcount < img->width)
                     {
                         vngo_wordcopy(destptr,ptr,cnt);
-    //                    memcpy(destptr,ptr,cnt*sizeof(word));
                         dcount += cnt;
                         ptr += cnt;
                         destptr += cnt;
@@ -584,7 +475,6 @@ VNGError VngoVportCL3D::image_trans (VngoRect *dest_rect,VngoTexture *img,dword 
                         ycount = h;
                     else
                         ycount = (vbuff.height) - dest_rect->y;
-//                        ycount = (vbuff.height-1) - dest_rect->y;
                 }
                 else        // starting Y is negative in this case.
                 {
@@ -593,7 +483,6 @@ VNGError VngoVportCL3D::image_trans (VngoRect *dest_rect,VngoTexture *img,dword 
                     if ((dest_rect->y + h) > vbuff.height)
                     {
                         ycount = vbuff.height;
-//                        ycount = vbuff.height-1;
                     }
                     else
                     {
@@ -613,7 +502,6 @@ VNGError VngoVportCL3D::image_trans (VngoRect *dest_rect,VngoTexture *img,dword 
                         xcount = w;
                     else
                         xcount = (vbuff.width) - dest_rect->x;
-//                        xcount = (vbuff.width-1) - dest_rect->x;
                 }
                 else        // starting X is negative in this case.
                 {
@@ -621,7 +509,6 @@ VNGError VngoVportCL3D::image_trans (VngoRect *dest_rect,VngoTexture *img,dword 
                     if ((dest_rect->x + w) > vbuff.width)
                     {
                         xcount = vbuff.width;
-//                        xcount = vbuff.width-1;
                     }
                     else
                     {
@@ -656,7 +543,7 @@ VNGError VngoVportCL3D::image_trans (VngoRect *dest_rect,VngoTexture *img,dword 
                     byte *btptr = (byte *)((ty * img->width) + tx + (dword)img->tex);
                     VngoShadePal16   *tp = (VngoShadePal16 *)vbuff.pal->shd_pal;
                     VngoColorShade16 *tc = &(*tp)[0];
-                    word             *stable = &tc->shl[(vbuff.pal->shd_pal->mid_point-1) >> 3];
+                    word             *stable = &tc->shl[vbuff.pal->shd_pal->mid_point >> 3];
                     for (int i=0;i < ycount;i++)
                     {
                         vngo_iline8to16(lptr,btptr,xcount,stable,flags);
@@ -672,7 +559,6 @@ VNGError VngoVportCL3D::image_trans (VngoRect *dest_rect,VngoTexture *img,dword 
     }
 
     return VNGO_NO_ERROR;
-#endif
 }
 
 
@@ -780,8 +666,6 @@ VNGError VngoVportCL3D::zblit_mono (VngoRect *dest_rect,VngoZMap *img,dword fgco
 
 VNGError VngoVportCL3D::image_trans_mono (VngoRect *dest_rect,VngoTexture *img,dword _fgcol,dword _bgcol)
 {
-    assert(lock_status);
-
     dword   fgcol,bgcol;
     long    w,h,x,y;
 
@@ -791,14 +675,32 @@ VNGError VngoVportCL3D::image_trans_mono (VngoRect *dest_rect,VngoTexture *img,d
     }
     else
     {
-        VngoColor24bit tclr = vbuff.pal->get_RGB(_fgcol);
-        if (vbuff.pal->flags & VNGO_15BIT)
+        if (_fgcol & (VNGO_COLOR_24BIT | VNGO_COLOR_15BIT | VNGO_COLOR_16BIT))
         {
-            fgcol = tclr.compress();
+            if ((_fgcol & VNGO_COLOR_15BIT)
+                && (vbuff.pal->flags & VNGO_15BIT))
+            {
+                fgcol = _fgcol;
+            }
+            else if ((_fgcol & VNGO_COLOR_16BIT)
+                     && (vbuff.pal->flags & VNGO_16BIT))
+            {
+                fgcol = _fgcol;
+            }
+            else
+                return VNGO_INTERNAL_ERROR;
         }
         else
         {
-            fgcol = tclr.compress16();
+            VngoColor24bit tclr = vbuff.pal->get_RGB(_fgcol);
+            if (vbuff.pal->flags & VNGO_15BIT)
+            {
+                fgcol = tclr.compress();
+            }
+            else
+            {
+                fgcol = tclr.compress16();
+            }
         }
     }
 
@@ -808,14 +710,32 @@ VNGError VngoVportCL3D::image_trans_mono (VngoRect *dest_rect,VngoTexture *img,d
     }
     else
     {
-        VngoColor24bit tclr = vbuff.pal->get_RGB(_bgcol);
-        if (vbuff.pal->flags & VNGO_15BIT)
+        if (_bgcol & (VNGO_COLOR_24BIT | VNGO_COLOR_15BIT | VNGO_COLOR_16BIT))
         {
-            bgcol = tclr.compress();
+            if ((_bgcol & VNGO_COLOR_15BIT)
+                && (vbuff.pal->flags & VNGO_15BIT))
+            {
+                bgcol = _bgcol;
+            }
+            else if ((_bgcol & VNGO_COLOR_16BIT)
+                     && (vbuff.pal->flags & VNGO_16BIT))
+            {
+                bgcol = _bgcol;
+            }
+            else
+                return VNGO_INTERNAL_ERROR;
         }
         else
         {
-            bgcol = tclr.compress16();
+            VngoColor24bit tclr = vbuff.pal->get_RGB(_bgcol);
+            if (vbuff.pal->flags & VNGO_15BIT)
+            {
+                bgcol = tclr.compress();
+            }
+            else
+            {
+                bgcol = tclr.compress16();
+            }
         }
     }
 
@@ -880,11 +800,11 @@ VNGError VngoVportCL3D::image_trans_mono (VngoRect *dest_rect,VngoTexture *img,d
             // Clip to positive conditions.
             if ((y + h) >= vbuff.height)
             {
-                h = vbuff.height - y - 1;
+                h = vbuff.height - y;
             }
             if ((x + w) >= vbuff.width)
             {
-                w = vbuff.width - x - 1;
+                w = vbuff.width - x;
             }
 
 
@@ -898,8 +818,9 @@ VNGError VngoVportCL3D::image_trans_mono (VngoRect *dest_rect,VngoTexture *img,d
             }
 
             ptr = (byte*)img->tex;
-            ptr += (yskip * pitch);
+            ptr += (yskip * pitch + ((xskip - (xskip & 0x7)) >> 3));
             t += (dword)vbuff.scrn_ptr + (x << 1);
+            xskip &= 0x7;
             while (h > 0)
             {
                 vngo_ilinemono16((word *)t,ptr,w,xskip,fgcol,bgcol);
@@ -950,22 +871,29 @@ VNGError VngoVportCL3D::pixel (VngoPoint *pt,VngoColor24bit *rgb_val)
 
     LL_Batch *pB = screen->get_batch(1);
     LL_Vert *pts = (LL_Vert*)ivory_arena_alloc (screen->VertPool,2*sizeof( LL_Vert ));
+    float tz = float(pt->z) * (1.f / float(0xffffffff));
 
-    pts[0].x = (left + dword(pt->x)) << 16;
-    pts[0].y = (top + dword(pt->y)) << 16;
-    pts[0].z = pt->z;
-    pts[0].dwColor = raw_rgb;
+    VngoColor24bit trgb(byte(raw_rgb >> 16),byte((raw_rgb >> 8) & 0xff), byte(raw_rgb & 0xff));
 
-    pts[1].x = (left + dword(pt->x)) << 16;
-    pts[1].y = (top + dword(pt->y)) << 16;
-    pts[1].z = pts[0].z;
-    pts[1].dwColor = raw_rgb;
+    pts[0].x = float(left + pt->x);
+    pts[0].y = float(top + pt->y);
+    pts[0].z = tz;
+    pts[0].r = float(trgb.r);
+    pts[0].g = float(trgb.g);
+    pts[0].b = float(trgb.b);
+
+    pts[1].x = float(left + pt->x);
+    pts[1].y = float(top + pt->y);
+    pts[1].z = tz;
+    pts[1].r = float(trgb.r);
+    pts[1].g = float(trgb.g);
+    pts[1].b = float(trgb.b);
 
     dword tflags = LL_RECT_LIST;
     if (vflags & VNGO_ZBUFFER_ACTIVE)
         tflags |= LL_Z_BUFFER;
 
-    pB->bOp     = LL_RECT;
+    pB->bOp     = LL_RECT2;
     pB->wCount  = 1;
     pB->dwFlags = tflags;
     pB->dwBuf   = NULL;
@@ -1004,21 +932,27 @@ VNGError VngoVportCL3D::pixel (VngoPointF *pt,VngoColor24bit *rgb_val)
     LL_Batch *pB = screen->get_batch(1);
     LL_Vert *pts = (LL_Vert*)ivory_arena_alloc (screen->VertPool,2*sizeof( LL_Vert ));
 
-    pts[0].x = (left + dword(pt->x)) << 16;
-    pts[0].y = (top + dword(pt->y)) << 16;
-    pts[0].z = dword (pt->z * dword (0xffffffff));
-    pts[0].dwColor = raw_rgb;
+    VngoColor24bit trgb(byte(raw_rgb >> 16),byte((raw_rgb >> 8) & 0xff), byte(raw_rgb & 0xff));
 
-    pts[1].x = (left + dword(pt->x)) << 16;
-    pts[1].y = (top + dword(pt->y)) << 16;
-    pts[1].z = pts[0].z;
-    pts[1].dwColor = raw_rgb;
+    pts[0].x = float(left) + pt->x;
+    pts[0].y = float(top) + pt->y;
+    pts[0].z = pt->z;
+    pts[0].r = float(trgb.r);
+    pts[0].g = float(trgb.g);
+    pts[0].b = float(trgb.b);
+
+    pts[1].x = float(left) + pt->x;
+    pts[1].y = float(top) + pt->y;
+    pts[1].z = pt->z;
+    pts[1].r = float(trgb.r);
+    pts[1].g = float(trgb.g);
+    pts[1].b = float(trgb.b);
 
     dword tflags = LL_RECT_LIST;
     if (vflags & VNGO_ZBUFFER_ACTIVE)
         tflags |= LL_Z_BUFFER;
 
-    pB->bOp     = LL_RECT;
+    pB->bOp     = LL_RECT2;
     pB->wCount  = 1;
     pB->dwFlags = tflags;
     pB->dwBuf   = NULL;
@@ -1110,15 +1044,19 @@ VNGError VngoVportCL3D::frect(VngoRect *rect,VngoColor24bit *rgb_val)
 
     dword raw_rgb = (rgb_val->r << 16) | (rgb_val->g << 8) | rgb_val->b;
 
-    pts[0].x = (left + dword(rect->x)) << 16;
-    pts[0].y = (top + dword(rect->y)) << 16;
-    pts[0].dwColor = raw_rgb;
+    pts[0].x = float(left + dword(rect->x));
+    pts[0].y = float(top + dword(rect->y));
+    pts[0].r = float(rgb_val->r);
+    pts[0].g = float(rgb_val->g);
+    pts[0].b = float(rgb_val->b);
 
-    pts[1].x = (left + dword(rect->x + rect->dx)) << 16;
-    pts[1].y = (top + dword(rect->y + rect->dy)) << 16;
-    pts[1].dwColor = raw_rgb;
+    pts[1].x = float(left + dword(rect->x + rect->dx));
+    pts[1].y = float(top + dword(rect->y + rect->dy));
+    pts[1].r = float(rgb_val->r);
+    pts[1].g = float(rgb_val->g);
+    pts[1].b = float(rgb_val->b);
 
-    pB->bOp     = LL_RECT;
+    pB->bOp     = LL_RECT2;
     pB->wCount  = 1;
     pB->dwFlags = LL_RECT_LIST;
     pB->dwBuf   = NULL;
@@ -1135,21 +1073,41 @@ VNGError VngoVportCL3D::frect(VngoRect *rect,dword color)
     assert (rect->y >= 0);
     assert ((rect->y + rect->dy) <= vbuff.height);
 
+    VngoColor24bit tclr;
+    if (color & VNGO_COLOR_15BIT)
+    {
+        tclr.r = byte((color & 0x7c00) >> 7);
+        tclr.g = byte((color & 0x3e0) >> 2);
+        tclr.b = byte((color & 0x1f) << 3);
+    }
+    else if (color & VNGO_COLOR_16BIT)
+    {
+        tclr.r = byte((color & 0xf800) >> 8);
+        tclr.g = byte((color & 0x7e0) >> 3);
+        tclr.b = byte((color & 0x1f) << 3);
+    }
+    else
+    {
+        tclr = vbuff.pal->get_RGB(color);
+    }
+
     LL_Batch *pB = screen->get_batch(1);
     LL_Vert *pts = (LL_Vert*)ivory_arena_alloc (screen->VertPool,2*sizeof( LL_Vert ));
 
-    VngoColor24bit rgb = vbuff.pal->get_RGB(color);
-    dword raw_rgb = (rgb.r << 16) | (rgb.g << 8) | rgb.b;
 
-    pts[0].x = (left + dword(rect->x)) << 16;
-    pts[0].y = (top + dword(rect->y)) << 16;
-    pts[0].dwColor = raw_rgb;
+    pts[0].x = float(left + dword(rect->x));
+    pts[0].y = float(top + dword(rect->y));
+    pts[0].r = float(tclr.r);
+    pts[0].g = float(tclr.g);
+    pts[0].b = float(tclr.b);
 
-    pts[1].x = (left + dword(rect->x + rect->dx)) << 16;
-    pts[1].y = (top + dword(rect->y + rect->dy)) << 16;
-    pts[1].dwColor = raw_rgb;
+    pts[1].x = float(left + dword(rect->x + rect->dx));
+    pts[1].y = float(top + dword(rect->y + rect->dy));
+    pts[1].r = float(tclr.r);
+    pts[1].g = float(tclr.g);
+    pts[1].b = float(tclr.b);
 
-    pB->bOp     = LL_RECT;
+    pB->bOp     = LL_RECT2;
     pB->wCount  = 1;
     pB->dwFlags = LL_RECT_LIST;
     pB->dwBuf   = NULL;
@@ -1165,13 +1123,15 @@ VNGError VngoVportCL3D::line (VngoPoint *p1, VngoPoint *p2,VngoColor24bit *rgb_v
     LL_Batch *pB = screen->get_batch(1);
     LL_Vert *pts = (LL_Vert*)ivory_arena_alloc (screen->VertPool,2*sizeof( LL_Vert ));
 
-    dword raw_rgb;
+    VngoColor24bit rgb;
+
     if (rgb_val)
     {
-        raw_rgb = (rgb_val->r << 16) | (rgb_val->g << 8) | rgb_val->b;
+        rgb = *rgb_val;
     }
     else
     {
+        dword raw_rgb;
         word *shades = (word*)vbuff.pal->shd_pal->ptr;
         shades += (p1->clr << 5);
         int tclr = shades[p1->shade >> 3];
@@ -1188,17 +1148,26 @@ VNGError VngoVportCL3D::line (VngoPoint *p1, VngoPoint *p2,VngoColor24bit *rgb_v
             raw_rgb |= (tclr << 5) & 0xfc00;
             raw_rgb |= (tclr << 3) & 0xf8;
         }
+        rgb.r = byte(raw_rgb >> 16);
+        rgb.g = byte((raw_rgb >> 8) & 0xff);
+        rgb.b = byte(raw_rgb & 0xff);
     }
 
-    pts[0].x = (left + p1->x) << 16;
-    pts[0].y = (top + p1->y) << 16;
-    pts[0].z = p1->z;
-    pts[0].dwColor = raw_rgb;
+    pts[0].x = float(left + p1->x);
+    pts[0].y = float(top + p1->y);
+    pts[0].z = float(p1->z) * (1.f / float(0xffffffff));
+    pts[0].r = float(rgb.r);
+    pts[0].g = float(rgb.g);
+    pts[0].b = float(rgb.b);
 
-    pts[1].x = (left + p2->x) << 16;
-    pts[1].y = (top + p2->y) << 16;
-    pts[1].z = p2->z;
-    pts[1].dwColor = raw_rgb;
+
+    pts[1].x = float(left + p2->x);
+    pts[1].y = float(top + p2->y);
+    pts[1].z = float(p2->z) * (1.f / float(0xffffffff));
+    pts[1].r = float(rgb.r);
+    pts[1].g = float(rgb.g);
+    pts[1].b = float(rgb.b);
+
 
     dword flags = LL_LINE_LIST;
     if (vflags & VNGO_ZBUFFER_ACTIVE)
@@ -1386,66 +1355,11 @@ VNGError VngoVportCL3D::clip_line (VngoPoint *p1, VngoPoint *p2,VngoColor24bit *
     {
         tp1.clr = vbuff.pal->get_index(*rgb_val);
         tp2.clr = tp1.clr;
-        tp1.shade = vbuff.pal->shd_pal->mid_point - 1;
+        tp1.shade = vbuff.pal->shd_pal->mid_point;
         tp2.shade = tp1.shade;
     }
 
-#if 1
     return line(&tp1,&tp2,rgb_val);
-#else
-    screen->open_frame();
-    LL_Batch *pB = screen->get_batch(1);
-    LL_Vert *pts = (LL_Vert*)ivory_arena_alloc (screen->VertPool,2*sizeof( LL_Vert ));
-
-    dword raw_rgb;
-    if (rgb_val)
-    {
-        raw_rgb = (rgb_val->r << 16) | (rgb_val->g << 8) | rgb_val->b;
-    }
-    else
-    {
-        word *shades = (word*)vbuff.pal->shd_pal->ptr;
-        shades += (tp1.clr << 5);
-        int tclr = shades[int(tp1.shade) >> 3];
-
-        if (vbuff.pal->flags & VNGO_15BIT)
-        {
-            raw_rgb  = (tclr << 9) & 0xf80000;
-            raw_rgb |= (tclr << 6) & 0xf800;
-            raw_rgb |= (tclr << 3) & 0xf8;
-        }
-        else
-        {
-            raw_rgb  = (tclr << 8) & 0xf80000;
-            raw_rgb |= (tclr << 5) & 0xfc00;
-            raw_rgb |= (tclr << 3) & 0xf8;
-        }
-    }
-
-    pts[0].x = (left << 16) + Flx16(tp1.x).flx;
-    pts[0].y = (top << 16) +  Flx16(tp1.y).flx;
-    pts[0].z = tp1.z;
-    pts[0].dwColor = raw_rgb;
-
-    pts[1].x = (left << 16) + Flx16(tp2.x).flx;
-    pts[1].y = (top << 16) +  Flx16(tp2.y).flx;
-    pts[1].z = tp2.z;
-    pts[1].dwColor = raw_rgb;
-
-    dword flags = LL_LINE_LIST;
-    if (vflags & VNGO_ZBUFFER_ACTIVE)
-    {
-        flags |= LL_Z_BUFFER;
-    }
-
-    pB->bOp     = LL_LINE;
-    pB->wCount  = 1;
-    pB->dwFlags = flags;
-    pB->dwBuf   = NULL;
-    pB->pVert   = pts;
-
-    return VNGO_NO_ERROR;
-#endif
 }
 
 
@@ -1456,13 +1370,15 @@ VNGError VngoVportCL3D::line (VngoPointF *p1, VngoPointF *p2,VngoColor24bit *rgb
     LL_Vert *pts = (LL_Vert*)ivory_arena_alloc (screen->VertPool,2*sizeof( LL_Vert ));
 
 
-    dword raw_rgb;
+    VngoColor24bit rgb;
+
     if (rgb_val)
     {
-        raw_rgb = (rgb_val->r << 16) | (rgb_val->g << 8) | rgb_val->b;
+        rgb = *rgb_val;
     }
     else
     {
+        dword raw_rgb;
         word *shades = (word*)vbuff.pal->shd_pal->ptr;
         shades += (p1->clr << 5);
         int tclr = shades[int(p1->shade) >> 3];
@@ -1479,17 +1395,25 @@ VNGError VngoVportCL3D::line (VngoPointF *p1, VngoPointF *p2,VngoColor24bit *rgb
             raw_rgb |= (tclr << 5) & 0xfc00;
             raw_rgb |= (tclr << 3) & 0xf8;
         }
+        rgb.r = byte(raw_rgb >> 16);
+        rgb.g = byte((raw_rgb >> 8) & 0xff);
+        rgb.b = byte(raw_rgb & 0xff);
+
     }
 
-    pts[0].x = (left << 16) + Flx16(p1->x).flx;
-    pts[0].y = (top << 16) +  Flx16(p1->y).flx;
-    pts[0].z = dword(p1->z * float(0xffffffff));
-    pts[0].dwColor = raw_rgb;
+    pts[0].x = float(left + p1->x);
+    pts[0].y = float(top+p1->y);
+    pts[0].z = p1->z;
+    pts[0].r = float(rgb.r);
+    pts[0].g = float(rgb.g);
+    pts[0].b = float(rgb.b);
 
-    pts[1].x = (left << 16) + Flx16(p2->x).flx;
-    pts[1].y = (top << 16) +  Flx16(p2->y).flx;
-    pts[1].z = dword(p2->z * float(0xffffffff));
-    pts[1].dwColor = raw_rgb;
+    pts[1].x = float(left + p2->x);
+    pts[1].y = float(top + p2->y);
+    pts[1].z = p2->z;
+    pts[0].r = float(rgb.r);
+    pts[0].g = float(rgb.g);
+    pts[0].b = float(rgb.b);
 
     dword flags = LL_LINE_LIST;
     if (vflags & VNGO_ZBUFFER_ACTIVE)
@@ -1509,7 +1433,7 @@ VNGError VngoVportCL3D::line (VngoPointF *p1, VngoPointF *p2,VngoColor24bit *rgb
 VNGError VngoVportCL3D::clip_line (VngoPointF *p1, VngoPointF *p2,VngoColor24bit *rgb_val,VngoRect *clip_rect)
 {
     screen->open_frame();
-#if 1
+
     VngoPoint tp1,tp2;
 
     tp1.x = long(p1->x + .5f);
@@ -1525,78 +1449,6 @@ VNGError VngoVportCL3D::clip_line (VngoPointF *p1, VngoPointF *p2,VngoColor24bit
     tp2.shade = long(p2->shade);
 
     return clip_line(&tp1,&tp2,rgb_val,clip_rect);
-#else
-    LL_Batch *pB = screen->get_batch(2);
-    LL_Vert *pts = (LL_Vert*)ivory_arena_alloc (screen->VertPool,2*sizeof( LL_Vert ));
-    LL_Vert *clip = (LL_Vert*)ivory_arena_alloc (screen->VertPool,2*sizeof( LL_Vert ));
-
-    VngoRect    tclip(0,0,vbuff.width,vbuff.height);
-
-    if (clip_rect)
-    {
-        if (tclip.clip_to(*clip_rect)==VNGO_FULLY_CLIPPED)
-            return VNGO_NO_ERROR;
-    }
-    clip->x = (tclip.x + left) << 16;
-    clip->y = (tclip.y + top) << 16;
-    clip->u = (tclip.x + tclip.dx + left) << 16;
-    clip->v = (tclip.y + tclip.dy + top) << 16;
-
-    pB->bOp     = LL_SET_CLIP_REGION;
-    pB->dwFlags = LL_SW_CLIP;
-    pB->pVert   = clip;
-    pB++;
-
-
-    dword raw_rgb;
-    if (rgb_val)
-    {
-        raw_rgb = (rgb_val->r << 16) | (rgb_val->g << 8) | rgb_val->b;
-    }
-    else
-    {
-        word *shades = (word*)vbuff.pal->shd_pal->ptr;
-        shades += (p1->clr << 5);
-        int tclr = shades[int(p1->shade) >> 3];
-
-        if (vbuff.pal->flags & VNGO_15BIT)
-        {
-            raw_rgb  = (tclr << 9) & 0xf80000;
-            raw_rgb |= (tclr << 6) & 0xf800;
-            raw_rgb |= (tclr << 3) & 0xf8;
-        }
-        else
-        {
-            raw_rgb  = (tclr << 8) & 0xf80000;
-            raw_rgb |= (tclr << 5) & 0xfc00;
-            raw_rgb |= (tclr << 3) & 0xf8;
-        }
-    }
-
-    pts[0].x = (left << 16) + Flx16(p1->x).flx;
-    pts[0].y = (top << 16) +  Flx16(p1->y).flx;
-    pts[0].z = dword(p1->z * float(0xffffffff));
-    pts[0].dwColor = raw_rgb;
-
-    pts[1].x = (left << 16) + Flx16(p2->x).flx;
-    pts[1].y = (top << 16) +  Flx16(p2->y).flx;
-    pts[1].z = dword(p2->z * float(0xffffffff));
-    pts[1].dwColor = raw_rgb;
-
-    dword flags = LL_LINE_LIST;
-    if (vflags & VNGO_ZBUFFER_ACTIVE)
-    {
-        flags |= LL_Z_BUFFER;
-    }
-
-    pB->bOp     = LL_LINE_CLIP;
-    pB->wCount  = 1;
-    pB->dwFlags = flags;
-    pB->dwBuf   = NULL;
-    pB->pVert   = pts;
-
-    return VNGO_NO_ERROR;
-#endif
 }
 
 
@@ -1608,8 +1460,6 @@ VNGError VngoVportCL3D::gline (VngoPoint *p1, VngoPoint *p2)
     LL_Batch *pB = screen->get_batch(1);
     LL_Vert *pts = (LL_Vert*)ivory_arena_alloc (screen->VertPool,2*sizeof( LL_Vert ));
 
-    dword raw_rgb,raw_rgb2;
-
     word *shades = (word*)vbuff.pal->shd_pal->ptr;
     word *tshades = shades + (p1->clr << 5);
     int tclr = tshades[int(p1->shade) >> 3];
@@ -1617,37 +1467,42 @@ VNGError VngoVportCL3D::gline (VngoPoint *p1, VngoPoint *p2)
     tshades = shades + (p2->clr << 5);
     int tclr2 = tshades[int(p2->shade) >> 3];
 
+    VngoColor24bit rgb,rgb2;
     if (vbuff.pal->flags & VNGO_15BIT)
     {
-        raw_rgb  = (tclr << 9) & 0xf80000;
-        raw_rgb |= (tclr << 6) & 0xf800;
-        raw_rgb |= (tclr << 3) & 0xf8;
+        rgb.r = (tclr >> 7) & 0xf8;
+        rgb.g = (tclr >> 2) & 0xf8;
+        rgb.b = (tclr << 3) & 0xf8;
 
-        raw_rgb2  = (tclr2 << 9) & 0xf80000;
-        raw_rgb2 |= (tclr2 << 6) & 0xf800;
-        raw_rgb2 |= (tclr2 << 3) & 0xf8;
+        rgb2.r = (tclr2 >> 7) & 0xf8;
+        rgb2.g = (tclr2 >> 2) & 0xf8;
+        rgb2.b = (tclr2 << 3) & 0xf8;
     }
     else
     {
-        raw_rgb  = (tclr << 8) & 0xf80000;
-        raw_rgb |= (tclr << 5) & 0xfc00;
-        raw_rgb |= (tclr << 3) & 0xf8;
+        rgb.r = (tclr >> 8) & 0xf8;
+        rgb.g = (tclr >> 2) & 0xfc;
+        rgb.b = (tclr << 3) & 0xf8;
 
-        raw_rgb2  = (tclr2 << 8) & 0xf80000;
-        raw_rgb2 |= (tclr2 << 5) & 0xfc00;
-        raw_rgb2 |= (tclr2 << 3) & 0xf8;
+        rgb2.r = (tclr2 >> 8) & 0xf8;
+        rgb2.g = (tclr2 >> 2) & 0xfc;
+        rgb2.b = (tclr2 << 3) & 0xf8;
     }
 
 
-    pts[0].x = (left << 16) + Flx16(p1->x).flx;
-    pts[0].y = (top << 16) +  Flx16(p1->y).flx;
-    pts[0].z = dword(p1->z);
-    pts[0].dwColor = raw_rgb;
+    pts[0].x = float(left + p1->x);
+    pts[0].y = float(top + p1->y);
+    pts[0].z = float(p1->z) * (1.f / float(0xffffffff));
+    pts[0].r = float(rgb.r);
+    pts[0].g = float(rgb.g);
+    pts[0].b = float(rgb.b);
 
-    pts[1].x = (left << 16) + Flx16(p2->x).flx;
-    pts[1].y = (top << 16) +  Flx16(p2->y).flx;
-    pts[1].z = dword(p2->z);
-    pts[1].dwColor = raw_rgb2;
+    pts[1].x = float(left + p2->x);
+    pts[1].y = float(top + p2->y);
+    pts[1].z = float(p2->z) * (1.f / float(0xffffffff));
+    pts[1].r = float(rgb2.r);
+    pts[1].g = float(rgb2.g);
+    pts[1].b = float(rgb2.b);
 
     dword flags = LL_LINE_LIST;
     if (vflags & VNGO_ZBUFFER_ACTIVE)
@@ -1669,8 +1524,6 @@ VNGError VngoVportCL3D::gline (VngoPointF *p1, VngoPointF *p2)
     LL_Vert *pts = (LL_Vert*)ivory_arena_alloc (screen->VertPool,2*sizeof( LL_Vert ));
     LL_Batch *pB = screen->get_batch(1);
 
-    dword raw_rgb,raw_rgb2;
-
     word *shades = (word*)vbuff.pal->shd_pal->ptr;
     word *tshades = shades + (p1->clr << 5);
     int tclr = tshades[int(p1->shade) >> 3];
@@ -1678,39 +1531,43 @@ VNGError VngoVportCL3D::gline (VngoPointF *p1, VngoPointF *p2)
     tshades = shades + (p2->clr << 5);
     int tclr2 = tshades[int(p2->shade) >> 3];
 
+    VngoColor24bit rgb,rgb2;
+
     if (vbuff.pal->flags & VNGO_15BIT)
     {
-        raw_rgb  = (tclr << 9) & 0xf80000;
-        raw_rgb |= (tclr << 6) & 0xf800;
-        raw_rgb |= (tclr << 3) & 0xf8;
+        rgb.r = (tclr >> 7) & 0xf8;
+        rgb.g = (tclr >> 2) & 0xf8;
+        rgb.b = (tclr << 3) & 0xf8;
 
-        raw_rgb2  = (tclr2 << 9) & 0xf80000;
-        raw_rgb2 |= (tclr2 << 6) & 0xf800;
-        raw_rgb2 |= (tclr2 << 3) & 0xf8;
+        rgb2.r = (tclr2 >> 7) & 0xf8;
+        rgb2.g = (tclr2 >> 2) & 0xf8;
+        rgb2.b = (tclr2 << 3) & 0xf8;
     }
     else
     {
-        raw_rgb  = (tclr << 8) & 0xf80000;
-        raw_rgb |= (tclr << 5) & 0xfc00;
-        raw_rgb |= (tclr << 3) & 0xf8;
+        rgb.r = (tclr >> 8) & 0xf8;
+        rgb.g = (tclr >> 2) & 0xfc;
+        rgb.b = (tclr << 3) & 0xf8;
 
-        raw_rgb2  = (tclr2 << 8) & 0xf80000;
-        raw_rgb2 |= (tclr2 << 5) & 0xfc00;
-        raw_rgb2 |= (tclr2 << 3) & 0xf8;
+        rgb2.r = (tclr2 >> 8) & 0xf8;
+        rgb2.g = (tclr2 >> 2) & 0xfc;
+        rgb2.b = (tclr2 << 3) & 0xf8;
     }
 
 
-    pts[0].x = (left << 16) + Flx16(p1->x).flx;
-    pts[0].y = (top << 16) +  Flx16(p1->y).flx;
-    pts[0].z = dword(p1->z * float(0xffffffff));
-//    pts[0].z = dword(p1->z);
-    pts[0].dwColor = raw_rgb;
+    pts[0].x = float(left) + p1->x;
+    pts[0].y = float(top) + p1->y;
+    pts[0].z = p1->z;
+    pts[0].r = float(rgb.r);
+    pts[0].g = float(rgb.g);
+    pts[0].b = float(rgb.b);
 
-    pts[1].x = (left << 16) + Flx16(p2->x).flx;
-    pts[1].y = (top << 16) +  Flx16(p2->y).flx;
-    pts[1].z = dword(p2->z * float(0xffffffff));
-//    pts[1].z = dword(p2->z);
-    pts[1].dwColor = raw_rgb2;
+    pts[1].x = float(left) + p2->x;
+    pts[1].y = float(top) + p2->y;
+    pts[1].z = p2->z;
+    pts[1].r = float(rgb2.r);
+    pts[1].g = float(rgb2.g);
+    pts[1].b = float(rgb2.b);
 
     dword flags = LL_LINE_LIST;
     if (vflags & VNGO_ZBUFFER_ACTIVE)
@@ -1919,7 +1776,6 @@ VNGError VngoVportCL3D::clip_gline (VngoPoint *p1, VngoPoint *p2,VngoRect *clip_
     LL_Batch *pB = screen->get_batch(2);
     LL_Vert *pts = (LL_Vert*)ivory_arena_alloc (screen->VertPool,2*sizeof( LL_Vert ));
 
-    dword raw_rgb,raw_rgb2;
 
     word *shades = (word*)vbuff.pal->shd_pal->ptr;
     word *tshades = shades + (tp1.clr << 5);
@@ -1928,37 +1784,43 @@ VNGError VngoVportCL3D::clip_gline (VngoPoint *p1, VngoPoint *p2,VngoRect *clip_
     tshades = shades + (tp2.clr << 5);
     int tclr2 = tshades[int(tp2.shade) >> 3];
 
+    VngoColor24bit rgb,rgb2;
+
     if (vbuff.pal->flags & VNGO_15BIT)
     {
-        raw_rgb  = (tclr << 9) & 0xf80000;
-        raw_rgb |= (tclr << 6) & 0xf800;
-        raw_rgb |= (tclr << 3) & 0xf8;
+        rgb.r = (tclr >> 7) & 0xf8;
+        rgb.g = (tclr >> 2) & 0xf8;
+        rgb.b = (tclr << 3) & 0xf8;
 
-        raw_rgb2  = (tclr2 << 9) & 0xf80000;
-        raw_rgb2 |= (tclr2 << 6) & 0xf800;
-        raw_rgb2 |= (tclr2 << 3) & 0xf8;
+        rgb2.r = (tclr2 >> 7) & 0xf8;
+        rgb2.g = (tclr2 >> 2) & 0xf8;
+        rgb2.b = (tclr2 << 3) & 0xf8;
     }
     else
     {
-        raw_rgb  = (tclr << 8) & 0xf80000;
-        raw_rgb |= (tclr << 5) & 0xfc00;
-        raw_rgb |= (tclr << 3) & 0xf8;
+        rgb.r = (tclr >> 8) & 0xf8;
+        rgb.g = (tclr >> 2) & 0xfc;
+        rgb.b = (tclr << 3) & 0xf8;
 
-        raw_rgb2  = (tclr2 << 8) & 0xf80000;
-        raw_rgb2 |= (tclr2 << 5) & 0xfc00;
-        raw_rgb2 |= (tclr2 << 3) & 0xf8;
+        rgb2.r = (tclr2 >> 8) & 0xf8;
+        rgb2.g = (tclr2 >> 2) & 0xfc;
+        rgb2.b = (tclr2 << 3) & 0xf8;
     }
 
 
-    pts[0].x = (left << 16) + Flx16(tp1.x).flx;
-    pts[0].y = (top << 16) +  Flx16(tp1.y).flx;
-    pts[0].z = dword(tp1.z);
-    pts[0].dwColor = raw_rgb;
+    pts[0].x = float(left + tp1.x);
+    pts[0].y = float(top + tp1.y);
+    pts[0].z = float(tp1.z) * (1.f / float(0xffffffff));
+    pts[0].r = float(rgb.r);
+    pts[0].g = float(rgb.g);
+    pts[0].b = float(rgb.b);
 
-    pts[1].x = (left << 16) + Flx16(tp2.x).flx;
-    pts[1].y = (top << 16) +  Flx16(tp2.y).flx;
-    pts[1].z = dword(tp2.z);
-    pts[1].dwColor = raw_rgb2;
+    pts[1].x = float(left + tp2.x);
+    pts[1].y = float(top + tp2.y);
+    pts[1].z = float(tp2.z) * (1.f / float(0xffffffff));
+    pts[1].r = float(rgb2.r);
+    pts[1].g = float(rgb2.g);
+    pts[1].b = float(rgb2.b);
 
     dword flags = LL_LINE_LIST;
     if (vflags & VNGO_ZBUFFER_ACTIVE)
@@ -1977,7 +1839,7 @@ VNGError VngoVportCL3D::clip_gline (VngoPoint *p1, VngoPoint *p2,VngoRect *clip_
 VNGError VngoVportCL3D::clip_gline (VngoPointF *p1, VngoPointF *p2,VngoRect *clip_rect)
 {
     screen->open_frame();
-#if 1
+
     VngoPoint tp1,tp2;
 
     tp1.x = long(p1->x + .5f);
@@ -1993,85 +1855,6 @@ VNGError VngoVportCL3D::clip_gline (VngoPointF *p1, VngoPointF *p2,VngoRect *cli
     tp2.shade = long(p2->shade);
 
     return clip_gline(&tp1,&tp2,clip_rect);
-#else
-    LL_Batch *pB = screen->get_batch(1);
-    LL_Vert *pts = (LL_Vert*)ivory_arena_alloc (screen->VertPool,2*sizeof( LL_Vert ));
-    LL_Vert *clip = (LL_Vert*)ivory_arena_alloc (screen->VertPool,2*sizeof( LL_Vert ));
-
-    VngoRect    tclip(0,0,vbuff.width,vbuff.height);
-
-    if (clip_rect)
-    {
-        if (tclip.clip_to(*clip_rect)==VNGO_FULLY_CLIPPED)
-            return VNGO_NO_ERROR;
-    }
-    clip->x = (tclip.x + left) << 16;
-    clip->y = (tclip.y + top) << 16;
-    clip->u = (tclip.x + tclip.dx + left) << 16;
-    clip->v = (tclip.y + tclip.dy + top) << 16;
-
-    pB->bOp     = LL_SET_CLIP_REGION;
-    pB->dwFlags = LL_SW_CLIP;
-    pB->pVert   = clip;
-    pB++;
-
-    dword raw_rgb,raw_rgb2;
-
-    word *shades = (word*)vbuff.pal->shd_pal->ptr;
-    word *tshades = shades + (p1->clr << 5);
-    int tclr = tshades[int(p1->shade) >> 3];
-
-    tshades = shades + (p2->clr << 5);
-    int tclr2 = tshades[int(p2->shade) >> 3];
-
-    if (vbuff.pal->flags & VNGO_15BIT)
-    {
-        raw_rgb  = (tclr << 9) & 0xf80000;
-        raw_rgb |= (tclr << 6) & 0xf800;
-        raw_rgb |= (tclr << 3) & 0xf8;
-
-        raw_rgb2  = (tclr2 << 9) & 0xf80000;
-        raw_rgb2 |= (tclr2 << 6) & 0xf800;
-        raw_rgb2 |= (tclr2 << 3) & 0xf8;
-    }
-    else
-    {
-        raw_rgb  = (tclr << 8) & 0xf80000;
-        raw_rgb |= (tclr << 5) & 0xfc00;
-        raw_rgb |= (tclr << 3) & 0xf8;
-
-        raw_rgb2  = (tclr2 << 8) & 0xf80000;
-        raw_rgb2 |= (tclr2 << 5) & 0xfc00;
-        raw_rgb2 |= (tclr2 << 3) & 0xf8;
-    }
-
-
-    pts[0].x = (left << 16) + Flx16(p1->x).flx;
-    pts[0].y = (top << 16) +  Flx16(p1->y).flx;
-    pts[0].z = dword(p1->z * float(0xffffffff));
-//    pts[0].z = dword(p1->z);
-    pts[0].dwColor = raw_rgb;
-
-    pts[1].x = (left << 16) + Flx16(p2->x).flx;
-    pts[1].y = (top << 16) +  Flx16(p2->y).flx;
-    pts[1].z = dword(p2->z * float(0xffffffff));
-//    pts[1].z = dword(p2->z);
-    pts[1].dwColor = raw_rgb2;
-
-    dword flags = LL_LINE_LIST;
-    if (vflags & VNGO_ZBUFFER_ACTIVE)
-    {
-        flags |= LL_Z_BUFFER;
-    }
-
-    pB->bOp     = LL_LINE_CLIP;
-    pB->wCount  = 1;
-    pB->dwFlags = flags;
-    pB->dwBuf   = NULL;
-    pB->pVert   = pts;
-
-    return VNGO_NO_ERROR;
-#endif
 }
 
 
@@ -2108,10 +1891,10 @@ int VngoVportCL3D::plock()
     {
         int locked=0;
         HRESULT hr;
-        while (!locked && (fail_safe < 1000))
+        while (!locked && (fail_safe < 10000))
         {
             fail_safe++;    // just so we can't loop infinately.
-            if ((hr = screen->BackBuffer->Lock (NULL, &ddsd,
+            if ((hr = screen->SurfaceManager->ddsurf->Lock (NULL, &ddsd,
                                      DDLOCK_SURFACEMEMORYPTR
                                      | DDLOCK_WAIT, NULL)) == DD_OK)
             {
@@ -2122,7 +1905,7 @@ int VngoVportCL3D::plock()
             }
             if (hr == DDERR_SURFACELOST)
             {
-                hr = screen->BackBuffer->Restore();
+                hr = screen->SurfaceManager->ddsurf->Restore();
                 if (hr != DD_OK)
                     locked = 1; // an error occured while
                                 // restoring the surface, so it cannot be locked.
@@ -2136,42 +1919,6 @@ int VngoVportCL3D::plock()
         }
 
         vbuff.zpitch = 640;
-
-#if 0
-        // Now do the zbuffer if needed.
-        if (screen->SurfaceManager->zddsurf)
-        {
-            locked = 0;
-            fail_safe = 0;
-            while (!locked && (fail_safe < 1000))
-            {
-                fail_safe++;    // just so we can't loop infinately.
-                if ((hr = screen->ZBuffer->Lock (NULL, &ddsd,
-                                                 DDLOCK_SURFACEMEMORYPTR
-                                                 | DDLOCK_WAIT, NULL)) == DD_OK)
-                {
-                    vbuff.zpitch = ddsd.lPitch;
-                    long    offset = (top * vbuff.zpitch) + (left * 2);
-                    vbuff.zbuff_ptr = (word *) ((dword)ddsd.lpSurface + offset);
-                    locked = 1;
-                }
-                if (hr == DDERR_SURFACELOST)
-                {
-                    hr = screen->ZBuffer->Restore();
-                    if (hr != DD_OK)
-                        locked = 1; // an error occured while
-                                    // restoring the surface, so it cannot be locked.
-                }
-            }
-
-            if (hr != DD_OK)
-            {
-                screen->BackBuffer->Unlock(NULL);
-                screen->SurfaceManager->unlock();
-                return (-1);        // failure to lock;
-            }
-        }
-#endif
 
     }
 
@@ -2187,7 +1934,7 @@ int VngoVportCL3D::punlock()
     int ret_val= screen->SurfaceManager->unlock();
     if (ret_val != 0)
     {
-        screen->BackBuffer->Unlock( NULL );
+        screen->SurfaceManager->ddsurf->Unlock( NULL );
         vbuff.scrn_ptr = NULL;
     }
     lock_status = 0;
@@ -2217,7 +1964,7 @@ VNGError VngoVportCL3D::poly (int count,VngoPoint pts[])
         dflags |= LL_Z_BUFFER;
     }
 
-    dword rgb;
+    VngoColor24bit rgb;
 
     word *shades = (word*)vbuff.pal->shd_pal->ptr;
     shades += (pts[0].clr << 5);
@@ -2226,23 +1973,25 @@ VNGError VngoVportCL3D::poly (int count,VngoPoint pts[])
 
     if (vbuff.pal->flags & VNGO_15BIT)
     {
-        rgb = ((tclr << 9) & 0xf80000);
-        rgb |= ((tclr >> 2) & 0xf800);
-        rgb |= ((tclr & 0x1f) << 3);
+        rgb.r = (tclr >> 7) & 0xf8;
+        rgb.g = (tclr >> 2) & 0xf8;
+        rgb.b = (tclr << 3) & 0xf8;
     }
     else
     {
-        rgb = ((tclr << 8) & 0xf80000);
-        rgb |= ((tclr << 5) & 0xfc00);
-        rgb |= ((tclr & 0x1f) << 3);
+        rgb.r = (tclr >> 8) & 0xf8;
+        rgb.g = (tclr >> 2) & 0xfc;
+        rgb.b = (tclr << 3) & 0xf8;
     }
 
     for (int i=0;i < count;i++)
     {
-        tpts[i].x = (left << 16) + (pts[i].x << 16);
-        tpts[i].y = (top << 16) +  (pts[i].y << 16);
-        tpts[i].z = pts[i].z;
-        tpts[i].dwColor = rgb;
+        tpts[i].x = float(left + pts[i].x);
+        tpts[i].y = float(top + pts[i].y);
+        tpts[i].z = float(pts[i].z) * (1.f / float(0xffffffff));
+        tpts[i].r = float(rgb.r);
+        tpts[i].g = float(rgb.g);
+        tpts[i].b = float(rgb.b);
     }
 
     pB->bOp     = LL_POLY;
@@ -2271,7 +2020,7 @@ VNGError VngoVportCL3D::poly (int count,VngoPointF pts[])
         dflags |= LL_Z_BUFFER;
     }
 
-    dword rgb;
+    VngoColor24bit rgb;
 
     word *rshades = (word*)vbuff.pal->shd_pal->ptr;
     word *shades;
@@ -2281,23 +2030,25 @@ VNGError VngoVportCL3D::poly (int count,VngoPointF pts[])
 
     if (vbuff.pal->flags & VNGO_15BIT)
     {
-        rgb = ((tclr << 9) & 0xf80000);
-        rgb |= ((tclr >> 2) & 0xf800);
-        rgb |= ((tclr & 0x1f) << 3);
+        rgb.r = (tclr >> 7) & 0xf8;
+        rgb.g = (tclr >> 2) & 0xf8;
+        rgb.b = (tclr << 3) & 0xf8;
     }
     else
     {
-        rgb = ((tclr << 8) & 0xf80000);
-        rgb |= ((tclr << 5) & 0xfc00);
-        rgb |= ((tclr & 0x1f) << 3);
+        rgb.r = (tclr >> 8) & 0xf8;
+        rgb.g = (tclr >> 2) & 0xfc;
+        rgb.b = (tclr << 3) & 0xf8;
     }
 
     for (int i=0;i < count;i++)
     {
-        tpts[i].x = (left << 16) + Flx16(pts[i].x).flx;
-        tpts[i].y = (top << 16) +  Flx16(pts[i].y).flx;
-        tpts[i].z = dword(pts[i].z * float(0xffffffff));
-        tpts[i].dwColor = rgb;
+        tpts[i].x = float(left) + pts[i].x;
+        tpts[i].y = float(top) + pts[i].y;
+        tpts[i].z = pts[i].z;
+        tpts[i].r = float(rgb.r);
+        tpts[i].g = float(rgb.g);
+        tpts[i].b = float(rgb.b);
     }
 
     pB->bOp     = LL_POLY;
@@ -2324,7 +2075,7 @@ VNGError VngoVportCL3D::gpoly (int count,VngoPoint pts[])
         dflags |= LL_Z_BUFFER;
     }
 
-    dword rgb;
+    VngoColor24bit rgb;
 
     word *rshades = (word*)vbuff.pal->shd_pal->ptr;
     word *shades;
@@ -2337,20 +2088,22 @@ VNGError VngoVportCL3D::gpoly (int count,VngoPoint pts[])
 
         if (vbuff.pal->flags & VNGO_15BIT)
         {
-            rgb = ((tclr << 9) & 0xf80000);
-            rgb |= ((tclr >> 2) & 0xf800);
-            rgb |= ((tclr & 0x1f) << 3);
+            rgb.r = (tclr >> 7) & 0xf8;
+            rgb.g = (tclr >> 2) & 0xf8;
+            rgb.b = (tclr << 3) & 0xf8;
         }
         else
         {
-            rgb = ((tclr << 8) & 0xf80000);
-            rgb |= ((tclr << 5) & 0xfc00);
-            rgb |= ((tclr & 0x1f) << 3);
+            rgb.r = (tclr >> 8) & 0xf8;
+            rgb.g = (tclr >> 2) & 0xfc;
+            rgb.b = (tclr << 3) & 0xf8;
         }
-        tpts[i].x = (left << 16) + (pts[i].x << 16);
-        tpts[i].y = (top << 16) +  (pts[i].y << 16);
-        tpts[i].z = pts[i].z;
-        tpts[i].dwColor = rgb;
+        tpts[i].x = float(left + pts[i].x);
+        tpts[i].y = float(top + pts[i].y);
+        tpts[i].z = float(pts[i].z) * (1.f / float(0xffffffff));
+        tpts[i].r = float(rgb.r);
+        tpts[i].g = float(rgb.g);
+        tpts[i].b = float(rgb.b);
     }
 
     pB->bOp     = LL_POLY;
@@ -2380,7 +2133,7 @@ VNGError VngoVportCL3D::gpoly (int count,VngoPointF pts[])
         dflags |= LL_Z_BUFFER;
     }
 
-    dword rgb;
+    VngoColor24bit rgb;
 
     word *rshades = (word*)vbuff.pal->shd_pal->ptr;
     word *shades;
@@ -2393,20 +2146,22 @@ VNGError VngoVportCL3D::gpoly (int count,VngoPointF pts[])
 
         if (vbuff.pal->flags & VNGO_15BIT)
         {
-            rgb = ((tclr << 9) & 0xf80000);
-            rgb |= ((tclr >> 2) & 0xf800);
-            rgb |= ((tclr & 0x1f) << 3);
+            rgb.r = (tclr >> 7) & 0xf8;
+            rgb.g = (tclr >> 2) & 0xf8;
+            rgb.b = (tclr << 3) & 0xf8;
         }
         else
         {
-            rgb = ((tclr << 8) & 0xf80000);
-            rgb |= ((tclr << 5) & 0xfc00);
-            rgb |= ((tclr & 0x1f) << 3);
+            rgb.r = (tclr >> 8) & 0xf8;
+            rgb.g = (tclr >> 2) & 0xfc;
+            rgb.b = (tclr << 3) & 0xf8;
         }
-        tpts[i].x = (left << 16) + Flx16(pts[i].x).flx;
-        tpts[i].y = (top << 16) +  Flx16(pts[i].y).flx;
-        tpts[i].z = dword(pts[i].z * float(0xffffffff));
-        tpts[i].dwColor = rgb;
+        tpts[i].x = float(left) + pts[i].x;
+        tpts[i].y = float(top) + pts[i].y;
+        tpts[i].z = pts[i].z;
+        tpts[i].r = float(rgb.r);
+        tpts[i].g = float(rgb.g);
+        tpts[i].b = float(rgb.b);
     }
 
     pB->bOp     = LL_POLY;
@@ -2447,7 +2202,10 @@ VNGError VngoVportCL3D::tpoly (int count,VngoPoint pts[],VngoTexture *tex)
     }
     if (tptr == NULL)
     {
-        tptr = new VngoCL3DTexture3D(tex,vbuff.pal);
+        if (tex->pal_ptr == NULL)
+            tex->pal_ptr = vbuff.pal;
+
+        tptr = new VngoCL3DTexture3D(tex,tex->pal_ptr);
         if (tptr->get_err_status() != VNGO_NO_ERROR)
         {
             delete tptr;
@@ -2461,7 +2219,8 @@ VNGError VngoVportCL3D::tpoly (int count,VngoPoint pts[],VngoTexture *tex)
         return (VNGO_UNSUPPORTED_TEXTURE);
     }
 
-    dword dflags = LL_POLY_FAN | LL_DITHER | LL_TEXTURE | LL_LIGHTING | LL_LIGHTING_INTERP_RGB;
+    dword dflags = LL_POLY_FAN | LL_DITHER | LL_TEXTURE | LL_LIGHTING
+                   | LL_LIGHTING_INTERP_RGB | LL_TEX_FILTER;
 
     if (vflags & VNGO_ZBUFFER_ACTIVE)
     {
@@ -2490,12 +2249,15 @@ VNGError VngoVportCL3D::tpoly (int count,VngoPoint pts[],VngoTexture *tex)
 
     for (int i=0;i < count;i++)
     {
-        tpts[i].x = (left << 16) + Flx16(pts[i].x).flx;
-        tpts[i].y = (top << 16) +  Flx16(pts[i].y).flx;
-        tpts[i].z = pts[i].z;
-        tpts[i].dwColor = rgb;
-        tpts[i].u = pts[i].u * tex->width;
-        tpts[i].v = pts[i].v * tex->height;
+        tpts[i].x = float(left + pts[i].x);
+        tpts[i].y = float(top + pts[i].y);
+        tpts[i].z = float(pts[i].z) * (1.f / float(0xffffffff));
+        tpts[i].r = float(shade);
+        tpts[i].g = float(shade);
+        tpts[i].b = float(shade);
+
+        tpts[i].u = float(pts[i].u) / float(0x10000);
+        tpts[i].v = float(pts[i].v) / float(0x10000);
     }
 
     pB->bOp     = LL_POLY;
@@ -2524,7 +2286,10 @@ VNGError VngoVportCL3D::tpoly (int count,VngoPointF pts[],VngoTexture *tex)
     }
     if (tptr == NULL)
     {
-        tptr = new VngoCL3DTexture3D(tex,vbuff.pal);
+        if (tex->pal_ptr == NULL)
+            tex->pal_ptr = vbuff.pal;
+
+        tptr = new VngoCL3DTexture3D(tex,tex->pal_ptr);
         if (tptr->get_err_status() != VNGO_NO_ERROR)
         {
             delete tptr;
@@ -2538,13 +2303,14 @@ VNGError VngoVportCL3D::tpoly (int count,VngoPointF pts[],VngoTexture *tex)
         return (VNGO_UNSUPPORTED_TEXTURE);
     }
 
-    dword dflags = LL_POLY_FAN | LL_DITHER | LL_TEXTURE | LL_LIGHTING | LL_LIGHTING_INTERP_RGB;
+    dword dflags = LL_POLY_FAN | LL_DITHER | LL_TEXTURE | LL_LIGHTING
+                   | LL_LIGHTING_INTERP_RGB | LL_TEX_FILTER;
 
     if (vflags & VNGO_ZBUFFER_ACTIVE)
     {
         dflags |= LL_Z_BUFFER;
     }
-//    if (tex->flags & VNGO_TEXTURE_TRANSPARENT)
+    if (tex->flags & VNGO_TEXTURE_TRANSPARENT)
         dflags |= LL_TEX_DECAL;
 
     dword rgb;
@@ -2552,10 +2318,10 @@ VNGError VngoVportCL3D::tpoly (int count,VngoPointF pts[],VngoTexture *tex)
     int mp = vbuff.pal->shd_pal->mid_point;
     int shade = int(pts[0].shade);
 
-    if (shade > mp)
-        shade= mp;
+    if (shade >= mp)
+        shade = mp - 1;
 
-    float modifier = (255.f / float(mp));
+    float modifier = (255.f / float(mp-1));
     shade = int(float(shade) * modifier);
     if (shade > 255)
         shade = 255;
@@ -2566,12 +2332,14 @@ VNGError VngoVportCL3D::tpoly (int count,VngoPointF pts[],VngoTexture *tex)
 
     for (int i=0;i < count;i++)
     {
-        tpts[i].x = (left << 16) + Flx16(pts[i].x).flx;
-        tpts[i].y = (top << 16) +  Flx16(pts[i].y).flx;
-        tpts[i].z = dword(pts[i].z * float(0xffffffff));
-        tpts[i].dwColor = rgb;
-        tpts[i].u = Flx16(pts[i].u * float(tex->width)).flx;
-        tpts[i].v = Flx16(pts[i].v * float(tex->height)).flx;
+        tpts[i].x = float(left) + pts[i].x;
+        tpts[i].y = float(top) + pts[i].y;
+        tpts[i].z = pts[i].z;
+        tpts[i].r = float(shade);
+        tpts[i].g = float(shade);
+        tpts[i].b = float(shade);
+        tpts[i].u = pts[i].u;
+        tpts[i].v = pts[i].v;
     }
 
     pB->bOp     = LL_POLY;
@@ -2600,7 +2368,10 @@ VNGError VngoVportCL3D::tpoly_persp (int count,VngoPoint pts[],VngoTexture *tex)
     }
     if (tptr == NULL)
     {
-        tptr = new VngoCL3DTexture3D(tex,vbuff.pal);
+        if (tex->pal_ptr == NULL)
+            tex->pal_ptr = vbuff.pal;
+
+        tptr = new VngoCL3DTexture3D(tex,tex->pal_ptr);
         if (tptr->get_err_status() != VNGO_NO_ERROR)
         {
             delete tptr;
@@ -2615,7 +2386,7 @@ VNGError VngoVportCL3D::tpoly_persp (int count,VngoPoint pts[],VngoTexture *tex)
     }
 
     dword dflags = LL_POLY_FAN | LL_DITHER | LL_TEXTURE | LL_LIGHTING
-                   | LL_LIGHTING_INTERP_RGB | LL_PERSPECTIVE;
+                   | LL_LIGHTING_INTERP_RGB | LL_PERSPECTIVE | LL_TEX_FILTER;
 
     if (vflags & VNGO_ZBUFFER_ACTIVE)
     {
@@ -2643,13 +2414,15 @@ VNGError VngoVportCL3D::tpoly_persp (int count,VngoPoint pts[],VngoTexture *tex)
 
     for (int i=0;i < count;i++)
     {
-        tpts[i].x = (left << 16) + Flx16(pts[i].x).flx;
-        tpts[i].y = (top << 16) +  Flx16(pts[i].y).flx;
-        tpts[i].z = pts[i].z;
-        tpts[i].dwColor = rgb;
-        tpts[i].u = pts[i].u * tex->width;
-        tpts[i].v = pts[i].v * tex->height;
-        tpts[i].w = float(pts[i].w) / float(0x3fffffff);
+        tpts[i].x = float(left + pts[i].x);
+        tpts[i].y = float(top + pts[i].y);
+        tpts[i].z = float(pts[i].z) * (1.f / float(0xffffffff));
+        tpts[i].r = float(shade);
+        tpts[i].g = float(shade);
+        tpts[i].b = float(shade);
+        tpts[i].u = float(pts[i].u) / float(0x10000);
+        tpts[i].v = float(pts[i].v) / float(0x10000);
+        tpts[i].w = 1.f / tpts[i].z;
     }
 
     pB->bOp     = LL_POLY;
@@ -2679,7 +2452,10 @@ VNGError VngoVportCL3D::tpoly_persp (int count,VngoPointF pts[],VngoTexture *tex
     }
     if (tptr == NULL)
     {
-        tptr = new VngoCL3DTexture3D(tex,vbuff.pal);
+        if (tex->pal_ptr == NULL)
+            tex->pal_ptr = vbuff.pal;
+
+        tptr = new VngoCL3DTexture3D(tex,tex->pal_ptr);
         if (tptr->get_err_status() != VNGO_NO_ERROR)
         {
             delete tptr;
@@ -2694,7 +2470,7 @@ VNGError VngoVportCL3D::tpoly_persp (int count,VngoPointF pts[],VngoTexture *tex
     }
 
     dword dflags = LL_POLY_FAN | LL_DITHER | LL_TEXTURE | LL_LIGHTING
-                   | LL_LIGHTING_INTERP_RGB | LL_PERSPECTIVE;
+                   | LL_LIGHTING_INTERP_RGB | LL_PERSPECTIVE | LL_TEX_FILTER;
 
     if (vflags & VNGO_ZBUFFER_ACTIVE)
     {
@@ -2723,13 +2499,15 @@ VNGError VngoVportCL3D::tpoly_persp (int count,VngoPointF pts[],VngoTexture *tex
 
     for (int i=0;i < count;i++)
     {
-        tpts[i].x = (left << 16) + Flx16(pts[i].x).flx;
-        tpts[i].y = (top << 16) +  Flx16(pts[i].y).flx;
-        tpts[i].z = dword(pts[i].z * float(0xffffffff));
-        tpts[i].dwColor = rgb;
-        tpts[i].u = Flx16(pts[i].u * float(tex->width)).flx;
-        tpts[i].v = Flx16(pts[i].v * float(tex->height)).flx;
-        tpts[i].w = pts[i].w;
+        tpts[i].x = float(left) + pts[i].x;
+        tpts[i].y = float(top) + pts[i].y;
+        tpts[i].z = pts[i].z;
+        tpts[i].r = float(shade);
+        tpts[i].g = float(shade);
+        tpts[i].b = float(shade);
+        tpts[i].u = pts[i].u;
+        tpts[i].v = pts[i].v;
+        tpts[i].w = 1.f / tpts[i].z;
     }
 
     pB->bOp     = LL_POLY;
@@ -2758,7 +2536,10 @@ VNGError VngoVportCL3D::gtpoly (int count,VngoPoint pts[],VngoTexture *tex)
     }
     if (tptr == NULL)
     {
-        tptr = new VngoCL3DTexture3D(tex,vbuff.pal);
+        if (tex->pal_ptr == NULL)
+            tex->pal_ptr = vbuff.pal;
+
+        tptr = new VngoCL3DTexture3D(tex,tex->pal_ptr);
         if (tptr->get_err_status() != VNGO_NO_ERROR)
         {
             delete tptr;
@@ -2772,7 +2553,8 @@ VNGError VngoVportCL3D::gtpoly (int count,VngoPoint pts[],VngoTexture *tex)
         return (VNGO_UNSUPPORTED_TEXTURE);
     }
 
-    dword dflags = LL_POLY_FAN | LL_DITHER | LL_TEXTURE | LL_LIGHTING | LL_LIGHTING_INTERP_RGB | LL_GOURAUD;
+    dword dflags = LL_POLY_FAN | LL_DITHER | LL_TEXTURE | LL_TEX_FILTER
+                   | LL_LIGHTING | LL_LIGHTING_INTERP_RGB | LL_GOURAUD;
 
     if (vflags & VNGO_ZBUFFER_ACTIVE)
     {
@@ -2802,12 +2584,14 @@ VNGError VngoVportCL3D::gtpoly (int count,VngoPoint pts[],VngoTexture *tex)
 
         rgb = shade | (shade << 8) | (shade << 16);
 
-        tpts[i].x = (left << 16) + Flx16(pts[i].x).flx;
-        tpts[i].y = (top << 16) +  Flx16(pts[i].y).flx;
-        tpts[i].z = pts[i].z;
-        tpts[i].dwColor = rgb;
-        tpts[i].u = pts[i].u * tex->width;
-        tpts[i].v = pts[i].v * tex->height;
+        tpts[i].x = float(left + pts[i].x);
+        tpts[i].y = float(top + pts[i].y);
+        tpts[i].z = float(pts[i].z) / float(0xffffffff);
+        tpts[i].r = float(shade);
+        tpts[i].g = float(shade);
+        tpts[i].b = float(shade);
+        tpts[i].u = float(pts[i].u) / float(0x10000);
+        tpts[i].v = float(pts[i].v) / float(0x10000);
     }
 
     pB->bOp     = LL_POLY;
@@ -2837,7 +2621,10 @@ VNGError VngoVportCL3D::gtpoly (int count,VngoPointF pts[],VngoTexture *tex)
     }
     if (tptr == NULL)
     {
-        tptr = new VngoCL3DTexture3D(tex,vbuff.pal);
+        if (tex->pal_ptr == NULL)
+            tex->pal_ptr = vbuff.pal;
+
+        tptr = new VngoCL3DTexture3D(tex,tex->pal_ptr);
         if (tptr->get_err_status() != VNGO_NO_ERROR)
         {
             delete tptr;
@@ -2851,7 +2638,8 @@ VNGError VngoVportCL3D::gtpoly (int count,VngoPointF pts[],VngoTexture *tex)
         return (VNGO_UNSUPPORTED_TEXTURE);
     }
 
-    dword dflags = LL_POLY_FAN | LL_DITHER | LL_TEXTURE | LL_LIGHTING | LL_LIGHTING_INTERP_RGB | LL_GOURAUD;
+    dword dflags = LL_POLY_FAN | LL_DITHER | LL_TEXTURE | LL_LIGHTING | LL_TEX_FILTER
+                   | LL_LIGHTING_INTERP_RGB | LL_GOURAUD;
 
     if (vflags & VNGO_ZBUFFER_ACTIVE)
     {
@@ -2881,12 +2669,14 @@ VNGError VngoVportCL3D::gtpoly (int count,VngoPointF pts[],VngoTexture *tex)
 
         rgb = shade | (shade << 8) | (shade << 16);
 
-        tpts[i].x = (left << 16) + Flx16(pts[i].x).flx;
-        tpts[i].y = (top << 16) +  Flx16(pts[i].y).flx;
-        tpts[i].z = dword(pts[i].z * float(0xffffffff));
-        tpts[i].dwColor = rgb;
-        tpts[i].u = Flx16(pts[i].u * float(tex->width)).flx;
-        tpts[i].v = Flx16(pts[i].v * float(tex->height)).flx;
+        tpts[i].x = float(left) + pts[i].x;
+        tpts[i].y = float(top) + pts[i].y;
+        tpts[i].z = pts[i].z;
+        tpts[i].r = float(shade);
+        tpts[i].g = float(shade);
+        tpts[i].b = float(shade);
+        tpts[i].u = pts[i].u;
+        tpts[i].v = pts[i].v;
     }
 
     pB->bOp     = LL_POLY;
@@ -2915,7 +2705,10 @@ VNGError VngoVportCL3D::gtpoly_persp (int count,VngoPoint pts[],VngoTexture *tex
     }
     if (tptr == NULL)
     {
-        tptr = new VngoCL3DTexture3D(tex,vbuff.pal);
+        if (tex->pal_ptr == NULL)
+            tex->pal_ptr = vbuff.pal;
+
+        tptr = new VngoCL3DTexture3D(tex,tex->pal_ptr);
         if (tptr->get_err_status() != VNGO_NO_ERROR)
         {
             delete tptr;
@@ -2929,7 +2722,7 @@ VNGError VngoVportCL3D::gtpoly_persp (int count,VngoPoint pts[],VngoTexture *tex
         return (VNGO_UNSUPPORTED_TEXTURE);
     }
 
-    dword dflags = LL_POLY_FAN | LL_DITHER | LL_TEXTURE | LL_LIGHTING
+    dword dflags = LL_POLY_FAN | LL_DITHER | LL_TEXTURE | LL_LIGHTING | LL_TEX_FILTER
                    | LL_LIGHTING_INTERP_RGB | LL_GOURAUD | LL_PERSPECTIVE;
 
     if (vflags & VNGO_ZBUFFER_ACTIVE)
@@ -2960,13 +2753,15 @@ VNGError VngoVportCL3D::gtpoly_persp (int count,VngoPoint pts[],VngoTexture *tex
 
         rgb = shade | (shade << 8) | (shade << 16);
 
-        tpts[i].x = (left << 16) + Flx16(pts[i].x).flx;
-        tpts[i].y = (top << 16) +  Flx16(pts[i].y).flx;
-        tpts[i].z = pts[i].z;
-        tpts[i].dwColor = rgb;
-        tpts[i].u = pts[i].u * tex->width;
-        tpts[i].v = pts[i].v * tex->height;
-        tpts[i].w = float(pts[i].w) / float(0x3fffffff);
+        tpts[i].x = float(left + pts[i].x);
+        tpts[i].y = float(top + pts[i].y);
+        tpts[i].z = float(pts[i].z) / float(0xffffffff);
+        tpts[i].r = float(shade);
+        tpts[i].g = float(shade);
+        tpts[i].b = float(shade);
+        tpts[i].u = float(pts[i].u) / float(0x10000);
+        tpts[i].v = float(pts[i].v) / float(0x10000);
+        tpts[i].w = 1.f / tpts[i].z;
     }
 
     pB->bOp     = LL_POLY;
@@ -2996,7 +2791,10 @@ VNGError VngoVportCL3D::gtpoly_persp (int count,VngoPointF pts[],VngoTexture *te
     }
     if (tptr == NULL)
     {
-        tptr = new VngoCL3DTexture3D(tex,vbuff.pal);
+        if (tex->pal_ptr == NULL)
+            tex->pal_ptr = vbuff.pal;
+
+        tptr = new VngoCL3DTexture3D(tex,tex->pal_ptr);
         if (tptr->get_err_status() != VNGO_NO_ERROR)
         {
             delete tptr;
@@ -3010,7 +2808,7 @@ VNGError VngoVportCL3D::gtpoly_persp (int count,VngoPointF pts[],VngoTexture *te
         return (VNGO_UNSUPPORTED_TEXTURE);
     }
 
-    dword dflags = LL_POLY_FAN | LL_DITHER | LL_TEXTURE | LL_GOURAUD
+    dword dflags = LL_POLY_FAN | LL_DITHER | LL_TEXTURE | LL_GOURAUD | LL_TEX_FILTER
                    | LL_LIGHTING | LL_LIGHTING_INTERP_RGB | LL_PERSPECTIVE;
 
     if (vflags & VNGO_ZBUFFER_ACTIVE)
@@ -3041,13 +2839,15 @@ VNGError VngoVportCL3D::gtpoly_persp (int count,VngoPointF pts[],VngoTexture *te
 
         rgb = shade | (shade << 8) | (shade << 16);
 
-        tpts[i].x = (left << 16) + Flx16(pts[i].x).flx;
-        tpts[i].y = (top << 16) +  Flx16(pts[i].y).flx;
-        tpts[i].z = dword(pts[i].z * float(0xffffffff));
-        tpts[i].dwColor = rgb;
-        tpts[i].u = Flx16(pts[i].u * float(tex->width)).flx;
-        tpts[i].v = Flx16(pts[i].v * float(tex->height)).flx;
-        tpts[i].w = pts[i].w;
+        tpts[i].x = float(left) + pts[i].x;
+        tpts[i].y = float(top) + pts[i].y;
+        tpts[i].z = pts[i].z;
+        tpts[i].r = float(shade);
+        tpts[i].g = float(shade);
+        tpts[i].b = float(shade);
+        tpts[i].u = pts[i].u;
+        tpts[i].v = pts[i].v;
+        tpts[i].w = 1.f / tpts[i].z;
     }
 
     pB->bOp     = LL_POLY;
@@ -3104,10 +2904,13 @@ VNGError VngoVportCL3D::grpoly (int count, VngoPoint pts[])
                 rgb |= ((tclr & 0x1f) << 3);
             }
         }
-        tpts[i].x = (left << 16) + (pts[i].x << 16);
-        tpts[i].y = (top << 16) +  (pts[i].y << 16);
-        tpts[i].z = pts[i].z;
-        tpts[i].dwColor = rgb;
+        VngoColor24bit vrgb(byte(rgb >> 16), byte((rgb >> 8) & 0xff),byte(rgb & 0xff));
+        tpts[i].x = float(left + pts[i].x);
+        tpts[i].y = float(top + pts[i].y);
+        tpts[i].z = float(pts[i].z) / float(0xffffffff);
+        tpts[i].r = float(vrgb.r);
+        tpts[i].g = float(vrgb.g);
+        tpts[i].b = float(vrgb.b);
     }
 
     pB->bOp     = LL_POLY;
@@ -3167,10 +2970,14 @@ VNGError VngoVportCL3D::grpoly (int count, VngoPointF pts[])
                 rgb |= ((tclr & 0x1f) << 3);
             }
         }
-        tpts[i].x = (left << 16) + Flx16(pts[i].x).flx;
-        tpts[i].y = (top << 16) +  Flx16(pts[i].y).flx;
-        tpts[i].z = dword(pts[i].z * float(0xffffffff));
-        tpts[i].dwColor = rgb;
+        VngoColor24bit vrgb(byte(rgb >> 16), byte((rgb >> 8) & 0xff),byte(rgb & 0xff));
+
+        tpts[i].x = float(left) + pts[i].x;
+        tpts[i].y = float(top) + pts[i].y;
+        tpts[i].z = pts[i].z;
+        tpts[i].r = float(vrgb.r);
+        tpts[i].g = float(vrgb.g);
+        tpts[i].b = float(vrgb.b);
     }
 
     pB->bOp     = LL_POLY;
@@ -3223,13 +3030,16 @@ VNGError VngoVportCL3D::poly_a (int count,VngoPoint pts[],long alpha)
         rgb |= ((tclr << 5) & 0xfc00);
         rgb |= ((tclr & 0x1f) << 3);
     }
+    VngoColor24bit vrgb(byte(rgb >> 16), byte((rgb >> 8) & 0xff),byte(rgb & 0xff));
 
     for (int i=0;i < count;i++)
     {
-        tpts[i].x = (left << 16) + (pts[i].x << 16);
-        tpts[i].y = (top << 16) +  (pts[i].y << 16);
-        tpts[i].z = pts[i].z;
-        tpts[i].dwColor = rgb;
+        tpts[i].x = float(left + pts[i].x);
+        tpts[i].y = float(top + pts[i].y);
+        tpts[i].z = float(pts[i].z) / float(0xffffffff);
+        tpts[i].r = float(vrgb.r);
+        tpts[i].g = float(vrgb.g);
+        tpts[i].b = float(vrgb.b);
     }
 
     pB->bOp     = LL_SET_CONSTANT_ALPHA;
@@ -3282,13 +3092,16 @@ VNGError VngoVportCL3D::poly_a (int count,VngoPointF pts[],long alpha)
         rgb |= ((tclr << 5) & 0xfc00);
         rgb |= ((tclr & 0x1f) << 3);
     }
+    VngoColor24bit vrgb(byte(rgb >> 16), byte((rgb >> 8) & 0xff),byte(rgb & 0xff));
 
     for (int i=0;i < count;i++)
     {
-        tpts[i].x = (left << 16) + Flx16(pts[i].x).flx;
-        tpts[i].y = (top << 16) +  Flx16(pts[i].y).flx;
-        tpts[i].z = dword(pts[i].z * float(0xffffffff));
-        tpts[i].dwColor = rgb;
+        tpts[i].x = float(left) + pts[i].x;
+        tpts[i].y = float(top) + pts[i].y;
+        tpts[i].z = pts[i].z;
+        tpts[i].r = float(vrgb.r);
+        tpts[i].g = float(vrgb.g);
+        tpts[i].b = float(vrgb.b);
     }
 
     pB->bOp     = LL_SET_CONSTANT_ALPHA;
@@ -3342,10 +3155,14 @@ VNGError VngoVportCL3D::gpoly_a (int count,VngoPoint pts[],long alpha)
             rgb |= ((tclr << 5) & 0xfc00);
             rgb |= ((tclr & 0x1f) << 3);
         }
-        tpts[i].x = (left << 16) + (pts[i].x << 16);
-        tpts[i].y = (top << 16) +  (pts[i].y << 16);
-        tpts[i].z = pts[i].z;
-        tpts[i].dwColor = rgb;
+        VngoColor24bit vrgb(byte(rgb >> 16), byte((rgb >> 8) & 0xff),byte(rgb & 0xff));
+
+        tpts[i].x = float(left + pts[i].x);
+        tpts[i].y = float(top + pts[i].y);
+        tpts[i].z = float(pts[i].z) / float(0xffffffff);
+        tpts[i].r = float(vrgb.r);
+        tpts[i].g = float(vrgb.g);
+        tpts[i].b = float(vrgb.b);
     }
 
     pB->bOp     = LL_SET_CONSTANT_ALPHA;
@@ -3402,10 +3219,13 @@ VNGError VngoVportCL3D::gpoly_a (int count,VngoPointF pts[],long alpha)
             rgb |= ((tclr << 5) & 0xfc00);
             rgb |= ((tclr & 0x1f) << 3);
         }
-        tpts[i].x = (left << 16) + Flx16(pts[i].x).flx;
-        tpts[i].y = (top << 16) +  Flx16(pts[i].y).flx;
-        tpts[i].z = dword(pts[i].z * float(0xffffffff));
-        tpts[i].dwColor = rgb;
+        VngoColor24bit vrgb(byte(rgb >> 16), byte((rgb >> 8) & 0xff),byte(rgb & 0xff));
+        tpts[i].x = float(left) + pts[i].x;
+        tpts[i].y = float(top) + pts[i].y;
+        tpts[i].z = pts[i].z;
+        tpts[i].r = float(vrgb.r);
+        tpts[i].g = float(vrgb.g);
+        tpts[i].b = float(vrgb.b);
     }
 
     pB->bOp     = LL_SET_CONSTANT_ALPHA;
@@ -3450,7 +3270,10 @@ VNGError VngoVportCL3D::tpoly_a (int count,VngoPoint pts[],VngoTexture *tex,long
     }
     if (tptr == NULL)
     {
-        tptr = new VngoCL3DTexture3D(tex,vbuff.pal);
+        if (tex->pal_ptr == NULL)
+            tex->pal_ptr = vbuff.pal;
+
+        tptr = new VngoCL3DTexture3D(tex,tex->pal_ptr);
         if (tptr->get_err_status() != VNGO_NO_ERROR)
         {
             delete tptr;
@@ -3494,12 +3317,14 @@ VNGError VngoVportCL3D::tpoly_a (int count,VngoPoint pts[],VngoTexture *tex,long
 
     for (int i=0;i < count;i++)
     {
-        tpts[i].x = (left << 16) + Flx16(pts[i].x).flx;
-        tpts[i].y = (top << 16) +  Flx16(pts[i].y).flx;
-        tpts[i].z = pts[i].z;
-        tpts[i].dwColor = rgb;
-        tpts[i].u = pts[i].u * tex->width;
-        tpts[i].v = pts[i].v * tex->height;
+        tpts[i].x = float(left + pts[i].x);
+        tpts[i].y = float(top + pts[i].y);
+        tpts[i].z = float(pts[i].z) / float(0xffffffff);
+        tpts[i].r = float(shade);
+        tpts[i].g = float(shade);
+        tpts[i].b = float(shade);
+        tpts[i].u = float(pts[i].u) / float(0x10000);
+        tpts[i].v = float(pts[i].v) / float(0x10000);
     }
 
     pB->bOp     = LL_SET_CONSTANT_ALPHA;
@@ -3532,7 +3357,10 @@ VNGError VngoVportCL3D::tpoly_a (int count,VngoPointF pts[],VngoTexture *tex,lon
     }
     if (tptr == NULL)
     {
-        tptr = new VngoCL3DTexture3D(tex,vbuff.pal);
+        if (tex->pal_ptr == NULL)
+            tex->pal_ptr = vbuff.pal;
+
+        tptr = new VngoCL3DTexture3D(tex,tex->pal_ptr);
         if (tptr->get_err_status() != VNGO_NO_ERROR)
         {
             delete tptr;
@@ -3576,12 +3404,14 @@ VNGError VngoVportCL3D::tpoly_a (int count,VngoPointF pts[],VngoTexture *tex,lon
 
     for (int i=0;i < count;i++)
     {
-        tpts[i].x = (left << 16) + Flx16(pts[i].x).flx;
-        tpts[i].y = (top << 16) +  Flx16(pts[i].y).flx;
-        tpts[i].z = dword(pts[i].z * float(0xffffffff));
-        tpts[i].dwColor = rgb;
-        tpts[i].u = Flx16(pts[i].u * float(tex->width)).flx;
-        tpts[i].v = Flx16(pts[i].v * float(tex->height)).flx;
+        tpts[i].x = float(left) + pts[i].x;
+        tpts[i].y = float(top) + pts[i].y;
+        tpts[i].z = pts[i].z;
+        tpts[i].r = float(shade);
+        tpts[i].g = float(shade);
+        tpts[i].b = float(shade);
+        tpts[i].u = pts[i].u;
+        tpts[i].v = pts[i].v;
     }
 
     // clip the apha to a valid range.
@@ -3621,7 +3451,10 @@ VNGError VngoVportCL3D::tpoly_persp_a (int count,VngoPoint pts[],VngoTexture *te
     }
     if (tptr == NULL)
     {
-        tptr = new VngoCL3DTexture3D(tex,vbuff.pal);
+        if (tex->pal_ptr == NULL)
+            tex->pal_ptr = vbuff.pal;
+
+        tptr = new VngoCL3DTexture3D(tex,tex->pal_ptr);
         if (tptr->get_err_status() != VNGO_NO_ERROR)
         {
             delete tptr;
@@ -3665,13 +3498,15 @@ VNGError VngoVportCL3D::tpoly_persp_a (int count,VngoPoint pts[],VngoTexture *te
 
     for (int i=0;i < count;i++)
     {
-        tpts[i].x = (left << 16) + Flx16(pts[i].x).flx;
-        tpts[i].y = (top << 16) +  Flx16(pts[i].y).flx;
-        tpts[i].z = pts[i].z;
-        tpts[i].dwColor = rgb;
-        tpts[i].u = pts[i].u * tex->width;
-        tpts[i].v = pts[i].v * tex->height;
-        tpts[i].w = float(pts[i].w) / float(0x3fffffff);
+        tpts[i].x = float(left + pts[i].x);
+        tpts[i].y = float(top + pts[i].y);
+        tpts[i].z = float(pts[i].z) / float(0xffffffff);
+        tpts[i].r = float(shade);
+        tpts[i].g = float(shade);
+        tpts[i].b = float(shade);
+        tpts[i].u = float(pts[i].u) / float(0x10000);
+        tpts[i].v = float(pts[i].v) / float(0x10000);
+        tpts[i].w = 1.f / tpts[i].z;
     }
 
     pB->bOp     = LL_SET_CONSTANT_ALPHA;
@@ -3705,7 +3540,10 @@ VNGError VngoVportCL3D::tpoly_persp_a (int count,VngoPointF pts[],VngoTexture *t
     }
     if (tptr == NULL)
     {
-        tptr = new VngoCL3DTexture3D(tex,vbuff.pal);
+        if (tex->pal_ptr == NULL)
+            tex->pal_ptr = vbuff.pal;
+
+        tptr = new VngoCL3DTexture3D(tex,tex->pal_ptr);
         if (tptr->get_err_status() != VNGO_NO_ERROR)
         {
             delete tptr;
@@ -3749,13 +3587,15 @@ VNGError VngoVportCL3D::tpoly_persp_a (int count,VngoPointF pts[],VngoTexture *t
 
     for (int i=0;i < count;i++)
     {
-        tpts[i].x = (left << 16) + Flx16(pts[i].x).flx;
-        tpts[i].y = (top << 16) +  Flx16(pts[i].y).flx;
-        tpts[i].z = dword (pts[i].z * float(0xffffffff));
-        tpts[i].dwColor = rgb;
-        tpts[i].u = Flx16(pts[i].u * float(tex->width)).flx;
-        tpts[i].v = Flx16(pts[i].v * float(tex->height)).flx;
-        tpts[i].w = pts[i].w;
+        tpts[i].x = float(left) + pts[i].x;
+        tpts[i].y = float(top) + pts[i].y;
+        tpts[i].z = pts[i].z;
+        tpts[i].r = float(shade);
+        tpts[i].g = float(shade);
+        tpts[i].b = float(shade);
+        tpts[i].u = pts[i].u;
+        tpts[i].v = pts[i].v;
+        tpts[i].w = 1.f / tpts[i].z;
     }
 
     pB->bOp     = LL_SET_CONSTANT_ALPHA;
@@ -3788,7 +3628,10 @@ VNGError VngoVportCL3D::gtpoly_a (int count,VngoPoint pts[],VngoTexture *tex,lon
     }
     if (tptr == NULL)
     {
-        tptr = new VngoCL3DTexture3D(tex,vbuff.pal);
+        if (tex->pal_ptr == NULL)
+            tex->pal_ptr = vbuff.pal;
+
+        tptr = new VngoCL3DTexture3D(tex,tex->pal_ptr);
         if (tptr->get_err_status() != VNGO_NO_ERROR)
         {
             delete tptr;
@@ -3833,12 +3676,14 @@ VNGError VngoVportCL3D::gtpoly_a (int count,VngoPoint pts[],VngoTexture *tex,lon
 
         rgb = shade | (shade << 8) | (shade << 16);
 
-        tpts[i].x = (left << 16) + Flx16(pts[i].x).flx;
-        tpts[i].y = (top << 16) +  Flx16(pts[i].y).flx;
-        tpts[i].z = pts[i].z;
-        tpts[i].dwColor = rgb;
-        tpts[i].u = pts[i].u * tex->width;
-        tpts[i].v = pts[i].v * tex->height;
+        tpts[i].x = float(left + pts[i].x);
+        tpts[i].y = float(top + pts[i].y);
+        tpts[i].z = float(pts[i].z) / float(0xffffffff);
+        tpts[i].r = float(shade);
+        tpts[i].g = float(shade);
+        tpts[i].b = float(shade);
+        tpts[i].u = float(pts[i].u) / float(0x10000);
+        tpts[i].v = float(pts[i].v) / float(0x10000);
     }
 
     pB->bOp     = LL_SET_CONSTANT_ALPHA;
@@ -3872,7 +3717,10 @@ VNGError VngoVportCL3D::gtpoly_a (int count,VngoPointF pts[],VngoTexture *tex,lo
     }
     if (tptr == NULL)
     {
-        tptr = new VngoCL3DTexture3D(tex,vbuff.pal);
+        if (tex->pal_ptr == NULL)
+            tex->pal_ptr = vbuff.pal;
+
+        tptr = new VngoCL3DTexture3D(tex,tex->pal_ptr);
         if (tptr->get_err_status() != VNGO_NO_ERROR)
         {
             delete tptr;
@@ -3917,12 +3765,14 @@ VNGError VngoVportCL3D::gtpoly_a (int count,VngoPointF pts[],VngoTexture *tex,lo
 
         rgb = shade | (shade << 8) | (shade << 16);
 
-        tpts[i].x = (left << 16) + Flx16(pts[i].x).flx;
-        tpts[i].y = (top << 16) +  Flx16(pts[i].y).flx;
-        tpts[i].z = dword(pts[i].z * float(0xffffffff));
-        tpts[i].dwColor = rgb;
-        tpts[i].u = Flx16(pts[i].u * float(tex->width)).flx;
-        tpts[i].v = Flx16(pts[i].v * float(tex->height)).flx;
+        tpts[i].x = float(left) + pts[i].x;
+        tpts[i].y = float(top) + pts[i].y;
+        tpts[i].z = pts[i].z;
+        tpts[i].r = float(shade);
+        tpts[i].g = float(shade);
+        tpts[i].b = float(shade);
+        tpts[i].u = pts[i].u;
+        tpts[i].v = pts[i].v;
     }
 
     pB->bOp     = LL_SET_CONSTANT_ALPHA;
@@ -3955,7 +3805,10 @@ VNGError VngoVportCL3D::gtpoly_persp_a (int count,VngoPoint pts[],VngoTexture *t
     }
     if (tptr == NULL)
     {
-        tptr = new VngoCL3DTexture3D(tex,vbuff.pal);
+        if (tex->pal_ptr == NULL)
+            tex->pal_ptr = vbuff.pal;
+
+        tptr = new VngoCL3DTexture3D(tex,tex->pal_ptr);
         if (tptr->get_err_status() != VNGO_NO_ERROR)
         {
             delete tptr;
@@ -4000,13 +3853,15 @@ VNGError VngoVportCL3D::gtpoly_persp_a (int count,VngoPoint pts[],VngoTexture *t
 
         rgb = shade | (shade << 8) | (shade << 16);
 
-        tpts[i].x = (left << 16) + Flx16(pts[i].x).flx;
-        tpts[i].y = (top << 16) +  Flx16(pts[i].y).flx;
-        tpts[i].z = pts[i].z;
-        tpts[i].dwColor = rgb;
-        tpts[i].u = pts[i].u * tex->width;
-        tpts[i].v = pts[i].v * tex->height;
-        tpts[i].w = float(pts[i].w) / float(0x3fffffff);
+        tpts[i].x = float(left + pts[i].x);
+        tpts[i].y = float(top + pts[i].y);
+        tpts[i].z = float(pts[i].z) / float(0xffffffff);
+        tpts[i].r = float(shade);
+        tpts[i].g = float(shade);
+        tpts[i].b = float(shade);
+        tpts[i].u = float(pts[i].u) / float(0x10000);
+        tpts[i].v = float(pts[i].v) / float(0x10000) ;
+        tpts[i].w = 1.f / tpts[i].z;
     }
 
     pB->bOp     = LL_SET_CONSTANT_ALPHA;
@@ -4040,7 +3895,10 @@ VNGError VngoVportCL3D::gtpoly_persp_a (int count,VngoPointF pts[],VngoTexture *
     }
     if (tptr == NULL)
     {
-        tptr = new VngoCL3DTexture3D(tex,vbuff.pal);
+        if (tex->pal_ptr == NULL)
+            tex->pal_ptr = vbuff.pal;
+
+        tptr = new VngoCL3DTexture3D(tex,tex->pal_ptr);
         if (tptr->get_err_status() != VNGO_NO_ERROR)
         {
             delete tptr;
@@ -4085,13 +3943,15 @@ VNGError VngoVportCL3D::gtpoly_persp_a (int count,VngoPointF pts[],VngoTexture *
 
         rgb = shade | (shade << 8) | (shade << 16);
 
-        tpts[i].x = (left << 16) + Flx16(pts[i].x).flx;
-        tpts[i].y = (top << 16) +  Flx16(pts[i].y).flx;
-        tpts[i].z = dword(pts[i].z * float(0xffffffff));
-        tpts[i].dwColor = rgb;
-        tpts[i].u = Flx16(pts[i].u * float(tex->width)).flx;
-        tpts[i].v = Flx16(pts[i].v * float(tex->height)).flx;
-        tpts[i].w = pts[i].w;
+        tpts[i].x = float(left) + pts[i].x;
+        tpts[i].y = float(top) + pts[i].y;
+        tpts[i].z = pts[i].z;
+        tpts[i].r = float(shade);
+        tpts[i].g = float(shade);
+        tpts[i].b = float(shade);
+        tpts[i].u = pts[i].u;
+        tpts[i].v = pts[i].v;
+        tpts[i].w = 1.f / tpts[i].z;
     }
 
     pB->bOp     = LL_SET_CONSTANT_ALPHA;

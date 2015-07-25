@@ -132,7 +132,7 @@ public:     // Construction/Destruction
     EschDrawable            *draws;
     EschScene               *scene;
     EschTerrain             *terrain;
-    EschParticleSystem      *prtsystem;
+    EschParticleGenerator   *prtgen;
     EschStarfield           *starfield;
     EschPlosion             *explosion;
     EschMeshDraw            *curmesh;
@@ -147,14 +147,6 @@ public:     // Construction/Destruction
     float                   RotateDegrees;
     float                   ScriptRotateDegrees;
 
-    enum
-    {
-        POINTS      =0,
-        PYRAMIDS    =1,
-        SPRITES     =2,
-    };
-
-    int                     kind_of_particles;
     XFBitmap                *backgrnd;
 
     Chronometer             fps_clock;

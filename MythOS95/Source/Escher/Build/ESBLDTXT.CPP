@@ -369,6 +369,282 @@ esch_error_codes EschBuildTexture::save(XFParseIFF *iff,
 }
 
 
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// EschBuildTexture - load                                                  ³
+//                                                                          ³
+// Loads data from a data file into the builder.                            ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+esch_error_codes EschBuildTexture::load(const char *fname, const char *tname,
+                                        VngoPal *pal)
+{
+    esch_error_codes    err;
+    XFParseIFF          iff;
+
+//ÄÄ Open file
+    if (iff.open(fname,XF_OPEN_READ | XF_OPEN_DENYWRITE))
+        return ESCH_ERR_FILEERROR;
+
+//ÄÄ Loop until a header with the correct name is found
+    err=ESCH_ERR_NONE;
+
+    for(;;)
+    {
+        if (iff.next() != XF_ERR_NONE)
+        {
+            if (!iff.depth)
+                return ESCH_ERR_NOTFOUND;
+            iff.leaveform();
+            continue;
+        }
+
+        if (iff.chunkid == iff.makeid('F','O','R','M'))
+        {
+            if (iff.formid == iff.makeid('E','M','T','L')
+                || iff.formid == iff.makeid('E','M','T','1'))
+            {
+                err=load(&iff,tname,pal);
+                if (!err
+                    || err != ESCH_ERR_NOTFOUND)
+                    break;
+            }
+
+            // Must scan inside any ESEN Scene forms.
+            else if (iff.formid == iff.makeid('E','S','E','N'))
+            {
+                iff.enterform();
+            }
+
+            // Must scan inside any EMSH Mesh forms.
+            else if (iff.formid == iff.makeid('E','M','S','H'))
+            {
+                iff.enterform();
+            }
+
+            // Must scan inside any ETER Terrain forms.
+            else if (iff.formid == iff.makeid('E','T','E','R'))
+            {
+                iff.enterform();
+            }
+        }
+    }
+
+//ÄÄ Return ok
+    iff.close();
+    return err;
+}
+
+esch_error_codes EschBuildTexture::load(XFParseIFF *iff, const char *tname,
+                                        VngoPal *pal)
+{
+    assertMyth("EschBuildTexture::load needs iff pointer",
+               iff);
+
+    release();
+
+//ÄÄ Verify correct form name
+    if (iff->chunkid != iff->makeid('F','O','R','M')
+        || (iff->formid != iff->makeid('E','M','T','L')
+            && iff->formid != iff->makeid('E','M','T','1')))
+        return ESCH_ERR_NOTFOUND;
+
+//ÄÄ Enter FORM, find header, verify name if any.
+    iff->enterform();
+
+    if (iff->seekchunk(iff->makeid('M','H','D','R'))
+        || iff->chunkSize != sizeof(EschFileMtlMHDR))
+    {
+        iff->leaveform();
+        return ESCH_ERR_INVALIDDATA;
+    }
+
+    EschFileMtlMHDR header;
+
+    if (iff->read(&header))
+    {
+        iff->leaveform();
+        return ESCH_ERR_FILEERROR;
+    }
+
+    if (tname && strncmp(tname,header.name,ESCH_MAX_NAME))
+    {
+        iff->leaveform();
+        return ESCH_ERR_NOTFOUND;
+    }
+
+//ÄÄ Verify header
+    if (header.nframes < 1
+        || (header.compress != ESCH_MTL_COMPRESS_NONE
+            && header.compress != ESCH_MTL_COMPRESS_RLE))
+    {
+        iff->leaveform();
+        return ESCH_ERR_NOTSUPPORTED;
+    }
+
+    int bpp;
+    switch (header.type)
+    {
+        case ESCH_MTL_TYPE_8BIT:
+        case ESCH_MTL_TYPE_8BIT_TRANSP:
+            if (!pal)
+            {
+                iff->leaveform();
+                return ESCH_ERR_INVALIDPARMS;
+            }
+            bpp = 1;
+            break;
+        case ESCH_MTL_TYPE_24BIT:
+            bpp = 3;
+            break;
+        case ESCH_MTL_TYPE_32BIT:
+            bpp = 4;
+            break;
+        default:
+            iff->leaveform();
+            return ESCH_ERR_NOTSUPPORTED;
+    }
+
+//ÄÄ Found, so load
+    strncpy(name,header.name,ESCH_MAX_NAME);
+    tflags = header.flags;
+
+    if (iff->seekchunk(iff->makeid('B','O','D','Y'))
+        || !iff->chunkSize)
+    {
+        iff->leaveform();
+        return ESCH_ERR_INVALIDDATA;
+    }
+
+//ÄÄ Allocate memory
+    nframes = header.nframes;
+    bms = new XFBitmap*[header.nframes];
+    if (!bms)
+    {
+        iff->leaveform();
+        return ESCH_ERR_NOMEMORY;
+    }
+    memset(bms,0,sizeof(XFBitmap*) * header.nframes);
+
+//ÄÄÄ Load body chunks into bitmap array
+    for(int f=0;;)
+    {
+        bms[f] = new XFBitmap;
+        if (!bms[f]
+            || bms[f]->create(header.xsize,header.ysize,bpp))
+        {
+            release(1);
+            iff->leaveform();
+            return ESCH_ERR_NOMEMORY;
+        }
+
+        //ÄÄÄ Copy in palette if needed
+        if (bpp == 1)
+        {
+            for(int i=0; i < 256; i++)
+            {
+                assert(pal != 0);
+                VngoColor24bit clr = pal->hw_pal.p[i];
+                bms[f]->pal[i] = (clr.r | (clr.g << 8) | (clr.b << 16));
+            }
+
+            if (header.type == ESCH_MTL_TYPE_8BIT_TRANSP)
+                bms[f]->pal[255] = 0xff00ff;
+        }
+
+        //ÄÄÄ Handle body
+        if (header.compress == ESCH_MTL_COMPRESS_RLE
+            && iff->chunkSize < (ulong)(header.xsize * header.ysize * bpp))
+        {
+            //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Compressed
+            byte *work = new byte[iff->chunkSize];
+            if (!work)
+                return ESCH_ERR_NOMEMORY;
+
+            if (iff->read(work))
+            {
+                delete [] work;
+                release(1);
+                iff->leaveform();
+                return ESCH_ERR_FILEERROR;
+            }
+
+            switch (bpp)
+            {
+                case 3:
+                    if (XFParseXEB::uncompress_rle_24bpp(header.xsize, header.ysize,
+                                                         iff->chunkSize, work,
+                                                         (byte*)bms[f]->data))
+                    {
+                        delete [] work;
+                        release(1);
+                        iff->leaveform();
+                        return ESCH_ERR_INVALIDDATA;
+                    }
+                    break;
+                case 4:
+                    if (XFParseXEB::uncompress_rle_32bpp(header.xsize, header.ysize,
+                                                         iff->chunkSize, work,
+                                                         (byte*)bms[f]->data))
+                    {
+                        delete [] work;
+                        release(1);
+                        iff->leaveform();
+                        return ESCH_ERR_INVALIDDATA;
+                    }
+                    break;
+                case 1:
+                    if (XFParseXEB::uncompress_rle_8bpp(header.xsize, header.ysize,
+                                                        iff->chunkSize, work,
+                                                        (byte*)bms[f]->data))
+                    {
+                        delete [] work;
+                        release(1);
+                        iff->leaveform();
+                        return ESCH_ERR_INVALIDDATA;
+                    }
+                    break;
+            }
+
+            delete [] work;
+        }
+        else
+        {
+            //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Uncompressed
+            if (iff->chunkSize != (ulong)(header.xsize * header.ysize * bpp))
+            {
+                release(1);
+                iff->leaveform();
+                return ESCH_ERR_INVALIDDATA;
+            }
+
+            if (iff->read(bms[f]->data))
+            {
+                release(1);
+                iff->leaveform();
+                return ESCH_ERR_FILEERROR;
+            }
+        }
+
+        f++;
+        if (f < header.nframes)
+        {
+            if (iff->seekchunk(iff->makeid('B','O','D','Y'))
+                || !iff->chunkSize)
+            {
+                release(1);
+                iff->leaveform();
+                return ESCH_ERR_INVALIDDATA;
+            }
+        }
+        else
+            break;
+    }
+
+//ÄÄÄ Return OK
+    iff->leaveform();
+    return ESCH_ERR_NONE;
+}
+
+
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //°°°°°°°°°°°°°°°°°°°°°°°°°°±  Utility Routines  ±°°°°°°°°°°°°°°°°°°°°°°°°°°°

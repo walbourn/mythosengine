@@ -130,6 +130,10 @@ BEGIN_MESSAGE_MAP(ToolView, CView)
 	ON_COMMAND(ID_VIEW_SHOW_SPHEXTS, OnViewShowSphereExtents)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_SHOW_SPHEXTS, OnUpdateViewShowSphereExtents)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_SHOW_BOXEXTS, OnUpdateViewShowBoxExtents)
+	ON_UPDATE_COMMAND_UI(ID_VIEW_RND_SORT, OnUpdateViewRndSort)
+	ON_COMMAND(ID_VIEW_RND_SORT, OnViewRndSort)
+	ON_COMMAND(ID_VIEW_RND_ALPHA, OnViewRndAlpha)
+	ON_UPDATE_COMMAND_UI(ID_VIEW_RND_ALPHA, OnUpdateViewRndAlpha)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -360,7 +364,8 @@ BOOL ToolView::ui_camera_properties(EschCameraEx *cam, int doupdate)
 //ÄÄÄ Misc
     CameraPropMiscPage      mdlg;
 
-    VngoColor24bit clr = pDoc->palette.hw_pal.p[(byte)cam->bcolor];
+    ASSERT(pDoc->palette != 0);
+    VngoColor24bit clr = pDoc->palette->hw_pal.p[(byte)cam->bcolor];
     mdlg.m_bcolor = (clr.r | (clr.g << 8) | (clr.b << 16));
 
 	mdlg.m_hither = cam->hither;
@@ -370,12 +375,14 @@ BOOL ToolView::ui_camera_properties(EschCameraEx *cam, int doupdate)
 //ÄÄÄ Extended
     CameraPropExPage        xdlg;
 
-    xdlg.m_haze_active = (cam->hz_pal) ? 1 : 0;
+    if (cam->vport)
+        xdlg.m_haze_active = (cam->vport->vflags & VNGO_HAZE_ON) ? 1 : 0;
+    else
+        xdlg.m_haze_active = 0;
     xdlg.haze_change = FALSE;
     xdlg.haze_color = (clr.r | (clr.g << 8) | (clr.b << 16));
     xdlg.m_bg_active = (cam->bg_bitmap) ? 1 : 0;
-    xdlg.bg_bm = cam->bg_bitmap;
-    cam->set_flags(cam->flags & ~ESCH_CAM_OWNSBITMAP);
+    xdlg.bg_bm = (XFBitmap*)cam->app_data;
 
 //ÄÄÄ Interact
     CPropertySheet  sh("Camera Properties");
@@ -426,34 +433,38 @@ BOOL ToolView::ui_camera_properties(EschCameraEx *cam, int doupdate)
         cam->set_yon(mdlg.m_yon);
         cam->set_hither(mdlg.m_hither);
         cam->set_factor(mdlg.m_scalef);
-        cam->set_bcolor(pDoc->palette.get_index((VngoColor24bit)mdlg.m_bcolor));
+        ASSERT(pDoc->palette != 0);
+        cam->set_bcolor(pDoc->palette->get_index((VngoColor24bit)mdlg.m_bcolor));
         
         //ÄÄÄ Extended
-        if (xdlg.m_haze_active)
+        if (cam->vport)
         {
-            if (xdlg.haze_change || !cam->hz_pal)
+            if (xdlg.m_haze_active)
             {
-                cam->create_haze(xdlg.m_levels, xdlg.m_slevels,
-                                 xdlg.m_blevels, xdlg.m_bpercent / 100.0f,
-                                 VngoColor24bit(xdlg.haze_color));
+                cam->set_haze(xdlg.m_startz, xdlg.m_midz,
+                              VngoColor24bit(xdlg.haze_color));
+            }
+            else
+            {
+                cam->vport->haze_off();
             }
         }
-        else
-            cam->set_haze(0);
 
         if (xdlg.m_bg_active && xdlg.bg_bm)
         {
-            if (xdlg.bg_bm != cam->bg_bitmap)
+            cam->app_data = xdlg.bg_bm;
+            if (cam->create_bg_bitmap(xdlg.bg_bm))
             {
-                cam->set_bg_bitmap(xdlg.bg_bm);
+                MessageBox("Create of bitmap background failed",
+                           "Bitmap Background",
+                           MB_OK | MB_ICONEXCLAMATION);
             }
-            else 
-                cam->set_flags(cam->flags | ESCH_CAM_OWNSBITMAP);
         }
         else
         {
             if (xdlg.bg_bm)
                 delete xdlg.bg_bm;
+            cam->app_data = 0;
             cam->set_bg_bitmap(0);
         }
 
@@ -467,12 +478,10 @@ BOOL ToolView::ui_camera_properties(EschCameraEx *cam, int doupdate)
         return TRUE;
     }
 
-    if (xdlg.bg_bm)
+    if (xdlg.bg_bm != cam->app_data)
     {
-        if (xdlg.bg_bm != cam->bg_bitmap)
+        if (xdlg.bg_bm)
             delete xdlg.bg_bm;
-        else
-            cam->set_flags(cam->flags | ESCH_CAM_OWNSBITMAP);
     }
 
     return FALSE;
@@ -1384,7 +1393,8 @@ void ToolView::OnEditNewCamera()
     EschCameraEx *cam = new EschCameraEx;
     ASSERT(cam);
     strncpy(cam->name,str,ESCH_MAX_NAME);
-    cam->set_bcolor(pDoc->palette.get_index(VngoColor24bit(20,20,32)));
+    ASSERT(pDoc->palette != 0);
+    cam->set_bcolor(pDoc->palette->get_index(VngoColor24bit(20,20,32)));
     
     if (ui_camera_properties(cam,0))
     {
@@ -1866,6 +1876,83 @@ void ToolView::OnUpdateViewRndPerspective(CCmdUI* pCmdUI)
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// ToolView - OnView(Update)RndAlpha                                        ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+void ToolView::OnViewRndAlpha() 
+{
+    switch (vpmode)
+    {
+        case VPMODE_STANDARD:
+            wVp[0].cflags ^= ESCH_CAM_ALPHA;
+            if (wVp[0].cam)
+            {
+                wVp[0].cam->set_flags(wVp[0].cflags);
+                wVp[0].Render();
+                wVp[0].RedrawWindow();
+            }
+            break;
+    }
+}
+
+void ToolView::OnUpdateViewRndAlpha(CCmdUI* pCmdUI) 
+{
+    switch (vpmode)
+    {
+        case VPMODE_STANDARD:
+            pCmdUI->Enable(1);
+            pCmdUI->SetCheck( (wVp[0].cflags & ESCH_CAM_ALPHA) ? 1 : 0);
+            break;
+        default:
+            pCmdUI->SetCheck(0);
+            pCmdUI->Enable(0);
+            break;
+    }
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// ToolView - OnView(Update)RndSort                                         ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+void ToolView::OnViewRndSort() 
+{
+    switch (vpmode)
+    {
+        case VPMODE_STANDARD:
+            wVp[0].cflags ^= ESCH_CAM_SORT;
+            if (wVp[0].cam)
+            {
+                wVp[0].cam->set_flags(wVp[0].cflags);
+                if (wVp[0].cam->vport)
+                {
+                    if (wVp[0].cflags & ESCH_CAM_SORT)
+                        wVp[0].cam->vport->zbuffer_off();
+                    else
+                        wVp[0].cam->vport->zbuffer_on();
+                }
+                wVp[0].Render();
+                wVp[0].RedrawWindow();
+            }
+            break;
+    }
+}
+
+void ToolView::OnUpdateViewRndSort(CCmdUI* pCmdUI) 
+{
+    switch (vpmode)
+    {
+        case VPMODE_STANDARD:
+            pCmdUI->Enable(1);
+            pCmdUI->SetCheck( (wVp[0].cflags & ESCH_CAM_SORT) ? 1 : 0);
+            break;
+        default:
+            pCmdUI->SetCheck(0);
+            pCmdUI->Enable(0);
+            break;
+    }
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // ToolView - OnViewShowSphereExtents                                       ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 void ToolView::OnViewShowSphereExtents() 
@@ -2290,4 +2377,3 @@ void ToolView::OnUpdateLightIntensity(CCmdUI* pCmdUI)
 }
 
 //°±² eof - eshtview.cpp ²±°
-

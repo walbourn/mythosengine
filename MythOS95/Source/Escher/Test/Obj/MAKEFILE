@@ -87,6 +87,7 @@ ddraw.lib\
 dinput.lib\
 d3drm.lib\
 dxguid.lib\
+wll3d.lib\
 user32.lib
 
 #дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
@@ -147,7 +148,7 @@ resource.res : ..\resource.rc\
 #дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
 
 $(EXE).exe:   $(OBJS)
-    $(LINK) $(LINKOPTS) /OUT:$*.exe /subsystem:windows,4 @<<
+    $(LINK) $(LINKOPTS) /NODEFAULTLIB:libcmtd /OUT:$*.exe /subsystem:windows,4 @<<
     $(OBJS) $(LIBS)
 <<
 

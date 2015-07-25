@@ -46,9 +46,11 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
+#define _OEMS
+#define _CLEAR_3D
 #include "simgine.hpp"
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
@@ -56,9 +58,6 @@
 //                                 Code
 //
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
-
-#ifdef  _OEMS
-#ifdef  _CLEAR_3D
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //°°°°°°°°°°°°°°°°°°°°°°±  Constructors/Destructors  ±°°°°°°°°°°°°°°°°°°°°°°°
@@ -94,6 +93,9 @@ SimScreen::error_codes SimScreenCL3D::init (ushort w, ushort h,
 {
     assertMyth("SimScreenCL3D::init needs SimApp", SimApp != 0);
 
+    release();
+
+//ÄÄÄ Verify bit-depth
     if (bd != 16)
         return ERROR_MODENOTSUPP;
 
@@ -107,61 +109,60 @@ SimScreen::error_codes SimScreenCL3D::init (ushort w, ushort h,
     if (!vgs)
         return ERROR_NOMEMORY;
 
+    if (vgs->get_initstate())
+    {
+        release();
+        return ERROR_SCNRMNGRINIT;
+    }
+
 //ÄÄÄ Create palette
     pal = new VngoPal16;
     if (!pal)
     {
-        err = ERROR_NOMEMORY;
-        goto leave_error;
+        release();
+        return ERROR_NOMEMORY;
     }
     if (((VngoPal16*)pal)->init(0) != 0)
     {
-        err = ERROR_PALINIT;
-        goto leave_error;
+        release();
+        return ERROR_PALINIT;
     }
 
 //ÄÄÄ Setup mode
-    vgs->set_mode (width, height, 16, pal,
-                   VNGO_3DDEVICE
-                   | VNGO_ALLOC_ZBUFFER
-                   | ((flags & FULLSCREEN) ? VNGO_SET_RESOLUTION : 0));
+    {
+        dword init_flags = VNGO_3DDEVICE | VNGO_ALLOC_ZBUFFER;
+
+        if (flags & FULLSCREEN)
+            init_flags |= VNGO_SET_RESOLUTION;
+        if (flags & TRUEFLIP)
+            init_flags |= VNGO_TRUE_FLIP;
+
+        if (vgs->set_mode (w, h, 16, pal, init_flags))
+        {
+            release();
+            return ERROR_MODEFAIL;
+        }
+    }
 
 //ÄÄÄ Setup viewport
-    gvport = new VngoVportCL3D (0,0,width,height,pal,VNGO_ZBUFFER_DEV,vgs);
+    gvport = new VngoVportCL3D (VngoRect(0,0,w,h), pal, VNGO_ZBUFFER_DEV, vgs);
     if (!gvport)
     {
-        err = ERROR_NOMEMORY;
-        goto leave_error;
+        release();
+        return ERROR_NOMEMORY;
     }
 
     if (gvport->get_init_state())
     {
-        err = ERROR_VPORTINIT;
-        goto leave_error;
+        release();
+        return ERROR_VPORTINIT;
     }
+
+    gvport->zbuffer_off();
 
     clear();
 
     return ERROR_NONE;
-
-leave_error: ;
-    if (gvport)
-    {
-        delete gvport;
-        gvport=0;
-    }
-    if (pal)
-    {
-        delete pal;
-        pal=0;
-    }
-    if (vgs)
-    {
-        delete vgs;
-        vgs=0;
-    }
-
-    return err;
 }
 
 
@@ -173,8 +174,8 @@ VngoVport *SimScreenCL3D::create_subviewport(VngoRect &srect, dword flags)
     assertMyth("SimScreenCL3D::create_subviewport needs screen manager and palette",
                vgs != 0 && pal != 0);
 
-    VngoVport *vport = new VngoVportCL3D (srect.x,srect.y,srect.dx,srect.dy,
-                                          pal,flags | VNGO_ZBUFFER_DEV,vgs);
+    VngoVport *vport = new VngoVportCL3D (srect, pal,
+                                          flags | VNGO_ZBUFFER_DEV,vgs);
     if (!vport)
         return 0;
 
@@ -183,9 +184,6 @@ VngoVport *SimScreenCL3D::create_subviewport(VngoRect &srect, dword flags)
 
     return vport;
 }
-
-#endif      // _CLEAR_3D
-#endif      // _OEMS
 
 //°±² End of module - simscl3d.cpp ²±°
 

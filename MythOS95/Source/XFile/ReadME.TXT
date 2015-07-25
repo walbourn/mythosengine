@@ -35,21 +35,11 @@
                              _Library Status_
 
  Notes by: Chuck Walbourn
- Updated: July 31, 1997
+ Updated: September 29, 1997
 
  Changes for this release --------------------------------------------------
 
-   o Added full bitdepth support to XFBitmap::create
-
-   o Added monochrome reader/writer support to the XFParseBMP, XFParseLBM,
-     and XFParseXEB classes.
-
-   o XFParseTGA now reads/writes 15/16/24/32-bit TGAs and reads RLE
-     compressed TGAs.  Note that previously 32-bit TGAs were converted
-     to 24-bit on read/write.
-
-   o Added new 'bpp' keyword to 'bitmap' function in IFFC to convert
-     2 bpp <=> 3 bpp images.
+   o Added compressed monochrome reader/writer to XFParseXEB class.
 
 
  Proposed changes ----------------------------------------------------------

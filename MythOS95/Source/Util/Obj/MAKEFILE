@@ -59,11 +59,13 @@ INCPATH   = ;$(MYTH95ROOT)\inc;
 # File specific variables                                                  Ё
 #дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
 
-LIBPATH = ;$(MYTH95ROOT)\lib;
+LIBPATH = $(MYTH95ROOT)\lib;
 
 PICEXE = pic
 
-PICOBJS = pic.obj
+PICOBJS = \
+pic.obj\
+pic.res
 
 LIBS = felix.lib\
 xfile.lib\
@@ -111,7 +113,7 @@ release: all
    copy *.exe $(MYTH95ROOT)\bin
 
 #дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
-# Picture recolor utility (Picasso)                                        Ё
+# Picture recolor utility                                                  Ё
 #дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
 
 $(PICEXE).exe:   $(PICOBJS)

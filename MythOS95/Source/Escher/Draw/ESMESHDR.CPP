@@ -42,7 +42,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include "escher.hpp"
@@ -101,7 +101,8 @@ EschMeshDraw::EschMeshDraw(const EschMeshDraw &mshd) :
     tmax (mshd.tmax),
     txt (mshd.txt)
 {
-    flags &= ~(ESCH_MSHD_OWNSTEXTURE
+    flags &= ~(ESCH_DRW_OWNSDATA
+               | ESCH_MSHD_OWNSTEXTURE
                | ESCH_MSHD_OWNSNOSTCTXT
                | ESCH_MSHD_OWNSNOMFTXT
                | ESCH_MSHD_OWNSNOPRCTXT);
@@ -137,7 +138,8 @@ const EschMeshDraw &EschMeshDraw::operator = (const EschMeshDraw &mshd)
 
         EschGeometry::operator = (mshd);
 
-        flags &= ~(ESCH_MSHD_OWNSTEXTURE
+        flags &= ~(ESCH_DRW_OWNSDATA
+                   | ESCH_MSHD_OWNSTEXTURE
                    | ESCH_MSHD_OWNSNOSTCTXT
                    | ESCH_MSHD_OWNSNOMFTXT
                    | ESCH_MSHD_OWNSNOPRCTXT);
@@ -192,17 +194,17 @@ void EschMeshDraw::draw()
         // Transform center into view
         exts.center.transform(&world,&p);
         p.transform(&cam->eye.iorient);
-        
+
         // Scale radius
         float r = exts.radius * world.scalef * cam->radius_factor * 1.05f;
 
         assertMyth("EschMeshDraw::draw radius scale resulted in negative radius",
                    r >= 0);
-        
+
         // Setup for compare
         float yon = cam->yon;
         float hither = cam->hither;
-        
+
         // Check for fully invisible against hither/yon
         if ( ((p.z + r) < hither)
              || ((p.z - r) > yon) )
@@ -211,7 +213,7 @@ void EschMeshDraw::draw()
             // need to do anything for children meshes.
             return;
         }
-        
+
         // If center is positive, then we can check against other planes
         // and for fully visible (will need changing later for more general
         // case)
@@ -219,7 +221,7 @@ void EschMeshDraw::draw()
         {
             float tx = p.z * cam->xsize;
             float ty = p.z * cam->ysize;
-            
+
             // Check for fully invisible against left/right/top/bottom
             if ( ((p.x + r) < -tx)
                  || ((p.x - r) > tx)
@@ -230,7 +232,7 @@ void EschMeshDraw::draw()
                 // need to do anything for children meshes.
                 return;
             }
-            
+
             // See if fully visible or needs clipping
             ctrlfl = ( ((p.z - r) > hither)
                         && ((p.z + r) < yon)
@@ -255,7 +257,7 @@ void EschMeshDraw::draw()
     //ÄÄÄ Clear arena
     assertMyth("EschMeshDraw needs Escher initialized",EschSysInstance != 0);
     ivory_arena_clear(EschSysInstance->wspace);
-        
+
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Setup Context
     EschContext ec(EschCurrent);
     ec.current = this;
@@ -305,7 +307,7 @@ void EschMeshDraw::draw()
     {
         fflags = face->flags;
 
-        //ÄÄÄ Figure out shade level (take minimum of shade levels for 
+        //ÄÄÄ Figure out shade level (take minimum of shade levels for
         //ÄÄÄ camera, drawable shade limits, and face)
         level = cflags & fflags & limits;
 
@@ -370,7 +372,7 @@ void EschMeshDraw::draw()
             }
         }
 
-        //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Compute shading 
+        //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Compute shading
 
         //ÄÄÄ Sets color (assumes draw face copies into face->b and face->c)
         vpt[face->a].clr=face->color;
@@ -378,11 +380,7 @@ void EschMeshDraw::draw()
         //ÄÄÄ Sets shade value
         if (lights)
         {
-            assert(ESCH_FACE_SELFILUM_MASK == 0xf00000);
-
-            dword base_shade = (fflags & ESCH_FACE_SELFILUM_MASK)
-                               ? ( (mp*(((fflags & ESCH_FACE_SELFILUM_MASK) >> 20)+1) ) >> 4)
-                               : 0;
+            dword base_shade = (mp*long(face->self_illum)) / 255;
 
             //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Smooth/Specular shading
             if (level & (ESCH_CAM_SHADE_SPECULAR|ESCH_CAM_SHADE_SMOOTH))
@@ -734,6 +732,139 @@ void EschMeshDraw::detach()
                | ESCH_MSHD_OWNSNOSTCTXT
                | ESCH_MSHD_OWNSNOMFTXT
                | ESCH_MSHD_OWNSNOPRCTXT);
+}
+
+
+
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°°°±  Utility Routines  ±°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//                              °°° private °°°                             ³
+// EschMeshDraw - clone_helper                                              ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+EschMeshDraw *EschMeshDraw::clone_helper(EschMeshDraw *_parent,
+                                         const EschMeshDraw *_refmsh,
+                                         int dupmf)
+{
+    EschMeshDraw *head=0;
+
+    while(_refmsh != 0)
+    {
+        //ÄÄÄ Create copy of current reference mesh draw instance
+        EschMeshDraw *mptr = new EschMeshDraw(*_refmsh);
+
+        // Need to attach, but must prevent invalid 'detach()' from copy...
+        mptr->mesh = 0;
+        if (mptr->attach(_refmsh->mesh))
+        {
+            delete mptr;
+            goto error_exit;
+        }
+
+        //ÄÄÄ See if there are any mframe instances of textures to dup
+        if (dupmf && mptr->txt)
+        {
+            for(ulong i=0; i < mptr->tmax; i++)
+            {
+                if (mptr->txt[i]
+                    && ((mptr->txt[i]->get_type()
+                        & ESCH_TXTT_BASEMASK) == ESCH_TXTT_MFRAME))
+                    break;
+            }
+
+            //ÄÄÄ Must create our own instances of mframe textures
+            if (i < mptr->tmax)
+            {
+                mptr->txt = new EschTexture*[mptr->tmax];
+                if (!mptr->txt)
+                {
+                    delete mptr;
+                    goto error_exit;
+                }
+                memset(mptr->txt,0,sizeof(EschTexture*)*mptr->tmax);
+
+                mptr->set_flags(mptr->flags | ESCH_MSHD_OWNSTEXTURE
+                                            | ESCH_MSHD_OWNSNOSTCTXT
+                                            | ESCH_MSHD_OWNSNOPRCTXT);
+
+                for(i=0; i < mptr->tmax; i++)
+                {
+                    EschTexture *txt = mptr->mesh->txt[i];
+
+                    if (txt
+                        && ((txt->get_type()
+                            & ESCH_TXTT_BASEMASK) == ESCH_TXTT_MFRAME))
+                    {
+                        EschTexture *t;
+                        if (txt->flags & ESCH_TXT_SHARED)
+                        {
+                            t=EschTexture::cache_new(txt->name);
+                            assert(t != 0);
+                        }
+                        else
+                        {
+                            t=new EschMultiFrameTexture(
+                                             *((EschMultiFrameTexture*)txt));
+                        }
+
+                        if (!t)
+                        {
+                            delete mptr;
+                            goto error_exit;
+                        }
+
+                        mptr->txt[i] = t;
+                    }
+                    else
+                    {
+                        mptr->txt[i] = txt;
+                    }
+                }
+            }
+        }
+
+        //ÄÄÄ Recurse for children
+        if (_refmsh->child())
+        {
+            if (!clone_helper(mptr,(const EschMeshDraw*)_refmsh->child(),dupmf))
+            {
+                delete mptr;
+                goto error_exit;
+            }
+        }
+
+        mptr->compute_world();
+
+        if (_parent)
+        {
+            mptr->adopt(_parent);
+            if (!head)
+                head = mptr;
+
+            _refmsh = (const EschMeshDraw*)_refmsh->next();
+        }
+        else
+        {
+            // If we are the root, don't copy our siblings into the
+            // new clone, only ourselves and our children!
+            return mptr;
+        }
+    }
+
+    return head;
+
+error_exit :;
+    while(head != 0)
+    {
+        EschMeshDraw *tmp = head;
+        head = (EschMeshDraw*)head->next();
+        tmp->remove(1);
+        delete tmp;
+    }
+
+    return 0;
 }
 
 

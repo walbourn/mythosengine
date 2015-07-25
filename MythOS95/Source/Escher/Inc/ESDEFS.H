@@ -98,7 +98,7 @@ typedef enum _esch_error_codes
 #define ESCH_CDF_BFCULL         0x2
 #define ESCH_CDF_INFINITEZ      0x4
 #define ESCH_CDF_MUSTTXT        0x8
-
+#define ESCH_CDF_DONTSORT       0x10
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // Update flags                                                             ³
@@ -126,6 +126,29 @@ typedef enum _esch_error_codes
 
 #define ESCH_REND_ALL               0xff
 
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// EschElement                                                              ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+//ÄÄÄ Types
+#define ESCH_ELMNT_BASE             0x0000
+#define ESCH_ELMNT_PIXEL            0x0100
+#define ESCH_ELMNT_LINE             0x0200
+#define ESCH_ELMNT_POLY             0x0300
+#define ESCH_ELMNT_GPOLY            0x0301
+#define ESCH_ELMNT_GPOLY_PERSP      0x0302
+#define ESCH_ELMNT_POLY_A           0x0310
+#define ESCH_ELMNT_GPOLY_A          0x0311
+#define ESCH_ELMNT_GPOLY_PERSP_A    0x0312
+#define ESCH_ELMNT_TXTPOLY          0x0320
+#define ESCH_ELMNT_TXTPOLY_PERSP    0x0321
+#define ESCH_ELMNT_GTXTPOLY         0x0322
+#define ESCH_ELMNT_GTXTPOLY_PERSP   0x0323
+#define ESCH_ELMNT_TXTPOLY_A        0x0330
+#define ESCH_ELMNT_TXTPOLY_PERSP_A  0x0331
+#define ESCH_ELMNT_GTXTPOLY_A       0x0332
+#define ESCH_ELMNT_GTXTPOLY_PERSP_A 0x0333
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // EschTexture                                                              ³
@@ -160,6 +183,7 @@ typedef enum _esch_error_codes
 
 //ÄÄÄ Load flags
 #define ESCH_TXTLD_SHARE            0x1
+#define ESCH_TXTLD_MFRAME           0x2
 
 #define ESCH_TXTLD_ALL              0xf
 
@@ -168,34 +192,37 @@ typedef enum _esch_error_codes
 // EschCamera                                                               ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
-#define ESCH_CAM_SHADE_WIRE         0x1     // Render with wireframe
-#define ESCH_CAM_SHADE_SOLID        0x2     // Render with solid colors
-#define ESCH_CAM_SHADE_FLAT         0x4     // Render with flat shading
-#define ESCH_CAM_SHADE_SMOOTH       0x8     // Render with smoothed shading
-#define ESCH_CAM_SHADE_SPECULAR     0x80    // Render with specular highlight
+#define ESCH_CAM_SHADE_WIRE         0x1         // Render with wireframe
+#define ESCH_CAM_SHADE_SOLID        0x2         // Render with solid colors
+#define ESCH_CAM_SHADE_FLAT         0x4         // Render with flat shading
+#define ESCH_CAM_SHADE_SMOOTH       0x8         // Render with smoothed shading
+#define ESCH_CAM_SHADE_SPECULAR     0x80        // Render with specular highlight
 
-#define ESCH_CAM_BACKCULL           0x100   // Backface culling
-#define ESCH_CAM_TEXTURED           0x200   // If set, textures on faces drawn
-#define ESCH_CAM_PERSPECTIVE        0x400   // Draw with perspective routines
-#define ESCH_CAM_ALPHA              0x800   // If set, alpha on faces is used
+#define ESCH_CAM_BACKCULL           0x100       // Backface culling
+#define ESCH_CAM_TEXTURED           0x200       // If set, textures on faces drawn
+#define ESCH_CAM_PERSPECTIVE        0x400       // Draw with perspective routines
+#define ESCH_CAM_ALPHA              0x800       // If set, alpha on faces is used
 
-#define ESCH_CAM_SHOW_ALL_LINES     0x1000  // Don't use visibility flags for
-                                            // wireframe mode
+#define ESCH_CAM_SHOW_ALL_LINES     0x1000      // Don't use visibility flags for
+                                                // wireframe mode
 
-#define ESCH_CAM_VPWASLOCKED        0x2000  // pre_rend() sets/clears this for post_rend()
+#define ESCH_CAM_VPWASLOCKED        0x2000      // pre_rend() sets/clears this for post_rend()
 
-#define ESCH_CAM_NOCLEAR            0x4000  // Don't clear viewport on render
+#define ESCH_CAM_NOCLEAR            0x4000      // Don't clear viewport on render
 
-#define ESCH_CAM_MODELSPACE         0x8000  // Perform lighting in model-space
-                                            // instead of world-space.
+#define ESCH_CAM_MODELSPACE         0x8000      // Perform lighting in model-space
+                                                // instead of world-space.
 
-#define ESCH_CAM_HAZE               0x10000 // Hazing effect active (Ex)
-#define ESCH_CAM_IGNORE_BMAP        0x20000 // Ignore's background bitmap if defined (Ex)
-#define ESCH_CAM_GRADIENT           0x40000 // Gradient background (Ex)
+#define ESCH_CAM_SORT               0x10000     // Must sort all output elements
+                                                // (pixels, lines, triangles, etc.)
 
-#define ESCH_CAM_OWNSBITMAP         0x100000// Owns background bitmap (Ex)
-#define ESCH_CAM_OWNSHAZE           0x200000// Owns haze palette (Ex)
-#define ESCH_CAM_OWNSGRADIENT       0x400000// Owns gradient palette (Ex)
+#define ESCH_CAM_NOFLUSH            0x20000     // Don't flush element list on render
+
+#define ESCH_CAM_IGNORE_BMAP        0x100000    // Ignore's background bitmap if defined (Ex)
+#define ESCH_CAM_GRADIENT           0x200000    // Gradient background (Ex)
+
+#define ESCH_CAM_OWNSBITMAP         0x400000    // Owns background bitmap (Ex)
+#define ESCH_CAM_OWNSGRADIENT       0x800000    // Owns gradient palette (Ex)
 
 #define ESCH_CAM_APP0               0x1000000   // Application defined bits
 #define ESCH_CAM_APP1               0x2000000
@@ -219,9 +246,9 @@ typedef enum _esch_error_codes
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
 //ÄÄÄ Flags
-#define ESCH_LGT_OFF                0x1     // Light is off
-#define ESCH_LGT_DARK               0x2     // Light is a darklight
-#define ESCH_LGT_ATTEN              0x10    // Light attenuates over a range
+#define ESCH_LGT_OFF                0x1         // Light is off
+#define ESCH_LGT_DARK               0x2         // Light is a darklight
+#define ESCH_LGT_ATTEN              0x10        // Light attenuates over a range
 
 #define ESCH_LGT_APP0               0x1000000   // Application defined bits
 #define ESCH_LGT_APP1               0x2000000
@@ -233,14 +260,14 @@ typedef enum _esch_error_codes
 #define ESCH_LGT_APP7               0x80000000
 
 //ÄÄÄ Types
-#define  ESCH_LGTT_AMBIENT          0x0000
-#define  ESCH_LGTT_VECTOR           0x0100
-#define  ESCH_LGTT_FPOINT           0x0200
-#define  ESCH_LGTT_FATTEN           0x0210
-#define  ESCH_LGTT_FSPOT            0x0211
-#define  ESCH_LGTT_POINT            0x0300
-#define  ESCH_LGTT_ATTEN            0x0310
-#define  ESCH_LGTT_SPOT             0x0311
+#define ESCH_LGTT_AMBIENT           0x0000
+#define ESCH_LGTT_VECTOR            0x0100
+#define ESCH_LGTT_FPOINT            0x0200
+#define ESCH_LGTT_FATTEN            0x0210
+#define ESCH_LGTT_FSPOT             0x0211
+#define ESCH_LGTT_POINT             0x0300
+#define ESCH_LGTT_ATTEN             0x0310
+#define ESCH_LGTT_SPOT              0x0311
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
@@ -298,7 +325,7 @@ typedef enum _esch_error_codes
 
 //ÄÄÄ Flags
 #define ESCH_DRW_SKIP               0x1     // Skip this drawable during draw
-                                            // and collide/pick tests.
+
 #define ESCH_DRW_OWNSDATA           0x2     // Buffers associated should be
                                             // deleted on destruction.
 #define ESCH_DRW_SKIPTEST           0x4     // Skip this drawable during
@@ -329,6 +356,7 @@ typedef enum _esch_error_codes
 #define ESCH_DRWT_PRTGEOMETRY       0x0220
 #define ESCH_DRWT_PRTSPRITE         0x0230
 #define ESCH_DRWT_PSYSTEM           0x0300
+#define ESCH_DRWT_PGENERATOR        0x0310
 #define ESCH_DRWT_GEOM              0x0400
 #define ESCH_DRWT_MESH              0x0410
 #define ESCH_DRWT_TERRAIN           0x0500
@@ -341,6 +369,18 @@ typedef enum _esch_error_codes
 #define ESCH_DRWT_METABOX           0x1200
 #define ESCH_DRWT_LOD               0x1300
 #define ESCH_DRWT_SKELETON          0x2000
+
+//ÄÄÄ EschParticle
+
+#define ESCH_PRT_TIMEBASED          0x10000 // Lifetime based on interval
+
+//ÄÄÄ EschParticleGenerator
+
+#define ESCH_PRTG_CIRCLE            0x10000 // Generation area is a circle
+#define ESCH_PRTG_RECTANGLE         0x20000 // Generation area is a rectangle
+#define ESCH_PRTG_NOAUTOGENERATE    0x100000 // Don't generate on animate()
+#define ESCH_PRTG_FRAMEBASED        0x200000 // Values for parts & lifetime
+                                             // given in frames
 
 //ÄÄÄ EschMeshDraw
 
@@ -388,7 +428,6 @@ typedef enum _esch_error_codes
                                             // pointed at the bottom.
 
 //ÄÄÄ EschMetabox
-
 #define ESCH_MBOX_TOP               0x10000
 #define ESCH_MBOX_BOTTOM            0x20000
 #define ESCH_MBOX_FRONT             0x40000
@@ -448,14 +487,6 @@ typedef enum _esch_error_codes
 #define ESCH_FACE_BCLINE            0x2000
 #define ESCH_FACE_CALINE            0x4000
 
-#define ESCH_FACE_SELFILUM_MASK     0xf00000 // Face self illum level
-                                             // (0 is no self-illumination,
-                                             //  f is fully self-illuminated)
-
-#define ESCH_FACE_ALPHA_MASK        0xf000000  // Face alpha level
-                                               // (0 is transparent
-                                               //  f is opaque)
-
 #define ESCH_FACE_APP0              0x10000000 // Application defined bits
 #define ESCH_FACE_APP1              0x20000000
 #define ESCH_FACE_APP2              0x40000000
@@ -492,6 +523,7 @@ typedef enum _esch_error_codes
 //ÄÄÄ Load flags
 #define ESCH_MSHLD_USEMFTXT         0x1
 #define ESCH_MSHLD_SHARETXT         0x2
+#define ESCH_MSHLD_FILETXT          0x4
 
 #define ESCH_MSHLD_ALL              0xf
 
@@ -522,7 +554,9 @@ typedef enum _esch_error_codes
 #define ESCH_SCENELD_CAMSEX         0x10
 #define ESCH_SCENELD_NOMFTXT        0x20
 #define ESCH_SCENELD_NOSHARETXT     0x40
-#define ESCH_SCENELD_SKELETON       0x80
+#define ESCH_SCENELD_NOFILETXT      0x80
+
+#define ESCH_SCENELD_SKELETON       0x100
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
@@ -545,6 +579,13 @@ typedef enum _esch_error_codes
 #define ESCH_SURF_APP1              0x2000
 #define ESCH_SURF_APP2              0x4000
 #define ESCH_SURF_APP3              0x8000
+
+//ÄÄÄ Load flags
+#define ESCH_TRNLD_USEMFTXT         0x1
+#define ESCH_TRNLD_SHARETXT         0x2
+#define ESCH_TRNLD_FILETXT          0x4
+
+#define ESCH_TRNLD_ALL              0xf
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
@@ -587,6 +628,7 @@ typedef enum _esch_error_codes
 
 #define ESCH_MBLD_INSCENE           0x10
 #define ESCH_MBLD_FIXED             0x20
+#define ESCH_MBLD_OLDFLOAT          0x40
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
@@ -694,7 +736,7 @@ typedef long esch_limb_type;
 #define ESCH_KEYFRAME_SHLDR                 0x00000800
 
 // Duplicates one of the above -- base object for a hierarchy
-#define ESCH_KEYFRAME_ROOT                  0x00000100
+#define ESCH_KEYFRAME_ROOT                  0x00000040
 
 // Modifiers
 #define ESCH_KEYFRAME_LEADING               0x00001000
@@ -739,6 +781,7 @@ typedef long esch_limb_type;
 
 #define ESCH_KEYFRAME_ALL                   0xFFFFFFFF
 
+
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // EschKeyframer Motion types                                               ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
@@ -760,7 +803,7 @@ typedef long esch_limb_type;
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
 #define ESCH_MAX_NAME               16      // maximum name length
-#define ESCH_MAX_ORTHOCOUNT         16
+#define ESCH_MAX_ORTHOCOUNT         4096
 
 #endif
 

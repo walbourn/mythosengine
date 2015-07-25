@@ -28,7 +28,7 @@
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
-// Created by Keith Stauffer
+// Created by Keith Stauffer & Paul Masters
 //
 // estrtop.cpp
 //
@@ -48,7 +48,15 @@
 
 #include "escher.hpp"
 #include "esfile.hpp"
-#include "estrtop.hpp"
+
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//
+//                                Equates
+//
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+// #define TERRAIN_DEBUG_AID
+// #define TERRAIN_NO_FRUSTRUM_WALK
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
@@ -72,17 +80,17 @@ float TreeHgtRandomizationMatrix[4][4] =
 //
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 
-// #define TERRAIN_DEBUG_AID
-// #define TERRAIN_NO_FRUSTRUM_WALK
-
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-//°°°°°°°°°°°°°°°°°°°°°°°°°°°°±  Operations  ±°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°±  Constructors/Destructors  ±°°°°°°°°°°°°°°°°°°°°°°°
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// EschTerrainTreeTop - constructor
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 EschTerrainTreeTop::EschTerrainTreeTop(EschTerrainEx* _terr, int _left, int _right,
                                        int _top, int _bottom, float _hgt) :
-EschTerrainEx(*_terr),
-hgt(_hgt)
+    EschTerrainEx(*_terr),
+    hgt(_hgt)
 {
     // initialize edge data;
     left_edge = 0;
@@ -159,9 +167,37 @@ hgt(_hgt)
 
     // Arbitrarily set the number of textures...
     // This should be file based...
-    tmax=4;
+    tmax=5;
 }
 
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// EschTerrainTreeTop - destructor
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+EschTerrainTreeTop::~EschTerrainTreeTop()
+{
+    release();
+
+    // Zero out "borrowed" pointers from EschTerrainEx
+    dlevels = 0;
+    cam = 0;
+
+    // Zero out "borrowed" pointers from EschTerrain
+    hfield = 0;
+    surfinfo = 0;
+    txtcolor = 0;
+    txt = 0;
+}
+
+
+
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°±  Operations  ±°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// EschTerrainTreeTop - release
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 void EschTerrainTreeTop::release()
 {
     if (htable)
@@ -182,11 +218,9 @@ void EschTerrainTreeTop::release()
 }
 
 
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// EschTerrain - draw                                                       ³
-//                                                                          ³
-// Displays the terrain.                                                    ³
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// EschTerrainTreeTop - draw
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 void EschTerrainTreeTop::draw()
 {
     assertMyth("EschLowTerrain::draw needs height-field information",
@@ -404,6 +438,10 @@ void EschTerrainTreeTop::draw()
     cam = NULL;
 }
 
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// EschTerrainTreeTop - setup_edge_limits
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 int EschTerrainTreeTop::setup_edge_limits(VngoPoint *pts)
 {
     if (edge_count != depth || !left_edge || !right_edge)
@@ -459,6 +497,10 @@ int EschTerrainTreeTop::setup_edge_limits(VngoPoint *pts)
     return 0;
 }
 
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// EschTerrainTreeTop - draw_tree_rect
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 VngoRect EschTerrainTreeTop::draw_tree_rect(VngoRect *iclip, VngoRect *oclip,
                                        int dlevel, dword flags)
 {
@@ -674,10 +716,9 @@ VngoRect EschTerrainTreeTop::draw_tree_rect(VngoRect *iclip, VngoRect *oclip,
 }
 
 
-//////////////////////////////////////////////////////////////////////
-////////draw_tree_skirt
-
-
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// EschTerrainTreeTop - draw_tree_skirt
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 VngoRect EschTerrainTreeTop::draw_tree_skirt(VngoRect *iclip, VngoRect *oclip,
                                        int dlevel, dword flags)
 {
@@ -1123,7 +1164,9 @@ VngoRect EschTerrainTreeTop::draw_tree_skirt(VngoRect *iclip, VngoRect *oclip,
 }
 
 
-
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// EschTerrainTreeTop - draw_tree_rect
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 void EschTerrainTreeTop::draw_tree_rect (VngoRect *rect, int dlevel,dword lflags)
 {
     ulong                   needed;
@@ -2309,9 +2352,9 @@ void EschTerrainTreeTop::draw_tree_rect (VngoRect *rect, int dlevel,dword lflags
 }
 
 
-//////////////////////////////////////////////////////////////////////////////////
-////////////  draw_tree_skirt pt2
-
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// EschTerrainTreeTop - draw_tree_skirt
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 void EschTerrainTreeTop::draw_tree_skirt (VngoRect *rect, int dlevel, dword lflags)
 {
     ulong                   needed;
@@ -2762,8 +2805,8 @@ void EschTerrainTreeTop::draw_tree_skirt (VngoRect *rect, int dlevel, dword lfla
 
             if (lflags & ESCH_TERNEX_SLIP_ON)
             {
-                face[0].txt = ESCH_TREETEX_TREESOLID;
-                face[1].txt = ESCH_TREETEX_TREESOLID;
+                face[0].txt = ESCH_TREETEX_TREEBACK;
+                face[1].txt = ESCH_TREETEX_TREEBACK;
             }
             else
             {
@@ -2842,9 +2885,9 @@ void EschTerrainTreeTop::draw_tree_skirt (VngoRect *rect, int dlevel, dword lfla
         for (i=0; i <= temp_len; i++)
         {   // Setup the first line A
             float h = htable[*ptr];
-            ((EschPoint *)vB)->x = cpt->x + ((h-hgt) * hvec.i);
-            ((EschPoint *)vB)->y = cpt->y + ((h-hgt) * hvec.j);
-            ((EschPoint *)vB)->z = cpt->z + ((h-hgt) * hvec.k);
+            ((EschPoint *)vB)->x = cpt->x + ((h-(hgt+0.5f)) * hvec.i);
+            ((EschPoint *)vB)->y = cpt->y + ((h-(hgt+0.5f)) * hvec.j);
+            ((EschPoint *)vB)->z = cpt->z + ((h-(hgt+0.5f)) * hvec.k);
             if (!dlevel && lflags & ESCH_TERNEX_SLIP_ON)
             {
                 h += TreeHgtRandomizationMatrix[(rect->x+i+1)&3][(rect->y+endy-1)&3];
@@ -2899,8 +2942,8 @@ void EschTerrainTreeTop::draw_tree_skirt (VngoRect *rect, int dlevel, dword lfla
 
             if (lflags & ESCH_TERNEX_SLIP_ON)
             {
-                face[0].txt = ESCH_TREETEX_TREESOLID;
-                face[1].txt = ESCH_TREETEX_TREESOLID;
+                face[0].txt = ESCH_TREETEX_TREEBACK;
+                face[1].txt = ESCH_TREETEX_TREEBACK;
             }
             else
             {
@@ -2982,9 +3025,9 @@ void EschTerrainTreeTop::draw_tree_skirt (VngoRect *rect, int dlevel, dword lfla
         for (i=0; i <= temp_len; i++)
         {   // Setup the first line A
             float h = htable[*ptr];
-            ((EschPoint *)vB)->x = cpt->x + ((h-hgt) * hvec.i);
-            ((EschPoint *)vB)->y = cpt->y + ((h-hgt) * hvec.j);
-            ((EschPoint *)vB)->z = cpt->z + ((h-hgt) * hvec.k);
+            ((EschPoint *)vB)->x = cpt->x + ((h-(hgt+0.5f)) * hvec.i);
+            ((EschPoint *)vB)->y = cpt->y + ((h-(hgt+0.5f)) * hvec.j);
+            ((EschPoint *)vB)->z = cpt->z + ((h-(hgt+0.5f)) * hvec.k);
             if (!dlevel && lflags & ESCH_TERNEX_SLIP_ON)
             {
                 h += TreeHgtRandomizationMatrix[1][(rect->y+i+1)&3];
@@ -3035,8 +3078,8 @@ void EschTerrainTreeTop::draw_tree_skirt (VngoRect *rect, int dlevel, dword lfla
 
             if (lflags & ESCH_TERNEX_SLIP_ON)
             {
-                face[0].txt = ESCH_TREETEX_TREESOLID;
-                face[1].txt = ESCH_TREETEX_TREESOLID;
+                face[0].txt = ESCH_TREETEX_TREEBACK;
+                face[1].txt = ESCH_TREETEX_TREEBACK;
             }
             else
             {
@@ -3114,9 +3157,9 @@ void EschTerrainTreeTop::draw_tree_skirt (VngoRect *rect, int dlevel, dword lfla
         for (i=0; i <= temp_len; i++)
         {   // Setup the first line A
             float h = htable[*ptr];
-            ((EschPoint *)vB)->x = cpt->x + ((h-hgt) * hvec.i);
-            ((EschPoint *)vB)->y = cpt->y + ((h-hgt) * hvec.j);
-            ((EschPoint *)vB)->z = cpt->z + ((h-hgt) * hvec.k);
+            ((EschPoint *)vB)->x = cpt->x + ((h-(hgt+0.5f)) * hvec.i);
+            ((EschPoint *)vB)->y = cpt->y + ((h-(hgt+0.5f)) * hvec.j);
+            ((EschPoint *)vB)->z = cpt->z + ((h-(hgt+0.5f)) * hvec.k);
             if (!dlevel && lflags & ESCH_TERNEX_SLIP_ON)
             {
                 h += TreeHgtRandomizationMatrix[(rect->x+rect->dx-1)&3][(rect->y+i+1)&3];
@@ -3167,8 +3210,8 @@ void EschTerrainTreeTop::draw_tree_skirt (VngoRect *rect, int dlevel, dword lfla
 
             if (lflags & ESCH_TERNEX_SLIP_ON)
             {
-                face[0].txt = ESCH_TREETEX_TREESOLID;
-                face[1].txt = ESCH_TREETEX_TREESOLID;
+                face[0].txt = ESCH_TREETEX_TREEBACK;
+                face[1].txt = ESCH_TREETEX_TREEBACK;
             }
             else
             {
@@ -3208,7 +3251,9 @@ void EschTerrainTreeTop::draw_tree_skirt (VngoRect *rect, int dlevel, dword lfla
 }
 
 
-
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// EschTerrainTreeTop - esch_find_draw_volume
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 int EschTerrainTreeTop::esch_find_draw_volume(EschVector *pts)
 {
     EschCamera             *cam;
@@ -3416,8 +3461,9 @@ int EschTerrainTreeTop::esch_find_draw_volume(EschVector *pts)
 }
 
 
-
-
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// EschTerrainTreeTop - draw_slip_endcap
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 void EschTerrainTreeTop::draw_slip_endcap (VngoRect *rect, dword type, int dlevel, dword lflags)
 {
     if (type & ESCH_TERNEX_ENDCAP_NONE)
@@ -3507,9 +3553,9 @@ void EschTerrainTreeTop::draw_slip_endcap (VngoRect *rect, dword type, int dleve
     cpt.z = origin.z + float (corner.y << scaleshift);
     cpt.transform (&cam->eye.iorient, &cpt);
 
-    ((EschPoint *)&points[0])->x = cpt.x + ((h-hgt) * hvec.i);
-    ((EschPoint *)&points[0])->y = cpt.y + ((h-hgt) * hvec.j);
-    ((EschPoint *)&points[0])->z = cpt.z + ((h-hgt) * hvec.k);
+    ((EschPoint *)&points[0])->x = cpt.x + ((h-(hgt+0.5f)) * hvec.i);
+    ((EschPoint *)&points[0])->y = cpt.y + ((h-(hgt+0.5f)) * hvec.j);
+    ((EschPoint *)&points[0])->z = cpt.z + ((h-(hgt+0.5f)) * hvec.k);
 
     if ((corner.x != left)
         && (corner.y != top))
@@ -3556,9 +3602,9 @@ void EschTerrainTreeTop::draw_slip_endcap (VngoRect *rect, dword type, int dleve
     cpt.y = origin.y;
     cpt.z = origin.z + float (corner.y << scaleshift);
     cpt.transform (&cam->eye.iorient, &cpt);
-    ((EschPoint *)&points[1])->x = cpt.x + ((h-hgt) * hvec.i);
-    ((EschPoint *)&points[1])->y = cpt.y + ((h-hgt) * hvec.j);
-    ((EschPoint *)&points[1])->z = cpt.z + ((h-hgt) * hvec.k);
+    ((EschPoint *)&points[1])->x = cpt.x + ((h-(hgt+0.5f)) * hvec.i);
+    ((EschPoint *)&points[1])->y = cpt.y + ((h-(hgt+0.5f)) * hvec.j);
+    ((EschPoint *)&points[1])->z = cpt.z + ((h-(hgt+0.5f)) * hvec.k);
     points[1].shade = sptr->shd;
     if (((corner.x+1) != right)
         && (corner.y != top))
@@ -3602,9 +3648,9 @@ void EschTerrainTreeTop::draw_slip_endcap (VngoRect *rect, dword type, int dleve
     cpt.y = origin.y;
     cpt.z = origin.z + float ((corner.y+corner.dy) << scaleshift);
     cpt.transform (&cam->eye.iorient, &cpt);
-    ((EschPoint *)&points[2])->x = cpt.x + ((h-hgt) * hvec.i);
-    ((EschPoint *)&points[2])->y = cpt.y + ((h-hgt) * hvec.j);
-    ((EschPoint *)&points[2])->z = cpt.z + ((h-hgt) * hvec.k);
+    ((EschPoint *)&points[2])->x = cpt.x + ((h-(hgt+0.5f)) * hvec.i);
+    ((EschPoint *)&points[2])->y = cpt.y + ((h-(hgt+0.5f)) * hvec.j);
+    ((EschPoint *)&points[2])->z = cpt.z + ((h-(hgt+0.5f)) * hvec.k);
     points[2].shade = sptr->shd;
     if (((corner.x+1) != right)
         && ((corner.y+1) != bottom))
@@ -3648,9 +3694,9 @@ void EschTerrainTreeTop::draw_slip_endcap (VngoRect *rect, dword type, int dleve
     cpt.y = origin.y;
     cpt.z = origin.z + float ((corner.y+corner.dy) << scaleshift);
     cpt.transform (&cam->eye.iorient, &cpt);
-    ((EschPoint *)&points[3])->x = cpt.x + ((h-hgt) * hvec.i);
-    ((EschPoint *)&points[3])->y = cpt.y + ((h-hgt) * hvec.j);
-    ((EschPoint *)&points[3])->z = cpt.z + ((h-hgt) * hvec.k);
+    ((EschPoint *)&points[3])->x = cpt.x + ((h-(hgt+0.5f)) * hvec.i);
+    ((EschPoint *)&points[3])->y = cpt.y + ((h-(hgt+0.5f)) * hvec.j);
+    ((EschPoint *)&points[3])->z = cpt.z + ((h-(hgt+0.5f)) * hvec.k);
     points[3].shade = sptr->shd;
     if (((corner.x) != left)
         && ((corner.y+1) != bottom))
@@ -3734,10 +3780,10 @@ void EschTerrainTreeTop::draw_slip_endcap (VngoRect *rect, dword type, int dleve
     }
     else
     {
-        face[0].txt = ESCH_TREETEX_TREESOLID;
-        face[1].txt = ESCH_TREETEX_TREESOLID;
-        face[2].txt = ESCH_TREETEX_TREESOLID;
-        face[3].txt = ESCH_TREETEX_TREESOLID;
+        face[0].txt = ESCH_TREETEX_TREEBACK;
+        face[1].txt = ESCH_TREETEX_TREEBACK;
+        face[2].txt = ESCH_TREETEX_TREEBACK;
+        face[3].txt = ESCH_TREETEX_TREEBACK;
     }
     if (type & ESCH_TERNEX_VERTICAL_TRANS)
     {
@@ -3748,10 +3794,10 @@ void EschTerrainTreeTop::draw_slip_endcap (VngoRect *rect, dword type, int dleve
     }
     else
     {
-        face[4].txt = ESCH_TREETEX_TREESOLID;
-        face[5].txt = ESCH_TREETEX_TREESOLID;
-        face[6].txt = ESCH_TREETEX_TREESOLID;
-        face[7].txt = ESCH_TREETEX_TREESOLID;
+        face[4].txt = ESCH_TREETEX_TREEBACK;
+        face[5].txt = ESCH_TREETEX_TREEBACK;
+        face[6].txt = ESCH_TREETEX_TREEBACK;
+        face[7].txt = ESCH_TREETEX_TREEBACK;
     }
     for (i=0; i<8; i+=2)
     {
@@ -3796,6 +3842,311 @@ void EschTerrainTreeTop::draw_slip_endcap (VngoRect *rect, dword type, int dleve
     ec.pop();
 }
 
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// EschTerrainTreeTop - check_LOS
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+int EschTerrainTreeTop::check_LOS (EschPoint *pt1, EschPoint *pt2,
+                           int precision,float *ndist) const
+{
+    // Check rect edges for collisions and use any points found in the check
+    // We can only collide with 2 lines.
+    // First step, figure out which 2.
+    // Second step, figure out the x or y where the lines are crossed
+    // Third, decide if new x,y point is on the rect edge or off
+    // If third passes,
+    //  Fourth build magnitude from starting point to ending point
+    // If new mag is < ndist,
+    //  ndist = new mag
+
+    // check 2 points against 4 edges to figure quadrants
+    // we can use this to do a trivial clip
+
+    int q1, q2;
+    if (pt1->x < left)
+    {
+        if (pt1->y < top)
+        {
+            q1 = 1;
+        }
+        else if (pt1->y > bottom)
+        {
+            q1 = 7;
+        }
+        else
+        {
+            q1 = 4;
+        }
+    }
+    else if (pt1->x > right)
+    {
+        if (pt1->y < top)
+        {
+            q1 = 3;
+        }
+        else if (pt1->y > bottom)
+        {
+            q1 = 9;
+        }
+        else
+        {
+            q1 = 6;
+        }
+    }
+    else
+    {
+        if (pt1->y < top)
+        {
+            q1 = 2;
+        }
+        else if (pt1->y > bottom)
+        {
+            q1 = 8;
+        }
+        else
+        {
+            q1 = 5;
+        }
+    }
+
+    if (pt2->x < left)
+    {
+        if (pt2->y < top)
+        {
+            q2 = 1;
+        }
+        else if (pt2->y > bottom)
+        {
+            q2 = 7;
+        }
+        else
+        {
+            q2 = 4;
+        }
+    }
+    else if (pt2->x > right)
+    {
+        if (pt2->y < top)
+        {
+            q2 = 3;
+        }
+        else if (pt2->y > bottom)
+        {
+            q2 = 9;
+        }
+        else
+        {
+            q2 = 6;
+        }
+    }
+    else
+    {
+        if (pt2->y < top)
+        {
+            q2 = 2;
+        }
+        else if (pt2->y > bottom)
+        {
+            q2 = 8;
+        }
+        else
+        {
+            q2 = 5;
+        }
+    }
+
+    // If both points are above, below, left, or right, its clipped
+    if ((q1 < 4 && q2 < 4)
+        || (q1 > 6 && q2 > 6)
+        || ((q1 == 1 || q1 == 4 || q1 == 7)
+            && (q2 == 1 || q2 == 4 || q2 == 7))
+        || ((q1 == 3 || q1 == 6 || q1 == 9)
+            && (q2 == 3 || q2 == 6 || q2 == 9)))
+    {
+        return 1;
+    }
+
+    // Now for a little less trivial clip
+
+
+
+
+//ÄÄÄ Form vector
+    VngoRect    temp_rect (left<<scaleshift,
+                           top<<scaleshift,
+                           (right - left)<<scaleshift,
+                           (bottom - top)<<scaleshift);
+    EschVector  temp (pt1->x - pt2->x, pt1->y - pt2->y, pt1->z - pt2->z);
+
+    float       dist = temp.magnitude();
+
+//ÄÄÄ Determine step count and size
+    long count;
+    if (precision > 0)
+    {
+        count = (long)(dist / float(precision)) + 1;
+    }
+    else
+    {
+        count = (long)(dist / scale) + 1;
+    }
+
+    float xstep = (pt2->x - pt1->x) / float(count);
+    float ystep = (pt2->y - pt1->y) / float(count);
+    float zstep = (pt2->z - pt1->z) / float(count);
+
+//ÄÄÄ Perform checks
+    float curx = pt1->x;
+    float cury = pt1->y;
+    float curz = pt1->z;
+
+    for (long i=0; i < count; i++)
+    {
+        if (temp_rect.point_in(int (curx), int (curz)))
+        {
+            float nheight = get_height(curx,curz);
+            if (nheight > cury)
+            {
+                if (ndist != NULL)
+                {
+                    EschVector tvect(curx-pt1->x,nheight-pt1->y,curz-pt1->z);
+                    *ndist = tvect.magnitude();
+                }
+                return 0;
+            }
+        }
+        curx += xstep;
+        cury += ystep;
+        curz += zstep;
+    }
+
+
+    return 1;
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// EschTerrainTreeTop - get_height
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+float EschTerrainTreeTop::get_height(float x, float z) const
+{
+    float   x0,y0,z0,a1,a2,b1,b2,c1,c2,t1,t2,y;
+
+    float _x = x - origin.x;
+    float _z = z - origin.z;
+
+    assertMyth("EschTerrain::get_height needs height-field information",
+               hfield && htable);
+
+    assertMyth("EschTerrain:get_height needs positive scales",
+               scale > 0);
+
+    int     lx = (int)_x >> scaleshift;
+    int     lz = (int)_z >> scaleshift;
+
+    float   wx = float(lx << scaleshift);
+    float   wz = float(lz << scaleshift);
+
+    x = _x - wx;
+    z = _z - wz;
+
+//ÄÄÄÄ Check that point is on map
+    if ((lx < 0)
+        || (lz < 0)
+        || (lx >= width)
+        || (lz >= depth))
+        return 0;
+
+    byte *ptr = &hfield[( lz * width ) + lx];
+
+//ÄÄÄÄ Compute parameters t1 and t2, and assign b1/b2
+
+    if (!((lx ^ lz) & 0x1)) // determine which triangle pattern to follow
+    {                       // __
+                            // |/  or /|
+        c2 = scale;
+        if (x < z)
+        {
+            x0 = 0;
+            y0 = htable[*ptr];
+            z0 = 0;
+            a1 = 0;
+            b1 = htable[*(ptr+width)] - y0;
+            b2 = htable[*(ptr+width+1)] - y0;
+            c1 = scale;
+            a2 = scale;
+
+            t2 = (x0 - x) / -a2;
+
+            t1 = (z0 + (c2 * t2) - z) / -c1;
+        }
+        else
+        {
+            x0 = 0;
+            y0 = htable[*ptr];
+            z0 = 0;
+            a1 = scale;
+            a2 = scale;
+            b1 = htable[*(ptr+width+1)] - y0;
+            b2 = htable[*(ptr+1)] - y0;
+            c1 = scale;
+            c2 = 0;
+
+            t1 = (z0 -z) / -c1;
+
+            t2 = (x0 + (a1 * t1) - x) / -a2;
+        }
+    }
+    else
+    {                       // |\
+                            // ---
+        c2 = scale;
+
+        if ((x+z) > scale)
+        {
+            x0 = scale;
+            y0 = htable[*(ptr+width+1)];
+            z0 = scale;
+            a1 = 0;
+            a2 = -scale;
+            b1 = htable[*(ptr+1)] - y0;
+            b2 = htable[*(ptr+width)] - y0;
+            c1 = -scale;
+            c2 = 0;
+
+            t1 = (z0 -z) / -c1;
+
+            t2 = (x0 + (a1 * t1) - x) / -a2;
+        }
+        else
+        {
+            x0 = 0;
+            y0 = htable[*ptr];
+            z0 = 0;
+            a1 = 0;
+            a2 = scale;
+            b1 = htable[*(ptr+width)] - y0;
+            b2 = htable[*(ptr+1)] - y0;
+            c1 = scale;
+            c2 = 0;
+
+            t1 = (z0 -z) / -c1;
+
+
+            t2 = (x0 + (a1 * t1) - x) / -a2;
+        }
+    }
+
+//ÄÄÄÄ Compute y
+    y = y0 + (b1 * t1) + (b2 * t2);
+
+    return (y + origin.y + hgt);
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// EschTerrainTreeTop - update_lods
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 void EschTerrainTreeTop::update_lods()
 {
     dlevels = terr->get_dlevels();
@@ -3805,6 +4156,68 @@ void EschTerrainTreeTop::update_lods()
     max_perspective_lod = terr->get_perspective_lod();
     max_smooth_lod = terr->get_smooth_lod();
     start_dlevel = terr->get_start_lod();
+
+    if (terr->flags & ESCH_TRN_LOD)
+    {
+        flags |= ESCH_TRN_LOD;
+    }
+    else
+    {
+        flags &= ~ESCH_TRN_LOD;
+    }
+}
+
+
+
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°°°±  Utility Routines  ±°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// EschTerrainTreeTop - get_exterior_rect
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+void EschTerrainTreeTop::get_exterior_rect (VngoRect *rect)
+{
+    rect->x = left;
+    rect->y = top;
+    rect->dx = right - left;
+    rect->dy = bottom - top;
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// EschTerrainTreeTop - get_exterior_rect_world
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+void EschTerrainTreeTop::get_exterior_rect_world (float *x, float *z, float *dx, float *dz)
+{
+    *x = float(left << terr->scaleshift);
+    *z = float(top << terr->scaleshift);
+    *dx = float((right-left) << terr->scaleshift);
+    *dz = float((bottom-top) << terr->scaleshift);
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// EschTerrainTreeTop - get_interior_rect
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+void EschTerrainTreeTop::get_interior_rect (VngoRect *rect)
+{
+    rect->x = left + 1;
+    rect->y = top + 1;
+    rect->dx = (right-left) - 2;
+    rect->dy = (bottom-top) - 2;
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// EschTerrainTreeTop - get_interior_rect_world
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+void EschTerrainTreeTop::get_interior_rect_world (float *x, float *z, float *dx, float *dz)
+{
+    *x = float((left + 1) << terr->scaleshift);
+    *z = float((top + 1) << terr->scaleshift);
+    *dx = float(((right-left) - 2) << terr->scaleshift);
+    *dz = float(((bottom-top) - 2) << terr->scaleshift);
 }
 
 //°±² End of module - estrtop.cpp ²±°

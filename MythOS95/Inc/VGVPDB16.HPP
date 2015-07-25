@@ -25,6 +25,8 @@
 //
 //ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд
 //
+// Created by Tim Little
+//
 // vgvpdb16.hpp
 //
 // Contains the 15/16-bit Windows DIB viewport class definition
@@ -59,12 +61,18 @@
 class VngoVportDB16 : public VngoVVport16
 {
 public:
+    //дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+    // Constructor/Destructors                                              Ё
+    //дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
     VngoVportDB16 () {};
     VngoVportDB16 (long width, long height, void *vbptr, void *zbptr,
                   VngoPal *my_pal,dword flags,int _pitch=0, int _zpitch=0);
 
     virtual ~VngoVportDB16();
 
+    //дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+    // Operations                                                           Ё
+    //дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
     VNGError init (long width, long height, void *vbptr, void *zbptr,
                    VngoPal *my_pal,dword flags, int _pitch=0, int _zpitch=0);
 };

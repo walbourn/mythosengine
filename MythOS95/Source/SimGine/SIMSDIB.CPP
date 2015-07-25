@@ -89,9 +89,19 @@ SimScreenDIB::~SimScreenDIB()
 SimScreen::error_codes SimScreenDIB::init (ushort w, ushort h,
                                            ushort bd, dword flags)
 {
-    BYTE *bits;
-
     assertMyth("SimScreenDIB::init needs SimApp", SimApp != 0);
+
+    release();
+
+//ÄÄÄ Verify bit-depth
+    switch (bd)
+    {
+        case 8:
+        case 15:
+            break;
+        default:
+            return ERROR_INVALIDPARMS;
+    }
 
 //ÄÄÄ Call base
     error_codes err = SimScreen::init(w,h,bd,flags);
@@ -103,67 +113,69 @@ SimScreen::error_codes SimScreenDIB::init (ushort w, ushort h,
     if (!vgs)
         return ERROR_NOMEMORY;
 
+    if (vgs->get_initstate())
+    {
+        release();
+        return ERROR_SCNRMNGRINIT;
+    }
+
 //ÄÄÄ Create palette
-    switch(bit_depth)
+    switch(bd)
     {
         case 8:
             pal = new VngoPal8;
             if (!pal)
             {
-                err = ERROR_NOMEMORY;
-                goto leave_error;
+                release();
+                return ERROR_NOMEMORY;
             }
             if (((VngoPal8*)pal)->init(0) != 0)
             {
-                err = ERROR_PALINIT;
-                goto leave_error;
+                release();
+                return ERROR_PALINIT;
             }
             break;
         case 15:
             pal = new VngoPal15;
             if (!pal)
             {
-                err = ERROR_NOMEMORY;
-                goto leave_error;
+                release();
+                return ERROR_NOMEMORY;
             }
             if (((VngoPal15*)pal)->init(0) != 0)
             {
-                err = ERROR_PALINIT;
-                goto leave_error;
-            }
-            break;
-        case 16:
-            pal = new VngoPal16;
-            if (!pal)
-            {
-                err = ERROR_NOMEMORY;
-                goto leave_error;
-            }
-            if (((VngoPal16*)pal)->init(0) != 0)
-            {
-                err = ERROR_PALINIT;
-                goto leave_error;
+                release();
+                return ERROR_PALINIT;
             }
             break;
         default:
-            err = ERROR_MODENOTSUPP;
-            goto leave_error;
+            release();
+            return ERROR_INVALIDPARMS;
     }
 
 //ÄÄÄ Setup mode
     {
-        int tbd = 8;
-        if (bit_depth != 8)
-            tbd = 16;
+        dword init_flags = 0;
 
-        vgs->set_mode (width, height, tbd, pal, (flags & FULLSCREEN));
+        if (flags & FULLSCREEN)
+            init_flags |= VNGO_SET_RESOLUTION;
+
+        int cdepth = 8;
+        if (bd != 8)
+            cdepth = 16;
+
+        if (vgs->set_mode (w, h, cdepth, pal, init_flags))
+        {
+            release();
+            return ERROR_MODEFAIL;
+        }
     }
 
-    bits = ((VngoDIB*)vgs)->gmap;
+    BYTE *bits = ((VngoDIB*)vgs)->gmap;
     if (!bits)
     {
-        err = ERROR_MODEFAIL;
-        goto leave_error;
+        release();
+        return ERROR_MODEFAIL;
     }
 
     if (w == 320 && h == 240 && (flags & FULLSCREEN))
@@ -189,56 +201,37 @@ SimScreen::error_codes SimScreenDIB::init (ushort w, ushort h,
 
         if (err != DD_OK)
         {
-            err = ERROR_MODENOTSUPP;
-            goto leave_error;
+            release();
+            return ERROR_MODENOTSUPP;
         }
         else
             primary->Release();
     }
 
 //ÄÄÄ Setup viewport
-    if (bit_depth == 8)
+    if (bd == 8)
     {
-        gvport = new VngoVportDB8 (width, height, bits, NULL, pal, 0);
+        gvport = new VngoVportDB8 (w, h, bits, NULL, pal, 0);
     }
     else
     {
-        gvport = new VngoVportDB16 (width, height, bits, NULL, pal, 0);
+        gvport = new VngoVportDB16 (w, h, bits, NULL, pal, 0);
     }
-    if (!bits || !gvport)
+    if (!gvport)
     {
-        err = ERROR_NOMEMORY;
-        goto leave_error;
+        release();
+        return ERROR_NOMEMORY;
     }
 
     if (gvport->get_init_state())
     {
-        err = ERROR_VPORTINIT;
-        goto leave_error;
+        release();
+        return ERROR_VPORTINIT;
     }
 
     clear();
 
     return ERROR_NONE;
-
-leave_error: ;
-    if (gvport)
-    {
-        delete gvport;
-        gvport=0;
-    }
-    if (pal)
-    {
-        delete pal;
-        pal=0;
-    }
-    if (vgs)
-    {
-        delete vgs;
-        vgs=0;
-    }
-
-    return err;
 }
 
 
@@ -264,7 +257,9 @@ VngoVport *SimScreenDIB::create_subviewport(VngoRect &srect, dword flags)
     }
     else
     {
-        dword t = dword(gvport->vbuff.scrn_ptr) + (srect.x << 1) + gvport->vbuff.ytable[srect.y];
+        dword t = dword(gvport->vbuff.scrn_ptr)
+                  + (srect.x << 1)
+                  + gvport->vbuff.ytable[srect.y];
         vport = new VngoVportDB16 (srect.dx, srect.dy,
                                   (void*)t,
                                   NULL, pal, flags, gvport->vbuff.pitch);

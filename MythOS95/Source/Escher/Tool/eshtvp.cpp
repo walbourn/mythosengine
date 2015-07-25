@@ -60,6 +60,8 @@
 static char BASED_CODE THIS_FILE[] = __FILE__;
 #endif
 
+extern ulong BitDepth;
+
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // ToolVPort                                                                ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
@@ -105,6 +107,7 @@ ToolVPort::ToolVPort()
     cflags = ESCH_CAM_MODELSPACE
              | ESCH_CAM_TEXTURED
              | ESCH_CAM_PERSPECTIVE
+             | ESCH_CAM_ALPHA
              | ESCH_CAM_BACKCULL
              | ESCH_CAM_SHADE_WIRE
              | ESCH_CAM_SHADE_SOLID
@@ -149,7 +152,11 @@ void ToolVPort::setup_vport(int width, int height)
 
     ASSERT(!(width & 0x3));
 
-    bmi = (LPBITMAPINFO) ivory_alloc (sizeof(BITMAPINFOHEADER) + 256*sizeof(WORD));
+    ulong ihsize = sizeof(BITMAPINFOHEADER);
+    if (BitDepth == 8)
+        ihsize += 256*sizeof(WORD);
+
+    bmi = (LPBITMAPINFO) ivory_alloc (ihsize);
     ASSERT(bmi);
 
     memset(bmi, 0, sizeof(*bmi));
@@ -157,25 +164,53 @@ void ToolVPort::setup_vport(int width, int height)
     bmi->bmiHeader.biWidth        = width;
     bmi->bmiHeader.biHeight       = -height;
     bmi->bmiHeader.biPlanes       = 1;
-    bmi->bmiHeader.biBitCount     = 8;
     bmi->bmiHeader.biCompression  = BI_RGB;
-    bmi->bmiHeader.biClrUsed      = 256;
-    bmi->bmiHeader.biClrImportant = 256;
-
-    gmap = new BYTE [width * height];
-    ASSERT(gmap);
-
-    for(int i=0; i < 256; i++)
-    {
-        ((WORD *)bmi->bmiColors)[i] = (WORD)i;
-
-    }
+    bmi->bmiHeader.biClrUsed      = 0;
+    bmi->bmiHeader.biClrImportant = 0;
 
     ToolDoc *pDoc = (ToolDoc*) ((CView *) GetParent())->GetDocument();
     ASSERT_VALID(pDoc);
 
-    gvp = new VngoVportDB8(width,height,gmap,NULL, &pDoc->palette,
-                           VNGO_ZBUFFER_DEV);
+    ASSERT(pDoc->palette != 0);
+
+    switch (BitDepth)
+    {
+        case 15:
+            {
+                ASSERT(pDoc->palette && (pDoc->palette->flags & VNGO_15BIT));
+
+                bmi->bmiHeader.biBitCount     = 16;
+
+                gmap = new BYTE [(((width*2)+3) & ~0x3)*height];
+            }
+            break;
+        default:
+            ASSERT(pDoc->palette && (pDoc->palette->flags & VNGO_8BIT));
+
+            bmi->bmiHeader.biBitCount     = 8;
+
+            for(int i=0; i < 256; i++)
+            {
+                ((WORD *)bmi->bmiColors)[i] = (WORD)i;
+            }
+
+            gmap = new BYTE [width * height];
+            break;
+    }
+
+    ASSERT(gmap);
+
+    switch (BitDepth)
+    {
+        case 15:
+            gvp = new VngoVportDB16(width,height,gmap,NULL, pDoc->palette,
+                                    VNGO_ZBUFFER_DEV);
+            break;
+        default:
+            gvp = new VngoVportDB8(width,height,gmap,NULL, pDoc->palette,
+                                   VNGO_ZBUFFER_DEV);
+            break;
+    }
     ASSERT(gvp);
 }
 
@@ -219,6 +254,11 @@ void ToolVPort::SetCamera(EschCameraEx *c)
 
     cam->attach(gvp);
     cam->set_flags(cflags);
+
+    if (cflags & ESCH_CAM_SORT)
+        gvp->zbuffer_off();
+    else
+        gvp->zbuffer_on();
 }
 
 
@@ -232,8 +272,9 @@ void ToolVPort::Render(void)
 
     if (!cam)
     {
+        ASSERT(pDoc->palette != 0);
         if (gvp)
-            gvp->reset(pDoc->palette.get_index((VngoColor24bit)0));
+            gvp->reset(pDoc->palette->get_index((VngoColor24bit)0));
         return;
     }
 
@@ -372,12 +413,21 @@ void ToolVPort::OnPaint()
     ToolDoc *pDoc = (ToolDoc*) ((CView *) GetParent())->GetDocument();
     ASSERT_VALID(pDoc);
 
-    SelectPalette(dc.m_hDC,pDoc->hpal,0);
-    dc.RealizePalette ();
+    if (BitDepth == 8)
+    {
+        SelectPalette(dc.m_hDC,pDoc->hpal,0);
+        dc.RealizePalette ();
+    }
 
-    SetDIBitsToDevice(dc.m_hDC, 0, 0, rect.right, rect.bottom,
+    int t=SetDIBitsToDevice(dc.m_hDC, 0, 0, rect.right, rect.bottom,
                       0, 0, 0, rect.bottom,
-                      gmap, bmi, DIB_PAL_COLORS);
+                      gmap, bmi, (BitDepth == 8) ? DIB_PAL_COLORS : DIB_RGB_COLORS);
+
+    if (!t)
+    {
+        MessageBox("SetDIBits returned error", MB_OK);
+        ExitProcess(1);
+    }
 }
 
 
@@ -1331,6 +1381,8 @@ void ToolVPort::OnRButtonDown(UINT nFlags, CPoint point)
     modeMenu.AppendMenu(MF_STRING, ID_VIEW_RND_BACKFACE, "Backface");
     modeMenu.AppendMenu(MF_STRING, ID_VIEW_RND_TEXTURES, "Textures");
     modeMenu.AppendMenu(MF_STRING, ID_VIEW_RND_PERSPECTIVE, "Perspective");
+    modeMenu.AppendMenu(MF_STRING, ID_VIEW_RND_ALPHA, "Alpha");
+    modeMenu.AppendMenu(MF_STRING, ID_VIEW_RND_SORT, "Sort");
 
     //ÄÄÄ Show Submenu
     CMenu   showMenu;

@@ -116,11 +116,9 @@ VNGError VngoD3DTexture3D::init(VngoTexture *_src,VngoPal *_pal)
 
     VngoDirect3D    *d3dscreen = (VngoDirect3D*)VgSystem.D3DTx->screen;
 
-    palette = _pal;
+    palette = 0;
     ref     = _src;
     chandle = new VngoCacheHndl;
-    next = ref->vtex3d;
-    ref->vtex3d = this;
 
     assert(VgSystem.D3DTx != NULL);
     VgSystem.D3DTx->add(chandle);
@@ -138,6 +136,7 @@ VNGError VngoD3DTexture3D::init(VngoTexture *_src,VngoPal *_pal)
     {
         bpp = 16;
     }
+
 
     DDSURFACEDESC   ddsd;
     ZeroMemory(&ddsd,sizeof(ddsd));
@@ -185,20 +184,126 @@ VNGError VngoD3DTexture3D::init(VngoTexture *_src,VngoPal *_pal)
         DeviceSurface->AddRef();
     }
 
-    if (palette == NULL)
+    VNGError err = load_texture();
+    if (err != VNGO_NO_ERROR)
     {
-        return VNGO_INTERNAL_ERROR;
+        return err;
     }
-    else
+
+    IDirect3DTexture2   *Texture;
+
+    DeviceSurface->QueryInterface(IID_IDirect3DTexture2, (void**)&Texture);
+
+    Texture->GetHandle(d3dscreen->d3dDevice,&handle);
+    Texture->Release();
+
+    restore();
+
+    next = ref->vtex3d;
+    ref->vtex3d = this;
+
+    return VNGO_NO_ERROR;
+}
+
+VNGError VngoD3DTexture3D::ready_texture()
+{
+    if (flags & VNGO_TEXTURE3D_DIRTY && DeviceSurface != NULL && handle != NULL)
     {
+        load_texture();
+        restore();
+    }
+    else if (DeviceSurface == NULL || handle == NULL)
+    {
+         // Here is where we find a new device surface and set that up.
+         return VNGO_NOT_SUPPORTED;
+
+         if (flags & VNGO_TEXTURE3D_DIRTY)
+         {
+            load_texture();
+         }
+         restore();
+    }
+    return VNGO_NO_ERROR;
+}
+
+VNGError VngoD3DTexture3D::reinit(VngoTexture *_src,VngoPal *_pal)
+{
+    return VNGO_NO_ERROR;
+}
+
+void VngoD3DTexture3D::release()
+{
+    if (MemorySurface == DeviceSurface)
+    {
+        MemorySurface = NULL;
+    }
+    if (MemorySurface)
+    {
+        MemorySurface->Release();
+        MemorySurface = NULL;
+    }
+    if (DeviceSurface)
+    {
+        DeviceSurface->Release();
+        DeviceSurface = NULL;
+    }
+#if 0
+    if (pal)
+    {
+        pal->Release();
+        pal = NULL;
+    }
+#endif
+    handle = NULL;
+
+    if (chandle)
+    {
+        delete chandle;
+        chandle = NULL;
+    }
+    return;
+}
+
+VNGError VngoD3DTexture3D::restore()
+{
+    HRESULT err;
+    IDirect3DTexture2   *MemTexture;
+    IDirect3DTexture2   *DevTexture;
+
+    if (DeviceSurface == MemorySurface)
+        return VNGO_NO_ERROR;
+
+    if (DeviceSurface->Restore() != DD_OK)
+        return VNGO_INTERNAL_ERROR;
+
+    DeviceSurface->QueryInterface(IID_IDirect3DTexture2, (void**)&DevTexture);
+    MemorySurface->QueryInterface(IID_IDirect3DTexture2, (void**)&MemTexture);
+
+    err = DevTexture->Load(MemTexture);
+
+    DevTexture->Release();
+    MemTexture->Release();
+
+    return VNGO_NO_ERROR;
+};
+
+VNGError    VngoD3DTexture3D::load_texture()
+{
+    VngoDirect3D    *d3dscreen = (VngoDirect3D*)VgSystem.D3DTx->screen;
+
+    if (palette != ref->pal_ptr)
+    {
+        palette = ref->pal_ptr;
         palette->create_ddpal(d3dscreen->dd,&pal);
         MemorySurface->SetPalette(pal);
         DeviceSurface->SetPalette(pal);
     }
 
-
     int fail_safe=0;
     HRESULT hr = DDERR_SURFACELOST; // prime it so it will loop at least once.
+    DDSURFACEDESC   ddsd;
+    ZeroMemory(&ddsd,sizeof(ddsd));
+    ddsd.dwSize = sizeof(ddsd);
 
     do
     {
@@ -236,8 +341,15 @@ VNGError VngoD3DTexture3D::init(VngoTexture *_src,VngoPal *_pal)
             int count =(ref->width * ref->height);
             for (int i=0;i < count; i++)
             {
-                VngoColor24bit tclr = palette->get_RGB(*sptr);
-                *dptr = tclr.compress16();
+                if (*sptr == 255)
+                {
+                    *dptr = 0xf81f;
+                }
+                else
+                {
+                    VngoColor24bit tclr = palette->get_RGB(*sptr);
+                    *dptr = tclr.compress16();
+                }
                 sptr++;
                 dptr++;
             }
@@ -257,8 +369,15 @@ VNGError VngoD3DTexture3D::init(VngoTexture *_src,VngoPal *_pal)
             int count =(ref->width * ref->height);
             for (int i=0;i < count; i++)
             {
-                VngoColor24bit tclr = palette->get_RGB(*sptr);
-                *dptr = tclr.compress();
+                if (*sptr == 255)
+                {
+                    *dptr = 0x7c1f;
+                }
+                else
+                {
+                    VngoColor24bit tclr = palette->get_RGB(*sptr);
+                    *dptr = tclr.compress();
+                }
                 sptr++;
                 dptr++;
             }
@@ -267,6 +386,7 @@ VNGError VngoD3DTexture3D::init(VngoTexture *_src,VngoPal *_pal)
         {
             // we don't readily support this.
             release();
+            MemorySurface->Unlock(NULL);
             return VNGO_INTERNAL_ERROR;
         }
     }
@@ -288,75 +408,8 @@ VNGError VngoD3DTexture3D::init(VngoTexture *_src,VngoPal *_pal)
 
 
     MemorySurface->Unlock(NULL);
-
-    IDirect3DTexture2   *Texture;
-
-    DeviceSurface->QueryInterface(IID_IDirect3DTexture2, (void**)&Texture);
-
-    Texture->GetHandle(d3dscreen->d3dDevice,&handle);
-    Texture->Release();
-
-    restore();
-
     return VNGO_NO_ERROR;
 }
-
-VNGError VngoD3DTexture3D::reinit(VngoTexture *_src,VngoPal *_pal)
-{
-    return VNGO_NO_ERROR;
-}
-
-void VngoD3DTexture3D::release()
-{
-    if (MemorySurface == DeviceSurface)
-    {
-        MemorySurface = NULL;
-    }
-    if (MemorySurface)
-    {
-        MemorySurface->Release();
-        MemorySurface = NULL;
-    }
-    if (DeviceSurface)
-    {
-        DeviceSurface->Release();
-        DeviceSurface = NULL;
-    }
-    if (pal)
-    {
-        pal->Release();
-        pal = NULL;
-    }
-    handle = NULL;
-
-    if (chandle)
-        delete chandle;
-    return;
-}
-
-VNGError VngoD3DTexture3D::restore()
-{
-    HRESULT err;
-    IDirect3DTexture2   *MemTexture;
-    IDirect3DTexture2   *DevTexture;
-
-    if (DeviceSurface == MemorySurface)
-        return VNGO_NO_ERROR;
-
-    if (DeviceSurface->Restore() != DD_OK)
-        return VNGO_INTERNAL_ERROR;
-
-    DeviceSurface->QueryInterface(IID_IDirect3DTexture2, (void**)&DevTexture);
-    MemorySurface->QueryInterface(IID_IDirect3DTexture2, (void**)&MemTexture);
-
-    err = DevTexture->Load(MemTexture);
-
-    DevTexture->Release();
-    MemTexture->Release();
-
-    return VNGO_NO_ERROR;
-};
-
 
 struct FindTextureData
 {

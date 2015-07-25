@@ -25,6 +25,8 @@
 //
 //컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
 //
+// Created by Tim Little
+//
 // vngscrn.hpp
 //
 // The screen manager classes.
@@ -59,6 +61,10 @@
 #endif // _CLEAR_3D
 #endif // _OEMS
 
+#ifdef _OPENGL
+#include "gl/gl.h"
+#endif
+
 #include <ddraw.h>
 #include <d3d.h>
 
@@ -82,20 +88,21 @@
 class VngoScreenManager
 {
 protected:
-    dword   type_info;
-    dword   lflags;
-    BOOL    init_state;
-    BOOL    frame_is_open;
-    RECT    damage_rect;
+    dword       type_info;
+    dword       lflags;
+    VNGError    init_state;
+    BOOL        frame_is_open;
+    RECT        damage_rect;
 
 public:
-    long    startx;
-    long    starty;
-    long    width;
-    long    height;
-    long    bit_depth;
-    char    hwName[12];
-    VngoPal *pal;
+    long        startx;
+    long        starty;
+    long        width;
+    long        height;
+    long        bit_depth;
+    char        hwName[12];
+    VngoPal     *pal;
+    dword       sins;
 
     enum { SCREENTYPE_DDRAW     = 1,
            SCREENTYPE_DIB       = 2,
@@ -103,27 +110,29 @@ public:
            SCREENTYPE_3DFX      = 4,
            SCREENTYPE_CLEAR3D   = 5,
            SCREENTYPE_MSI       = 6,
-           SCREENTYPE_HYBRID    = 7};
+           SCREENTYPE_OPENGL    = 7,
+           SCREENTYPE_HYBRID    = 8};
 
     virtual ~VngoScreenManager() {};
 
     void set_startxy(int sx,int sy) { startx = sx; starty = sy;}
 
     dword get_type () {return (type_info);}
-    BOOL get_initstate() { return (init_state);}
+    VNGError get_initstate() { return (init_state);}
 
-    virtual BOOL init()=0;
-    virtual void reinit(Flx16 brightness=0)=0;
-    virtual BOOL set_mode(int width, int height, int bpp, VngoPal *pal, dword flags = 0)=0;
-    virtual BOOL check_mode(int width, int height, int bpp)=0;
-    virtual void set_palette(VngoPal *p,Flx16 brightness=0)=0;
-    virtual void term()=0;
-    virtual void flip()
+    virtual VNGError init()=0;
+    virtual VNGError reinit(Flx16 brightness=0)=0;
+    virtual VNGError set_mode(int width, int height, int bpp, VngoPal *pal, dword flags = 0)=0;
+    virtual VNGError check_mode(int width, int height, int bpp, dword _flags, VngoPixelInfo *pinfo)=0;
+    virtual VNGError set_palette(VngoPal *p,Flx16 brightness=0)=0;
+    virtual VNGError term()=0;
+    virtual VNGError flip()
     {
         damage_rect.left = width;
         damage_rect.right = 0;
         damage_rect.top = height;
         damage_rect.bottom = 0;
+        return VNGO_NO_ERROR;
     }
     virtual void invalidate(const VngoRect &rect)
     {
@@ -145,6 +154,7 @@ public:
     }
     virtual void open_frame() {};
     virtual void close_frame() {};
+    virtual VNGError dump_textures()=0;
 
 };
 
@@ -157,6 +167,7 @@ class VngoDIB : public VngoScreenManager
 public:
     HRESULT             err;
     LPDIRECTDRAW        dd;
+    LPDIRECTDRAW2       dd2;
     BITMAPINFO          *bmi;
     HDC                 hdc;
     BYTE                *gmap;
@@ -169,13 +180,14 @@ public:
 
     virtual ~VngoDIB();
 
-    virtual BOOL init();
-    virtual void reinit(Flx16 brightness=0);
-    virtual BOOL set_mode(int width, int height, int bpp, VngoPal *pal, dword flags = 0);
-    virtual BOOL check_mode(int width, int height, int bpp);
-    virtual void set_palette(VngoPal *p,Flx16 brightness=0);
-    virtual void term();
-    virtual void flip();
+    virtual VNGError init();
+    virtual VNGError reinit(Flx16 brightness=0);
+    virtual VNGError set_mode(int width, int height, int bpp, VngoPal *pal, dword flags = 0);
+    virtual VNGError check_mode(int width, int height, int bpp, dword _flags, VngoPixelInfo *pinfo);
+    virtual VNGError set_palette(VngoPal *p,Flx16 brightness=0);
+    virtual VNGError term();
+    virtual VNGError flip();
+    virtual VNGError dump_textures();
 };
 
 
@@ -187,6 +199,7 @@ class VngoDirectDraw : public VngoScreenManager
 public:
     HRESULT                 err;
     LPDIRECTDRAW            dd;
+    LPDIRECTDRAW2           dd2;
     LPDIRECTDRAWSURFACE     FrontBuffer;
     LPDIRECTDRAWSURFACE     BackBuffer;
     LPDIRECTDRAWSURFACE     Primary;
@@ -201,13 +214,14 @@ public:
     VngoDirectDraw(HWND hwndclient);
     virtual ~VngoDirectDraw();
 
-    virtual BOOL init();
-    virtual void reinit(Flx16 brightness=0);
-    virtual BOOL set_mode(int width, int height, int bpp, VngoPal *pal, dword flags = 0);
-    virtual BOOL check_mode(int width, int height, int bpp);
-    virtual void flip();
-    virtual void set_palette(VngoPal *p,Flx16 brightness=0);
-    virtual void term();
+    virtual VNGError init();
+    virtual VNGError reinit(Flx16 brightness=0);
+    virtual VNGError set_mode(int width, int height, int bpp, VngoPal *pal, dword flags = 0);
+    virtual VNGError check_mode(int width, int height, int bpp, dword _flags, VngoPixelInfo *pinfo);
+    virtual VNGError flip();
+    virtual VNGError set_palette(VngoPal *p,Flx16 brightness=0);
+    virtual VNGError term();
+    virtual VNGError dump_textures();
 
 };
 
@@ -220,6 +234,7 @@ class VngoHybrid : public VngoScreenManager
 public:
     HRESULT                 err;
     LPDIRECTDRAW            dd;
+    LPDIRECTDRAW2           dd2;
     LPDIRECTDRAWSURFACE     FrontBuffer;
     LPDIRECTDRAWSURFACE     BackBuffer;
     LPDIRECTDRAWSURFACE     Primary;
@@ -233,13 +248,14 @@ public:
     VngoHybrid(HWND hwndclient);
     virtual ~VngoHybrid();
 
-    virtual BOOL init();
-    virtual void reinit(Flx16 brightness=0);
-    virtual BOOL set_mode(int width, int height, int bpp, VngoPal *pal, dword flags = 0);
-    virtual BOOL check_mode(int width, int height, int bpp);
-    virtual void flip();
-    virtual void set_palette(VngoPal *p,Flx16 brightness=0);
-    virtual void term();
+    virtual VNGError init();
+    virtual VNGError reinit(Flx16 brightness=0);
+    virtual VNGError set_mode(int width, int height, int bpp, VngoPal *pal, dword flags = 0);
+    virtual VNGError check_mode(int width, int height, int bpp, dword _flags, VngoPixelInfo *pinfo);
+    virtual VNGError flip();
+    virtual VNGError set_palette(VngoPal *p,Flx16 brightness=0);
+    virtual VNGError term();
+    virtual VNGError dump_textures();
 
 };
 
@@ -247,12 +263,12 @@ public:
 //컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
 // Direct3D screen manager
 //컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
-#ifdef _D3D
 class VngoDirect3D : public VngoScreenManager
 {
 public:
     HRESULT                 err;
     LPDIRECTDRAW            dd;
+    LPDIRECTDRAW2           dd2;
     LPDIRECTDRAWSURFACE     FrontBuffer;
     LPDIRECTDRAWSURFACE     BackBuffer;
     LPDIRECTDRAWSURFACE     Primary;
@@ -266,23 +282,26 @@ public:
     IDirect3DDevice2        *d3dDevice;
     IDirect3DViewport2      *d3dViewport;
     char                    *target;
+    GUID                    targetID;
 
     VngoDirect3D() {};
-    VngoDirect3D(HWND hwndclient);
+    VngoDirect3D(HWND hwndclient,char *targetname=NULL);
     virtual ~VngoDirect3D();
 
-    virtual BOOL init();
-    virtual void reinit(Flx16 brightness=0);
-    virtual BOOL set_mode(int width, int height, int bpp, VngoPal *pal, dword flags = 0);
-    virtual BOOL check_mode(int width, int height, int bpp);
-    virtual void flip();
-    virtual void set_palette(VngoPal *p,Flx16 brightness=0);
-    virtual void term();
+    virtual VNGError init();
+    virtual VNGError init(char *targetNam);
+    virtual VNGError reinit(Flx16 brightness=0);
+    virtual VNGError set_mode(int width, int height, int bpp, VngoPal *pal, dword flags = 0);
+    virtual VNGError check_mode(int width, int height, int bpp, dword _flags, VngoPixelInfo *pinfo);
+    virtual VNGError flip();
+    virtual VNGError set_palette(VngoPal *p,Flx16 brightness=0);
+    virtual VNGError term();
+
     virtual void open_frame();
     virtual void close_frame();
+    virtual VNGError dump_textures();
 
 };
-#endif
 
 
 //컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
@@ -293,12 +312,14 @@ public:
 
 #define CLEAR3D_MAX_BATCH_COPROCESSOR 25
 #define CLEAR3D_MAX_BATCH_PROCESSOR 1000
+#define CLEAR3D_MAX_BATCH CLEAR3D_MAX_BATCH_COPROCESSOR
 
 class VngoClear3D : public VngoScreenManager
 {
 public:
     HRESULT                 err;
     LPDIRECTDRAW            dd;
+    LPDIRECTDRAW2           dd2;
     LPDIRECTDRAWSURFACE     FrontBuffer;
     LPDIRECTDRAWSURFACE     BackBuffer;
     LPDIRECTDRAWSURFACE     Primary;
@@ -317,18 +338,21 @@ public:
 
     VngoClear3D(HWND hwndclient);
     virtual ~VngoClear3D();
-    virtual BOOL init();
-    virtual void reinit(Flx16 brightness);
-    virtual BOOL check_mode(int _width, int _height, int _bpp);
-    virtual BOOL set_mode(int _width, int _height, int _bpp, VngoPal *_pal,dword flags);
-    virtual void flip();
-    virtual void set_palette(VngoPal *p,Flx16 brightness);
+
+    virtual VNGError init();
+    virtual VNGError reinit(Flx16 brightness);
+    virtual VNGError check_mode(int _width, int _height, int _bpp, dword _flags, VngoPixelInfo *pinfo);
+    virtual VNGError set_mode(int _width, int _height, int _bpp, VngoPal *_pal,dword flags);
+    virtual VNGError flip();
+    virtual VNGError set_palette(VngoPal *p,Flx16 brightness);
+    virtual VNGError term();
+    virtual VNGError dump_textures();
+
     virtual void open_frame();
     virtual void close_frame();
     virtual void flush();
     virtual void run_dl();
     virtual void wait_busy();
-    virtual void term();
 
     LL_Batch *get_batch(int num_batches=1);
 };
@@ -348,16 +372,16 @@ public:
     Vngo3Dfx();
     virtual ~Vngo3Dfx();
 
-    virtual BOOL init();
-    virtual void reinit(Flx16 brightness=0){return;};
-    virtual BOOL set_mode(int width, int height, int bpp, VngoPal *pal, dword flags = 0);
-    virtual BOOL check_mode(int width, int height, int bpp) {return FALSE;}
-    virtual void flip();
-    virtual void set_palette(VngoPal *p,Flx16 brightness=0){return;};
-    virtual void term();
+    virtual VNGError init();
+    virtual VNGError reinit(Flx16 brightness=0){return VNGO_NO_ERROR;};
+    virtual VNGError set_mode(int width, int height, int bpp, VngoPal *pal, dword flags = 0);
+    virtual VNGError check_mode(int width, int height, int bpp, dword _flags, VngoPixelInfo *pinfo) {return VNGO_NOT_SUPPORTED;}
+    virtual VNGError flip();
+    virtual VNGError set_palette(VngoPal *p,Flx16 brightness=0){return VNGO_NO_ERROR;};
+    virtual VNGError term();
+    virtual VNGError dump_textures();
 };
 #endif // _3DFX
-
 
 //컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
 // Matrox Simple Interface screen manager
@@ -375,14 +399,15 @@ public:
     VngoMSI(WNDPROC lpWindowProc);
     virtual ~VngoMSI();
 
-    virtual BOOL init();
-    virtual BOOL init(WNDPROC lpWindowProc=NULL);
-    virtual void reinit(Flx16 brightness=0){return;};
-    virtual BOOL set_mode(int width, int height, int bpp, VngoPal *pal, dword flags = 0);
-    virtual BOOL check_mode(int width, int height, int bpp) {return FALSE;}
-    virtual void flip();
-    virtual void set_palette(VngoPal *p,Flx16 brightness=0){return;};
-    virtual void term();
+    virtual VNGError init();
+    virtual VNGError init(WNDPROC lpWindowProc=NULL);
+    virtual VNGError reinit(Flx16 brightness=0){return VNGO_NO_ERROR;};
+    virtual VNGError set_mode(int width, int height, int bpp, VngoPal *pal, dword flags = 0);
+    virtual VNGError check_mode(int width, int height, int bpp, dword _flags, VngoPixelInfo *pinfo) {return VNGO_NOT_SUPPORTED;}
+    virtual VNGError flip();
+    virtual VNGError set_palette(VngoPal *p,Flx16 brightness=0){return VNGO_NO_ERROR;};
+    virtual VNGError term();
+    virtual VNGError dump_textures();
 
     virtual void open_frame()
     {
@@ -414,6 +439,32 @@ public:
 };
 #endif // _MSI
 #endif // _OEMS
+
+#ifdef _OPENGL
+class VngoOpenGL : public VngoScreenManager
+{
+    LPDIRECTDRAW            dd;
+    HWND                    hWndClient;
+    HDC                     hDC;
+    HGLRC                   hGLRC;
+    PIXELFORMATDESCRIPTOR   pixDesc;
+    int                     pixIndex;
+    float                   xscale;
+    float                   yscale;
+
+public:
+    VngoOpenGL();
+    VngoOpenGL(HWND hwndclient);
+    virtual ~VngoOpenGL();
+    virtual VNGError init();
+    virtual VNGError reinit(Flx16 brightness);
+    virtual VNGError set_mode(int _width, int _height, int bpp, VngoPal *pal, dword flags = 0);
+    virtual VNGError check_mode(int width, int height, int bpp, dword _flags, VngoPixelInfo *pinfo);
+    virtual VNGError flip();
+    virtual VNGError set_palette(VngoPal *p, Flx16 brightness);
+    virtual VNGError term();
+};
+#endif // _OPENGL
 
 #ifdef __WATCOMC__
 #pragma pack();

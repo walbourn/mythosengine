@@ -79,13 +79,7 @@ void EschFrameRef::set_position(const EschPoint *pt, dword update)
 //ÄÄÄ Update inverse transform
     if (update & ESCH_UPD_INVERSE)
     {
-#ifdef INCREMENTAL_INVERSE
-        iorient.mtx[ESCH_MTX_J] = -pt->x;
-        iorient.mtx[ESCH_MTX_K] = -pt->y;
-        iorient.mtx[ESCH_MTX_L] = -pt->z;
-#else
         orient.inverse(&iorient);
-#endif
     }
 }
 
@@ -100,14 +94,126 @@ void EschFrameRef::set_position(const float ix, const float iy, const float iz,
 //ÄÄÄ Update inverse transform
     if (update & ESCH_UPD_INVERSE)
     {
-#ifdef INCREMENTAL_INVERSE
-        iorient.mtx[ESCH_MTX_J] = -ix;
-        iorient.mtx[ESCH_MTX_K] = -iy;
-        iorient.mtx[ESCH_MTX_L] = -iz;
-#else
         orient.inverse(&iorient);
-#endif
     }
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// EschFrameRef - set_top                                                   ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+void EschFrameRef::set_top(const EschVector *v, dword update)
+{
+    EschVector top(v->i, v->j, v->k);
+    top.normalize();
+
+//ÄÄÄ Create right vector
+    EschVector right = top CROSS dir;
+
+//ÄÄÄ Fill in matrix for ortho rotation
+
+    //ÄÄÄ Transform
+    orient.mtx[ESCH_MTX_A] = right.i;
+    orient.mtx[ESCH_MTX_B] = right.j;
+    orient.mtx[ESCH_MTX_C] = right.k;
+
+    orient.mtx[ESCH_MTX_D] = top.i;
+    orient.mtx[ESCH_MTX_E] = top.j;
+    orient.mtx[ESCH_MTX_F] = top.k;
+
+    if (update & ESCH_UPD_ORTHO)
+        orthogonalize_top(update);
+    else if (update & ESCH_UPD_INVERSE)
+        compute_inverse();
+}
+
+void EschFrameRef::set_top(float ii, float ij, float ik, dword update)
+{
+    EschVector v(ii,ij,ik);
+    v.normalize();
+
+//ÄÄÄ Create right vector
+    EschVector right = v CROSS dir;
+
+//ÄÄÄ Fill in matrix for ortho rotation
+
+    //ÄÄÄ Transform
+    orient.mtx[ESCH_MTX_A] = right.i;
+    orient.mtx[ESCH_MTX_B] = right.j;
+    orient.mtx[ESCH_MTX_C] = right.k;
+
+    orient.mtx[ESCH_MTX_D] = v.i;
+    orient.mtx[ESCH_MTX_E] = v.j;
+    orient.mtx[ESCH_MTX_F] = v.k;
+
+    if (update & ESCH_UPD_ORTHO)
+        orthogonalize_top(update);
+    else if (update & ESCH_UPD_INVERSE)
+        compute_inverse();
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// EschFrameRef - set_direction                                             ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+void EschFrameRef::set_direction(const EschVector *v, dword update)
+{
+    dir = *v;
+    dir.normalize();
+
+    EschVector  top(orient.mtx[ESCH_MTX_D],
+                    orient.mtx[ESCH_MTX_E],
+                    orient.mtx[ESCH_MTX_F]);
+
+//ÄÄÄ Create right vector
+    EschVector right = top CROSS dir;
+
+//ÄÄÄ Fill in matrix for ortho rotation
+
+    //ÄÄÄ Transform
+    orient.mtx[ESCH_MTX_A] = right.i;
+    orient.mtx[ESCH_MTX_B] = right.j;
+    orient.mtx[ESCH_MTX_C] = right.k;
+
+    orient.mtx[ESCH_MTX_G] = dir.i;
+    orient.mtx[ESCH_MTX_H] = dir.j;
+    orient.mtx[ESCH_MTX_I] = dir.k;
+
+    if (update & ESCH_UPD_ORTHO)
+        orthogonalize(update);
+    else if (update & ESCH_UPD_INVERSE)
+        compute_inverse();
+}
+
+void EschFrameRef::set_direction(float ii, float ij, float ik, dword update)
+{
+    dir.i = ii;
+    dir.j = ij;
+    dir.k = ik;
+    dir.normalize();
+
+    EschVector  top(orient.mtx[ESCH_MTX_D],
+                    orient.mtx[ESCH_MTX_E],
+                    orient.mtx[ESCH_MTX_F]);
+
+//ÄÄÄ Create right vector
+    EschVector right = top CROSS dir;
+
+//ÄÄÄ Fill in matrix for ortho rotation
+
+    //ÄÄÄ Transform
+    orient.mtx[ESCH_MTX_A] = right.i;
+    orient.mtx[ESCH_MTX_B] = right.j;
+    orient.mtx[ESCH_MTX_C] = right.k;
+
+    orient.mtx[ESCH_MTX_G] = dir.i;
+    orient.mtx[ESCH_MTX_H] = dir.j;
+    orient.mtx[ESCH_MTX_I] = dir.k;
+
+    if (update & ESCH_UPD_ORTHO)
+        orthogonalize(update);
+    else if (update & ESCH_UPD_INVERSE)
+        compute_inverse();
 }
 
 
@@ -152,10 +258,8 @@ void EschFrameRef::rotatex(const float degrees, dword update)
 
 //ÄÄÄ Orthogonalize
     if ((++ortho_count > ESCH_MAX_ORTHOCOUNT) && (update & ESCH_UPD_ORTHO))
-    {
         orthogonalize(update);
-        ortho_count=0;
-    }
+
 //ÄÄÄ Update inverse transform
     else if (update & ESCH_UPD_INVERSE)
     {
@@ -251,10 +355,8 @@ void EschFrameRef::rotatey(const float degrees, dword update)
 
 //ÄÄÄ Orthogonalize
     if ((++ortho_count > ESCH_MAX_ORTHOCOUNT) && (update & ESCH_UPD_ORTHO))
-    {
         orthogonalize(update);
-        ortho_count=0;
-    }
+
 //ÄÄÄ Update inverse transform
     else if (update & ESCH_UPD_INVERSE)
     {
@@ -350,10 +452,8 @@ void EschFrameRef::rotatez(const float degrees, dword update)
 
 //ÄÄÄ Orthogonalize
     if ((++ortho_count > ESCH_MAX_ORTHOCOUNT) && (update & ESCH_UPD_ORTHO))
-    {
         orthogonalize(update);
-        ortho_count=0;
-    }
+
 //ÄÄÄ Update inverse transform
     else if (update & ESCH_UPD_INVERSE)
     {
@@ -611,6 +711,8 @@ void EschFrameRef::scale(const float is, dword update)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 void EschFrameRef::orthogonalize(dword update)
 {
+    ortho_count = 0;
+
 //ÄÄÄ Get vectors to form into orthonormal basis
     // dir is already a normalized copy of mtx[G,H,I], so use dir as v1
     float mag;
@@ -681,6 +783,8 @@ void EschFrameRef::orthogonalize(dword update)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 void EschFrameRef::orthogonalize_top(dword update)
 {
+    ortho_count = 0;
+
 //ÄÄÄ Get vectors to form into orthonormal basis
     // dir is already a normalized copy of mtx[G,H,I], so use dir as v1
 
@@ -757,6 +861,8 @@ void EschFrameRef::orthogonalize_top(dword update)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 void EschFrameRef::orthogonalize_right(dword update)
 {
+    ortho_count = 0;
+
 //ÄÄÄ Get vectors to form into orthonormal basis
     // dir is already a normalized copy of mtx[G,H,I], so use dir as v1
 

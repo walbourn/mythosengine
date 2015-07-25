@@ -138,7 +138,7 @@ MaxDevices::~MaxDevices()
 void MaxDevices::update ()
 {
     // Capture the mouse state
-    if (theMouse)
+    if (is_mouse_present())
     {
         theMouse->update();
         theMouse->get_movement (&snapshot_mdx, &snapshot_mdy);
@@ -147,13 +147,13 @@ void MaxDevices::update ()
     }
 
     // Capture the keyboard state.
-    if (theKeyboard)
+    if (is_keyboard_present())
     {
         theKeyboard->update();
     }
 
     // Capture the joystick state.
-    if (theJoystick)
+    if (is_joystick_present())
     {
         theJoystick->get_stat (&snapshot_jstat);
     }
@@ -179,7 +179,7 @@ void MaxDevices::wm_clear ()
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //  MaxDevices::init
-//  Clears all devices before processing wm_ members
+//  Initializes all devices
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 void MaxDevices::init ()
 {
@@ -196,7 +196,7 @@ void MaxDevices::init ()
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //  MaxDevices::uninit
-//  Clears all devices before processing wm_ members
+//  Uninitializes all devices
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 void MaxDevices::uninit ()
 {
@@ -208,6 +208,78 @@ void MaxDevices::uninit ()
 
     if (theJoystick)
         theJoystick->uninit();
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//  MaxDevices::enable_keyboard
+//
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+int MaxDevices::enable_keyboard (int enabled)
+{
+    if (theKeyboard)
+    {
+        if (enabled)
+        {
+            if (!theKeyboard->is_initialized())
+                theKeyboard->init ();
+        }
+        else
+        {
+            if (theKeyboard->is_initialized())
+                theKeyboard->uninit();
+        }
+    }
+
+    return theKeyboard != 0;
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//  MaxDevices::enable_mouse
+//
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+int MaxDevices::enable_mouse (int enabled)
+{
+    if (theMouse)
+    {
+        if (enabled)
+        {
+            if (!theMouse->is_initialized())
+                theMouse->init();
+        }
+        else
+        {
+            if (theMouse->is_initialized())
+                theMouse->uninit();
+        }
+    }
+
+    return theMouse != 0;
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//  MaxDevices::enable_joystick
+//
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+int MaxDevices::enable_joystick (int enabled)
+{
+    if (theJoystick)
+    {
+        if (enabled)
+        {
+            if (!theJoystick->is_initialized())
+                theJoystick->init ();
+        }
+        else
+        {
+            if (theJoystick->is_initialized())
+                theJoystick->uninit ();
+        }
+    }
+
+    return theJoystick != 0;
 }
 
 
@@ -275,6 +347,73 @@ void MaxDevices::get_joystick (JOYINFOEX *js) const
 }
 
 
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//  MaxDevices::is_mouse_present
+//
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+bool MaxDevices::is_mouse_present () const
+{
+    return theMouse != 0 && theMouse->is_present();
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//  MaxDevices::is_keyboard_present
+//
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+bool MaxDevices::is_keyboard_present () const
+{
+    return theKeyboard != 0
+           && theKeyboard->is_present();
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//  MaxDevices::is_joystick_present
+//
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+bool MaxDevices::is_joystick_present () const
+{
+    return theJoystick != 0
+           && theJoystick->is_present();
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//  MaxDevices::is_mouse_enabled
+//
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+bool MaxDevices::is_mouse_enabled () const
+{
+    return theMouse != 0
+           && theMouse->is_present()
+           && theMouse->is_initialized();
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//  MaxDevices::is_keyboard_enabled
+//
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+bool MaxDevices::is_keyboard_enabled () const
+{
+    return theKeyboard != 0
+           && theKeyboard->is_present()
+           && theKeyboard->is_initialized();
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//  MaxDevices::is_joystick_enabled
+//
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+bool MaxDevices::is_joystick_enabled () const
+{
+    return theJoystick != 0
+           && theJoystick->is_present()
+           && theJoystick->is_initialized();
+}
+
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
@@ -290,6 +429,29 @@ MaxDevicesWin32::MaxDevicesWin32 (HWND _hwnd):
     MaxDevices (),
     hwndClient (_hwnd)
 {
+    // Create the Keyboard object
+    theKeyboard = new MaxKeyboardWin32 ();
+    if (!theKeyboard->is_present())
+    {
+        delete theKeyboard;
+        theKeyboard = 0;
+    }
+
+    // Create the Mouse object
+    theMouse = new MaxMouseWin32 ();
+    if (!theMouse->is_present())
+    {
+        delete theMouse;
+        theMouse = 0;
+    }
+
+    // Create the Joystick object
+    theJoystick = new MaxJoystickWin32 ();
+    if (!theJoystick->is_present())
+    {
+        delete theJoystick;
+        theJoystick = 0;
+    }
 }
 
 
@@ -301,86 +463,6 @@ MaxDevicesWin32::~MaxDevicesWin32()
 {
 }
 
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-//  MaxDevicesWin32::enable_keyboard
-//
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-int MaxDevicesWin32::enable_keyboard (int enabled)
-{
-    if (enabled)
-    {
-        if (!theKeyboard)
-        {
-            theKeyboard = new MaxKeyboardWin32;
-            theKeyboard->init ();
-        }
-    }
-    else
-    {
-        if (theKeyboard)
-        {
-            delete theKeyboard;
-            theKeyboard = 0;
-        }
-    }
-
-    return theKeyboard != 0;
-}
-
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-//  MaxDevicesWin32::enable_mouse
-//
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-int MaxDevicesWin32::enable_mouse (int enabled)
-{
-    if (enabled)
-    {
-        if (!theMouse)
-        {
-            theMouse = new MaxMouseWin32;
-            theMouse->init();
-        }
-    }
-    else
-    {
-        if (theMouse)
-        {
-            delete theMouse;
-            theMouse = 0;
-        }
-    }
-
-    return theMouse != 0;
-}
-
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-//  MaxDevicesWin32::enable_joystick
-//
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-int MaxDevicesWin32::enable_joystick (int enabled)
-{
-    if (enabled)
-    {
-        if (!theJoystick)
-        {
-            theJoystick = new MaxJoystickWin32;
-            theJoystick->init ();
-        }
-    }
-    else
-    {
-        if (theJoystick)
-        {
-            delete theJoystick;
-            theJoystick = 0;
-        }
-    }
-
-    return theJoystick != 0;
-}
 
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
@@ -403,6 +485,33 @@ MaxDevicesDirectX::MaxDevicesDirectX (HWND _hwnd):
                            &pdi,
                            NULL) != DI_OK)
         pdi = 0;
+
+    if (pdi)
+    {
+        // Create the Keyboard object
+        theKeyboard = new MaxKeyboardDirectX (pdi, hwndClient);
+        if (!theKeyboard->is_present())
+        {
+            delete theKeyboard;
+            theKeyboard = 0;
+        }
+
+        // Create the Mouse object
+        theMouse = new MaxMouseDirectX (pdi, hwndClient);
+        if (!theMouse->is_present())
+        {
+            delete theMouse;
+            theMouse = 0;
+        }
+
+        // Create the Joystick object
+        theJoystick = new MaxJoystickDirectX (pdi, hwndClient);
+        if (!theJoystick->is_present())
+        {
+            delete theJoystick;
+            theJoystick = 0;
+        }
+    }
 }
 
 
@@ -413,96 +522,5 @@ MaxDevicesDirectX::MaxDevicesDirectX (HWND _hwnd):
 MaxDevicesDirectX::~MaxDevicesDirectX()
 {
 }
-
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-//  MaxDevicesDirectX::enable_keyboard
-//
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-int MaxDevicesDirectX::enable_keyboard (int enabled)
-{
-    if (!pdi)
-        return 0;
-
-    if (enabled)
-    {
-        if (!theKeyboard)
-        {
-            theKeyboard = new MaxKeyboardDirectX (pdi, hwndClient);
-            return theKeyboard->init ();
-        }
-    }
-    else
-    {
-        if (theKeyboard)
-        {
-            delete theKeyboard;
-            theKeyboard = 0;
-        }
-    }
-
-    return theKeyboard != 0;
-}
-
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-//  MaxDevicesDirectX::enable_mouse
-//
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-int MaxDevicesDirectX::enable_mouse (int enabled)
-{
-    if (!pdi)
-        return 0;
-
-    if (enabled)
-    {
-        if (!theMouse)
-        {
-            theMouse = new MaxMouseDirectX (pdi, hwndClient);
-            return theMouse->init();
-        }
-    }
-    else
-    {
-        if (theMouse)
-        {
-            delete theMouse;
-            theMouse = 0;
-        }
-    }
-
-    return theMouse != 0;
-}
-
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-//  MaxDevicesDirectX::enable_joystick
-//
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-int MaxDevicesDirectX::enable_joystick (int enabled)
-{
-    if (!pdi)
-        return 0;
-
-    if (enabled)
-    {
-        if (!theJoystick)
-        {
-            theJoystick = new MaxJoystickDirectX (pdi, hwndClient);
-            return theJoystick->init ();
-        }
-    }
-    else
-    {
-        if (theJoystick)
-        {
-            delete theJoystick;
-            theJoystick = 0;
-        }
-    }
-
-    return theJoystick != 0;
-}
-
 
 //°±² End of module - maxdevs.cpp ²±°

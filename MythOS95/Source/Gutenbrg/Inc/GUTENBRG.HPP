@@ -77,6 +77,8 @@ long gberg_outc(VngoVport *vp, long x, long y, char c, BOOL vert=FALSE);
 long gberg_widthc(char c);
 long gberg_heightc();
 
+long gberg_width(const char *str);
+
 //같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같�
 //
 //                                Classes

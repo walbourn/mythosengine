@@ -1,6 +1,7 @@
 @echo off
 if .%1==.tools goto tools
 if .%1==.tests goto tests
+if .%1==.examples goto examples
 rem 컴컴 Ivory '95 컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
 cd ivory
 call mk %1
@@ -185,14 +186,31 @@ rem call mk clean
 rem call mk
 rem if ERRORLEVEL 1 goto error
 rem cd ..\..
-rem 컴컴 Gameframe '95 컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
-cd gameframe
+rem 컴컴 SimGine 컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+cd simgine\test
 call mk clean
 call mk
 if ERRORLEVEL 1 goto error
-cd ..
-rem 컴컴 SimGine 컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
-cd simgine\test
+cd ..\..
+goto exit
+rem *************************************************************************
+rem *************************** Examples ************************************
+rem *************************************************************************
+:examples
+rem 컴컴 3D Viewer 컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+cd examples\viewer
+call mk clean
+call mk
+if ERRORLEVEL 1 goto error
+cd ..\..
+rem 컴컴 LLander 컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+cd examples\llander
+call mk clean
+call mk
+if ERRORLEVEL 1 goto error
+cd ..\..
+rem 컴컴 Script 컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
+cd examples\script
 call mk clean
 call mk
 if ERRORLEVEL 1 goto error

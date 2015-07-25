@@ -41,7 +41,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include "stdafx.h"
@@ -96,7 +96,7 @@ TerrPropGenPage::TerrPropGenPage() : CPropertyPage(TerrPropGenPage::IDD),
     m_orgy = 0.0f;
     m_orgz = 0.0f;
     m_autoCenterOrg = FALSE;
-	//}}AFX_DATA_INIT
+        //}}AFX_DATA_INIT
 }
 
 TerrPropGenPage::~TerrPropGenPage()
@@ -129,7 +129,7 @@ void TerrPropGenPage::DoDataExchange(CDataExchange* pDX)
     DDX_Text(pDX, IDC_TPROP_ORGZ, m_orgz);
     DDV_MinMaxFloat(pDX, m_orgz, -32768.f, 32768.f);
     DDX_Check(pDX, IDC_TPROP_AUTOORG, m_autoCenterOrg);
-	//}}AFX_DATA_MAP
+        //}}AFX_DATA_MAP
 
     if (!pDX->m_bSaveAndValidate)
     {
@@ -237,7 +237,7 @@ void TerrPropGenPage::DoDataExchange(CDataExchange* pDX)
     }
 }
 
-void TerrPropGenPage::OnAutoCenter() 
+void TerrPropGenPage::OnAutoCenter()
 {
     int state=m_autoCenterCtl.GetCheck();
 
@@ -398,16 +398,16 @@ void TerrPropHColrPage::DoDataExchange(CDataExchange* pDX)
 IMPLEMENT_DYNCREATE(TerrPropHTablePage, CPropertyPage)
 
 BEGIN_MESSAGE_MAP(TerrPropHTablePage, CPropertyPage)
-	//{{AFX_MSG_MAP(TerrPropHTablePage)
-		// NOTE: the ClassWizard will add message map macros here
-	//}}AFX_MSG_MAP
+        //{{AFX_MSG_MAP(TerrPropHTablePage)
+                // NOTE: the ClassWizard will add message map macros here
+        //}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 TerrPropHTablePage::TerrPropHTablePage() : CPropertyPage(TerrPropHTablePage::IDD)
 {
-	//{{AFX_DATA_INIT(TerrPropHTablePage)
-		// NOTE: the ClassWizard will add member initialization here
-	//}}AFX_DATA_INIT
+        //{{AFX_DATA_INIT(TerrPropHTablePage)
+                // NOTE: the ClassWizard will add member initialization here
+        //}}AFX_DATA_INIT
 
     for(long i=0; i < 256; i++)
         htable[i] = 0;
@@ -419,10 +419,10 @@ TerrPropHTablePage::~TerrPropHTablePage()
 
 void TerrPropHTablePage::DoDataExchange(CDataExchange* pDX)
 {
-	CPropertyPage::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(TerrPropHTablePage)
-	DDX_Control(pDX, IDC_TROP_HGTS, m_list);
-	//}}AFX_DATA_MAP
+        CPropertyPage::DoDataExchange(pDX);
+        //{{AFX_DATA_MAP(TerrPropHTablePage)
+        DDX_Control(pDX, IDC_TROP_HGTS, m_list);
+        //}}AFX_DATA_MAP
 
     if (!pDX->m_bSaveAndValidate)
     {
@@ -716,7 +716,7 @@ void CameraPropLODPage::DoDataExchange(CDataExchange* pDX)
     }
 }
 
-void CameraPropLODPage::OnLevelOfDetail() 
+void CameraPropLODPage::OnLevelOfDetail()
 {
     m_lod = !m_lod;
     m_medCtl.EnableWindow(m_lod);
@@ -775,7 +775,7 @@ void CameraPropMiscPage::DoDataExchange(CDataExchange* pDX)
     }
 }
 
-void CameraPropMiscPage::OnBackgroundColor() 
+void CameraPropMiscPage::OnBackgroundColor()
 {
     ASSERT(pDoc);
 
@@ -802,10 +802,10 @@ void CameraPropMiscPage::OnBackgroundColor()
 IMPLEMENT_DYNCREATE(CameraPropExPage, CPropertyPage)
 
 BEGIN_MESSAGE_MAP(CameraPropExPage, CPropertyPage)
-	//{{AFX_MSG_MAP(CameraPropExPage)
-	ON_BN_CLICKED(IDC_CPROP_BITMAP, OnSelectBitmap)
-	ON_BN_CLICKED(IDC_CPROP_HCOLR, OnHazeColor)
-	//}}AFX_MSG_MAP
+        //{{AFX_MSG_MAP(CameraPropExPage)
+        ON_BN_CLICKED(IDC_CPROP_BITMAP, OnSelectBitmap)
+        ON_BN_CLICKED(IDC_CPROP_HCOLR, OnHazeColor)
+        //}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 CameraPropExPage::CameraPropExPage() : CPropertyPage(CameraPropExPage::IDD),
@@ -813,19 +813,15 @@ CameraPropExPage::CameraPropExPage() : CPropertyPage(CameraPropExPage::IDD),
     haze_color (0),
     haze_change (FALSE)
 {
-	//{{AFX_DATA_INIT(CameraPropExPage)
-	m_bg_active = FALSE;
-	m_haze_active = FALSE;
-	m_slevels = 0;
-	m_levels = 0;
-	m_bpercent = 0.0f;
-	m_blevels = 0;
-	//}}AFX_DATA_INIT
+        //{{AFX_DATA_INIT(CameraPropExPage)
+        m_bg_active = FALSE;
+        m_haze_active = FALSE;
+        m_startz = 0.0f;
+        m_midz = 0.0f;
+        //}}AFX_DATA_INIT
 
-    m_levels = 64;
-    m_slevels = 24;
-    m_blevels = 48;
-    m_bpercent = 50.0f;
+    m_startz = 0.5f;
+    m_midz = 0.85f;
 }
 
 CameraPropExPage::~CameraPropExPage()
@@ -840,18 +836,17 @@ void CameraPropExPage::setup(TerrEditDoc *pd)
 
 void CameraPropExPage::DoDataExchange(CDataExchange* pDX)
 {
-	CPropertyPage::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CameraPropExPage)
-	DDX_Control(pDX, IDC_CPROP_BMBACK, m_bg_activeCtl);
-	DDX_Control(pDX, IDC_CPROP_HAZE, m_haze_activeCtl);
-	DDX_Check(pDX, IDC_CPROP_BMBACK, m_bg_active);
-	DDX_Check(pDX, IDC_CPROP_HAZE, m_haze_active);
-	DDX_Text(pDX, IDC_CPROP_SLEVEL, m_slevels);
-	DDX_Text(pDX, IDC_CPROP_LEVEL, m_levels);
-	DDX_Text(pDX, IDC_CPROP_BPERC, m_bpercent);
-	DDV_MinMaxFloat(pDX, m_bpercent, 1.f, 99.f);
-	DDX_Text(pDX, IDC_CPROP_BLEVEL, m_blevels);
-	//}}AFX_DATA_MAP
+        CPropertyPage::DoDataExchange(pDX);
+        //{{AFX_DATA_MAP(CameraPropExPage)
+        DDX_Control(pDX, IDC_CPROP_BMBACK, m_bg_activeCtl);
+        DDX_Control(pDX, IDC_CPROP_HAZE, m_haze_activeCtl);
+        DDX_Check(pDX, IDC_CPROP_BMBACK, m_bg_active);
+        DDX_Check(pDX, IDC_CPROP_HAZE, m_haze_active);
+        DDX_Text(pDX, IDC_CPROP_STARTZ, m_startz);
+        DDV_MinMaxFloat(pDX, m_startz, 0.f, 1.f);
+        DDX_Text(pDX, IDC_CPROP_MIDZ, m_midz);
+        DDV_MinMaxFloat(pDX, m_midz, 0.f, 1.f);
+        //}}AFX_DATA_MAP
 
     if (pDX->m_bSaveAndValidate)
     {
@@ -862,43 +857,16 @@ void CameraPropExPage::DoDataExchange(CDataExchange* pDX)
             pDX->Fail();
         }
 
-        pDX->PrepareEditCtrl(IDC_CPROP_LEVEL);
-        switch(m_levels)
+        pDX->PrepareEditCtrl(IDC_CPROP_MIDZ);
+        if (m_midz < m_startz)
         {
-            case 8:
-            case 16:
-            case 32:
-            case 64:
-            case 128:
-            case 256:
-                break;
-            default:
-                AfxMessageBox("Must be 8, 16, 32, 64, 128, or 256.",MB_OK | MB_ICONEXCLAMATION);
-                pDX->Fail();
-        }
-
-        pDX->PrepareEditCtrl(IDC_CPROP_SLEVEL);
-        if (m_slevels >= m_levels)
-        {
-            AfxMessageBox("Must be less than the number of levels.",MB_OK | MB_ICONEXCLAMATION);
-            pDX->Fail();
-        }
-
-        pDX->PrepareEditCtrl(IDC_CPROP_BLEVEL);
-        if (m_blevels >= m_levels)
-        {
-            AfxMessageBox("Must be less than the number of levels.",MB_OK | MB_ICONEXCLAMATION);
-            pDX->Fail();
-        }
-        if (m_blevels <= m_slevels)
-        {
-            AfxMessageBox("Must be greater than the number of unaffected levels.",MB_OK | MB_ICONEXCLAMATION);
+            AfxMessageBox("Must be greater than the Start Z.",MB_OK | MB_ICONEXCLAMATION);
             pDX->Fail();
         }
     }
 }
 
-void CameraPropExPage::OnSelectBitmap() 
+void CameraPropExPage::OnSelectBitmap()
 {
     CFileDialog dlg(TRUE,
                     NULL, NULL,
@@ -921,26 +889,26 @@ void CameraPropExPage::OnSelectBitmap()
             return;
         }
 
-        XFParseBitmap	*b=0;
+        XFParseBitmap   *b=0;
         if (name.Find(".bmp") != -1)
         {
-		    b = new XFParseBMP (bm);
+                    b = new XFParseBMP (bm);
         }
         else if (name.Find(".cel") != -1)
         {
-		    b = new XFParseCEL (bm);
+                    b = new XFParseCEL (bm);
         }
         else if (name.Find(".lbm") != -1)
         {
-		    b = new XFParseLBM (bm);
+                    b = new XFParseLBM (bm);
         }
         else if (name.Find(".pcx") != -1)
         {
-		    b = new XFParsePCX (bm);
+                    b = new XFParsePCX (bm);
         }
         else if (name.Find(".xeb") != -1)
         {
-		    b = new XFParseXEB (bm);
+                    b = new XFParseXEB (bm);
         }
         else
         {
@@ -979,10 +947,10 @@ void CameraPropExPage::OnSelectBitmap()
             return;
         }
 
-        if (bm->bpp != 1)
+        if (bm->bpp != 1 && bm->bpp != 2 && bm->bpp != 3)
         {
             delete bm;
-            MessageBox("Must be an 8-bit image",
+            MessageBox("Must be an 8-bit, 15-bit, or 24-bit image",
                        "Escher Tool",
                        MB_OK | MB_ICONEXCLAMATION);
             return;
@@ -996,7 +964,7 @@ void CameraPropExPage::OnSelectBitmap()
     }
 }
 
-void CameraPropExPage::OnHazeColor() 
+void CameraPropExPage::OnHazeColor()
 {
     ASSERT(pDoc);
 
@@ -1048,16 +1016,16 @@ SurfPropGenPage::SurfPropGenPage()
     m_flipu = FALSE;
     m_flipv = FALSE;
     m_indistxt = FALSE;
-	m_cbit11 = FALSE;
-	m_cbit12 = FALSE;
-	m_hidden = FALSE;
-	m_highonly = FALSE;
-	m_notile = FALSE;
-	m_app0 = FALSE;
-	m_app1 = FALSE;
-	m_app2 = FALSE;
-	m_app3 = FALSE;
-	//}}AFX_DATA_INIT
+        m_cbit11 = FALSE;
+        m_cbit12 = FALSE;
+        m_hidden = FALSE;
+        m_highonly = FALSE;
+        m_notile = FALSE;
+        m_app0 = FALSE;
+        m_app1 = FALSE;
+        m_app2 = FALSE;
+        m_app3 = FALSE;
+        //}}AFX_DATA_INIT
 }
 
 SurfPropGenPage::~SurfPropGenPage()
@@ -1068,7 +1036,7 @@ void SurfPropGenPage::DoDataExchange(CDataExchange* pDX)
 {
     CPropertyPage::DoDataExchange(pDX);
     //{{AFX_DATA_MAP(SurfPropGenPage)
-	DDX_Control(pDX, IDC_SPROP_NOTILE, m_notileCtl);
+        DDX_Control(pDX, IDC_SPROP_NOTILE, m_notileCtl);
     DDX_Control(pDX, IDC_SPROP_TILE, m_tileCtl);
     DDX_Control(pDX, IDC_SPROP_TXT, m_txtList);
     DDX_Control(pDX, IDC_SPROP_COLR, m_colorbutton);
@@ -1083,16 +1051,16 @@ void SurfPropGenPage::DoDataExchange(CDataExchange* pDX)
     DDX_Check(pDX, IDC_SPROP_FLIPV, m_flipv);
     DDX_Check(pDX, IDC_SPROP_INDISTXT, m_indistxt);
     DDX_CBIndex(pDX, IDC_SPROP_TILE, m_tile);
-	DDX_Check(pDX, IDC_SPROP_CBIT11, m_cbit11);
-	DDX_Check(pDX, IDC_SPROP_CBIT12, m_cbit12);
-	DDX_Check(pDX, IDC_SPROP_HIDDEN, m_hidden);
-	DDX_Check(pDX, IDC_SPROP_HIGHONLY, m_highonly);
-	DDX_Check(pDX, IDC_SPROP_NOTILE, m_notile);
-	DDX_Check(pDX, IDC_SPROP_APP0, m_app0);
-	DDX_Check(pDX, IDC_SPROP_APP1, m_app1);
-	DDX_Check(pDX, IDC_SPROP_APP2, m_app2);
-	DDX_Check(pDX, IDC_SPROP_APP3, m_app3);
-	//}}AFX_DATA_MAP
+        DDX_Check(pDX, IDC_SPROP_CBIT11, m_cbit11);
+        DDX_Check(pDX, IDC_SPROP_CBIT12, m_cbit12);
+        DDX_Check(pDX, IDC_SPROP_HIDDEN, m_hidden);
+        DDX_Check(pDX, IDC_SPROP_HIGHONLY, m_highonly);
+        DDX_Check(pDX, IDC_SPROP_NOTILE, m_notile);
+        DDX_Check(pDX, IDC_SPROP_APP0, m_app0);
+        DDX_Check(pDX, IDC_SPROP_APP1, m_app1);
+        DDX_Check(pDX, IDC_SPROP_APP2, m_app2);
+        DDX_Check(pDX, IDC_SPROP_APP3, m_app3);
+        //}}AFX_DATA_MAP
 
     if (!pDX->m_bSaveAndValidate)
     {
@@ -1117,7 +1085,7 @@ void SurfPropGenPage::DoDataExchange(CDataExchange* pDX)
     }
 }
 
-void SurfPropGenPage::OnTextureSelectChange() 
+void SurfPropGenPage::OnTextureSelectChange()
 {
     int i = m_txtList.GetCurSel();
 
@@ -1147,7 +1115,7 @@ void SurfPropGenPage::OnTextureSelectChange()
     }
 }
 
-void SurfPropGenPage::OnColor() 
+void SurfPropGenPage::OnColor()
 {
     ASSERT(pDoc);
 
@@ -1187,8 +1155,8 @@ IMPLEMENT_DYNCREATE(ColorGenPropPage, CPropertyPage)
 
 BEGIN_MESSAGE_MAP(ColorGenPropPage, CPropertyPage)
     //{{AFX_MSG_MAP(ColorGenPropPage)
-	ON_BN_CLICKED(IDC_CLRPRP_RESETUSAGE, OnResetUsage)
-	//}}AFX_MSG_MAP
+        ON_BN_CLICKED(IDC_CLRPRP_RESETUSAGE, OnResetUsage)
+        //}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 ColorGenPropPage::ColorGenPropPage() : CPropertyPage(ColorGenPropPage::IDD),
@@ -1197,12 +1165,12 @@ ColorGenPropPage::ColorGenPropPage() : CPropertyPage(ColorGenPropPage::IDD),
 {
     //{{AFX_DATA_INIT(ColorGenPropPage)
     m_name = _T("");
-	m_app0 = FALSE;
-	m_app1 = FALSE;
-	m_app2 = FALSE;
-	m_app3 = FALSE;
-	m_highonly = FALSE;
-	//}}AFX_DATA_INIT
+        m_app0 = FALSE;
+        m_app1 = FALSE;
+        m_app2 = FALSE;
+        m_app3 = FALSE;
+        m_highonly = FALSE;
+        //}}AFX_DATA_INIT
 }
 
 ColorGenPropPage::~ColorGenPropPage()
@@ -1213,15 +1181,15 @@ void ColorGenPropPage::DoDataExchange(CDataExchange* pDX)
 {
     CPropertyPage::DoDataExchange(pDX);
     //{{AFX_DATA_MAP(ColorGenPropPage)
-	DDX_Control(pDX, IDC_CLRPRP_RESETUSAGE, m_resetCtl);
+        DDX_Control(pDX, IDC_CLRPRP_RESETUSAGE, m_resetCtl);
     DDX_Text(pDX, IDC_CLRPRP_NAME, m_name);
     DDV_MaxChars(pDX, m_name, 16);
-	DDX_Check(pDX, IDC_CLRPRP_APP0, m_app0);
-	DDX_Check(pDX, IDC_CLRPRP_APP1, m_app1);
-	DDX_Check(pDX, IDC_CLRPRP_APP2, m_app2);
-	DDX_Check(pDX, IDC_CLRPRP_APP3, m_app3);
-	DDX_Check(pDX, IDC_CLRPRP_HIGHONLY, m_highonly);
-	//}}AFX_DATA_MAP
+        DDX_Check(pDX, IDC_CLRPRP_APP0, m_app0);
+        DDX_Check(pDX, IDC_CLRPRP_APP1, m_app1);
+        DDX_Check(pDX, IDC_CLRPRP_APP2, m_app2);
+        DDX_Check(pDX, IDC_CLRPRP_APP3, m_app3);
+        DDX_Check(pDX, IDC_CLRPRP_HIGHONLY, m_highonly);
+        //}}AFX_DATA_MAP
 
     if (!pDX->m_bSaveAndValidate)
     {
@@ -1229,7 +1197,7 @@ void ColorGenPropPage::DoDataExchange(CDataExchange* pDX)
     }
 }
 
-void ColorGenPropPage::OnResetUsage() 
+void ColorGenPropPage::OnResetUsage()
 {
     if (!UpdateData(TRUE))
         return;
@@ -1303,11 +1271,11 @@ BEGIN_MESSAGE_MAP(ColorSelectPropPage, CPropertyPage)
     //{{AFX_MSG_MAP(ColorSelectPropPage)
     ON_WM_PAINT()
     ON_WM_LBUTTONDOWN()
-	ON_WM_SIZE()
-	//}}AFX_MSG_MAP
+        ON_WM_SIZE()
+        //}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
-ColorSelectPropPage::ColorSelectPropPage() : 
+ColorSelectPropPage::ColorSelectPropPage() :
     CPropertyPage(ColorSelectPropPage::IDD),
     palette(0),
     color(0),
@@ -1403,7 +1371,7 @@ void ColorSelectPropPage::setup_vport(int width, int height)
         ((WORD *)bmi->bmiColors)[i] = (WORD)i;
     }
 
-    gvport = new VngoVportDB8 (((width+3) & ~0x3), height, 
+    gvport = new VngoVportDB8 (((width+3) & ~0x3), height,
                                gmap, NULL, palette, 0);
     ASSERT(gvport != 0);
 }
@@ -1426,7 +1394,7 @@ void ColorSelectPropPage::release_vport()
     }
 }
 
-void ColorSelectPropPage::OnPaint() 
+void ColorSelectPropPage::OnPaint()
 {
     CPaintDC dc(this); // device context for painting
 
@@ -1466,12 +1434,12 @@ void ColorSelectPropPage::OnPaint()
                                         gmap, bmi, DIB_PAL_COLORS);
 }
 
-void ColorSelectPropPage::OnLButtonDown(UINT nFlags, CPoint point) 
+void ColorSelectPropPage::OnLButtonDown(UINT nFlags, CPoint point)
 {
     int x = point.x;
     int y = point.y;
 
-    if (x > (wid-50) || (y>hgt) || (y<0) || (x<0) )   
+    if (x > (wid-50) || (y>hgt) || (y<0) || (x<0) )
         return;
 
     int x_index = x / x_spacing;
@@ -1489,9 +1457,9 @@ void ColorSelectPropPage::OnLButtonDown(UINT nFlags, CPoint point)
     CPropertyPage::OnLButtonDown(nFlags, point);
 }
 
-void ColorSelectPropPage::OnSize(UINT nType, int cx, int cy) 
+void ColorSelectPropPage::OnSize(UINT nType, int cx, int cy)
 {
-	CPropertyPage::OnSize(nType, cx, cy);
+        CPropertyPage::OnSize(nType, cx, cy);
 
     wid = cx;
     hgt = cy;
@@ -1514,10 +1482,10 @@ void ColorSelectPropPage::OnSize(UINT nType, int cx, int cy)
 IMPLEMENT_DYNCREATE(ShadeReviewPropPage, CPropertyPage)
 
 BEGIN_MESSAGE_MAP(ShadeReviewPropPage, CPropertyPage)
-	//{{AFX_MSG_MAP(ShadeReviewPropPage)
-	ON_WM_PAINT()
-	ON_WM_SIZE()
-	//}}AFX_MSG_MAP
+        //{{AFX_MSG_MAP(ShadeReviewPropPage)
+        ON_WM_PAINT()
+        ON_WM_SIZE()
+        //}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 ShadeReviewPropPage::ShadeReviewPropPage() :
@@ -1533,9 +1501,9 @@ ShadeReviewPropPage::ShadeReviewPropPage() :
     x_spacing(0),
     y_spacing(0)
 {
-	//{{AFX_DATA_INIT(ShadeReviewPropPage)
-		// NOTE: the ClassWizard will add member initialization here
-	//}}AFX_DATA_INIT
+        //{{AFX_DATA_INIT(ShadeReviewPropPage)
+                // NOTE: the ClassWizard will add member initialization here
+        //}}AFX_DATA_INIT
 }
 
 ShadeReviewPropPage::~ShadeReviewPropPage()
@@ -1551,10 +1519,10 @@ ShadeReviewPropPage::~ShadeReviewPropPage()
 
 void ShadeReviewPropPage::DoDataExchange(CDataExchange* pDX)
 {
-	CPropertyPage::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(ShadeReviewPropPage)
-		// NOTE: the ClassWizard will add DDX and DDV calls here
-	//}}AFX_DATA_MAP
+        CPropertyPage::DoDataExchange(pDX);
+        //{{AFX_DATA_MAP(ShadeReviewPropPage)
+                // NOTE: the ClassWizard will add DDX and DDV calls here
+        //}}AFX_DATA_MAP
 
     if (!pDX->m_bSaveAndValidate)
     {
@@ -1614,7 +1582,7 @@ void ShadeReviewPropPage::setup_vport(int width, int height)
         ((WORD *)bmi->bmiColors)[i] = (WORD)i;
     }
 
-    gvport = new VngoVportDB8 (((width+3) & ~0x3), height, 
+    gvport = new VngoVportDB8 (((width+3) & ~0x3), height,
                                gmap, NULL, palette, 0);
     ASSERT(gvport != 0);
 }
@@ -1637,7 +1605,7 @@ void ShadeReviewPropPage::release_vport()
     }
 }
 
-void ShadeReviewPropPage::OnPaint() 
+void ShadeReviewPropPage::OnPaint()
 {
     CPaintDC dc(this); // device context for painting
 
@@ -1658,7 +1626,7 @@ void ShadeReviewPropPage::OnPaint()
 
     VngoRect vrc(0,0,x_spacing,y_spacing);
 
-    byte mp = (byte) ((shade->num_shd_lvl * (shade->mid_point-1)) / 256);
+    byte mp = (byte) ((shade->num_shd_lvl * shade->mid_point) / 256);
 
     for (int i = 0; i < shade->num_shd_lvl; i++)
     {
@@ -1682,9 +1650,9 @@ void ShadeReviewPropPage::OnPaint()
                                         gmap, bmi, DIB_PAL_COLORS);
 }
 
-void ShadeReviewPropPage::OnSize(UINT nType, int cx, int cy) 
+void ShadeReviewPropPage::OnSize(UINT nType, int cx, int cy)
 {
-	CPropertyPage::OnSize(nType, cx, cy);
+        CPropertyPage::OnSize(nType, cx, cy);
 
     wid = cx;
     hgt = cy;
@@ -1786,26 +1754,26 @@ void TerrExpStatDlg::DoDataExchange(CDataExchange* pDX)
 // DemImportDlg                                                             ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 BEGIN_MESSAGE_MAP(DEMImportDlg, CDialog)
-	//{{AFX_MSG_MAP(DEMImportDlg)
-	ON_BN_CLICKED(IDC_DEM_AVERAGE, OnDemAverage)
-	ON_BN_CLICKED(IDC_DEM_STD, OnDemStd)
-	ON_BN_CLICKED(IDC_DEM_UNIFORM, OnDemUniform)
-	//}}AFX_MSG_MAP
+        //{{AFX_MSG_MAP(DEMImportDlg)
+        ON_BN_CLICKED(IDC_DEM_AVERAGE, OnDemAverage)
+        ON_BN_CLICKED(IDC_DEM_STD, OnDemStd)
+        ON_BN_CLICKED(IDC_DEM_UNIFORM, OnDemUniform)
+        //}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 DEMImportDlg::DEMImportDlg(CWnd* pParent /*=NULL*/)
-	: CDialog(DEMImportDlg::IDD, pParent)
+        : CDialog(DEMImportDlg::IDD, pParent)
 {
-	//{{AFX_DATA_INIT(DEMImportDlg)
-	m_avg_maxd = 0.0f;
-	m_lat_degrees = 0;
-	m_lat_minutes = 0;
-	m_lat_seconds = 0;
-	m_lng_degrees = 0;
-	m_lng_minutes = 0;
-	m_lng_seconds = 0;
-	m_normalize = FALSE;
-	//}}AFX_DATA_INIT
+        //{{AFX_DATA_INIT(DEMImportDlg)
+        m_avg_maxd = 0.0f;
+        m_lat_degrees = 0;
+        m_lat_minutes = 0;
+        m_lat_seconds = 0;
+        m_lng_degrees = 0;
+        m_lng_minutes = 0;
+        m_lng_seconds = 0;
+        m_normalize = FALSE;
+        //}}AFX_DATA_INIT
 
     option=0;
     m_avg_maxd=16.0f;
@@ -1841,38 +1809,38 @@ void DEMImportDlg::DoDataExchange(CDataExchange* pDX)
         m_lat_seconds = l;
     }
 
-	CDialog::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(DEMImportDlg)
-	DDX_Control(pDX, IDC_DEM_LNG_SECONDS, m_lng_secondsCtl);
-	DDX_Control(pDX, IDC_DEM_LNG_MINUTES, m_lng_minutesCtl);
-	DDX_Control(pDX, IDC_DEM_LNG_DEGREES, m_lng_degreesCtl);
-	DDX_Control(pDX, IDC_DEM_LAT_SECONDS, m_lat_secondsCtl);
-	DDX_Control(pDX, IDC_DEM_LAT_MINUTES, m_lat_minutesCtl);
-	DDX_Control(pDX, IDC_DEM_LAT_DEGREES, m_lat_degreesCtl);
+        CDialog::DoDataExchange(pDX);
+        //{{AFX_DATA_MAP(DEMImportDlg)
+        DDX_Control(pDX, IDC_DEM_LNG_SECONDS, m_lng_secondsCtl);
+        DDX_Control(pDX, IDC_DEM_LNG_MINUTES, m_lng_minutesCtl);
+        DDX_Control(pDX, IDC_DEM_LNG_DEGREES, m_lng_degreesCtl);
+        DDX_Control(pDX, IDC_DEM_LAT_SECONDS, m_lat_secondsCtl);
+        DDX_Control(pDX, IDC_DEM_LAT_MINUTES, m_lat_minutesCtl);
+        DDX_Control(pDX, IDC_DEM_LAT_DEGREES, m_lat_degreesCtl);
     DDX_Control(pDX, IDC_DEM_STD, m_stdCtl);
     DDX_Control(pDX, IDC_DEM_UNIFORM, m_uniformCtl);
     DDX_Control(pDX, IDC_DEM_AVERAGE, m_avgCtl);
-	DDX_Control(pDX, IDC_DEM_AVGMAXD, m_avg_maxdCtl);
-	DDX_Text(pDX, IDC_DEM_AVGMAXD, m_avg_maxd);
-	DDV_MinMaxFloat(pDX, m_avg_maxd, 1.f, 32768.f);
-	DDX_Text(pDX, IDC_DEM_LAT_DEGREES, m_lat_degrees);
-	DDV_MinMaxUInt(pDX, m_lat_degrees, 0, 90);
-	DDX_Text(pDX, IDC_DEM_LAT_MINUTES, m_lat_minutes);
-	DDV_MinMaxUInt(pDX, m_lat_minutes, 0, 59);
-	DDX_Text(pDX, IDC_DEM_LAT_SECONDS, m_lat_seconds);
-	DDV_MinMaxUInt(pDX, m_lat_seconds, 0, 59);
-	DDX_Text(pDX, IDC_DEM_LNG_DEGREES, m_lng_degrees);
-	DDV_MinMaxUInt(pDX, m_lng_degrees, 0, 180);
-	DDX_Text(pDX, IDC_DEM_LNG_MINUTES, m_lng_minutes);
-	DDV_MinMaxUInt(pDX, m_lng_minutes, 0, 59);
-	DDX_Text(pDX, IDC_DEM_LNG_SECONDS, m_lng_seconds);
-	DDV_MinMaxUInt(pDX, m_lng_seconds, 0, 59);
+        DDX_Control(pDX, IDC_DEM_AVGMAXD, m_avg_maxdCtl);
+        DDX_Text(pDX, IDC_DEM_AVGMAXD, m_avg_maxd);
+        DDV_MinMaxFloat(pDX, m_avg_maxd, 1.f, 32768.f);
+        DDX_Text(pDX, IDC_DEM_LAT_DEGREES, m_lat_degrees);
+        DDV_MinMaxUInt(pDX, m_lat_degrees, 0, 90);
+        DDX_Text(pDX, IDC_DEM_LAT_MINUTES, m_lat_minutes);
+        DDV_MinMaxUInt(pDX, m_lat_minutes, 0, 59);
+        DDX_Text(pDX, IDC_DEM_LAT_SECONDS, m_lat_seconds);
+        DDV_MinMaxUInt(pDX, m_lat_seconds, 0, 59);
+        DDX_Text(pDX, IDC_DEM_LNG_DEGREES, m_lng_degrees);
+        DDV_MinMaxUInt(pDX, m_lng_degrees, 0, 180);
+        DDX_Text(pDX, IDC_DEM_LNG_MINUTES, m_lng_minutes);
+        DDV_MinMaxUInt(pDX, m_lng_minutes, 0, 59);
+        DDX_Text(pDX, IDC_DEM_LNG_SECONDS, m_lng_seconds);
+        DDV_MinMaxUInt(pDX, m_lng_seconds, 0, 59);
     DDX_Control(pDX, IDC_LNG_EAST, m_lng_east);
     DDX_Control(pDX, IDC_LNG_WEST, m_lng_west);
     DDX_Control(pDX, IDC_LAT_NORTH, m_lat_north);
     DDX_Control(pDX, IDC_LAT_SOUTH, m_lat_south);
-	DDX_Check(pDX, IDC_DEM_NORMALIZE, m_normalize);
-	//}}AFX_DATA_MAP
+        DDX_Check(pDX, IDC_DEM_NORMALIZE, m_normalize);
+        //}}AFX_DATA_MAP
 
     if (!pDX->m_bSaveAndValidate)
     {
@@ -1915,21 +1883,21 @@ void DEMImportDlg::DoDataExchange(CDataExchange* pDX)
     }
 }
 
-void DEMImportDlg::OnDemStd() 
+void DEMImportDlg::OnDemStd()
 {
     int state=m_stdCtl.GetCheck();
 
     m_avg_maxdCtl.EnableWindow(!state);
 }
 
-void DEMImportDlg::OnDemUniform() 
+void DEMImportDlg::OnDemUniform()
 {
     int state=m_uniformCtl.GetCheck();
 
     m_avg_maxdCtl.EnableWindow(!state);
 }
 
-void DEMImportDlg::OnDemAverage() 
+void DEMImportDlg::OnDemAverage()
 {
     int state=m_avgCtl.GetCheck();
 
@@ -1941,30 +1909,30 @@ void DEMImportDlg::OnDemAverage()
 // DEMProgressDlg                                                           ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 BEGIN_MESSAGE_MAP(DEMProgressDlg, CDialog)
-	//{{AFX_MSG_MAP(DEMProgressDlg)
-		// NOTE: the ClassWizard will add message map macros here
-	//}}AFX_MSG_MAP
+        //{{AFX_MSG_MAP(DEMProgressDlg)
+                // NOTE: the ClassWizard will add message map macros here
+        //}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 DEMProgressDlg::DEMProgressDlg(USGSFileParseDEM *d, CWnd* pParent /*=NULL*/)
-	: CDialog(DEMProgressDlg::IDD, pParent),
+        : CDialog(DEMProgressDlg::IDD, pParent),
     dem(d),
     okon(FALSE)
 {
-	//{{AFX_DATA_INIT(DEMProgressDlg)
-	m_comments = _T("");
-	m_elv_units = _T("");
-	m_fname = _T("");
-	m_grnd_units = _T("");
-	m_name = _T("");
-	m_profile_cols = 0;
-	m_profile_rows = 0;
-	m_quality = 0;
-	m_status = _T("");
-	m_axisx = 0.0f;
-	m_axisy = 0.0f;
-	m_axisz = 0.0f;
-	//}}AFX_DATA_INIT
+        //{{AFX_DATA_INIT(DEMProgressDlg)
+        m_comments = _T("");
+        m_elv_units = _T("");
+        m_fname = _T("");
+        m_grnd_units = _T("");
+        m_name = _T("");
+        m_profile_cols = 0;
+        m_profile_rows = 0;
+        m_quality = 0;
+        m_status = _T("");
+        m_axisx = 0.0f;
+        m_axisy = 0.0f;
+        m_axisz = 0.0f;
+        //}}AFX_DATA_INIT
 
     ASSERT(dem);
 
@@ -2007,23 +1975,23 @@ void DEMProgressDlg::DoDataExchange(CDataExchange* pDX)
         m_comments = dem->comment;  m_comments.TrimRight();  m_comments.TrimLeft();
     }
 
-	CDialog::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(DEMProgressDlg)
-	DDX_Control(pDX, IDOK, m_ok);
-	DDX_Control(pDX, IDC_DPRG_BAR, m_pbar);
-	DDX_Text(pDX, IDC_DPRG_COMMENT, m_comments);
-	DDX_Text(pDX, IDC_DPRG_EUNITS, m_elv_units);
-	DDX_Text(pDX, IDC_DPRG_FNAME, m_fname);
-	DDX_Text(pDX, IDC_DPRG_GUNITS, m_grnd_units);
-	DDX_Text(pDX, IDC_DPRG_NAME, m_name);
-	DDX_Text(pDX, IDC_DPRG_PCOLS, m_profile_cols);
-	DDX_Text(pDX, IDC_DPRG_PROWS, m_profile_rows);
-	DDX_Text(pDX, IDC_DPRG_QUALITY, m_quality);
-	DDX_Text(pDX, IDC_STATUS, m_status);
-	DDX_Text(pDX, IDC_DPRG_AXISX, m_axisx);
-	DDX_Text(pDX, IDC_DPRG_AXISY, m_axisy);
-	DDX_Text(pDX, IDC_DPRG_AXISZ, m_axisz);
-	//}}AFX_DATA_MAP
+        CDialog::DoDataExchange(pDX);
+        //{{AFX_DATA_MAP(DEMProgressDlg)
+        DDX_Control(pDX, IDOK, m_ok);
+        DDX_Control(pDX, IDC_DPRG_BAR, m_pbar);
+        DDX_Text(pDX, IDC_DPRG_COMMENT, m_comments);
+        DDX_Text(pDX, IDC_DPRG_EUNITS, m_elv_units);
+        DDX_Text(pDX, IDC_DPRG_FNAME, m_fname);
+        DDX_Text(pDX, IDC_DPRG_GUNITS, m_grnd_units);
+        DDX_Text(pDX, IDC_DPRG_NAME, m_name);
+        DDX_Text(pDX, IDC_DPRG_PCOLS, m_profile_cols);
+        DDX_Text(pDX, IDC_DPRG_PROWS, m_profile_rows);
+        DDX_Text(pDX, IDC_DPRG_QUALITY, m_quality);
+        DDX_Text(pDX, IDC_STATUS, m_status);
+        DDX_Text(pDX, IDC_DPRG_AXISX, m_axisx);
+        DDX_Text(pDX, IDC_DPRG_AXISY, m_axisy);
+        DDX_Text(pDX, IDC_DPRG_AXISZ, m_axisz);
+        //}}AFX_DATA_MAP
 
     if (!pDX->m_bSaveAndValidate)
     {
@@ -2041,17 +2009,17 @@ void DEMProgressDlg::DoDataExchange(CDataExchange* pDX)
 // LocateDlg                                                                ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 BEGIN_MESSAGE_MAP(LocateDlg, CDialog)
-	//{{AFX_MSG_MAP(LocateDlg)
-	ON_BN_CLICKED(IDC_LOCATE_BROWSE, OnBrowse)
-	//}}AFX_MSG_MAP
+        //{{AFX_MSG_MAP(LocateDlg)
+        ON_BN_CLICKED(IDC_LOCATE_BROWSE, OnBrowse)
+        //}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 LocateDlg::LocateDlg(CWnd* pParent /*=NULL*/)
-	: CDialog(LocateDlg::IDD, pParent)
+        : CDialog(LocateDlg::IDD, pParent)
 {
-	//{{AFX_DATA_INIT(LocateDlg)
-	m_fname = _T("");
-	//}}AFX_DATA_INIT
+        //{{AFX_DATA_INIT(LocateDlg)
+        m_fname = _T("");
+        //}}AFX_DATA_INIT
 
     typestr = _T("");
     title = _T("Locate File");
@@ -2059,11 +2027,11 @@ LocateDlg::LocateDlg(CWnd* pParent /*=NULL*/)
 
 void LocateDlg::DoDataExchange(CDataExchange* pDX)
 {
-	CDialog::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(LocateDlg)
-	DDX_Text(pDX, IDC_LOCATE_FILE, m_fname);
-	DDV_MaxChars(pDX, m_fname, 256);
-	//}}AFX_DATA_MAP
+        CDialog::DoDataExchange(pDX);
+        //{{AFX_DATA_MAP(LocateDlg)
+        DDX_Text(pDX, IDC_LOCATE_FILE, m_fname);
+        DDV_MaxChars(pDX, m_fname, 256);
+        //}}AFX_DATA_MAP
 
     if (!pDX->m_bSaveAndValidate)
     {
@@ -2085,7 +2053,7 @@ void LocateDlg::DoDataExchange(CDataExchange* pDX)
     }
 }
 
-void LocateDlg::OnBrowse() 
+void LocateDlg::OnBrowse()
 {
     CString str = typestr + "All files (*.*)|*.*||";
 
@@ -2108,19 +2076,19 @@ void LocateDlg::OnBrowse()
 // SetBaseElvDlg                                                            ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 BEGIN_MESSAGE_MAP(SetBaseElvDlg, CDialog)
-	//{{AFX_MSG_MAP(SetBaseElvDlg)
-		// NOTE: the ClassWizard will add message map macros here
-	//}}AFX_MSG_MAP
+        //{{AFX_MSG_MAP(SetBaseElvDlg)
+                // NOTE: the ClassWizard will add message map macros here
+        //}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 SetBaseElvDlg::SetBaseElvDlg(CWnd* pParent /*=NULL*/)
-	: CDialog(SetBaseElvDlg::IDD, pParent)
+        : CDialog(SetBaseElvDlg::IDD, pParent)
 {
-	//{{AFX_DATA_INIT(SetBaseElvDlg)
-	m_setbase_elv = 0.0f;
-	m_elvmin = 0.0f;
-	m_elvmax = 0.0f;
-	//}}AFX_DATA_INIT
+        //{{AFX_DATA_INIT(SetBaseElvDlg)
+        m_setbase_elv = 0.0f;
+        m_elvmin = 0.0f;
+        m_elvmax = 0.0f;
+        //}}AFX_DATA_INIT
 }
 
 void SetBaseElvDlg::DoDataExchange(CDataExchange* pDX)
@@ -2130,13 +2098,13 @@ void SetBaseElvDlg::DoDataExchange(CDataExchange* pDX)
         m_setbase_elv = m_elvmin;
     }
 
-	CDialog::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(SetBaseElvDlg)
-	DDX_Text(pDX, IDC_SETBASE_ELV, m_setbase_elv);
-	DDV_MinMaxFloat(pDX, m_setbase_elv, -32768.f, 32768.f);
-	DDX_Text(pDX, IDC_SETBASE_MIN, m_elvmin);
-	DDX_Text(pDX, IDC_SETBASE_MAX, m_elvmax);
-	//}}AFX_DATA_MAP
+        CDialog::DoDataExchange(pDX);
+        //{{AFX_DATA_MAP(SetBaseElvDlg)
+        DDX_Text(pDX, IDC_SETBASE_ELV, m_setbase_elv);
+        DDV_MinMaxFloat(pDX, m_setbase_elv, -32768.f, 32768.f);
+        DDX_Text(pDX, IDC_SETBASE_MIN, m_elvmin);
+        DDX_Text(pDX, IDC_SETBASE_MAX, m_elvmax);
+        //}}AFX_DATA_MAP
 
     if (pDX->m_bSaveAndValidate)
     {

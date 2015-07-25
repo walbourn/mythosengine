@@ -66,21 +66,37 @@ INCPATH   = ;..\;..\..\inc;$(MYTH95ROOT)\inc;
 
 LIBPATH = $(MYTH95ROOT)\lib;
 
+#ÄÄÄ Directory
 EXEDIR = eshdir
 
-OBJSDIR = eshdir.obj
+OBJSDIR = \
+eshdir.obj\
+eshdir.res
 
+#ÄÄÄ Lightwave Converter
 EXELW = eshlw
 
-OBJSLW = eshlw.obj
+OBJSLW = \
+eshlw.obj\
+eshlw.res
 
-LIBS = ivory.lib\
+#ÄÄÄ Texture Librarian
+EXETLIB = eshtlib
+
+OBJSTLIB = \
+lexyy.obj\
+eshtlib.obj\
+eshtlibp.obj\
+eshtlib.res
+
+LIBS = \
+ivorymfc.lib\
 xfile.lib\
 felix.lib\
 vangogh.lib\
 escher.lib
 
-all: setstden $(EXEDIR).exe $(EXELW).exe
+all: setstden $(EXEDIR).exe $(EXELW).exe $(EXETLIB).exe
 
 #ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 # Standard make include                                                    ³
@@ -134,6 +150,22 @@ $(EXELW).exe:   $(OBJSLW)
    $(LINK) $(LINKOPTS) /OUT:$*.exe @<<
    $(OBJSLW) $(LIBS)
 <<
+
+
+#ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+# Escher Texture Librarian                                                 ³
+#ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+$(EXETLIB).exe:   $(OBJSTLIB)
+   $(LINK) $(LINKOPTS) /OUT:$*.exe @<<
+   $(OBJSTLIB) $(LIBS)
+<<
+
+lexyy.obj : .\lexyy.c
+	$(CC) $(CCOPTIONS) /W2 lexyy.c
+
+.\lexyy.c : ..\eshtlib.l
+   flex -8 ../eshtlib.l
 
 #°±² End of makefile ²±°
 

@@ -25,6 +25,8 @@
 //
 //컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
 //
+// Created by Tim Little
+//
 // vngtxtr.hpp
 //
 // Contains the texture classes definitions
@@ -65,6 +67,7 @@
 //컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
 class VngoTexture3D;
 class VngoScreenManager;
+class VngoVport;
 
 class VngoCacheHndl
 {
@@ -113,19 +116,40 @@ struct VngoTexture
     void            *tex;
     dword           flags;
     VngoTexture3D   *vtex3d;
+    VngoPal         *pal_ptr;
 
-    VngoTexture() {flags = VNGO_TEXTURE_8BIT; tex=NULL; vtex3d=NULL;}
-    VngoTexture(dword _flags) {flags = _flags; tex=NULL; vtex3d=NULL;}
-    VngoTexture (short _width, short _height, void *_tex, dword _flags = VNGO_TEXTURE_8BIT)
-    {
-        width   = _width;
-        height  = _height;
-        tex     = _tex;
-        flags   = _flags;
-        vtex3d  = NULL;
-    }
+    VngoTexture() :
+        tex(0),
+        flags(VNGO_TEXTURE_8BIT),
+        vtex3d(0),
+        pal_ptr(0)
+    {}
 
-    ~VngoTexture();
+    VngoTexture(dword _flags) :
+        tex(0),
+        flags(_flags),
+        vtex3d(0),
+        pal_ptr(0)
+    {}
+
+    VngoTexture (short _width, short _height,
+                 void *_tex, dword _flags = VNGO_TEXTURE_8BIT,
+                 VngoPal *_pal =0) :
+        width(_width),
+        height(_height),
+        tex(_tex),
+        flags(_flags),
+        vtex3d(0),
+        pal_ptr(_pal)
+    {}
+
+    ~VngoTexture() { release(); }
+
+    void release();
+    void make_dirty();
+    VNGError create(short w, short h, int bits = 8, int trans = 1);
+    VNGError convert(XFBitmap *bm, VngoPal *pal);
+
 };
 
 struct VngoCTexture : public VngoTexture
@@ -134,6 +158,9 @@ struct VngoCTexture : public VngoTexture
 
     VngoCTexture() {ytable=NULL;};
     VngoCTexture(VngoTexture *_tex);
+
+    ~VngoCTexture() { release(); }
+
     VNGError init(VngoTexture *_tex);
     void release();
 };
@@ -147,11 +174,6 @@ class VngoTexture3D
 protected:
     VngoTextureType dev_type;
     VNGError        err_status;
-public:
-    VngoCacheHndl   *chandle;
-    VngoTexture     *ref;
-    VngoTexture3D   *next;
-    VngoPal         *palette;
 
     VngoTexture3D ()
     {
@@ -159,16 +181,27 @@ public:
         chandle = NULL;
         ref = NULL;
         palette = NULL;
+        flags = 0;
     }
-    VngoTexture3D (VngoTexture *_tex,VngoPal *_pal = NULL);
+    VngoTexture3D (VngoTexture *_tex,VngoPal *_pal = NULL) { }
+    VngoTexture3D (const VngoTexture3D &t);
+    VngoTexture3D &operator= (const VngoTexture3D &t);
+
+public:
+    VngoCacheHndl   *chandle;
+    VngoTexture     *ref;
+    VngoTexture3D   *next;
+    VngoPal         *palette;
+    dword           flags;
+
     VngoTextureType get_type() {return (dev_type);}
     VNGError get_err_status() {return err_status;}
 
     virtual ~VngoTexture3D() {};
-    virtual VNGError init(VngoTexture *_src,VngoPal *_pal=NULL)=0;
-    virtual VNGError reinit(VngoTexture *_src,VngoPal *_pal=NULL) = 0;
-    virtual void release()=0;
-
+    virtual VNGError init(VngoTexture *_src,VngoPal *_pal=NULL) {return VNGO_NO_ERROR;}
+    virtual VNGError reinit(VngoTexture *_src,VngoPal *_pal=NULL) {return VNGO_NO_ERROR;}
+    virtual VNGError ready_texture() {return VNGO_NO_ERROR;}
+    virtual void release() {};
 };
 
 class VngoMemTexture3D : public VngoTexture3D
@@ -188,13 +221,14 @@ public:
     virtual ~VngoMemTexture3D();
     virtual VNGError init(VngoTexture *_src,VngoPal *_pal=NULL);
     virtual VNGError reinit(VngoTexture *_src,VngoPal *_pal=NULL);
+    virtual VNGError ready_texture() {return VNGO_NO_ERROR;};
     virtual void release();
 };
 
-#ifdef _D3D
 class VngoD3DTexture3D : public VngoTexture3D
 {
     dword       iflags;
+    VNGError    load_texture();
 public:
     IDirectDrawSurface  *MemorySurface;
     IDirectDrawSurface  *DeviceSurface;
@@ -207,18 +241,19 @@ public:
         MemorySurface = NULL;
         DeviceSurface = NULL;
         pal           = NULL;
-        handle     = NULL;
+        handle        = NULL;
+        iflags        = NULL;
     }
 
     VngoD3DTexture3D (VngoTexture *_src,VngoPal *_pal=NULL);
     virtual ~VngoD3DTexture3D();
     virtual VNGError init(VngoTexture *_src,VngoPal *_pal=NULL);
     virtual VNGError reinit(VngoTexture *_src,VngoPal *_pal=NULL);
+    virtual VNGError ready_texture();
     virtual void release();
 private:
     VNGError restore();
 };
-#endif          // _D3D
 
 #ifdef _OEMS
 #ifdef _CLEAR_3D
@@ -240,6 +275,7 @@ public:
     virtual ~VngoCL3DTexture3D();
     virtual VNGError init(VngoTexture *_src,VngoPal *_pal=NULL);
     virtual VNGError reinit(VngoTexture *_src,VngoPal *_pal=NULL);
+    virtual VNGError ready_texture();
     virtual void release();
 private:
     VNGError restore();
@@ -306,6 +342,7 @@ public:
 class VngoSystem
 {
 public:
+    VngoVport           *cur_vport;
     VngoTextureManager  *DIBTx;     // Assumed to be a VngoDIB
     VngoTextureManager  *DDTx;      // Assumed to be a VngoDirectDraw
     VngoTextureManager  *D3DTx;     // Assumed to be a VngoDirect3D
@@ -313,6 +350,18 @@ public:
     VngoTextureManager  *CL3DTx;    // Assumed to be a VngoClear3D
     VngoTextureManager  *GlideTx;   // Assumed to be a Vngo3Dfx
     VngoTextureManager  *MSITx;     // Assumed to be a VngoMSI
+
+    VngoSystem()
+    {
+        cur_vport = NULL;
+        DIBTx = NULL;
+        DDTx = NULL;
+        D3DTx = NULL;
+        OGLTx = NULL;
+        CL3DTx = NULL;
+        GlideTx = NULL;
+        MSITx = NULL;
+    }
 };
 
 #ifdef __WATCOMC__

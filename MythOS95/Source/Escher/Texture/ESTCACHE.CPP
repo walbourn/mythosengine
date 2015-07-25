@@ -164,6 +164,12 @@ int EschTexture::cache_release(IvoryHandle h)
                     ivory_hunlock(tc->handle);
                 }
                 ivory_hfree(&tc->handle);
+
+                if (tc->name)
+                {
+                    delete [] tc->name;
+                    tc->name = 0;
+                }
             }
             return 1;
         }
@@ -238,6 +244,9 @@ esch_error_codes EschTexture::cache_register(const char *n, IvoryHandle hnd,
     tc->max = m;
     tc->width = w;
     tc->height = h;
+    tc->name = new char[ESCH_MAX_NAME];
+    if (!tc->name)
+        return ESCH_ERR_NOMEMORY;
 
     strncpy(tc->name,n,ESCH_MAX_NAME);
 

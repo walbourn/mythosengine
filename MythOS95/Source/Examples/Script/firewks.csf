@@ -1,0 +1,236 @@
+//ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
+//
+//                                /\    /\ 
+//                               /  \  /  \ 
+//                              /    \/    \ 
+//                             /  /\    /\  \ 
+//                            /  /  \  /  Y T H O S
+//                           /  /    \/    \  \ 
+//                          /  /            \  \ 
+//                         /__/              \__\ 
+//
+//                      Microsoft Windows '95 Version
+//
+//            Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.
+//                           All Rights Reserved.
+//
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//
+//           *** Charybdis Enterprises, Inc. Company Confidential ***
+//
+//  This file and all associated files are the company proprietary property
+//        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+//
+// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
+// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
+// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
+// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
+// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+//
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//
+//                               3D SCRIPT EXAMPLE
+//
+// Created by Chuck Walbourn
+//
+// firewks.csf
+//
+//ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
+
+create camera="Camera"
+{
+    position=0,0,-100;
+    lookat=0,0,0;
+    shade=smooth;
+    yon=4000;
+}
+
+waitkey=1000;
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// First burst
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+create drawable="Sparks1" type=particle maxcount=4096
+{
+    position=0,-30,0;
+    parts=10;
+    life=1;
+    speed=5;
+    sphere=0.5;
+    color=255,255,0,255,255,255;
+    acceleration=0,-8,0;
+}
+
+animate drawable="Sparks1"
+{
+    velocity = 0,29,0;
+    acceleration = 0,-8,0;
+}
+
+waitkey=2000;
+
+modify drawable="Sparks1"
+{
+    parts=2000;
+    life=1.5,1;
+    speed=20;
+    sphere=2;
+}
+
+waitkey=250;
+
+modify drawable="Sparks1"
+{
+    parts=0;
+}
+
+waitkey=500;
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// Second burst
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+create drawable="Sparks2" type=particle maxcount=4096
+{
+    position=0,-30,0;
+    parts=10;
+    life=1;
+    speed=5;
+    sphere=0.5;
+    color=255,0,0,255,255,255;
+    acceleration=0,-8,0;
+}
+
+create drawable="Sparks3" type=particle maxcount=4096
+{
+    position=-20,-30,0;
+    parts=10;
+    life=1;
+    speed=5;
+    sphere=0.5;
+    color=0,255,0,255,255,255;
+    acceleration=0,-8,0;
+}
+
+create drawable="Sparks4" type=particle maxcount=4096
+{
+    position=20,-30,0;
+    parts=10;
+    life=1;
+    speed=5;
+    sphere=0.5;
+    color=0,0,255,255,255,255;
+    acceleration=0,-8,0;
+}
+
+animate drawable="Sparks2"
+{
+    velocity = 0,29,0;
+    acceleration = 0,-8,0;
+}
+
+animate drawable="Sparks3"
+{
+    velocity = 0,24,0;
+    acceleration = 0,-8,0;
+}
+
+animate drawable="Sparks4"
+{
+    velocity = 0,25,0;
+    acceleration = 0,-8,0;
+}
+
+waitkey=2000;
+
+modify drawable="Sparks2"
+{
+    parts=2000;
+    life=1.5,1;
+    speed=20;
+    sphere=2;
+}
+
+waitkey=50;
+
+modify drawable="Sparks3"
+{
+    parts=2000;
+    life=1.5,1;
+    speed=20;
+    sphere=2;
+}
+
+waitkey=50;
+
+modify drawable="Sparks4"
+{
+    parts=2000;
+    life=1.5,1;
+    speed=20;
+    sphere=2;
+}
+
+waitkey=100;
+
+modify drawable="Sparks2"
+{
+    parts=0;
+}
+
+waitkey=50;
+
+modify drawable="Sparks3"
+{
+    parts=0;
+}
+
+waitkey=50;
+
+modify drawable="Sparks4"
+{
+    parts=0;
+}
+
+waitkey=500;
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// Third and final burst
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+modify drawable="Sparks1"
+{
+    position=0,-30,0;
+    parts=10;
+    life=1;
+    speed=5;
+    sphere=0.5;
+    color=0,255,255,255,255,255;
+    acceleration=0,-8,0;
+}
+
+animate drawable="Sparks1"
+{
+    velocity = 0,27,0;
+    acceleration = 0,-8,0;
+}
+
+waitkey=2000;
+
+modify drawable="Sparks1"
+{
+    parts=4000;
+    life=1.5,1;
+    speed=20;
+    sphere=2;
+}
+
+waitkey=250;
+
+modify drawable="Sparks1"
+{
+    parts=0;
+}
+
+
+waitkey=5000; 
+
+//°±² eof - firewks.csf ²±°

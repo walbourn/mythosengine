@@ -54,9 +54,9 @@
 #endif
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-//             
+//
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include "esdraw.hpp"
@@ -185,6 +185,8 @@ public:
     EschPoint       pos;
     float           width;
     float           height;
+    float           rotation;
+    float           scale;
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Constructor/Destructors                                              ³
@@ -192,13 +194,18 @@ public:
     EschSprite() :
         EschDrawable(ESCH_DRWT_SPRITE),
         txt(0),
-        alpha_level(255) {};
-    EschSprite(float ix, float iy, float iz, float w, float h) :
+        alpha_level(255),
+        rotation(0),
+        scale(1) {};
+    EschSprite(float ix, float iy, float iz, float w, float h,
+               float r=0, float s=1) :
         EschDrawable(ESCH_DRWT_SPRITE),
+        txt(0),
+        alpha_level(255),
         pos(ix,iy,iz),
         width(w), height(h),
-        txt(0),
-        alpha_level(255) {};
+        rotation(r),
+        scale(s) {};
 
     virtual ~EschSprite();
 
@@ -235,12 +242,16 @@ public:
         height=h;
     }
 
+    void set_rotation (float r) { rotation = r; }
+    void set_scale (float s) { scale = s; }
+
     void set_alpha(long alpha) { alpha_level = alpha; }
     long get_alpha() const { return alpha_level; }
 
     void attach(EschTexture *t);
 
-    esch_error_codes create(XFBitmap *bm, float w, float h);
+    esch_error_codes create(XFBitmap *bm, float w, float h,
+                            int trans=1, VngoPal *pal=0);
 };
 
 #ifdef __WATCOMC__

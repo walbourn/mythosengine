@@ -27,7 +27,6 @@
 //
 // vngserv.cpp
 //
-//ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ Revision History ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
@@ -40,6 +39,21 @@
 #include "debug.h"
 #include "portable.h"
 #include "vangogh.hpp"
+
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//
+//                                 Macros
+//
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+// The SAME_SIGNS macro assumes arithmetic where the exclusive-or
+// operation will work on sign bits.  This works for twos-complement,
+// and most other machine arithmetic.
+#define SAME_SIGNS( a, b ) \
+        (((long) ((unsigned long) a ^ (unsigned long) b)) >= 0 )
+#define MAX(a,b) (a>b)?a:b
+
+#define ABS(a) (a<0)?(a*=(-1)):a
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
@@ -56,6 +70,9 @@ STATIC  dword invert_table[2048];
 //
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// vngo_get_invert
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 dword * vngo_get_invert()
 {
     static  needs_init = 1;
@@ -84,8 +101,13 @@ dword * vngo_get_invert()
 }
 
 
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°° VngoRect °°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-//  clip_to
+// VngoRect - clip_to
+//
 //      Clip the rect to the passed in rectangle.  It will return the
 //      resulting rectangle.  If the rect is completely clipped, it will
 //      return a rectangle with all elements = 0.
@@ -134,460 +156,426 @@ VNGError VngoRect::clip_to(VngoRect &crect)
     return (VNGO_NO_ERROR);
 }
 
-
-VngoTexture::~VngoTexture()
-{
-    VngoTexture3D   *tptr = vtex3d;
-    while(tptr)
-    {
-        VngoTexture3D   *temp = tptr->next;
-        delete (tptr);
-        tptr = temp;
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// VngoRect - clip_to
+//
+//      Clip the passed in line to the rect.  It will return the
+//      resulting line.  If the line is completely clipped, it will
+//      return VNGO_FULLY_CLIPPED, and no parameters will be modified.
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+VNGError VngoRect::clip_to(VngoPoint *p1,VngoPoint *p2,dword flags)
+{                     \
+    if ((p1->x >= x && p1->x < (x + dx) && p2->x >= x && p2->x < (x + dx))
+        && (p1->y >= y && p1->y < (y + dy) && p2->y >= y && p2->y < (y + dy)))
+    {   // It doesn't need to be clipped.
+        if (flags & VNGO_CLIP_VERBOSE)
+            return VNGO_FULLY_INSIDE;
+        else
+            return VNGO_NO_ERROR;
     }
-}
 
-VngoCTexture::VngoCTexture (VngoTexture *_tex)
-{
-    ytable = NULL;
-    init(_tex);
-}
 
-VNGError VngoCTexture::init(VngoTexture *_tex)
-{
-    if (_tex->flags & VNGO_TEXTURE_8BIT)
+    int top = y;
+    int bottom = y + dy;
+    int left = x;
+    int right = x + dx;
+
+    VngoPoint   tp1 = *p1;
+    VngoPoint   tp2 = *p2;
+
+    if (p1->x > p2->x)
     {
-
-        short   lcount = 0;
-        long    hsize=0;
-
-        byte    *tsource = (byte*)_tex->tex;
-        width = _tex->width;
-        height = _tex->height;
-        flags = _tex->flags;
-        ytable = new dword [height+1];
-
-        if (ytable == NULL)
-        {
-            return VNGO_MEMORY_ERROR;
-        }
-        for (int j=0;j < height;j++)
-        {
-            if (j==0)
-                ytable[j] = 0;
-            else
-                ytable[j] = ytable[j-1] + hsize;
-
-            hsize = 0;
-            for (int i=0;i < width;)
-            {
-                hsize+=2;
-                while((tsource[(j*width)+i] != VNGO_TRANSPARENT_COLOR) && i < width)
-                {
-                    i++;
-                    hsize++;
-                }
-                hsize+=2;
-                while((tsource[(j*width)+i] == VNGO_TRANSPARENT_COLOR) && i < width)
-                {
-                    i++;
-                }
-            }
-        }
-        long    tsize=ytable[j-1] + hsize;
-        tex = new byte[tsize];
-
-        if (tex == NULL)
-            return VNGO_MEMORY_ERROR;
-
-        for (j=0;j < height;j++)
-        {
-            byte *ptr = (byte*)tex + ytable[j];
-            for (int i=0;i < width;)
-            {
-                word *cptr = (word *)ptr;
-                ptr += 2;
-                lcount = 0;
-                while((tsource[(j*width)+i] != VNGO_TRANSPARENT_COLOR) && i < width)
-                {
-                    *ptr=tsource[(j*width)+i];
-                    lcount++;
-                    i++;
-                    ptr++;
-                }
-                *cptr = lcount;
-                cptr = (word *)ptr;
-                ptr += 2;
-                lcount = 0;
-                while((tsource[(j*width)+i] == VNGO_TRANSPARENT_COLOR) && i < width)
-                {
-                    lcount++;
-                    i++;
-                }
-                *cptr = lcount;
-            }
-        }
-        flags |= VNGO_TEXTURE_COMPRESSED;
-        return VNGO_NO_ERROR;
+        tp1 = *p2;
+        tp2 = *p1;
     }
-    else if (_tex->flags & VNGO_TEXTURE_15BIT
-             || _tex->flags & VNGO_TEXTURE_16BIT)
+
+    if ((tp2.x < left) || (tp1.x > right))
     {
-
-        word    *tsource = (word*)_tex->tex;
-        short   lcount = 0;
-        long    hsize=0;
-
-        width = _tex->width;
-        height = _tex->height;
-        flags = _tex->flags;
-        ytable = new dword [height+1];
-
-        if (ytable == NULL)
-        {
-            return VNGO_MEMORY_ERROR;
-        }
-        for (int j=0;j < height;j++)
-        {
-            if (j==0)
-                ytable[j] = 0;
-            else
-                ytable[j] = ytable[j-1] + (hsize << 1);
-
-            hsize = 0;
-            for (int i=0;i < width;)
-            {
-                hsize++;
-                if (_tex->flags & VNGO_TEXTURE_15BIT)
-                { // 0x7c1f is the transparent color for 15bpp.
-                    while((tsource[(j*width)+i] != 0x7c1f) && i < width)
-                    {
-                        i++;
-                        hsize++;
-                    }
-                    hsize++;
-                    while((tsource[(j*width)+i] == 0x7c1f) && i < width)
-                    {
-                        i++;
-                    }
-                }
-                else
-                { // 0xf81f is the transparent color for 16bpp.
-                    while((tsource[(j*width)+i] != 0xf81f) && i < width)
-                    {
-                        i++;
-                        hsize++;
-                    }
-                    hsize++;
-                    while((tsource[(j*width)+i] == 0xf81f) && i < width)
-                    {
-                        i++;
-                    }
-                }
-            }
-        }
-        long    tsize=ytable[j-1] + (hsize << 1);
-        tex = new byte[tsize];
-
-        if (tex == NULL)
-            return VNGO_MEMORY_ERROR;
-
-        for (j=0;j < height;j++)
-        {
-            word *ptr = (word*)((byte*)tex + ytable[j]);
-            for (int i=0;i < width;)
-            {
-                if (_tex->flags & VNGO_TEXTURE_15BIT)
-                { // 0x7c1f is the transparent color for 15bpp.
-                    word *cptr = ptr;
-                    ptr++;
-                    lcount = 0;
-                    while((tsource[(j*width)+i] != 0x7c1f) && i < width)
-                    {
-                        *ptr=tsource[(j*width)+i];
-                        lcount++;
-                        i++;
-                        ptr++;
-                    }
-                    *cptr = lcount;
-                    cptr = ptr;
-                    ptr++;
-                    lcount = 0;
-                    while((tsource[(j*width)+i] == 0x7c1f) && i < width)
-                    {
-                        lcount++;
-                        i++;
-                    }
-                    *cptr = lcount;
-                }
-                else
-                { // 0xf81f is the transparent color for 16bpp.
-                    word *cptr = ptr;
-                    ptr++;
-                    lcount = 0;
-                    while((tsource[(j*width)+i] != 0xf81f) && i < width)
-                    {
-                        *ptr=tsource[(j*width)+i];
-                        lcount++;
-                        i++;
-                        ptr++;
-                    }
-                    *cptr = lcount;
-                    cptr = (word *)ptr;
-                    ptr++;
-                    lcount = 0;
-                    while((tsource[(j*width)+i] == 0xf81f) && i < width)
-                    {
-                        lcount++;
-                        i++;
-                    }
-                    *cptr = lcount;
-                }
-            }
-        }
-        flags |= VNGO_TEXTURE_COMPRESSED;
-        return VNGO_NO_ERROR;
+        return VNGO_FULLY_CLIPPED;
     }
-    return VNGO_UNSUPPORTED_TEXTURE;
+    if (tp1.y < tp2.y)
+    {
+        if ((tp2.y < top) || (tp1.y > bottom))
+            return VNGO_FULLY_CLIPPED;
+
+        if (tp1.y < top)
+        {
+            // clip to the top.
+            Flx16   dy1 = Flx16(tp2.y - tp1.y);
+            Flx16   dy2 = Flx16(tp2.y - top);
+            Flx16   dx  = Flx16(tp2.x - tp1.x);
+            Flx16   scale = flx_16div16(dy2,dy1);
+            dx = flx_16mul16(dx,scale);
+            tp1.y = top;
+            tp1.x = tp2.x - (int) dx;
+
+            if (flags & VNGO_CLIP_SHADE)
+            {
+                Flx16   ds  = Flx16(tp2.shade - tp1.shade);
+                ds = flx_16mul16(ds,scale);
+                tp1.shade = tp2.shade - (int)ds;
+            }
+            if (flags & VNGO_CLIP_Z)
+            {
+                Flx16   dz  = Flx16(tp2.z - tp1.z,0);
+                dz = flx_16mul16(dz,scale);
+                tp1.z += dz.flx;
+            }
+
+
+        }
+        if (tp2.y > bottom)
+        {
+            // clip to the bottom.
+            Flx16   dy1 = Flx16(tp2.y - tp1.y);
+            Flx16   dy2 = Flx16(tp2.y - bottom);
+            Flx16   dx  = Flx16(tp2.x - tp1.x);
+            Flx16 scale = flx_16div16(dy2,dy1);
+            dx = flx_16mul16(dx,scale);
+            tp2.y = bottom;
+            tp2.x = tp2.x - (int) dx;
+
+            if (flags & VNGO_CLIP_SHADE)
+            {
+                Flx16   ds  = Flx16(tp2.shade - tp2.shade);
+                ds = flx_16mul16(ds,scale);
+                tp2.shade = tp2.shade - (int) ds;
+            }
+            if (flags & VNGO_CLIP_Z)
+            {
+                Flx16   dz  = Flx16(tp2.z - tp1.z,0);
+                dz = flx_16mul16(dz,scale);
+                tp2.z = tp2.z + dz.flx;
+            }
+        }
+    }
+    else
+    {
+        if ((tp1.y < top) || (tp2.y > bottom))
+            return VNGO_FULLY_CLIPPED;
+
+        if (tp2.y < top)
+        {
+            // clip to the top.
+            Flx16   dy1 = Flx16(tp1.y - tp2.y);
+            Flx16   dy2 = Flx16(tp1.y - top);
+            Flx16   dx  = Flx16(tp1.x - tp2.x);
+            Flx16   scale = flx_16div16(dy2,dy1);
+            dx = flx_16mul16(dx,scale);
+            tp2.y = top;
+            tp2.x = tp1.x - (int) dx;
+
+            if (flags & VNGO_CLIP_SHADE)
+            {
+                Flx16   ds  = Flx16(tp1.shade - tp2.shade);
+                ds = flx_16mul16(ds,scale);
+                tp2.shade = tp1.shade - (int) ds;
+            }
+
+            if (flags & VNGO_CLIP_Z)
+            {
+                Flx16   dz  = Flx16(tp1.z - tp2.z,0);
+                dz = flx_16mul16(dz,scale);
+                tp2.z += dz.flx;
+            }
+        }
+        if (tp1.y > bottom)
+        {
+            // clip to the bottom.
+            Flx16   dy1 = Flx16(tp1.y - tp2.y);
+            Flx16   dy2 = Flx16(tp1.y - bottom);
+            Flx16   dx  = Flx16(tp1.x - tp2.x);
+            Flx16   scale = flx_16div16(dy2,dy1);
+            dx = flx_16mul16(dx,scale);
+            tp1.y = bottom;
+            tp1.x = tp1.x - (int) dx;
+
+            if (flags & VNGO_CLIP_SHADE)
+            {
+                Flx16   ds  = Flx16(tp1.shade - tp2.shade);
+                ds = flx_16mul16(ds,scale);
+                tp1.shade = tp1.shade - (int) ds;
+            }
+
+            if (flags & VNGO_CLIP_Z)
+            {
+                Flx16   dz  = Flx16(tp1.z - tp2.z,0);
+                dz = flx_16mul16(dz,scale);
+                tp1.z += dz.flx;
+            }
+        }
+    }
+
+    if (tp1.x < left)
+    {
+        // clip to the left.
+        Flx16   dx1 = Flx16(tp2.x - tp1.x);
+        Flx16   dx2 = Flx16(tp2.x - left);
+        Flx16   dy  = Flx16(tp2.y - tp1.y);
+        Flx16   scale = flx_16div16(dx2,dx1);
+        dy = flx_16mul16(dy, scale);
+        tp1.x = left;
+        tp1.y = tp2.y - (int) dy;
+
+        if (flags & VNGO_CLIP_SHADE)
+        {
+            Flx16   ds  = Flx16(tp2.shade - tp1.shade);
+            ds = flx_16mul16(ds, scale);
+            tp1.shade = tp2.shade - (int) ds;
+        }
+
+        if (flags & VNGO_CLIP_Z)
+        {
+            Flx16   dz  = Flx16(tp2.z - tp1.z,0);
+            dz = flx_16mul16(dz, scale);
+            tp1.z += dz.flx;
+        }
+    }
+    if (tp2.x > right)
+    {
+        // clip to the right.
+        Flx16   dx1 = Flx16(tp2.x - tp1.x);
+        Flx16   dx2 = Flx16(tp2.x - right);
+        Flx16   dy  = Flx16(tp2.y - tp1.y);
+
+        Flx16   scale = flx_16div16(dx2,dx1);
+        dy = flx_16mul16(dy, scale);
+        tp2.x = right;
+        tp2.y = tp2.y - (int) dy;
+
+        if (flags & VNGO_CLIP_SHADE)
+        {
+            Flx16   ds  = Flx16(tp2.shade - tp1.shade);
+            ds = flx_16mul16(ds, scale);
+            tp2.shade = tp2.shade - (int) ds;
+        }
+        if (flags & VNGO_CLIP_Z)
+        {
+            Flx16   dz  = Flx16(tp2.z - tp1.z,0);
+            dz = flx_16mul16(dz, scale);
+            tp2.z += dz.flx;
+        }
+    }
+
+
+    // Now that the line has been clipped, do a second
+    // trivial rejection test.
+
+    if ((tp1.x >= right) || (tp2.x < left)
+        || ((tp1.y >= bottom) && (tp2.y >= bottom))
+        || ((tp1.y < top) && (tp2.y < top)))
+    {
+        return VNGO_FULLY_CLIPPED;
+    }
+    *p1 = tp1;
+    *p2 = tp2;
+
+    return VNGO_NO_ERROR;
 }
 
-void VngoCTexture::release()
+VNGError VngoRect::clip_to(VngoPointF *p1,VngoPointF *p2,dword flags)
 {
-    if (tex)
-        delete tex;
-    if (ytable)
-        delete ytable;
+    VngoPoint   tp1,tp2;
+    tp1.x = int(p1->x);
+    tp1.y = int(p1->y);
+
+    tp2.x = int(p2->x);
+    tp2.y = int(p2->y);
+
+    if (flags & VNGO_CLIP_SHADE)
+    {
+        tp1.shade = int(p1->shade);
+        tp2.shade = int(p2->shade);
+    }
+    if (flags & VNGO_CLIP_Z)
+    {
+        tp1.z = int(p1->z * float(0xffffffff));
+        tp2.z = int(p2->z * float(0xffffffff));
+    }
+    VNGError tret = clip_to(&tp1,&tp2,flags | VNGO_CLIP_VERBOSE);
+    if (tret != VNGO_NO_ERROR)
+    {
+        if (flags & VNGO_CLIP_VERBOSE)
+            return tret;
+        else if (tret == VNGO_FULLY_CLIPPED)
+            return VNGO_FULLY_CLIPPED;
+        else
+            return VNGO_NO_ERROR;
+    }
+    p1->x = float(tp1.x);
+    p1->y = float(tp1.y);
+    p2->x = float(tp2.x);
+    p2->y = float(tp2.y);
+    if (flags & VNGO_CLIP_Z)
+    {
+        p1->z = float(tp1.z) / float(0xffffffff);
+        p2->z = float(tp2.z) / float(0xffffffff);
+    }
+    if (flags & VNGO_CLIP_SHADE)
+    {
+        p1->shade = float(tp1.shade);
+        p2->shade = float(tp2.shade);
+    }
+
+    return VNGO_NO_ERROR;
 }
 
 
-VngoMemTexture3D::VngoMemTexture3D(VngoTexture *_src,VngoPal *_pal)
-{
-    dev_type = VNGO_MEM_TEX;
-    err_status = init(_src,_pal);
-}
 
-VngoMemTexture3D::~VngoMemTexture3D()
+
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°° VngoHazeInfoVVP16 °°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// VngoHazeInfoVVP16 - Destructor
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+VngoHazeInfoVVP16::~VngoHazeInfoVVP16()
 {
     release();
 }
 
-VNGError VngoMemTexture3D::init(VngoTexture *_src,VngoPal *_pal)
-{
-    palette = _pal;
-    ref = _src;
-    vtxt = _src;
-    switch (_src->width)
-    {
-        case    32:
-            widthshift     = 5;
-            u_upshift      = 11;
-            break;
-        case    64:
-            widthshift     = 6;
-            u_upshift      = 10;
-            break;
-        case    128:
-            widthshift     = 7;
-            u_upshift      = 9;
-            break;
-        case    256:
-            widthshift     = 8;
-            u_upshift      = 8;
-            break;
-        case    16:
-            widthshift     = 4;
-            u_upshift      = 12;
-            break;
-        default:
-            // Could also at this point create a texture of the closest
-            // supported size and resample source into it.
-            return (VNGO_UNSUPPORTED_TEXTURE);
-    }
-    u_downshift    = 32 - widthshift;
 
-    switch (_src->height)
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// VngoHazeInfoVVP16 - setup
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+void VngoHazeInfoVVP16::setup(VngoHazeInfo *info)
+{
+    if (rtable == NULL)
+        rtable = (byte*)ivory_alloc(256*32*sizeof(byte));
+    if (gtable == NULL)
+        gtable = (byte*)ivory_alloc(256*32*sizeof(byte));
+    if (btable == NULL)
+        btable = (byte*)ivory_alloc(256*32*sizeof(byte));
+
+    start_depth = dword(info->start_depth * float(0xffff));
+    dword tstart_depth = start_depth >> 8;
+    float tdist = float(256 - tstart_depth);
+
+    for (dword d = 0;d < 256;d++)
     {
-        case    32:
-            heightshift    = 5;
-            v_upshift      = 11;
-            v_downshift    = 27;
-            break;
-        case    64:
-            heightshift    = 6;
-            v_upshift      = 10;
-            v_downshift    = 26;
-            break;
-        case    128:
-            heightshift    = 7;
-            v_upshift      = 9;
-            v_downshift    = 25;
-            break;
-        case    256:
-            heightshift    = 8;
-            v_upshift      = 8;
-            v_downshift    = 24;
-            break;
-        case    16:
-            heightshift    = 4;
-            v_upshift      = 12;
-            v_downshift    = 28;
-            break;
-        default:
-            // Could also at this point create a texture of the closest
-            // supported size and resample source into it.
-            return (VNGO_UNSUPPORTED_TEXTURE);
+        dword offset= d << 5;
+        for (byte r = 0;r < 32;r++)
+        {
+            if (d >= tstart_depth)
+            {   // We haze it.
+                float   tr = float((info->target_color.r >> 3) - r);
+                float   td = float(d - tstart_depth);
+                float   scalar = td / tdist;
+                rtable[offset+r]=r+byte(tr*scalar);
+            }
+            else
+            {   // We don't!  Theoreticaly we will never touch this.
+                rtable[offset+r]=r;
+            }
+        }
+        for (byte g = 0;g < 32;g++)
+        {
+            if (d >= tstart_depth)
+            {   // We haze it.
+                float   tg = float((info->target_color.g >> 3) - g);
+                float   td = float(d - tstart_depth);
+                float   scalar = td / tdist;
+                gtable[offset+g]=g+byte(tg*scalar);
+            }
+            else
+            {   // We don't!  Theoreticaly we will never touch this.
+                gtable[offset+g]=g;
+            }
+        }
+        for (byte b = 0;b < 32;b++)
+        {
+            if (d >= tstart_depth)
+            {   // We haze it.
+                float   tb = float((info->target_color.b >> 3) - b);
+                float   td = float(d - tstart_depth);
+                float   scalar = td / tdist;
+                btable[offset+b]=b+byte(tb*scalar);
+            }
+            else
+            {   // We don't!  Theoreticaly we will never touch this.
+                btable[offset+b]=b;
+            }
+        }
     }
-    next = _src->vtex3d;
-    _src->vtex3d = this;
-    return VNGO_NO_ERROR;
+
 }
 
-VNGError VngoMemTexture3D::reinit(VngoTexture *_src,VngoPal *_pal)
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// VngoHazeInfoVVP16 - release
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+void VngoHazeInfoVVP16::release()
+{
+    if (rtable != NULL)
+        ivory_free((void**)&rtable);
+    if (gtable != NULL)
+        ivory_free((void**)&gtable);
+    if (btable != NULL)
+        ivory_free((void**)&btable);
+}
+
+
+
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°° VngoHazeInfoVVP8 °°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// VngoHazeInfoVVP8 - Destructor
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+VngoHazeInfoVVP8::~VngoHazeInfoVVP8()
 {
     release();
-    err_status = init(_src,_pal);
-    return err_status;
 }
 
-void VngoMemTexture3D::release()
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// VngoHazeInfoVVP8 - setup
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+void VngoHazeInfoVVP8::setup(VngoHazeInfo *info,VngoPal *pal)
 {
-    palette = NULL;
-    VngoTexture3D   *prev = NULL;
-    VngoTexture3D   *cur = ref->vtex3d;
-    while(cur != this && cur !=NULL)
+    if (htable == NULL)
+        htable = (byte*)ivory_alloc(128*256*sizeof(byte));
+
+    start_depth = dword(info->start_depth * float(0xffff));
+    dword tstart_depth = start_depth >> 9;
+    float tdist = float(128 - tstart_depth);
+
+    for (dword d = 0;d < 128;d++)
     {
-        prev = cur;
-        cur = cur->next;
-    }
-    if (cur != NULL)
-    {   // This means we have not already been removed.
-        if (prev)
-        {   // This means we are not the head of the list.
-            prev->next = cur->next;
-            cur->next = NULL;
-        }
-        else
-        {   // We are the head.
-            ref->vtex3d = cur->next;
-        }
-    }
-    ref = NULL;
-    vtxt = NULL;
-}
-
-VngoTextureManager::~VngoTextureManager()
-{
-}
-
-VNGError VngoTextureManager::ready()
-{
-    // This makes sure that a texture is properly loaded and ready for use
-    // another way of thinking of it is "cached in".
-    return VNGO_NO_ERROR;
-}
-
-VNGError VngoTextureManager::add(VngoCacheHndl *ntex,int ready)
-{
-    if(ready)
-    {
-        // The texture is ready to go and should be put in the ready queue.
-        if (ready_tail)
+        dword offset= d << 8;
+        for (int i = 0;i < 256;i++)
         {
-            ntex->prev = ready_tail;
-            ready_tail->next = ntex;
+            if (d >= tstart_depth)
+            {   // We haze it.
+                VngoColor24bit sclr = pal->get_RGB(i);
+                float   tr = float(info->target_color.r  - sclr.r);
+                float   tg = float(info->target_color.g  - sclr.g);
+                float   tb = float(info->target_color.b  - sclr.b);
+
+                float   td = float(d - tstart_depth);
+                float   scalar = td / tdist;
+                sclr.r = sclr.r + byte(tr*scalar);
+                sclr.g = sclr.g + byte(tg*scalar);
+                sclr.b = sclr.b + byte(tb*scalar);
+                htable[offset+i]=byte(pal->get_index(sclr));
+            }
+            else
+            {   // We don't!  Theoreticaly we will never touch this.
+                htable[offset+i]=i;
+            }
         }
-        else
-        {
-            ready_head = ntex;
-            ntex->prev = NULL;
-        }
-        ntex->next = NULL;
-        ready_tail = ntex;
-        ntex->flags = VNGO_TEXTURE_CACHED_IN;
     }
-    else
-    {
-        // put it in the out queue at the tail.
-        if (out_tail)
-        {
-            ntex->prev = out_tail;
-            out_tail->next = ntex;
-        }
-        else
-        {
-            out_head = ntex;
-            ntex->prev = NULL;
-        }
-        ntex->next = NULL;
-        out_tail = ntex;
-        ntex->flags = VNGO_TEXTURE_CACHED_OUT;
-    }
-    return VNGO_NO_ERROR;
 }
 
-VNGError VngoTextureManager::remove(VngoCacheHndl *ntex)
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// VngoHazeInfoVVP8 - release
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+void VngoHazeInfoVVP8::release()
 {
-    if(ready_head == ntex)
-    {
-        // remove from the ready head position.
-    }
-    else if (ready_tail == ntex)
-    {
-        // remove from the ready tail position.
-    }
-    else if (out_head == ntex)
-    {
-        // remove from the out head position.
-    }
-    else if (out_tail == ntex)
-    {
-        // remove from the out tail position.
-    }
-    else
-    {
-        // look through the ready queue for the texture and remove it.
-        // then look through the out queue for the texture and remove it.
-    }
-    return VNGO_NO_ERROR;
-}
-
-VngoCacheHndl::~VngoCacheHndl()
-{
-    if (VgSystem.DIBTx)
-    {
-        if (VgSystem.DIBTx->remove(this) == VNGO_NO_ERROR)
-            return;
-    }
-    if (VgSystem.DDTx)
-    {
-        if (VgSystem.DDTx->remove(this) == VNGO_NO_ERROR)
-            return;
-    }
-    if (VgSystem.D3DTx)
-    {
-        if (VgSystem.D3DTx->remove(this) == VNGO_NO_ERROR)
-            return;
-    }
-    if (VgSystem.OGLTx)
-    {
-        if (VgSystem.OGLTx->remove(this) == VNGO_NO_ERROR)
-            return;
-    }
-    if (VgSystem.CL3DTx)
-    {
-        if (VgSystem.CL3DTx->remove(this) == VNGO_NO_ERROR)
-            return;
-    }
-    if (VgSystem.GlideTx)
-    {
-        if (VgSystem.GlideTx->remove(this) == VNGO_NO_ERROR)
-            return;
-    }
-    if (VgSystem.MSITx)
-    {
-        if (VgSystem.MSITx->remove(this) == VNGO_NO_ERROR)
-            return;
-    }
-    return;
+    if (htable != NULL)
+        ivory_free((void**)&htable);
 }
 
 //°±² End of module - vngserv.cpp ²±°

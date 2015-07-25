@@ -186,6 +186,10 @@ protected:
 	afx_msg void OnViewShowSphereExtents();
 	afx_msg void OnUpdateViewShowSphereExtents(CCmdUI* pCmdUI);
 	afx_msg void OnUpdateViewShowBoxExtents(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateViewRndSort(CCmdUI* pCmdUI);
+	afx_msg void OnViewRndSort();
+	afx_msg void OnViewRndAlpha();
+	afx_msg void OnUpdateViewRndAlpha(CCmdUI* pCmdUI);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

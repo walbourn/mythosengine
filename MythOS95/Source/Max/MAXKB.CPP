@@ -190,7 +190,8 @@ static unsigned char ctrl2ascii[128] =
 //  Create a Keyboard object.                                               ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 MaxKeyboard::MaxKeyboard():
-    BuffList (0)
+    BuffList (0),
+    initialized (false)
 {
     // Nothing to do here
 }
@@ -220,8 +221,18 @@ int MaxKeyboard::init ()
     KeyStat[5] = 0;
     KeyStat[6] = 0;
     KeyStat[7] = 0;
+    KeyStat[8] = 0;
+    KeyStat[9] = 0;
+    KeyStat[10] = 0;
+    KeyStat[11] = 0;
+    KeyStat[12] = 0;
+    KeyStat[13] = 0;
+    KeyStat[14] = 0;
+    KeyStat[15] = 0;
 
     clear();
+
+    initialized = true;
 
     return 0;
 }
@@ -241,6 +252,14 @@ void MaxKeyboard::clear ()
     KeyStatHold[5] = KeyStat[5];
     KeyStatHold[6] = KeyStat[6];
     KeyStatHold[7] = KeyStat[7];
+    KeyStatHold[8] = KeyStat[8];
+    KeyStatHold[9] = KeyStat[9];
+    KeyStatHold[10] = KeyStat[10];
+    KeyStatHold[11] = KeyStat[11];
+    KeyStatHold[12] = KeyStat[12];
+    KeyStatHold[13] = KeyStat[13];
+    KeyStatHold[14] = KeyStat[14];
+    KeyStatHold[15] = KeyStat[15];
 }
 
 
@@ -259,6 +278,16 @@ void MaxKeyboard::uninit ()
     KeyStatHold[5] = KeyStat[5] = 0;
     KeyStatHold[6] = KeyStat[6] = 0;
     KeyStatHold[7] = KeyStat[7] = 0;
+    KeyStatHold[8] = KeyStat[8] = 0;
+    KeyStatHold[9] = KeyStat[9] = 0;
+    KeyStatHold[10] = KeyStat[10] = 0;
+    KeyStatHold[11] = KeyStat[11] = 0;
+    KeyStatHold[12] = KeyStat[12] = 0;
+    KeyStatHold[13] = KeyStat[13] = 0;
+    KeyStatHold[14] = KeyStat[14] = 0;
+    KeyStatHold[15] = KeyStat[15] = 0;
+
+    initialized = false;
 }
 
 
@@ -315,11 +344,20 @@ void MaxKeyboard::process_key (ushort cooked_key)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 int MaxKeyboard::check_key (int key) const
 {
-    const int offset (((key >> 5) & 0x03) + (key > 0xff ? 4: 0));
+    const int offset (((key >> 5) & 0x07) + (key > 0xff ? 8: 0));
     const dword mask (1 << (key & 0x1f));
 
     // If the key has been marked, return true
     return (KeyStatHold[offset] & mask) != 0;
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//  is_present                                                              ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+bool MaxKeyboard::is_present () const
+{
+    return true;
 }
 
 
@@ -362,8 +400,9 @@ void MaxKeyboardWin32::wm_keydown (int vkey)
 {
     UINT scan_code = MapVirtualKey (vkey, 0);
 
-    const dword mask  = 1 << (scan_code & 0x1f);
-    int offset = (scan_code >> 5) & 0x03;
+//    int offset = (scan_code >> 5) & 0x03;
+    const dword mask (1 << (scan_code & 0x1f));
+    const int offset (((scan_code >> 5) & 0x07) + (scan_code > 0xff ? 8: 0));
 
     // Actually mark the key as present
     KeyStat[offset] |= mask;
@@ -382,8 +421,9 @@ void MaxKeyboardWin32::wm_keyup (int vkey)
 {
     UINT scan_code = MapVirtualKey (vkey, 0);
 
-    const dword mask = 1 << (scan_code & 0x1f);
-    int offset = (scan_code >> 5) & 0x03;
+//    int offset = (scan_code >> 5) & 0x03;
+    const dword mask  (1 << (scan_code & 0x1f));
+    const int offset (((scan_code >> 5) & 0x07) + (scan_code > 0xff ? 8: 0));
 
     // Actually mark the key as present
     KeyStat[offset] &= ~mask;
@@ -445,7 +485,7 @@ int MaxKeyboardDirectX::init ()
         prop.dwData = DIDATA_SIZE;
         pdid->SetProperty (DIPROP_BUFFERSIZE, &prop.diph);
 
-        pdid->Acquire();
+        initialized = SUCCEEDED(pdid->Acquire());
     }
 
     return 0;
@@ -462,6 +502,7 @@ void MaxKeyboardDirectX::uninit ()
 
     if (pdid)
         pdid->Unacquire();
+
 }
 
 
@@ -490,7 +531,8 @@ void MaxKeyboardDirectX::update ()
     {
         const dword scan (didata[i].dwOfs);
         const dword mask (1 << (scan & 0x1f));
-        const int offset ((scan >> 5) & 0x03);
+//        const int offset ((scan >> 5) & 0x03);
+        const int offset (((scan >> 5) & 0x07) + (scan > 0xff ? 8: 0));
 
         if (didata[i].dwData & 0x80)
         {
@@ -507,6 +549,15 @@ void MaxKeyboardDirectX::update ()
             KeyStat[offset] &= ~mask;
         }
     }
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//  is_present                                                              ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+bool MaxKeyboardDirectX::is_present () const
+{
+    return pdid != 0;
 }
 
 

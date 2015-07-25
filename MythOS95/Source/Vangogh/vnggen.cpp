@@ -2,9 +2,9 @@
 //
 //                                                           %__________%
 //                                                          %/ . .  .   \%
-//           Van Gogh 2D-Display Library                     |  . .  o. | 
+//           Van Gogh 2D-Display Library                     |  . .  o. |
 //                                                           |. _  .   .|
-//          Microsoft Windows '95 Version                    | / \   .  | 
+//          Microsoft Windows '95 Version                    | / \   .  |
 //                                                           |_|_|_._._.|
 // Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
 //              All rights reserved.                        %\__________/%
@@ -33,7 +33,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include <assert.h>
@@ -47,12 +47,12 @@
 //
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 
-inline void SWAP (int &a, int &b) 
+inline void SWAP (int &a, int &b)
 {
 #if 0
     a = a ^ b;
     b = a ^ b;
-    a = a ^ b;    
+    a = a ^ b;
 #else   // This is safer if a & b are references to the same variable.
     int t;
     t = a;
@@ -68,7 +68,7 @@ inline void COPYPOINT (VngoPoint *p1,VngoPoint *p2)
     p1->z = p2->z;
     p1->shade = p2->shade;
     p1->clr = p2->clr;
-}     
+}
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
@@ -103,12 +103,12 @@ void vngo_line (VngoVport *vp, VngoPoint *p1,VngoPoint *p2,VngoColor24bit *rgb_v
         {
             COPYPOINT(&pt1, p1);
             COPYPOINT(&pt2, p2);
-        }                  
-        else               
-        {                  
+        }
+        else
+        {
             COPYPOINT(&pt1, p2);
             COPYPOINT(&pt2, p1);
-        }                  
+        }
     }
 
     int x1 = pt1.x;
@@ -121,7 +121,7 @@ void vngo_line (VngoVport *vp, VngoPoint *p1,VngoPoint *p2,VngoColor24bit *rgb_v
     if (rgb_val)
     {
         color = vp->vbuff.pal->get_index(*rgb_val);
-        shade = vp->vbuff.pal->shd_pal->mid_point - 1; 
+        shade = vp->vbuff.pal->shd_pal->mid_point;
     }
 
     pt1.clr = color;
@@ -164,7 +164,7 @@ void vngo_line (VngoVport *vp, VngoPoint *p1,VngoPoint *p2,VngoColor24bit *rgb_v
             // The vertical line.
             pt1.x = x1;
             for (i = y1; i < y2; i++)
-            {   
+            {
                 pt1.y = i;
                 pt1.z += zstep.flx;
                 vp->pixel(&pt1);
@@ -246,7 +246,7 @@ void vngo_line (VngoVport *vp, VngoPoint *p1,VngoPoint *p2,VngoColor24bit *rgb_v
                 {
                     y++;
                     y3--;
-                    d+=(dx<<1);     
+                    d+=(dx<<1);
                 }
                 pt1.x = x;
                 pt1.y = y;
@@ -286,22 +286,22 @@ void vngo_gline (VngoVport *vp, VngoPoint *p1,VngoPoint *p2,VngoColor24bit *rgb_
         {
             COPYPOINT(&pt1, p1);
             COPYPOINT(&pt2, p2);
-        }                  
-        else               
-        {                  
+        }
+        else
+        {
             COPYPOINT(&pt2, p1);
             COPYPOINT(&pt1, p2);
-        }                  
-    }                      
-    else                   
-    {                      
+        }
+    }
+    else
+    {
         if (p1->y <= p2->y)
-        {                  
+        {
             COPYPOINT(&pt1, p1);
             COPYPOINT(&pt2, p2);
-        }                  
-        else               
-        {                  
+        }
+        else
+        {
             COPYPOINT(&pt1, p2);
             COPYPOINT(&pt2, p1);
         }
@@ -368,7 +368,7 @@ void vngo_gline (VngoVport *vp, VngoPoint *p1,VngoPoint *p2,VngoColor24bit *rgb_
 
             pt1.x = x1;
             for (i = y1; i < y2; i++)
-            {   
+            {
                 pt1.y = i;
                 pt1.z += zstep.flx;
                 s1 += sstep;
@@ -467,7 +467,7 @@ void vngo_gline (VngoVport *vp, VngoPoint *p1,VngoPoint *p2,VngoColor24bit *rgb_
                 {
                     y++;
                     y3--;
-                    d+=(dx<<1);     
+                    d+=(dx<<1);
                 }
                 pt1.x = x;
                 pt1.y = y;

@@ -41,11 +41,11 @@
 
  ---------------------------------------------------------------------------
 
-                         *** Version 1.4 Release ***
+                         *** Version 1.5 Release ***
 
-                                July 31, 1997
+                             October 8, 1997
 
- This is the fifth full release of the MythOS collection.  Usage of this 
+ This is the sixth full release of the MythOS collection.  Usage of this 
  library is subject to your license agreement.  All materials herein 
  should be treated as confidential information.
 
@@ -73,10 +73,17 @@
  |
  +--Bin                             Utility programs
  |
- +--Lib                             Production Libraries (multi-threaded)
- |  +--Assert                       Assert version of libraries (multi-threaded)
- |  +--Assert.NMT                   Assert version libraries (non multi-threaded)
- |  +--NMT                          Production Libraries (non multi-threaded)
+ +--Lib                             Production Libraries (multi-threaded static)
+ |  |
+ |  +--Assert                       Assert version of libraries (multi-threaded static)
+ |  |
+ |  +--ML                           Production Libraries (single-threaded)
+ |  |
+ |  +--Assert.ML                    Assert version libraries (single-threaded)
+ |  |
+ |  +--Assert.MD                    Assert version libraries (multi-threaded DLL)
+ |  |
+ |  +--MD                           Production Libraries (multi-threaded DLL)
  |
  +--Source
     +--Bach                         Bach (Sound library)
@@ -107,11 +114,15 @@
     |  |
     |  +--Draw (source only)
     |  |
+    |  +--Element (source only)
+    |  |
     |  +--Light (source only)
     |  |
     |  +--Math (source only)
     |  |
     |  +--Motion (source only)
+    |  |
+    |  +--Particle (source only)
     |  |
     |  +--Texture (source only)
     |  |
@@ -122,6 +133,8 @@
     |  +--Tool
     |  |
     |  +--Test
+    |  |  +--Data
+    |  |  |
     |  |  +--Obj
     |  | 
     |  +--Util
@@ -134,6 +147,21 @@
     |     |
     |     +--Obj
     |
+    +--Examples                     Example Code
+    |  |
+    |  +--Viewer
+    |  |  +--Obj
+    |  | 
+    |  +--LLander
+    |  |  +--Data
+    |  |  |
+    |  |  +--Obj
+    |  | 
+    |  +--Script
+    |     +--Data
+    |     |
+    |     +--Obj
+    |
     +--Felix                        Felix (Fixed-point support)
     |  +--Inc (source only)
     |  |
@@ -141,11 +169,6 @@
     |  |
     |  +--Test
     |     +--Obj
-    |
-    +--GameFrame                    Application framework and example
-    |  +--Inc
-    |  |
-    |  +--Obj
     |
     +--Gutenbrg                     Gutenberg (Font and string support)
     |  +--Inc (source only)
@@ -181,6 +204,9 @@
     |  +--Inc (source only)
     |  |
     |  +--Obj (source only)
+    |  |
+    |  +--Test
+    |     +--Obj
     |
     +--SimGine                      SimGine Framework (Source)
     |  +--Inc
@@ -188,6 +214,8 @@
     |  +--Obj
     |  |
     |  +--Test
+    |     +--Res
+    |     |
     |     +--Obj
     |
     +--System                       MythOS System (Source)
@@ -263,12 +291,18 @@
     README.TXT's are in each of the library component directories with
     current status and work notes.
 
+    A new examples directory was added to the release.  The GameFrame
+    was removed.
+
     This version of MythOS was built with Microsoft Visual C++ v5.0.  The
     MFC-based tools will therefore not compile with v2.x MSVC.
 
-    The .libs have been built using the multi-threaded version of the C
-    run-time library.  Non multi-threaded versions have been provided
-    for those who want to use the non multi-threaded run-time libraries.
+    The .libs have been built with the three run-time library choices for
+    Visual C++.  The multi-threaded libraries were built with /MT, the
+    single-threaded libraries with /ML, and the multi-threaded DLL
+    libraries with /MD.  The ASSERT.NMT and NMT directories from the
+    last release were renamed to ASSERT.ML and ML to match the compiler
+    switch.
 
     Note: The Escher Exporter must be built using Watcom v10 and the 
           Autodesk IPAS4 Toolkit, since it is a 3D Studio Plug-In module.
@@ -286,8 +320,46 @@
     contained in the root directory of the installed tree structure into
     C:\FLEX (must be this directory!) and put C:\FLEX in your path.
 
-  
+      
     
+ ---------------------------------------------------------------------------
+ EXAMPLES
+
+    We have started to include some example code with this release.  The
+    ReadME files for the examples give details on thier function.
+
+    The Viewer example is a simple object viewer with interactive controls
+    simliar to the Microsoft Direct3D Viewer sample.  This is a great
+    place to see how to handle all of the initialization issues for MythOS
+    and how to respond to various error conditions.
+
+    The second example, Lunar Lander, was previously the GameFrame
+    example and has been converted over to use the SimGine framework.  It
+    makes use of more of the 2D and support functionality of MythOS.
+
+    Script, our third example, is a simple scripting system for creating,
+    modifying, and animating cameras, lights, meshes, and particle
+    generators.  This could be extended in many directions, but the system
+    does allow you to play with various parameters and try out some simple
+    physics stuff with Newton.
+    
+
+
+ ---------------------------------------------------------------------------
+ BUILDING CODE
+
+    The majority of the code has been setup to build and run from the
+    command line using Microsoft's NMAKE utility.  There are 'mk.bat'
+    batch files in each directory that build the local files.  The
+    examples and testers include run batches which keep the current
+    directory with the supporting data files.
+
+    The MFC-based tools are setup to build release versions with the
+    'mk.bat' but full control files have been included for use with
+    Microsoft's Developer Studio.
+
+
+
  ---------------------------------------------------------------------------
  PROBLEMS/BUGS
 
@@ -295,6 +367,12 @@
     like to hear about them.  E-mail or FAX is the preferred method 
     for reporting problems.  We are committed to doing quality work, 
     so please let us know what you find.
+
+    Bug reports should be sent to mythos_bugs@charybdis.com.  General
+    comments are welcome at mythos@charybdis.com.  There is a public
+    message board on our website which is open for comments and
+    discussions with other MythOS developers.  The URL is
+    http://www.charybdis.com/wwwboard/wwwboard-mythos.html.
 
     We will make future releases as the need arises and updates become 
     available.

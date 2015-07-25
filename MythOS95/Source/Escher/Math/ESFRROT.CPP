@@ -194,10 +194,8 @@ void EschFrameRef::rotate(const EschVector *v, const float degrees, dword update
 
 //ÄÄÄ Orthogonalize
     if ((++ortho_count > ESCH_MAX_ORTHOCOUNT) && (update & ESCH_UPD_ORTHO))
-    {
         orthogonalize(update);
-        ortho_count=0;
-    }
+
 //ÄÄÄ Update inverse transform
     else if (update & ESCH_UPD_INVERSE)
     {

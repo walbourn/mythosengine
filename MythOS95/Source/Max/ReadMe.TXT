@@ -31,9 +31,37 @@
                               _Library Status_
 
   Notes by: Dan Higdon
-  Updated: July 25, 1997
+  Updated: September 29, 1997
 
   Changes for this release --------------------------------------------------
+    
+    o Now, theDevices are created when the device block is created, but
+      still must be initialized, either individually, through the
+      EventSource, or through MaxDevices::init().
+
+    o New members of MaxMouse/Keyboard/Joystick added:
+      bool is_present () const;     // Did the device create successfully?
+      bool is_initialized () const; // Is the device ready to produce input?
+
+    o New members of MaxDevices that mirror the above:
+
+        // These tell if the device could "create" correctly
+        bool is_mouse_present() const;
+        bool is_keyboard_present() const;
+        bool is_joystick_present() const;
+
+        // These tell if the device is ready to produce data
+        bool is_mouse_enabled () const;
+        bool is_keyboard_enabled () const;
+        bool is_joystick_enabled () const;
+
+
+  --- Previous Changes ---
+
+    o This is a bug fix for the previous release.  It turns out that the
+      DirectInput scancodes didn't match up with the "actual" DOS-style
+      scan codes.  The new scancodes are in there now; you will need to
+      rebuild any CEL files.
 
     o Totally re-wrote the MaxDevice class and associated Devices.  Now,
       the user has the choice of instantiating either a MaxDeviceWin32

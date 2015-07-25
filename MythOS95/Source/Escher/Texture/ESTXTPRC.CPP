@@ -40,7 +40,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include "escher.hpp"
@@ -179,6 +179,7 @@ esch_error_codes EschProceduralTexture::init(ushort w, ushort h,
 //ÄÄÄ Initialize output buffer
     txt.width = w;
     txt.height = h;
+    txt.pal_ptr = pal;
 
     txt.tex = new byte[txt.width * txt.height];
     if (!txt.tex)
@@ -199,6 +200,7 @@ esch_error_codes EschProceduralTexture::init(ushort w, ushort h,
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 void EschProceduralTexture::generate()
 {
+    txt.make_dirty();
 }
 
 //°±² End of module - estxtprc.cpp ²±°

@@ -143,7 +143,6 @@ GameState::GameState (MaxDevices *d):
         }
 #endif
 #endif
-#ifdef _D3D
         if (!ini.read("UseD3D",buff))
         {
             strlwr(buff);
@@ -153,7 +152,6 @@ GameState::GameState (MaxDevices *d):
                 use_fullscreen |= VNGO_3DDEVICE | VNGO_ALLOC_ZBUFFER;
             }
         }
-#endif
         if (!ini.read("UseDirectDraw",buff))
         {
             strlwr(buff);
@@ -204,7 +202,7 @@ GameState::GameState (MaxDevices *d):
         {
             screen = new VngoDIB (hWndClient);
         }
-        else if (screen->get_initstate() == FALSE)
+        else if (screen->get_initstate() != VNGO_NO_ERROR)
         {
             delete screen;
             screen = new VngoDIB (hWndClient);
@@ -267,25 +265,29 @@ GameState::GameState (MaxDevices *d):
 #ifdef _3DFX
         else if (screen->get_type() == VngoScreenManager::SCREENTYPE_3DFX)
         {
-            gvp = new VngoVport3Dfx(map_xsize,map_ysize,0,0,mypal,VNGO_ZBUFFER_DEV);
+            VngoRect rct(0,0,map_xsize,map_ysize);
+            gvp = new VngoVport3Dfx(rct,mypal,VNGO_ZBUFFER_DEV);
         }
 #endif
 #ifdef _MSI
         else if (screen->get_type() == VngoScreenManager::SCREENTYPE_MSI)
         {
+            VngoRect rct(0,0,map_xsize,map_ysize);
             VngoMSI *msi = (VngoMSI *)screen;
-            gvp = new VngoVportMSI(map_xsize,map_ysize,0,0,mypal,VNGO_ZBUFFER_DEV,msi);
+            gvp = new VngoVportMSI(rct,mypal,VNGO_ZBUFFER_DEV,msi);
               gvp = NULL;
         }
 #endif
 #endif
         else if (screen->get_type() == VngoScreenManager::SCREENTYPE_D3D)
         {
-            gvp = new VngoVportD3D(0,0,map_xsize,map_ysize,mypal,VNGO_ZBUFFER_DEV,screen);
+            VngoRect rct(0,0,map_xsize,map_ysize);
+            gvp = new VngoVportD3D(rct,mypal,VNGO_ZBUFFER_DEV,screen);
         }
         else
         {
-            gvp = new VngoVVport8(0,0,map_xsize,map_ysize,mypal,VNGO_ZBUFFER_DEV);
+            VngoRect rct(0,0,map_xsize,map_ysize);
+            gvp = new VngoVVport8(rct,mypal,VNGO_ZBUFFER_DEV);
         }
 
 
@@ -513,6 +515,15 @@ GameState::~GameState ()
     int bpp = 8;
     strcpy(scrname,"No Screen");
 
+    for (int i=0;i < 4;i++)
+    {
+        tex[i].release();
+        if (tex[i].tex)
+        {
+            ivory_free((void **)&(tex[i].tex));
+        }
+    }
+
     if (screen)
     {
         bpp = screen->bit_depth;
@@ -522,11 +533,6 @@ GameState::~GameState ()
 
 
 
-    for (int i=0;i < 4;i++)
-    {
-        if (tex[i].tex)
-            ivory_free((void **)&(tex[i].tex));
-    }
     if (ticks > 0)
     {
         double frate  = (double)frames * 1000.0 / (double)ticks;

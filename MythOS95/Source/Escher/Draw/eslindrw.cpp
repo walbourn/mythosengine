@@ -40,7 +40,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include "escher.hpp"
@@ -50,6 +50,8 @@
 //                                 Data
 //
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+
+extern VngoPointF EschTempVPointF;
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
@@ -68,80 +70,40 @@
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 void EschLineDraw::draw()
 {
-    EschCamera          *cam;
-    EschPoint           pnt[2];
-    VngoPoint           vpt[2];
+    VngoPointF      vpt2;
 
 //ÄÄÄ Setup local pointers to current camera and Van Gogh viewport.
     assertMyth("EschLineDraw::draw needs camera in current context",
                EschCurrent != NULL && EschCurrent->camera != NULL);
 
-    cam=EschCurrent->camera;
+    EschCamera *cam=EschCurrent->camera;
 
     assertMyth("EschLineDraw::draw needs a viewport in current context's camera",
                cam->vport != NULL);
 
-//ÄÄÄ Transform into copy of point
-    pos1.transform(&cam->eye.iorient,pnt);
-    pos2.transform(&cam->eye.iorient,&pnt[1]);
+//ÄÄÄ Setup Context
+    EschContext ec(EschCurrent);
+    ec.current = this;
+    ec.push();
 
-//ÄÄÄ Clip against view volume
+//ÄÄÄ Transform end points
+    pos1.transform(&cam->eye.iorient,(EschPoint*)&EschTempVPointF);
+    pos2.transform(&cam->eye.iorient,(EschPoint*)&vpt2);
 
-    // Near/far clipping
-    if (pnt[0].z > cam->yon
-        || pnt[1].z > cam->yon)
-        return;
+//ÄÄÄ Light (normal shade value)
+    float mp = float(cam->vport->vbuff.pal->shd_pal->mid_point);
 
-    if (pnt[0].z < cam->hither
-        || pnt[1].z < cam->hither)
-        return;
+    EschTempVPointF.clr = color;
+    EschTempVPointF.shade = mp;
 
-    // Left/right/top/bottom plane clipping
-    float zx1 = pnt[0].z * cam->xsize;
-    float zx2 = pnt[1].z * cam->xsize;
-
-    float zy1 = pnt[0].z * cam->ysize;
-    float zy2 = pnt[1].z * cam->ysize;
-
-    if (pnt[0].x < -zx1
-        && pnt[1].x < -zx2)
-        return;
-
-    if (pnt[0].x > zx1
-        && pnt[1].x > zx2)
-        return;
-
-    if (pnt[0].y < -zy1
-        && pnt[1].y < -zy2)
-        return;
-
-    if (pnt[0].y > zy1
-        && pnt[1].y > zy2)
-        return;
-
-    flags |= ESCH_DRW_VISIBLE;
-
-//ÄÄÄ Project 
-    VngoVport *vport = cam->vport;
-
-    assertMyth("EschLineDraw::draw needs palette in viewport",
-               vport->vbuff.pal != 0);
-
-    int mp = vport->vbuff.pal->shd_pal->mid_point;
-
-    for(int i=0; i < 2; i++)
-    {
-        vpt[i].x = long((pnt[i].x * cam->xscalar) / pnt[i].z)
-                   + (cam->vport->vbuff.width >> 1);
-        vpt[i].y = (cam->vport->vbuff.height >> 1)
-                   - long((pnt[i].y * cam->yscalar) / pnt[i].z);
-        vpt[i].z = ulong(pnt[i].z * cam->z_factor);
-        vpt[i].clr = color;
-        vpt[i].shade = mp;
-    }
+    vpt2.clr = color;
+    vpt2.shade = mp;
 
 //ÄÄÄ Draw line
-    vport->clip_line(vpt, &vpt[1]);
+    esch_clipdraw_line(&vpt2, ESCH_CDF_CLIP);
+
+//ÄÄÄ Cleanup
+    ec.pop();
 }
 
 //°±² End of module - eslindrw.cpp ²±°

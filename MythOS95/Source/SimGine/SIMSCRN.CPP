@@ -78,12 +78,7 @@ SimScreen::SimScreen() :
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 SimScreen::~SimScreen()
 {
-    if (gvport)
-        delete gvport;
-    if (pal)
-        delete pal;
-    if (vgs)
-        delete vgs;
+    release();
 }
 
 
@@ -107,6 +102,70 @@ SimScreen::error_codes SimScreen::init (ushort w, ushort h,
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// SimScreen - release
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+void SimScreen::release()
+{
+    if (gvport)
+    {
+        delete gvport;
+        gvport=0;
+    }
+    if (pal)
+    {
+        delete pal;
+        pal=0;
+    }
+    if (vgs)
+    {
+        delete vgs;
+        vgs=0;
+    }
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// SimScreen - lock
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+long SimScreen::lock ()
+{
+    assertMyth("SimScreen::lock needs viewport", gvport != 0);
+
+    return gvport->lock();
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// SimScreen - unlock
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+int SimScreen::unlock ()
+{
+    assertMyth("SimScreen::unlock needs viewport", gvport != 0);
+
+    return gvport->unlock();
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// SimScreen - clear
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+void SimScreen::clear ()
+{
+    assertMyth("SimScreen::clear needs viewport and palette",
+               gvport != 0 && pal != 0);
+
+    int was_locked = lock();
+    if (was_locked != -1)
+    {
+        gvport->reset(pal->get_index (VngoColor24bit (0,0,0)));
+        if (!was_locked)
+            unlock();
+    }
+    invalidate();
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 // SimScreen - load_palette
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 BOOL SimScreen::load_palette (const char *fname, const char *name,
@@ -116,9 +175,7 @@ BOOL SimScreen::load_palette (const char *fname, const char *name,
 
     assertMyth("SimScreen::load_palette needs input filename", fname != 0);
 
-//ÄÄÄ Clean up any old palette information that is still around.
-    if (freeold && pal)
-        delete pal;
+    VngoPal *temp_pal = pal;
 
 //ÄÄÄ Initialize the Vangogh palette
     switch (bit_depth)
@@ -179,7 +236,13 @@ BOOL SimScreen::load_palette (const char *fname, const char *name,
     }
 
 //ÄÄÄ Set palette
-    return set_palette(pal);
+    BOOL retval = set_palette(pal);
+
+//ÄÄÄ Clean up any old palette information that is still around.
+    if (freeold && temp_pal)
+        delete temp_pal;
+
+    return retval;
 }
 
 
@@ -215,88 +278,12 @@ BOOL SimScreen::set_palette (VngoPal *p, BOOL clr)
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-// SimScreen - flip
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-void SimScreen::flip ()
-{
-    assertMyth("SimScreen::flip needs screen manager", vgs != 0);
-
-    vgs->flip();
-}
-
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-// SimScreen - reinit
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-void SimScreen::reinit ()
-{
-    assertMyth("SimScreen::reinit needs screen manager", vgs != 0);
-
-    vgs->reinit(brightness);
-}
-
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-// SimScreen - lock
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-long SimScreen::lock ()
-{
-    assertMyth("SimScreen::lock needs viewport", gvport != 0);
-
-//    return gvport->lock();
-    return 0;
-}
-
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-// SimScreen - unlock
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-int SimScreen::unlock ()
-{
-    assertMyth("SimScreen::unlock needs viewport", gvport != 0);
-
-//    return gvport->unlock();
-    return 0;
-}
-
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-// SimScreen - clear
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-void SimScreen::clear ()
-{
-    assertMyth("SimScreen::clear needs viewport and palette",
-               gvport != 0 && pal != 0);
-
-    int was_locked = lock();
-    if (was_locked != -1)
-    {
-        gvport->reset(pal->get_index (VngoColor24bit (0,0,0)));
-        if (!was_locked)
-            unlock();
-    }
-    invalidate();
-}
-
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 // SimScreen - set_brightness
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 void SimScreen::set_brightness(float b)
 {
     brightness = b;
     reinit();
-}
-
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-// SimScreen - invalidate
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-void SimScreen::invalidate(const VngoRect &rct)
-{
-    assertMyth("SimScreen::invalidate needs screen manager", vgs != 0);
-
-    vgs->invalidate(rct);
 }
 
 
@@ -311,78 +298,9 @@ BOOL SimScreen::capture()
     XFBitmap    bm;
 
 //ÄÄÄ Copy data into bitmap
-    switch (bit_depth)
+    if (!gvport)
     {
-        case 8:
-            {
-                if (bm.create(width,height,1))
-                    return FALSE;
-
-                memcpy (bm.pal, &pal->hw_pal.p[0], 256 * sizeof (dword));
-
-                lock();
-                byte *dptr = bm.data;
-                byte *sptr = gvport->vbuff.scrn_ptr;
-                for (int y = 0; y < height; ++y)
-                {
-                    memcpy (dptr, sptr, width);
-                    dptr += width;
-                    sptr += gvport->vbuff.pitch;
-                }
-                unlock();
-            }
-            break;
-        case 15:
-            {
-                if (bm.create(width,height,3))
-                    return FALSE;
-
-                lock();
-                byte *dptr = bm.data;
-                byte *sptr = gvport->vbuff.scrn_ptr;
-                for (int y = 0; y < height; ++y)
-                {
-                    word *tptr = (word*)sptr;
-                    for(int x = 0; x < width; ++x)
-                    {
-                        word pcolor = *(tptr++);
-
-                        *(dptr++) = (pcolor >> 7) & 0xf8;
-                        *(dptr++) = (pcolor >> 2) & 0xf8;
-                        *(dptr++) = (pcolor << 3) & 0xf8;
-                    }
-
-                    sptr += gvport->vbuff.pitch;
-                }
-                unlock();
-            }
-            break;
-        case 16:
-            {
-                if (bm.create(width,height,3))
-                    return FALSE;
-
-                lock();
-                byte *dptr = bm.data;
-                byte *sptr = gvport->vbuff.scrn_ptr;
-                for (int y = 0; y < height; ++y)
-                {
-                    word *tptr = (word*)sptr;
-                    for(int x = 0; x < width; ++x)
-                    {
-                        word pcolor = *(tptr++);
-
-                        *(dptr++) = (pcolor >> 8) & 0xf8;
-                        *(dptr++) = (pcolor >> 3) & 0xfc;
-                        *(dptr++) = (pcolor << 3) & 0xf8;
-                    }
-
-                    sptr += gvport->vbuff.pitch;
-                }
-                unlock();
-            }
-            break;
-        default:
+        if (gvport->capture(&bm) != VNGO_NO_ERROR)
             return FALSE;
     }
 

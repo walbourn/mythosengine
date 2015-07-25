@@ -94,6 +94,7 @@ protected:
     //컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
     short   last_x;
     short   last_y;
+    bool    initialized;
 
 public:
     //컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
@@ -122,6 +123,9 @@ public:
     virtual void get_movement (short *dx, short *dy) = 0;
     virtual byte get_buttons() const = 0;   // bits 0,1,2 button up/down
                                             // bits 4,5,6 button dblclick status.
+    virtual bool is_present () const;
+
+    bool is_initialized () const { return initialized; }
 };
 
 
@@ -193,6 +197,7 @@ public:
     virtual void get_movement (short *dx, short *dy);
     virtual byte get_buttons() const;    // bits 0,1,2 button up/down
                                          // bits 4,5,6 button dblclick status.
+    virtual bool is_present () const;
 };
 
 

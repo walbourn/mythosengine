@@ -101,7 +101,7 @@ void vngo_smooth_rect (VngoVport *vp,
         {
             int t = pts[corners].clr;
             colors[corners].r = (t >> 8) & 0xf8;
-            colors[corners].g = (t >> 2) & 0xfc;
+            colors[corners].g = (t >> 3) & 0xfc;
             colors[corners].b = (t << 3) & 0xf8;
         }
         else if ( pts[corners].clr & VNGO_COLOR_15BIT)
@@ -126,7 +126,7 @@ void vngo_smooth_rect (VngoVport *vp,
             {
                 t = ((VngoShadePal16*)shade)->get_shaded_index(pts[corners].clr,pts[corners].shade);
                 colors[corners].r = (t >> 8) & 0xf8;
-                colors[corners].g = (t >> 2) & 0xfc;
+                colors[corners].g = (t >> 3) & 0xfc;
                 colors[corners].b = (t << 3) & 0xf8;
             }
             else
@@ -212,7 +212,7 @@ void vngo_smooth_rect (VngoVport *vp,
 
 
     VngoPoint   tpoint;
-    tpoint.shade = lpal->shd_pal->mid_point - 1;
+    tpoint.shade = lpal->shd_pal->mid_point;
 
     int lr,lrs,rr,rrs;
     int lg,lgs,rg,rgs;
@@ -448,6 +448,74 @@ void vngo_smooth_rect (VngoVport *vp,
     }
 }
 
+VNGError vngo_smooth_blit(VngoVport *vp, VngoTexture *img,
+                      VngoRect  *target,VngoRect *clip)
+{
+    if ((target->dx <  img->width) || (target->dy < img->height))
+    {
+        // this is compressing the image, and we don't do that yet.
+        return VNGO_NOT_SUPPORTED;
+    }
+    else if (target->dx == img->width && target->dy == img->height)
+    {
+        return vp->image_trans(target,img);
+    }
+    // we now know that at least one dimention is being stretched.
+
+    VngoPoint   pts[4];
+
+    float       wstep,hstep;
+    dword       cflags = 0;
+
+    wstep = float(target->dx)/float(img->width);
+    hstep = float(target->dy)/float(img->height);
+
+    if (!(img->flags & VNGO_TEXTURE_8BIT))
+        return VNGO_NOT_SUPPORTED;
+
+    byte *topclr = (byte*)img->tex;
+    byte *botclr = topclr + img->width;
+    float   tx,ty,rtx,rty;
+    rtx = tx = float(target->x);
+    rty = ty = float(target->y);
+    int mp = vp->vbuff.pal->shd_pal->mid_point;
+
+
+    pts[0].shade = pts[1].shade = pts[2].shade = pts[3].shade = mp;
+    pts[0].z = pts[1].z = pts[2].z = pts[3].z = 0;
+
+    for (int y=0;y < img->height-1;y++)
+    {
+        tx = rtx;
+        ty = rty;
+        for (int x=0;x < img->width -1;x++)
+        {
+            pts[0].x = int(tx + 0.5f);
+            pts[0].y = int(ty + 0.5f);
+            pts[0].clr = topclr[x];
+
+            pts[3].x = int(tx + 0.5f);
+            pts[3].y = int(ty + hstep + 0.5f);
+            pts[3].clr = topclr[x];
+
+            tx += wstep;
+
+            pts[1].x = int(tx + 0.5f);
+            pts[1].y = int(ty + 0.5f);
+            pts[1].clr = topclr[x+1];
+
+            pts[2].x = int(tx + 0.5f);
+            pts[2].y = int(ty + hstep + 0.5f);
+            pts[2].clr = botclr[x+1];
+
+            vngo_smooth_rect (vp,pts,clip);
+        }
+        topclr = botclr;
+        botclr += img->width;
+        rty += hstep;
+    }
+    return VNGO_NO_ERROR;
+}
 
 
 //°±² End of module - vngsmth.cpp ²±°

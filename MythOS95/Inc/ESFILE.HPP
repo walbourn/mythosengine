@@ -332,10 +332,34 @@ struct EschVertexV1
 };
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Face
-//ÄÄÄ 'FAC1' (floating-point)
+//ÄÄÄ 'FAC2' (floating-point w/ alpha)
 // Consists of an array of EschFace structures
 
+//ÄÄÄ 'FAC1' (floating-point)
+#define ESCH_FACEV2_SILLUM_MASK 0xf00000
+#define ESCH_FACEV2_ALPHA_MASK 0xf000000
+struct EschFaceV2
+{
+    dword           flags;
+    word            a;
+    word            b;
+    word            c;
+    word            txt;
+    float           u[3];
+    float           v[3];
+    dword           color;
+    struct
+    {
+        float       i;
+        float       j;
+        float       k;
+        dword       na;
+    }       normal;
+};
+
 //ÄÄÄ 'FACE' (fixed-point)
+#define ESCH_FACEV1_SILLUM_MASK 0xf00000
+#define ESCH_FACEV1_ALPHA_MASK 0xf000000
 struct EschFaceV1
 {
     dword           flags;
@@ -514,6 +538,13 @@ struct EschFileTerrHDRV1
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Surface data
 //ÄÄÄ 'SURF'
 // 2D array of dwords (width*height)/(surfratio*2) in size, one row at a time.
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Material description
+//ÄÄÄ 'MTL '
+struct EschFileTerrMTL
+{
+    char    name[ESCH_MAX_NAME];
+};
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Normals data
 //ÄÄÄ 'NRM2' (floating-point)

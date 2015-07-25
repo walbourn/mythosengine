@@ -1,0 +1,134 @@
+//ммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммм
+//
+//                                /\    /\ 
+//                               /  \  /  \ 
+//                              /    \/    \ 
+//                             /  /\    /\  \ 
+//                            /  /  \  /  Y T H O S
+//                           /  /    \/    \  \ 
+//                          /  /            \  \ 
+//                         /__/              \__\ 
+//
+//                      Microsoft Windows '95 Version
+//
+//            Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.
+//                           All Rights Reserved.
+//
+//ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд
+//
+//           *** Charybdis Enterprises, Inc. Company Confidential ***
+//
+//  This file and all associated files are the company proprietary property
+//        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+//
+// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
+// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
+// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
+// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
+// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+//
+//ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд
+//
+//                          LUNAR LANDER EXAMPLE
+//
+// Created by Chuck Walbourn and Dan Higdon
+//
+// resource.rc
+//
+//ммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммм
+
+//╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟
+//
+//                                Includes
+//
+//╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟
+
+#define WIN32_LEAN_AND_MEAN
+#include "windows.h"
+#include "simdefs.h"
+
+//╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠
+//
+//                               Resources
+//
+//╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠
+
+//дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+// Menu pulldowns                                                           Ё
+//дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+
+//дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+// String Table                                                             Ё
+//дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+
+STRINGTABLE DISCARDABLE
+BEGIN
+
+    IDS_SIM_APPNAME     "Lunar Lander"
+
+    IDS_SIM_NOMEMORY    "Out of Memory"
+
+END
+
+
+//дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+// Icons (Large and Small)                                                  Ё
+//дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+
+GENERIC ICON "charybds.ico"
+
+
+//дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+// Dialogs                                                                  Ё
+//дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+
+
+//дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+// Version Information                                                      Ё
+//дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+
+1 VERSIONINFO
+ FILEVERSION 1,0,0,0
+ PRODUCTVERSION 1,5,0,0
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0xbL
+#else
+ FILEFLAGS 0xaL
+#endif
+ FILEOS 0x10001L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904E4"
+        BEGIN
+            VALUE "OriginalFilename", "llander.exe\0"
+
+            VALUE "ProductName", "MythOS(tm) 95\0"
+            VALUE "InternalName", "Lunar Lander\0"
+            VALUE "FileDescription", "MythOS(tm) '95 Lunar Lander Example\0"
+
+            VALUE "ProductVersion", "1.5\0"
+            VALUE "FileVersion", "1.0\0"
+
+            VALUE "Comments", "CHARYBDIS ENTERPRISES, INC. COMPANY CONFIDENTIAL\0"
+
+            VALUE "CompanyName", "Charybdis Enterprises, Inc.\0"
+
+            VALUE "LegalCopyright",
+"Copyright \251 1997\0"
+
+            VALUE "LegalTrademarks",
+"MythOS is a trademark of Charybdis Enterprises, Inc.\n\
+Microsoft and Windows are tradmarks of Microsoft Corp.\0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1252
+    END
+END
+
+//╟╠╡ eof - resource.rc ╡╠╟

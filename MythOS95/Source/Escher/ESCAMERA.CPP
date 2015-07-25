@@ -83,7 +83,8 @@ EschCamera::EschCamera(VngoVport *vp) :
     flags(0),
     vport(0),
     aspect_ratio(1.0),
-    bcolor(0)
+    bcolor(0),
+    app_data(0)
 {
     strcpy(name,EschNoName);
 
@@ -103,7 +104,8 @@ EschCamera::EschCamera(const char *fname, const char *cname) :
     factor(1.0),
     hither(1.0),
     yon(4096.0),
-    bcolor(0)
+    bcolor(0),
+    app_data(0)
 {
     strncpy(name,cname ? cname : EschNoName,ESCH_MAX_NAME);
 
@@ -129,7 +131,8 @@ EschCamera::EschCamera(const EschCamera &cam) :
     fov(cam.fov),
     bcolor(cam.bcolor),
     radius_factor(cam.radius_factor),
-    z_factor(cam.z_factor)
+    z_factor(cam.z_factor),
+    app_data(cam.app_data)
 {
     strncpy(name,cam.name,ESCH_MAX_NAME);
 };
@@ -177,6 +180,7 @@ const EschCamera &EschCamera::operator = (const EschCamera &cam)
         radius_factor = cam.radius_factor;
         z_factor = cam.z_factor;
         strncpy(name,cam.name,ESCH_MAX_NAME);
+        app_data = cam.app_data;
     }
     return *this;
 };
@@ -194,6 +198,11 @@ void EschCamera::attach(VngoVport *vp)
 
     if (!vp)
         return;
+
+    if (vp->vflags & VNGO_ZBUFFER_DEV)
+        flags &= ~ESCH_CAM_SORT;
+    else
+        flags |= ESCH_CAM_SORT;
 
     compute_scalar();
     compute_frustrum();
@@ -323,6 +332,10 @@ void EschCamera::rend()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 void EschCamera::post_rend()
 {
+//ÄÄÄ Flush element buffer (if not forcing skip of this step)
+    if (!(flags & ESCH_CAM_NOFLUSH))
+        EschElement::flush();
+
 //ÄÄÄ Unlock (if old state was unlocked)
     if (!(flags & ESCH_CAM_VPWASLOCKED))
         vport->unlock();
@@ -843,9 +856,8 @@ void EschCamera::compute_z_factor()
     assertMyth("EschCamera::compute_z_factor assumes yon greater than hither",
                yon > hither);
 
-    z_factor = (0.9999f / (yon - hither + 1.0f)) * float(0xffffffff);
     // go ahead and normalize Z between 0 and 1.
-//    z_factor = (0.9999f / (yon - hither + 1.0f));
+    z_factor = (0.9999f / (yon - hither + 1.0f));
 }
 
 
@@ -909,7 +921,7 @@ esch_error_codes EschCamera::load(const char *fname, const char *cname)
     XFParseIFF          iff;
 
 //ÄÄ Open file
-    if (iff.open(fname,XF_OPEN_READ))
+    if (iff.open(fname,XF_OPEN_READ | XF_OPEN_DENYWRITE))
         return ESCH_ERR_FILEERROR;
 
 //ÄÄ Loop until a header with the correct name is found
@@ -922,6 +934,7 @@ esch_error_codes EschCamera::load(const char *fname, const char *cname)
             if (!iff.depth)
                 return ESCH_ERR_NOTFOUND;
             iff.leaveform();
+            continue;
         }
 
         if (iff.chunkid == iff.makeid('E','C','A','M')

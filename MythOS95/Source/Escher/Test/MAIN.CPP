@@ -117,7 +117,7 @@ int APIENTRY WinMain (HINSTANCE hInstance,
 
     esys=new EschSystem;
     if (!esys
-        || esys->init(262144))
+        || esys->init(262144,65536))
     {
         MessageBeep(0);
         MessageBox(hWndClient,
@@ -139,6 +139,17 @@ int APIENTRY WinMain (HINSTANCE hInstance,
     }
 
     mode = new EscherTest (Devs);
+
+    if (mode->screen == NULL)
+    {
+        MessageBeep(0);
+        MessageBox(hWndClient,
+                   "Failed to create the Screen",
+                   "Fatal Error",
+                   MB_OK);
+        return FALSE;
+    }
+
     mode->LoadEvents ("etevt.iff");
     if (!mode->active)
     {
@@ -214,6 +225,12 @@ int APIENTRY WinMain (HINSTANCE hInstance,
     {
         strlwr(buff);
         if (!mode->SetupSprite(buff))
+            return FALSE;
+    }
+
+    if (!ini.read("TextureFile",buff))
+    {
+        if (EschTexture::file_register(buff))
             return FALSE;
     }
 

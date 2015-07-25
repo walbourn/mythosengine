@@ -25,6 +25,8 @@
 //
 //컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
 //
+// Created by Tim Little
+//
 // vngcolor.hpp
 //
 // This file has all of the various color definitions

@@ -40,7 +40,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include "escher.hpp"
@@ -122,8 +122,11 @@ void EschSprite::draw()
     if (!txt)
         return;
 
+    float _width = width * scale;
+    float _height = height * scale;
+
     assertMyth("EschSprite::draw needs valid size",
-               width > 0 && height > 0);
+               _width > 0 && _height > 0);
 
 //ÄÄÄ Setup local pointers to current camera and Van Gogh viewport.
     assertMyth("EschSprite::draw needs camera in current context",
@@ -137,6 +140,8 @@ void EschSprite::draw()
     float yon = cam->yon;
     float hither = cam->hither;
 
+    float tx, ty;
+
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Transform
     //ÄÄÄ Transform into copy of point
     if (flags & ESCH_SPRITE_INFINITE)
@@ -146,12 +151,12 @@ void EschSprite::draw()
         ((EschVector*)&pos)->transform(&cam->eye.iorient,
                                        (EschVector*)&EschTempPoint);
 
+        tx = EschTempPoint.z * cam->xsize;
+        ty = EschTempPoint.z * cam->ysize;
+
         if (EschTempPoint.z > 0)
         {
-            float tx = EschTempPoint.z * cam->xsize;
-            float ty = EschTempPoint.z * cam->ysize;
-
-            float r = max(width,height) * cam->radius_factor;
+            float r = max(_width,_height) * cam->radius_factor;
 
             // Check for fully invisible against left/right/top/bottom
             if ( ((EschTempPoint.x + r) < -tx)
@@ -160,15 +165,7 @@ void EschSprite::draw()
                  || ((EschTempPoint.y - r) > ty) )
                 return;
 
-            // See if fully visible or needs clipping
-            ctrlfl = ( ((EschTempPoint.z - r) > hither)
-                        && ((EschTempPoint.z + r) < yon)
-                        && ((EschTempPoint.x - r) > -tx)
-                        && ((EschTempPoint.x + r) < tx)
-                        && ((EschTempPoint.y - r) > -ty)
-                        && ((EschTempPoint.y + r) < ty) )
-                     ? ESCH_CDF_INFINITEZ | ESCH_CDF_MUSTTXT
-                     : ESCH_CDF_CLIP | ESCH_CDF_INFINITEZ | ESCH_CDF_MUSTTXT;
+            ctrlfl = ESCH_CDF_INFINITEZ | ESCH_CDF_MUSTTXT;
         }
         else ctrlfl = ESCH_CDF_CLIP | ESCH_CDF_INFINITEZ | ESCH_CDF_MUSTTXT;
     }
@@ -184,12 +181,12 @@ void EschSprite::draw()
             || EschTempPoint.z < hither)
             return;
 
+        tx = EschTempPoint.z * cam->xsize;
+        ty = EschTempPoint.z * cam->ysize;
+
         if (EschTempPoint.z > 0)
         {
-            float tx = EschTempPoint.z * cam->xsize;
-            float ty = EschTempPoint.z * cam->ysize;
-
-            float r = max(width,height) * cam->radius_factor;
+            float r = max(_width,_height) * cam->radius_factor;
 
             // Check for fully invisible against left/right/top/bottom
             if ( ((EschTempPoint.x + r) < -tx)
@@ -198,13 +195,7 @@ void EschSprite::draw()
                  || ((EschTempPoint.y - r) > ty) )
                 return;
 
-            // See if fully visible or needs clipping
-            ctrlfl = ( ((EschTempPoint.x - r) > -tx)
-                        && ((EschTempPoint.x + r) < tx)
-                        && ((EschTempPoint.y - r) > -ty)
-                        && ((EschTempPoint.y + r) < ty) )
-                     ? ESCH_CDF_MUSTTXT
-                     : ESCH_CDF_CLIP | ESCH_CDF_MUSTTXT;
+            ctrlfl = ESCH_CDF_MUSTTXT;
         }
         else ctrlfl = ESCH_CDF_CLIP | ESCH_CDF_MUSTTXT;
     }
@@ -240,7 +231,7 @@ void EschSprite::draw()
 // |  *  |
 // |   B |
 // 0-----1
-//
+
     float ti = cam->top.i;
     float tj = cam->top.j;
 
@@ -249,8 +240,8 @@ void EschSprite::draw()
     if (ti < 0)
         s = -s;
 
-    float wh = width / 2;
-    float hh = height / 2;
+    float wh = _width / 2;
+    float hh = _height / 2;
 
     float xc = wh*c;
     float yc = hh*c;
@@ -258,39 +249,68 @@ void EschSprite::draw()
     float xs = wh*s;
     float ys = hh*s;
 
-#if 0
-    ((EschPoint*)(&vpt[0]))->x = EschTempPoint.x - wh;
-    ((EschPoint*)(&vpt[0]))->y = EschTempPoint.y - hh;
+    EschPoint temp(-xc+ys, -xs-yc, 0);
+    if (rotation != 0)
+        temp.rotatez (rotation);
+    if (!(ctrlfl & ESCH_CDF_CLIP))
+    {
+        if ( ((EschTempPoint.x - temp.x) < -tx)
+             || ((EschTempPoint.x + temp.x) > tx)
+             || ((EschTempPoint.y - temp.y) < -ty)
+             || ((EschTempPoint.y + temp.y) > ty) )
+            ctrlfl |= ESCH_CDF_CLIP;
+    }
+    ((EschPoint*)(&vpt[0]))->x = EschTempPoint.x + temp.x;
+    ((EschPoint*)(&vpt[0]))->y = EschTempPoint.y + temp.y;
     ((EschPoint*)(&vpt[0]))->z = EschTempPoint.z;
 
-    ((EschPoint*)(&vpt[1]))->x = EschTempPoint.x + wh;
-    ((EschPoint*)(&vpt[1]))->y = EschTempPoint.y - hh;
+    temp.x = xc+ys;
+    temp.y = xs-yc;
+    if (rotation != 0)
+        temp.rotatez (rotation);
+    if (!(ctrlfl & ESCH_CDF_CLIP))
+    {
+        if ( ((EschTempPoint.x - temp.x) < -tx)
+             || ((EschTempPoint.x + temp.x) > tx)
+             || ((EschTempPoint.y - temp.y) < -ty)
+             || ((EschTempPoint.y + temp.y) > ty) )
+            ctrlfl |= ESCH_CDF_CLIP;
+    }
+    ((EschPoint*)(&vpt[1]))->x = EschTempPoint.x + temp.x;
+    ((EschPoint*)(&vpt[1]))->y = EschTempPoint.y + temp.y;
     ((EschPoint*)(&vpt[1]))->z = EschTempPoint.z;
 
-    ((EschPoint*)(&vpt[2]))->x = EschTempPoint.x + wh;
-    ((EschPoint*)(&vpt[2]))->y = EschTempPoint.y + hh;
+    temp.x = xc - ys;
+    temp.y = xs + yc;
+    if (rotation != 0)
+        temp.rotatez (rotation);
+    if (!(ctrlfl & ESCH_CDF_CLIP))
+    {
+        if ( ((EschTempPoint.x - temp.x) < -tx)
+             || ((EschTempPoint.x + temp.x) > tx)
+             || ((EschTempPoint.y - temp.y) < -ty)
+             || ((EschTempPoint.y + temp.y) > ty) )
+            ctrlfl |= ESCH_CDF_CLIP;
+    }
+    ((EschPoint*)(&vpt[2]))->x = EschTempPoint.x + temp.x;
+    ((EschPoint*)(&vpt[2]))->y = EschTempPoint.y + temp.y;
     ((EschPoint*)(&vpt[2]))->z = EschTempPoint.z;
 
-    ((EschPoint*)(&vpt[3]))->x = EschTempPoint.x - wh;
-    ((EschPoint*)(&vpt[3]))->y = EschTempPoint.y + hh;
+    temp.x = -xc - ys;
+    temp.y = -xs + yc;
+    if (rotation != 0)
+        temp.rotatez (rotation);
+    if (!(ctrlfl & ESCH_CDF_CLIP))
+    {
+        if ( ((EschTempPoint.x - temp.x) < -tx)
+             || ((EschTempPoint.x + temp.x) > tx)
+             || ((EschTempPoint.y - temp.y) < -ty)
+             || ((EschTempPoint.y + temp.y) > ty) )
+            ctrlfl |= ESCH_CDF_CLIP;
+    }
+    ((EschPoint*)(&vpt[3]))->x = EschTempPoint.x + temp.x;
+    ((EschPoint*)(&vpt[3]))->y = EschTempPoint.y + temp.y;
     ((EschPoint*)(&vpt[3]))->z = EschTempPoint.z;
-#else
-    ((EschPoint*)(&vpt[0]))->x = EschTempPoint.x - xc + ys;
-    ((EschPoint*)(&vpt[0]))->y = EschTempPoint.y - xs - yc;
-    ((EschPoint*)(&vpt[0]))->z = EschTempPoint.z;
-
-    ((EschPoint*)(&vpt[1]))->x = EschTempPoint.x + xc + ys;
-    ((EschPoint*)(&vpt[1]))->y = EschTempPoint.y + xs - yc;
-    ((EschPoint*)(&vpt[1]))->z = EschTempPoint.z;
-
-    ((EschPoint*)(&vpt[2]))->x = EschTempPoint.x + xc - ys;
-    ((EschPoint*)(&vpt[2]))->y = EschTempPoint.y + xs + yc;
-    ((EschPoint*)(&vpt[2]))->z = EschTempPoint.z;
-
-    ((EschPoint*)(&vpt[3]))->x = EschTempPoint.x - xc - ys;
-    ((EschPoint*)(&vpt[3]))->y = EschTempPoint.y - xs + yc;
-    ((EschPoint*)(&vpt[3]))->z = EschTempPoint.z;
-#endif
 
 //ÄÄÄ Create 2 faces
     ec.faces[0].flags = (limits & (ESCH_FACE_WIRE
@@ -305,6 +325,7 @@ void EschSprite::draw()
     {
         ec.faces[0].flags |= ESCH_FACE_ALPHA;
         ec.faces[0].set_alpha(alpha_level);
+        ec.faces[1].set_alpha(alpha_level);
     }
     ec.faces[1].flags = ec.faces[0].flags;
 
@@ -323,7 +344,7 @@ void EschSprite::draw()
     ec.faces[1].u[0]  = float(0.01);
     ec.faces[1].v[0]  = float(0.99);
     ec.faces[1].b     = 2;
-    ec.faces[1].u[1]  = float(0.99); 
+    ec.faces[1].u[1]  = float(0.99);
     ec.faces[1].v[1]  = float(0.01);
     ec.faces[1].c     = 3;
     ec.faces[1].u[2]  = float(0.01);
@@ -462,7 +483,8 @@ void EschSprite::attach(EschTexture *t)
 //                                                                          ³
 // Creates a sprite from a (appropriate) bitmap.                            ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-esch_error_codes EschSprite::create(XFBitmap *bm, float w, float h)
+esch_error_codes EschSprite::create(XFBitmap *bm, float w, float h,
+                                    int trans, VngoPal *pal)
 {
 //ÄÄÄ Verify valid input
     if (w <= 0 || h <= 0)
@@ -481,7 +503,7 @@ esch_error_codes EschSprite::create(XFBitmap *bm, float w, float h)
     if (!txt)
         return ESCH_ERR_NOMEMORY;
 
-    esch_error_codes err=((EschStaticTexture*)txt)->create(bm);
+    esch_error_codes err=((EschStaticTexture*)txt)->create(bm,trans,pal);
     if (err)
         return err;
 

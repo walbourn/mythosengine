@@ -25,6 +25,8 @@
 //
 //컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
 //
+// Created by Tim Little
+//
 // vngstrct.hpp
 //
 // Contains the general structure definitions
@@ -232,6 +234,8 @@ struct VngoRect
     }
 
     VNGError clip_to(VngoRect &crect);
+    VNGError clip_to(VngoPoint *p1,VngoPoint *p2,dword flags);
+    VNGError clip_to(VngoPointF *p1,VngoPointF *p2,dword flags);
 
     int point_in(int _x,int _y)
     {
@@ -242,6 +246,7 @@ struct VngoRect
     }
 
     int point_in(VngoPoint &pt) {return point_in(pt.x,pt.y);}
+    int point_in(VngoPointF &pt) {return point_in(int(pt.x),int(pt.y));}
 };
 
 
@@ -266,6 +271,60 @@ struct VngoVbuffer
     VngoPoint2  *edge1;     // Edge arrays for the scan converters to use.
     VngoPoint2  *edge2;     // Edge arrays for the scan converters to use.
 };
+
+struct VngoPixelInfo
+{
+    long        bits_per_pixel;
+    dword       rmask;
+    dword       gmask;
+    dword       bmask;
+};
+
+class VngoHazeInfo
+{
+public:
+    VngoColor24bit  target_color;
+    float           start_depth;    // Range 0 - 0.9999f things beyond, not hazed.
+    float           mid_depth;      // so you can have a pheudo curve to the haze.
+
+    VngoHazeInfo()
+    {
+        target_color.r = 255;       // Default to white.
+        target_color.g = 255;
+        target_color.b = 255;
+        start_depth = 0.6f;         // a fair default.
+        mid_depth = 0.85f;          // a fair default.
+    }
+};
+
+class VngoHazeInfoVVP16
+{
+public:
+    byte    *rtable;
+    byte    *gtable;
+    byte    *btable;
+    dword   start_depth;
+
+    VngoHazeInfoVVP16(){rtable=NULL;gtable=NULL;btable=NULL;}
+    ~VngoHazeInfoVVP16();
+
+    void setup(VngoHazeInfo *info);
+    void release();
+};
+
+class VngoHazeInfoVVP8
+{
+public:
+    byte    *htable;
+    dword   start_depth;
+
+    VngoHazeInfoVVP8(){htable=NULL;}
+    ~VngoHazeInfoVVP8();
+
+    void setup(VngoHazeInfo *info,VngoPal *pal);
+    void release();
+};
+
 
 #ifdef __WATCOMC__
 #pragma pack();

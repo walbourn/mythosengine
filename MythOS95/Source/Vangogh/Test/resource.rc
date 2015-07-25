@@ -52,7 +52,7 @@
 //дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
 // Icons (Large and Small)                                                  Ё
 //дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
-GENERIC ICON lcharyb.ico
+GENERIC ICON charybds.ico
 
 
 //дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
@@ -74,7 +74,7 @@ END
 
 1 VERSIONINFO
  FILEVERSION 1,0,0,0
- PRODUCTVERSION 1,4,0,0
+ PRODUCTVERSION 1,5,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0xbL
@@ -95,7 +95,7 @@ BEGIN
             VALUE "InternalName", "VanGogh\0"
             VALUE "FileDescription", "MythOS VanGogh Tester\0"
 
-            VALUE "ProductVersion", "1.4\0"
+            VALUE "ProductVersion", "1.5\0"
             VALUE "FileVersion", "1.0\0"
 
             VALUE "Comments", "By Tim Little\0"
@@ -103,7 +103,7 @@ BEGIN
             VALUE "CompanyName", "Charybdis Enterprises, Inc.\0"
 
             VALUE "LegalCopyright",
-"Copyright \251 1995, 1996 by Charybdis Enterprises, Inc.\0"
+"Copyright \251 1995-1997\0"
 
             VALUE "LegalTrademarks",
 "MythOS-95 is a trademark of Charybdis Enterprises, Inc.\n\

@@ -80,6 +80,8 @@ event SHADE_SPECULAR
    [ key #f8 ]
 }
 
+;ÄÄÄ More camera toggles
+
 event TEXTURE_MAP
 {
    [ key #f9 
@@ -100,9 +102,21 @@ event SHADE_PERSPECTIVE
    [ key #f10 ]
 }
 
+event SHADE_ALPHA
+{
+   [ key #f11 ]
+}
+
+event SORT
+{
+   [ key #f12
+     not key #shift ]
+}
+
 event ZBUFFER
 {
-   [ key #f12 ]
+   [ key #f12
+     key #shift ]
 }
 
 ;ÄÄÄ Input controls.
@@ -229,13 +243,13 @@ event TERRAIN_LOD
 
 event TERRAIN_DEBUG
 {
-    [ key #f11 
+    [ key 'u'
       not key #lshift ]
 }
 
 event CAM_HOVER
 {
-    [ key #f11 
+    [ key 'u'
       key #lshift ]
 }
 

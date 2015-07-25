@@ -63,7 +63,7 @@
 #define SIM_MYTHOS_MEM_SIZE             (8*1024*1024)
 #define SIM_MYTHOS_TASK_STACK_SIZE      (128*1024)
 #define SIM_MYTHOS_ESCHER_ARENA_SIZE    (384*1024)
-
+#define SIM_MYTHOS_ESCHER_SORT_SIZE     (64*1024)
 
 //컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
 // Model Settings

@@ -83,16 +83,19 @@ public:
     enum
     {
         FULLSCREEN          = 0x1,
+        TRUEFLIP            = 0x2,
     };
 
     enum error_codes
     {
         ERROR_NONE          = 0,
         ERROR_NOMEMORY      = 1,
-        ERROR_PALINIT       = 2,
-        ERROR_MODEFAIL      = 3,
-        ERROR_MODENOTSUPP   = 4,
-        ERROR_VPORTINIT     = 5,
+        ERROR_INVALIDPARMS  = 2,
+        ERROR_SCNRMNGRINIT  = 3,
+        ERROR_PALINIT       = 4,
+        ERROR_MODEFAIL      = 5,
+        ERROR_MODENOTSUPP   = 6,
+        ERROR_VPORTINIT     = 7,
     };
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
@@ -120,31 +123,37 @@ public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
     virtual error_codes init (ushort w, ushort h,
                               ushort bd = 16, dword flags=FULLSCREEN);
-    virtual BOOL load_palette (const char *fname, const char *name, BOOL freeold=TRUE);
-    virtual BOOL set_palette (VngoPal *p, BOOL clr=TRUE);
-    virtual void flip ();
-    virtual void reinit ();
-
+    virtual void release();
     virtual VngoVport *create_subviewport(VngoRect &screen_rect, dword flags) = 0;
-
     virtual long lock ();
     virtual int  unlock ();
-    virtual void clear ();
 
-    virtual void set_brightness(float b);
+    void clear ();
+    void reinit () { if (vgs) vgs->reinit(brightness); }
+    void flip () { if (vgs) vgs->flip(); }
+
+    BOOL load_palette (const char *fname, const char *name, BOOL freeold=TRUE);
+    BOOL set_palette (VngoPal *p, BOOL clr=TRUE);
+
+    void set_brightness(float b);
     float get_brightness() const { return brightness; }
 
-    virtual void invalidate (const VngoRect &);
+    void invalidate (const VngoRect &rct)
+    {
+        if (vgs)
+            vgs->invalidate(rct);
+    }
     void invalidate ()
     {
-        VngoRect rect;
-        rect.x=rect.y=0;
-        rect.dx=width;
-        rect.dy=height;
-        invalidate(rect);
+        VngoRect rct;
+        rct.x=rct.y=0;
+        rct.dx=width;
+        rct.dy=height;
+        if (vgs)
+            vgs->invalidate(rct);
     }
 
-    virtual BOOL capture();
+    BOOL capture();
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Utility functions                                                    ³
@@ -183,6 +192,8 @@ public:
     virtual error_codes init (ushort w, ushort h, 
                               ushort bd = 16, dword flags=FULLSCREEN);
     virtual VngoVport *create_subviewport(VngoRect &srect, dword flags);
+    virtual long lock ();
+    virtual int  unlock ();
 };
 
 
@@ -210,7 +221,6 @@ public:
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 // SimScreenD3D - Microsoft Direct3D implementation of screen class
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-#ifdef  _D3D
 class SimScreenD3D : public SimScreen
 {
 public:
@@ -226,8 +236,9 @@ public:
     virtual error_codes init (ushort w, ushort h, 
                               ushort bd = 16, dword flags=FULLSCREEN);
     virtual VngoVport *create_subviewport(VngoRect &srect, dword flags);
+    virtual long lock ();
+    virtual int  unlock ();
 };
-#endif // _D3D
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ

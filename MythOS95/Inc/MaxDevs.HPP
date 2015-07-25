@@ -136,9 +136,9 @@ public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
     // Operations
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-    virtual int enable_keyboard (int) = 0;
-    virtual int enable_mouse    (int) = 0;
-    virtual int enable_joystick (int) = 0;
+    virtual int enable_keyboard (int);
+    virtual int enable_mouse    (int);
+    virtual int enable_joystick (int);
 
     // Update the internal values for the various devices
     virtual void update ();
@@ -163,9 +163,12 @@ public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
     // Accessors
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-    bool is_mouse_enabled () const { return theMouse != 0; }
-    bool is_keyboard_enabled () const { return theKeyboard != 0; }
-    bool is_joystick_enabled () const { return theJoystick != 0; }
+    bool is_mouse_present() const;
+    bool is_keyboard_present() const;
+    bool is_joystick_present() const;
+    bool is_mouse_enabled () const;
+    bool is_keyboard_enabled () const;
+    bool is_joystick_enabled () const;
 };
 
 
@@ -193,9 +196,6 @@ public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
     // Operations
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-    virtual int enable_keyboard (int);
-    virtual int enable_mouse    (int);
-    virtual int enable_joystick (int);
 
     // Update the internal values for the various devices
 //    virtual void update ();
@@ -230,9 +230,6 @@ public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
     // Operations
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-    virtual int enable_keyboard (int);
-    virtual int enable_mouse    (int);
-    virtual int enable_joystick (int);
 
     // Update the internal values for the various devices
 //    virtual void update ();

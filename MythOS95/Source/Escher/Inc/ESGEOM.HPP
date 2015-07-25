@@ -164,6 +164,28 @@ public:
         if (update & ESCH_UPD_WORLD)  compute_world(update);
     }
 
+    void set_top(const EschVector *v, dword update=ESCH_UPD_ALL)
+    {
+        local.set_top(v,update);
+        if (update & ESCH_UPD_WORLD)  compute_world(update);
+    }
+    void set_top(float ii, float ij, float ik, dword update=ESCH_UPD_ALL)
+    {
+        local.set_top(ii,ij,ik,update);
+        if (update & ESCH_UPD_WORLD)  compute_world(update);
+    }
+
+    void set_direction(const EschVector *v, dword update=ESCH_UPD_ALL)
+    {
+        local.set_direction(v,update);
+        if (update & ESCH_UPD_WORLD)  compute_world(update);
+    }
+    void set_direction(float ii, float ij, float ik, dword update=ESCH_UPD_ALL)
+    {
+        local.set_direction(ii,ij,ik,update);
+        if (update & ESCH_UPD_WORLD)  compute_world(update);
+    }
+
     void rotatex(const float degrees, dword update=ESCH_UPD_ALL)
     {
         local.rotatex(degrees,update);
@@ -278,21 +300,32 @@ public:
     float           v[3];
     dword           color;                  // Base-color
     EschVector      normal;                 // Face normal.
+    byte            self_illum;             // Self-illumination value (0=off)
+    byte            alpha_a;                // Triangle alpha values
+    byte            alpha_b;
+    byte            alpha_c;
+    void            *app_data;              // Application data pointer
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Constructor/Destructors                                              ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-    EschFace() {}
+    EschFace() : app_data(0) {}
     EschFace(dword _f, word _a, word _b, word _c, word _txt,
              float _u0, float _u1, float _u2,
              float _v0, float _v1, float _v2,
-             dword _clr, float _i, float _j, float _k) :
+             dword _clr, float _i, float _j, float _k,
+             byte _si=0,
+             byte _aa=255, byte _ab=255, byte _ac=255, void *_app=0) :
         flags(_f),
         a(_a), b(_b), c(_c),
         txt(_txt),
         color(_clr),
-        normal(_i,_j,_k)
-
+        normal(_i,_j,_k),
+        self_illum(_si),
+        alpha_a(_aa),
+        alpha_b(_ab),
+        alpha_c(_ac),
+        app_data(_app)
     {
         u[0] = _u0;
         u[1] = _u1;
@@ -309,17 +342,10 @@ public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
     void set_flags(dword f) { flags = f; }
 
-    long get_alpha() 
-    {
-        assert (flags & ESCH_FACE_ALPHA);
-        return ((flags & ESCH_FACE_ALPHA_MASK) >> 20);
-    }
-    void set_alpha(long alpha)
-    {
-        assert (flags & ESCH_FACE_ALPHA);
-        flags = (flags & ~ESCH_FACE_ALPHA_MASK) |
-                ((alpha << 20) & ESCH_FACE_ALPHA_MASK);
-    }
+    void set_app_data(void *p) { app_data = p; }
+
+    long get_alpha() const { return alpha_a; }
+    void set_alpha(long alpha) { alpha_a = (byte)alpha; }
 };
 
 
@@ -391,6 +417,9 @@ public:
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 class EschMeshDraw : public EschGeometry {
 
+    static EschMeshDraw *clone_helper(EschMeshDraw *_parent,
+                                      const EschMeshDraw *_refmsh, int dupmf);
+
 public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Public data members                                                  ³
@@ -446,6 +475,11 @@ public:
             exts.draw(&world,clr);
     }
 
+    EschMeshDraw *clone(int dupmf=1) const { return clone_helper(0, this, dupmf); }
+
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    // I/O Routines.                                                        ³
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
     virtual esch_error_codes load(const char *fname, const char *oname=0,
                                   VngoPal *pal=0, EschMesh *msh=0, char *pn=0,
                                   dword ctrlfl=ESCH_MSHLD_ALL);
@@ -454,29 +488,7 @@ public:
                                   dword ctrlfl=ESCH_MSHLD_ALL);
 };
 
-//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-//
-//                               Prototypes
-//
-//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-
-int esch_rotate_check(ulong count,VngoPoint *pts,EschCamera *cam=NULL);
-int esch_rotate_check(ulong count,VngoPoint2 *pts);
-
-extern "C" void esch_clipdraw_face(ulong ind, dword ctrlfl=ESCH_CDF_CLIP);
-extern "C" void esch_clip_poly(VngoVbuffer *vport,VngoPoint *points, ulong *n_vertices);
-extern "C" void esch_zclip_poly(float hither, float yon,VngoPoint *points, ulong *n_vertices);
-extern "C" void esch_clip_x_line(long p,VngoPoint *s, VngoPoint *f, VngoPoint *out_put);
-extern "C" void esch_clip_y_line(long p,VngoPoint *s, VngoPoint *f, VngoPoint *out_put);
-extern "C" void esch_clip_z_line(long p,VngoPoint *s, VngoPoint *f, VngoPoint *out_put);
-
 #ifdef __WATCOMC__
-#pragma aux (_ASMSTKCALL_) esch_clipdraw_face;
-#pragma aux (_ASMSTKCALL_) esch_clip_poly;
-#pragma aux (_ASMSTKCALL_) esch_clip_x_line;
-#pragma aux (_ASMSTKCALL_) esch_clip_y_line;
-#pragma aux (_ASMSTKCALL_) esch_clip_z_line;
-
 #pragma pack();
 #endif
 

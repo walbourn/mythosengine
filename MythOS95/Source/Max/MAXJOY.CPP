@@ -105,6 +105,7 @@
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 MaxJoystick::MaxJoystick():
     joy_present (0),
+    initialized (false),
     auto_polled (0),
     timer_id (0)
 {
@@ -157,6 +158,8 @@ MaxJoystickWin32::MaxJoystickWin32():
     info.dwFlags = JOY_RETURNALL | JOY_RETURNCENTERED | JOY_USEDEADZONE;
 
     memset (&caps, 0, sizeof (caps));
+
+    joy_present = short (joyGetNumDevs());
 }
 
 
@@ -175,8 +178,6 @@ MaxJoystickWin32::~MaxJoystickWin32()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 short MaxJoystickWin32::init ()
 {
-    joy_present = short (joyGetNumDevs());
-
     if (joy_present)
     {
         // Fill in the capabilities
@@ -190,6 +191,7 @@ short MaxJoystickWin32::init ()
             joy_present = 0;
     }
 
+    initialized = joy_present != 0;
     return joy_present;
 }
 
@@ -200,6 +202,7 @@ short MaxJoystickWin32::init ()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 void MaxJoystickWin32::uninit()
 {
+    initialized = false;
     joy_present = 0;
     if (timer_id)
     {
@@ -215,7 +218,7 @@ void MaxJoystickWin32::uninit()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 void MaxJoystickWin32::get_stat (JOYINFOEX *stat) const
 {
-    if (joy_present)
+    if (joy_present && initialized)
     {
         if (auto_polled)
         {
@@ -360,6 +363,8 @@ MaxJoystickDirectX::MaxJoystickDirectX (IDirectInput *pdi, HWND _hwnd):
             pdid->SetCooperativeLevel (_hwnd, DISCL_EXCLUSIVE | DISCL_FOREGROUND);
         }
     }
+
+    joy_present = (pdid != 0);
 }
 
 
@@ -375,6 +380,7 @@ MaxJoystickDirectX::~MaxJoystickDirectX()
         pdid->Release();
         pdid = 0;
     }
+    joy_present = false;
 }
 
 
@@ -394,12 +400,8 @@ IDirectInputDevice2 *MaxJoystickDirectX::get_di2() const
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 short MaxJoystickDirectX::init ()
 {
-    joy_present = (pdid != 0);
-
     if (joy_present)
     {
-        HRESULT hr;
-
 //        pdid->SetDataFormat (&c_dfDIJoystick);
         dicaps.dwSize = sizeof (DIDEVCAPS);
         pdid->GetCapabilities (&dicaps);
@@ -417,10 +419,8 @@ short MaxJoystickDirectX::init ()
 #endif
 
         // Finally, aquire the device
-        hr = pdid->Acquire();
-
-        if (SUCCEEDED (hr))
-            joy_present = true;
+        HRESULT hr = pdid->Acquire();
+        initialized = SUCCEEDED (hr);
     }
 
     return joy_present;
@@ -433,6 +433,7 @@ short MaxJoystickDirectX::init ()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 void MaxJoystickDirectX::uninit()
 {
+    initialized = false;
     joy_present = 0;
     if (pdid)
         pdid->Unacquire();
@@ -455,21 +456,28 @@ void MaxJoystickDirectX::get_stat (JOYINFOEX *stat) const
 {
     HRESULT hr;
 
-    if (!joy_present)
+    if (!pdid || !initialized)
+    {
+        memset (stat, 0, sizeof (*stat));
         return;
+    }
 
     if (!auto_polled)
         pdid->Poll();
 
     // Get the DirectInput data
     DIJOYSTATE distat;
+    memset (&distat, 0, sizeof (DIJOYSTATE));
     while (pdid->GetDeviceState (sizeof (distat), &distat) == DIERR_INPUTLOST)
     {
         hr = pdid->Acquire();
 
         // We can't reacquire, so don't go any further
         if (!SUCCEEDED (hr))
+        {
+            memset (stat, 0, sizeof (*stat));
             return;
+        }
     }
 
     // Fill in the JOYINFOEX structure
@@ -485,6 +493,8 @@ void MaxJoystickDirectX::get_stat (JOYINFOEX *stat) const
 
     if (dicaps.dwPOVs > 0)
         stat->dwPOV = distat.rgdwPOV[0];
+    else
+        stat->dwPOV = JOY_POVCENTERED;
 
     // Compute and store the button state
     assert (dicaps.dwButtons <= 32);
@@ -676,6 +686,9 @@ void CALLBACK MaxJoystickDirectX::di_poll_routine (UINT idTimer, UINT msg, DWORD
 
 int MaxJoystickDirectX::auto_poll (BOOL activate, UINT rate)
 {
+    if (!pdid || !initialized)
+        return 0;
+
     auto_polled = activate;
 
     if (activate)

@@ -32,18 +32,9 @@
                              _Library Status_
 
  Notes by: Chuck Walbourn
- Updated: July 29, 1997
+ Updated: September 29, 1997
 
- Changes for this release ---------------------------------------------------
-
-    o Added variable-pitch font support
-
-    o Added TrueType font capture to GFONT.EXE
-
-    o Added vertical-write versions of GBergText routines
-
-
-  Proposed changes ----------------------------------------------------------
+ Proposed changes -----------------------------------------------------------
 
     o Faster string 'search' for loadstring by having compiler build a
       binary search tree and having loadstring use it.

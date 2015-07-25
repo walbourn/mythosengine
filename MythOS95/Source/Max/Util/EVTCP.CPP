@@ -29,9 +29,9 @@
 //
 //                              *** Utilities ***
 //
-// evtcp.cpp
+// By Dan Higdon
 //
-//     This is the parse module for the IFF event compiler.
+// evtcp.cpp
 //
 //อออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออ
 

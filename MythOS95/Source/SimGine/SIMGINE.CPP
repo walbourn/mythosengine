@@ -94,7 +94,8 @@ SimGine::SimGine() :
     startup_height (SIM_DEFAULT_HEIGHT),
     startup_bitdepth (SIM_DEFAULT_BITDEPTH),
     startup_memsize (SIM_MYTHOS_MEM_SIZE),
-    startup_arenasize (SIM_MYTHOS_ESCHER_ARENA_SIZE)
+    startup_arenasize (SIM_MYTHOS_ESCHER_ARENA_SIZE),
+    startup_sortsize (SIM_MYTHOS_ESCHER_SORT_SIZE)
 {
     assertMyth("Must be only one SimGine derived class instance in an application",
                SimApp == 0);
@@ -186,6 +187,16 @@ BOOL SimGine::init_instance()
     if (startup & STARTUP_DX5)
     {
         Devs = new MaxDevicesDirectX (hWndClient);
+
+        if (!Devs)
+            return FALSE;
+
+        if (!Devs->is_mouse_present() || !Devs->is_keyboard_present())
+        {
+            delete Devs;
+            Devs = new MaxDevicesWin32 (hWndClient);
+        }
+
     }
     else
     {
@@ -203,18 +214,15 @@ BOOL SimGine::init_instance()
     ivory_sub_initialize (bozo_alloc, sizeof (bozo_stackspace));
 
 //ÄÄÄ Finish MythOS initialization
-    if (MythOS->init (startup_arenasize, bozo_alloc))
+    if (MythOS->init (startup_arenasize, startup_sortsize, bozo_alloc))
         return FALSE;
 
 //ÄÄÄ Create screen
-
-#ifdef  _D3D
     if (startup & STARTUP_D3D)
     {
         Screen = new SimScreenD3D;
     }
     else
-#endif // _D3D
 
 #ifdef  _OEMS
 #ifdef  _CLEAR_3D
@@ -238,10 +246,14 @@ BOOL SimGine::init_instance()
     if (!Screen)
         return FALSE;
 
+    dword sflags = 0;
+    if (startup & STARTUP_FULLSCREEN)
+        sflags |= SimScreen::FULLSCREEN;
+    if (startup & STARTUP_TRUEFLIP)
+        sflags |= SimScreen::TRUEFLIP;
+
     if (Screen->init(startup_width, startup_height,
-                     startup_bitdepth,
-                     (startup & STARTUP_FULLSCREEN)
-                     ? SimScreen::FULLSCREEN : 0))
+                     startup_bitdepth, sflags))
         return FALSE;
 
 //ÄÄÄ Create Audio

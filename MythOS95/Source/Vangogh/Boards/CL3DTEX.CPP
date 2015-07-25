@@ -290,6 +290,15 @@ VNGError VngoCL3DTexture3D::init(VngoTexture *_src,VngoPal *_pal)
     return VNGO_NO_ERROR;
 }
 
+VNGError VngoCL3DTexture3D::ready_texture()
+{
+    if (DeviceSurface == NULL)
+    {
+
+    }
+    return VNGO_NO_ERROR;
+}
+
 VNGError VngoCL3DTexture3D::reinit(VngoTexture *_src,VngoPal *_pal)
 {
     return VNGO_NO_ERROR;
@@ -302,14 +311,18 @@ void VngoCL3DTexture3D::release()
         DeviceSurface->Release();
         DeviceSurface = NULL;
     }
+#if 0
     if (pal)
     {
         pal->Release();
         pal = NULL;
     }
-
+#endif
     if (chandle)
+    {
         delete chandle;
+        chandle = NULL;
+    }
     return;
 }
 

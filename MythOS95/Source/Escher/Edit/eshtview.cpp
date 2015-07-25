@@ -382,7 +382,12 @@ void TerrEditView::OnUpdate(CView* pSender, LPARAM lHint, CObject* pHint)
         rend.terr.surfinfo = pDoc->surfinfo;
         rend.terr.hsurfnorml = pDoc->hsurfnorml;
         rend.terr.set_origin(pDoc->orgx, pDoc->orgy, pDoc->orgz);
-        rend.terr.set_lod(pDoc->lod_medium, pDoc->lod_low);
+        rend.terr.set_lod(3, pDoc->lod_medium, pDoc->lod_low);
+        rend.terr.set_texture_lod(3);
+        rend.terr.set_perspective_lod(0);
+        rend.terr.set_smooth_lod(3);
+        rend.terr.set_start_lod(0);
+
         rend.terr.flags &= ~ESCH_TRN_LOD;
         if (pDoc->lod_active)
             rend.terr.flags |= ESCH_TRN_LOD;

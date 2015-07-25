@@ -129,7 +129,7 @@ extern "C" void vngo_agtriangle16 (VngoVbuffer *vb,VngoPoint2 *pts,
 
     tri.start_y = (high_pt->y + 0x8000) >> 16;
     tri.color = pts[0].clr;
-    tri.sptr  = (word*)(dword(vb->scrn_ptr) + vb->ytable[(high_pt->y + 0x8000) >> 16]); 
+    tri.sptr  = (word*)(dword(vb->scrn_ptr) + vb->ytable[(high_pt->y + 0x8000) >> 16]);
 
     scan_gouraud_edge(edge1,high_pt,low_pt);
 
@@ -185,9 +185,10 @@ extern "C" void draw_aghlines16(VngoTriangle *tri, long alpha)
     for (long y=0;y <= count;y++)
     {
         long ts = edge1->shade;
-        long tx = (edge1->x + 0x8000) >> 16;
+        long tx = (edge1->x + 0xffff) >> 16;
         word *ptr = scrn + tx;
-        int dx = ((edge2->x + 0x8000) >> 16);
+        int dx = edge2->x >> 16;
+//        int dx = ((edge2->x + 0x8000) >> 16);
         long *dmatrix = &DitherMatrix[(start_y+y)&3][0];
         long *amatrix = &AlphaMatrix[(start_y+y)&3][0];
 

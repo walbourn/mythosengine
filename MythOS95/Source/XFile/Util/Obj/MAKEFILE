@@ -57,15 +57,22 @@ LIBPATH = ..\..\obj;$(MYTH95ROOT)\lib;
 # File specific variables                                                  Ё
 #дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
 
+#ддд Directory
 EXEDIR = iffdir
 
-OBJSDIR = xuiffdir.obj
+OBJSDIR = \
+xuiffdir.obj\
+xuiffdir.res
 
+
+#ддд IFF Compiler
 EXEC = iffc
 
-OBJSC = lexyy.obj\
+OBJSC = \
+lexyy.obj\
 xuiffc.obj\
-xuiffcp.obj
+xuiffcp.obj\
+xuiffc.res
 
 LIBS = xfile.lib ivorymfc.lib
 
@@ -126,10 +133,8 @@ $(EXEC).exe:     $(OBJSC)
 lexyy.obj : .\lexyy.c
 	$(CC) $(CCOPTIONS) /W2 lexyy.c
    
-
 .\lexyy.c : ..\xuiffc.l
    flex -8 ../xuiffc.l
-
 
 #╟╠╡ End of makefile ╡╠╟
 

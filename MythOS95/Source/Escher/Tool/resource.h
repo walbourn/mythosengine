@@ -143,10 +143,12 @@
 #define IDC_SPROP_NSLIGHTS              1053
 #define IDC_SPROP_NFALIGHTS             1054
 #define IDC_CPROP_LEVEL                 1054
+#define IDC_CPROP_STARTZ                1054
 #define IDC_SPROP_NFSLIGHTS             1055
 #define IDC_CPROP_BLEVEL                1055
 #define IDC_CPROP_SLEVEL                1056
 #define IDC_MPROP_TXTLIST               1056
+#define IDC_CPROP_MIDZ                  1056
 #define IDC_CPROP_BPERC                 1057
 #define IDC_MPROP_TXTPROP               1057
 #define IDC_TPROP_NAME                  1058
@@ -186,6 +188,11 @@
 #define IDC_FPROP_ABLINE                1081
 #define IDC_FPROP_BCLINE                1082
 #define IDC_FPROP_CALINE                1083
+#define IDC_FPROP_ALPHA                 1084
+#define IDC_FPROP_SELFILLUM             1085
+#define IDC_FPROP_ALPHAA                1086
+#define IDC_FPROP_ALPHAB                1087
+#define IDC_FPROP_ALPHAC                1088
 #define ID_FILE_PALETTE                 32772
 #define ID_EDIT_PROP                    32774
 #define ID_VIEW_RND_ALL_LINES           32775
@@ -210,6 +217,8 @@
 #define ID_FILE_COMPRESS                32799
 #define ID_FILE_TRUECOLOR               32800
 #define ID_FILE_FLOATING                32801
+#define ID_VIEW_RND_SORT                32802
+#define ID_VIEW_RND_ALPHA               32803
 #define ID_VIEW_REFRESH                 32809
 #define ID_VIEW_RND_SPECULAR            32816
 #define ID_VIEW_RND_WIREFRAME           32820
@@ -232,8 +241,8 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        143
-#define _APS_NEXT_COMMAND_VALUE         32802
-#define _APS_NEXT_CONTROL_VALUE         1081
+#define _APS_NEXT_COMMAND_VALUE         32804
+#define _APS_NEXT_CONTROL_VALUE         1086
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

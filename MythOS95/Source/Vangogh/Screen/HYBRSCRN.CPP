@@ -53,6 +53,7 @@ VngoHybrid::VngoHybrid():
     pitch(0),
     hWndClient(NULL)
 {
+    sins = 0;
     strcpy(hwName,"Hybrid");
     pal = NULL;
 }
@@ -74,41 +75,47 @@ VngoHybrid::VngoHybrid(HWND hwndclient):
 
 VngoHybrid::~VngoHybrid()
 {
+    if ((lflags & VNGO_SET_RESOLUTION) && dd != NULL)
+        dd->RestoreDisplayMode();
+
     term();
 }
 
 
-BOOL VngoHybrid::init()
+VNGError VngoHybrid::init()
 {
     strcpy(hwName,"Hybrid");
     err = DirectDrawCreate(NULL, &dd, NULL);
 
     if (err != DD_OK)
-        return FALSE;
+    {
+        term();
+        return VNGO_INTERNAL_ERROR;
+    }
 
     type_info = SCREENTYPE_HYBRID;
-    return TRUE;
+    return VNGO_NO_ERROR;
 }
 
 
-void VngoHybrid::reinit(Flx16 brightness)
+VNGError VngoHybrid::reinit(Flx16 brightness)
 {
     if (!pal)
-        return;
+        return VNGO_NOT_SUPPORTED;
 
-    set_palette(pal,brightness);
+    return set_palette(pal,brightness);
 }
 
-BOOL VngoHybrid::check_mode(int _width, int _height, int bpp)
+VNGError VngoHybrid::check_mode(int _width, int _height, int bpp, dword _flags, VngoPixelInfo *pinfo)
 {
     assert (dd != 0);
 
-    return (FALSE);
+    return (VNGO_NOT_SUPPORTED);
 }
 
 
 
-BOOL VngoHybrid::set_mode(int _width, int _height, int bpp, VngoPal *_pal,dword flags)
+VNGError VngoHybrid::set_mode(int _width, int _height, int bpp, VngoPal *_pal,dword flags)
 {
     width = _width;
     height = _height;
@@ -116,9 +123,6 @@ BOOL VngoHybrid::set_mode(int _width, int _height, int bpp, VngoPal *_pal,dword 
     startx = 0;
     starty = 0;
     bit_depth = bpp;
-
-    if (err != DD_OK)
-        return FALSE;
 
     if (lflags & VNGO_SET_RESOLUTION)
     {
@@ -133,7 +137,10 @@ BOOL VngoHybrid::set_mode(int _width, int _height, int bpp, VngoPal *_pal,dword 
     }
 
     if (err != DD_OK)
-        return FALSE;
+    {
+        term();
+        return VNGO_INTERNAL_ERROR;
+    }
 
     // Get rid of any previous surfaces.
     if (FrontBuffer)
@@ -174,7 +181,10 @@ BOOL VngoHybrid::set_mode(int _width, int _height, int bpp, VngoPal *_pal,dword 
     err = dd->CreateSurface(&ddsd, &Primary, NULL);
 
     if (err != DD_OK)
-        return FALSE;
+    {
+        term();
+        return VNGO_INTERNAL_ERROR;
+    }
 
 
     // get a pointer to the back buffer.
@@ -185,7 +195,10 @@ BOOL VngoHybrid::set_mode(int _width, int _height, int bpp, VngoPal *_pal,dword 
         err = Primary->GetAttachedSurface(&caps, &BackBuffer);
 
         if (err != DD_OK)
-            return FALSE;
+        {
+            term();
+            return VNGO_INTERNAL_ERROR;
+        }
     }
     else
     {
@@ -205,7 +218,10 @@ BOOL VngoHybrid::set_mode(int _width, int _height, int bpp, VngoPal *_pal,dword 
         err = dd->CreateSurface (&ddsd, &BackBuffer, NULL);
 
         if (err != DD_OK)
-            return FALSE;
+        {
+            term();
+            return VNGO_INTERNAL_ERROR;
+        }
     }
 
     //
@@ -220,13 +236,13 @@ BOOL VngoHybrid::set_mode(int _width, int _height, int bpp, VngoPal *_pal,dword 
     {
         gmap = new byte[_width * _height];
         if (gmap == NULL)
-            return FALSE;
+            return VNGO_MEMALLOC_ERROR;
     }
     else
     {
         gmap = new byte[_width * _height * 2];
         if (gmap == NULL)
-            return FALSE;
+            return VNGO_MEMALLOC_ERROR;
     }
 #endif
 
@@ -238,7 +254,10 @@ BOOL VngoHybrid::set_mode(int _width, int _height, int bpp, VngoPal *_pal,dword 
     err = dd->CreateSurface (&ddsd, &FrontBuffer, NULL);
 
     if (err != DD_OK)
-        return FALSE;
+    {
+        term();
+        return VNGO_INTERNAL_ERROR;
+    }
 
 #if 1 // For now we will steal the pointer from the surface and assume it never moves. :(
     int fail_safe = 0;
@@ -265,7 +284,10 @@ BOOL VngoHybrid::set_mode(int _width, int _height, int bpp, VngoPal *_pal,dword 
         }
     }
     if (gmap == NULL)
-        return FALSE;
+    {
+        term();
+        return VNGO_INTERNAL_ERROR;
+    }
 
 #else
     // Ok now we have a surface, lets change it to use our memory.
@@ -280,19 +302,61 @@ BOOL VngoHybrid::set_mode(int _width, int _height, int bpp, VngoPal *_pal,dword 
     err = FrontBuffer->QueryInterface(IID_IDirectDrawSurface3,(LPVOID*)&temp);
     if (err != DD_OK)
     {
-        return FALSE;
+        term();
+        return VNGO_INTERNAL_ERROR;
     }
 
     err = temp->SetSurfaceDesc(&ddsd,0);
 #endif
-    if(err!=DD_OK)
+    if(err != DD_OK)
     {
-        return FALSE;
+        term();
+        return VNGO_INTERNAL_ERROR;
     }
 
-    if (err != DD_OK)
-        return FALSE;
+    DDSURFACEDESC   tdesc;
+    memset(&tdesc,0,sizeof(tdesc));
+    tdesc.dwSize = sizeof(tdesc);
+    int safty=0;
+    locked = 0;
+    while (!locked && safty < 10000)
+    {
+        safty++;
+        HRESULT terr;
+        terr = FrontBuffer->Lock(NULL,&tdesc,DDLOCK_SURFACEMEMORYPTR | DDLOCK_WAIT,NULL);
+        if (terr == DD_OK)
+        {
+            locked = 1;
+        }
+        if (terr == DDERR_SURFACELOST)
+        {
+            terr = FrontBuffer->Restore();
+            if (terr != DD_OK)
+                locked = 0; // an error occured while
+                            // restoring the surface, so it cannot be locked.
+        }
+    }
+    if (locked)
+        FrontBuffer->Unlock(NULL);
+    else
+        return VNGO_INTERNAL_ERROR;
 
+    if (tdesc.ddpfPixelFormat.dwRBitMask == 0xf800)   // Is it 16bpp?
+    {
+        if (!(_pal->flags & VNGO_16BIT))
+        {
+            term();
+            return VNGO_NEEDS_PAL16;
+        }
+    }
+    else if (tdesc.ddpfPixelFormat.dwRBitMask == 0x7c00) // Is it 15bpp?
+    {
+        if (!(_pal->flags & VNGO_15BIT))
+        {
+            term();
+            return VNGO_NEEDS_PAL15;
+        }
+    }
     // Create a palette if we are in a paletized display mode.
 
     if (bpp == 8)
@@ -333,10 +397,12 @@ BOOL VngoHybrid::set_mode(int _width, int _height, int bpp, VngoPal *_pal,dword 
         ReleaseDC (NULL, hdc);
     }
 
-    return TRUE;
+    sins |= VNGO_NO_FILTERS | VNGO_NO_FOG | VNGO_NOT_3DDEVICE;
+
+    return VNGO_NO_ERROR;
 }
 
-void VngoHybrid::flip()
+VNGError VngoHybrid::flip()
 {
 
     if (Primary->IsLost() == DDERR_SURFACELOST)
@@ -372,7 +438,7 @@ void VngoHybrid::flip()
         }
         if (ddrval != DDERR_WASSTILLDRAWING)
         {
-            return;
+            return VNGO_INTERNAL_ERROR;
         }
     }
 #if 0
@@ -398,7 +464,7 @@ void VngoHybrid::flip()
                 }
                 if (ddrval != DDERR_WASSTILLDRAWING)
                 {
-                    return;
+                    return VNGO_INTERNAL_ERROR;
                 }
             }
         }
@@ -432,18 +498,18 @@ void VngoHybrid::flip()
             }
             if (ddrval != DDERR_WASSTILLDRAWING)
             {
-                return;
+                return VNGO_INTERNAL_ERROR;
             }
         }
     }
 #endif
-    VngoScreenManager::flip();
+    return VngoScreenManager::flip();
 }
 
-void VngoHybrid::set_palette(VngoPal *p,Flx16 brightness)
+VNGError VngoHybrid::set_palette(VngoPal *p,Flx16 brightness)
 {
     if (!Palette)
-        return;
+        return VNGO_NOT_SUPPORTED;
 
     pal = p;
 
@@ -471,11 +537,12 @@ void VngoHybrid::set_palette(VngoPal *p,Flx16 brightness)
 
     Palette->SetEntries(0,0,256,ape);
 
+    return VNGO_NO_ERROR;
 }
 
 
 
-void VngoHybrid::term()
+VNGError VngoHybrid::term()
 {
     if (FrontBuffer)
     {
@@ -508,4 +575,12 @@ void VngoHybrid::term()
         dd->Release();
         dd = NULL;
     }
+    return VNGO_NO_ERROR;
 }
+
+VNGError VngoHybrid::dump_textures()
+{
+    return VNGO_NO_ERROR;
+}
+
+

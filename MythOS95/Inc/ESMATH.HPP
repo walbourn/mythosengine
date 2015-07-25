@@ -65,15 +65,14 @@
 #endif
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-//             
+//
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include <math.h>
 
 #include <portable.h>
-#include <felix.hpp>
 
 #include "esdefs.h"
 
@@ -108,6 +107,8 @@
 
 #define ESCH_MTX_NUM    12
 
+//#define ESCH_INLINE_TRANSFORM
+
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                               Prototypes
@@ -135,8 +136,8 @@ extern "C" float esch_magnitude(const EschVector *vect);
 //ÄÄ Matrix functions
 extern "C" void esch_concatmatrix(const EschMatrix *s, const EschMatrix *m,
                                   EschMatrix *d);
-extern "C" int esch_inversematrix(const EschMatrix *m, EschMatrix *d);
 extern "C" float esch_detmatrix(const EschMatrix *m);
+extern "C" int esch_inversematrix(const EschMatrix *m, EschMatrix *d);
 
 //ÄÄ Trig functions
 inline float esch_sin(float degrees) { return float(sin(degrees * 0.017453292f)); }
@@ -178,10 +179,11 @@ public:
     ~EschPoint() {}
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-    // Arthimetic operators on points.                                      ³
+    // Arithmetic operators on points.                                      ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
     //ÄÄÄ Addition/Subtraction of points.
+    EschPoint operator + (const EschVector &v) const;
     EschPoint operator + (const EschPoint &b) const
     {
         return EschPoint(x + b.x,
@@ -189,14 +191,16 @@ public:
                          z + b.z);
     }
 
+    EschPoint operator += (const EschVector &v);
     EschPoint operator += (const EschPoint &b)
-    {   
+    {
         x = x + b.x;
         y = y + b.y;
         z = z + b.z;
         return (*this);
     }
 
+    EschPoint operator - (const EschVector &v) const;
     EschPoint operator - (const EschPoint &b) const
     {
         return EschPoint(x - b.x,
@@ -204,6 +208,7 @@ public:
                          z - b.z);
     }
 
+    EschPoint operator -= (const EschVector &v);
     EschPoint operator -= (const EschPoint &b)
     {
         x = x - b.x;
@@ -219,48 +224,36 @@ public:
     }
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    // Point operations                                                     ³
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+    float distance(const EschPoint *p) const;
+
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Transformation operations.                                           ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-    void transform(const EschMatrix *m) 
-    {
-        ::esch_transform(this,m,this);
-    }
-    void transform(const EschFrameRef *m)
-    {
-        ::esch_transform(this,(EschMatrix *)m,this);
-    }
+    void transform(const EschMatrix *m);
+    void transform(const EschFrameRef *m) { transform((EschMatrix*)m); }
 
-    void transform(const EschMatrix *m, EschPoint *result) const
-    {
-        ::esch_transform(this,m,result);
-    }
+    void transform(const EschMatrix *m, EschPoint *result) const;
     void transform(const EschFrameRef *m, EschPoint *result) const
     {
-        ::esch_transform(this,(EschMatrix *)m,result);
+        transform((EschMatrix*)m,result);
     }
 
-    void rotatex(const float degrees)
-    {
-        ::esch_rotatex(this,degrees,this);
-    }
+    void rotatex(const float degrees) { ::esch_rotatex(this,degrees,this); }
     void rotatex(const float degrees, EschPoint *result) const
     {
         ::esch_rotatex(this,degrees,result);
     }
 
-    void rotatey(const float degrees)
-    {
-        ::esch_rotatey(this,degrees,this);
-    }
+    void rotatey(const float degrees) { ::esch_rotatey(this,degrees,this); }
     void rotatey(const float degrees, EschPoint *result) const
     {
         ::esch_rotatey(this,degrees,result);
     }
 
-    void rotatez(const float degrees)
-    {
-        ::esch_rotatez(this,degrees,this);
-    }
+    void rotatez(const float degrees) { ::esch_rotatez(this,degrees,this); }
     void rotatez(const float degrees, EschPoint *result) const
     {
         ::esch_rotatez(this,degrees,result);
@@ -287,11 +280,13 @@ public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
     EschVector() {}
     EschVector(float ii, float ij, float ik) : i(ii), j(ij), k(ik) {}
+    EschVector(const EschPoint &p1, const EschPoint &p2) :
+        i(p2.x - p1.x), j(p2.y - p1.y), k(p2.z - p1.z) {}
 
     ~EschVector() {}
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-    // Arthimetic operations on vectors                                     ³
+    // Arithmetic operations on vectors                                     ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
     //ÄÄÄ Addition/Subtraction of vectors.
@@ -302,7 +297,7 @@ public:
                           k + b.k);
     }
     EschVector operator += (const EschVector &b)
-    {   
+    {
         i = i + b.i;
         j = j + b.j;
         k = k + b.k;
@@ -316,7 +311,7 @@ public:
                           k - b.k);
     }
     EschVector operator -= (const EschVector &b)
-    {   
+    {
         i = i - b.i;
         j = j - b.j;
         k = k - b.k;
@@ -337,7 +332,7 @@ public:
                           k + scalar);
     }
     EschVector operator += (const float scalar)
-    {   
+    {
         i = i + scalar;
         j = j + scalar;
         k = k + scalar;
@@ -351,7 +346,7 @@ public:
                           k - scalar);
     }
     EschVector operator -= (const float scalar)
-    {   
+    {
         i = i - scalar;
         j = j - scalar;
         k = k - scalar;
@@ -406,7 +401,7 @@ public:
 
     float magnitude() const { return (esch_magnitude(this));}
 
-    void normalize() 
+    void normalize()
     {
         float   mag;
         mag = magnitude();
@@ -434,64 +429,46 @@ public:
         i = i * scale;
         j = j * scale;
         k = k * scale;
-    }        
+    }
 
     //ÄÄÄ Translate vector
     void translate(float ix, float iy, float iz)
     {
         i = i + ix;
         j = j + iy;
-        k = k + iz; 
+        k = k + iz;
     }
     void translate(const EschVector *v)
     {
         i = i + v->i;
         j = j + v->j;
-        k = k + v->k; 
+        k = k + v->k;
     }
 
     //ÄÄÄ Transform by a matrix
-    void transform(const EschMatrix *m)
-    {
-        ::esch_transform_notran(this,m,this);
-    }
-    void transform(const EschFrameRef *m)
-    {
-        ::esch_transform_notran(this,(EschMatrix *)m,this);
-    }
+    void transform(const EschMatrix *m);
+    void transform(const EschFrameRef *m) { transform((EschMatrix*)m); }
 
-    void transform(const EschMatrix *m, EschVector *result) const
-    {
-        ::esch_transform_notran(this,m,result);
-    }
+    void transform(const EschMatrix *m, EschVector *result) const;
     void transform(const EschFrameRef *m, EschVector *result) const
     {
-        ::esch_transform_notran(this,(EschMatrix *)m,result);
+        transform((EschMatrix*)m,result);
     }
 
     //ÄÄÄ Rotate vector
-    void rotatex(const float degrees)
-    {
-        ::esch_rotatex(this,degrees,this);
-    }
+    void rotatex(const float degrees) { ::esch_rotatex(this,degrees,this); }
     void rotatex(const float degrees, EschVector *result) const
     {
         ::esch_rotatex(this,degrees,result);
     }
 
-    void rotatey(const float degrees)
-    {
-        ::esch_rotatey(this,degrees,this);
-    }
+    void rotatey(const float degrees) { ::esch_rotatey(this,degrees,this); }
     void rotatey(const float degrees, EschVector *result) const
     {
         ::esch_rotatey(this,degrees,result);
     }
 
-    void rotatez(const float degrees)
-    {
-        ::esch_rotatez(this,degrees,this);
-    }
+    void rotatez(const float degrees) { ::esch_rotatez(this,degrees,this); }
     void rotatez(const float degrees, EschVector *result) const
     {
         ::esch_rotatez(this,degrees,result);
@@ -501,6 +478,8 @@ public:
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // EschPlane - 3D plane.                                                    ³
+//                                                                          ³
+// normal.i*X + normal.j*Y + normal.k*Z + dist = 0                          ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 class EschPlane {
 
@@ -517,8 +496,89 @@ public:
     EschPlane() {}
     EschPlane(float ia, float ib, float ic, float id) :
         normal(ia,ib,ic), dist(id) {}
+    EschPlane(EschVector &in, float id) :
+        normal(in), dist(id) {}
 
     ~EschPlane() {}
+
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    // Plane operations                                                     ³
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+    void normalize()
+    {
+        float mag = normal.magnitude();
+
+#ifdef assertMyth
+        assertMyth("EschPlane::normalize found magnitude of zero",
+                   mag > 0);
+#endif
+
+        if (mag)
+        {
+            normal.i /= mag;
+            normal.j /= mag;
+            normal.k /= mag;
+            dist /= mag;
+        }
+    }
+
+    void nearest(const EschPoint *p, EschPoint *result) const
+    {
+#ifdef assertMyth
+        assertMyth("EschPlane::nearest needs valid input", p!=0 && result!=0);
+#endif
+
+        float d = ::esch_dot(&normal,(EschVector*)p) + dist;
+
+        result->x = p->x - (d * normal.i);
+        result->y = p->y - (d * normal.j);
+        result->z = p->z - (d * normal.k);
+    }
+
+    float distance(const EschPoint *p) const
+    {
+        return (::esch_dot(&normal,(EschVector*)p) + dist);
+    }
+
+    void project(EschVector *v, EschVector *result) const
+    {
+#ifdef assertMyth
+        assertMyth("EschPlane::project needs valid input", v!=0 && result!=0);
+#endif
+        float dot = ::esch_dot(&normal,v);
+
+        result->i = v->i - (dot * normal.i);
+        result->j = v->j - (dot * normal.j);
+        result->k = v->k - (dot * normal.k);
+    }
+
+    float ray(const EschPoint *pt, const EschVector *v) const
+    {
+#ifdef assertMyth
+        assertMyth("EschPlane::ray needs valid input", pt != 0 && v != 0);
+#endif
+        float dot = ::esch_dot(&normal,v);
+        if (dot <= 0)
+            return 0;
+
+        float t = - ((dist + ::esch_dot(&normal,(EschVector*)pt)) / dot);
+
+        if (t <= 0)
+            return 0;
+
+        return t;
+    }
+
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    // Transformation operations                                            ³
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+    //ÄÄÄ Transform by a matrix
+    void transform(const EschMatrix *im);
+    void transform(const EschFrameRef *m);
+
+    void transform(const EschMatrix *im, EschPlane *result) const;
+    void transform(const EschFrameRef *m, EschPlane *result) const;
 };
 
 
@@ -582,7 +642,7 @@ public:
     ~EschMatrix() {}
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-    // Arthimetic operations on matricies                                   ³
+    // Arithmetic operations on matricies                                   ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
     //ÄÄÄ Multiplication by a matrix.
@@ -660,9 +720,9 @@ public:
         orient.mtx[ESCH_MTX_A]=a; orient.mtx[ESCH_MTX_D]=d;
         orient.mtx[ESCH_MTX_B]=b; orient.mtx[ESCH_MTX_E]=e;
         orient.mtx[ESCH_MTX_C]=c; orient.mtx[ESCH_MTX_F]=f;
-        orient.mtx[ESCH_MTX_G]=g; orient.mtx[ESCH_MTX_J]=j; 
-        orient.mtx[ESCH_MTX_H]=h; orient.mtx[ESCH_MTX_K]=k; 
-        orient.mtx[ESCH_MTX_I]=i; orient.mtx[ESCH_MTX_L]=l; 
+        orient.mtx[ESCH_MTX_G]=g; orient.mtx[ESCH_MTX_J]=j;
+        orient.mtx[ESCH_MTX_H]=h; orient.mtx[ESCH_MTX_K]=k;
+        orient.mtx[ESCH_MTX_I]=i; orient.mtx[ESCH_MTX_L]=l;
         compute_inverse();
     }
     EschFrameRef(EschMatrix *m, float s=1) :
@@ -680,7 +740,7 @@ public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Utility functions for working with frames of reference.              ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-    void get_position(EschPoint *pt) const 
+    void get_position(EschPoint *pt) const
     {
         pt->x = orient.mtx[ESCH_MTX_J];
         pt->y = orient.mtx[ESCH_MTX_K];
@@ -696,6 +756,12 @@ public:
     void set_position(const EschPoint *pt, dword update=ESCH_UPD_ALL);
     void set_position(const float ix, const float iy, const float iz,
                       dword update=ESCH_UPD_ALL);
+
+    void set_top(const EschVector *v, dword update=ESCH_UPD_ALL);
+    void set_top(float ii, float ij, float ik, dword update=ESCH_UPD_ALL);
+
+    void set_direction(const EschVector *v, dword update=ESCH_UPD_ALL);
+    void set_direction(float ii, float ij, float ik, dword update=ESCH_UPD_ALL);
 
     void rotatex(const float degrees, dword update=ESCH_UPD_ALL);
     void rotatey(const float degrees, dword update=ESCH_UPD_ALL);
@@ -729,6 +795,227 @@ public:
 
     void compute_inverse();
 };
+
+
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//
+//                                Inlines
+//
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// EschPoint
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+inline EschPoint EschPoint::operator += (const EschVector &v)
+{
+    x += v.i;
+    y += v.j;
+    z += v.k;
+    return (*this);
+}
+
+inline EschPoint EschPoint::operator + (const EschVector &v) const
+{
+    return EschPoint (x + v.i,
+                      y + v.j,
+                      z + v.k);
+}
+
+inline EschPoint EschPoint::operator -= (const EschVector &v)
+{
+    x -= v.i;
+    y -= v.j;
+    z -= v.k;
+    return (*this);
+}
+
+inline EschPoint EschPoint::operator - (const EschVector &v) const
+{
+    return EschPoint (x - v.i,
+                      y - v.j,
+                      z - v.k);
+}
+
+inline float EschPoint::distance(const EschPoint *p) const
+{
+    return ::esch_magnitude(&EschVector(p->x - x, p->y - y, p->z - z));
+}
+
+inline void EschPoint::transform(const EschMatrix *m)
+{
+#ifdef assertMyth
+    assertMyth("EschPoint::transform needs valid input", m != 0);
+#endif
+
+#ifdef ESCH_INLINE_TRANSFORM
+    float _x = x;
+    float _y = y;
+    float _z = z;
+    
+    x = m->mtx[ESCH_MTX_A]*_x
+        + m->mtx[ESCH_MTX_D]*_y
+        + m->mtx[ESCH_MTX_G]*_z
+        + m->mtx[ESCH_MTX_J];
+
+    y = m->mtx[ESCH_MTX_B]*_x
+        + m->mtx[ESCH_MTX_E]*_y
+        + m->mtx[ESCH_MTX_H]*_z
+        + m->mtx[ESCH_MTX_K];
+
+    z = m->mtx[ESCH_MTX_C]*_x
+        + m->mtx[ESCH_MTX_F]*_y
+        + m->mtx[ESCH_MTX_I]*_z
+        + m->mtx[ESCH_MTX_L];
+#else
+    ::esch_transform(this,m,this);
+#endif
+}
+
+inline void EschPoint::transform(const EschMatrix *m, EschPoint *result) const
+{
+#ifdef assertMyth
+    assertMyth("EschPoint::transform needs valid input", m!=0 && result!=0);
+#endif
+
+#ifdef ESCH_INLINE_TRANSFORM
+    result->x = m->mtx[ESCH_MTX_A]*x
+                + m->mtx[ESCH_MTX_D]*y
+                + m->mtx[ESCH_MTX_G]*z
+                + m->mtx[ESCH_MTX_J];
+
+    result->y = m->mtx[ESCH_MTX_B]*x
+                + m->mtx[ESCH_MTX_E]*y
+                + m->mtx[ESCH_MTX_H]*z
+                + m->mtx[ESCH_MTX_K];
+
+    result->z = m->mtx[ESCH_MTX_C]*x
+                + m->mtx[ESCH_MTX_F]*y
+                + m->mtx[ESCH_MTX_I]*z
+                + m->mtx[ESCH_MTX_L];
+#else
+    ::esch_transform(this,m,result);
+#endif
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// EschVector
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+inline void EschVector::transform(const EschMatrix *m)
+{
+#ifdef assertMyth
+    assertMyth("EschVector::transform needs valid input", m != 0);
+#endif
+
+#ifdef ESCH_INLINE_TRANSFORM
+    float _i = i;
+    float _j = j;
+    float _k = k;
+    
+    i = m->mtx[ESCH_MTX_A]*_i
+        + m->mtx[ESCH_MTX_D]*_j
+        + m->mtx[ESCH_MTX_G]*_k;
+
+    j = m->mtx[ESCH_MTX_B]*_i
+        + m->mtx[ESCH_MTX_E]*_j
+        + m->mtx[ESCH_MTX_H]*_k;
+
+    k = m->mtx[ESCH_MTX_C]*_i
+        + m->mtx[ESCH_MTX_F]*_j
+        + m->mtx[ESCH_MTX_I]*_k;
+#else
+    ::esch_transform_notran(this,m,this);
+#endif
+}
+
+inline void EschVector::transform(const EschMatrix *m, EschVector *result) const
+{
+#ifdef assertMyth
+    assertMyth("EschVector::transform needs valid input", m!=0 && result!=0);
+#endif
+
+#ifdef ESCH_INLINE_TRANSFORM
+    result->i = m->mtx[ESCH_MTX_A]*i
+                + m->mtx[ESCH_MTX_D]*j
+                + m->mtx[ESCH_MTX_G]*k;
+
+    result->j = m->mtx[ESCH_MTX_B]*i
+                + m->mtx[ESCH_MTX_E]*j
+                + m->mtx[ESCH_MTX_H]*k;
+
+    result->k = m->mtx[ESCH_MTX_C]*i
+                + m->mtx[ESCH_MTX_F]*j
+                + m->mtx[ESCH_MTX_I]*k;
+#else
+    ::esch_transform_notran(this,m,result);
+#endif
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// EschPlane
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+inline void EschPlane::transform(const EschMatrix *im)
+{
+#ifdef assertMyth
+    assertMyth("EschPlane::transform needs valid input", im != 0);
+#endif
+
+// This is a multiply by the transpose of the matrix 'im'
+
+    float _i = normal.i;
+    float _j = normal.j;
+    float _k = normal.k;
+
+    normal.i = im->mtx[ESCH_MTX_A]*_i
+               + im->mtx[ESCH_MTX_B]*_j
+               + im->mtx[ESCH_MTX_C]*_k;
+
+    normal.j = im->mtx[ESCH_MTX_D]*_i
+               + im->mtx[ESCH_MTX_E]*_j
+               + im->mtx[ESCH_MTX_F]*_k;
+
+    normal.k = im->mtx[ESCH_MTX_G]*_i
+               + im->mtx[ESCH_MTX_H]*_j
+               + im->mtx[ESCH_MTX_I]*_k;
+}
+
+inline void EschPlane::transform(const EschFrameRef *m)
+{
+#ifdef assertMyth
+    assertMyth("EschPlane::transform needs valid input", m != 0);
+#endif
+    transform(&m->iorient);
+}
+
+inline void EschPlane::transform(const EschMatrix *im, EschPlane *result) const
+{
+#ifdef assertMyth
+    assertMyth("EschPlane::transform needs valid input", im!=0 && result!=0);
+#endif
+
+// This is a multiply by the transpose of the matrix 'im'
+
+    result->normal.i = im->mtx[ESCH_MTX_A]*normal.i
+                       + im->mtx[ESCH_MTX_B]*normal.j
+                       + im->mtx[ESCH_MTX_C]*normal.k;
+
+    result->normal.j = im->mtx[ESCH_MTX_D]*normal.i
+                       + im->mtx[ESCH_MTX_E]*normal.j
+                       + im->mtx[ESCH_MTX_F]*normal.k;
+
+    result->normal.k = im->mtx[ESCH_MTX_G]*normal.i
+                       + im->mtx[ESCH_MTX_H]*normal.j
+                       + im->mtx[ESCH_MTX_I]*normal.k;
+}
+
+inline void EschPlane::transform(const EschFrameRef *m, EschPlane *result) const
+{
+#ifdef assertMyth
+    assertMyth("EschPlane::transform needs valid input", m!=0 && result!=0);
+#endif
+    transform(&m->iorient,result);
+}
 
 #ifdef __WATCOMC__
 #pragma pack();

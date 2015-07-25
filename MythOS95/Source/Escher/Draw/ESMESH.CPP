@@ -239,7 +239,7 @@ esch_error_codes EschMesh::load(const char *fname, const char *oname,
     release();
 
 //ÄÄ Open file
-    if (iff.open(fname,XF_OPEN_READ))
+    if (iff.open(fname,XF_OPEN_READ | XF_OPEN_DENYWRITE))
         return ESCH_ERR_FILEERROR;
 
 //ÄÄ Loop until a header with the correct name is found
@@ -252,6 +252,7 @@ esch_error_codes EschMesh::load(const char *fname, const char *oname,
             if (!iff.depth)
                 return ESCH_ERR_NOTFOUND;
             iff.leaveform();
+            continue;
         }
 
         if (iff.chunkid == iff.makeid('F','O','R','M'))
@@ -426,7 +427,7 @@ esch_error_codes EschMesh::load(XFParseIFF *iff,
         }
 
         //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Faces
-        else if (iff->chunkid == iff->makeid('F','A','C','1'))
+        else if (iff->chunkid == iff->makeid('F','A','C','2'))
         {
             //ÄÄÄ Data in floating-point
             if (f || iff->chunkSize != (nfaces * sizeof(EschFace)))
@@ -452,6 +453,89 @@ esch_error_codes EschMesh::load(XFParseIFF *iff,
                 err=ESCH_ERR_FILEERROR;
                 goto error_exit;
             }
+
+            EschFace *tptr = ptr;
+            for(i=0; i < nfaces; i++, tptr++)
+                tptr->app_data = 0;
+
+            ivory_hunlock(f);
+        }
+        else if (iff->chunkid == iff->makeid('F','A','C','1'))
+        {
+            //ÄÄÄ Data in older floating-point format
+            if (f || iff->chunkSize != (nfaces * sizeof(EschFaceV2)))
+            {
+                err=ESCH_ERR_INVALIDFDATA;
+                goto error_exit;
+            }
+            f = ivory_halloc( sizeof(EschFace) * nfaces );
+            if (!f)
+            {
+                err=ESCH_ERR_NOMEMORY;
+                goto error_exit;
+            }
+
+            EschFace *ptr = (EschFace*)ivory_hlock(f);
+            if (!ptr)
+            {
+                err=ESCH_ERR_LOCKFAILED;
+                goto error_exit;
+            }
+
+            EschFaceV2 *ftemp = new EschFaceV2[nfaces];
+            if (!ftemp)
+            {
+                err=ESCH_ERR_NOMEMORY;
+                goto error_exit;
+            }
+
+            if (iff->read(ftemp))
+            {
+                delete [] ftemp;
+                err=ESCH_ERR_FILEERROR;
+                goto error_exit;
+            }
+
+            EschFace *tptr = ptr;
+            EschFaceV2 *tmpptr = ftemp;
+            for(ulong i=0; i < nfaces; i++, tptr++, tmpptr++)
+            {
+                tptr->flags = tmpptr->flags & ~(ESCH_FACEV2_SILLUM_MASK
+                                                | ESCH_FACEV2_ALPHA_MASK);
+                tptr->a = tmpptr->a;
+                tptr->b = tmpptr->b;
+                tptr->c = tmpptr->c;
+                tptr->txt = tmpptr->txt;
+                tptr->u[0] = tmpptr->u[0];
+                tptr->u[1] = tmpptr->u[1];
+                tptr->u[2] = tmpptr->u[2];
+                tptr->v[0] = tmpptr->v[0];
+                tptr->v[1] = tmpptr->v[1];
+                tptr->v[2] = tmpptr->v[2];
+                tptr->color = tmpptr->color;
+                tptr->normal.i = tmpptr->normal.i;
+                tptr->normal.j = tmpptr->normal.j;
+                tptr->normal.k = tmpptr->normal.k;
+
+                tptr->self_illum = byte((tmpptr->flags & ESCH_FACEV2_SILLUM_MASK) >> 16);
+
+                if (tmpptr->flags & ESCH_FACE_ALPHA)
+                {
+                    tptr->alpha_a = 
+                    tptr->alpha_b = 
+                    tptr->alpha_c = byte((tmpptr->flags & ESCH_FACEV2_ALPHA_MASK) >> 20);
+                }
+                else
+                {
+                    tptr->alpha_a = 
+                    tptr->alpha_b = 
+                    tptr->alpha_c = 255;
+                }
+
+                tptr->app_data = 0;
+            }
+
+            delete [] ftemp;
             ivory_hunlock(f);
         }
         else if (iff->chunkid == iff->makeid('F','A','C','E'))
@@ -494,7 +578,8 @@ esch_error_codes EschMesh::load(XFParseIFF *iff,
             EschFaceV1 *tmpptr = ftemp;
             for(ulong i=0; i < nfaces; i++, tptr++, tmpptr++)
             {
-                tptr->flags = tmpptr->flags;
+                tptr->flags = tmpptr->flags & ~(ESCH_FACEV1_SILLUM_MASK
+                                                | ESCH_FACEV1_ALPHA_MASK);
                 tptr->a = tmpptr->a;
                 tptr->b = tmpptr->b;
                 tptr->c = tmpptr->c;
@@ -509,6 +594,22 @@ esch_error_codes EschMesh::load(XFParseIFF *iff,
                 tptr->normal.i = tmpptr->normal.i / 65536.0f;
                 tptr->normal.j = tmpptr->normal.j / 65536.0f;
                 tptr->normal.k = tmpptr->normal.k / 65536.0f;
+
+                tptr->self_illum = byte((tmpptr->flags & ESCH_FACEV1_SILLUM_MASK) >> 16);
+                if (tmpptr->flags & ESCH_FACE_ALPHA)
+                {
+                    tptr->alpha_a = 
+                    tptr->alpha_b = 
+                    tptr->alpha_c = byte((tmpptr->flags & ESCH_FACEV1_ALPHA_MASK) >> 20);
+                }
+                else
+                {
+                    tptr->alpha_a = 
+                    tptr->alpha_b = 
+                    tptr->alpha_c = 255;
+                }
+
+                tptr->app_data = 0;
             }
 
             delete [] ftemp;
@@ -643,7 +744,7 @@ esch_error_codes EschMesh::load(XFParseIFF *iff,
                 goto error_exit;
             }
 
-            //ÄÄÄ  Allocate texture array, if not already allocated.
+            //ÄÄÄ Allocate texture array
             txt = new EschTexture*[header.nmtls];
             if (!txt)
             {
@@ -653,10 +754,22 @@ esch_error_codes EschMesh::load(XFParseIFF *iff,
             tmax = header.nmtls;
             flags |= ESCH_MSH_OWNSTEXTURE;
 
-            //ÄÄÄ Fill out from texture cache
+            //ÄÄÄ Fill out from texture cache/file systems
             for(i=0; i < header.nmtls; i++)
             {
-                txt[i] = EschTexture::cache_new(emtl[i].name);
+                txt[i] = 0;
+
+                if (ctrlfl & ESCH_MSHLD_SHARETXT)
+                    txt[i] = EschTexture::cache_new(emtl[i].name);
+
+                if (!txt[i] && (ctrlfl & ESCH_MSHLD_FILETXT))
+                {
+                    dword tfl = ESCH_TXTLD_ALL;
+                    if (!(ctrlfl & ESCH_MSHLD_SHARETXT))
+                        tfl &= ~ESCH_TXTLD_SHARE;
+
+                    txt[i] = EschTexture::file_load(emtl[i].name,pal,tfl);
+                }
             }
         }
 
@@ -666,17 +779,28 @@ esch_error_codes EschMesh::load(XFParseIFF *iff,
                  && (iff->formid == iff->makeid('E','M','T','L')
                      || iff->formid == iff->makeid('E','M','T','1')))
         {
-            if (!emtl || !txt)
+            //ÄÄÄ Allocate texture memory, if not already allocated.
+            if (!txt)
             {
-                err=ESCH_ERR_INVALIDDATA;
-                goto error_exit;
+                txt = new EschTexture*[header.nmtls];
+                if (!txt)
+                {
+                    err=ESCH_ERR_NOMEMORY;
+                    goto error_exit;
+                }
+                memset(txt,0,sizeof(EschTexture*)*header.nmtls);
+                tmax = header.nmtls;
+                flags |= ESCH_MSH_OWNSTEXTURE;
             }
 
+            //ÄÄÄ Figure out next texture we are looking for.
             for(i=0; i < header.nmtls; i++)
             {
                 if (!txt[i])
                     break;
             }
+
+            //ÄÄÄ Load texture
             if (i < header.nmtls)
             {
                 EschTexture *t = ((ctrlfl & ESCH_MSHLD_USEMFTXT)
@@ -693,7 +817,7 @@ esch_error_codes EschMesh::load(XFParseIFF *iff,
                 if (!(ctrlfl & ESCH_MSHLD_SHARETXT))
                     tfl &= ~ESCH_TXTLD_SHARE;
 
-                err=t->load(iff,emtl[i].name,tfl,pal);
+                err=t->load(iff, (emtl) ? emtl[i].name : 0, tfl, pal);
 
                 if (!err)
                     txt[i]=t;
@@ -738,7 +862,10 @@ esch_error_codes EschMesh::load(XFParseIFF *iff,
     }
 
     if (emtl)
-        delete emtl;
+    {
+        delete [] emtl;
+        emtl=0;
+    }
 
 //ÄÄ Update diags
     assertMyth("EschMesh needs Escher initialized",EschSysInstance != 0);
@@ -772,13 +899,18 @@ error_exit : ;
         ivory_hfree(&v);
     if (f)
         ivory_hfree(&f);
-    for(i=0; i < tmax; i++)
+    if (txt)
     {
-        if (txt[i])
-            delete txt[i];
+        for(i=0; i < tmax; i++)
+        {
+            if (txt[i])
+                delete txt[i];
+        }
+        delete [] txt;
+        txt=0;
     }
-    delete [] txt;
-    txt=0;
+    if (emtl)
+        delete [] emtl;
 
     iff->leaveform();
     return err;

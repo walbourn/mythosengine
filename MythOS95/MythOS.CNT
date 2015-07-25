@@ -111,6 +111,7 @@
 5 Vngo3Dfx Class=PG_VNGO_3DFX
 5 VngoClear3D Class=PG_VNGO_CLEAR3D
 5 VngoMSI Class=PG_VNGO_MSI
+5 VngoOpenGL Class=PG_VNGO_OPENGL
 3 Color Classes
 4 VngoColorHLS Class=PG_VNGO_COLORHLS
 4 VngoColor24bit Class=PG_VNGO_COLOR24BIT
@@ -151,33 +152,40 @@
 3 Overview=PG_ESCH_OVERVIEW
 3 C-style
 4 C-style Math Functions=PG_ESCH_CSTYMATH
-4 C-style Draw Function=PG_ESCH_CSTYDRAW
+4 C-style Draw Functions=PG_ESCH_CSTYDRAW
 4 C-style Clip Support Functions=PG_ESCH_CSTYCLIP
 3 Control/Collection Classes
 4 EschSystem Class=PG_ESCH_SYSTEM
 4 EschScene Class=PG_ESCH_SCENE
 3 Drawable Classes
 4 EschDrawable Class=PG_ESCH_DRAWABLE
-4 EschPointDraw Class=PG_ESCH_POINTDRAW
-4 EschLineDraw Class=PG_ESCH_LINEDRAW
-4 EschSprite Class=PG_ESCH_SPRITE
-4 EschParticle Class=PG_ESCH_PARTICLE
-4 EschParticlePyramid Class=PG_ESCH_PARTICLEPYR
-4 EschParticleGeometry Class=PG_ESCH_PARTICLEGEOM
-4 EschParticleSprite Class=PG_ESCH_PARTICLESPR
-4 EschParticleSystem Class=PG_ESCH_PARTICLESYS
-4 EschGeometry Class=PG_ESCH_GEOMETRY
-4 EschMeshDraw Class=PG_ESCH_MESHDRAW
-4 EschTerrain Class=PG_ESCH_TERRAIN
-4 EschTerrainEx Class=PG_ESCH_TERRAINEX
-4 EschTerrainTreeTop Class=PG_ESCH_TERRAINTREETOP
-4 EschPartition Class=PG_ESCH_PARTITION
-4 EschGridPartition Class=PG_ESCH_GRIDPARTITION
-4 EschStarfield Class=PG_ESCH_STARFIELD
-4 EschPlosion Class=PG_ESCH_PLOSION
-4 EschMetabox Class=PG_ESCH_METABOX
-4 EschLevelOfDetail Class=PG_ESCH_LOD
-4 EschKeyframeDraw Class=PG_ESCH_KFDRAW
+4 Basic Drawables
+5 EschPointDraw Class=PG_ESCH_POINTDRAW
+5 EschLineDraw Class=PG_ESCH_LINEDRAW
+5 EschSprite Class=PG_ESCH_SPRITE
+4 Particle Drawables
+5 EschParticle Class=PG_ESCH_PARTICLE
+5 EschParticlePyramid Class=PG_ESCH_PARTICLEPYR
+5 EschParticleGeometry Class=PG_ESCH_PARTICLEGEOM
+5 EschParticleSprite Class=PG_ESCH_PARTICLESPR
+5 EschParticleSystem Class=PG_ESCH_PARTICLESYS
+5 EschParticleGenerator Class=PG_ESCH_PARTICLEGEN
+4 Geometry Drawables
+5 EschGeometry Class=PG_ESCH_GEOMETRY
+5 EschMeshDraw Class=PG_ESCH_MESHDRAW
+4 Terrain Drawables
+5 EschTerrain Class=PG_ESCH_TERRAIN
+5 EschTerrainEx Class=PG_ESCH_TERRAINEX
+5 EschTerrainTreeTop Class=PG_ESCH_TERRAINTREETOP
+4 Partitioning Drawables
+5 EschPartition Class=PG_ESCH_PARTITION
+5 EschGridPartition Class=PG_ESCH_GRIDPARTITION
+4 Misc Drawables
+5 EschStarfield Class=PG_ESCH_STARFIELD
+5 EschPlosion Class=PG_ESCH_PLOSION
+5 EschMetabox Class=PG_ESCH_METABOX
+5 EschLevelOfDetail Class=PG_ESCH_LOD
+5 EschKeyframeDraw Class=PG_ESCH_KFDRAW
 3 Drawable Support Structures
 4 EschCollision Structure=PG_ESCH_COLLISION
 4 EschPicking Structure=PG_ESCH_PICKING
@@ -189,8 +197,6 @@
 4 EschBoxExtents Class=PG_ESCH_BOX_EXTS
 4 EschFace Class=PG_ESCH_FACE
 4 EschMesh Class=PG_ESCH_MESH
-3 Informational Classes
-4 EschContext Class=PG_ESCH_CONTEXT
 3 Camera Classes
 4 EschCamera Class=PG_ESCH_CAMERA
 4 EschCameraEx Class=PG_ESCH_CAMERAEX
@@ -213,6 +219,9 @@
 4 EschKeyframer Class=PG_ESCH_KEYFRAMER
 4 EschKeyframeDraw Class=PG_ESCH_KFDRAW
 4 EschLimbSegment Class=PG_ESCH_LIMBSEG
+3 Render Support Classes
+4 EschContext Class=PG_ESCH_CONTEXT
+4 EschElement Class=PG_ESCH_ELEMENT
 3 Builder Classes
 4 EschBuildTexture=PG_ESCH_BUILDTEXTURE
 4 EschBuildMesh=PG_ESCH_BUILDMESH
@@ -264,6 +273,7 @@
 3 Escher Directory=UG_ESCH_DIR
 3 Escher Exporter=UG_ESCH_EXPORT
 3 Escher Lightwave Converter=UG_ESCH_LW
+3 Escher Texture Librarian=UG_ESCH_TLIB
 3 Escher Tool=UG_ESCH_TOOL
 3 Escher Terrain Editor=UG_ESCH_TERR
 2 Gutenberg

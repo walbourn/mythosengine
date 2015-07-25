@@ -229,7 +229,8 @@ void EschMultiFrameTexture::animate()
 //                                                                          ³
 // Creates a texture from an array of (appropriate) XFile bitmaps.          ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-esch_error_codes EschMultiFrameTexture::create(ushort n, XFBitmap *bms, int trans)
+esch_error_codes EschMultiFrameTexture::create(ushort n, XFBitmap *bms,
+                                               int trans, VngoPal *pal)
 {
     ushort  i;
 
@@ -240,9 +241,6 @@ esch_error_codes EschMultiFrameTexture::create(ushort n, XFBitmap *bms, int tran
     for(i=0; i < n; i++)
     {
         const XFBitmap *bm = &bms[i];
-
-        if (bm->bpp != 1)
-            return ESCH_ERR_INVALIDPARMS;
 
         switch (bm->width)
         {
@@ -294,6 +292,8 @@ esch_error_codes EschMultiFrameTexture::create(ushort n, XFBitmap *bms, int tran
         return ESCH_ERR_LOCKFAILED;
     }
 
+    memset(data, 0, base + size*n);
+
     flags = ESCH_TXT_LOCKED | ESCH_TXT_OWNSDATA;
 
 //ÄÄÄ Create texture from input
@@ -306,7 +306,8 @@ esch_error_codes EschMultiFrameTexture::create(ushort n, XFBitmap *bms, int tran
                                       bm->height,
                                       (byte*)data + base + size*i,
                                       VNGO_TEXTURE_8BIT
-                                      | ((trans) ? VNGO_TEXTURE_TRANSPARENT : 0));
+                                      | ((trans) ? VNGO_TEXTURE_TRANSPARENT : 0),
+                                      pal);
 
         int locked=0;
         if (bm->pal || bm->data)
@@ -319,7 +320,8 @@ esch_error_codes EschMultiFrameTexture::create(ushort n, XFBitmap *bms, int tran
                 return ESCH_ERR_LOCKFAILED;
         }
 
-        memcpy(ptr->tex,bm->data,size);
+        if (ptr->convert(bm,pal) != VNGO_NO_ERROR)
+            return ESCH_ERR_NOTSUPPORTED;
 
         if (!locked)
             bm->unlock();
@@ -435,6 +437,8 @@ esch_error_codes EschMultiFrameTexture::load(XFParseIFF *iff,
         return ESCH_ERR_LOCKFAILED;
     }
 
+    memset(data, 0, base + size*header.nframes);
+
     flags = ESCH_TXT_LOCKED | ESCH_TXT_OWNSDATA | header.flags;
 
 //ÄÄÄ Create texture from body chunks
@@ -455,7 +459,7 @@ esch_error_codes EschMultiFrameTexture::load(XFParseIFF *iff,
         ptr->VngoTexture::VngoTexture(header.xsize,
                                       header.ysize,
                                       (byte*)data + base + size*i,
-                                      tflags);
+                                      tflags,pal);
 
         if (iff->seekchunk(iff->makeid('B','O','D','Y'))
             || !iff->chunkSize)

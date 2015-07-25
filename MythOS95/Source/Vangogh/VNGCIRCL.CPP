@@ -2,9 +2,9 @@
 //
 //                                                           %__________%
 //                                                          %/ . .  .   \%
-//           Van Gogh 2D-Display Library                     |  . .  o. | 
+//           Van Gogh 2D-Display Library                     |  . .  o. |
 //                                                           |. _  .   .|
-//          Microsoft Windows '95 Version                    | / \   .  | 
+//          Microsoft Windows '95 Version                    | / \   .  |
 //                                                           |_|_|_._._.|
 // Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
 //              All rights reserved.                        %\__________/%
@@ -35,7 +35,7 @@
 //같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같�
 //
 //                                Includes
-//                                
+//
 //같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같�
 
 #include <assert.h>
@@ -204,7 +204,7 @@ void vngo_circle(VngoVport *vp,long xoffset, long yoffset,long r,dword color)
 STATIC void plot8(VngoVport *vp,long px,long py,long ox,long oy,dword color)
 {
     VngoPoint   p1;
-    p1.shade = vp->vbuff.pal->shd_pal->mid_point -1;
+    p1.shade = vp->vbuff.pal->shd_pal->mid_point;
     p1.clr = color;
     p1.x = ox+px;
     p1.y = oy+py;
@@ -252,7 +252,7 @@ void vngo_clip_circle(VngoVport *vp,long xoffset, long yoffset,long r,dword colo
 STATIC void clip_plot8(VngoVport *vp,long px,long py,long ox,long oy,dword color)
 {
     VngoPoint   p1;
-    p1.shade = vp->vbuff.pal->shd_pal->mid_point -1;
+    p1.shade = vp->vbuff.pal->shd_pal->mid_point;
     p1.clr = color;
     p1.x = ox+px;
     p1.y = oy+py;

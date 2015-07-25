@@ -47,6 +47,7 @@ VngoDIB::VngoDIB(HWND hwndclient):
     hpal(0),
     hWndClient(hwndclient)
 {
+    sins = 0;
     strcpy(hwName,"DIB Draw");
     pal = NULL;
     init_state = init();
@@ -60,36 +61,39 @@ VngoDIB::~VngoDIB()
 }
 
 
-BOOL VngoDIB::init()
+VNGError VngoDIB::init()
 {
     hdc = GetDC (hWndClient);
 
     err = DirectDrawCreate(NULL, &dd, NULL);
 
     if (err != DD_OK)
-        return FALSE;
+    {
+        term();
+        return VNGO_INTERNAL_ERROR;
+    }
 
     type_info = SCREENTYPE_DIB;
-    return TRUE;
+    return VNGO_NO_ERROR;
 }
 
-void VngoDIB::reinit(Flx16 brightness)
+VNGError VngoDIB::reinit(Flx16 brightness)
 {
     if (!pal)
-        return;
+        return VNGO_NOT_SUPPORTED;
 
-    set_palette(pal,brightness);
+    return set_palette(pal,brightness);
 }
 
 
-BOOL VngoDIB::check_mode(int _width, int _height, int bpp)
+VNGError VngoDIB::check_mode(int _width, int _height, int bpp, dword _flags, VngoPixelInfo *pinfo)
 {
     assert (dd != 0);
 
-    return (FALSE);
+    return (VNGO_NOT_SUPPORTED);
 }
 
-BOOL VngoDIB::set_mode(int _width, int _height, int bpp, VngoPal *_pal, dword flags)
+VNGError VngoDIB::set_mode(int _width, int _height, int bpp, VngoPal *_pal, dword flags)
 {
     startx = 0;
     starty = 0;
@@ -99,11 +103,20 @@ BOOL VngoDIB::set_mode(int _width, int _height, int bpp, VngoPal *_pal, dword fl
     pal = _pal;
 
     if (bpp == 15 || bpp == 16)
+    {
+        if (!(pal->flags & VNGO_15BIT))
+        {
+            return VNGO_NEEDS_PAL15;
+        }
         bit_depth = 15;
+    }
     else if (bpp == 8)
         bit_depth = 8;
     else
-        return FALSE;
+    {
+        term();
+        return VNGO_NOT_SUPPORTED;
+    }
 
     if (bpp == 8)
     {
@@ -118,6 +131,11 @@ BOOL VngoDIB::set_mode(int _width, int _height, int bpp, VngoPal *_pal, dword fl
             bmi->bmiHeader.biClrUsed     = COLORS;
             bmi->bmiHeader.biClrImportant= COLORS;
         }
+        else
+        {
+            term();
+            return VNGO_MEMALLOC_ERROR;
+        }
     }
     else
     {
@@ -131,6 +149,11 @@ BOOL VngoDIB::set_mode(int _width, int _height, int bpp, VngoPal *_pal, dword fl
             bmi->bmiHeader.biCompression  = 0;
             bmi->bmiHeader.biClrUsed      = 0;
             bmi->bmiHeader.biClrImportant = 0;
+        }
+        else
+        {
+            term();
+            return VNGO_MEMALLOC_ERROR;
         }
     }
 
@@ -151,9 +174,18 @@ BOOL VngoDIB::set_mode(int _width, int _height, int bpp, VngoPal *_pal, dword fl
     }
 
     if (err != DD_OK)
-        return FALSE;
+    {
+        term();
+        return VNGO_INTERNAL_ERROR;
+    }
 
     gmap = new BYTE [width * height * (bpp / 8)];
+    if (!gmap)
+    {
+        term();
+        return VNGO_MEMALLOC_ERROR;
+    }
+
     bmi->bmiHeader.biWidth = width;
     bmi->bmiHeader.biHeight = -height;
     if (pal && bpp == 8)
@@ -162,7 +194,7 @@ BOOL VngoDIB::set_mode(int _width, int _height, int bpp, VngoPal *_pal, dword fl
         LOGPALETTE *lpal = (LOGPALETTE *)ivory_alloc(sizeof(LOGPALETTE)+256*sizeof(PALETTEENTRY));
         lpal->palVersion = 0x300;
         lpal->palNumEntries = 256;
-            for (int i=0; i < COLORS; i++)
+        for (int i=0; i < COLORS; i++)
         {
             ((WORD *)bmi->bmiColors)[i] = i;
             lpal->palPalEntry[i].peRed  = t->hw_pal.p[i].r;
@@ -181,11 +213,14 @@ BOOL VngoDIB::set_mode(int _width, int _height, int bpp, VngoPal *_pal, dword fl
         }
         ivory_free ((void **)&lpal);
     }
-    return TRUE;
+
+    sins |= VNGO_NO_FILTERS | VNGO_NO_FOG | VNGO_NOT_3DDEVICE;
+    invalidate();
+    return VNGO_NO_ERROR;
 }
 
 
-void VngoDIB::flip()
+VNGError VngoDIB::flip()
 {
 #if 1
     SetDIBitsToDevice (hdc,
@@ -203,11 +238,11 @@ void VngoDIB::flip()
                        gmap, bmi, DIB_PAL_COLORS);
 
 #endif
-    VngoScreenManager::flip();
+    return VngoScreenManager::flip();
 }
 
 
-void VngoDIB::set_palette(VngoPal *p,Flx16 brightness)
+VNGError VngoDIB::set_palette(VngoPal *p,Flx16 brightness)
 {
 
     if (bit_depth == 8)
@@ -260,10 +295,12 @@ void VngoDIB::set_palette(VngoPal *p,Flx16 brightness)
     }
     else
         pal = p;
+
+    return VNGO_NO_ERROR;
 }
 
 
-void VngoDIB::term()
+VNGError VngoDIB::term()
 {
     if (hpal)
         DeleteObject(hpal);
@@ -286,5 +323,12 @@ void VngoDIB::term()
     }
 
     ReleaseDC (NULL, hdc);
+
+    return VNGO_NO_ERROR;
+}
+
+VNGError VngoDIB::dump_textures()
+{
+    return VNGO_NO_ERROR;
 }
 

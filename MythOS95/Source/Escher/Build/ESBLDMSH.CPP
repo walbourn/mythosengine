@@ -83,6 +83,10 @@ EschBuildMesh::EschBuildMesh() :
            | ESCH_FACE_SPECULAR
            | ESCH_FACE_SMOOTH
            | ESCH_FACE_FLAT),
+    selfi(0),
+    alpha_a(255),
+    alpha_b(255),
+    alpha_c(255),
     v(0),
     f(0),
     txt(0)
@@ -102,6 +106,10 @@ EschBuildMesh::EschBuildMesh(ulong mv, ulong mf, ulong mt) :
            | ESCH_FACE_SPECULAR
            | ESCH_FACE_SMOOTH
            | ESCH_FACE_FLAT),
+    selfi(0),
+    alpha_a(255),
+    alpha_b(255),
+    alpha_c(255),
     v(0),
     f(0),
     txt(0)
@@ -400,7 +408,13 @@ esch_error_codes EschBuildMesh::save(XFParseIFF *iff, dword ctrlfl,
         EschFaceV1 *tmpptr = ftemp;
         for(ulong i=0; i < nfaces; i++, tptr++, tmpptr++)
         {
-            tmpptr->flags = tptr->flags;
+            dword flags = tptr->flags;
+            if (tptr->self_illum)
+                flags |= (tptr->self_illum << 16) & ESCH_FACEV1_SILLUM_MASK;
+            if (flags & ESCH_FACE_ALPHA)
+                flags |= (tptr->alpha_a << 20) & ESCH_FACEV1_ALPHA_MASK;
+            tmpptr->flags = flags;
+
             tmpptr->a = tptr->a;
             tmpptr->b = tptr->b;
             tmpptr->c = tptr->c;
@@ -426,9 +440,51 @@ esch_error_codes EschBuildMesh::save(XFParseIFF *iff, dword ctrlfl,
 
         delete [] ftemp;
     }
+    else if (ctrlfl & ESCH_MBLD_OLDFLOAT)
+    {
+        EschFaceV2 *ftemp = new EschFaceV2[nfaces];
+        if (!ftemp)
+            return ESCH_ERR_NOMEMORY;
+
+        EschFace *tptr = f;
+        EschFaceV2 *tmpptr = ftemp;
+        for(ulong i=0; i < nfaces; i++, tptr++, tmpptr++)
+        {
+            dword flags = tptr->flags;
+            if (tptr->self_illum)
+                flags |= (tptr->self_illum << 16) & ESCH_FACEV2_SILLUM_MASK;
+            if (flags & ESCH_FACE_ALPHA)
+                flags |= (tptr->alpha_a << 20) & ESCH_FACEV2_ALPHA_MASK;
+            tmpptr->flags = flags;
+
+            tmpptr->a = tptr->a;
+            tmpptr->b = tptr->b;
+            tmpptr->c = tptr->c;
+            tmpptr->txt = tptr->txt;
+            tmpptr->u[0] = tptr->u[0];
+            tmpptr->u[1] = tptr->u[1];
+            tmpptr->u[2] = tptr->u[2];
+            tmpptr->v[0] = tptr->v[0];
+            tmpptr->v[1] = tptr->v[1];
+            tmpptr->v[2] = tptr->v[2];
+            tmpptr->color = tptr->color;
+            tmpptr->normal.i = tptr->normal.i;
+            tmpptr->normal.j = tptr->normal.j;
+            tmpptr->normal.k = tptr->normal.k;
+        }
+
+        if (iff->write(iff->makeid('F','A','C','1'),
+                       ftemp,sizeof(EschFaceV2) * nfaces))
+        {
+            delete [] ftemp;
+            return ESCH_ERR_FILEERROR;
+        }
+
+        delete [] ftemp;
+    }
     else
     {
-        if (iff->write(iff->makeid('F','A','C','1'),
+        if (iff->write(iff->makeid('F','A','C','2'),
                        f,sizeof(EschFace) * nfaces))
             return ESCH_ERR_FILEERROR;
     }
@@ -516,7 +572,16 @@ esch_error_codes EschBuildMesh::add_face(const EschFace *face)
             && face->txt >= ntxts))
         return ESCH_ERR_INVALIDPARMS;
 
-    f[nfaces++] = *face;
+    f[nfaces] = *face;
+    f[nfaces].app_data = 0;
+    if (!(f[nfaces].flags & ESCH_FACE_ALPHA))
+    {
+        f[nfaces].alpha_a =
+        f[nfaces].alpha_b =
+        f[nfaces].alpha_c = 255;
+    }
+
+    nfaces++;
 
     return ESCH_ERR_NONE;
 }
@@ -540,6 +605,13 @@ esch_error_codes EschBuildMesh::set_face(ulong i, const EschFace *face)
         return ESCH_ERR_INVALIDPARMS;
 
     f[i] = *face;
+    f[i].app_data = 0;
+    if (!(f[i].flags & ESCH_FACE_ALPHA))
+    {
+        f[i].alpha_a =
+        f[i].alpha_b =
+        f[i].alpha_c = 255;
+    }
 
     return ESCH_ERR_NONE;
 }

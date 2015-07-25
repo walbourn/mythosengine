@@ -38,21 +38,32 @@
 
  Notes by: Chuck Walbourn
 
- Last Updated: May 21, 1997
+ Last Updated: September 23, 1997
 
  Escher Tool - MFC Application
 
  Changes for this release --------------------------------------------------
 
- Version 2.00
+ Version 2.03
 
-    o Updated for floating-point formats
+    o Updated for new EschFace structure changes.
 
-    o Updated for darklights
+    o Added Alpha controls and interface.
+
+    o Fixed bug with Face Properties dialog which didn't allow selection
+      of faces other than the first one.
+
+ Version 2.02
+
+    o Updated for new EschCameraEx.
 
 
 
  Pending changes -----------------------------------------------------------
+
+    o Support for 15-bit DIB mode
+
+    o Support for full-screen mode with 3D hardware
 
     o The Camera, Light, and Meshes properties dialogs should enforce
       unique names for the items.

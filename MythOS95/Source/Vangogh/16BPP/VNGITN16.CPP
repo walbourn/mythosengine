@@ -240,7 +240,7 @@ VNGError VngoVVport16::image_trans (VngoRect *dest_rect,VngoTexture *img,dword f
                 byte *btptr = (byte *)((ty * img->width) + tx + (dword)img->tex);
                 VngoShadePal16   *tp = (VngoShadePal16 *)vbuff.pal->shd_pal;
                 VngoColorShade16 *tc = &(*tp)[0];
-                word             *stable = &tc->shl[(vbuff.pal->shd_pal->mid_point-1) >> 3];
+                word             *stable = &tc->shl[vbuff.pal->shd_pal->mid_point >> 3];
                 for (int i=0;i < ycount;i++)
                 {
                     vngo_iline8to16(lptr,btptr,xcount,stable,flags);

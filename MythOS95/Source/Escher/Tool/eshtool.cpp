@@ -60,7 +60,7 @@
 //
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
-#define VERSION "2.00"
+#define VERSION "2.03"
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
@@ -93,6 +93,7 @@ ToolApp theApp;
 
 MythosSystem    *MythOS=NULL;
 
+ulong           BitDepth=8;
 dword           AutoRotate=0;
 float           AutoRotateSpeed=float(AUTOROTATE_SLOW);
 Chronometer     Clock;
@@ -154,6 +155,15 @@ BOOL ToolApp::InitInstance()
     }
     else
         AutoRotate = 0;
+
+    if (strstr(m_lpCmdLine,"-8bpp"))
+    {
+        BitDepth=8;
+    }
+    else if (strstr(m_lpCmdLine,"-15bpp"))
+    {
+        BitDepth=15;
+    }
 
 	if (m_lpCmdLine[0] == '\0'
         || m_lpCmdLine[0] == '-')

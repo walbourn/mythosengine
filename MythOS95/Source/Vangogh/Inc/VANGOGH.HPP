@@ -25,6 +25,8 @@
 //
 //컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
 //
+// Created by Tim Little
+//
 // vangogh.hpp
 //
 // The Generic include file for users to include to use the
@@ -80,6 +82,7 @@ extern void vngo_clip_circle(VngoVport *vp,VngoPoint *center,long r);
 extern void vngo_clip_circle(VngoVport *vp,long xoffset, long yoffset,long r,dword color);
 extern void vngo_clip_circle(VngoVport *vp,long xoffset, long yoffset,long r,dword color, int width);
 extern void vngo_smooth_rect(VngoVport *vp, VngoPoint *pts, VngoRect *clip = NULL);
+extern VNGError vngo_smooth_blit(VngoVport *vp,VngoTexture *img, VngoRect *target,VngoRect *clip = NULL);
 extern void vngo_line(VngoVport *vp, VngoPoint *p1, VngoPoint *p2, VngoColor24bit *rgv_val=NULL);
 extern void vngo_gline(VngoVport *vp, VngoPoint *p1, VngoPoint *p2, VngoColor24bit *rgv_val=NULL);
 

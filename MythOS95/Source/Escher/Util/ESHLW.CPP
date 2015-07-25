@@ -104,6 +104,9 @@ struct Surface
     char    *name;
     dword   flags;
     dword   color;
+    byte    alpha;
+    byte    selfi;
+    word    na;
 };
 
 struct Poly    
@@ -563,7 +566,7 @@ STATIC void print_info(Point *points, ulong maxpoints,
                    surfs[i].color,
                    (surfs[i].flags & ESCH_FACE_ONESIDED) ? "" : "TWOSIDED",
                    (surfs[i].flags & ESCH_FACE_SPECULAR) ? "SPECULAR" : "",
-                   (surfs[i].flags & ESCH_FACE_SELFILUM_MASK) ? "LUMINOUS" : "");
+                   (surfs[i].selfi) ? "LUMINOUS" : "");
         }
     }
 
@@ -811,6 +814,9 @@ STATIC Surface *process_surface_list(XFParseIFF &iff, ulong &max)
                 ((VngoColor24bit*)&surfs[i].color)->r = 128;
                 ((VngoColor24bit*)&surfs[i].color)->g = 128;
                 ((VngoColor24bit*)&surfs[i].color)->b = 128;
+
+                surfs[i].selfi = 0;
+                surfs[i].alpha = 255;
                 i++;
                 prev = ptr;
             }
@@ -1044,7 +1050,7 @@ STATIC BOOL process_surfaces(XFParseIFF &iff, Surface *surfs, ulong max)
 
                 if (flags & LW_SURF_FLAG_LUMINOUS)
                 {
-                    surf->flags |= ESCH_FACE_SELFILUM_MASK;
+                    surf->selfi = 128;
                 }
             }
             else if (id == iff.makeid('L','U','M','I')
@@ -1052,12 +1058,8 @@ STATIC BOOL process_surfaces(XFParseIFF &iff, Surface *surfs, ulong max)
             {
                 short value = (*ptr << 8) | *(ptr+1); 
 
-                assert(ESCH_FACE_SELFILLUM_MASK == 0xf00000);
-
-                surf->flags &= ~ESCH_FACE_SELFILUM_MASK;
-
                 if (value > 0)
-                    surf->flags |= ((value-1) & 0xff) << 20;
+                    surf->selfi = byte((value-1) & 0xff);
             }
             else if (id == iff.makeid('S','P','E','C')
                      && size == 2)
@@ -1171,6 +1173,8 @@ STATIC void generate(const char *name,
                 continue;
 
             mbld.set_face_flags(surfs[ptr->surf-1].flags);
+            mbld.set_self_illum(surfs[ptr->surf-1].selfi);
+            mbld.set_alpha(surfs[ptr->surf-1].alpha);
 
             dword color = surfs[ptr->surf-1].color;
 

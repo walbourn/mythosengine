@@ -39,20 +39,25 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include <io.h>
+#include <dos.h>
 #include <stdlib.h>
 #include <string.h>
 #include <i86.h>
 #include <float.h>
+#include <ctype.h>
 
 #include "portable.h"
 #include "debug.h"
 
+#include "xfio.h"
+
 #include <pjbasics.h>
 
+#include "exprtn.h"
 #include "pxp.h"
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
@@ -85,7 +90,7 @@ typedef struct {
         Color_24    rcol, gcol, bcol;
 } MapParams;
 
-typedef struct {    
+typedef struct {
         uchar       ok;
         uchar       kind;
         char        name[13];
@@ -101,22 +106,22 @@ typedef struct {
 
 typedef struct mtl
 {
-    char name[17];	/* Material's 16-char name */
-    BXPColor amb;	/* 0-255 triplets */
-    BXPColor diff;	/* 0-255 triplets */
-    BXPColor spec;	/* 0-255 triplets */
-    short transparency;	/* 0-100 */
-    short shading;	/* 0=WIRE 1=FLAT 2=GOURAUD 3=PHONG 4=METAL */
+    char name[17];      /* Material's 16-char name */
+    BXPColor amb;       /* 0-255 triplets */
+    BXPColor diff;      /* 0-255 triplets */
+    BXPColor spec;      /* 0-255 triplets */
+    short transparency; /* 0-100 */
+    short shading;      /* 0=WIRE 1=FLAT 2=GOURAUD 3=PHONG 4=METAL */
     unsigned long flags; /* Material flags */
-    unsigned short use;	/* Use flags */
-    short shininess;	/* 0-100 */
-    short shin2pct;	/* 0-100 */
-    short shin3pct;	/* 0-100 - Not Used  */
-    short xpfall;	/* 0-100 */
-    short refblur;	/* 0-100 */
-    short selfipct;	/* 0-100 */
-    float wiresize;	/* size of wire frame */
-        
+    unsigned short use; /* Use flags */
+    short shininess;    /* 0-100 */
+    short shin2pct;     /* 0-100 */
+    short shin3pct;     /* 0-100 - Not Used  */
+    short xpfall;       /* 0-100 */
+    short refblur;      /* 0-100 */
+    short selfipct;     /* 0-100 */
+    float wiresize;     /* size of wire frame */
+
     Mapping *map[NMAPTYPES];
     void *appdata;
 } Mtl;
@@ -178,7 +183,7 @@ STATIC struct MtlCapture
     MtlData     mtl;
     Mtl _far    *ptr;
 } *capture_mtl=NULL;
-       
+
 // Light export information
 
 extern int lgt_omnias;
@@ -210,6 +215,9 @@ int capture_setup()
 
 //ÄÄ Get object information
     pxp_get_item_count(count);
+
+    if (source_mode == 3)
+        return 3;
 
     // Always have an ambient light in the system
     if (count <= 1)
@@ -273,7 +281,7 @@ int capture_setup()
                                 count_fattenlights++;
                         }
                         else
-                        {   
+                        {
                             if (lgt_omnias == 2)
                                 count_pointlights++;
                             else // lgt_omnias == 1
@@ -307,6 +315,8 @@ int capture_setup()
     }
 
     capture_idata = malloc(capture_numb * sizeof(ItemData));
+    if (!capture_idata)
+        return 2;
 
     for(i=0, capture_numb=0; i < count; i++)
     {
@@ -321,14 +331,14 @@ int capture_setup()
                         memcpy(&capture_idata[capture_numb++],&idata,sizeof(ItemData));
                     }
                     break;
-               
+
                 case PXPAMBIENT:
                     if (lights_flag)
                     {
                         memcpy(&capture_idata[capture_numb++],&idata,sizeof(ItemData));
                     }
                     break;
-               
+
                 case PXPLIGHT:
                     if (lights_flag)
                     {
@@ -360,6 +370,9 @@ int capture_setup()
     }
 
     capture_mtl = malloc(256 * sizeof(struct MtlCapture));
+    if (!capture_mtl)
+        return 2;
+
     memset(capture_mtl,0,256 * sizeof(struct MtlCapture));
 
     pxp_material_count(count);
@@ -375,7 +388,7 @@ int capture_setup()
     capture_mtl[255].mtl.diff.g=128;
     capture_mtl[255].mtl.diff.b=128;
     capture_mtl[255].mtl.shading=4;
-    
+
     return 0;
 }
 
@@ -427,12 +440,12 @@ int capture_get(ItemData **item, XVData **verts, XFData **faces)
         goto error_exit;
 
     pxp_get_verts((*item)->name, 0, nverts, *verts, status);
-    
+
     if (!status)
         goto error_exit;
-    
+
     pxp_get_faces((*item)->name, 0, nfaces, *faces, status);
-    
+
     if (!status)
         goto error_exit;
 
@@ -499,11 +512,11 @@ int capture_getpivot(ItemData *idata, float *px, float *py, float *pz)
     *py = mtx[0][1]*p.x
           + mtx[1][1]*p.y
           + mtx[2][1]*p.z;
-    
+
     *pz = mtx[0][2]*p.x
           + mtx[1][2]*p.y
           + mtx[2][2]*p.z;
-    
+
     return 1;
 }
 
@@ -550,7 +563,7 @@ int capture_gethier(ItemData *idata, char *name, float *m)
 
 //ÄÄÄ Get node ID for parent of object
     kxp_get_parent(i,t);
-   
+
     if (t <= -1)
     {
         if (m)
@@ -581,7 +594,7 @@ int capture_gethier(ItemData *idata, char *name, float *m)
             pm[0][0] = 1.0;                 // Already captured in get_verts, but
             pm[0][1] = 0.0;                 // Needs to be I for computation to
             pm[0][2] = 0.0;                 // work below
-            pm[1][0] = 0.0;                 
+            pm[1][0] = 0.0;
             pm[1][1] = 1.0;
             pm[1][2] = 0.0;
             pm[2][0] = 0.0;
@@ -612,11 +625,11 @@ int capture_gethier(ItemData *idata, char *name, float *m)
     if (m)
     {
         // O(R->P) = O(R->W) * Pi(W->P)
-        
+
         inverse_mtx(pm,pm);
         concat_mtx(mtx,pm,m);
     }
-    
+
     return 1;
 }
 
@@ -626,15 +639,16 @@ int capture_gethier(ItemData *idata, char *name, float *m)
 //                                                                          ³
 // Returns information on materials captureb before.                        ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-MtlData *capture_mtlget(int ind, ushort *selfi)
+MtlData *capture_mtlget(int ind, short *selfi, short *transp)
 {
     if (!capture_mtl || ind < 0 || ind >= 255)
         return NULL;
 
     if (selfi)
-    {
         *selfi = capture_mtl[ind].ptr->selfipct;
-    }
+
+    if (transp)
+        *transp = capture_mtl[ind].ptr->transparency;
 
     return &capture_mtl[ind].mtl;
 }
@@ -725,7 +739,7 @@ int capture_mtlfile(int ind, char *fname, char *tfname)
 char *locate_map(char *fname, char *fullname)
 {
     int     i;
-    char    path[128];
+    char    path[256];
 
     if (!fname || !fullname)
         return 0;
@@ -759,11 +773,243 @@ char *locate_map(char *fname, char *fullname)
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// get_root_from_fullname                                                   ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+char *get_root_from_fullname(char *fullname)
+{
+    char *c;
+
+    // Find first lead character in fullname
+    for(c = fullname + strlen(fullname) - 1; c > fullname; c--)
+    {
+        if (*c == '\\')
+        {
+            c++;
+            break;
+        }
+    }
+
+    return c;
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// isvalid_sequential_name                                                  ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+STATIC int isvalid_sequential_name(char *fname, char *fullname)
+{
+    char *c, *t;
+    
+    c = get_root_from_fullname(fullname);
+    if (!*c)
+        return 0;
+
+    // Compare with root name until we hit the '*' symbol
+    for(t = fname; *t != 0; t++, c++)
+    {
+        if (*t == '*')
+            break;
+
+        if (*t != *c)
+            return 0;
+    }
+
+    if (!isdigit(*c))
+        return 0;
+
+    // Verify all remaining characters until '.' or end are numbers
+    for(; *c != 0; c++)
+    {
+        if (*c == '.')
+            return 1;
+
+        if (!isdigit(*c))
+            return 0;
+    }
+    
+    return 1;
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// locate_sequential_maps                                                   ³
+//                                                                          ³
+// Attempts to locate and sort sequential maps.                             ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+ulong locate_sequential_maps(char *fname, char **seq_names)
+{
+    int                 i, status;
+    int                 changed;
+    char                *c, *t;
+    int                 value1, value2;
+    ulong               count;
+    struct find_t       find;
+    char                path[256];
+    char                full[256];
+
+    if (!fname || !seq_names)
+        return 0;
+
+//ÄÄÄ Search for files that match mask and are of correct numbering format
+
+    // Search map paths
+    for(i=0; i < 250; i++)
+    {
+        gfx_get_paths(GFX_MAP_PATH,i,path,full);
+        if (!*path)
+            continue;
+
+        strcpy(full,path);
+        strcat(full,"\\");
+        strcat(full,fname);
+
+        gfx_findfirst(full,0,&find,status);
+        if (!status)
+        {
+            if (isvalid_sequential_name(fname,find.name))
+                goto found;
+
+            for(;;)
+            {
+                gfx_findnext(&find,status);
+                if (status)
+                    break;
+
+                if (isvalid_sequential_name(fname,find.name))
+                    goto found;
+            }
+        }
+    }
+
+    // Search image path
+    gfx_get_paths(GFX_IMG_PATH,0,path,full);
+    strcpy(full,path);
+    strcat(full,"\\");
+    strcat(full,fname);
+
+    gfx_findfirst(full,0,&find,status);
+    if (status)
+        return 0;
+
+    if (isvalid_sequential_name(fname,find.name))
+        goto found;
+
+    for(;;)
+    {
+        gfx_findnext(&find,status);
+        if (status)
+            break;
+
+        if (isvalid_sequential_name(fname,find.name))
+            goto found;
+    }
+
+    return 0;
+
+//ÄÄÄ Load names and attempt to sort
+found:; 
+
+    // Count number of matches
+    count=1;
+
+    for(;;)
+    {
+        gfx_findnext(&find,status);
+        if (status)
+            break;
+
+        if (isvalid_sequential_name(fname,find.name))
+            count++;
+    }
+
+    // Store all matches
+    gfx_findfirst(full,0,&find,status);
+    if (status)
+        return 0;
+
+    *seq_names = malloc(256*count);
+    if (!*seq_names)
+        return 0;
+    memset(*seq_names,0,256*count);
+
+    if (isvalid_sequential_name(fname,find.name))
+    {
+        strcpy(full,path);
+        strcat(full,"\\");
+        strcat(full,find.name);
+        strncpy(*seq_names,full,255);
+        count=1;
+    }
+    else
+    {
+        count = 0;
+    }
+
+    for(;;)
+    {
+        gfx_findnext(&find,status);
+        if (status)
+            break;
+
+        if (isvalid_sequential_name(fname,find.name))
+        {
+            strcpy(full,path);
+            strcat(full,"\\");
+            strcat(full,find.name);
+            strncpy(&(*seq_names)[256*count],full,255);
+            count++;
+        }
+    }
+
+    // Sort names to get frame sequence (Bubblesort)
+    for(;;)
+    {
+        changed=0;
+        for(i=0; i < count-1; i++)
+        {
+            // Get value 1
+            c = get_root_from_fullname(&(*seq_names)[256*i]);
+            for(t = fname; *t != 0; t++, c++)
+            {
+                if (*t == '*')
+                    break;
+            }
+            value1 = atoi(c);
+
+            // Get value 2
+            c = get_root_from_fullname(&(*seq_names)[256*(i+1)]);
+            for(t = fname; *t != 0; t++, c++)
+            {
+                if (*t == '*')
+                    break;
+            }
+            value2 = atoi(c);
+
+            // Compare and swap if needed
+            if (value2 < value1)
+            {
+                char temp[256];
+                strncpy(temp,&(*seq_names)[256*i],255);
+                strncpy(&(*seq_names)[256*i],
+                        &(*seq_names)[256*(i+1)], 255);
+                strncpy(&(*seq_names)[256*(i+1)],temp,255);
+                changed=1;
+            }
+        }
+        if (!changed)
+            break;
+    }
+
+    return count;
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // capture_mtlbitmap                                                        ³
 //                                                                          ³
 // Attempts to locate and load the map bitmap file given.                   ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-BXPColor *capture_mtlbitmap(char *fname, ushort *xs, ushort *ys, int forcesize)
+BXPColor *capture_mtlbitmap(char *fname, int locate, ushort *xs, ushort *ys, int forcesize)
 {
     int         i;
     int         desirex;
@@ -773,7 +1019,9 @@ BXPColor *capture_mtlbitmap(char *fname, ushort *xs, ushort *ys, int forcesize)
     BitmapInfo  binfo;
     char        fullname[256];
 
-    if (!locate_map(fname,fullname))
+    if (!locate)
+        strcpy(fullname,fname);
+    else if (!locate_map(fname,fullname))
         return NULL;
 
 //ÄÄÄ Load image
@@ -837,7 +1085,7 @@ BXPColor *capture_mtlbitmap(char *fname, ushort *xs, ushort *ys, int forcesize)
         if (binfo.height > desirey)
             desirey=256;
     }
-    
+
 //ÄÄÄ Perform resize
     if (desirex != binfo.width
         || desirey != binfo.height)
@@ -849,12 +1097,12 @@ BXPColor *capture_mtlbitmap(char *fname, ushort *xs, ushort *ys, int forcesize)
             free(tbm);
             return 0;
         }
-        
+
         gfx_resize_bitmap(tbm, binfo.width, binfo.height,
                           bm, desirex, desirey, i);
 
         free(tbm);
-        
+
         if (i < 1)
         {
             free(bm);
@@ -965,12 +1213,12 @@ BXPColor *capture_flcframe(char *fname, Flic *flic,
             free(tbm);
             goto error_exit;
         }
-        
+
         gfx_resize_bitmap(tbm, raster->width, raster->height,
                           bm, desirex, desirey, i);
 
         free(tbm);
-        
+
         if (i < 1)
         {
             goto error_exit;
@@ -1009,7 +1257,7 @@ void capture_terminate()
         free(capture_mtl);
         capture_mtl=NULL;
     }
-    
+
     capture_numb=0;
 }
 

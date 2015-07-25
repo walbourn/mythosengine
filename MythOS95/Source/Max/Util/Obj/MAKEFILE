@@ -61,13 +61,17 @@ LIBPATH = ..\..\obj;$(MYTH95ROOT)\lib;
 
 EXEC = maxc
 
-OBJSC = lexyy.obj\
+OBJSC = \
+lexyy.obj\
 evtc.obj\
-evtcp.obj
+evtcp.obj\
+evtc.res
 
 LIBS =\
-xfile.lib max.lib\
-user32.lib winmm.lib
+xfile.lib\
+max.lib\
+user32.lib\
+winmm.lib
 
 all: setstden $(EXEC).exe
 
@@ -114,8 +118,12 @@ lexyy.obj : .\lexyy.c
 
 clean:
    del *.obj
+   del *.res
    del *.err
    del *.lst
+   del *.ilk
+   del *.pdb
+   del *.vcp
 
 #°±² End of makefile ²±°
 

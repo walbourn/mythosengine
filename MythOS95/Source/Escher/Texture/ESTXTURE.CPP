@@ -73,7 +73,8 @@ EschTexture::EschTexture() :
     ttyp(ESCH_TXTT_BASE),
     flags(0),
     name(EschNoName),
-    ptr(0)
+    ptr(0),
+    app_data(0)
 {
     //컴 Update diags
     assertMyth("EschTexture needs Escher initialized",EschSysInstance != 0);
@@ -84,7 +85,8 @@ EschTexture::EschTexture(const EschTexture &txt) :
     ttyp(txt.ttyp),
     flags(txt.flags & ~ESCH_TXT_OWNSDATA),
     name(txt.name),
-    ptr(txt.ptr)
+    ptr(txt.ptr),
+    app_data(txt.app_data)
 {
     //컴 Update diags
     assertMyth("EschTexture needs Escher initialized",EschSysInstance != 0);
@@ -124,6 +126,7 @@ const EschTexture &EschTexture::operator = (const EschTexture &txt)
         flags = txt.flags & ~(ESCH_TXT_OWNSDATA|ESCH_TXT_SHARED);
         name = txt.name;
         ptr = txt.ptr;
+        app_data = txt.app_data;
     }
     return *this;
 }
@@ -478,7 +481,7 @@ esch_error_codes EschTexture::load(const char *fname, const char *tname,
     XFParseIFF          iff;
 
 //컴 Open file
-    if (iff.open(fname,XF_OPEN_READ))
+    if (iff.open(fname,XF_OPEN_READ | XF_OPEN_DENYWRITE))
         return ESCH_ERR_FILEERROR;
 
 //컴 Loop until a header with the correct name is found
@@ -491,6 +494,7 @@ esch_error_codes EschTexture::load(const char *fname, const char *tname,
             if (!iff.depth)
                 return ESCH_ERR_NOTFOUND;
             iff.leaveform();
+            continue;
         }
 
         if (iff.chunkid == iff.makeid('F','O','R','M'))
@@ -510,8 +514,14 @@ esch_error_codes EschTexture::load(const char *fname, const char *tname,
                 iff.enterform();
             }
 
-            // Must scan inside any EMSH Scene forms.
+            // Must scan inside any EMSH Mesh forms.
             else if (iff.formid == iff.makeid('E','M','S','H'))
+            {
+                iff.enterform();
+            }
+
+            // Must scan inside any ETER Terrain forms.
+            else if (iff.formid == iff.makeid('E','T','E','R'))
             {
                 iff.enterform();
             }

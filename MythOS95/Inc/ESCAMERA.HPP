@@ -117,6 +117,7 @@ public:
     float           z_factor;               // scale to appropriate z range
     EschPlane       frustrum[6];            // View frustrum planes
     char            name[ESCH_MAX_NAME];    // Camera name
+    void            *app_data;              // Application data pointer
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Constructor/Destructors                                              ³
@@ -321,6 +322,8 @@ public:
 
     void set_flags(const dword f) { flags=f; }
 
+    void set_app_data(void *p) { app_data = p; }
+
     void set_aspect_ratio(const float ar, dword update=ESCH_UPD_ALL)
     {
         aspect_ratio=ar;
@@ -366,9 +369,7 @@ public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
     short           bg_offx;                // Bitmap Background window offset
     short           bg_offy;
-    XFBitmap        *bg_bitmap;             // Bitmap background
-    VngoShadePal    *hz_pal;                // Haze shade palette
-    long            hz_startz;              // Haze near cut-off (scaled)
+    VngoTexture     *bg_bitmap;             // Bitmap background
     VngoShadePal    *grd_pal;               // Gradient shade palette
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
@@ -393,13 +394,12 @@ public:
     // Utility functions.                                                   ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
     void set_bg_offset(short x, short y) { bg_offx=x; bg_offy=y; }
-    int set_bg_bitmap(XFBitmap *bm, int owns=1);
 
-    int set_haze(VngoShadePal *hzp, int owns=1, long startz=0);
-    esch_error_codes create_haze(ushort levels,
-                                 ushort slevel,
-                                 ushort blevel, float bpercent,
-                                 VngoColor24bit tcolor);
+    int set_bg_bitmap(VngoTexture *tex, int owns=1);
+    int create_bg_bitmap(XFBitmap *bm);
+
+    int set_haze(float start, float mid);
+    int set_haze(float start, float mid, VngoColor24bit tcolor);
 
     int set_gradient(VngoShadePal *grdp, int owns=1);
     esch_error_codes create_gradient(ushort levels,

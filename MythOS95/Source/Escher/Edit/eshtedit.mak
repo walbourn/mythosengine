@@ -26,10 +26,6 @@ NULL=
 NULL=nul
 !ENDIF 
 
-CPP=cl.exe
-MTL=midl.exe
-RSC=rc.exe
-
 !IF  "$(CFG)" == "eshtedit - Win32 Debug"
 
 OUTDIR=.\WinDebug
@@ -87,12 +83,47 @@ CLEAN :
 "$(OUTDIR)" :
     if not exist "$(OUTDIR)/$(NULL)" mkdir "$(OUTDIR)"
 
+CPP=cl.exe
 CPP_PROJ=/nologo /G5 /MD /W3 /Gm /GX /Zi /Od /I "..\..\inc" /D "_DEBUG" /D\
  "WIN32" /D "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /Fr"$(INTDIR)\\"\
  /Fp"$(INTDIR)\eshtedit.pch" /Yu"stdafx.h" /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD\
  /c 
 CPP_OBJS=.\WinDebug/
 CPP_SBRS=.\WinDebug/
+
+.c{$(CPP_OBJS)}.obj::
+   $(CPP) @<<
+   $(CPP_PROJ) $< 
+<<
+
+.cpp{$(CPP_OBJS)}.obj::
+   $(CPP) @<<
+   $(CPP_PROJ) $< 
+<<
+
+.cxx{$(CPP_OBJS)}.obj::
+   $(CPP) @<<
+   $(CPP_PROJ) $< 
+<<
+
+.c{$(CPP_SBRS)}.sbr::
+   $(CPP) @<<
+   $(CPP_PROJ) $< 
+<<
+
+.cpp{$(CPP_SBRS)}.sbr::
+   $(CPP) @<<
+   $(CPP_PROJ) $< 
+<<
+
+.cxx{$(CPP_SBRS)}.sbr::
+   $(CPP) @<<
+   $(CPP_PROJ) $< 
+<<
+
+MTL=midl.exe
+MTL_PROJ=/mktyplib203 
+RSC=rc.exe
 RSC_PROJ=/l 0x409 /fo"$(INTDIR)\eshtedit.res" /d "_DEBUG" /d "_AFXDLL" 
 BSC32=bscmake.exe
 BSC32_FLAGS=/nologo /o"$(OUTDIR)\eshtedit.bsc" 
@@ -184,11 +215,46 @@ CLEAN :
 "$(OUTDIR)" :
     if not exist "$(OUTDIR)/$(NULL)" mkdir "$(OUTDIR)"
 
+CPP=cl.exe
 CPP_PROJ=/nologo /G5 /MD /W3 /GX /O2 /I "..\..\inc" /D "NDEBUG" /D "WIN32" /D\
  "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /Fp"$(INTDIR)\eshtedit.pch" /Yu"stdafx.h"\
  /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
 CPP_OBJS=.\WinRel/
 CPP_SBRS=.
+
+.c{$(CPP_OBJS)}.obj::
+   $(CPP) @<<
+   $(CPP_PROJ) $< 
+<<
+
+.cpp{$(CPP_OBJS)}.obj::
+   $(CPP) @<<
+   $(CPP_PROJ) $< 
+<<
+
+.cxx{$(CPP_OBJS)}.obj::
+   $(CPP) @<<
+   $(CPP_PROJ) $< 
+<<
+
+.c{$(CPP_SBRS)}.sbr::
+   $(CPP) @<<
+   $(CPP_PROJ) $< 
+<<
+
+.cpp{$(CPP_SBRS)}.sbr::
+   $(CPP) @<<
+   $(CPP_PROJ) $< 
+<<
+
+.cxx{$(CPP_SBRS)}.sbr::
+   $(CPP) @<<
+   $(CPP_PROJ) $< 
+<<
+
+MTL=midl.exe
+MTL_PROJ=/mktyplib203 
+RSC=rc.exe
 RSC_PROJ=/l 0x409 /fo"$(INTDIR)\eshtedit.res" /d "NDEBUG" /d "_AFXDLL" 
 BSC32=bscmake.exe
 BSC32_FLAGS=/nologo /o"$(OUTDIR)\eshtedit.bsc" 
@@ -224,37 +290,6 @@ LINK32_OBJS= \
 
 !ENDIF 
 
-.c{$(CPP_OBJS)}.obj::
-   $(CPP) @<<
-   $(CPP_PROJ) $< 
-<<
-
-.cpp{$(CPP_OBJS)}.obj::
-   $(CPP) @<<
-   $(CPP_PROJ) $< 
-<<
-
-.cxx{$(CPP_OBJS)}.obj::
-   $(CPP) @<<
-   $(CPP_PROJ) $< 
-<<
-
-.c{$(CPP_SBRS)}.sbr::
-   $(CPP) @<<
-   $(CPP_PROJ) $< 
-<<
-
-.cpp{$(CPP_SBRS)}.sbr::
-   $(CPP) @<<
-   $(CPP_PROJ) $< 
-<<
-
-.cxx{$(CPP_SBRS)}.sbr::
-   $(CPP) @<<
-   $(CPP_PROJ) $< 
-<<
-
-MTL_PROJ=/mktyplib203 
 
 !IF "$(CFG)" == "eshtedit - Win32 Debug" || "$(CFG)" ==\
  "eshtedit - Win32 Release"
@@ -279,6 +314,7 @@ DEP_CPP_ESHTD=\
 	"..\..\inc\escontxt.hpp"\
 	"..\..\inc\esdefs.h"\
 	"..\..\inc\esdraw.hpp"\
+	"..\..\inc\eselemnt.hpp"\
 	"..\..\inc\esexts.hpp"\
 	"..\..\inc\esgeom.hpp"\
 	"..\..\inc\eskeyfrm.hpp"\
@@ -291,7 +327,6 @@ DEP_CPP_ESHTD=\
 	"..\..\inc\esscene.hpp"\
 	"..\..\inc\essystem.hpp"\
 	"..\..\inc\esterran.hpp"\
-	"..\..\inc\estrtop.hpp"\
 	"..\..\inc\estxture.hpp"\
 	"..\..\inc\felix.hpp"\
 	"..\..\inc\felix.ipp"\
@@ -305,6 +340,9 @@ DEP_CPP_ESHTD=\
 	"..\..\inc\maxdevs.hpp"\
 	"..\..\inc\maxesrc.hpp"\
 	"..\..\inc\maxevt.hpp"\
+	"..\..\inc\maxjoy.hpp"\
+	"..\..\inc\maxkb.hpp"\
+	"..\..\inc\maxmouse.hpp"\
 	"..\..\inc\maxvmap.hpp"\
 	"..\..\inc\mythos.h"\
 	"..\..\inc\mythos.hpp"\
@@ -337,6 +375,8 @@ DEP_CPP_ESHTD=\
 	".\Eshtedit.h"\
 	".\eshtusgs.h"\
 	".\stdafx.h"\
+	{$(INCLUDE)}"dinput.h"\
+	{$(INCLUDE)}"gl\gl.h"\
 	
 
 "$(INTDIR)\eshtdlg.obj"	"$(INTDIR)\eshtdlg.sbr" : $(SOURCE) $(DEP_CPP_ESHTD)\
@@ -382,6 +422,7 @@ DEP_CPP_ESHTDL=\
 	"..\..\inc\escontxt.hpp"\
 	"..\..\inc\esdefs.h"\
 	"..\..\inc\esdraw.hpp"\
+	"..\..\inc\eselemnt.hpp"\
 	"..\..\inc\esexts.hpp"\
 	"..\..\inc\esgeom.hpp"\
 	"..\..\inc\eskeyfrm.hpp"\
@@ -394,7 +435,6 @@ DEP_CPP_ESHTDL=\
 	"..\..\inc\esscene.hpp"\
 	"..\..\inc\essystem.hpp"\
 	"..\..\inc\esterran.hpp"\
-	"..\..\inc\estrtop.hpp"\
 	"..\..\inc\estxture.hpp"\
 	"..\..\inc\felix.hpp"\
 	"..\..\inc\felix.ipp"\
@@ -408,6 +448,9 @@ DEP_CPP_ESHTDL=\
 	"..\..\inc\maxdevs.hpp"\
 	"..\..\inc\maxesrc.hpp"\
 	"..\..\inc\maxevt.hpp"\
+	"..\..\inc\maxjoy.hpp"\
+	"..\..\inc\maxkb.hpp"\
+	"..\..\inc\maxmouse.hpp"\
 	"..\..\inc\maxvmap.hpp"\
 	"..\..\inc\mythos.h"\
 	"..\..\inc\mythos.hpp"\
@@ -440,6 +483,8 @@ DEP_CPP_ESHTDL=\
 	".\Eshtdoc.h"\
 	".\Eshtedit.h"\
 	".\stdafx.h"\
+	{$(INCLUDE)}"dinput.h"\
+	{$(INCLUDE)}"gl\gl.h"\
 	
 
 "$(INTDIR)\eshtdlgt.obj"	"$(INTDIR)\eshtdlgt.sbr" : $(SOURCE) $(DEP_CPP_ESHTDL)\
@@ -485,6 +530,7 @@ DEP_CPP_ESHTDLG=\
 	"..\..\inc\escontxt.hpp"\
 	"..\..\inc\esdefs.h"\
 	"..\..\inc\esdraw.hpp"\
+	"..\..\inc\eselemnt.hpp"\
 	"..\..\inc\esexts.hpp"\
 	"..\..\inc\esgeom.hpp"\
 	"..\..\inc\eskeyfrm.hpp"\
@@ -497,7 +543,6 @@ DEP_CPP_ESHTDLG=\
 	"..\..\inc\esscene.hpp"\
 	"..\..\inc\essystem.hpp"\
 	"..\..\inc\esterran.hpp"\
-	"..\..\inc\estrtop.hpp"\
 	"..\..\inc\estxture.hpp"\
 	"..\..\inc\felix.hpp"\
 	"..\..\inc\felix.ipp"\
@@ -511,6 +556,9 @@ DEP_CPP_ESHTDLG=\
 	"..\..\inc\maxdevs.hpp"\
 	"..\..\inc\maxesrc.hpp"\
 	"..\..\inc\maxevt.hpp"\
+	"..\..\inc\maxjoy.hpp"\
+	"..\..\inc\maxkb.hpp"\
+	"..\..\inc\maxmouse.hpp"\
 	"..\..\inc\maxvmap.hpp"\
 	"..\..\inc\mythos.h"\
 	"..\..\inc\mythos.hpp"\
@@ -542,6 +590,8 @@ DEP_CPP_ESHTDLG=\
 	".\Eshtdoc.h"\
 	".\Eshtedit.h"\
 	".\stdafx.h"\
+	{$(INCLUDE)}"dinput.h"\
+	{$(INCLUDE)}"gl\gl.h"\
 	
 
 "$(INTDIR)\eshtdlgx.obj"	"$(INTDIR)\eshtdlgx.sbr" : $(SOURCE)\
@@ -566,9 +616,6 @@ DEP_CPP_ESHTDLG=\
 !ENDIF 
 
 SOURCE=.\eshtdoc.cpp
-
-!IF  "$(CFG)" == "eshtedit - Win32 Debug"
-
 DEP_CPP_ESHTDO=\
 	"..\..\inc\bozo.h"\
 	"..\..\inc\bozo.hpp"\
@@ -586,6 +633,7 @@ DEP_CPP_ESHTDO=\
 	"..\..\inc\escontxt.hpp"\
 	"..\..\inc\esdefs.h"\
 	"..\..\inc\esdraw.hpp"\
+	"..\..\inc\eselemnt.hpp"\
 	"..\..\inc\esexts.hpp"\
 	"..\..\inc\esfile.hpp"\
 	"..\..\inc\esgeom.hpp"\
@@ -599,7 +647,6 @@ DEP_CPP_ESHTDO=\
 	"..\..\inc\esscene.hpp"\
 	"..\..\inc\essystem.hpp"\
 	"..\..\inc\esterran.hpp"\
-	"..\..\inc\estrtop.hpp"\
 	"..\..\inc\estxture.hpp"\
 	"..\..\inc\felix.hpp"\
 	"..\..\inc\felix.ipp"\
@@ -613,6 +660,9 @@ DEP_CPP_ESHTDO=\
 	"..\..\inc\maxdevs.hpp"\
 	"..\..\inc\maxesrc.hpp"\
 	"..\..\inc\maxevt.hpp"\
+	"..\..\inc\maxjoy.hpp"\
+	"..\..\inc\maxkb.hpp"\
+	"..\..\inc\maxmouse.hpp"\
 	"..\..\inc\maxvmap.hpp"\
 	"..\..\inc\mythos.h"\
 	"..\..\inc\mythos.hpp"\
@@ -648,7 +698,12 @@ DEP_CPP_ESHTDO=\
 	".\Eshtrend.h"\
 	".\Eshtview.h"\
 	".\stdafx.h"\
+	{$(INCLUDE)}"dinput.h"\
+	{$(INCLUDE)}"gl\gl.h"\
 	
+
+!IF  "$(CFG)" == "eshtedit - Win32 Debug"
+
 
 "$(INTDIR)\eshtdoc.obj"	"$(INTDIR)\eshtdoc.sbr" : $(SOURCE) $(DEP_CPP_ESHTDO)\
  "$(INTDIR)" "$(INTDIR)\eshtedit.pch"
@@ -656,19 +711,6 @@ DEP_CPP_ESHTDO=\
 
 !ELSEIF  "$(CFG)" == "eshtedit - Win32 Release"
 
-DEP_CPP_ESHTDO=\
-	"..\..\inc\esdefs.h"\
-	"..\..\inc\esfile.hpp"\
-	"..\..\inc\felix.hpp"\
-	"..\..\inc\portable.h"\
-	".\eshtdlg.h"\
-	".\Eshtdoc.h"\
-	".\Eshtedit.h"\
-	".\Eshtgrid.h"\
-	".\Eshtlist.h"\
-	".\Eshtrend.h"\
-	".\Eshtview.h"\
-	
 
 "$(INTDIR)\eshtdoc.obj" : $(SOURCE) $(DEP_CPP_ESHTDO) "$(INTDIR)"\
  "$(INTDIR)\eshtedit.pch"
@@ -697,6 +739,7 @@ DEP_CPP_ESHTDOC=\
 	"..\..\inc\escontxt.hpp"\
 	"..\..\inc\esdefs.h"\
 	"..\..\inc\esdraw.hpp"\
+	"..\..\inc\eselemnt.hpp"\
 	"..\..\inc\esexts.hpp"\
 	"..\..\inc\esfile.hpp"\
 	"..\..\inc\esgeom.hpp"\
@@ -710,7 +753,6 @@ DEP_CPP_ESHTDOC=\
 	"..\..\inc\esscene.hpp"\
 	"..\..\inc\essystem.hpp"\
 	"..\..\inc\esterran.hpp"\
-	"..\..\inc\estrtop.hpp"\
 	"..\..\inc\estxture.hpp"\
 	"..\..\inc\felix.hpp"\
 	"..\..\inc\felix.ipp"\
@@ -724,6 +766,9 @@ DEP_CPP_ESHTDOC=\
 	"..\..\inc\maxdevs.hpp"\
 	"..\..\inc\maxesrc.hpp"\
 	"..\..\inc\maxevt.hpp"\
+	"..\..\inc\maxjoy.hpp"\
+	"..\..\inc\maxkb.hpp"\
+	"..\..\inc\maxmouse.hpp"\
 	"..\..\inc\maxvmap.hpp"\
 	"..\..\inc\mythos.h"\
 	"..\..\inc\mythos.hpp"\
@@ -761,6 +806,8 @@ DEP_CPP_ESHTDOC=\
 	".\eshtusgs.h"\
 	".\Eshtview.h"\
 	".\stdafx.h"\
+	{$(INCLUDE)}"dinput.h"\
+	{$(INCLUDE)}"gl\gl.h"\
 	
 
 "$(INTDIR)\eshtdoci.obj"	"$(INTDIR)\eshtdoci.sbr" : $(SOURCE)\
@@ -812,6 +859,7 @@ DEP_CPP_ESHTE=\
 	"..\..\inc\escontxt.hpp"\
 	"..\..\inc\esdefs.h"\
 	"..\..\inc\esdraw.hpp"\
+	"..\..\inc\eselemnt.hpp"\
 	"..\..\inc\esexts.hpp"\
 	"..\..\inc\esgeom.hpp"\
 	"..\..\inc\eskeyfrm.hpp"\
@@ -824,7 +872,6 @@ DEP_CPP_ESHTE=\
 	"..\..\inc\esscene.hpp"\
 	"..\..\inc\essystem.hpp"\
 	"..\..\inc\esterran.hpp"\
-	"..\..\inc\estrtop.hpp"\
 	"..\..\inc\estxture.hpp"\
 	"..\..\inc\felix.hpp"\
 	"..\..\inc\felix.ipp"\
@@ -838,6 +885,9 @@ DEP_CPP_ESHTE=\
 	"..\..\inc\maxdevs.hpp"\
 	"..\..\inc\maxesrc.hpp"\
 	"..\..\inc\maxevt.hpp"\
+	"..\..\inc\maxjoy.hpp"\
+	"..\..\inc\maxkb.hpp"\
+	"..\..\inc\maxmouse.hpp"\
 	"..\..\inc\maxvmap.hpp"\
 	"..\..\inc\mythos.h"\
 	"..\..\inc\mythos.hpp"\
@@ -873,6 +923,8 @@ DEP_CPP_ESHTE=\
 	".\Eshtrend.h"\
 	".\Eshtview.h"\
 	".\stdafx.h"\
+	{$(INCLUDE)}"dinput.h"\
+	{$(INCLUDE)}"gl\gl.h"\
 	
 
 "$(INTDIR)\eshtedit.obj"	"$(INTDIR)\eshtedit.sbr" : $(SOURCE) $(DEP_CPP_ESHTE)\
@@ -935,6 +987,7 @@ DEP_CPP_ESHTG=\
 	"..\..\inc\escontxt.hpp"\
 	"..\..\inc\esdefs.h"\
 	"..\..\inc\esdraw.hpp"\
+	"..\..\inc\eselemnt.hpp"\
 	"..\..\inc\esexts.hpp"\
 	"..\..\inc\esgeom.hpp"\
 	"..\..\inc\eskeyfrm.hpp"\
@@ -947,7 +1000,6 @@ DEP_CPP_ESHTG=\
 	"..\..\inc\esscene.hpp"\
 	"..\..\inc\essystem.hpp"\
 	"..\..\inc\esterran.hpp"\
-	"..\..\inc\estrtop.hpp"\
 	"..\..\inc\estxture.hpp"\
 	"..\..\inc\felix.hpp"\
 	"..\..\inc\felix.ipp"\
@@ -961,6 +1013,9 @@ DEP_CPP_ESHTG=\
 	"..\..\inc\maxdevs.hpp"\
 	"..\..\inc\maxesrc.hpp"\
 	"..\..\inc\maxevt.hpp"\
+	"..\..\inc\maxjoy.hpp"\
+	"..\..\inc\maxkb.hpp"\
+	"..\..\inc\maxmouse.hpp"\
 	"..\..\inc\maxvmap.hpp"\
 	"..\..\inc\mythos.h"\
 	"..\..\inc\mythos.hpp"\
@@ -996,6 +1051,8 @@ DEP_CPP_ESHTG=\
 	".\Eshtrend.h"\
 	".\Eshtview.h"\
 	".\stdafx.h"\
+	{$(INCLUDE)}"dinput.h"\
+	{$(INCLUDE)}"gl\gl.h"\
 	
 
 "$(INTDIR)\Eshtgrid.obj"	"$(INTDIR)\Eshtgrid.sbr" : $(SOURCE) $(DEP_CPP_ESHTG)\
@@ -1044,6 +1101,7 @@ DEP_CPP_ESHTL=\
 	"..\..\inc\escontxt.hpp"\
 	"..\..\inc\esdefs.h"\
 	"..\..\inc\esdraw.hpp"\
+	"..\..\inc\eselemnt.hpp"\
 	"..\..\inc\esexts.hpp"\
 	"..\..\inc\esgeom.hpp"\
 	"..\..\inc\eskeyfrm.hpp"\
@@ -1056,7 +1114,6 @@ DEP_CPP_ESHTL=\
 	"..\..\inc\esscene.hpp"\
 	"..\..\inc\essystem.hpp"\
 	"..\..\inc\esterran.hpp"\
-	"..\..\inc\estrtop.hpp"\
 	"..\..\inc\estxture.hpp"\
 	"..\..\inc\felix.hpp"\
 	"..\..\inc\felix.ipp"\
@@ -1070,6 +1127,9 @@ DEP_CPP_ESHTL=\
 	"..\..\inc\maxdevs.hpp"\
 	"..\..\inc\maxesrc.hpp"\
 	"..\..\inc\maxevt.hpp"\
+	"..\..\inc\maxjoy.hpp"\
+	"..\..\inc\maxkb.hpp"\
+	"..\..\inc\maxmouse.hpp"\
 	"..\..\inc\maxvmap.hpp"\
 	"..\..\inc\mythos.h"\
 	"..\..\inc\mythos.hpp"\
@@ -1105,6 +1165,8 @@ DEP_CPP_ESHTL=\
 	".\Eshtrend.h"\
 	".\Eshtview.h"\
 	".\stdafx.h"\
+	{$(INCLUDE)}"dinput.h"\
+	{$(INCLUDE)}"gl\gl.h"\
 	
 
 "$(INTDIR)\Eshtlist.obj"	"$(INTDIR)\Eshtlist.sbr" : $(SOURCE) $(DEP_CPP_ESHTL)\
@@ -1153,6 +1215,7 @@ DEP_CPP_ESHTM=\
 	"..\..\inc\escontxt.hpp"\
 	"..\..\inc\esdefs.h"\
 	"..\..\inc\esdraw.hpp"\
+	"..\..\inc\eselemnt.hpp"\
 	"..\..\inc\esexts.hpp"\
 	"..\..\inc\esgeom.hpp"\
 	"..\..\inc\eskeyfrm.hpp"\
@@ -1165,7 +1228,6 @@ DEP_CPP_ESHTM=\
 	"..\..\inc\esscene.hpp"\
 	"..\..\inc\essystem.hpp"\
 	"..\..\inc\esterran.hpp"\
-	"..\..\inc\estrtop.hpp"\
 	"..\..\inc\estxture.hpp"\
 	"..\..\inc\felix.hpp"\
 	"..\..\inc\felix.ipp"\
@@ -1179,6 +1241,9 @@ DEP_CPP_ESHTM=\
 	"..\..\inc\maxdevs.hpp"\
 	"..\..\inc\maxesrc.hpp"\
 	"..\..\inc\maxevt.hpp"\
+	"..\..\inc\maxjoy.hpp"\
+	"..\..\inc\maxkb.hpp"\
+	"..\..\inc\maxmouse.hpp"\
 	"..\..\inc\maxvmap.hpp"\
 	"..\..\inc\mythos.h"\
 	"..\..\inc\mythos.hpp"\
@@ -1216,6 +1281,8 @@ DEP_CPP_ESHTM=\
 	".\Eshtrend.h"\
 	".\Eshtview.h"\
 	".\stdafx.h"\
+	{$(INCLUDE)}"dinput.h"\
+	{$(INCLUDE)}"gl\gl.h"\
 	
 
 "$(INTDIR)\eshtmfrm.obj"	"$(INTDIR)\eshtmfrm.sbr" : $(SOURCE) $(DEP_CPP_ESHTM)\
@@ -1266,6 +1333,7 @@ DEP_CPP_ESHTR=\
 	"..\..\inc\escontxt.hpp"\
 	"..\..\inc\esdefs.h"\
 	"..\..\inc\esdraw.hpp"\
+	"..\..\inc\eselemnt.hpp"\
 	"..\..\inc\esexts.hpp"\
 	"..\..\inc\esgeom.hpp"\
 	"..\..\inc\eskeyfrm.hpp"\
@@ -1278,7 +1346,6 @@ DEP_CPP_ESHTR=\
 	"..\..\inc\esscene.hpp"\
 	"..\..\inc\essystem.hpp"\
 	"..\..\inc\esterran.hpp"\
-	"..\..\inc\estrtop.hpp"\
 	"..\..\inc\estxture.hpp"\
 	"..\..\inc\felix.hpp"\
 	"..\..\inc\felix.ipp"\
@@ -1292,6 +1359,9 @@ DEP_CPP_ESHTR=\
 	"..\..\inc\maxdevs.hpp"\
 	"..\..\inc\maxesrc.hpp"\
 	"..\..\inc\maxevt.hpp"\
+	"..\..\inc\maxjoy.hpp"\
+	"..\..\inc\maxkb.hpp"\
+	"..\..\inc\maxmouse.hpp"\
 	"..\..\inc\maxvmap.hpp"\
 	"..\..\inc\mythos.h"\
 	"..\..\inc\mythos.hpp"\
@@ -1328,6 +1398,8 @@ DEP_CPP_ESHTR=\
 	".\Eshtrend.h"\
 	".\Eshtview.h"\
 	".\stdafx.h"\
+	{$(INCLUDE)}"dinput.h"\
+	{$(INCLUDE)}"gl\gl.h"\
 	
 
 "$(INTDIR)\Eshtrend.obj"	"$(INTDIR)\Eshtrend.sbr" : $(SOURCE) $(DEP_CPP_ESHTR)\
@@ -1377,6 +1449,7 @@ DEP_CPP_ESHTU=\
 	"..\..\inc\escontxt.hpp"\
 	"..\..\inc\esdefs.h"\
 	"..\..\inc\esdraw.hpp"\
+	"..\..\inc\eselemnt.hpp"\
 	"..\..\inc\esexts.hpp"\
 	"..\..\inc\esgeom.hpp"\
 	"..\..\inc\eskeyfrm.hpp"\
@@ -1389,7 +1462,6 @@ DEP_CPP_ESHTU=\
 	"..\..\inc\esscene.hpp"\
 	"..\..\inc\essystem.hpp"\
 	"..\..\inc\esterran.hpp"\
-	"..\..\inc\estrtop.hpp"\
 	"..\..\inc\estxture.hpp"\
 	"..\..\inc\felix.hpp"\
 	"..\..\inc\felix.ipp"\
@@ -1403,6 +1475,9 @@ DEP_CPP_ESHTU=\
 	"..\..\inc\maxdevs.hpp"\
 	"..\..\inc\maxesrc.hpp"\
 	"..\..\inc\maxevt.hpp"\
+	"..\..\inc\maxjoy.hpp"\
+	"..\..\inc\maxkb.hpp"\
+	"..\..\inc\maxmouse.hpp"\
 	"..\..\inc\maxvmap.hpp"\
 	"..\..\inc\mythos.h"\
 	"..\..\inc\mythos.hpp"\
@@ -1434,6 +1509,8 @@ DEP_CPP_ESHTU=\
 	".\Eshtedit.h"\
 	".\eshtusgs.h"\
 	".\stdafx.h"\
+	{$(INCLUDE)}"dinput.h"\
+	{$(INCLUDE)}"gl\gl.h"\
 	
 
 "$(INTDIR)\Eshtusgs.obj"	"$(INTDIR)\Eshtusgs.sbr" : $(SOURCE) $(DEP_CPP_ESHTU)\
@@ -1478,6 +1555,7 @@ DEP_CPP_ESHTV=\
 	"..\..\inc\escontxt.hpp"\
 	"..\..\inc\esdefs.h"\
 	"..\..\inc\esdraw.hpp"\
+	"..\..\inc\eselemnt.hpp"\
 	"..\..\inc\esexts.hpp"\
 	"..\..\inc\esgeom.hpp"\
 	"..\..\inc\eskeyfrm.hpp"\
@@ -1490,7 +1568,6 @@ DEP_CPP_ESHTV=\
 	"..\..\inc\esscene.hpp"\
 	"..\..\inc\essystem.hpp"\
 	"..\..\inc\esterran.hpp"\
-	"..\..\inc\estrtop.hpp"\
 	"..\..\inc\estxture.hpp"\
 	"..\..\inc\felix.hpp"\
 	"..\..\inc\felix.ipp"\
@@ -1504,6 +1581,9 @@ DEP_CPP_ESHTV=\
 	"..\..\inc\maxdevs.hpp"\
 	"..\..\inc\maxesrc.hpp"\
 	"..\..\inc\maxevt.hpp"\
+	"..\..\inc\maxjoy.hpp"\
+	"..\..\inc\maxkb.hpp"\
+	"..\..\inc\maxmouse.hpp"\
 	"..\..\inc\maxvmap.hpp"\
 	"..\..\inc\mythos.h"\
 	"..\..\inc\mythos.hpp"\
@@ -1540,6 +1620,8 @@ DEP_CPP_ESHTV=\
 	".\Eshtrend.h"\
 	".\Eshtview.h"\
 	".\stdafx.h"\
+	{$(INCLUDE)}"dinput.h"\
+	{$(INCLUDE)}"gl\gl.h"\
 	
 
 "$(INTDIR)\eshtview.obj"	"$(INTDIR)\eshtview.sbr" : $(SOURCE) $(DEP_CPP_ESHTV)\
@@ -1589,6 +1671,7 @@ DEP_CPP_STDAF=\
 	"..\..\inc\escontxt.hpp"\
 	"..\..\inc\esdefs.h"\
 	"..\..\inc\esdraw.hpp"\
+	"..\..\inc\eselemnt.hpp"\
 	"..\..\inc\esexts.hpp"\
 	"..\..\inc\esgeom.hpp"\
 	"..\..\inc\eskeyfrm.hpp"\
@@ -1601,7 +1684,6 @@ DEP_CPP_STDAF=\
 	"..\..\inc\esscene.hpp"\
 	"..\..\inc\essystem.hpp"\
 	"..\..\inc\esterran.hpp"\
-	"..\..\inc\estrtop.hpp"\
 	"..\..\inc\estxture.hpp"\
 	"..\..\inc\felix.hpp"\
 	"..\..\inc\felix.ipp"\
@@ -1615,6 +1697,9 @@ DEP_CPP_STDAF=\
 	"..\..\inc\maxdevs.hpp"\
 	"..\..\inc\maxesrc.hpp"\
 	"..\..\inc\maxevt.hpp"\
+	"..\..\inc\maxjoy.hpp"\
+	"..\..\inc\maxkb.hpp"\
+	"..\..\inc\maxmouse.hpp"\
 	"..\..\inc\maxvmap.hpp"\
 	"..\..\inc\mythos.h"\
 	"..\..\inc\mythos.hpp"\
@@ -1643,6 +1728,8 @@ DEP_CPP_STDAF=\
 	"..\..\inc\xfini.hpp"\
 	"..\..\inc\xfio.h"\
 	".\stdafx.h"\
+	{$(INCLUDE)}"dinput.h"\
+	{$(INCLUDE)}"gl\gl.h"\
 	
 CPP_SWITCHES=/nologo /G5 /MD /W3 /Gm /GX /Zi /Od /I "..\..\inc" /D "_DEBUG" /D\
  "WIN32" /D "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /Fr"$(INTDIR)\\"\
@@ -1675,6 +1762,7 @@ DEP_CPP_STDAF=\
 	"..\..\inc\escontxt.hpp"\
 	"..\..\inc\esdefs.h"\
 	"..\..\inc\esdraw.hpp"\
+	"..\..\inc\eselemnt.hpp"\
 	"..\..\inc\esexts.hpp"\
 	"..\..\inc\esgeom.hpp"\
 	"..\..\inc\eskeyfrm.hpp"\
@@ -1687,7 +1775,6 @@ DEP_CPP_STDAF=\
 	"..\..\inc\esscene.hpp"\
 	"..\..\inc\essystem.hpp"\
 	"..\..\inc\esterran.hpp"\
-	"..\..\inc\estrtop.hpp"\
 	"..\..\inc\estxture.hpp"\
 	"..\..\inc\felix.hpp"\
 	"..\..\inc\felix.ipp"\
@@ -1701,6 +1788,9 @@ DEP_CPP_STDAF=\
 	"..\..\inc\maxdevs.hpp"\
 	"..\..\inc\maxesrc.hpp"\
 	"..\..\inc\maxevt.hpp"\
+	"..\..\inc\maxjoy.hpp"\
+	"..\..\inc\maxkb.hpp"\
+	"..\..\inc\maxmouse.hpp"\
 	"..\..\inc\maxvmap.hpp"\
 	"..\..\inc\mythos.h"\
 	"..\..\inc\mythos.hpp"\
@@ -1729,6 +1819,7 @@ DEP_CPP_STDAF=\
 	"..\..\inc\xfini.hpp"\
 	"..\..\inc\xfio.h"\
 	".\stdafx.h"\
+	{$(INCLUDE)}"dinput.h"\
 	
 CPP_SWITCHES=/nologo /G5 /MD /W3 /GX /O2 /I "..\..\inc" /D "NDEBUG" /D "WIN32"\
  /D "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /Fp"$(INTDIR)\eshtedit.pch" /Yc"stdafx.h"\

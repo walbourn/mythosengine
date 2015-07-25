@@ -25,9 +25,9 @@
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
-// vngvp8.cpp
+// vngd3d.cpp
 //
-//     The C pluss pluss 8bpp view port classes.
+//     The C pluss pluss Direct3D view port classes.
 //
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ Revision History ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
@@ -44,20 +44,8 @@
 #include "portable.h"
 #include "ivory.h"
 
-// This file always needs _D3D defined.
-
-#ifndef _D3D
-#define _D3D_TEMP
-#define _D3D
-#endif
-
 #include "vangogh.hpp"
 #include "vngd3d.hpp"
-
-#ifdef  _D3D_TEMP
-#undef  _D3D
-#undef  _D3D_TEMP
-#endif
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
@@ -90,6 +78,8 @@ extern "C" void vngo_wordcopy(void *dest,void *src,dword count);
 //
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 
+extern VngoSystem   VgSystem;
+
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
 //                                 Code
@@ -104,22 +94,21 @@ extern "C" void vngo_wordcopy(void *dest,void *src,dword count);
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
 
-VngoVportD3D::VngoVportD3D (long width,long height,long org_x,long org_y,VngoPal *my_pal,dword flags,VngoScreenManager *_screen)
+VngoVportD3D::VngoVportD3D (VngoRect &dim,VngoPal *my_pal,dword flags,VngoScreenManager *_screen)
 {
-    init_status = init (width,height,org_x,org_y,my_pal,flags,_screen);
+    init_status = init (dim,my_pal,flags,_screen);
 }
 
-VNGError VngoVportD3D::init (long _left,long _top,long width,long height,VngoPal *my_pal,dword flags,VngoScreenManager *_screen)
+VNGError VngoVportD3D::init (VngoRect &dim,VngoPal *my_pal,dword flags,VngoScreenManager *_screen)
 {
     screen = (VngoDirect3D*)_screen;
 
     vflags = flags;
-    vflags |= VNGO_PAL_MAPPED_DEV;
     vbuff.pal = my_pal;
-    vbuff.width = width;
-    vbuff.height = height;
-    top = _top;
-    left = _left;
+    vbuff.width = dim.dx;
+    vbuff.height = dim.dy;
+    top = dim.y;
+    left = dim.x;
 
     int was_locked = plock();
     if (was_locked == -1)
@@ -211,7 +200,6 @@ VNGError VngoVportD3D::init (long _left,long _top,long width,long height,VngoPal
         }
     }
 
-
     return (VNGO_NO_ERROR);
 }
 
@@ -237,24 +225,60 @@ VngoVportD3D::~VngoVportD3D()
 
 void VngoVportD3D::zbuffer_on()
 {
-    if (vflags & VNGO_ZBUFFER_DEV)
-    {
-        screen->d3dDevice->SetRenderState(D3DRENDERSTATE_ZENABLE,TRUE);
-        screen->d3dDevice->SetRenderState(D3DRENDERSTATE_ZWRITEENABLE,TRUE);
-        screen->d3dDevice->SetRenderState(D3DRENDERSTATE_ZFUNC,D3DCMP_LESS);
-    }
     VngoVport::zbuffer_on();
+
+    make_current();
 }
 
 void VngoVportD3D::zbuffer_off()
 {
-    screen->d3dDevice->SetRenderState(D3DRENDERSTATE_ZENABLE,FALSE);
-    screen->d3dDevice->SetRenderState(D3DRENDERSTATE_ZWRITEENABLE,FALSE);
     VngoVport::zbuffer_off();
+
+    make_current();
 }
+
+void VngoVportD3D::make_current()
+{
+    if (VgSystem.cur_vport != this)
+    {
+        VgSystem.cur_vport = this;
+        if ((vflags & VNGO_ZBUFFER_DEV)
+            && (vflags & VNGO_ZBUFFER_ACTIVE))
+        {
+            screen->d3dDevice->SetRenderState(D3DRENDERSTATE_ZENABLE,TRUE);
+            screen->d3dDevice->SetRenderState(D3DRENDERSTATE_ZWRITEENABLE,TRUE);
+            screen->d3dDevice->SetRenderState(D3DRENDERSTATE_ZFUNC,D3DCMP_LESSEQUAL);
+        }
+        else
+        {
+            screen->d3dDevice->SetRenderState(D3DRENDERSTATE_ZENABLE,FALSE);
+            screen->d3dDevice->SetRenderState(D3DRENDERSTATE_ZWRITEENABLE,FALSE);
+        }
+        if (((vflags & VNGO_TRUE_ALPHA)
+            && !(screen->sins & VNGO_NO_TRUE_ALPHA))
+            || (screen->sins & VNGO_NO_STIPPLE_ALPHA))
+        {
+            // setup true alpha here!
+        }
+
+        if (vflags & VNGO_TEXTURE_FILTER)
+        {
+            screen->d3dDevice->SetRenderState(D3DRENDERSTATE_TEXTUREMAG, D3DFILTER_LINEAR);
+            screen->d3dDevice->SetRenderState(D3DRENDERSTATE_TEXTUREMIN, D3DFILTER_LINEAR);
+        }
+        else
+        {
+            screen->d3dDevice->SetRenderState(D3DRENDERSTATE_TEXTUREMAG, D3DFILTER_NEAREST);
+            screen->d3dDevice->SetRenderState(D3DRENDERSTATE_TEXTUREMIN, D3DFILTER_NEAREST);
+        }
+    }
+}
+
 
 void VngoVportD3D::reset(dword c,dword farz)
 {
+    make_current();
+
     HRESULT         ddrval;
     DDBLTFX         ddbltfx;
     RECT            destRect;
@@ -274,23 +298,28 @@ void VngoVportD3D::reset(dword c,dword farz)
     destRect.right  = left + vbuff.width;
     destRect.bottom = top + vbuff.height;
 
+    int t = punlock();
+
     int try1=0;
-    do
+    if (!(vflags & VNGO_NOCLEAR_VBUFFER))
     {
-        ddrval = screen->BackBuffer->Blt( &destRect,
-                                          NULL, NULL,
-                                          DDBLT_COLORFILL | DDBLT_WAIT,
-                                          &ddbltfx );
+        do
+        {
+            ddrval = screen->SurfaceManager->ddsurf->Blt( &destRect,
+                                              NULL, NULL,
+                                              DDBLT_COLORFILL | DDBLT_WAIT,
+                                              &ddbltfx );
 
-        if( ddrval == DDERR_SURFACELOST ) {
-            ddrval = screen->BackBuffer->Restore();
-        }
-        try1++;
+            if( ddrval == DDERR_SURFACELOST ) {
+                ddrval = screen->SurfaceManager->ddsurf->Restore();
+            }
+            try1++;
 
-    } while((ddrval != DD_OK) && (try1 < 150));
+        } while((ddrval != DD_OK) && (try1 < 150));
+    }
 
     ddbltfx.dwFillColor = 0;
-    ddbltfx.dwFillDepth = 65535;
+    ddbltfx.dwFillDepth = farz >> 16;
     try1 = 0;
     if (vflags & VNGO_ZBUFFER_ACTIVE)
     {
@@ -299,19 +328,21 @@ void VngoVportD3D::reset(dword c,dword farz)
             // Use direct draw to clear the ZBuffer.
             do
             {
-                ddrval = screen->ZBuffer->Blt( NULL,
+                ddrval = screen->SurfaceManager->zddsurf->Blt( NULL,
                                                NULL, NULL,
                                                DDBLT_DEPTHFILL | DDBLT_WAIT,
                                                &ddbltfx );
 
                 if( ddrval == DDERR_SURFACELOST )
                 {
-                    ddrval = screen->ZBuffer->Restore();
+                    ddrval = screen->SurfaceManager->zddsurf->Restore();
                 }
                 try1++;
             } while( ddrval != DD_OK && try1 < 150 );
         }
     }
+    if (t)
+        plock();
 }
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
@@ -324,7 +355,186 @@ void VngoVportD3D::reset(dword c,dword farz)
 
 VNGError VngoVportD3D::image_trans (VngoRect *dest_rect,VngoTexture *img,dword flags)
 {
-    assert(lock_status);
+#if 0
+
+    long        w,h;
+    VngoRect    dr;
+
+    if (flags & VNGO_STRETCH)
+    {
+        return (VNGO_NOT_SUPPORTED);
+    }
+
+    if ((img->flags & VNGO_TEXTURE_15BIT && vbuff.pal->flags & VNGO_16BIT)
+        || (img->flags & VNGO_TEXTURE_16BIT && vbuff.pal->flags & VNGO_15BIT))
+    {
+        return (VNGO_UNSUPPORTED_TEXTURE);
+    }
+
+    w = MIN(img->width,dest_rect->dx);
+    h = MIN(img->height,dest_rect->dy);
+
+    dr.x = dest_rect->x;
+    dr.y = dest_rect->y;
+    dr.dx = w;
+    dr.dy = h;
+
+    if (((dest_rect->x + w) <= vbuff.width) &&
+        ((dest_rect->y + h) <= vbuff.height) &&
+        (dest_rect->x >= 0) && (dest_rect->y >= 0))
+    {
+        if (img->flags & VNGO_TEXTURE_COMPRESSED && !(img->flags & VNGO_TEXTURE_8BIT))
+        {
+            int was_locked = plock();
+            if (was_locked != -1)
+            {
+                for (int y=0;y < img->height;y++)
+                {
+                    word *ptr = (word*)(ulong(img->tex) + (((VngoCTexture*)img)->ytable[y]));
+//                    &(img->tex[((VngoCTexture*)img)->ytable[y]]);
+                    long cnt = *ptr;
+                    ptr++;
+                    word *destptr = (word*)(vbuff.scrn_ptr + vbuff.ytable[dest_rect->y + y]) + dest_rect->x;
+                    long dcount = 0;
+                    while (dcount < img->width)
+                    {
+                        vngo_wordcopy(destptr,ptr,cnt);
+//                        memcpy(destptr,ptr,cnt*sizeof(word));
+                        dcount += cnt;
+                        ptr += cnt;
+                        destptr += cnt;
+                        cnt = *ptr;
+                        ptr++;
+                        destptr += cnt;
+                        dcount += cnt;
+                        cnt = *ptr;
+                        ptr++;
+                    }
+                }
+                if (!was_locked)
+                    punlock();
+                return VNGO_NO_ERROR;
+            }
+            else
+                return VNGO_INTERNAL_ERROR;
+        }
+    }
+#if 0       // For now we will clip everything.
+    else
+#endif
+    {
+        if (img->flags & VNGO_TEXTURE_COMPRESSED)
+            return VNGO_UNSUPPORTED_TEXTURE;
+
+        if ((dest_rect->x < vbuff.width) && (dest_rect->y < vbuff.height) &&
+            (dest_rect->x + w >= 0) && (dest_rect->y + h >= 0))
+        {
+            word    *lptr,*tptr;
+            dword   t;
+            dword   tx=0,ty=0;
+            long    xcount,ycount;
+
+            if (dest_rect->y >= 0)
+            {
+                t = vbuff.ytable[dest_rect->y];
+                if ((dest_rect->y + h) < vbuff.height)
+                    ycount = h;
+                else
+                    ycount = (vbuff.height) - dest_rect->y;
+//                    ycount = (vbuff.height-1) - dest_rect->y;
+            }
+            else        // starting Y is negative in this case.
+            {
+                ty = -dest_rect->y;
+                t = vbuff.ytable[0];
+                if ((dest_rect->y + h) > vbuff.height)
+                {
+                    ycount = vbuff.height;
+//                    ycount = vbuff.height-1;
+                }
+                else
+                {
+                    ycount = h + dest_rect->y;
+                }
+
+            }
+            t += (dword)(vbuff.scrn_ptr);
+
+            // At this point t = the pointer to the begining of the first
+            // scan line to be drawn.
+
+            if (dest_rect->x >= 0)
+            {
+                t += (dest_rect->x << 1);
+                if ((dest_rect->x + w) < vbuff.width)
+                    xcount = w;
+                else
+                    xcount = (vbuff.width) - dest_rect->x;
+//                    xcount = (vbuff.width-1) - dest_rect->x;
+            }
+            else        // starting X is negative in this case.
+            {
+                tx = -dest_rect->x;
+                if ((dest_rect->x + w) > vbuff.width)
+                {
+                    xcount = vbuff.width;
+//                    xcount = vbuff.width-1;
+                }
+                else
+                {
+                    xcount = w + dest_rect->x;
+                }
+            }
+            int was_locked = plock();
+            if (was_locked != -1)
+            {
+                if (img->flags & VNGO_TEXTURE_16BIT)
+                {
+                    lptr = (word *)t;
+                    tptr = (word *)((ty * (img->width << 1)) + (tx << 1) + (dword)img->tex);
+                    for (int i=0;i < ycount;i++)
+                    {
+                        vngo_iline16(lptr,tptr,xcount,flags);
+                        lptr += (vbuff.pitch >> 1);
+                        tptr += img->width;
+                    }
+                }
+                else if (img->flags & VNGO_TEXTURE_15BIT)
+                {
+                    lptr = (word *)t;
+                    tptr = (word *)((ty * (img->width << 1)) + (tx << 1) + (dword)img->tex);
+                    for (int i=0;i < ycount;i++)
+                    {
+                        vngo_iline15(lptr,tptr,xcount,flags);
+                        lptr += (vbuff.pitch >> 1);
+                        tptr += img->width;
+                    }
+                }
+                else if (img->flags & VNGO_TEXTURE_8BIT)
+                {
+                    lptr = (word *)t;
+                    byte *btptr = (byte *)((ty * img->width) + tx + (dword)img->tex);
+                    VngoShadePal16   *tp = (VngoShadePal16 *)vbuff.pal->shd_pal;
+                    VngoColorShade16 *tc = &(*tp)[0];
+                    word             *stable = &tc->shl[vbuff.pal->shd_pal->mid_point >> 3];
+                    for (int i=0;i < ycount;i++)
+                    {
+                        vngo_iline8to16(lptr,btptr,xcount,stable,flags);
+                        lptr  += (vbuff.pitch >> 1);
+                        btptr += img->width;
+                    }
+                }
+                if (!was_locked)
+                    punlock();
+                return VNGO_NO_ERROR;
+            }
+            else
+                return VNGO_INTERNAL_ERROR;
+        }
+    }
+    return VNGO_NO_ERROR;
+#else
+//    assert(lock_status);
 
     long        w,h;
     VngoRect    dr;
@@ -361,7 +571,6 @@ VNGError VngoVportD3D::image_trans (VngoRect *dest_rect,VngoTexture *img,dword f
                 for (int y=0;y < img->height;y++)
                 {
                     word *ptr = (word*)(ulong(img->tex) + (((VngoCTexture*)img)->ytable[y]));
-    //                &(img->tex[((VngoCTexture*)img)->ytable[y]]);
                     long cnt = *ptr;
                     ptr++;
                     word *destptr = (word*)(vbuff.scrn_ptr + vbuff.ytable[dest_rect->y + y]) + dest_rect->x;
@@ -369,7 +578,6 @@ VNGError VngoVportD3D::image_trans (VngoRect *dest_rect,VngoTexture *img,dword f
                     while (dcount < img->width)
                     {
                         vngo_wordcopy(destptr,ptr,cnt);
-    //                    memcpy(destptr,ptr,cnt*sizeof(word));
                         dcount += cnt;
                         ptr += cnt;
                         destptr += cnt;
@@ -412,7 +620,6 @@ VNGError VngoVportD3D::image_trans (VngoRect *dest_rect,VngoTexture *img,dword f
                         ycount = h;
                     else
                         ycount = (vbuff.height) - dest_rect->y;
-//                        ycount = (vbuff.height-1) - dest_rect->y;
                 }
                 else        // starting Y is negative in this case.
                 {
@@ -421,7 +628,6 @@ VNGError VngoVportD3D::image_trans (VngoRect *dest_rect,VngoTexture *img,dword f
                     if ((dest_rect->y + h) > vbuff.height)
                     {
                         ycount = vbuff.height;
-//                        ycount = vbuff.height-1;
                     }
                     else
                     {
@@ -441,7 +647,6 @@ VNGError VngoVportD3D::image_trans (VngoRect *dest_rect,VngoTexture *img,dword f
                         xcount = w;
                     else
                         xcount = (vbuff.width) - dest_rect->x;
-//                        xcount = (vbuff.width-1) - dest_rect->x;
                 }
                 else        // starting X is negative in this case.
                 {
@@ -449,7 +654,6 @@ VNGError VngoVportD3D::image_trans (VngoRect *dest_rect,VngoTexture *img,dword f
                     if ((dest_rect->x + w) > vbuff.width)
                     {
                         xcount = vbuff.width;
-//                        xcount = vbuff.width-1;
                     }
                     else
                     {
@@ -484,7 +688,7 @@ VNGError VngoVportD3D::image_trans (VngoRect *dest_rect,VngoTexture *img,dword f
                     byte *btptr = (byte *)((ty * img->width) + tx + (dword)img->tex);
                     VngoShadePal16   *tp = (VngoShadePal16 *)vbuff.pal->shd_pal;
                     VngoColorShade16 *tc = &(*tp)[0];
-                    word             *stable = &tc->shl[(vbuff.pal->shd_pal->mid_point-1) >> 3];
+                    word             *stable = &tc->shl[vbuff.pal->shd_pal->mid_point >> 3];
                     for (int i=0;i < ycount;i++)
                     {
                         vngo_iline8to16(lptr,btptr,xcount,stable,flags);
@@ -500,6 +704,7 @@ VNGError VngoVportD3D::image_trans (VngoRect *dest_rect,VngoTexture *img,dword f
     }
 
     return VNGO_NO_ERROR;
+#endif
 }
 
 
@@ -607,8 +812,6 @@ VNGError VngoVportD3D::zblit_mono (VngoRect *dest_rect,VngoZMap *img,dword fgcol
 
 VNGError VngoVportD3D::image_trans_mono (VngoRect *dest_rect,VngoTexture *img,dword _fgcol,dword _bgcol)
 {
-    assert(lock_status);
-
     dword   fgcol,bgcol;
     long    w,h,x,y;
 
@@ -618,14 +821,32 @@ VNGError VngoVportD3D::image_trans_mono (VngoRect *dest_rect,VngoTexture *img,dw
     }
     else
     {
-        VngoColor24bit tclr = vbuff.pal->get_RGB(_fgcol);
-        if (vbuff.pal->flags & VNGO_15BIT)
+        if (_fgcol & (VNGO_COLOR_24BIT | VNGO_COLOR_15BIT | VNGO_COLOR_16BIT))
         {
-            fgcol = tclr.compress();
+            if ((_fgcol & VNGO_COLOR_15BIT)
+                && (vbuff.pal->flags & VNGO_15BIT))
+            {
+                fgcol = _fgcol;
+            }
+            else if ((_fgcol & VNGO_COLOR_16BIT)
+                     && (vbuff.pal->flags & VNGO_16BIT))
+            {
+                fgcol = _fgcol;
+            }
+            else
+                return VNGO_INTERNAL_ERROR;
         }
         else
         {
-            fgcol = tclr.compress16();
+            VngoColor24bit tclr = vbuff.pal->get_RGB(_fgcol);
+            if (vbuff.pal->flags & VNGO_15BIT)
+            {
+                fgcol = tclr.compress();
+            }
+            else
+            {
+                fgcol = tclr.compress16();
+            }
         }
     }
 
@@ -635,14 +856,32 @@ VNGError VngoVportD3D::image_trans_mono (VngoRect *dest_rect,VngoTexture *img,dw
     }
     else
     {
-        VngoColor24bit tclr = vbuff.pal->get_RGB(_bgcol);
-        if (vbuff.pal->flags & VNGO_15BIT)
+        if (_bgcol & (VNGO_COLOR_24BIT | VNGO_COLOR_15BIT | VNGO_COLOR_16BIT))
         {
-            bgcol = tclr.compress();
+            if ((_bgcol & VNGO_COLOR_15BIT)
+                && (vbuff.pal->flags & VNGO_15BIT))
+            {
+                bgcol = _bgcol;
+            }
+            else if ((_bgcol & VNGO_COLOR_16BIT)
+                     && (vbuff.pal->flags & VNGO_16BIT))
+            {
+                bgcol = _bgcol;
+            }
+            else
+                return VNGO_INTERNAL_ERROR;
         }
         else
         {
-            bgcol = tclr.compress16();
+            VngoColor24bit tclr = vbuff.pal->get_RGB(_bgcol);
+            if (vbuff.pal->flags & VNGO_15BIT)
+            {
+                bgcol = tclr.compress();
+            }
+            else
+            {
+                bgcol = tclr.compress16();
+            }
         }
     }
 
@@ -707,11 +946,11 @@ VNGError VngoVportD3D::image_trans_mono (VngoRect *dest_rect,VngoTexture *img,dw
             // Clip to positive conditions.
             if ((y + h) >= vbuff.height)
             {
-                h = vbuff.height - y - 1;
+                h = vbuff.height - y;
             }
             if ((x + w) >= vbuff.width)
             {
-                w = vbuff.width - x - 1;
+                w = vbuff.width - x;
             }
 
 
@@ -725,8 +964,9 @@ VNGError VngoVportD3D::image_trans_mono (VngoRect *dest_rect,VngoTexture *img,dw
             }
 
             ptr = (byte*)img->tex;
-            ptr += (yskip * pitch);
+            ptr += (yskip * pitch + ((xskip - (xskip & 0x7)) >> 3));
             t += (dword)vbuff.scrn_ptr + (x << 1);
+            xskip &= 0x7;
             while (h > 0)
             {
                 vngo_ilinemono16((word *)t,ptr,w,xskip,fgcol,bgcol);
@@ -762,116 +1002,235 @@ VNGError VngoVportD3D::clip_frect(VngoRect *rect,VngoColor24bit *rgb_val, VngoRe
     if (trect.clip_to(vprect) == VNGO_FULLY_CLIPPED)
         return VNGO_NO_ERROR;
 
-    return frect(&trect,rgb_val);
-}
-
-
-VNGError VngoVportD3D::clip_frect(VngoRect *rect,dword color, VngoRect *clip)
-{
-    VngoRect trect = *rect;
-    VngoRect vprect(0,0,vbuff.width,vbuff.height);
-
-    if (clip)
-    {
-        if (trect.clip_to(*clip) == VNGO_FULLY_CLIPPED)
-            return VNGO_NO_ERROR;
-    }
-
-    if (trect.clip_to(vprect) == VNGO_FULLY_CLIPPED)
-        return VNGO_NO_ERROR;
-
-    return frect(&trect,color);
-}
-
-
-VNGError VngoVportD3D::frect(VngoRect *rect,VngoColor24bit *rgb_val)
-{
-    assert (rect->x >= 0);
-    assert ((rect->x + rect->dx) <= vbuff.width);
-    assert (rect->y >= 0);
-    assert ((rect->y + rect->dy) <= vbuff.height);
+    int t;
+    t = punlock();
 
     RECT    wtrect;
     DDBLTFX ddbltfx;
-    wtrect.left = rect->x + left;
-    wtrect.right = wtrect.left + vbuff.width;
-    wtrect.top = rect->y + top;
-    wtrect.bottom = wtrect.top + vbuff.height;
+    wtrect.left = trect.x + left;
+    wtrect.right = wtrect.left + trect.dx;
+    wtrect.top = trect.y + top;
+    wtrect.bottom = wtrect.top + trect.dy;
 
     ddbltfx.dwSize = sizeof(ddbltfx);
-
     if (vbuff.pal->flags & VNGO_15BIT)
         ddbltfx.dwFillColor = rgb_val->compress();
     else
         ddbltfx.dwFillColor = rgb_val->compress16();
 
-    HRESULT ddrval;
-    int try1=0;
-    do
+    screen->SurfaceManager->ddsurf->Blt( &wtrect, NULL, NULL, DDBLT_COLORFILL | DDBLT_WAIT, &ddbltfx);
+
+    if (t)
+        plock();
+    return VNGO_NO_ERROR;
+}
+
+
+VNGError VngoVportD3D::clip_frect(VngoRect *rect,dword color, VngoRect *clip)
+{
+    VngoColor24bit tclr;
+    if (color & VNGO_COLOR_15BIT)
     {
-        ddrval = screen->BackBuffer->Blt( &wtrect,
-                                          NULL, NULL,
-                                          DDBLT_COLORFILL | DDBLT_WAIT,
-                                          &ddbltfx );
+        tclr.r = byte((color & 0x7c00) >> 7);
+        tclr.g = byte((color & 0x3e0) >> 2);
+        tclr.b = byte((color & 0x1f) << 3);
+    }
+    else if (color & VNGO_COLOR_16BIT)
+    {
+        tclr.r = byte((color & 0xf800) >> 8);
+        tclr.g = byte((color & 0x7e0) >> 3);
+        tclr.b = byte((color & 0x1f) << 3);
+    }
+    else
+    {
+        tclr = vbuff.pal->get_RGB(color);
+    }
+    return clip_frect(rect,&tclr,clip);
+}
 
-        if( ddrval == DDERR_SURFACELOST )
-        {
-            ddrval = screen->BackBuffer->Restore();
-        }
-        try1++;
 
-    } while((ddrval != DD_OK) && (try1 < 150));
+VNGError VngoVportD3D::frect(VngoRect *rect,VngoColor24bit *rgb_val)
+{
+    VngoRect trect = *rect;
+    VngoRect vprect(0,0,vbuff.width,vbuff.height);
 
+    int t;
+    t = punlock();
+
+    RECT    wtrect;
+    DDBLTFX ddbltfx;
+    wtrect.left = trect.x + left;
+    wtrect.right = wtrect.left + trect.dx;
+    wtrect.top = trect.y + top;
+    wtrect.bottom = wtrect.top + trect.dy;
+
+    ddbltfx.dwSize = sizeof(ddbltfx);
+    if (vbuff.pal->flags & VNGO_15BIT)
+        ddbltfx.dwFillColor = rgb_val->compress();
+    else
+        ddbltfx.dwFillColor = rgb_val->compress16();
+
+    screen->SurfaceManager->ddsurf->Blt( &wtrect, NULL, NULL, DDBLT_COLORFILL | DDBLT_WAIT, &ddbltfx);
+
+    if (t)
+        plock();
     return VNGO_NO_ERROR;
 }
 
 
 VNGError VngoVportD3D::frect(VngoRect *rect,dword color)
 {
-    assert (rect->x >= 0);
-    assert ((rect->x + rect->dx) <= vbuff.width);
-    assert (rect->y >= 0);
-    assert ((rect->y + rect->dy) <= vbuff.height);
-
-    RECT    wtrect;
-    DDBLTFX ddbltfx;
-    wtrect.left = rect->x + left;
-    wtrect.right = wtrect.left + vbuff.width;
-    wtrect.top = rect->y + top;
-    wtrect.bottom = wtrect.top + vbuff.height;
-
-    ddbltfx.dwSize = sizeof(ddbltfx);
-    VngoColor24bit rgb = vbuff.pal->get_RGB(color);
-
-    if (vbuff.pal->flags & VNGO_15BIT)
-        ddbltfx.dwFillColor = rgb.compress();
-    else
-        ddbltfx.dwFillColor = rgb.compress16();
-
-    HRESULT ddrval;
-    int try1=0;
-
-    do
+    VngoColor24bit tclr;
+    if (color & VNGO_COLOR_15BIT)
     {
-        ddrval = screen->BackBuffer->Blt( &wtrect,
-                                          NULL, NULL,
-                                          DDBLT_COLORFILL | DDBLT_WAIT,
-                                          &ddbltfx );
+        tclr.r = byte((color & 0x7c00) >> 7);
+        tclr.g = byte((color & 0x3e0) >> 2);
+        tclr.b = byte((color & 0x1f) << 3);
+    }
+    else if (color & VNGO_COLOR_16BIT)
+    {
+        tclr.r = byte((color & 0xf800) >> 8);
+        tclr.g = byte((color & 0x7e0) >> 3);
+        tclr.b = byte((color & 0x1f) << 3);
+    }
+    else
+    {
+        tclr = vbuff.pal->get_RGB(color);
+    }
+    return frect(rect,&tclr);
+}
 
-        if( ddrval == DDERR_SURFACELOST )
+
+VNGError VngoVportD3D::pixel (VngoPoint *pt, VngoColor24bit *rgb_val)
+{
+    make_current();
+
+    VngoColor24bit tclr;
+
+    if (rgb_val)
+        tclr = *rgb_val;
+    else
+    {
+        VngoShadePal16   *tp = (VngoShadePal16 *)vbuff.pal->shd_pal;
+        VngoColorShade16 *tc = &(*tp)[pt->clr];
+        dword color = tc->shl[pt->shade >> 3];
+        if (vbuff.pal->flags & VNGO_COLOR_15BIT)
         {
-            ddrval = screen->BackBuffer->Restore();
+            tclr.r = byte((color & 0x7c00) >> 7);
+            tclr.g = byte((color & 0x3e0) >> 2);
+            tclr.b = byte((color & 0x1f) << 3);
         }
-        try1++;
+        else
+        {
+            tclr.r = byte((color & 0xf800) >> 8);
+            tclr.g = byte((color & 0x7e0) >> 2);
+            tclr.b = byte((color & 0x1f) << 3);
+        }
+    }
 
-    } while((ddrval != DD_OK) && (try1 < 150));
+    D3DTLVERTEX vert;
+    vert.sx = float(pt->x + left);
+    vert.sy = float(pt->y + top);
+    if (pt->z > 0)
+        vert.sz = (D3DVALUE)float(ulong(pt->z))/float(0xffffffff);
+    else
+        vert.sz = 0.f;
+
+    vert.color = RGB_MAKE(tclr.r,tclr.g,tclr.b);
+    vert.specular = RGB_MAKE(0,0,0);
+
+    screen->d3dDevice->SetRenderState(D3DRENDERSTATE_TEXTUREHANDLE,NULL);
+
+    screen->d3dDevice->DrawPrimitive(D3DPT_POINTLIST,D3DVT_TLVERTEX,&vert,1,D3DDP_DONOTCLIP);
+    return VNGO_NO_ERROR;
+}
+VNGError VngoVportD3D::pixel (VngoPointF *pt, VngoColor24bit *rgb_val)
+{
+    make_current();
+
+    VngoColor24bit tclr;
+
+    if (rgb_val)
+        tclr = *rgb_val;
+    else
+    {
+        VngoShadePal16   *tp = (VngoShadePal16 *)vbuff.pal->shd_pal;
+        VngoColorShade16 *tc = &(*tp)[pt->clr];
+        dword color = tc->shl[dword(pt->shade) >> 3];
+        if (vbuff.pal->flags & VNGO_COLOR_15BIT)
+        {
+            tclr.r = byte((color & 0x7c00) >> 7);
+            tclr.g = byte((color & 0x3e0) >> 2);
+            tclr.b = byte((color & 0x1f) << 3);
+        }
+        else
+        {
+            tclr.r = byte((color & 0xf800) >> 8);
+            tclr.g = byte((color & 0x7e0) >> 2);
+            tclr.b = byte((color & 0x1f) << 3);
+        }
+    }
+
+    D3DTLVERTEX vert;
+    vert.sx = pt->x + left;
+    vert.sy = pt->y + top;
+
+    if (pt->z > 0)
+        vert.sz = pt->z;
+    else
+        vert.sz = 0.f;
+
+    vert.color = RGB_MAKE(tclr.r,tclr.g,tclr.b);
+    vert.specular = RGB_MAKE(0,0,0);
+
+    screen->d3dDevice->SetRenderState(D3DRENDERSTATE_TEXTUREHANDLE,NULL);
+
+    screen->d3dDevice->DrawPrimitive(D3DPT_POINTLIST,D3DVT_TLVERTEX,&vert,1,D3DDP_DONOTCLIP);
+    return VNGO_NO_ERROR;
+
+}
+
+VNGError VngoVportD3D::clip_pixel (VngoPoint *pt, VngoColor24bit *rgb_val,
+                     VngoRect *clip_rect)
+{
+    VngoRect vprect(0,0,vbuff.width,vbuff.height);
+
+    if (clip_rect)
+    {
+        vprect.clip_to(*clip_rect);
+    }
+    if (vprect.point_in(*pt))
+        return pixel(pt,rgb_val);
 
     return VNGO_NO_ERROR;
 }
 
+VNGError VngoVportD3D::clip_pixel (VngoPointF *pt, VngoColor24bit *rgb_val,
+                     VngoRect *clip_rect)
+{
+    VngoRect vprect(0,0,vbuff.width,vbuff.height);
+
+    VngoPoint   tpt;
+    tpt.x = long(pt->x + .5f);
+    tpt.x = long(pt->y + .5f);
+    tpt.z = dword(pt->z * float(0xffffffff));
+    tpt.clr = pt->clr;
+    tpt.shade = long(pt->shade);
+
+    if (clip_rect)
+    {
+        vprect.clip_to(*clip_rect);
+    }
+    if (vprect.point_in(tpt))
+        return pixel(&tpt,rgb_val);
+
+    return VNGO_NO_ERROR;
+}
 
 VNGError VngoVportD3D::line (VngoPoint *p1, VngoPoint *p2,VngoColor24bit *rgb_val)
 {
+    make_current();
+
     screen->open_frame();
     D3DTLVERTEX verts[2];
 
@@ -898,14 +1257,14 @@ VNGError VngoVportD3D::line (VngoPoint *p1, VngoPoint *p2,VngoColor24bit *rgb_va
         }
     }
 
-    verts[0].sx = (D3DVALUE)p1->x;
-    verts[0].sy = (D3DVALUE)p1->y;
+    verts[0].sx = (D3DVALUE)p1->x+left;
+    verts[0].sy = (D3DVALUE)p1->y+top;
     verts[0].sz = (D3DVALUE)float(ulong(p1->z) >> 16)*ZCONST;
     verts[0].color = RGB_MAKE(rgb.r,rgb.g,rgb.b);
     verts[0].specular = RGB_MAKE(0,0,0);
 
-    verts[1].sx = (D3DVALUE)p2->x;
-    verts[1].sy = (D3DVALUE)p2->y;
+    verts[1].sx = (D3DVALUE)p2->x+left;
+    verts[1].sy = (D3DVALUE)p2->y+top;
     verts[1].sz = (D3DVALUE)float(ulong(p2->z) >> 16)*ZCONST;
     verts[1].color = RGB_MAKE(rgb.r,rgb.g,rgb.b);
     verts[1].specular = RGB_MAKE(0,0,0);
@@ -917,6 +1276,8 @@ VNGError VngoVportD3D::line (VngoPoint *p1, VngoPoint *p2,VngoColor24bit *rgb_va
 }
 VNGError VngoVportD3D::line (VngoPointF *p1, VngoPointF *p2,VngoColor24bit *rgb_val)
 {
+    make_current();
+
     screen->open_frame();
     D3DTLVERTEX verts[2];
 
@@ -943,14 +1304,14 @@ VNGError VngoVportD3D::line (VngoPointF *p1, VngoPointF *p2,VngoColor24bit *rgb_
         }
     }
 
-    verts[0].sx = (D3DVALUE)p1->x;
-    verts[0].sy = (D3DVALUE)p1->y;
+    verts[0].sx = (D3DVALUE)p1->x+left;
+    verts[0].sy = (D3DVALUE)p1->y+top;
     verts[0].sz = (D3DVALUE)p1->z;
     verts[0].color = RGB_MAKE(rgb.r,rgb.g,rgb.b);
     verts[0].specular = RGB_MAKE(0,0,0);
 
-    verts[1].sx = (D3DVALUE)p2->x;
-    verts[1].sy = (D3DVALUE)p2->y;
+    verts[1].sx = (D3DVALUE)p2->x+left;
+    verts[1].sy = (D3DVALUE)p2->y+top;
     verts[1].sz = (D3DVALUE)p2->z;
     verts[1].color = RGB_MAKE(rgb.r,rgb.g,rgb.b);
     verts[1].specular = RGB_MAKE(0,0,0);
@@ -960,8 +1321,63 @@ VNGError VngoVportD3D::line (VngoPointF *p1, VngoPointF *p2,VngoColor24bit *rgb_
     screen->d3dDevice->DrawPrimitive(D3DPT_LINELIST,D3DVT_TLVERTEX,verts,2,D3DDP_DONOTCLIP);
     return VNGO_NO_ERROR;
 }
+
+VNGError VngoVportD3D::clip_line (VngoPoint *p1, VngoPoint *p2, VngoColor24bit *rgb_val,
+                    VngoRect *clip_rect)
+{
+    make_current();
+    VngoPoint tp1,tp2;
+
+    tp1 = *p1;
+    tp2 = *p2;
+
+    VngoRect    crect(0,0,vbuff.width-1,vbuff.height-1);
+
+    if (clip_rect)
+        crect.clip_to(*clip_rect);
+
+    int cflags = 0;
+    if (VNGO_ZBUFFER_ACTIVE & vflags)
+        cflags |= VNGO_CLIP_Z;
+
+    VNGError err = crect.clip_to(&tp1,&tp2,cflags);
+    if (err == VNGO_FULLY_CLIPPED)
+        return VNGO_NO_ERROR;
+    else
+        return line(&tp1,&tp2,rgb_val);
+
+}
+VNGError VngoVportD3D::clip_line (VngoPointF *p1, VngoPointF *p2, VngoColor24bit *rgb_val,
+                    VngoRect *clip_rect)
+{
+    make_current();
+    VngoPointF tp1,tp2;
+
+    tp1 = *p1;
+    tp2 = *p2;
+
+    VngoRect    crect(0,0,vbuff.width-1,vbuff.height-1);
+
+    if (clip_rect)
+        crect.clip_to(*clip_rect);
+
+    int cflags = 0;
+    if (VNGO_ZBUFFER_ACTIVE & vflags)
+        cflags |= VNGO_CLIP_Z;
+
+    VNGError err = crect.clip_to(&tp1,&tp2,cflags);
+    if (err == VNGO_FULLY_CLIPPED)
+        return VNGO_NO_ERROR;
+    else
+        return line(&tp1,&tp2,rgb_val);
+}
+
+
+
 VNGError VngoVportD3D::gline (VngoPoint *p1, VngoPoint *p2)
 {
+    make_current();
+
     screen->open_frame();
     D3DTLVERTEX verts[2];
 
@@ -995,14 +1411,14 @@ VNGError VngoVportD3D::gline (VngoPoint *p1, VngoPoint *p2)
     }
 
 
-    verts[0].sx = (D3DVALUE)p1->x;
-    verts[0].sy = (D3DVALUE)p1->y;
+    verts[0].sx = (D3DVALUE)p1->x+left;
+    verts[0].sy = (D3DVALUE)p1->y+top;
     verts[0].sz = (D3DVALUE)float(ulong(p1->z) >> 16)*ZCONST;
     verts[0].color = RGB_MAKE(rgb1.r,rgb1.g,rgb1.b);
     verts[0].specular = RGB_MAKE(0,0,0);
 
-    verts[1].sx = (D3DVALUE)p2->x;
-    verts[1].sy = (D3DVALUE)p2->y;
+    verts[1].sx = (D3DVALUE)p2->x+left;
+    verts[1].sy = (D3DVALUE)p2->y+top;
     verts[1].sz = (D3DVALUE)float(ulong(p2->z) >> 16)*ZCONST;
     verts[1].color = RGB_MAKE(rgb2.r,rgb2.g,rgb2.b);
     verts[1].specular = RGB_MAKE(0,0,0);
@@ -1014,6 +1430,8 @@ VNGError VngoVportD3D::gline (VngoPoint *p1, VngoPoint *p2)
 }
 VNGError VngoVportD3D::gline (VngoPointF *p1, VngoPointF *p2)
 {
+    make_current();
+
     screen->open_frame();
     D3DTLVERTEX verts[2];
 
@@ -1047,14 +1465,14 @@ VNGError VngoVportD3D::gline (VngoPointF *p1, VngoPointF *p2)
     }
 
 
-    verts[0].sx = (D3DVALUE)p1->x;
-    verts[0].sy = (D3DVALUE)p1->y;
+    verts[0].sx = (D3DVALUE)p1->x+left;
+    verts[0].sy = (D3DVALUE)p1->y+top;
     verts[0].sz = (D3DVALUE)p1->z;
     verts[0].color = RGB_MAKE(rgb1.r,rgb1.g,rgb1.b);
     verts[0].specular = RGB_MAKE(0,0,0);
 
-    verts[1].sx = (D3DVALUE)p2->x;
-    verts[1].sy = (D3DVALUE)p2->y;
+    verts[1].sx = (D3DVALUE)p2->x+left;
+    verts[1].sy = (D3DVALUE)p2->y+top;
     verts[1].sz = (D3DVALUE)p2->z;
     verts[1].color = RGB_MAKE(rgb2.r,rgb2.g,rgb2.b);
     verts[1].specular = RGB_MAKE(0,0,0);
@@ -1064,14 +1482,84 @@ VNGError VngoVportD3D::gline (VngoPointF *p1, VngoPointF *p2)
     screen->d3dDevice->DrawPrimitive(D3DPT_LINELIST,D3DVT_TLVERTEX,verts,2,D3DDP_DONOTCLIP);
     return VNGO_NO_ERROR;
 }
+
+
+VNGError VngoVportD3D::clip_gline (VngoPoint *p1, VngoPoint *p2,VngoRect *clip_rect)
+{
+    make_current();
+
+    VngoPoint tp1,tp2;
+
+    tp1 = *p1;
+    tp2 = *p2;
+
+    VngoRect    crect(0,0,vbuff.width-1,vbuff.height-1);
+
+    if (clip_rect)
+        crect.clip_to(*clip_rect);
+
+    int cflags = VNGO_CLIP_SHADE;
+    if (VNGO_ZBUFFER_ACTIVE & vflags)
+        cflags |= VNGO_CLIP_Z;
+
+    VNGError err = crect.clip_to(&tp1,&tp2,cflags);
+    if (err == VNGO_FULLY_CLIPPED)
+        return VNGO_NO_ERROR;
+    else
+        return gline(&tp1,&tp2);
+
+}
+VNGError VngoVportD3D::clip_gline (VngoPointF *p1, VngoPointF *p2,VngoRect *clip_rect)
+{
+    make_current();
+    VngoPointF tp1,tp2;
+
+    tp1 = *p1;
+    tp2 = *p2;
+
+    VngoRect    crect(0,0,vbuff.width-1,vbuff.height-1);
+
+    if (clip_rect)
+        crect.clip_to(*clip_rect);
+
+    int cflags = VNGO_CLIP_SHADE;
+    if (VNGO_ZBUFFER_ACTIVE & vflags)
+        cflags |= VNGO_CLIP_Z;
+
+    VNGError err = crect.clip_to(&tp1,&tp2,cflags);
+    if (err == VNGO_FULLY_CLIPPED)
+        return VNGO_NO_ERROR;
+    else
+        return gline(&tp1,&tp2);
+}
+
+
 VNGError VngoVportD3D::gline_persp (VngoPoint *p1, VngoPoint *p2)
 {
+    make_current();
+
     return gline(p1,p2);
 }
 VNGError VngoVportD3D::gline_persp (VngoPointF *p1, VngoPointF *p2)
 {
+    make_current();
+
     return gline(p1,p2);
 }
+VNGError VngoVportD3D::clip_gline_persp (VngoPoint *p1, VngoPoint *p2,VngoRect *clip_rect)
+{
+    make_current();
+
+    return clip_gline(p1,p2,clip_rect);
+}
+VNGError VngoVportD3D::clip_gline_persp (VngoPointF *p1, VngoPointF *p2,VngoRect *clip_rect)
+{
+    make_current();
+
+    return clip_gline(p1,p2,clip_rect);
+}
+
+
 
 int VngoVportD3D::plock()
 {
@@ -1082,13 +1570,18 @@ int VngoVportD3D::plock()
     ddsd.dwSize = sizeof(ddsd);
 
     if (ret_val != 1)
-    {
+    {   // This is a hack to get Microsoft to flush their bogus ExecuteBuffer!!!!
+
+        {   // We shouldn't be here if the screen is locked!
+            screen->close_frame();
+        }
+
         int locked=0;
         HRESULT hr;
         while (!locked && (fail_safe < 1000))
         {
             fail_safe++;    // just so we can't loop infinately.
-            if ((hr = screen->BackBuffer->Lock (NULL, &ddsd,
+            if ((hr = screen->SurfaceManager->ddsurf->Lock (NULL, &ddsd,
                                      DDLOCK_SURFACEMEMORYPTR
                                      | DDLOCK_WAIT, NULL)) == DD_OK)
             {
@@ -1100,10 +1593,12 @@ int VngoVportD3D::plock()
             }
             if (hr == DDERR_SURFACELOST)
             {
-                hr = screen->BackBuffer->Restore();
+                hr = screen->SurfaceManager->ddsurf->Restore();
                 if (hr != DD_OK)
-                    locked = 1; // an error occured while
-                                // restoring the surface, so it cannot be locked.
+                {
+                    locked = 0; // an error occured while
+                    return -1;  // restoring the surface, so it cannot be locked.
+                }
             }
         }
 
@@ -1112,43 +1607,6 @@ int VngoVportD3D::plock()
             screen->SurfaceManager->unlock();
             return (-1);        // failure to lock;
         }
-
-#if 0
-        // Now do the zbuffer if needed.
-        if (screen->SurfaceManager->zddsurf)
-        {
-            locked = 0;
-            fail_safe = 0;
-            while (!locked && (fail_safe < 1000))
-            {
-                fail_safe++;    // just so we can't loop infinately.
-                if ((hr = screen->ZBuffer->Lock (NULL, &ddsd,
-                                                 DDLOCK_SURFACEMEMORYPTR
-                                                 | DDLOCK_WAIT, NULL)) == DD_OK)
-                {
-                    vbuff.zpitch = ddsd.lPitch;
-                    long    offset = (top * vbuff.zpitch) + (left * 2);
-                    vbuff.zbuff_ptr = (word *) ((dword)ddsd.lpSurface + offset);
-                    locked = 1;
-                }
-                if (hr == DDERR_SURFACELOST)
-                {
-                    hr = screen->ZBuffer->Restore();
-                    if (hr != DD_OK)
-                        locked = 1; // an error occured while
-                                    // restoring the surface, so it cannot be locked.
-                }
-            }
-
-            if (hr != DD_OK)
-            {
-                screen->BackBuffer->Unlock(NULL);
-                screen->SurfaceManager->unlock();
-                return (-1);        // failure to lock;
-            }
-        }
-#endif
-
     }
 
     lock_status = 1;
@@ -1163,7 +1621,7 @@ int VngoVportD3D::punlock()
     int ret_val= screen->SurfaceManager->unlock();
     if (ret_val != 0)
     {
-        screen->BackBuffer->Unlock( NULL );
+        screen->SurfaceManager->ddsurf->Unlock( NULL );
         vbuff.scrn_ptr = NULL;
     }
     lock_status = 0;
@@ -1182,6 +1640,8 @@ int VngoVportD3D::punlock()
 
 VNGError VngoVportD3D::poly (int count,VngoPoint pts[])
 {
+    make_current();
+
     assert (count < VNGO_MAX_VERTCOUNT);
 
     screen->open_frame();
@@ -1208,8 +1668,8 @@ VNGError VngoVportD3D::poly (int count,VngoPoint pts[])
 
     for (int i=0;i < count;i++)
     {
-        verts[i].sx = (D3DVALUE)pts[i].x;
-        verts[i].sy = (D3DVALUE)pts[i].y;
+        verts[i].sx = (D3DVALUE)pts[i].x+left;
+        verts[i].sy = (D3DVALUE)pts[i].y+top;
         if (pts[i].z > 0)
             verts[i].sz = (D3DVALUE)float(ulong(pts[i].z)) / float(0xffffffff);
 //            verts[i].sz = (D3DVALUE)float(ulong(pts[i].z) >> 16)*ZCONST;
@@ -1226,6 +1686,8 @@ VNGError VngoVportD3D::poly (int count,VngoPoint pts[])
 
 VNGError VngoVportD3D::poly (int count,VngoPointF pts[])
 {
+    make_current();
+
     assert (count < VNGO_MAX_VERTCOUNT);
 
     screen->open_frame();
@@ -1252,8 +1714,8 @@ VNGError VngoVportD3D::poly (int count,VngoPointF pts[])
 
     for (int i=0;i < count;i++)
     {
-        verts[i].sx = (D3DVALUE)pts[i].x;
-        verts[i].sy = (D3DVALUE)pts[i].y;
+        verts[i].sx = (D3DVALUE)pts[i].x+left;
+        verts[i].sy = (D3DVALUE)pts[i].y+top;
         verts[i].sz = (D3DVALUE)pts[i].z;
         verts[i].color = RGB_MAKE(rgb.r,rgb.g,rgb.b);
         verts[i].specular = RGB_MAKE(0,0,0);
@@ -1266,6 +1728,8 @@ VNGError VngoVportD3D::poly (int count,VngoPointF pts[])
 
 VNGError VngoVportD3D::gpoly (int count,VngoPoint pts[])
 {
+    make_current();
+
     assert (count < VNGO_MAX_VERTCOUNT);
 
     screen->open_frame();
@@ -1277,8 +1741,8 @@ VNGError VngoVportD3D::gpoly (int count,VngoPoint pts[])
     VngoColor24bit rgb;
     for (int i=0;i < count;i++)
     {
-        verts[i].sx = (D3DVALUE)pts[i].x;
-        verts[i].sy = (D3DVALUE)pts[i].y;
+        verts[i].sx = (D3DVALUE)pts[i].x+left;
+        verts[i].sy = (D3DVALUE)pts[i].y+top;
         if (pts[i].z > 0)
             verts[i].sz = (D3DVALUE)float(ulong(pts[i].z)) / float(0xffffffff);
 //            verts[i].sz = (D3DVALUE)float(ulong(pts[i].z) >> 16)*ZCONST;
@@ -1313,6 +1777,8 @@ VNGError VngoVportD3D::gpoly (int count,VngoPoint pts[])
 
 VNGError VngoVportD3D::gpoly (int count,VngoPointF pts[])
 {
+    make_current();
+
     assert (count < VNGO_MAX_VERTCOUNT);
 
     screen->open_frame();
@@ -1324,8 +1790,8 @@ VNGError VngoVportD3D::gpoly (int count,VngoPointF pts[])
     VngoColor24bit rgb;
     for (int i=0;i < count;i++)
     {
-        verts[i].sx = (D3DVALUE)pts[i].x;
-        verts[i].sy = (D3DVALUE)pts[i].y;
+        verts[i].sx = (D3DVALUE)pts[i].x+left;
+        verts[i].sy = (D3DVALUE)pts[i].y+top;
         verts[i].sz = (D3DVALUE)pts[i].z;
 
         tclr = shades[int(pts[i].shade) >> 3];
@@ -1356,11 +1822,15 @@ VNGError VngoVportD3D::gpoly (int count,VngoPointF pts[])
 
 VNGError VngoVportD3D::gpoly_persp (int count,VngoPoint pts[])
 {
+    make_current();
+
     assert (count < VNGO_MAX_VERTCOUNT);
     return gpoly(count,pts);
 }
 VNGError VngoVportD3D::gpoly_persp (int count,VngoPointF pts[])
 {
+    make_current();
+
     assert (count < VNGO_MAX_VERTCOUNT);
     return gpoly(count,pts);
 }
@@ -1368,7 +1838,8 @@ VNGError VngoVportD3D::gpoly_persp (int count,VngoPointF pts[])
 
 VNGError VngoVportD3D::tpoly (int count,VngoPoint pts[],VngoTexture *tex)
 {
-    assert(lock_status);
+    make_current();
+
     assert (count <= VNGO_MAX_VERTCOUNT);
 
     screen->open_frame();
@@ -1381,12 +1852,20 @@ VNGError VngoVportD3D::tpoly (int count,VngoPoint pts[],VngoTexture *tex)
     }
     if (tptr == NULL)
     {
-        tptr = new VngoD3DTexture3D(tex,vbuff.pal);
-        if (tptr->get_err_status() != VNGO_NO_ERROR)
+        if (tex->pal_ptr == NULL)
+            tex->pal_ptr = vbuff.pal;
+
+        tptr = new VngoD3DTexture3D(tex,tex->pal_ptr);
+        if (tptr)
         {
-            delete tptr;
-            return (VNGO_UNSUPPORTED_TEXTURE);
+            if (tptr->get_err_status() != VNGO_NO_ERROR)
+            {
+                delete tptr;
+                return (VNGO_UNSUPPORTED_TEXTURE);
+            }
         }
+        else
+            return VNGO_MEMALLOC_ERROR;
     }
 
 
@@ -1396,6 +1875,10 @@ VNGError VngoVportD3D::tpoly (int count,VngoPoint pts[],VngoTexture *tex)
     }
 
     D3DTLVERTEX tpts[VNGO_MAX_VERTCOUNT];
+
+    if (tptr->ready_texture() != VNGO_NO_ERROR)
+        return VNGO_INTERNAL_ERROR;
+
 
     int mp = vbuff.pal->shd_pal->mid_point;
     int shade = pts[0].shade;
@@ -1412,8 +1895,8 @@ VNGError VngoVportD3D::tpoly (int count,VngoPoint pts[],VngoTexture *tex)
 
     for (int i=0;i < count;i++)
     {
-        tpts[i].sx = (D3DVALUE)pts[i].x;
-        tpts[i].sy = (D3DVALUE)pts[i].y;
+        tpts[i].sx = (D3DVALUE)pts[i].x+left;
+        tpts[i].sy = (D3DVALUE)pts[i].y+top;
 
         if (pts[i].z > 0)
             tpts[i].sz = (D3DVALUE)float(ulong(pts[i].z)) / float(0xffffffff);
@@ -1421,7 +1904,8 @@ VNGError VngoVportD3D::tpoly (int count,VngoPoint pts[],VngoTexture *tex)
         else
             tpts[i].sz = 0.f;
 
-        tpts[i].rhw = (D3DVALUE)1.f;       // Need to figure out W.
+        tpts[i].rhw = (D3DVALUE) pts[i].w;
+//        tpts[i].rhw = (D3DVALUE)1.f;       // Need to figure out W.
 
 
         tpts[i].color = RGB_MAKE (shade,shade,shade);
@@ -1442,6 +1926,15 @@ VNGError VngoVportD3D::tpoly (int count,VngoPoint pts[],VngoTexture *tex)
     screen->d3dDevice->SetRenderState(D3DRENDERSTATE_SHADEMODE, D3DSHADE_FLAT);
     screen->d3dDevice->SetRenderState(D3DRENDERSTATE_DITHERENABLE,TRUE);
 
+    if (tex->flags & VNGO_TEXTURE_TRANSPARENT)
+    {
+        screen->d3dDevice->SetRenderState(D3DRENDERSTATE_COLORKEYENABLE,TRUE);
+    }
+    else
+    {
+        screen->d3dDevice->SetRenderState(D3DRENDERSTATE_COLORKEYENABLE,FALSE);
+    }
+
     screen->d3dDevice->DrawPrimitive(D3DPT_TRIANGLEFAN,D3DVT_TLVERTEX,tpts,count,D3DDP_DONOTCLIP);
 
     return VNGO_NO_ERROR;
@@ -1449,7 +1942,8 @@ VNGError VngoVportD3D::tpoly (int count,VngoPoint pts[],VngoTexture *tex)
 
 VNGError VngoVportD3D::tpoly (int count,VngoPointF pts[],VngoTexture *tex)
 {
-    assert(lock_status);
+    make_current();
+
     assert (count <= VNGO_MAX_VERTCOUNT);
 
     screen->open_frame();
@@ -1462,12 +1956,21 @@ VNGError VngoVportD3D::tpoly (int count,VngoPointF pts[],VngoTexture *tex)
     }
     if (tptr == NULL)
     {
-        tptr = new VngoD3DTexture3D(tex,vbuff.pal);
-        if (tptr->get_err_status() != VNGO_NO_ERROR)
+        if (tex->pal_ptr == NULL)
+            tex->pal_ptr = vbuff.pal;
+
+        tptr = new VngoD3DTexture3D(tex,tex->pal_ptr);
+        if (tptr)
         {
-            delete tptr;
-            return (VNGO_UNSUPPORTED_TEXTURE);
+            if (tptr->get_err_status() != VNGO_NO_ERROR)
+            {
+                delete tptr;
+                tptr = NULL;
+                return (VNGO_UNSUPPORTED_TEXTURE);
+            }
         }
+        else
+            return VNGO_MEMALLOC_ERROR;
     }
 
 
@@ -1475,6 +1978,9 @@ VNGError VngoVportD3D::tpoly (int count,VngoPointF pts[],VngoTexture *tex)
     {
         return (VNGO_UNSUPPORTED_TEXTURE);
     }
+
+    if (tptr->ready_texture() != VNGO_NO_ERROR)
+        return VNGO_INTERNAL_ERROR;
 
     D3DTLVERTEX tpts[VNGO_MAX_VERTCOUNT];
 
@@ -1493,11 +1999,12 @@ VNGError VngoVportD3D::tpoly (int count,VngoPointF pts[],VngoTexture *tex)
 
     for (int i=0;i < count;i++)
     {
-        tpts[i].sx = (D3DVALUE)pts[i].x;
-        tpts[i].sy = (D3DVALUE)pts[i].y;
+        tpts[i].sx = (D3DVALUE)pts[i].x+left;
+        tpts[i].sy = (D3DVALUE)pts[i].y+top;
         tpts[i].sz = (D3DVALUE)pts[i].z;
 
-        tpts[i].rhw = (D3DVALUE)1.f;       // Need to figure out W.
+        tpts[i].rhw = (D3DVALUE) pts[i].w;
+//        tpts[i].rhw = (D3DVALUE)1.f;       // Need to figure out W.
 
 
         tpts[i].color = RGB_MAKE (shade,shade,shade);
@@ -1519,6 +2026,15 @@ VNGError VngoVportD3D::tpoly (int count,VngoPointF pts[],VngoTexture *tex)
     screen->d3dDevice->SetRenderState(D3DRENDERSTATE_SHADEMODE, D3DSHADE_FLAT);
     screen->d3dDevice->SetRenderState(D3DRENDERSTATE_DITHERENABLE,TRUE);
 
+    if (tex->flags & VNGO_TEXTURE_TRANSPARENT)
+    {
+        screen->d3dDevice->SetRenderState(D3DRENDERSTATE_COLORKEYENABLE,TRUE);
+    }
+    else
+    {
+        screen->d3dDevice->SetRenderState(D3DRENDERSTATE_COLORKEYENABLE,FALSE);
+    }
+
     screen->d3dDevice->DrawPrimitive(D3DPT_TRIANGLEFAN,D3DVT_TLVERTEX,tpts,count,D3DDP_DONOTCLIP);
 
     return VNGO_NO_ERROR;
@@ -1526,7 +2042,8 @@ VNGError VngoVportD3D::tpoly (int count,VngoPointF pts[],VngoTexture *tex)
 
 VNGError VngoVportD3D::tpoly_persp (int count,VngoPoint pts[],VngoTexture *tex)
 {
-    assert(lock_status);
+    make_current();
+
     assert (count <= VNGO_MAX_VERTCOUNT);
 
     screen->open_frame();
@@ -1539,12 +2056,20 @@ VNGError VngoVportD3D::tpoly_persp (int count,VngoPoint pts[],VngoTexture *tex)
     }
     if (tptr == NULL)
     {
-        tptr = new VngoD3DTexture3D(tex,vbuff.pal);
-        if (tptr->get_err_status() != VNGO_NO_ERROR)
+        if (tex->pal_ptr == NULL)
+            tex->pal_ptr = vbuff.pal;
+
+        tptr = new VngoD3DTexture3D(tex,tex->pal_ptr);
+        if (tptr)
         {
-            delete tptr;
-            return (VNGO_UNSUPPORTED_TEXTURE);
+            if (tptr->get_err_status() != VNGO_NO_ERROR)
+            {
+                delete tptr;
+                return (VNGO_UNSUPPORTED_TEXTURE);
+            }
         }
+        else
+            return VNGO_MEMALLOC_ERROR;
     }
 
 
@@ -1552,6 +2077,9 @@ VNGError VngoVportD3D::tpoly_persp (int count,VngoPoint pts[],VngoTexture *tex)
     {
         return (VNGO_UNSUPPORTED_TEXTURE);
     }
+
+    if (tptr->ready_texture() != VNGO_NO_ERROR)
+        return VNGO_INTERNAL_ERROR;
 
     D3DTLVERTEX tpts[VNGO_MAX_VERTCOUNT];
 
@@ -1570,16 +2098,19 @@ VNGError VngoVportD3D::tpoly_persp (int count,VngoPoint pts[],VngoTexture *tex)
 
     for (int i=0;i < count;i++)
     {
-        tpts[i].sx = (D3DVALUE)pts[i].x;
-        tpts[i].sy = (D3DVALUE)pts[i].y;
+        tpts[i].sx = (D3DVALUE)pts[i].x+left;
+        tpts[i].sy = (D3DVALUE)pts[i].y+top;
 
         if (pts[i].z > 0)
             tpts[i].sz = (D3DVALUE)float(ulong(pts[i].z)) / float(0xffffffff);
-//            tpts[i].sz = (D3DVALUE)float(ulong(pts[i].z) >> 16)*ZCONST;
         else
             tpts[i].sz = 0.f;
 
-        tpts[i].rhw = (D3DVALUE)1.f / pts[i].z;       // Need to figure out W.
+        if (tpts[i].sz > 0.99999f)
+            tpts[i].sz = 0.99999f;
+
+        tpts[i].rhw = (D3DVALUE) pts[i].w;
+//        tpts[i].rhw = (D3DVALUE)1.f / tpts[i].sz;       // Need to figure out W.
 
 
         tpts[i].color = RGB_MAKE (shade,shade,shade);
@@ -1599,6 +2130,15 @@ VNGError VngoVportD3D::tpoly_persp (int count,VngoPoint pts[],VngoTexture *tex)
     screen->d3dDevice->SetRenderState(D3DRENDERSTATE_TEXTUREHANDLE,((VngoD3DTexture3D*)tptr)->handle);
     screen->d3dDevice->SetRenderState(D3DRENDERSTATE_SHADEMODE, D3DSHADE_FLAT);
     screen->d3dDevice->SetRenderState(D3DRENDERSTATE_DITHERENABLE,TRUE);
+
+    if (tex->flags & VNGO_TEXTURE_TRANSPARENT)
+    {
+        screen->d3dDevice->SetRenderState(D3DRENDERSTATE_COLORKEYENABLE,TRUE);
+    }
+    else
+    {
+        screen->d3dDevice->SetRenderState(D3DRENDERSTATE_COLORKEYENABLE,FALSE);
+    }
 
     screen->d3dDevice->DrawPrimitive(D3DPT_TRIANGLEFAN,D3DVT_TLVERTEX,tpts,count,D3DDP_DONOTCLIP);
 
@@ -1608,7 +2148,8 @@ VNGError VngoVportD3D::tpoly_persp (int count,VngoPoint pts[],VngoTexture *tex)
 
 VNGError VngoVportD3D::tpoly_persp (int count,VngoPointF pts[],VngoTexture *tex)
 {
-    assert(lock_status);
+    make_current();
+
     assert (count <= VNGO_MAX_VERTCOUNT);
 
     screen->open_frame();
@@ -1621,12 +2162,20 @@ VNGError VngoVportD3D::tpoly_persp (int count,VngoPointF pts[],VngoTexture *tex)
     }
     if (tptr == NULL)
     {
-        tptr = new VngoD3DTexture3D(tex,vbuff.pal);
-        if (tptr->get_err_status() != VNGO_NO_ERROR)
+        if (tex->pal_ptr == NULL)
+            tex->pal_ptr = vbuff.pal;
+
+        tptr = new VngoD3DTexture3D(tex,tex->pal_ptr);
+        if (tptr)
         {
-            delete tptr;
-            return (VNGO_UNSUPPORTED_TEXTURE);
+            if (tptr->get_err_status() != VNGO_NO_ERROR)
+            {
+                delete tptr;
+                return (VNGO_UNSUPPORTED_TEXTURE);
+            }
         }
+        else
+            return VNGO_MEMALLOC_ERROR;
     }
 
 
@@ -1634,6 +2183,10 @@ VNGError VngoVportD3D::tpoly_persp (int count,VngoPointF pts[],VngoTexture *tex)
     {
         return (VNGO_UNSUPPORTED_TEXTURE);
     }
+
+    if (tptr->ready_texture() != VNGO_NO_ERROR)
+        return VNGO_INTERNAL_ERROR;
+
 
     D3DTLVERTEX tpts[VNGO_MAX_VERTCOUNT];
 
@@ -1652,10 +2205,14 @@ VNGError VngoVportD3D::tpoly_persp (int count,VngoPointF pts[],VngoTexture *tex)
 
     for (int i=0;i < count;i++)
     {
-        tpts[i].sx = (D3DVALUE)pts[i].x;
-        tpts[i].sy = (D3DVALUE)pts[i].y;
+        tpts[i].sx = (D3DVALUE)pts[i].x+left;
+        tpts[i].sy = (D3DVALUE)pts[i].y+top;
         tpts[i].sz = (D3DVALUE)pts[i].z;
-        tpts[i].rhw = (D3DVALUE)1.f / pts[i].z;
+        if (tpts[i].sz > 0.99999f)
+            tpts[i].sz = 0.99999f;
+
+        tpts[i].rhw = (D3DVALUE) pts[i].w;
+//        tpts[i].rhw = (D3DVALUE)1.f / tpts[i].sz;
 
 
         tpts[i].color = RGB_MAKE (shade,shade,shade);
@@ -1676,6 +2233,15 @@ VNGError VngoVportD3D::tpoly_persp (int count,VngoPointF pts[],VngoTexture *tex)
     screen->d3dDevice->SetRenderState(D3DRENDERSTATE_SHADEMODE, D3DSHADE_FLAT);
     screen->d3dDevice->SetRenderState(D3DRENDERSTATE_DITHERENABLE,TRUE);
 
+    if (tex->flags & VNGO_TEXTURE_TRANSPARENT)
+    {
+        screen->d3dDevice->SetRenderState(D3DRENDERSTATE_COLORKEYENABLE,TRUE);
+    }
+    else
+    {
+        screen->d3dDevice->SetRenderState(D3DRENDERSTATE_COLORKEYENABLE,FALSE);
+    }
+
     screen->d3dDevice->DrawPrimitive(D3DPT_TRIANGLEFAN,D3DVT_TLVERTEX,tpts,count,D3DDP_DONOTCLIP);
 
     return VNGO_NO_ERROR;
@@ -1683,7 +2249,8 @@ VNGError VngoVportD3D::tpoly_persp (int count,VngoPointF pts[],VngoTexture *tex)
 
 VNGError VngoVportD3D::gtpoly (int count,VngoPoint pts[],VngoTexture *tex)
 {
-    assert(lock_status);
+    make_current();
+
     assert (count <= VNGO_MAX_VERTCOUNT);
 
     screen->open_frame();
@@ -1696,12 +2263,20 @@ VNGError VngoVportD3D::gtpoly (int count,VngoPoint pts[],VngoTexture *tex)
     }
     if (tptr == NULL)
     {
-        tptr = new VngoD3DTexture3D(tex,vbuff.pal);
-        if (tptr->get_err_status() != VNGO_NO_ERROR)
+        if (tex->pal_ptr == NULL)
+            tex->pal_ptr = vbuff.pal;
+
+        tptr = new VngoD3DTexture3D(tex,tex->pal_ptr);
+        if (tptr)
         {
-            delete tptr;
-            return (VNGO_UNSUPPORTED_TEXTURE);
+            if (tptr->get_err_status() != VNGO_NO_ERROR)
+            {
+                delete tptr;
+                return (VNGO_UNSUPPORTED_TEXTURE);
+            }
         }
+        else
+            return VNGO_MEMALLOC_ERROR;
     }
 
 
@@ -1709,6 +2284,9 @@ VNGError VngoVportD3D::gtpoly (int count,VngoPoint pts[],VngoTexture *tex)
     {
         return (VNGO_UNSUPPORTED_TEXTURE);
     }
+
+    if (tptr->ready_texture() != VNGO_NO_ERROR)
+        return VNGO_INTERNAL_ERROR;
 
     D3DTLVERTEX tpts[VNGO_MAX_VERTCOUNT];
 
@@ -1725,8 +2303,8 @@ VNGError VngoVportD3D::gtpoly (int count,VngoPoint pts[],VngoTexture *tex)
 #endif
     for (int i=0;i < count;i++)
     {
-        tpts[i].sx = (D3DVALUE)pts[i].x;
-        tpts[i].sy = (D3DVALUE)pts[i].y;
+        tpts[i].sx = (D3DVALUE)pts[i].x+left;
+        tpts[i].sy = (D3DVALUE)pts[i].y+top;
 
         if (pts[i].z > 0)
             tpts[i].sz = (D3DVALUE)float(ulong(pts[i].z)) / float(0xffffffff);
@@ -1734,7 +2312,8 @@ VNGError VngoVportD3D::gtpoly (int count,VngoPoint pts[],VngoTexture *tex)
         else
             tpts[i].sz = 0.f;
 
-        tpts[i].rhw = (D3DVALUE)1.f;       // Need to figure out W.
+        tpts[i].rhw = (D3DVALUE) pts[i].w;
+//        tpts[i].rhw = (D3DVALUE)1.f;       // Need to figure out W.
 
         int specular = 0;
         shade = pts[i].shade;
@@ -1764,6 +2343,15 @@ VNGError VngoVportD3D::gtpoly (int count,VngoPoint pts[],VngoTexture *tex)
     screen->d3dDevice->SetRenderState(D3DRENDERSTATE_SHADEMODE, D3DSHADE_GOURAUD);
     screen->d3dDevice->SetRenderState(D3DRENDERSTATE_DITHERENABLE,TRUE);
 
+    if (tex->flags & VNGO_TEXTURE_TRANSPARENT)
+    {
+        screen->d3dDevice->SetRenderState(D3DRENDERSTATE_COLORKEYENABLE,TRUE);
+    }
+    else
+    {
+        screen->d3dDevice->SetRenderState(D3DRENDERSTATE_COLORKEYENABLE,FALSE);
+    }
+
     screen->d3dDevice->DrawPrimitive(D3DPT_TRIANGLEFAN,D3DVT_TLVERTEX,tpts,count,D3DDP_DONOTCLIP);
 
     return VNGO_NO_ERROR;
@@ -1772,7 +2360,8 @@ VNGError VngoVportD3D::gtpoly (int count,VngoPoint pts[],VngoTexture *tex)
 
 VNGError VngoVportD3D::gtpoly (int count,VngoPointF pts[],VngoTexture *tex)
 {
-    assert(lock_status);
+    make_current();
+
     assert (count <= VNGO_MAX_VERTCOUNT);
 
     screen->open_frame();
@@ -1785,11 +2374,17 @@ VNGError VngoVportD3D::gtpoly (int count,VngoPointF pts[],VngoTexture *tex)
     }
     if (tptr == NULL)
     {
-        tptr = new VngoD3DTexture3D(tex,vbuff.pal);
-        if (tptr->get_err_status() != VNGO_NO_ERROR)
+        if (tex->pal_ptr == NULL)
+            tex->pal_ptr = vbuff.pal;
+
+        tptr = new VngoD3DTexture3D(tex,tex->pal_ptr);
+        if (tptr)
         {
-            delete tptr;
-            return (VNGO_UNSUPPORTED_TEXTURE);
+            if (tptr->get_err_status() != VNGO_NO_ERROR)
+            {
+                delete tptr;
+                return (VNGO_UNSUPPORTED_TEXTURE);
+            }
         }
     }
 
@@ -1798,6 +2393,9 @@ VNGError VngoVportD3D::gtpoly (int count,VngoPointF pts[],VngoTexture *tex)
     {
         return (VNGO_UNSUPPORTED_TEXTURE);
     }
+
+    if (tptr->ready_texture() != VNGO_NO_ERROR)
+        return VNGO_INTERNAL_ERROR;
 
     D3DTLVERTEX tpts[VNGO_MAX_VERTCOUNT];
 
@@ -1808,11 +2406,12 @@ VNGError VngoVportD3D::gtpoly (int count,VngoPointF pts[],VngoTexture *tex)
 
     for (int i=0;i < count;i++)
     {
-        tpts[i].sx = (D3DVALUE)pts[i].x;
-        tpts[i].sy = (D3DVALUE)pts[i].y;
+        tpts[i].sx = (D3DVALUE)pts[i].x+left;
+        tpts[i].sy = (D3DVALUE)pts[i].y+top;
         tpts[i].sz = (D3DVALUE)pts[i].z;
 
-        tpts[i].rhw = (D3DVALUE)1.f;       // Need to figure out W.
+        tpts[i].rhw = (D3DVALUE) pts[i].w;
+//        tpts[i].rhw = (D3DVALUE)1.f;       // Need to figure out W.
 
         int specular = 0;
         shade = int(pts[i].shade);
@@ -1841,6 +2440,15 @@ VNGError VngoVportD3D::gtpoly (int count,VngoPointF pts[],VngoTexture *tex)
     screen->d3dDevice->SetRenderState(D3DRENDERSTATE_SHADEMODE, D3DSHADE_GOURAUD);
     screen->d3dDevice->SetRenderState(D3DRENDERSTATE_DITHERENABLE,TRUE);
 
+    if (tex->flags & VNGO_TEXTURE_TRANSPARENT)
+    {
+        screen->d3dDevice->SetRenderState(D3DRENDERSTATE_COLORKEYENABLE,TRUE);
+    }
+    else
+    {
+        screen->d3dDevice->SetRenderState(D3DRENDERSTATE_COLORKEYENABLE,FALSE);
+    }
+
     screen->d3dDevice->DrawPrimitive(D3DPT_TRIANGLEFAN,D3DVT_TLVERTEX,tpts,count,D3DDP_DONOTCLIP);
 
     return VNGO_NO_ERROR;
@@ -1848,7 +2456,8 @@ VNGError VngoVportD3D::gtpoly (int count,VngoPointF pts[],VngoTexture *tex)
 
 VNGError VngoVportD3D::gtpoly_persp (int count,VngoPoint pts[],VngoTexture *tex)
 {
-    assert(lock_status);
+    make_current();
+
     assert (count <= VNGO_MAX_VERTCOUNT);
 
     screen->open_frame();
@@ -1861,12 +2470,20 @@ VNGError VngoVportD3D::gtpoly_persp (int count,VngoPoint pts[],VngoTexture *tex)
     }
     if (tptr == NULL)
     {
-        tptr = new VngoD3DTexture3D(tex,vbuff.pal);
-        if (tptr->get_err_status() != VNGO_NO_ERROR)
+        if (tex->pal_ptr == NULL)
+            tex->pal_ptr = vbuff.pal;
+
+        tptr = new VngoD3DTexture3D(tex,tex->pal_ptr);
+        if (tptr)
         {
-            delete tptr;
-            return (VNGO_UNSUPPORTED_TEXTURE);
+            if (tptr->get_err_status() != VNGO_NO_ERROR)
+            {
+                delete tptr;
+                return (VNGO_UNSUPPORTED_TEXTURE);
+            }
         }
+        else
+            return VNGO_MEMALLOC_ERROR;
     }
 
 
@@ -1874,6 +2491,9 @@ VNGError VngoVportD3D::gtpoly_persp (int count,VngoPoint pts[],VngoTexture *tex)
     {
         return (VNGO_UNSUPPORTED_TEXTURE);
     }
+
+    if (tptr->ready_texture() != VNGO_NO_ERROR)
+        return VNGO_INTERNAL_ERROR;
 
     D3DTLVERTEX tpts[VNGO_MAX_VERTCOUNT];
 
@@ -1890,16 +2510,19 @@ VNGError VngoVportD3D::gtpoly_persp (int count,VngoPoint pts[],VngoTexture *tex)
 #endif
     for (int i=0;i < count;i++)
     {
-        tpts[i].sx = (D3DVALUE)pts[i].x;
-        tpts[i].sy = (D3DVALUE)pts[i].y;
+        tpts[i].sx = (D3DVALUE)pts[i].x+left;
+        tpts[i].sy = (D3DVALUE)pts[i].y+top;
 
         if (pts[i].z > 0)
             tpts[i].sz = (D3DVALUE)float(ulong(pts[i].z)) / float(0xffffffff);
-//            tpts[i].sz = (D3DVALUE)float(ulong(pts[i].z) >> 16)*ZCONST;
         else
             tpts[i].sz = 0.f;
 
-        tpts[i].rhw = (D3DVALUE)1.f / tpts[i].sz;
+        if (tpts[i].sz > 0.99999f)
+            tpts[i].sz = 0.99999f;
+
+        tpts[i].rhw = (D3DVALUE) pts[i].w;
+//        tpts[i].rhw = (D3DVALUE)1.f / tpts[i].sz;
 
         int specular = 0;
         shade = pts[i].shade;
@@ -1928,6 +2551,15 @@ VNGError VngoVportD3D::gtpoly_persp (int count,VngoPoint pts[],VngoTexture *tex)
     screen->d3dDevice->SetRenderState(D3DRENDERSTATE_SHADEMODE, D3DSHADE_GOURAUD);
     screen->d3dDevice->SetRenderState(D3DRENDERSTATE_DITHERENABLE,TRUE);
 
+    if (tex->flags & VNGO_TEXTURE_TRANSPARENT)
+    {
+        screen->d3dDevice->SetRenderState(D3DRENDERSTATE_COLORKEYENABLE,TRUE);
+    }
+    else
+    {
+        screen->d3dDevice->SetRenderState(D3DRENDERSTATE_COLORKEYENABLE,FALSE);
+    }
+
     screen->d3dDevice->DrawPrimitive(D3DPT_TRIANGLEFAN,D3DVT_TLVERTEX,tpts,count,D3DDP_DONOTCLIP);
 
     return VNGO_NO_ERROR;
@@ -1936,7 +2568,8 @@ VNGError VngoVportD3D::gtpoly_persp (int count,VngoPoint pts[],VngoTexture *tex)
 
 VNGError VngoVportD3D::gtpoly_persp (int count,VngoPointF pts[],VngoTexture *tex)
 {
-    assert(lock_status);
+    make_current();
+
     assert (count <= VNGO_MAX_VERTCOUNT);
 
     screen->open_frame();
@@ -1949,12 +2582,20 @@ VNGError VngoVportD3D::gtpoly_persp (int count,VngoPointF pts[],VngoTexture *tex
     }
     if (tptr == NULL)
     {
-        tptr = new VngoD3DTexture3D(tex,vbuff.pal);
-        if (tptr->get_err_status() != VNGO_NO_ERROR)
+        if (tex->pal_ptr == NULL)
+            tex->pal_ptr = vbuff.pal;
+
+        tptr = new VngoD3DTexture3D(tex,tex->pal_ptr);
+        if (tptr)
         {
-            delete tptr;
-            return (VNGO_UNSUPPORTED_TEXTURE);
+            if (tptr->get_err_status() != VNGO_NO_ERROR)
+            {
+                delete tptr;
+                return (VNGO_UNSUPPORTED_TEXTURE);
+            }
         }
+        else
+            return VNGO_MEMALLOC_ERROR;
     }
 
 
@@ -1962,6 +2603,9 @@ VNGError VngoVportD3D::gtpoly_persp (int count,VngoPointF pts[],VngoTexture *tex
     {
         return (VNGO_UNSUPPORTED_TEXTURE);
     }
+
+    if (tptr->ready_texture() != VNGO_NO_ERROR)
+        return VNGO_INTERNAL_ERROR;
 
     D3DTLVERTEX tpts[VNGO_MAX_VERTCOUNT];
 
@@ -1972,11 +2616,15 @@ VNGError VngoVportD3D::gtpoly_persp (int count,VngoPointF pts[],VngoTexture *tex
 
     for (int i=0;i < count;i++)
     {
-        tpts[i].sx = (D3DVALUE)pts[i].x;
-        tpts[i].sy = (D3DVALUE)pts[i].y;
+        tpts[i].sx = (D3DVALUE)pts[i].x+left;
+        tpts[i].sy = (D3DVALUE)pts[i].y+top;
         tpts[i].sz = (D3DVALUE)pts[i].z;
 
-        tpts[i].rhw = (D3DVALUE)1.f / tpts[i].sz;
+        if (tpts[i].sz > 0.99999f)
+            tpts[i].sz = 0.99999f;
+
+        tpts[i].rhw = (D3DVALUE) pts[i].w;
+//        tpts[i].rhw = (D3DVALUE)1.f / tpts[i].sz;
 
         int specular = 0;
         shade = int(pts[i].shade);
@@ -2005,6 +2653,15 @@ VNGError VngoVportD3D::gtpoly_persp (int count,VngoPointF pts[],VngoTexture *tex
     screen->d3dDevice->SetRenderState(D3DRENDERSTATE_SHADEMODE, D3DSHADE_GOURAUD);
     screen->d3dDevice->SetRenderState(D3DRENDERSTATE_DITHERENABLE,TRUE);
 
+    if (tex->flags & VNGO_TEXTURE_TRANSPARENT)
+    {
+        screen->d3dDevice->SetRenderState(D3DRENDERSTATE_COLORKEYENABLE,TRUE);
+    }
+    else
+    {
+        screen->d3dDevice->SetRenderState(D3DRENDERSTATE_COLORKEYENABLE,FALSE);
+    }
+
     screen->d3dDevice->DrawPrimitive(D3DPT_TRIANGLEFAN,D3DVT_TLVERTEX,tpts,count,D3DDP_DONOTCLIP);
 
     return VNGO_NO_ERROR;
@@ -2013,6 +2670,8 @@ VNGError VngoVportD3D::gtpoly_persp (int count,VngoPointF pts[],VngoTexture *tex
 
 VNGError VngoVportD3D::poly_a (int count,VngoPoint pts[],long alpha)
 {
+    make_current();
+
     assert (count < VNGO_MAX_VERTCOUNT);
 
     screen->open_frame();
@@ -2039,8 +2698,8 @@ VNGError VngoVportD3D::poly_a (int count,VngoPoint pts[],long alpha)
 
     for (int i=0;i < count;i++)
     {
-        verts[i].sx = (D3DVALUE)pts[i].x;
-        verts[i].sy = (D3DVALUE)pts[i].y;
+        verts[i].sx = (D3DVALUE)pts[i].x+left;
+        verts[i].sy = (D3DVALUE)pts[i].y+top;
         if (pts[i].z > 0)
             verts[i].sz = (D3DVALUE)float(ulong(pts[i].z)) / float(0xffffffff);
         else
@@ -2063,6 +2722,8 @@ VNGError VngoVportD3D::poly_a (int count,VngoPoint pts[],long alpha)
 
 VNGError VngoVportD3D::poly_a (int count,VngoPointF pts[],long alpha)
 {
+    make_current();
+
     assert (count < VNGO_MAX_VERTCOUNT);
 
     screen->open_frame();
@@ -2089,8 +2750,8 @@ VNGError VngoVportD3D::poly_a (int count,VngoPointF pts[],long alpha)
 
     for (int i=0;i < count;i++)
     {
-        verts[i].sx = (D3DVALUE)pts[i].x;
-        verts[i].sy = (D3DVALUE)pts[i].y;
+        verts[i].sx = (D3DVALUE)pts[i].x+left;
+        verts[i].sy = (D3DVALUE)pts[i].y+top;
         verts[i].sz = (D3DVALUE)pts[i].z;
         verts[i].color = RGBA_MAKE(rgb.r,rgb.g,rgb.b,alpha);
         verts[i].specular = RGBA_MAKE(0,0,0,alpha);
@@ -2108,6 +2769,8 @@ VNGError VngoVportD3D::poly_a (int count,VngoPointF pts[],long alpha)
 
 VNGError VngoVportD3D::gpoly_a (int count,VngoPoint pts[],long alpha)
 {
+    make_current();
+
     assert (count < VNGO_MAX_VERTCOUNT);
 
     screen->open_frame();
@@ -2119,8 +2782,8 @@ VNGError VngoVportD3D::gpoly_a (int count,VngoPoint pts[],long alpha)
     VngoColor24bit rgb;
     for (int i=0;i < count;i++)
     {
-        verts[i].sx = (D3DVALUE)pts[i].x;
-        verts[i].sy = (D3DVALUE)pts[i].y;
+        verts[i].sx = (D3DVALUE)pts[i].x+left;
+        verts[i].sy = (D3DVALUE)pts[i].y+top;
         if (pts[i].z > 0)
             verts[i].sz = (D3DVALUE)float(ulong(pts[i].z)) / float(0xffffffff);
         else
@@ -2161,6 +2824,8 @@ VNGError VngoVportD3D::gpoly_a (int count,VngoPoint pts[],long alpha)
 
 VNGError VngoVportD3D::gpoly_a (int count,VngoPointF pts[],long alpha)
 {
+    make_current();
+
     assert (count < VNGO_MAX_VERTCOUNT);
 
     screen->open_frame();
@@ -2172,8 +2837,8 @@ VNGError VngoVportD3D::gpoly_a (int count,VngoPointF pts[],long alpha)
     VngoColor24bit rgb;
     for (int i=0;i < count;i++)
     {
-        verts[i].sx = (D3DVALUE)pts[i].x;
-        verts[i].sy = (D3DVALUE)pts[i].y;
+        verts[i].sx = (D3DVALUE)pts[i].x+left;
+        verts[i].sy = (D3DVALUE)pts[i].y+top;
         verts[i].sz = (D3DVALUE)pts[i].z;
 
         tclr = shades[int(pts[i].shade) >> 3];
@@ -2211,19 +2876,23 @@ VNGError VngoVportD3D::gpoly_a (int count,VngoPointF pts[],long alpha)
 
 VNGError VngoVportD3D::gpoly_persp_a (int count,VngoPoint pts[],long alpha)
 {
+    make_current();
+
     assert (count < VNGO_MAX_VERTCOUNT);
     return gpoly_a(count,pts,alpha);
 }
 VNGError VngoVportD3D::gpoly_persp_a (int count,VngoPointF pts[],long alpha)
 {
+    make_current();
+
     assert (count < VNGO_MAX_VERTCOUNT);
     return gpoly_a(count,pts,alpha);
 }
 
 VNGError VngoVportD3D::tpoly_a (int count,VngoPoint pts[],VngoTexture *tex,long alpha)
 {
+    make_current();
 
-    assert(lock_status);
     assert (count <= VNGO_MAX_VERTCOUNT);
 
     screen->open_frame();
@@ -2236,12 +2905,20 @@ VNGError VngoVportD3D::tpoly_a (int count,VngoPoint pts[],VngoTexture *tex,long 
     }
     if (tptr == NULL)
     {
-        tptr = new VngoD3DTexture3D(tex,vbuff.pal);
-        if (tptr->get_err_status() != VNGO_NO_ERROR)
+        if (tex->pal_ptr == NULL)
+            tex->pal_ptr = vbuff.pal;
+
+        tptr = new VngoD3DTexture3D(tex,tex->pal_ptr);
+        if (tptr)
         {
-            delete tptr;
-            return (VNGO_UNSUPPORTED_TEXTURE);
+            if (tptr->get_err_status() != VNGO_NO_ERROR)
+            {
+                delete tptr;
+                return (VNGO_UNSUPPORTED_TEXTURE);
+            }
         }
+        else
+            return VNGO_MEMALLOC_ERROR;
     }
 
 
@@ -2249,6 +2926,9 @@ VNGError VngoVportD3D::tpoly_a (int count,VngoPoint pts[],VngoTexture *tex,long 
     {
         return (VNGO_UNSUPPORTED_TEXTURE);
     }
+
+    if (tptr->ready_texture() != VNGO_NO_ERROR)
+        return VNGO_INTERNAL_ERROR;
 
     D3DTLVERTEX tpts[VNGO_MAX_VERTCOUNT];
 
@@ -2269,15 +2949,16 @@ VNGError VngoVportD3D::tpoly_a (int count,VngoPoint pts[],VngoTexture *tex,long 
 
     for (int i=0;i < count;i++)
     {
-        tpts[i].sx = (D3DVALUE)pts[i].x;
-        tpts[i].sy = (D3DVALUE)pts[i].y;
+        tpts[i].sx = (D3DVALUE)pts[i].x+left;
+        tpts[i].sy = (D3DVALUE)pts[i].y+top;
 
         if (pts[i].z > 0)
             tpts[i].sz = (D3DVALUE)float(ulong(pts[i].z) >> 16)*ZCONST;
         else
             tpts[i].sz = 0.f;
 
-        tpts[i].rhw = (D3DVALUE)1.f / tpts[i].sz;
+        tpts[i].rhw = (D3DVALUE) pts[i].w;
+//        tpts[i].rhw = (D3DVALUE)1.f / tpts[i].sz;
 
         tpts[i].color = RGBA_MAKE (shade,shade,shade,alpha);
         tpts[i].specular = RGBA_MAKE(specular,specular,specular,alpha);
@@ -2292,8 +2973,13 @@ VNGError VngoVportD3D::tpoly_a (int count,VngoPoint pts[],VngoTexture *tex,long 
 
     if (tex->flags & VNGO_TEXTURE_TRANSPARENT)
     {
-        screen->d3dDevice->SetRenderState(D3DRENDERSTATE_COLORKEYENABLE, TRUE);
+        screen->d3dDevice->SetRenderState(D3DRENDERSTATE_COLORKEYENABLE,TRUE);
     }
+    else
+    {
+        screen->d3dDevice->SetRenderState(D3DRENDERSTATE_COLORKEYENABLE,FALSE);
+    }
+
     screen->d3dDevice->SetRenderState(D3DRENDERSTATE_ALPHABLENDENABLE, TRUE);
     screen->d3dDevice->SetRenderState(D3DRENDERSTATE_DESTBLEND, D3DBLEND_BOTHSRCALPHA);
     screen->d3dDevice->SetRenderState(D3DRENDERSTATE_SRCBLEND, D3DBLEND_BOTHSRCALPHA);
@@ -2316,7 +3002,8 @@ VNGError VngoVportD3D::tpoly_a (int count,VngoPoint pts[],VngoTexture *tex,long 
 VNGError VngoVportD3D::tpoly_a (int count,VngoPointF pts[],VngoTexture *tex,long alpha)
 {
 
-    assert(lock_status);
+    make_current();
+
     assert (count <= VNGO_MAX_VERTCOUNT);
 
     screen->open_frame();
@@ -2329,12 +3016,20 @@ VNGError VngoVportD3D::tpoly_a (int count,VngoPointF pts[],VngoTexture *tex,long
     }
     if (tptr == NULL)
     {
-        tptr = new VngoD3DTexture3D(tex,vbuff.pal);
-        if (tptr->get_err_status() != VNGO_NO_ERROR)
+        if (tex->pal_ptr == NULL)
+            tex->pal_ptr = vbuff.pal;
+
+        tptr = new VngoD3DTexture3D(tex,tex->pal_ptr);
+        if (tptr)
         {
-            delete tptr;
-            return (VNGO_UNSUPPORTED_TEXTURE);
+            if (tptr->get_err_status() != VNGO_NO_ERROR)
+            {
+                delete tptr;
+                return (VNGO_UNSUPPORTED_TEXTURE);
+            }
         }
+        else
+            return VNGO_MEMALLOC_ERROR;
     }
 
 
@@ -2342,6 +3037,9 @@ VNGError VngoVportD3D::tpoly_a (int count,VngoPointF pts[],VngoTexture *tex,long
     {
         return (VNGO_UNSUPPORTED_TEXTURE);
     }
+
+    if (tptr->ready_texture() != VNGO_NO_ERROR)
+        return VNGO_INTERNAL_ERROR;
 
     D3DTLVERTEX tpts[VNGO_MAX_VERTCOUNT];
 
@@ -2362,11 +3060,12 @@ VNGError VngoVportD3D::tpoly_a (int count,VngoPointF pts[],VngoTexture *tex,long
 
     for (int i=0;i < count;i++)
     {
-        tpts[i].sx = (D3DVALUE)pts[i].x;
-        tpts[i].sy = (D3DVALUE)pts[i].y;
+        tpts[i].sx = (D3DVALUE)pts[i].x+left;
+        tpts[i].sy = (D3DVALUE)pts[i].y+top;
         tpts[i].sz = (D3DVALUE)pts[i].z;
 
-        tpts[i].rhw = (D3DVALUE)1.f / tpts[i].sz;
+        tpts[i].rhw = (D3DVALUE) pts[i].w;
+//        tpts[i].rhw = (D3DVALUE)1.f / tpts[i].sz;
 
         tpts[i].color = RGBA_MAKE (shade,shade,shade,alpha);
         tpts[i].specular = RGBA_MAKE(specular,specular,specular,alpha);
@@ -2382,8 +3081,13 @@ VNGError VngoVportD3D::tpoly_a (int count,VngoPointF pts[],VngoTexture *tex,long
 
     if (tex->flags & VNGO_TEXTURE_TRANSPARENT)
     {
-        screen->d3dDevice->SetRenderState(D3DRENDERSTATE_COLORKEYENABLE, TRUE);
+        screen->d3dDevice->SetRenderState(D3DRENDERSTATE_COLORKEYENABLE,TRUE);
     }
+    else
+    {
+        screen->d3dDevice->SetRenderState(D3DRENDERSTATE_COLORKEYENABLE,FALSE);
+    }
+
     screen->d3dDevice->SetRenderState(D3DRENDERSTATE_ALPHABLENDENABLE, TRUE);
     screen->d3dDevice->SetRenderState(D3DRENDERSTATE_DESTBLEND, D3DBLEND_BOTHSRCALPHA);
     screen->d3dDevice->SetRenderState(D3DRENDERSTATE_SRCBLEND, D3DBLEND_BOTHSRCALPHA);
@@ -2405,8 +3109,8 @@ VNGError VngoVportD3D::tpoly_a (int count,VngoPointF pts[],VngoTexture *tex,long
 
 VNGError VngoVportD3D::tpoly_persp_a (int count,VngoPoint pts[],VngoTexture *tex,long alpha)
 {
+    make_current();
 
-    assert(lock_status);
     assert (count <= VNGO_MAX_VERTCOUNT);
 
     screen->open_frame();
@@ -2419,12 +3123,20 @@ VNGError VngoVportD3D::tpoly_persp_a (int count,VngoPoint pts[],VngoTexture *tex
     }
     if (tptr == NULL)
     {
-        tptr = new VngoD3DTexture3D(tex,vbuff.pal);
-        if (tptr->get_err_status() != VNGO_NO_ERROR)
+        if (tex->pal_ptr == NULL)
+            tex->pal_ptr = vbuff.pal;
+
+        tptr = new VngoD3DTexture3D(tex,tex->pal_ptr);
+        if (tptr)
         {
-            delete tptr;
-            return (VNGO_UNSUPPORTED_TEXTURE);
+            if (tptr->get_err_status() != VNGO_NO_ERROR)
+            {
+                delete tptr;
+                return (VNGO_UNSUPPORTED_TEXTURE);
+            }
         }
+        else
+            return VNGO_MEMALLOC_ERROR;
     }
 
 
@@ -2432,6 +3144,9 @@ VNGError VngoVportD3D::tpoly_persp_a (int count,VngoPoint pts[],VngoTexture *tex
     {
         return (VNGO_UNSUPPORTED_TEXTURE);
     }
+
+    if (tptr->ready_texture() != VNGO_NO_ERROR)
+        return VNGO_INTERNAL_ERROR;
 
     D3DTLVERTEX tpts[VNGO_MAX_VERTCOUNT];
 
@@ -2452,15 +3167,19 @@ VNGError VngoVportD3D::tpoly_persp_a (int count,VngoPoint pts[],VngoTexture *tex
 
     for (int i=0;i < count;i++)
     {
-        tpts[i].sx = (D3DVALUE)pts[i].x;
-        tpts[i].sy = (D3DVALUE)pts[i].y;
+        tpts[i].sx = (D3DVALUE)pts[i].x+left;
+        tpts[i].sy = (D3DVALUE)pts[i].y+top;
 
         if (pts[i].z > 0)
             tpts[i].sz = (D3DVALUE)float(ulong(pts[i].z) >> 16)*ZCONST;
         else
             tpts[i].sz = 0.f;
 
-        tpts[i].rhw = (D3DVALUE)1.f / tpts[i].sz;
+        if (tpts[i].sz > 0.99999f)
+            tpts[i].sz = 0.99999f;
+
+        tpts[i].rhw = (D3DVALUE) pts[i].w;
+//        tpts[i].rhw = (D3DVALUE)1.f / tpts[i].sz;
 
         tpts[i].color = RGBA_MAKE (shade,shade,shade,alpha);
         tpts[i].specular = RGBA_MAKE(specular,specular,specular,alpha);
@@ -2475,8 +3194,13 @@ VNGError VngoVportD3D::tpoly_persp_a (int count,VngoPoint pts[],VngoTexture *tex
 
     if (tex->flags & VNGO_TEXTURE_TRANSPARENT)
     {
-        screen->d3dDevice->SetRenderState(D3DRENDERSTATE_COLORKEYENABLE, TRUE);
+        screen->d3dDevice->SetRenderState(D3DRENDERSTATE_COLORKEYENABLE,TRUE);
     }
+    else
+    {
+        screen->d3dDevice->SetRenderState(D3DRENDERSTATE_COLORKEYENABLE,FALSE);
+    }
+
     screen->d3dDevice->SetRenderState(D3DRENDERSTATE_ALPHABLENDENABLE, TRUE);
     screen->d3dDevice->SetRenderState(D3DRENDERSTATE_DESTBLEND, D3DBLEND_BOTHSRCALPHA);
     screen->d3dDevice->SetRenderState(D3DRENDERSTATE_SRCBLEND, D3DBLEND_BOTHSRCALPHA);
@@ -2498,8 +3222,8 @@ VNGError VngoVportD3D::tpoly_persp_a (int count,VngoPoint pts[],VngoTexture *tex
 
 VNGError VngoVportD3D::tpoly_persp_a (int count,VngoPointF pts[],VngoTexture *tex,long alpha)
 {
+    make_current();
 
-    assert(lock_status);
     assert (count <= VNGO_MAX_VERTCOUNT);
 
     screen->open_frame();
@@ -2512,12 +3236,20 @@ VNGError VngoVportD3D::tpoly_persp_a (int count,VngoPointF pts[],VngoTexture *te
     }
     if (tptr == NULL)
     {
-        tptr = new VngoD3DTexture3D(tex,vbuff.pal);
-        if (tptr->get_err_status() != VNGO_NO_ERROR)
+        if (tex->pal_ptr == NULL)
+            tex->pal_ptr = vbuff.pal;
+
+        tptr = new VngoD3DTexture3D(tex,tex->pal_ptr);
+        if (tptr)
         {
-            delete tptr;
-            return (VNGO_UNSUPPORTED_TEXTURE);
+            if (tptr->get_err_status() != VNGO_NO_ERROR)
+            {
+                delete tptr;
+                return (VNGO_UNSUPPORTED_TEXTURE);
+            }
         }
+        else
+            return VNGO_MEMALLOC_ERROR;
     }
 
 
@@ -2525,6 +3257,9 @@ VNGError VngoVportD3D::tpoly_persp_a (int count,VngoPointF pts[],VngoTexture *te
     {
         return (VNGO_UNSUPPORTED_TEXTURE);
     }
+
+    if (tptr->ready_texture() != VNGO_NO_ERROR)
+        return VNGO_INTERNAL_ERROR;
 
     D3DTLVERTEX tpts[VNGO_MAX_VERTCOUNT];
 
@@ -2545,10 +3280,15 @@ VNGError VngoVportD3D::tpoly_persp_a (int count,VngoPointF pts[],VngoTexture *te
 
     for (int i=0;i < count;i++)
     {
-        tpts[i].sx = (D3DVALUE)pts[i].x;
-        tpts[i].sy = (D3DVALUE)pts[i].y;
+        tpts[i].sx = (D3DVALUE)pts[i].x+left;
+        tpts[i].sy = (D3DVALUE)pts[i].y+top;
         tpts[i].sz = (D3DVALUE)pts[i].z;
-        tpts[i].rhw = (D3DVALUE)1.f / tpts[i].sz;
+
+        if (tpts[i].sz > 0.99999f)
+            tpts[i].sz = 0.99999f;
+
+        tpts[i].rhw = (D3DVALUE) pts[i].w;
+//        tpts[i].rhw = (D3DVALUE)1.f / tpts[i].sz;
 
         tpts[i].color = RGBA_MAKE (shade,shade,shade,alpha);
         tpts[i].specular = RGBA_MAKE(specular,specular,specular,alpha);
@@ -2563,8 +3303,13 @@ VNGError VngoVportD3D::tpoly_persp_a (int count,VngoPointF pts[],VngoTexture *te
 
     if (tex->flags & VNGO_TEXTURE_TRANSPARENT)
     {
-        screen->d3dDevice->SetRenderState(D3DRENDERSTATE_COLORKEYENABLE, TRUE);
+        screen->d3dDevice->SetRenderState(D3DRENDERSTATE_COLORKEYENABLE,TRUE);
     }
+    else
+    {
+        screen->d3dDevice->SetRenderState(D3DRENDERSTATE_COLORKEYENABLE,FALSE);
+    }
+
     screen->d3dDevice->SetRenderState(D3DRENDERSTATE_ALPHABLENDENABLE, TRUE);
     screen->d3dDevice->SetRenderState(D3DRENDERSTATE_DESTBLEND, D3DBLEND_BOTHSRCALPHA);
     screen->d3dDevice->SetRenderState(D3DRENDERSTATE_SRCBLEND, D3DBLEND_BOTHSRCALPHA);
@@ -2586,8 +3331,8 @@ VNGError VngoVportD3D::tpoly_persp_a (int count,VngoPointF pts[],VngoTexture *te
 
 VNGError VngoVportD3D::gtpoly_a (int count,VngoPoint pts[],VngoTexture *tex,long alpha)
 {
+    make_current();
 
-    assert(lock_status);
     assert (count <= VNGO_MAX_VERTCOUNT);
 
     screen->open_frame();
@@ -2600,12 +3345,20 @@ VNGError VngoVportD3D::gtpoly_a (int count,VngoPoint pts[],VngoTexture *tex,long
     }
     if (tptr == NULL)
     {
-        tptr = new VngoD3DTexture3D(tex,vbuff.pal);
-        if (tptr->get_err_status() != VNGO_NO_ERROR)
+        if (tex->pal_ptr == NULL)
+            tex->pal_ptr = vbuff.pal;
+
+        tptr = new VngoD3DTexture3D(tex,tex->pal_ptr);
+        if (tptr)
         {
-            delete tptr;
-            return (VNGO_UNSUPPORTED_TEXTURE);
+            if (tptr->get_err_status() != VNGO_NO_ERROR)
+            {
+                delete tptr;
+                return (VNGO_UNSUPPORTED_TEXTURE);
+            }
         }
+        else
+            return VNGO_MEMALLOC_ERROR;
     }
 
 
@@ -2613,6 +3366,9 @@ VNGError VngoVportD3D::gtpoly_a (int count,VngoPoint pts[],VngoTexture *tex,long
     {
         return (VNGO_UNSUPPORTED_TEXTURE);
     }
+
+    if (tptr->ready_texture() != VNGO_NO_ERROR)
+        return VNGO_INTERNAL_ERROR;
 
     D3DTLVERTEX tpts[VNGO_MAX_VERTCOUNT];
 
@@ -2623,15 +3379,16 @@ VNGError VngoVportD3D::gtpoly_a (int count,VngoPoint pts[],VngoTexture *tex,long
 
     for (int i=0;i < count;i++)
     {
-        tpts[i].sx = (D3DVALUE)pts[i].x;
-        tpts[i].sy = (D3DVALUE)pts[i].y;
+        tpts[i].sx = (D3DVALUE)pts[i].x+left;
+        tpts[i].sy = (D3DVALUE)pts[i].y+top;
 
         if (pts[i].z > 0)
             tpts[i].sz = (D3DVALUE)float(ulong(pts[i].z) >> 16)*ZCONST;
         else
             tpts[i].sz = 0.f;
 
-        tpts[i].rhw = (D3DVALUE)1.f / tpts[i].sz;
+        tpts[i].rhw = (D3DVALUE) pts[i].w;
+//        tpts[i].rhw = (D3DVALUE)1.f / tpts[i].sz;
 
         int specular = 0;
         shade = pts[i].shade;
@@ -2652,11 +3409,15 @@ VNGError VngoVportD3D::gtpoly_a (int count,VngoPoint pts[],VngoTexture *tex,long
         assert (pts[i].y < vbuff.height);
     }
 
-
     if (tex->flags & VNGO_TEXTURE_TRANSPARENT)
     {
-        screen->d3dDevice->SetRenderState(D3DRENDERSTATE_COLORKEYENABLE, TRUE);
+        screen->d3dDevice->SetRenderState(D3DRENDERSTATE_COLORKEYENABLE,TRUE);
     }
+    else
+    {
+        screen->d3dDevice->SetRenderState(D3DRENDERSTATE_COLORKEYENABLE,FALSE);
+    }
+
     screen->d3dDevice->SetRenderState(D3DRENDERSTATE_ALPHABLENDENABLE, TRUE);
     screen->d3dDevice->SetRenderState(D3DRENDERSTATE_DESTBLEND, D3DBLEND_BOTHSRCALPHA);
     screen->d3dDevice->SetRenderState(D3DRENDERSTATE_SRCBLEND, D3DBLEND_BOTHSRCALPHA);
@@ -2679,8 +3440,8 @@ VNGError VngoVportD3D::gtpoly_a (int count,VngoPoint pts[],VngoTexture *tex,long
 
 VNGError VngoVportD3D::gtpoly_a (int count,VngoPointF pts[],VngoTexture *tex,long alpha)
 {
+    make_current();
 
-    assert(lock_status);
     assert (count <= VNGO_MAX_VERTCOUNT);
 
     screen->open_frame();
@@ -2693,12 +3454,20 @@ VNGError VngoVportD3D::gtpoly_a (int count,VngoPointF pts[],VngoTexture *tex,lon
     }
     if (tptr == NULL)
     {
-        tptr = new VngoD3DTexture3D(tex,vbuff.pal);
-        if (tptr->get_err_status() != VNGO_NO_ERROR)
+        if (tex->pal_ptr == NULL)
+            tex->pal_ptr = vbuff.pal;
+
+        tptr = new VngoD3DTexture3D(tex,tex->pal_ptr);
+        if (tptr)
         {
-            delete tptr;
-            return (VNGO_UNSUPPORTED_TEXTURE);
+            if (tptr->get_err_status() != VNGO_NO_ERROR)
+            {
+                delete tptr;
+                return (VNGO_UNSUPPORTED_TEXTURE);
+            }
         }
+        else
+            return VNGO_MEMALLOC_ERROR;
     }
 
 
@@ -2706,6 +3475,9 @@ VNGError VngoVportD3D::gtpoly_a (int count,VngoPointF pts[],VngoTexture *tex,lon
     {
         return (VNGO_UNSUPPORTED_TEXTURE);
     }
+
+    if (tptr->ready_texture() != VNGO_NO_ERROR)
+        return VNGO_INTERNAL_ERROR;
 
     D3DTLVERTEX tpts[VNGO_MAX_VERTCOUNT];
 
@@ -2716,10 +3488,11 @@ VNGError VngoVportD3D::gtpoly_a (int count,VngoPointF pts[],VngoTexture *tex,lon
 
     for (int i=0;i < count;i++)
     {
-        tpts[i].sx = (D3DVALUE)pts[i].x;
-        tpts[i].sy = (D3DVALUE)pts[i].y;
+        tpts[i].sx = (D3DVALUE)pts[i].x+left;
+        tpts[i].sy = (D3DVALUE)pts[i].y+top;
         tpts[i].sz = (D3DVALUE)pts[i].z;
-        tpts[i].rhw = (D3DVALUE)1.f / tpts[i].sz;
+        tpts[i].rhw = (D3DVALUE) pts[i].w;
+//        tpts[i].rhw = (D3DVALUE)1.f / tpts[i].sz;
 
         int specular = 0;
         shade = int(pts[i].shade);
@@ -2740,11 +3513,15 @@ VNGError VngoVportD3D::gtpoly_a (int count,VngoPointF pts[],VngoTexture *tex,lon
         assert (pts[i].y < vbuff.height);
     }
 
-
     if (tex->flags & VNGO_TEXTURE_TRANSPARENT)
     {
-        screen->d3dDevice->SetRenderState(D3DRENDERSTATE_COLORKEYENABLE, TRUE);
+        screen->d3dDevice->SetRenderState(D3DRENDERSTATE_COLORKEYENABLE,TRUE);
     }
+    else
+    {
+        screen->d3dDevice->SetRenderState(D3DRENDERSTATE_COLORKEYENABLE,FALSE);
+    }
+
     screen->d3dDevice->SetRenderState(D3DRENDERSTATE_ALPHABLENDENABLE, TRUE);
     screen->d3dDevice->SetRenderState(D3DRENDERSTATE_DESTBLEND, D3DBLEND_BOTHSRCALPHA);
     screen->d3dDevice->SetRenderState(D3DRENDERSTATE_SRCBLEND, D3DBLEND_BOTHSRCALPHA);
@@ -2766,8 +3543,8 @@ VNGError VngoVportD3D::gtpoly_a (int count,VngoPointF pts[],VngoTexture *tex,lon
 
 VNGError VngoVportD3D::gtpoly_persp_a (int count,VngoPointF pts[],VngoTexture *tex,long alpha)
 {
+    make_current();
 
-    assert(lock_status);
     assert (count <= VNGO_MAX_VERTCOUNT);
 
     screen->open_frame();
@@ -2780,12 +3557,20 @@ VNGError VngoVportD3D::gtpoly_persp_a (int count,VngoPointF pts[],VngoTexture *t
     }
     if (tptr == NULL)
     {
-        tptr = new VngoD3DTexture3D(tex,vbuff.pal);
-        if (tptr->get_err_status() != VNGO_NO_ERROR)
+        if (tex->pal_ptr == NULL)
+            tex->pal_ptr = vbuff.pal;
+
+        tptr = new VngoD3DTexture3D(tex,tex->pal_ptr);
+        if (tptr)
         {
-            delete tptr;
-            return (VNGO_UNSUPPORTED_TEXTURE);
+            if (tptr->get_err_status() != VNGO_NO_ERROR)
+            {
+                delete tptr;
+                return (VNGO_UNSUPPORTED_TEXTURE);
+            }
         }
+        else
+            return VNGO_MEMALLOC_ERROR;
     }
 
 
@@ -2793,6 +3578,9 @@ VNGError VngoVportD3D::gtpoly_persp_a (int count,VngoPointF pts[],VngoTexture *t
     {
         return (VNGO_UNSUPPORTED_TEXTURE);
     }
+
+    if (tptr->ready_texture() != VNGO_NO_ERROR)
+        return VNGO_INTERNAL_ERROR;
 
     D3DTLVERTEX tpts[VNGO_MAX_VERTCOUNT];
 
@@ -2803,11 +3591,15 @@ VNGError VngoVportD3D::gtpoly_persp_a (int count,VngoPointF pts[],VngoTexture *t
 
     for (int i=0;i < count;i++)
     {
-        tpts[i].sx = (D3DVALUE)pts[i].x;
-        tpts[i].sy = (D3DVALUE)pts[i].y;
+        tpts[i].sx = (D3DVALUE)pts[i].x+left;
+        tpts[i].sy = (D3DVALUE)pts[i].y+top;
         tpts[i].sz = (D3DVALUE)pts[i].z;
 
-        tpts[i].rhw = (D3DVALUE)1.f / tpts[i].sz;
+        if (tpts[i].sz > 0.99999f)
+            tpts[i].sz = 0.99999f;
+
+        tpts[i].rhw = (D3DVALUE) pts[i].w;
+//        tpts[i].rhw = (D3DVALUE)1.f / tpts[i].sz;
 
         int specular = 0;
         shade = int(pts[i].shade);
@@ -2832,8 +3624,13 @@ VNGError VngoVportD3D::gtpoly_persp_a (int count,VngoPointF pts[],VngoTexture *t
 
     if (tex->flags & VNGO_TEXTURE_TRANSPARENT)
     {
-        screen->d3dDevice->SetRenderState(D3DRENDERSTATE_COLORKEYENABLE, TRUE);
+        screen->d3dDevice->SetRenderState(D3DRENDERSTATE_COLORKEYENABLE,TRUE);
     }
+    else
+    {
+        screen->d3dDevice->SetRenderState(D3DRENDERSTATE_COLORKEYENABLE,FALSE);
+    }
+
     screen->d3dDevice->SetRenderState(D3DRENDERSTATE_ALPHABLENDENABLE, TRUE);
     screen->d3dDevice->SetRenderState(D3DRENDERSTATE_DESTBLEND, D3DBLEND_BOTHSRCALPHA);
     screen->d3dDevice->SetRenderState(D3DRENDERSTATE_SRCBLEND, D3DBLEND_BOTHSRCALPHA);
@@ -2855,8 +3652,8 @@ VNGError VngoVportD3D::gtpoly_persp_a (int count,VngoPointF pts[],VngoTexture *t
 
 VNGError VngoVportD3D::gtpoly_persp_a (int count,VngoPoint pts[],VngoTexture *tex,long alpha)
 {
+    make_current();
 
-    assert(lock_status);
     assert (count <= VNGO_MAX_VERTCOUNT);
 
     screen->open_frame();
@@ -2869,12 +3666,20 @@ VNGError VngoVportD3D::gtpoly_persp_a (int count,VngoPoint pts[],VngoTexture *te
     }
     if (tptr == NULL)
     {
-        tptr = new VngoD3DTexture3D(tex,vbuff.pal);
-        if (tptr->get_err_status() != VNGO_NO_ERROR)
+        if (tex->pal_ptr == NULL)
+            tex->pal_ptr = vbuff.pal;
+
+        tptr = new VngoD3DTexture3D(tex,tex->pal_ptr);
+        if (tptr)
         {
-            delete tptr;
-            return (VNGO_UNSUPPORTED_TEXTURE);
+            if (tptr->get_err_status() != VNGO_NO_ERROR)
+            {
+                delete tptr;
+                return (VNGO_UNSUPPORTED_TEXTURE);
+            }
         }
+        else
+            return VNGO_MEMALLOC_ERROR;
     }
 
 
@@ -2882,6 +3687,9 @@ VNGError VngoVportD3D::gtpoly_persp_a (int count,VngoPoint pts[],VngoTexture *te
     {
         return (VNGO_UNSUPPORTED_TEXTURE);
     }
+
+    if (tptr->ready_texture() != VNGO_NO_ERROR)
+        return VNGO_INTERNAL_ERROR;
 
     D3DTLVERTEX tpts[VNGO_MAX_VERTCOUNT];
 
@@ -2892,15 +3700,19 @@ VNGError VngoVportD3D::gtpoly_persp_a (int count,VngoPoint pts[],VngoTexture *te
 
     for (int i=0;i < count;i++)
     {
-        tpts[i].sx = (D3DVALUE)pts[i].x;
-        tpts[i].sy = (D3DVALUE)pts[i].y;
+        tpts[i].sx = (D3DVALUE)pts[i].x+left;
+        tpts[i].sy = (D3DVALUE)pts[i].y+top;
 
         if (pts[i].z > 0)
             tpts[i].sz = (D3DVALUE)float(ulong(pts[i].z) >> 16)*ZCONST;
         else
             tpts[i].sz = 0.f;
 
-        tpts[i].rhw = (D3DVALUE)1.f / tpts[i].sz;
+        if (tpts[i].sz > 0.99999f)
+            tpts[i].sz = 0.99999f;
+
+        tpts[i].rhw = (D3DVALUE) pts[i].w;
+//        tpts[i].rhw = (D3DVALUE)1.f / tpts[i].sz;
 
         int specular = 0;
         shade = pts[i].shade;
@@ -2921,11 +3733,15 @@ VNGError VngoVportD3D::gtpoly_persp_a (int count,VngoPoint pts[],VngoTexture *te
         assert (pts[i].y < vbuff.height);
     }
 
-
     if (tex->flags & VNGO_TEXTURE_TRANSPARENT)
     {
-        screen->d3dDevice->SetRenderState(D3DRENDERSTATE_COLORKEYENABLE, TRUE);
+        screen->d3dDevice->SetRenderState(D3DRENDERSTATE_COLORKEYENABLE,TRUE);
     }
+    else
+    {
+        screen->d3dDevice->SetRenderState(D3DRENDERSTATE_COLORKEYENABLE,FALSE);
+    }
+
     screen->d3dDevice->SetRenderState(D3DRENDERSTATE_ALPHABLENDENABLE, TRUE);
     screen->d3dDevice->SetRenderState(D3DRENDERSTATE_DESTBLEND, D3DBLEND_BOTHSRCALPHA);
     screen->d3dDevice->SetRenderState(D3DRENDERSTATE_SRCBLEND, D3DBLEND_BOTHSRCALPHA);
@@ -2945,4 +3761,4 @@ VNGError VngoVportD3D::gtpoly_persp_a (int count,VngoPoint pts[],VngoTexture *te
     return VNGO_NO_ERROR;
 }
 
-//°±² End of module - vngvvp8.cpp ²±°
+//°±² End of module - vngd3d.cpp ²±°

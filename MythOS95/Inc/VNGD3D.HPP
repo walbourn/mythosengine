@@ -25,13 +25,14 @@
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
+// Created by Tim Little
+//
 // vngd3d.hpp
 //
 // Contains the Direct3D viewport class definition
 //
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
 
-#ifdef  _D3D
 #ifndef __VNGD3D_HPP
 #define __VNGD3D_HPP  1
 
@@ -64,41 +65,74 @@
 class VngoVportD3D : public VngoVport
 {
     long            left,top;
+    DDSURFACEDESC   ddsd;
     VngoDirect3D    *screen;
 
     int plock();
     int punlock();
 public:
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    // Constructor/Destructors                                              ³
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
     VngoVportD3D() {};
-    VngoVportD3D(long,long,long,long,VngoPal *,dword,VngoScreenManager *_screen);
+    VngoVportD3D(VngoRect &dim,VngoPal *,dword,VngoScreenManager *_screen);
+
     virtual ~VngoVportD3D();
 
-    virtual VNGError init (long,long,long,long,VngoPal *,dword,VngoScreenManager *_screen);
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    // Operations                                                           ³
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+    VNGError init (VngoRect &dim,VngoPal *,dword,VngoScreenManager *_screen);
 
-    // All of these functions will be virtuals eventualy.
     virtual void zbuffer_on();
     virtual void zbuffer_off();
+
+    virtual void texture_filter_on()
+    {
+        vflags |= VNGO_TEXTURE_FILTER;
+        VgSystem.cur_vport = NULL;
+        make_current();
+    }
+    virtual void texture_filter_off()
+    {
+        vflags &= ~VNGO_TEXTURE_FILTER;
+        VgSystem.cur_vport = NULL;
+        make_current();
+    }
+
+    virtual void true_alpha_on()
+    {
+        vflags |= VNGO_TRUE_ALPHA;
+        VgSystem.cur_vport = NULL;
+        make_current();
+    }
+    virtual void true_alpha_off()
+    {
+        vflags &= ~VNGO_TRUE_ALPHA;
+        VgSystem.cur_vport = NULL;
+        make_current();
+    }
+
+    virtual void make_current();
+
+    virtual VNGError capture(XFBitmap *bm)
+    {
+        VNGError err = VNGO_INTERNAL_ERROR;
+        int was_locked = plock();
+        if(was_locked != -1)
+        {
+            err = VngoVport::capture(bm);
+            if (!was_locked)
+                punlock();
+        }
+        return err;
+    }
+
+    //ÄÄÄ Basic drawing functions
     virtual void reset(dword c=0,dword farz=0xffffffff);
-
-
     virtual VNGError vpcopy (int destx,int desty,VngoVport *dest);
-//            {return VNGO_NOT_SUPPORTED;};
 
-    virtual VNGError pixel (VngoPoint *pt, VngoColor24bit *rgb_val = NULL)
-            {return VNGO_NOT_SUPPORTED;};
-    virtual VNGError pixel (VngoPointF *pt, VngoColor24bit *rgb_val = NULL)
-            {return VNGO_NOT_SUPPORTED;};
-    virtual VNGError clip_pixel (VngoPoint *pt, VngoColor24bit *rgb_val = NULL,
-                                 VngoRect *clip_rect=NULL)
-            {return VNGO_NOT_SUPPORTED;};
-    virtual VNGError clip_pixel (VngoPointF *pt, VngoColor24bit *rgb_val = NULL,
-                                 VngoRect *clip_rect=NULL)
-            {return VNGO_NOT_SUPPORTED;};
-    virtual dword read_pixel (VngoPoint *pt, VngoPoint *dest)
-            {return VNGO_NOT_SUPPORTED;};
-    virtual dword read_pixel (int x, int y, VngoPoint *dest)
-            {return VNGO_NOT_SUPPORTED;};
-
+    //ÄÄÄ Rectangle drawing functions
     virtual VNGError frect (VngoRect *rect, dword color);
     virtual VNGError frect (VngoRect *rect, VngoColor24bit *rgb_val);
     virtual VNGError clip_frect (VngoRect *rect,
@@ -108,6 +142,31 @@ public:
                                  VngoColor24bit *rgb_val,
                                  VngoRect *clip_rect=NULL);
 
+    //ÄÄÄ Pixel drawing functions
+    virtual VNGError pixel (VngoPoint *pt, VngoColor24bit *rgb_val = NULL);
+    virtual VNGError pixel (VngoPointF *pt, VngoColor24bit *rgb_val = NULL);
+    virtual VNGError clip_pixel (VngoPoint *pt, VngoColor24bit *rgb_val = NULL,
+                                 VngoRect *clip_rect=NULL);
+    virtual VNGError clip_pixel (VngoPointF *pt, VngoColor24bit *rgb_val = NULL,
+                                 VngoRect *clip_rect=NULL);
+    virtual dword read_pixel (VngoPoint *pt, VngoPoint *dest)
+        { return VNGO_NOT_SUPPORTED; }
+    virtual dword read_pixel (int x, int y, VngoPoint *dest)
+        { return VNGO_NOT_SUPPORTED; }
+
+    //ÄÄÄ Image transfer functions
+    virtual VNGError image_trans (VngoRect *dest_rect,VngoTexture *img,
+                                  dword flags=0);
+    virtual VNGError image_trans_a (VngoRect *dest_rect,VngoTexture *img,
+                                    long alpha=127, dword flags=0)
+        { return VNGO_NOT_SUPPORTED; }
+
+    virtual VNGError image_trans_mono (VngoRect *dest_rect,VngoTexture *img,
+                                       dword fgcol,dword bgcol=VNGO_TRANSPARENT);
+    virtual VNGError zblit_mono (VngoRect *dest_rect,VngoZMap *zmp,dword fdist,
+                                 dword ndist=0);
+
+    //ÄÄÄ Line drawing functions
     virtual VNGError line (VngoPoint *p1, VngoPoint *p2,
                            VngoColor24bit *rgb_val=NULL);
     virtual VNGError line (VngoPointF *p1, VngoPointF *p2,
@@ -119,26 +178,20 @@ public:
 
     virtual VNGError clip_line (VngoPoint *p1, VngoPoint *p2,
                                 VngoColor24bit *rgb_val=NULL,
-                                VngoRect *clip_rect=NULL)
-            {return VNGO_NOT_SUPPORTED;};
+                                VngoRect *clip_rect=NULL);
     virtual VNGError clip_line (VngoPointF *p1, VngoPointF *p2,
                                 VngoColor24bit *rgb_val=NULL,
-                                VngoRect *clip_rect=NULL)
-            { return VNGO_NOT_SUPPORTED;};
+                                VngoRect *clip_rect=NULL);
     virtual VNGError clip_gline (VngoPoint *p1, VngoPoint *p2,
-                                 VngoRect *clip_rect=NULL)
-            {return VNGO_NOT_SUPPORTED;};
+                                 VngoRect *clip_rect=NULL);
     virtual VNGError clip_gline (VngoPointF *p1, VngoPointF *p2,
-                                 VngoRect *clip_rect=NULL)
-            { return VNGO_NOT_SUPPORTED;};
+                                 VngoRect *clip_rect=NULL);
     virtual VNGError clip_gline_persp (VngoPoint *p1, VngoPoint *p2,
-                                       VngoRect *clip_rect=NULL)
-            {return VNGO_NOT_SUPPORTED;};
+                                       VngoRect *clip_rect=NULL);
     virtual VNGError clip_gline_persp (VngoPointF *p1, VngoPointF *p2,
-                                       VngoRect *clip_rect=NULL)
-            { return VNGO_NOT_SUPPORTED;};
+                                       VngoRect *clip_rect=NULL);
 
-// Polygon functions.
+    //ÄÄÄ Polygon drawing functions
     virtual VNGError poly (int count, VngoPoint pts[]);
     virtual VNGError poly (int count, VngoPointF pts[]);
     virtual VNGError gpoly (int count, VngoPoint pts[]);
@@ -147,27 +200,20 @@ public:
     virtual VNGError gpoly_persp (int count, VngoPoint pts[]);
     virtual VNGError gpoly_persp (int count, VngoPointF pts[]);
     virtual VNGError tpoly (int count, VngoPoint pts[],VngoTexture *tex);
-//            {return VNGO_NOT_SUPPORTED;};
     virtual VNGError tpoly (int count, VngoPointF pts[],VngoTexture *tex);
-//            { return VNGO_NOT_SUPPORTED;};
     virtual VNGError tpoly_persp (int count, VngoPoint pts[],VngoTexture *tex);
-//            {return VNGO_NOT_SUPPORTED;};
     virtual VNGError tpoly_persp (int count, VngoPointF pts[],VngoTexture *tex);
-//            { return VNGO_NOT_SUPPORTED;};
     virtual VNGError gtpoly (int count, VngoPoint pts[],VngoTexture *tex);
-//            {return VNGO_NOT_SUPPORTED;};
     virtual VNGError gtpoly (int count, VngoPointF pts[],VngoTexture *tex);
-//            { return VNGO_NOT_SUPPORTED;};
     virtual VNGError gtpoly_persp (int count, VngoPoint pts[],VngoTexture *tex);
-//            {return VNGO_NOT_SUPPORTED;};
     virtual VNGError gtpoly_persp (int count, VngoPointF pts[],VngoTexture *tex);
-//            { return VNGO_NOT_SUPPORTED;};
-    virtual VNGError grpoly (int count,VngoPoint pts[])
-            { return VNGO_NOT_SUPPORTED;};
-    virtual VNGError grpoly (int count,VngoPointF pts[])
-            { return VNGO_NOT_SUPPORTED;};
 
-// Alpha blended versions
+    virtual VNGError grpoly (int count,VngoPoint pts[])
+        { return VNGO_NOT_SUPPORTED; }
+    virtual VNGError grpoly (int count,VngoPointF pts[])
+        { return VNGO_NOT_SUPPORTED; }
+
+    //ÄÄÄ Alpha-blended polygon drawing functions
     virtual VNGError poly_a (int count, VngoPoint pts[],long alpha=127);
     virtual VNGError poly_a (int count, VngoPointF pts[],long alpha=127);
     virtual VNGError gpoly_a (int count, VngoPoint pts[],long alpha=127);
@@ -191,29 +237,11 @@ public:
     virtual VNGError gtpoly_persp_a (int count, VngoPointF pts[],
                                      VngoTexture *tex,long alpha=127);
 
-    virtual VNGError image_trans (VngoRect *dest_rect,VngoTexture *img,
-                                  dword flags=0);
-    virtual VNGError image_trans_mono (VngoRect *dest_rect,VngoTexture *img,
-                                       dword fgcol,dword bgcol=VNGO_TRANSPARENT);
-    virtual VNGError zblit_mono (VngoRect *dest_rect,VngoZMap *zmp,dword fdist,
-                                 dword ndist=0);
-
-    virtual VNGError image_trans_a (VngoRect *dest_rect,VngoTexture *img,
-                                    long alpha=127, dword flags=0)
-    {
-        return VNGO_NOT_SUPPORTED;
-    }
-    virtual VNGError image_trans_mono_a (VngoRect *dest_rect,VngoTexture *img,
-                                         dword fgcol,dword bgcol=VNGO_TRANSPARENT,
-                                         long alpha=127)
-    {
-        return VNGO_NOT_SUPPORTED;
-    }
-
-    virtual VNGError haze(VngoShadePal *hazepal,long startZ=0,VngoRect *rect=NULL)
-    {
-        return VNGO_NOT_SUPPORTED;
-    }
+    //ÄÄÄ Fogging/hazing functions
+    virtual VNGError set_haze(VngoHazeInfo *haze_info)
+        { return VNGO_NOT_SUPPORTED; }
+    virtual VNGError haze()
+        { return VNGO_NOT_SUPPORTED; }
 };
 
 #ifdef __WATCOMC__
@@ -225,7 +253,6 @@ public:
 #endif
 
 #endif          // __VNGD3D_HPP
-#endif          // _D3D
 
 //°±² End of module - vngd3d.hpp ²±°
 

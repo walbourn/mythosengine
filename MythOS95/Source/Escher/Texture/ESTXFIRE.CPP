@@ -199,6 +199,7 @@ esch_error_codes EschFireTexture::init(ushort w, ushort h,
     }
 
 //ÄÄÄ Compute shift
+    txt.flags |= VNGO_TEXTURE_TRANSPARENT;
     switch (txt.width)
     {
         case 16:
@@ -270,6 +271,9 @@ esch_error_codes EschFireTexture::init(ushort w, ushort h,
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 void EschFireTexture::generate()
 {
+    // Call the base up front!
+    EschProceduralTexture::generate();
+
     // Dump the bases for the flame on the screen.
 
     for (int i = 0; i < txt.width; i++)

@@ -40,13 +40,7 @@
 // Chronos
 //
 //      Chronos is the system timer interface.  Through Chronos, the user
-//  can register functions to be invoked at a particular interval.  The
-//  system programmable timer can also be controlled through this interface.
-//
-//  For ultra-precise measurements, Timer 0 is supported, but not in
-//  an interrupt-generating mode.  This timer is most useful for
-//  determining elapsed time for short intervals, such as the joystick
-//  discharge time, or system processor timings.
+//  can register functions to be invoked at a particular interval.
 //
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
 
@@ -64,19 +58,11 @@
 
 #include "chronos.hpp"
 
-
-//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-//
-//                                Equates
-//
-//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                               Structures
 //
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-
 
 struct iChronosUserProc
 {
@@ -95,10 +81,10 @@ struct iChronosUserProc
 extern "C" int mythos_atexit (register void (*__func) (void));
 extern "C" void mythos_atexit_remove (register void (*__func) (void));
 
-extern "C" double profiler_rdtsc();
+extern "C" double chronos_rdtsc();
 
 // A cleanup function
-static void chronos_cleanup ();
+static void ichronos_cleanup ();
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
@@ -106,16 +92,13 @@ static void chronos_cleanup ();
 //
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 
-
 const int MAX_CALLBACKS = 32;
 
-static volatile ulong system_freq;
-static volatile int   instance = 0;
+static volatile ulong   system_freq;
+static volatile int     instance = 0;
 static iChronosUserProc timer_handles[MAX_CALLBACKS];
-static bool    __chronos_use_pentium = false;
-static double  __chronos_scale;
-
-
+static bool             __chronos_use_pentium = false;
+static double           __chronos_scale;
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
@@ -123,9 +106,8 @@ static double  __chronos_scale;
 //
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 
-
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-//  A simple utility to convert between "timer multipliers" and milliseconds
+// A simple utility to convert between "timer multipliers" and milliseconds
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 inline ulong mult2ms (ulong multiplier)
 {
@@ -134,7 +116,10 @@ inline ulong mult2ms (ulong multiplier)
     return 549 / (multiplier * 10);
 }
 
+
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// ichronos_timer_proc 
+//
 //  This routine will call our timer proc.
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 void CALLBACK ichronos_timer_proc (UINT idTimer, UINT msg, DWORD dwUser, DWORD dw1, DWORD dw2)
@@ -147,41 +132,10 @@ void CALLBACK ichronos_timer_proc (UINT idTimer, UINT msg, DWORD dwUser, DWORD d
 }
 
 
-BOOL profiler_init()
-{
-    SYSTEM_INFO  ProfilerSysinfo;
-
-    GetSystemInfo (&ProfilerSysinfo);
-    __chronos_use_pentium = false;
-
-    if (ProfilerSysinfo.dwProcessorType == PROCESSOR_INTEL_PENTIUM)
-    {
-        int     c0,cf;  // clocks.
-        double  t0,tf;  // ticks.
-
-        int x = 1;
-
-        c0 = clock();
-        t0 = profiler_rdtsc();
-
-        for (int i=0;i < 20000000; i++)
-            x = (i & x) ? 0 : 1;
-
-        tf = profiler_rdtsc();
-        cf = clock();
-
-        double rate = (tf-t0)/((cf-c0)*(1000000.0 / double(CLOCKS_PER_SEC)));
-        __chronos_scale = 1.0 / (rate * 1000.0);
-
-        __chronos_use_pentium = true;
-    }
-
-    return __chronos_use_pentium;
-}
-
-
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-//  Initialize Chronos, install the int 8 handler
+// chronos_init
+//
+// Initialize Chronos
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 void chronos_init ()
 {
@@ -190,10 +144,35 @@ void chronos_init ()
         system_freq = 0;
         chronos_interval (0);
         memset (timer_handles, 0, sizeof (timer_handles));
-        mythos_atexit (chronos_cleanup);
+        mythos_atexit (ichronos_cleanup);
 
-        // Set up the pentium timer (was profiler)
-        profiler_init();
+        // See if we can use the Pentium timer register
+        SYSTEM_INFO  ProfilerSysinfo;
+
+        GetSystemInfo (&ProfilerSysinfo);
+        __chronos_use_pentium = false;
+
+        if (ProfilerSysinfo.dwProcessorType == PROCESSOR_INTEL_PENTIUM)
+        {
+            int     c0,cf;  // clocks.
+            double  t0,tf;  // ticks.
+
+            int x = 1;
+
+            c0 = clock();
+            t0 = chronos_rdtsc();
+
+            for (int i=0;i < 20000000; i++)
+                x = (i & x) ? 0 : 1;
+
+            tf = chronos_rdtsc();
+            cf = clock();
+
+            double rate = (tf-t0)/((cf-c0)*(1000000.0 / double(CLOCKS_PER_SEC)));
+            __chronos_scale = 1.0 / (rate * 1000.0);
+
+            __chronos_use_pentium = true;
+        }
     }
 
     instance++;
@@ -201,26 +180,28 @@ void chronos_init ()
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-//  Terminate Chronos, remove the int 8 handler
+// chronos_term
+//
+// Terminate Chronos
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 void chronos_term ()
 {
-    mythos_atexit_remove (chronos_cleanup);
+    mythos_atexit_remove (ichronos_cleanup);
 
     if (instance > 0)
     {
         if (--instance == 0)
         {
-            chronos_cleanup();
+            ichronos_cleanup();
         }
     }
 }
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-// The cleanup function.
+// ichronos_cleanup
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-static void chronos_cleanup ()
+static void ichronos_cleanup ()
 {
     chronos_clear_callbacks ();
 
@@ -232,9 +213,9 @@ static void chronos_cleanup ()
     system_freq = 0;
 }
 
+
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-//  Program timer to new interval in milliherz (thousandths of a cycle per sec).
-//  (Basically, take hz*1000)
+// chronos_interval_mhz
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 int chronos_interval_mhz (dword mlhz)
 {
@@ -246,6 +227,8 @@ int chronos_interval_mhz (dword mlhz)
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// chronos_interval
+//
 //  Program the timer to the given number of multiples of its base
 //  frequency (18.207 hz), based on 0  (0 == 18hz, 1 = 36hz, etc)
 //  Return whether or not you succeeded
@@ -268,10 +251,11 @@ int chronos_interval (word multiplier)
 }
 
 
-
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-//  Add the function/parameter to the callback list for execution every
-//  'freq' timer ticks.
+// chronos_add_callback
+//
+// Add the function/parameter to the callback list for execution every
+// 'freq' timer ticks.
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 void chronos_add_callback (ChronosCallback func, dword freq, void *parm)
 {
@@ -300,7 +284,9 @@ void chronos_add_callback (ChronosCallback func, dword freq, void *parm)
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-//  Clear all callback functions.
+// chronos_clear_callbacks
+//
+// Clear all callback functions.
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 void chronos_clear_callbacks ()
 {
@@ -316,27 +302,30 @@ void chronos_clear_callbacks ()
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-//  Return the current time in processor clock fractions
+// chronos_time_now_precise
+//
+// Return the current time in processor clock fractions
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 double chronos_time_now_precise ()
 {
     if (__chronos_use_pentium)
-        return profiler_rdtsc() * __chronos_scale;
+        return chronos_rdtsc() * __chronos_scale;
     else
         return double (timeGetTime());
 }
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-//  Return the current time in milliseconds.
+// chronos_time_now
+//
+// Return the current time in milliseconds.
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 clock_t chronos_time_now ()
 {
     if (__chronos_use_pentium)
-        return clock_t (profiler_rdtsc() * __chronos_scale);
+        return clock_t (chronos_rdtsc() * __chronos_scale);
     else
         return timeGetTime();
 }
-
 
 //°±² End of module - chronos.cpp ²±°

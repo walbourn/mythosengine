@@ -142,6 +142,8 @@ BEGIN
             MENUITEM "&Backface\tF3",               ID_VIEW_RND_BACKFACE
             MENUITEM "&Textures\tF9",               ID_VIEW_RND_TEXTURES
             MENUITEM "Perspecti&ve\tF10",           ID_VIEW_RND_PERSPECTIVE
+            MENUITEM "Alp&ha\tF11",                 ID_VIEW_RND_ALPHA
+            MENUITEM "S&ort\tF12",                  ID_VIEW_RND_SORT
         END
         POPUP "S&how"
         BEGIN
@@ -217,6 +219,8 @@ BEGIN
     VK_F1,          ID_VIEW_RND_ALL_LINES,  VIRTKEY, ALT, NOINVERT
     VK_F1,          ID_APP_HELP,            VIRTKEY, SHIFT, NOINVERT
     VK_F10,         ID_VIEW_RND_PERSPECTIVE, VIRTKEY, NOINVERT
+    VK_F11,         ID_VIEW_RND_ALPHA,      VIRTKEY, NOINVERT
+    VK_F12,         ID_VIEW_RND_SORT,       VIRTKEY, NOINVERT
     VK_F2,          ID_VIEW_RND_MSPACE,     VIRTKEY, NOINVERT
     VK_F3,          ID_VIEW_RND_BACKFACE,   VIRTKEY, NOINVERT
     VK_F4,          ID_VIEW_RND_WIREFRAME,  VIRTKEY, NOINVERT
@@ -621,14 +625,10 @@ BEGIN
     CONTROL         "Active",IDC_CPROP_HAZE,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,25,50,45,15
     PUSHBUTTON      "&Hazing Target Color",IDC_CPROP_HCOLR,150,50,80,15
-    RTEXT           "Shade-levels:",IDC_STATIC,15,72,60,10
-    EDITTEXT        IDC_CPROP_LEVEL,75,70,40,15,ES_AUTOHSCROLL
-    RTEXT           "Unaffected level:",IDC_STATIC,120,72,70,10
-    EDITTEXT        IDC_CPROP_SLEVEL,195,70,41,15,ES_AUTOHSCROLL
-    RTEXT           "'Break-point' level:",IDC_STATIC,15,87,60,10
-    EDITTEXT        IDC_CPROP_BLEVEL,75,85,40,15,ES_AUTOHSCROLL
-    RTEXT           "'Break-point' precent:",IDC_STATIC,120,87,70,10
-    EDITTEXT        IDC_CPROP_BPERC,195,85,41,15,ES_AUTOHSCROLL
+    RTEXT           "Starting Z:",IDC_STATIC,18,72,61,10
+    EDITTEXT        IDC_CPROP_STARTZ,83,70,40,15,ES_AUTOHSCROLL
+    RTEXT           "Mid-point Z:",IDC_STATIC,120,72,70,10
+    EDITTEXT        IDC_CPROP_MIDZ,195,70,41,15,ES_AUTOHSCROLL
     LTEXT           "These settings are not saved into the Escher Data file at the present",
                     IDC_STATIC,15,110,225,10
     LTEXT           "time.  They may be added to the format in the future.",
@@ -775,13 +775,13 @@ STYLE WS_CHILD | WS_VISIBLE | WS_DISABLED | WS_CAPTION
 CAPTION "Flags"
 FONT 8, "MS Sans Serif"
 BEGIN
-    GROUPBOX        "Shade Limits",IDC_STATIC,15,10,80,75
+    GROUPBOX        "Shade Limits",IDC_STATIC,15,10,80,82
     CONTROL         "Wire",IDC_FPROP_WIRE,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,30,25,45,10
     CONTROL         "Solid",IDC_FPROP_SOLID,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,30,36,45,10
+                    WS_TABSTOP,30,35,45,10
     CONTROL         "Flat",IDC_FPROP_FLAT,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,30,46,45,10
+                    WS_TABSTOP,30,45,45,10
     CONTROL         "Smooth",IDC_FPROP_SMOOTH,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,30,55,45,10
     CONTROL         "Specular",IDC_FPROP_SPECULAR,"Button",BS_AUTOCHECKBOX | 
@@ -796,9 +796,16 @@ BEGIN
                     WS_TABSTOP,125,10,115,10
     CONTROL         "Allow Perspective Correction",IDC_FPROP_APERSP,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,125,40,115,10
-    RTEXT           "Self-illumination Level:",IDC_STATIC,105,65,80,10
-    COMBOBOX        IDC_FPROP_SELFILLM,195,65,50,60,CBS_DROPDOWNLIST | 
-                    WS_VSCROLL | WS_TABSTOP
+    RTEXT           "Self-illumination Level:",IDC_STATIC,105,66,80,10
+    CONTROL         "Alpha",IDC_FPROP_ALPHA,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,30,75,45,10
+    EDITTEXT        IDC_FPROP_SELFILLUM,191,65,47,12,ES_AUTOHSCROLL
+    RTEXT           "Alpha Level A:",IDC_STATIC,107,88,80,10
+    RTEXT           "Alpha Level B:",IDC_STATIC,107,104,80,10
+    RTEXT           "Alpha Level C:",IDC_STATIC,107,120,80,10
+    EDITTEXT        IDC_FPROP_ALPHAA,191,87,47,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_FPROP_ALPHAB,191,103,47,12,ES_AUTOHSCROLL
+    EDITTEXT        IDC_FPROP_ALPHAC,191,119,47,12,ES_AUTOHSCROLL
 END
 
 
@@ -809,8 +816,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 2,0,0,0
- PRODUCTVERSION 2,0,0,0
+ FILEVERSION 2,0,3,0
+ PRODUCTVERSION 2,0,3,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -828,13 +835,13 @@ BEGIN
             VALUE "Comments", "by Chuck Walbourn\0"
             VALUE "CompanyName", "Charybdis Enterprises, Inc.\0"
             VALUE "FileDescription", "Escher Tool MFC Application\0"
-            VALUE "FileVersion", "2.00\0"
+            VALUE "FileVersion", "2.03\0"
             VALUE "InternalName", "EschTool\0"
             VALUE "LegalCopyright", "Copyright © 1995-1997\0"
             VALUE "LegalTrademarks", "MythOS is a trademark of Charybdis Enterprises, Inc.\0"
             VALUE "OriginalFilename", "ESHTOOL.EXE\0"
             VALUE "ProductName", "Escher Tool\0"
-            VALUE "ProductVersion", "2.00\0"
+            VALUE "ProductVersion", "2.03\0"
         END
     END
     BLOCK "VarFileInfo"
@@ -887,27 +894,6 @@ IDD_FPROP_GEN DLGINIT
 BEGIN
     IDC_FPROP_TXT, 0x403, 5, 0
 0x6f4e, 0x656e, "\000" 
-    0
-END
-
-IDD_FPROP_FLAGS DLGINIT
-BEGIN
-    IDC_FPROP_SELFILLM, 0x403, 2, 0
-0x0030, 
-    IDC_FPROP_SELFILLM, 0x403, 2, 0
-0x0031, 
-    IDC_FPROP_SELFILLM, 0x403, 2, 0
-0x0032, 
-    IDC_FPROP_SELFILLM, 0x403, 2, 0
-0x0033, 
-    IDC_FPROP_SELFILLM, 0x403, 2, 0
-0x0034, 
-    IDC_FPROP_SELFILLM, 0x403, 2, 0
-0x0035, 
-    IDC_FPROP_SELFILLM, 0x403, 2, 0
-0x0036, 
-    IDC_FPROP_SELFILLM, 0x403, 2, 0
-0x0037, 
     0
 END
 
@@ -1029,6 +1015,8 @@ STRINGTABLE DISCARDABLE
 BEGIN
     ID_FILE_TRUECOLOR       "When saving/sending documents, this controls the use of 8-bit vs true-color format for texture data\nTruecolor"
     ID_FILE_FLOATING        "When saving/sending documents, this controls the use of floating vs. fixed-poitn data formats\nFloating-point"
+    ID_VIEW_RND_SORT        "Rendering sort controls the use of the Z-buffer vs. sorting mode\nSort"
+    ID_VIEW_RND_ALPHA       "Render using alpha-blending\nAlpha"
     ID_VIEW_REFRESH         "Redraw the current views\nRefresh"
 END
 

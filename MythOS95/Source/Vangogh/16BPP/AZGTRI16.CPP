@@ -129,7 +129,7 @@ extern "C" void vngo_azgtriangle16 (VngoVbuffer *vb,VngoPoint2 *pts,
 
     tri.start_y = (high_pt->y + 0x8000) >> 16;
     tri.color = pts[0].clr;
-    tri.sptr  = (word*)(dword(vb->scrn_ptr) + vb->ytable[(high_pt->y + 0x8000) >> 16]); 
+    tri.sptr  = (word*)(dword(vb->scrn_ptr) + vb->ytable[(high_pt->y + 0x8000) >> 16]);
     tri.zptr  = (word*)(long(vb->zbuff_ptr) + vb->ztable[tri.start_y]);
 
     scan_zgouraud_edge(edge1,high_pt,low_pt);
@@ -194,10 +194,12 @@ extern "C" void draw_azghlines16(VngoTriangle *tri, long alpha)
     {
         long tz = edge1->z;
         long ts = edge1->shade;
-        long tx = (edge1->x + 0x8000) >> 16;
+        long tx = (edge1->x + 0xffff) >> 16;
+//        long tx = (edge1->x + 0x8000) >> 16;
         word *ptr = scrn + tx;
         word *zptr = zbuff + tx;
-        int dx = ((edge2->x + 0x8000) >> 16);
+        int dx = edge2->x >> 16;
+//        int dx = ((edge2->x + 0x8000) >> 16);
         long *dmatrix = &DitherMatrix[(start_y+y)&3][0];
         long *amatrix = &AlphaMatrix[(start_y+y)&3][0];
 

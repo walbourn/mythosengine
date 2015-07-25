@@ -5,11 +5,11 @@ Dialog Escher[]=
 {
 { -1, 1, -1, -1, 0, 5, 5, 520, 424, NULL, NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
 { 0, -1, -1, 2, 4, 156, 16, 194, 18, " Escher Data Exporter ", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
-{ 0, -1, 1, 3, 4, 22, 56, 74, 18, "Source:", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
-{ 0, -1, 2, 4, 1, 100, 56, 66, 18, " All ", NULL, 0, 0, 65, 0, FNULL, FNULL, 0 },
-{ 0, -1, 3, 5, 1, 176, 56, 90, 18, " Selected ", NULL, 0, 0, 83, 0, FNULL, FNULL, 0 },
-{ 0, -1, 4, 6, 4, 288, 56, 66, 18, "Target:", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
-{ 0, -1, 5, 7, 1, 362, 56, 116, 20, "EXPORT.IFF", NULL, 0, 0, 84, 0, FNULL, FNULL, 0 },
+{ 0, -1, 1, 3, 4, 24, 48, 74, 18, "Source:", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
+{ 0, -1, 2, 4, 1, 104, 48, 66, 18, " All ", NULL, 0, 0, 65, 0, FNULL, FNULL, 0 },
+{ 0, -1, 3, 5, 1, 176, 48, 90, 18, " Selected ", NULL, 0, 0, 83, 0, FNULL, FNULL, 0 },
+{ 0, -1, 4, 6, 4, 288, 48, 66, 18, "Target:", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
+{ 0, -1, 5, 7, 1, 360, 47, 116, 20, "EXPORT.IFF", NULL, 0, 0, 84, 0, FNULL, FNULL, 0 },
 { 0, -1, 6, 8, 4, 292, 84, 66, 20, "Scene:", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
 { 0, -1, 7, 9, 5, 362, 84, 139, 18, (void *)0, NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
 { 0, -1, 8, 10, 4, 26, 92, 210, 18, " Object Local Coordinates ", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
@@ -59,7 +59,8 @@ Dialog Escher[]=
 { 0, -1, 52, 54, 1, 128, 368, 80, 18, " Fixed ", NULL, 0, 0, 0, 2, FNULL, FNULL, 0 },
 { 0, -1, 53, 55, 1, 242, 392, 66, 20, " OK ", NULL, 0, 0, 13, 0, FNULL, FNULL, 0 },
 { 0, -1, 54, 56, 1, 346, 392, 66, 20, " Cancel ", NULL, 0, 0, 27, 0, FNULL, FNULL, 0 },
-{ 0, -1, 55, -1, 3, 462, 392, 26, 20, " ! ", NULL, 0, 0, 33, 0, FNULL, FNULL, 0 },
+{ 0, -1, 55, 57, 3, 462, 392, 26, 20, " ! ", NULL, 0, 0, 33, 0, FNULL, FNULL, 0 },
+{ 0, -1, 56, -1, 1, 120, 69, 130, 18, " Keyframes Only ", NULL, 0, 0, 75, 0, FNULL, FNULL, 0 },
 };
 
 /* Tree Identifiers: Escher */
@@ -104,12 +105,13 @@ Dialog Escher[]=
 #define OK                              54
 #define CANCEL                          55
 #define ABOUT                           56
+#define KEY_ONLY                        57
 
 /* Editables */
 
 Editable Escher_edit[]=
 {
-{ 16, 16, 0, "AAAAAAAAAAAAAAAA", 0, 0, 0, NULL, NULL },
-{ 8, 8, 0, "BBBBBBBB", 4, 0, 0, NULL, NULL },
-{ 8, 8, 0, "CCCCCCCC", 4, 0, 0, NULL, NULL },
+{ 16, 16, 0, "                ", 0, 0, 0, NULL, NULL },
+{ 8, 8, 0, "        ", 4, 0, 0, NULL, NULL },
+{ 8, 8, 0, "        ", 4, 0, 0, NULL, NULL },
 };

@@ -120,7 +120,11 @@ void VngoPal::release()
 
 void VngoPal::create_ddpal(LPDIRECTDRAW _dd,IDirectDrawPalette **_ddpal)
 {
-    if (_dd != NULL)
+    if (ddpal != NULL)
+    {
+        *_ddpal = ddpal;
+    }
+    else if (_dd != NULL)
     {
         PALETTEENTRY        ape[256];
         for (int i=0;i < 255;i++)
@@ -133,7 +137,8 @@ void VngoPal::create_ddpal(LPDIRECTDRAW _dd,IDirectDrawPalette **_ddpal)
         ape[256].peRed = hw_pal.p[256].g;
         ape[256].peRed = hw_pal.p[256].b;
 
-        _dd->CreatePalette(DDPCAPS_8BIT,ape,_ddpal,NULL);
+        _dd->CreatePalette(DDPCAPS_8BIT,ape,&ddpal,NULL);
+        *_ddpal = ddpal;
     }
 }
 
@@ -150,6 +155,11 @@ VngoPal::~VngoPal()
         shd_pal = NULL;
         flags &= ~VNGO_MYMEM_SHADE;
     }
+    if (ddpal != NULL)
+    {
+        ddpal->Release();
+        ddpal=NULL;
+    }
 }
 
 
@@ -160,6 +170,7 @@ VngoPal8::VngoPal8()
 {
     flags = VNGO_8BIT;
     shd_pal = NULL;
+    ddpal = NULL;
 }
 
 
@@ -534,7 +545,8 @@ find_pal:
     // Get the new information
     tpal->num_shd_lvl = hdr.num_levels;
     tpal->num_shd_lvl_bits = hdr.level_bits;
-    tpal->mid_point = hdr.mid_point;
+    int tbits = 8 - hdr.level_bits;
+    tpal->mid_point = ((hdr.mid_point >> tbits) - 1) << tbits;
 
     dword id = iffp->makeid('s','h','d','L');
     for (int i=0; i < VNGO_PAL_SIZE; i++)
@@ -584,6 +596,8 @@ find_pal:
 VngoPal15::VngoPal15()
 {
     flags = VNGO_15BIT;
+    shd_pal=NULL;
+    ddpal = NULL;
 }
 
 
@@ -632,6 +646,7 @@ void VngoPal15::release()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 int VngoPal15::init(dword _flags,VngoHwPal *hw,VngoShadePal16 *sh)
 {
+    ddpal=NULL;
     if (hw)
     {
         for (int i=0;i < 256;i++)
@@ -682,6 +697,7 @@ int VngoPal15::init(dword _flags,const char *palfile)
     int             err = 0;
     VngoPalIFF15    loadpal(this);
 
+    ddpal=NULL;
     init(0);
     err=loadpal.load(palfile);
 
@@ -702,6 +718,7 @@ int VngoPal15::init(dword _flags,XFParseIFF *palfile)
     int             err = 0;
     VngoPalIFF15    loadpal(this);
 
+    ddpal=NULL;
     init(0);
     err=loadpal.load(palfile);
 
@@ -712,39 +729,46 @@ int VngoPal15::init(dword _flags,XFParseIFF *palfile)
 STATIC void calc_linear_colors15 (word *colors, int steps,
                                   VngoColor24bit color, int break_point)
 {
-    VngoColorHLS    hlst;
+    float           tr,tg,tb;
     VngoColor24bit  tclr;
-    Flx16           t1;
-    Flx16           base,mean,step,step2,max;
 
-    hlst = color;
-    mean = hlst.l;
-    base = hlst.l * (Flx16)0.2;
+    tr = float(color.r);
+    tg = float(color.g);
+    tb = float(color.b);
 
-    t1 = hlst.l - base;
-    step = t1 / Flx16 (break_point);
 
-        break_point--;  // Convert to 0 based value
+    float   rstep = tr / float(break_point);
+    float   gstep = tg / float(break_point);
+    float   bstep = tb / float(break_point);
 
-    for (int i = break_point-1; i >= 0; i--)
+    for (int i = break_point; i >= 0; i--)
     {
-        hlst.l -= step;
-        tclr = hlst;
+        tclr.r = int(tr + 0.5f);
+        tclr.g = int(tg + 0.5f);
+        tclr.b = int(tb + 0.5f);
+        tr -= rstep;
+        tg -= gstep;
+        tb -= bstep;
         colors[i] = tclr.compress();
     }
 
-    colors[break_point] = color.compress();
 
-    hlst.l = mean;
+    tr = float(color.r);
+    tg = float(color.g);
+    tb = float(color.b);
 
-    t1 = (Flx16)1 - hlst.l;
-    max = t1 * (Flx16) 0.75;
-    step = max / Flx16 (steps - break_point);
+    rstep = (255.f - tr) / float(steps - break_point);
+    gstep = (255.f - tg) / float(steps - break_point);
+    bstep = (255.f - tb) / float(steps - break_point);
 
-    for (i = break_point + 1; i < steps; i++)
+    for (i = break_point+1; i < steps; i++)
     {
-        hlst.l += step;
-        tclr = hlst;
+        tr += rstep;
+        tg += gstep;
+        tb += bstep;
+        tclr.r = int(tr + 0.5f);
+        tclr.g = int(tg + 0.5f);
+        tclr.b = int(tb + 0.5f);
         colors[i] = tclr.compress();
     }
 }
@@ -760,7 +784,8 @@ void MakePal15fromPal8(VngoPal15 *p15, VngoPal8 *p8)
 // memory has to be allocated before you get to this routine.
     for (int i=0;i < 256;i++)
     {
-        calc_linear_colors15(&data15[i <<5],32,p8->get_RGB(i),p8->shd_pal->mid_point >> 3);
+        calc_linear_colors15(&data15[i <<5],32,p8->get_RGB(i),
+                             p8->shd_pal->mid_point >> (8 - p8->shd_pal->num_shd_lvl_bits));
     }
     for (i=0;i < 256;i++)
     {
@@ -1028,24 +1053,9 @@ find_pal:
     // Get the new information
     tpal->num_shd_lvl = hdr.num_levels;
     tpal->num_shd_lvl_bits = hdr.level_bits;
-    tpal->mid_point = hdr.mid_point;
+    int tbits = 8 - hdr.level_bits;
+    tpal->mid_point = ((hdr.mid_point >> tbits) - 1) << tbits;
 
-#if 0
-    dword id = iffp->makeid('s','h','d','L');
-    for (int i=0; i < VNGO_PAL_SIZE; i++)
-    {
-        err = iffp->seekchunk (id);
-        if (err)
-            return (err);
-
-        if (tpal->num_shd_lvl * sizeof (byte) != iffp->chunkSize)
-            return XF_ERR_CHUNKNOTFOUND;
-
-        err = iffp->read (&(*tpal)[i]);
-        if (err)
-            return (err);
-    }
-#endif
     iffp->leaveform();
 
     // ---- Find and read the hardware palette.
@@ -1073,7 +1083,8 @@ find_pal:
 // memory has to be allocated before you get to this routine.
     for (int i=0;i < 256;i++)
     {
-        calc_linear_colors15(&data15[i <<5],32,pal->get_RGB(i),pal->shd_pal->mid_point >> 3);
+        calc_linear_colors15(&data15[i <<5],32,pal->get_RGB(i),
+                             pal->shd_pal->mid_point >> (8 - pal->shd_pal->num_shd_lvl_bits));
     }
 
     // ---- Clean up and close down.
@@ -1090,6 +1101,8 @@ find_pal:
 VngoPal16::VngoPal16()
 {
     flags = VNGO_16BIT;
+    shd_pal=NULL;
+    ddpal = NULL;
 }
 
 
@@ -1138,6 +1151,8 @@ void VngoPal16::release()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 int VngoPal16::init(dword _flags,VngoHwPal *hw,VngoShadePal16 *sh)
 {
+    ddpal=NULL;
+
     if (hw)
     {
         for (int i=0;i < 256;i++)
@@ -1188,6 +1203,8 @@ int VngoPal16::init(dword _flags,const char *palfile)
     int         err = 0;
     VngoPalIFF16 loadpal(this);
 
+    ddpal=NULL;
+
     init(0);
     err=loadpal.load(palfile);
 
@@ -1208,6 +1225,8 @@ int VngoPal16::init(dword _flags,XFParseIFF *palfile)
     int             err = 0;
     VngoPalIFF16    loadpal(this);
 
+    ddpal=NULL;
+
     init(0);
     err=loadpal.load(palfile);
 
@@ -1218,41 +1237,91 @@ int VngoPal16::init(dword _flags,XFParseIFF *palfile)
 STATIC void calc_linear_colors16 (word *colors, int steps,
                                   VngoColor24bit color, int break_point)
 {
+#if 1
+    float           tr,tg,tb;
+    VngoColor24bit  tclr;
+
+    tr = float(color.r);
+    tg = float(color.g);
+    tb = float(color.b);
+
+
+    float   rstep = tr / float(break_point);
+    float   gstep = tg / float(break_point);
+    float   bstep = tb / float(break_point);
+
+    for (int i = break_point -1; i >= 0; i--)
+    {
+        tclr.r = int(tr + 0.5f);
+        tclr.g = int(tg + 0.5f);
+        tclr.b = int(tb + 0.5f);
+        tr -= rstep;
+        tg -= gstep;
+        tb -= bstep;
+        colors[i] = tclr.compress16();
+    }
+
+
+    tr = float(color.r);
+    tg = float(color.g);
+    tb = float(color.b);
+
+    rstep = (255.f - tr) / float(steps - break_point);
+    gstep = (255.f - tg) / float(steps - break_point);
+    bstep = (255.f - tb) / float(steps - break_point);
+
+    for (i = break_point; i < steps; i++)
+    {
+        tr += rstep;
+        tg += gstep;
+        tb += bstep;
+        tclr.r = int(tr + 0.5f);
+        tclr.g = int(tg + 0.5f);
+        tclr.b = int(tb + 0.5f);
+        colors[i] = tclr.compress16();
+    }
+#else
+
     VngoColorHLS    hlst;
     VngoColor24bit  tclr;
-    Flx16           t1;
-    Flx16           base,mean,step,step2,max;
+    float           t1;
+    float           base,mean,step,step2,max,tl;
+
 
     hlst = color;
-    mean = hlst.l;
-    base = hlst.l * (Flx16)0.2;
+    tl = float(hlst.l);
+    mean = tl;
+    base = tl * 0.2f;
 
-    t1 = hlst.l - base;
-    step = t1 / Flx16 (break_point);
+    t1 = mean - base;
+    step = t1 / float(break_point);
 
-        break_point--;  // Convert to 0 based value
+    break_point--;  // Convert to 0 based value
 
     for (int i = break_point-1; i >= 0; i--)
     {
-        hlst.l -= step;
+        tl -= step;
+        hlst.l = Flx16(tl);
         tclr = hlst;
         colors[i] = tclr.compress16();
     }
 
     colors[break_point] = color.compress16();
 
-    hlst.l = mean;
+    tl = mean;
 
-    t1 = (Flx16)1 - hlst.l;
-    max = t1 * (Flx16) 0.75;
-    step = max / Flx16 (steps - break_point);
+    t1 = 1.f - tl;
+    max = t1 * float(0.85);
+    step = max / float(steps - break_point);
 
     for (i = break_point + 1; i < steps; i++)
     {
-        hlst.l += step;
+        tl += step;
+        hlst.l = Flx16(tl);
         tclr = hlst;
         colors[i] = tclr.compress16();
     }
+#endif
 }
 
 
@@ -1266,7 +1335,8 @@ void MakePal16fromPal8(VngoPal16 *p16, VngoPal8 *p8)
 // memory has to be allocated before you get to this routine.
     for (int i=0;i < 256;i++)
     {
-        calc_linear_colors16(&data16[i <<5],32,p8->get_RGB(i),p8->shd_pal->mid_point >> 3);
+        calc_linear_colors16(&data16[i <<5],32,p8->get_RGB(i),
+                             p8->shd_pal->mid_point >> (8 - p8->shd_pal->num_shd_lvl_bits));
     }
     for (i=0;i < 256;i++)
     {
@@ -1533,24 +1603,9 @@ find_pal:
     // Get the new information
     tpal->num_shd_lvl = hdr.num_levels;
     tpal->num_shd_lvl_bits = hdr.level_bits;
-    tpal->mid_point = hdr.mid_point;
+    int tbits = 8 - hdr.level_bits;
+    tpal->mid_point = ((hdr.mid_point >> tbits) - 1) << tbits;
 
-#if 0
-    dword id = iffp->makeid('s','h','d','L');
-    for (int i=0; i < VNGO_PAL_SIZE; i++)
-    {
-        err = iffp->seekchunk (id);
-        if (err)
-            return (err);
-
-        if (tpal->num_shd_lvl * sizeof (byte) != iffp->chunkSize)
-            return XF_ERR_CHUNKNOTFOUND;
-
-        err = iffp->read (&(*tpal)[i]);
-        if (err)
-            return (err);
-    }
-#endif
     iffp->leaveform();
 
     // ---- Find and read the hardware palette.
@@ -1578,7 +1633,8 @@ find_pal:
 // memory has to be allocated before you get to this routine.
     for (int i=0;i < 256;i++)
     {
-        calc_linear_colors16(&data16[i <<5],32,pal->get_RGB(i),pal->shd_pal->mid_point >> 3);
+        calc_linear_colors16(&data16[i <<5],32,pal->get_RGB(i),
+                             pal->shd_pal->mid_point >> (8 - pal->shd_pal->num_shd_lvl_bits));
     }
 
     // ---- Clean up and close down.

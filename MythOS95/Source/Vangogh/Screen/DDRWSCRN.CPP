@@ -51,6 +51,7 @@ VngoDirectDraw::VngoDirectDraw(HWND hwndclient):
     Palette(NULL),
     hWndClient(hwndclient)
 {
+    sins = 0;
     strcpy(hwName,"Direct Draw");
     pal = NULL;
     init_state = init();
@@ -58,41 +59,47 @@ VngoDirectDraw::VngoDirectDraw(HWND hwndclient):
 
 VngoDirectDraw::~VngoDirectDraw()
 {
+    if ((lflags & VNGO_SET_RESOLUTION) && dd != NULL)
+        dd->RestoreDisplayMode();
+
     term();
 }
 
 
-BOOL VngoDirectDraw::init()
+VNGError VngoDirectDraw::init()
 {
     strcpy(hwName,"DDraw");
     err = DirectDrawCreate(NULL, &dd, NULL);
 
     if (err != DD_OK)
-        return FALSE;
+    {
+        term();
+        return VNGO_INTERNAL_ERROR;
+    }
 
     type_info = SCREENTYPE_DDRAW;
-    return TRUE;
+    return VNGO_NO_ERROR;
 }
 
 
-void VngoDirectDraw::reinit(Flx16 brightness)
+VNGError VngoDirectDraw::reinit(Flx16 brightness)
 {
     if (!pal)
-        return;
+        return VNGO_NOT_SUPPORTED;
 
-    set_palette(pal,brightness);
+    return set_palette(pal,brightness);
 }
 
-BOOL VngoDirectDraw::check_mode(int _width, int _height, int bpp)
+VNGError VngoDirectDraw::check_mode(int _width, int _height, int bpp,dword _flags, VngoPixelInfo *pinfo)
 {
     assert (dd != 0);
 
-    return (FALSE);
+    return (VNGO_NOT_SUPPORTED);
 }
 
 
 
-BOOL VngoDirectDraw::set_mode(int _width, int _height, int bpp, VngoPal *_pal,dword flags)
+VNGError VngoDirectDraw::set_mode(int _width, int _height, int bpp, VngoPal *_pal,dword flags)
 {
     width = _width;
     height = _height;
@@ -100,9 +107,6 @@ BOOL VngoDirectDraw::set_mode(int _width, int _height, int bpp, VngoPal *_pal,dw
     startx = 0;
     starty = 0;
     bit_depth = bpp;
-
-    if (err != DD_OK)
-        return FALSE;
 
     if (lflags & VNGO_SET_RESOLUTION)
     {
@@ -117,7 +121,10 @@ BOOL VngoDirectDraw::set_mode(int _width, int _height, int bpp, VngoPal *_pal,dw
     }
 
     if (err != DD_OK)
-        return FALSE;
+    {
+        term();
+        return VNGO_INTERNAL_ERROR;
+    }
 
     // Get rid of any previous surfaces.
     if (BackBuffer)
@@ -168,7 +175,10 @@ BOOL VngoDirectDraw::set_mode(int _width, int _height, int bpp, VngoPal *_pal,dw
         ddsd.ddsCaps.dwCaps &= ~DDSCAPS_VIDEOMEMORY;
         err = dd->CreateSurface(&ddsd, &Primary, NULL);
         if (err != DD_OK)
-            return FALSE;
+        {
+            term();
+            return VNGO_INTERNAL_ERROR;
+        }
         lflags &= ~VNGO_FORCE_SYSTEMMEMORY;
     }
 
@@ -182,7 +192,10 @@ BOOL VngoDirectDraw::set_mode(int _width, int _height, int bpp, VngoPal *_pal,dw
         err = Primary->GetAttachedSurface(&caps, &BackBuffer);
 
         if (err != DD_OK)
-            return FALSE;
+        {
+            term();
+            return VNGO_INTERNAL_ERROR;
+        }
 
         if (lflags & VNGO_FORCE_SYSTEMMEMORY)
         {
@@ -193,7 +206,10 @@ BOOL VngoDirectDraw::set_mode(int _width, int _height, int bpp, VngoPal *_pal,dw
             err = dd->CreateSurface (&ddsd, &FrontBuffer, NULL);
 
             if (err != DD_OK)
-                return FALSE;
+            {
+                term();
+                return VNGO_INTERNAL_ERROR;
+            }
         }
         else
             FrontBuffer = BackBuffer;
@@ -220,7 +236,10 @@ BOOL VngoDirectDraw::set_mode(int _width, int _height, int bpp, VngoPal *_pal,dw
         FrontBuffer = BackBuffer;
 
         if (err != DD_OK)
-            return FALSE;
+        {
+            term();
+            return VNGO_INTERNAL_ERROR;
+        }
     }
 
     ZBuffer = NULL;
@@ -241,7 +260,10 @@ BOOL VngoDirectDraw::set_mode(int _width, int _height, int bpp, VngoPal *_pal,dw
         err = dd->CreateSurface (&ddsd, &ZBuffer, NULL);
 
         if (err != DD_OK)
-            return FALSE;
+        {
+            term();
+            return VNGO_INTERNAL_ERROR;
+        }
     }
 
 
@@ -249,9 +271,54 @@ BOOL VngoDirectDraw::set_mode(int _width, int _height, int bpp, VngoPal *_pal,dw
 
     if (SurfaceManager == NULL)
     {
-        return FALSE;
+        term();
+        return VNGO_MEMALLOC_ERROR;
     }
     // Create a palette if we are in a paletized display mode.
+
+    DDSURFACEDESC   tdesc;
+    memset(&tdesc,0,sizeof(tdesc));
+    tdesc.dwSize = sizeof(tdesc);
+    int safty=0;
+    int locked = 0;
+    while (!locked && safty < 10000)
+    {
+        safty++;
+        HRESULT terr;
+        terr = BackBuffer->Lock(NULL,&tdesc,DDLOCK_SURFACEMEMORYPTR | DDLOCK_WAIT,NULL);
+        if (terr == DD_OK)
+        {
+            locked = 1;
+        }
+        if (terr == DDERR_SURFACELOST)
+        {
+            terr = BackBuffer->Restore();
+            if (terr != DD_OK)
+                locked = 0; // an error occured while
+                            // restoring the surface, so it cannot be locked.
+        }
+    }
+    if (locked)
+        BackBuffer->Unlock(NULL);
+    else
+        return VNGO_INTERNAL_ERROR;
+
+    if (tdesc.ddpfPixelFormat.dwRBitMask == 0xf800)   // Is it 16bpp?
+    {
+        if (!(_pal->flags & VNGO_16BIT))
+        {
+            term();
+            return VNGO_NEEDS_PAL16;
+        }
+    }
+    else if (tdesc.ddpfPixelFormat.dwRBitMask == 0x7c00) // Is it 15bpp?
+    {
+        if (!(_pal->flags & VNGO_15BIT))
+        {
+            term();
+            return VNGO_NEEDS_PAL15;
+        }
+    }
 
     if (bpp == 8)
     {
@@ -290,11 +357,12 @@ BOOL VngoDirectDraw::set_mode(int _width, int _height, int bpp, VngoPal *_pal,dw
         }
         ReleaseDC (NULL, hdc);
     }
+    sins |= VNGO_NO_FILTERS | VNGO_NO_FOG | VNGO_NOT_3DDEVICE;
 
-    return TRUE;
+    return VNGO_NO_ERROR;
 }
 
-void VngoDirectDraw::flip()
+VNGError VngoDirectDraw::flip()
 {
 
     if (FrontBuffer->IsLost() == DDERR_SURFACELOST)
@@ -329,7 +397,7 @@ void VngoDirectDraw::flip()
                 }
                 if (ddrval != DDERR_WASSTILLDRAWING)
                 {
-                    return;
+                    return VNGO_INTERNAL_ERROR;
                 }
             }
         }
@@ -363,17 +431,17 @@ void VngoDirectDraw::flip()
             }
             if (ddrval != DDERR_WASSTILLDRAWING)
             {
-                return;
+                return VNGO_INTERNAL_ERROR;
             }
         }
     }
-        VngoScreenManager::flip();
+    return VngoScreenManager::flip();
 }
 
-void VngoDirectDraw::set_palette(VngoPal *p,Flx16 brightness)
+VNGError VngoDirectDraw::set_palette(VngoPal *p,Flx16 brightness)
 {
     if (!Palette)
-        return;
+        return VNGO_NOT_SUPPORTED;
 
     pal = p;
 
@@ -401,11 +469,12 @@ void VngoDirectDraw::set_palette(VngoPal *p,Flx16 brightness)
 
     Palette->SetEntries(0,0,256,ape);
 
+    return VNGO_NO_ERROR;
 }
 
 
 
-void VngoDirectDraw::term()
+VNGError VngoDirectDraw::term()
 {
 
     if (SurfaceManager)
@@ -448,4 +517,11 @@ void VngoDirectDraw::term()
         dd->Release();
         dd = NULL;
     }
+    return VNGO_NO_ERROR;
 }
+
+VNGError VngoDirectDraw::dump_textures()
+{
+    return VNGO_NO_ERROR;
+}
+

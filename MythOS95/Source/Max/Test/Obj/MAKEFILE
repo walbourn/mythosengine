@@ -117,6 +117,8 @@ clean:
    del *.lst
    del *.ilk
    del *.pdb
+   del ..\maxtest.iff
+   del ..\maxtest.hpp
 
 #°±² End of makefile ²±°
 

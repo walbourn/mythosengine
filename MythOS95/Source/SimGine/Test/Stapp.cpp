@@ -111,7 +111,13 @@ BOOL TesterApp::init_instance()
             {
                 strlwr(buff);
 
-                startup &= ~(STARTUP_DDRAW | STARTUP_CLEAR3D);
+                startup &= ~(STARTUP_DDRAW
+                             | STARTUP_D3D
+                             | STARTUP_CLEAR3D);
+
+                if (strstr(buff,"direct3d"))
+                    startup |= STARTUP_D3D;
+                else
 
 #ifdef  _OEMS
 #ifdef  _CLEAR_3D
@@ -144,9 +150,39 @@ BOOL TesterApp::init_instance()
         }
     }
 
+    if (startup & STARTUP_D3D)
+    {
+        // Direct3D can only run in 15- or 16-bit
+        if (startup_bitdepth == 8)
+            startup_bitdepth = 16;
+    }
+    else
+
+#ifdef  _OEMS
+#ifdef  _CLEAR_3D
+    if (startup & STARTUP_CLEAR3D)
+    {
+        // Clear3D can only run in 16-bit
+        startup_bitdepth = 16;
+    }
+    else
+#endif
+#endif
+
+    if (!(startup & STARTUP_DDRAW))
+    {
+        // DIB can only run in 8- or 15-bit
+        if (startup_bitdepth == 16)
+            startup_bitdepth = 15;
+    }
+
 //ÄÄÄ Perform base init
     if (!SimGine::init_instance())
+    {
+        MessageBox(hWndClient, "SimGine Failed to Initialize Instance",
+                   appName, MB_ICONEXCLAMATION | MB_OK);
         return FALSE;
+    }
 
 //ÄÄÄ Install fonts
     if (gberg_install_font("arl-7x12.iff", 0))

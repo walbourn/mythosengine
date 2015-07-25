@@ -40,7 +40,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include "escher.hpp"
@@ -51,8 +51,7 @@
 //
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 
-extern EschPoint EschTempPoint;
-extern VngoPoint EschTempVPoint;
+extern VngoPointF EschTempVPointF;
 
 float EschLevelOfDetail::dist[ESCH_LOD_MAX_LEVELS];
 
@@ -141,12 +140,12 @@ void EschLevelOfDetail::draw()
     assertMyth("EschLevelOfDetail::draw needs a viewport in current context's camera",
                cam->vport != NULL);
 
-    g->exts.center.transform(&g->world,&EschTempPoint);
-    EschTempPoint.transform(&cam->eye.iorient);
+    g->exts.center.transform(&g->world,(EschPoint*)&EschTempVPointF);
+    ((EschPoint*)&EschTempVPointF)->transform(&cam->eye.iorient);
 
     for(int i=0; i < nlevels; i++)
     {
-        if (EschTempPoint.z < dist[i])
+        if (EschTempVPointF.z < dist[i])
         {
             flags |= ESCH_DRW_VISIBLE;
 
@@ -167,38 +166,24 @@ void EschLevelOfDetail::draw()
     }
 
 //ÄÄÄ If beyond highest level, draw as a colored dot...
-    if (EschTempPoint.z > cam->yon
-        || EschTempPoint.z < cam->hither)
-        return;
-    
-    // Left/right/top/bottom plane clipping
-    float zx = EschTempPoint.z * cam->xsize;
-    float zy = EschTempPoint.z * cam->ysize;
 
-    if (EschTempPoint.x < -zx
-        || EschTempPoint.x > zx
-        || EschTempPoint.y < -zy
-        || EschTempPoint.y > zy)
-        return;
+    //ÄÄÄ Setup Context
+    EschContext ec(EschCurrent);
+    ec.current = this;
+    ec.push();
 
-    flags |= ESCH_DRW_VISIBLE;
+    //ÄÄÄ Light (normal shade value)
+    assertMyth("EschPointDraw::draw needs palette in viewport",
+               cam->vport->vbuff.pal != 0);
 
-    //ÄÄÄ Project pixel
-    EschTempVPoint.x = long((EschTempPoint.x * cam->xscalar) / EschTempPoint.z)
-                       + (cam->vport->vbuff.width >> 1);
-    EschTempVPoint.y = (cam->vport->vbuff.height >> 1)
-                       - long((EschTempPoint.y * cam->yscalar) / EschTempPoint.z);
-    EschTempVPoint.z = ulong(EschTempPoint.z * cam->z_factor);
-    EschTempVPoint.clr = color;
+    EschTempVPointF.clr = color;
+    EschTempVPointF.shade = float(cam->vport->vbuff.pal->shd_pal->mid_point);
 
-    VngoVport *vport = cam->vport;
+    //ÄÄÄ Draw
+    esch_clipdraw_point(ESCH_CDF_CLIP);
 
-    assertMyth("EschLevelOfDetail::draw needs palette in viewport",
-                vport->vbuff.pal != 0);
-    EschTempVPoint.shade = vport->vbuff.pal->shd_pal->mid_point;
-
-    //ÄÄÄ Draw pixel
-    vport->pixel(&EschTempVPoint);
+    //ÄÄÄ Cleanup
+    ec.pop();
 }
 
 
@@ -296,7 +281,7 @@ esch_error_codes EschLevelOfDetail::collide(EschCollision *data) const
                                       | ESCH_CLSN_NOSETUP);
 
         data->flags |= ESCH_CLSN_NOWALK | ESCH_CLSN_NOSETUP;
-        
+
         esch_error_codes err = geom[current]->collide(data);
 
         data->flags &= ~(ESCH_CLSN_NOWALK | ESCH_CLSN_NOSETUP);

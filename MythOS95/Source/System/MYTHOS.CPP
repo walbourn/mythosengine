@@ -86,7 +86,8 @@ MythosSystem::~MythosSystem()
 //                                                                          ³
 // Initializes the libraries with explicit initialization.                  ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-int MythosSystem::init(ulong esch_arena_size, IvorySubAlloc *bozo_alloc)
+int MythosSystem::init(ulong esch_arena_size, ulong esch_sort_size,
+                       IvorySubAlloc *bozo_alloc)
 {
     int err;
 
@@ -98,7 +99,7 @@ int MythosSystem::init(ulong esch_arena_size, IvorySubAlloc *bozo_alloc)
         Bozo.set_allocator(bozo_alloc);
 
 //ÄÄÄ Init Escher
-    err=Escher.init(esch_arena_size);
+    err=Escher.init(esch_arena_size,esch_sort_size);
 
     return err;
 }

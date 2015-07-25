@@ -237,9 +237,20 @@ extern "C" void draw_talhlines16 (VngoTriangle *tri,long alpha)
                     tclr2.g = (t2 >> 2) & 0xf8;
                     tclr2.b = (t2 << 3) & 0xf8;
 
-                    tclr.r = byte(((long(tclr.r) << talpha1) + (long(tclr2.r) << talpha2)) >> 3);
-                    tclr.g = byte(((long(tclr.g) << talpha1) + (long(tclr2.g) << talpha2)) >> 3);
-                    tclr.b = byte(((long(tclr.b) << talpha1) + (long(tclr2.b) << talpha2)) >> 3);
+                    t = ((long(tclr.r)* alpha) + (long(tclr2.r) * (255 - alpha))) >> 8;
+                    if (t > 255)
+                        t = 255;
+                    tclr.r = t;
+
+                    t = ((long(tclr.g)* alpha) + (long(tclr2.g)*(255 - alpha))) >> 8;
+                    if (t > 255)
+                        t = 255;
+                    tclr.g = t;
+
+                    t = ((long(tclr.b)* alpha) + (long(tclr2.b)*(255 - alpha))) >> 8;
+                    if (t > 255)
+                        t = 255;
+                    tclr.b = t;
 
                     *ptr = tclr.compress();
                 }
@@ -282,9 +293,24 @@ extern "C" void draw_talhlines16 (VngoTriangle *tri,long alpha)
                     tclr2.g = (t2 >> 3) & 0xfc;
                     tclr2.b = (t2 << 3) & 0xf8;
 
-                    tclr.r = byte(((long(tclr.r) << talpha1) + (long(tclr2.r) << talpha2)) >> 3);
-                    tclr.g = byte(((long(tclr.g) << talpha1) + (long(tclr2.g) << talpha2)) >> 3);
-                    tclr.b = byte(((long(tclr.b) << talpha1) + (long(tclr2.b) << talpha2)) >> 3);
+                    t = ((long(tclr.r)* alpha) + (long(tclr2.r) * (255 - alpha))) >> 8;
+                    if (t > 255)
+                        t = 255;
+                    tclr.r = t;
+
+                    t = ((long(tclr.g)* alpha) + (long(tclr2.g)*(255 - alpha))) >> 8;
+                    if (t > 255)
+                        t = 255;
+                    tclr.g = t;
+
+                    t = ((long(tclr.b)* alpha) + (long(tclr2.b)*(255 - alpha))) >> 8;
+                    if (t > 255)
+                        t = 255;
+                    tclr.b = t;
+
+//                    tclr.r = byte(((long(tclr.r) << talpha1) + (long(tclr2.r) << talpha2)) >> 3);
+//                    tclr.g = byte(((long(tclr.g) << talpha1) + (long(tclr2.g) << talpha2)) >> 3);
+//                    tclr.b = byte(((long(tclr.b) << talpha1) + (long(tclr2.b) << talpha2)) >> 3);
 
                     *ptr = tclr.compress16();
                 }

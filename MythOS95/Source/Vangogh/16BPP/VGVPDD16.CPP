@@ -416,11 +416,12 @@ int VngoVportDD16::lock()
 {
     int fail_safe=0;
     int ret_val = surf_stat->lock();
+    lock_status = ret_val;
     if (ret_val != 1)
     {
         int locked=0;
         HRESULT hr;
-        while (!locked && (fail_safe < 1000))
+        while (!locked && (fail_safe < 50000))
         {
             fail_safe++;    // just so we can't loop infinately.
             if ((hr = pddsurf->Lock (NULL, &ddsd,
@@ -435,8 +436,11 @@ int VngoVportDD16::lock()
             {
                 hr = pddsurf->Restore();
                 if (hr != DD_OK)
-                    locked = 1; // an error occured while
+                {
+                    surf_stat->unlock();
+                    return -1;  // an error occured while
                                 // restoring the surface, so it cannot be locked.
+                }
             }
         }
 
@@ -446,39 +450,6 @@ int VngoVportDD16::lock()
             return (-1);        // failure to lock;
         }
 
-#if 0
-        // Now do the zbuffer if needed.
-        if (surf_stat->zddsurf)
-        {
-            locked = 0;
-            fail_safe = 0;
-            while (!locked && (fail_safe < 1000))
-            {
-                fail_safe++;    // just so we can't loop infinately.
-                if ((hr = surf_stat->zddsurf->Lock (NULL, &ddsd,
-                                                    DDLOCK_SURFACEMEMORYPTR
-                                                    | DDLOCK_WAIT, NULL)) == DD_OK)
-                {
-                    vbuff.zpitch = ddsd.lPitch;
-                    vbuff.zbuff_ptr = (word *) ((dword)ddsd.lpSurface + zp_offset);
-                    locked = 1;
-                }
-                if (hr == DDERR_SURFACELOST)
-                {
-                    hr = surf_stat->zddsurf->Restore();
-                    if (hr != DD_OK)
-                        locked = 1; // an error occured while
-                                    // restoring the surface, so it cannot be locked.
-                }
-            }
-
-            if (hr != DD_OK)
-            {
-                surf_stat->unlock();
-                return (-1);        // failure to lock;
-            }
-        }
-#endif
     }
 
     lock_status = 1;

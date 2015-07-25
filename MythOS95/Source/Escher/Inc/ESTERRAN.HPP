@@ -28,7 +28,7 @@
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
-// Created by Tim Little & Chuck Walbourn
+// Created by Tim Little, Chuck Walbourn, Keith Stauffer, and Paul Masters
 //
 // esterran.hpp
 //
@@ -36,6 +36,12 @@
 // uses a 2D array of 8-bit height values to create a realistic "outdoor"
 // terrain.  The terrain may have textures and be drawn with multiple
 // levels of detail.
+//
+// EschTerrainEx class extends this with a more complex level-of-detail
+// drawing algorithm.
+//
+// EschTerrainTreeTop creates 'forest blocks' which sit above an instance
+// of the EschTerrainEx class to fill large terrain-following drawables.
 //
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
 
@@ -71,6 +77,12 @@
 #define ESCH_LOW_TERRAIN_X_PRIMARY  0x1
 #define ESCH_LOW_TERRAIN_Z_PRIMARY  0x2
 #define ESCH_MAX_LOD                8
+
+#define ESCH_TREETEX_TREETOPS       1
+#define ESCH_TREETEX_TREETRANS      2
+#define ESCH_TREETEX_TREESOLID      3
+#define ESCH_TREETEX_UNDERGROWTH    4
+#define ESCH_TREETEX_TREEBACK       5
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
@@ -115,7 +127,6 @@ protected:
     void draw_block(int w, int d, int i, int j,
                     esch_surf_type *sptr, dword ctrlfl,
                     ulong shift=0);
-
 
     enum
     {
@@ -163,7 +174,7 @@ public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Constructor/Destructors                                              ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-    EschTerrain(const char *fname=0, const char *tname=0);
+    EschTerrain(const char *fname=0, const char *tname=0, VngoPal *pal=0);
 
     virtual ~EschTerrain();
 
@@ -189,6 +200,12 @@ public:
     ushort get_surface_flags(const EschPoint *pt) const
     {
         return get_surface_flags(pt->x, pt->z);
+    }
+
+    virtual dword get_surface_color(float x, float z) const;
+    dword get_surface_color(const EschPoint *pt) const
+    {
+        return get_surface_color(pt->x, pt->z);
     }
 
     virtual int check_LOS(EschPoint *pt1, EschPoint *pt2, int precision=-1,float *dist=NULL) const;
@@ -219,8 +236,12 @@ public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // I/O routines                                                         ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-    virtual esch_error_codes load(const char *fname, const char *tname=0, ushort *hclr=0);
-    virtual esch_error_codes load(XFParseIFF *iff, const char *tname=0, ushort *hclr=0);
+    virtual esch_error_codes load(const char *fname, const char *tname=0,
+                                  ushort *hclr=0, VngoPal *pal=0,
+                                  dword ctrlfl=ESCH_TRNLD_ALL);
+    virtual esch_error_codes load(XFParseIFF *iff, const char *tname=0,
+                                  ushort *hclr=0, VngoPal *pal=0,
+                                  dword ctrlfl=ESCH_TRNLD_ALL);
 };
 
 
@@ -287,9 +308,9 @@ protected:
 
 public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-    // Public data members                                                  ³
+    // Constructor/Destructors                                              ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-    EschTerrainEx (const char *fname=0, const char *tname=0);
+    EschTerrainEx (const char *fname=0, const char *tname=0, VngoPal *pal=0);
     EschTerrainEx (const EschTerrainEx &_t);
     virtual ~EschTerrainEx();
 
@@ -297,23 +318,123 @@ public:
     // Operations                                                           ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
     virtual void draw();
-
+    virtual void release();
     virtual float get_height(float x, float z) const;
+
     virtual void set_lod (int count,...);
     virtual void set_texture_lod(int lod);
     virtual void set_perspective_lod(int lod);
     virtual void set_smooth_lod(int lod);
     virtual void set_start_lod(int lod);
 
-    float *get_dlevels () {return dlevels;}
-    int get_texture_lod() {return max_texture_lod;}
-    int get_perspective_lod() {return max_perspective_lod;}
-    int get_smooth_lod() {return max_smooth_lod;}
-    int get_start_lod() {return start_dlevel;}
-    int get_num_lod() {return num_dlevels;}
-    void hide_rect(VngoRect &hrect);
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    // Utility functions.                                                   ³
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+    int get_num_lod() const { return num_dlevels; }
+    int get_texture_lod() const { return max_texture_lod; }
+    int get_perspective_lod() const { return max_perspective_lod; }
+    int get_smooth_lod() const { return max_smooth_lod; }
+    int get_start_lod() const { return start_dlevel; }
 
+    float *get_dlevels() const { return dlevels; }
+
+    void hide_rect(VngoRect &hrect);
+};
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// EschTerrainTreeTop - Terrain extension for trees.                        ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+class EschTerrainTreeTop : public EschTerrainEx
+{
+public:
+    enum
+    {
+        ESCH_TERNEX_SKIRT_NONE          = 0x0,
+        ESCH_TERNEX_SKIRT_TOP           = 0x1,
+        ESCH_TERNEX_SKIRT_BOTTOM        = 0x2,
+        ESCH_TERNEX_SKIRT_LEFT          = 0x4,
+        ESCH_TERNEX_SKIRT_RIGHT         = 0x8,
+        ESCH_TERNEX_SKIRT_ALL           = ESCH_TERNEX_SKIRT_TOP
+                                         | ESCH_TERNEX_SKIRT_BOTTOM
+                                         | ESCH_TERNEX_SKIRT_LEFT
+                                         | ESCH_TERNEX_SKIRT_RIGHT,
+        ESCH_TERNEX_SLIP_ON             = 0x200,
+        ESCH_TERNEX_SLIP_TOPLEFT        = 0x400,
+        ESCH_TERNEX_SLIP_TOPRIGHT       = 0x800,
+        ESCH_TERNEX_SLIP_BOTTOMLEFT     = 0x1000,
+        ESCH_TERNEX_SLIP_BOTTOMRIGHT    = 0x2000,
+        ESCH_TERNEX_SLIP_DRAWS_TOP      = 0x4000,
+        ESCH_TERNEX_SLIP_DRAWS_BOTTOM   = 0x8000,
+        ESCH_TERNEX_SLIP_DRAWS_LEFT     = 0x10000,
+        ESCH_TERNEX_SLIP_DRAWS_RIGHT    = 0x20000,
+        ESCH_TERNEX_ENDCAP_NONE         = 0x40000,
+        ESCH_TERNEX_HORIZONTAL_TRANS    = 0x80000,
+        ESCH_TERNEX_VERTICAL_TRANS      = 0x100000
+    };
+
+protected:
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    // Protected data members                                               ³
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+    VngoRect treerect;
+
+    long    left;
+    long    right;
+    long    top;
+    long    bottom;
+    float   hgt;
+
+    EschTerrainEx *terr;
+
+    int esch_find_draw_volume(EschVector *pts=0);
+    VngoRect draw_tree_rect(VngoRect *iclip, VngoRect *oclip,int dlevel,dword flags);
+    void draw_tree_rect(VngoRect *iclip, int dlevel, dword flags);
+    int setup_edge_limits(VngoPoint *edge);
+
+    VngoRect draw_tree_skirt(VngoRect *iclip, VngoRect *oclip,int dlevel,dword flags);
+    void draw_tree_skirt(VngoRect *iclip, int dlevel, dword flags);
+
+    void draw_slip_endcap (VngoRect *rect, dword type, int dlevel, dword lflags);
+
+public:
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    // Public data members                                                  ³
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+    BOOL    TOP_FACING;
+    BOOL    LEFT_FACING;
+    BOOL    RIGHT_FACING;
+    BOOL    BOTTOM_FACING;
+
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    // Constructor/Destructors                                              ³
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+    EschTerrainTreeTop(EschTerrainEx* terr, int _left, int _right,
+                       int _top, int _bottom, float _hgt);
+    virtual ~EschTerrainTreeTop();
+
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    // Operations                                                           ³
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+    virtual void draw();
     virtual void release();
+    virtual int check_LOS(EschPoint *pt1, EschPoint *pt2, int precision=-1,float *dist=NULL) const;
+    virtual float get_height(float x, float z) const;
+
+    void update_lods();
+
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    // Utility functions.                                                   ³
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+    long get_left() const {return left;};
+    long get_right() const {return right;};
+    long get_top() const {return top;};
+    long get_bottom() const {return bottom;};
+
+    void get_exterior_rect (VngoRect *rect);
+    void get_exterior_rect_world (float *x, float *z, float *dx, float *dz);
+    void get_interior_rect (VngoRect *rect);
+    void get_interior_rect_world (float *x, float *z, float *dx, float *dz);
 };
 
 #ifdef __WATCOMC__

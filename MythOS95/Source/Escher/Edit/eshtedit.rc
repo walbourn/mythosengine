@@ -852,14 +852,10 @@ BEGIN
     CONTROL         "Active",IDC_CPROP_HAZE,"Button",BS_AUTOCHECKBOX | 
                     WS_TABSTOP,25,70,45,15
     PUSHBUTTON      "&Hazing Target Color",IDC_CPROP_HCOLR,150,70,80,15
-    RTEXT           "Shade-levels:",-1,15,92,60,10
-    EDITTEXT        IDC_CPROP_LEVEL,75,90,40,15,ES_AUTOHSCROLL
-    RTEXT           "Unaffected level:",-1,120,92,70,10
-    EDITTEXT        IDC_CPROP_SLEVEL,195,90,41,15,ES_AUTOHSCROLL
-    RTEXT           "'Break-point' level:",-1,15,107,60,10
-    EDITTEXT        IDC_CPROP_BLEVEL,75,105,40,15,ES_AUTOHSCROLL
-    RTEXT           "'Break-point' precent:",-1,120,107,70,10
-    EDITTEXT        IDC_CPROP_BPERC,195,105,41,15,ES_AUTOHSCROLL
+    RTEXT           "Start Z:",-1,15,92,60,10
+    EDITTEXT        IDC_CPROP_STARTZ,75,90,40,15,ES_AUTOHSCROLL
+    RTEXT           "Mid-point Z",-1,120,92,70,10
+    EDITTEXT        IDC_CPROP_MIDZ,195,90,41,15,ES_AUTOHSCROLL
 END
 
 IDD_TXTPROP_SFLAGS DIALOG DISCARDABLE  0, 0, 272, 130
@@ -994,8 +990,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 2,0,0,0
- PRODUCTVERSION 2,0,0,0
+ FILEVERSION 2,1,1,0
+ PRODUCTVERSION 2,1,1,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -1013,13 +1009,13 @@ BEGIN
             VALUE "Comments", "by Chuck Walbourn\0"
             VALUE "CompanyName", "Charybdis Enterprises, Inc.\0"
             VALUE "FileDescription", "Escher Terrain Editor MFC Application\0"
-            VALUE "FileVersion", "2.00\0"
+            VALUE "FileVersion", "2.11\0"
             VALUE "InternalName", "Terrain Edit\0"
             VALUE "LegalCopyright", "Copyright © 1995-1997\0"
             VALUE "LegalTrademarks", "MythOS is a trademark of Charybdis Enterprises, Inc.\0"
             VALUE "OriginalFilename", "ESHTEDIT.EXE\0"
             VALUE "ProductName", "Escher Terrain Editor\0"
-            VALUE "ProductVersion", "2.00\0"
+            VALUE "ProductVersion", "2.11\0"
         END
     END
     BLOCK "VarFileInfo"

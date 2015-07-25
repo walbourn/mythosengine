@@ -203,7 +203,7 @@ esch_error_codes EschFastAttenLight::load(const char *fname, const char *lname)
     XFParseIFF          iff;
 
 //ÄÄ Open file
-    if (iff.open(fname,XF_OPEN_READ))
+    if (iff.open(fname,XF_OPEN_READ | XF_OPEN_DENYWRITE))
         return ESCH_ERR_FILEERROR;
 
 //ÄÄ Loop until a header with the correct name is found
@@ -216,6 +216,7 @@ esch_error_codes EschFastAttenLight::load(const char *fname, const char *lname)
             if (!iff.depth)
                 return ESCH_ERR_NOTFOUND;
             iff.leaveform();
+            continue;
         }
 
         if (iff.chunkid == iff.makeid('E','F','A','T')

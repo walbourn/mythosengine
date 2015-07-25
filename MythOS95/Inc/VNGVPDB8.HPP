@@ -25,6 +25,8 @@
 //
 //ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд
 //
+// Created by Tim Little
+//
 // vngvpdb8.hpp
 //
 // Contains the 8-bit Windows DIB viewport class definition
@@ -59,16 +61,20 @@
 class VngoVportDB8 : public VngoVVport8
 {
 public:
+    //дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+    // Constructor/Destructors                                              Ё
+    //дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
     VngoVportDB8 () {};
     VngoVportDB8 (long width, long height, void *vbptr, void *zbptr,
                   VngoPal *my_pal,dword flags,int _pitch=0, int _zpitch=0);
 
     virtual ~VngoVportDB8();
 
+    //дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+    // Operations                                                           Ё
+    //дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
     VNGError init (long width, long height, void *vbptr, void *zbptr,
                    VngoPal *my_pal,dword flags, int _pitch=0, int _zpitch=0);
-
-
 };
 
 #ifdef __WATCOMC__

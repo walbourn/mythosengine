@@ -56,13 +56,16 @@
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // EschSystem - Constructor                                                 ³
-//                                                                          ³
-// Sets up the library, initializing the library if the arena_size is given.³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-EschSystem::EschSystem(ulong arena_size) :
+EschSystem::EschSystem(ulong arena_size, ulong sort_size) :
     wspace_mbytes(0),
     wspace_sbytes(0),
     wspace(0),
+    sspace_mdepth(0),
+    sspace_mbytes(0),
+    sspace_sbytes(0),
+    sspace(0),
+    sroot(0),
     diag_faces(0),
     diag_verts(0),
     diag_ifaces(0),
@@ -70,7 +73,10 @@ EschSystem::EschSystem(ulong arena_size) :
     diag_ntxts(0),
     tcache_hi(0),
     tcache_max(0),
-    tcache(0)
+    tcache(0),
+    tfile_hi(0),
+    tfile_max(0),
+    tfile(0)
 {
     esch_error_codes    err;
 
@@ -82,44 +88,22 @@ EschSystem::EschSystem(ulong arena_size) :
     //ÄÄ Create workspace, if arena_size given
     if (arena_size)
     {
-        err=init(arena_size);
-        assert (err == ESCH_ERR_NONE);
+        err=init(arena_size,sort_size);
+        assertMyth ("EschSystem constructor failed init()",
+                    err == ESCH_ERR_NONE);
     }
 }
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // EschSystem - Destructor                                                  ³
-//                                                                          ³
-// Destroys the work-space.                                                 ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 EschSystem::~EschSystem()
 {
     assertMyth("~EschSystem: EschSysInstance points to invalid data",
                EschSysInstance == this);
 
-    //ÄÄ Destroy texture cache
-    if (tcache)
-    {
-        for(ulong i=0; i < tcache_hi; i++)
-        {
-            assertMyth("~EschSystem:  Texture cache not empty",
-                       tcache[i].handle == 0);
-
-            if (tcache[i].handle)
-            {
-                ivory_hfree(&tcache[i].handle);
-            }
-        }
-
-        delete [] tcache;
-    }
-
-    //ÄÄ Destroy workspace
-    if (wspace)
-    {
-        ivory_free((void**)&wspace);
-    }
+    release();
 
     EschSysInstance=0;
 }
@@ -133,15 +117,14 @@ EschSystem::~EschSystem()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // EschSystem - init                                                        ³
 //                                                                          ³
-// Initializes the library, creating the required workspace buffer.         ³
+// Initializes the library, created required global data.                   ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-esch_error_codes EschSystem::init(ulong arena_size)
+esch_error_codes EschSystem::init(ulong arena_size, ulong sort_size)
 {
-    assertMyth("EschSystem::init requires a positive arena size",
-               arena_size > 0);    
+    assertMyth("EschSystem::init requires a positive arena and sort size",
+               arena_size > 0 && sort_size > 0);
 
-    if (wspace)
-        return ESCH_ERR_NONE;
+    release();
 
 //ÄÄ Create workspace arena
     wspace=(IvoryArena*)ivory_alloc(arena_size);
@@ -149,10 +132,84 @@ esch_error_codes EschSystem::init(ulong arena_size)
         return ESCH_ERR_NOMEMORY;
 
     wspace_sbytes = arena_size;
+    wspace_mbytes = 0;
 
-    ivory_arena_initialize(wspace,arena_size);
+    if (!ivory_arena_initialize(wspace,arena_size))
+        return ESCH_ERR_NOMEMORY;
+
+//ÄÄ Create sort arena
+    sspace=(IvoryArena*)ivory_alloc(sort_size);
+    if (!sspace)
+        return ESCH_ERR_NOMEMORY;
+
+    sspace_sbytes = sort_size;
+    sspace_mbytes = 0;
+    sspace_mdepth = 0;
+
+    if (!ivory_arena_initialize(sspace,sort_size))
+        return ESCH_ERR_NOMEMORY;
+
+    sroot = 0;
 
     return ESCH_ERR_NONE;
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// EschSystem - release                                                     ³
+//                                                                          ³
+// Releases the global data space for Escher.                               ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+void EschSystem::release()
+{
+//ÄÄ Destroy texture cache
+    if (tcache)
+    {
+        for(ulong i=0; i < tcache_hi; i++)
+        {
+            assertMyth("~EschSystem:  Texture cache not empty",
+                       tcache[i].handle == 0);
+
+            if (tcache[i].handle)
+            {
+                ivory_hfree(&tcache[i].handle);
+            }
+            if (tcache[i].name)
+            {
+                delete [] tcache[i].name;
+                tcache[i].name = 0;
+            }
+        }
+
+        delete [] tcache;
+        tcache=0;
+    }
+
+//ÄÄ Destroy texture file list
+    if (tfile)
+    {
+        for(ulong i=0; i < tfile_hi; i++)
+        {
+            if (tfile[i].names)
+                delete [] tfile[i].names;
+            if (tfile[i].iff)
+                delete tfile[i].iff;
+        }
+
+        delete [] tfile;
+        tfile=0;
+    }
+
+//ÄÄ Destroy arenas
+    if (wspace)
+    {
+        ivory_free((void**)&wspace);
+    }
+    if (sspace)
+    {
+        ivory_free((void**)&sspace);
+    }
+    sroot=0;
 }
 
 //°±² End of module - essystem.cpp ²±°

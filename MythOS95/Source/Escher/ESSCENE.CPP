@@ -224,7 +224,7 @@ esch_error_codes EschScene::load(const char *fname, const char *sname,
     XFParseIFF          iff;
 
 //컴 Open file
-    if (iff.open(fname,XF_OPEN_READ))
+    if (iff.open(fname,XF_OPEN_READ | XF_OPEN_DENYWRITE))
         return ESCH_ERR_FILEERROR;
 
 //컴 Loop until an 'ESEN' FORM with correct name is found.
@@ -355,7 +355,6 @@ esch_error_codes EschScene::load(XFParseIFF *iff, const char *sname,
                 goto error_exit;
             }
 
-
             dword ctrlfl = ESCH_MSHLD_ALL;
 
             if (flgs & ESCH_SCENELD_NOMFTXT)
@@ -363,6 +362,9 @@ esch_error_codes EschScene::load(XFParseIFF *iff, const char *sname,
 
             if (flgs & ESCH_SCENELD_NOSHARETXT)
                 ctrlfl &= ~ESCH_MSHLD_SHARETXT;
+
+            if (flgs & ESCH_SCENELD_NOFILETXT)
+                ctrlfl &= ~ESCH_MSHLD_FILETXT;
 
             err=m->load(iff,0,pal,0,pname,ctrlfl);
             if (err)
@@ -392,7 +394,7 @@ esch_error_codes EschScene::load(XFParseIFF *iff, const char *sname,
         }
         else if (iff->chunkid == iff->makeid('F','O','R','M')
                  && iff->formid == iff->makeid('E','M','S','H')
-                 && flgs & ESCH_SCENELD_MESHES)
+                 && flgs & (ESCH_SCENELD_MESHES))
         {
             EschMeshDraw    *m;
 
@@ -403,7 +405,6 @@ esch_error_codes EschScene::load(XFParseIFF *iff, const char *sname,
                 goto error_exit;
             }
 
-
             dword ctrlfl = ESCH_MSHLD_ALL;
 
             if (flgs & ESCH_SCENELD_NOMFTXT)
@@ -411,6 +412,9 @@ esch_error_codes EschScene::load(XFParseIFF *iff, const char *sname,
 
             if (flgs & ESCH_SCENELD_NOSHARETXT)
                 ctrlfl &= ~ESCH_MSHLD_SHARETXT;
+
+            if (flgs & ESCH_SCENELD_NOFILETXT)
+                ctrlfl &= ~ESCH_MSHLD_FILETXT;
 
             err=m->load(iff,0,pal,0,pname,ctrlfl);
             if (err)
@@ -442,7 +446,7 @@ esch_error_codes EschScene::load(XFParseIFF *iff, const char *sname,
         //컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴� Cameras
         else if ((iff->chunkid == iff->makeid('E','C','A','M')
                   || iff->chunkid == iff->makeid('E','C','A','1'))
-                 && flgs & ESCH_SCENELD_CAMERAS)
+                 && flgs & (ESCH_SCENELD_CAMERAS))
         {
             EschCamera  *c;
 
@@ -486,7 +490,7 @@ esch_error_codes EschScene::load(XFParseIFF *iff, const char *sname,
                    || iff->chunkid == iff->makeid('E','A','T','1')
                    || iff->chunkid == iff->makeid('E','S','P','T')
                    || iff->chunkid == iff->makeid('E','S','P','1') )
-                 && flgs & ESCH_SCENELD_LIGHTS)
+                 && (flgs & ESCH_SCENELD_LIGHTS))
         {
             EschLight   *l=0;
 

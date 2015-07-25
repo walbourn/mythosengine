@@ -288,10 +288,8 @@ public:
 	CButton	m_haze_activeCtl;
 	BOOL	m_bg_active;
 	BOOL	m_haze_active;
-	UINT	m_slevels;
-	UINT	m_levels;
-	float	m_bpercent;
-	UINT	m_blevels;
+	float	m_startz;
+	float	m_midz;
 	//}}AFX_DATA
 
     XFBitmap *bg_bm;
@@ -545,11 +543,15 @@ public:
 	BOOL	m_bcline;
 	BOOL	m_caline;
 	BOOL	m_flat;
-	int		m_selfi;
 	BOOL	m_smooth;
 	BOOL	m_solid;
 	BOOL	m_specular;
 	BOOL	m_wire;
+	BOOL	m_alpha;
+	UINT	m_alpha_a;
+	UINT	m_alpha_b;
+	UINT	m_alpha_c;
+	UINT	m_selfillum;
 	//}}AFX_DATA
 
 

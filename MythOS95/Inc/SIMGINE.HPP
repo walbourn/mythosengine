@@ -126,8 +126,9 @@ public:
         STARTUP_D3D                 = 0x2,
         STARTUP_CLEAR3D             = 0x4,
         STARTUP_FULLSCREEN          = 0x1000,
-        STARTUP_AUDIO               = 0x2000,
-        STARTUP_DX5                 = 0x4000,
+        STARTUP_TRUEFLIP            = 0x2000,
+        STARTUP_AUDIO               = 0x4000,
+        STARTUP_DX5                 = 0x8000,
     };
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
@@ -145,6 +146,7 @@ public:
     ushort      na;
     dword       startup_memsize;            // Ivory static memory size
     dword       startup_arenasize;          // Escher arena memory space
+    dword       startup_sortsize;           // Escher sort memory space
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Constructor/Destructors                                              ³

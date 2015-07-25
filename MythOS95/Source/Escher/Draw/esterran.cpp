@@ -42,7 +42,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include <xfile.hpp>
@@ -95,7 +95,7 @@ static EschFace Face(FACE_FLAGS,
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // EschTerrain - constructor                                                ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-EschTerrain::EschTerrain(const char *fname, const char *tname) :
+EschTerrain::EschTerrain(const char *fname, const char *tname, VngoPal *pal) :
     EschDrawable(ESCH_DRWT_TERRAIN),
     width(0),
     depth(0),
@@ -127,7 +127,7 @@ EschTerrain::EschTerrain(const char *fname, const char *tname) :
 
 //ÄÄ Load data set, if requested
     if (fname)
-        load(fname,tname);
+        load(fname,tname,0,pal);
 };
 
 
@@ -318,8 +318,8 @@ void EschTerrain::compute_texture_uv(float &u_left, float &u_right,
     int woff = w & mask;
 
     assert(ESCH_SURF_TILE1 == 0x10 && ESCH_SURF_TILE2 == 0x20 && ESCH_SURF_TILE3 == 0x40);
-    long tile = tile_lookup[(flags & (ESCH_SURF_TILE1 
-                                      | ESCH_SURF_TILE2 
+    long tile = tile_lookup[(flags & (ESCH_SURF_TILE1
+                                      | ESCH_SURF_TILE2
                                       | ESCH_SURF_TILE3)) >> 4];
 
     float tile_factor = float(tile);
@@ -343,7 +343,7 @@ void EschTerrain::compute_texture_uv(float &u_left, float &u_right,
         v_bottom = float(doff) * rate;
     }
     else
-    {             
+    {
         v_top = tile_factor - (float(doff+1) * rate);
         v_bottom = tile_factor - (float(doff) * rate);
     }
@@ -401,8 +401,8 @@ void EschTerrain::draw_block(int w, int d, int i, int j,
             Face.c = (word)i;
 
             Face.u[0] = u_left;
-            Face.u[1] = u_left;  
-            Face.u[2] = u_right;  
+            Face.u[1] = u_left;
+            Face.u[2] = u_right;
 
             Face.v[0] = v_bottom;
             Face.v[1] = v_top;
@@ -429,9 +429,9 @@ void EschTerrain::draw_block(int w, int d, int i, int j,
         Face.b = (word)(j-1);
         Face.c = (word)(i-1);
 
-        Face.u[0] = u_right;  
-        Face.u[1] = u_left;  
-        Face.u[2] = u_left;  
+        Face.u[0] = u_right;
+        Face.u[1] = u_left;
+        Face.u[2] = u_left;
 
         Face.v[0] = (d & test) ? v_bottom : v_top;
         Face.v[1] = v_bottom;
@@ -448,9 +448,9 @@ void EschTerrain::draw_block(int w, int d, int i, int j,
         Face.b = (word)i;
         Face.c = (word)j;
 
-        Face.u[0] = u_left;  
-        Face.u[1] = u_right;  
-        Face.u[2] = u_right;  
+        Face.u[0] = u_left;
+        Face.u[1] = u_right;
+        Face.u[2] = u_right;
 
         Face.v[0] = (d & test) ? v_bottom : v_top;
         Face.v[1] = v_top;
@@ -464,9 +464,9 @@ void EschTerrain::draw_block(int w, int d, int i, int j,
             Face.b = (word)(i-1);
             Face.c = (word)i;
 
-            Face.u[0] = u_right;  
-            Face.u[1] = u_left;  
-            Face.u[2] = u_right;  
+            Face.u[0] = u_right;
+            Face.u[1] = u_left;
+            Face.u[2] = u_right;
 
             Face.v[0] = v_bottom;
             Face.v[1] = v_top;
@@ -478,9 +478,9 @@ void EschTerrain::draw_block(int w, int d, int i, int j,
             Face.b = (word)j;
             Face.c = (word)(j-1);
 
-            Face.u[0] = u_right;  
-            Face.u[1] = u_right;  
-            Face.u[2] = u_left;  
+            Face.u[0] = u_right;
+            Face.u[1] = u_right;
+            Face.u[2] = u_left;
 
             Face.v[0] = v_top;
             Face.v[1] = v_bottom;
@@ -715,7 +715,7 @@ void EschTerrain::draw_transitions(int w, int d, int i, int j,
             break;
         case BOTTOM_CORNERS:
             Face.a = (word)(j-1);
-            Face.b = (word)i;   
+            Face.b = (word)i;
             Face.c = (word)j;
 
             Face.u[0] = u_left;
@@ -727,7 +727,7 @@ void EschTerrain::draw_transitions(int w, int d, int i, int j,
             Face.v[2] = v_bottom;
             break;
         case TOP_CORNERS:
-            Face.a = (word)i;   
+            Face.a = (word)i;
             Face.b = (word)j;
             Face.c = (word)(i-1);
 
@@ -974,7 +974,7 @@ void EschTerrain::draw()
         }
     }
 
-    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Far points 
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Far points
     tx = cam->yon * cam->xsize;
     ty = cam->yon * cam->ysize;
 
@@ -1037,7 +1037,7 @@ void EschTerrain::draw()
         if (!compute_area(mlox, mloz, mhix, mhiz,
                           &swm, &ewm, &sdm, &edm, 2))
         {
-            swm=sw-2;   
+            swm=sw-2;
             if (sw < 0)
                 sw = 0;
             sdm=sd-2;
@@ -1164,8 +1164,8 @@ void EschTerrain::draw()
 #if USE_LOW_LOD
                 if ((d < sdl || d >= edl-3 || w < swl || w >= ewl-3)
                     && (d & 0x3))
-                { 
-                    // Handle missing triangle for 
+                {
+                    // Handle missing triangle for
                     if (!(flags & ESCH_TRN_DOTS)
                         && (w == ewl))
                     {
@@ -1189,8 +1189,8 @@ void EschTerrain::draw()
 #endif
                 if ((d < sdm || d >= edm-1 || w < swm || w >= ewm-1)
                     && (d & 0x1))
-                { 
-                    // Handle missing triangle for 
+                {
+                    // Handle missing triangle for
                     if (!(flags & ESCH_TRN_DOTS)
                         && (w == ewm))
                     {
@@ -1264,7 +1264,7 @@ void EschTerrain::draw()
                                + (cam->vport->vbuff.width >> 1);
                         v->y = (cam->vport->vbuff.height >> 1)
                                - long((((EschPoint*)v)->y * cam->yscalar) / ((EschPoint*)v)->z);
-                        v->z = ulong(((EschPoint*)v)->z * cam->z_factor);
+                        v->z = ulong(((EschPoint*)v)->z * cam->z_factor * float(0xffffffff));
                         vflags[i] |= ESCH_VVERT_PROJECTED;
 
                         //ÄÄÄ Draw pixel
@@ -1474,7 +1474,7 @@ void EschTerrain::draw()
 #if USE_LOW_LOD
         if (flags & ESCH_TRN_LOD
             && (d < sdl-3 || d > edl+3))
-        { 
+        {
             d += 4;
             pd.x += dvec.i * 4;
             pd.y += dvec.j * 4;
@@ -1484,7 +1484,7 @@ void EschTerrain::draw()
 #endif
         if (flags & ESCH_TRN_LOD
             && (d < sdm-1 || d > edm+1))
-        { 
+        {
             d += 2;
             pd.x += dvec.i * 2;
             pd.y += dvec.j * 2;
@@ -1560,7 +1560,7 @@ void EschTerrain::compute_shades(EschCamera *cam, EschLight *lgts)
         assertMyth("EschTerrain::compute_shades needs palette in camera's viewport",
                     cam && cam->vport && cam->vport->vbuff.pal);
 
-        byte mp = (byte) cam->vport->vbuff.pal->shd_pal->mid_point;
+        byte mp = (byte) (cam->vport->vbuff.pal->shd_pal->mid_point);
 
         for(d=0, sptr=surfinfo; d < (depth >> surfshift); d++)
         {
@@ -1654,34 +1654,19 @@ void EschTerrain::compute_shades(EschCamera *cam, EschLight *lgts)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 void EschTerrain::release()
 {
+//ÄÄ Free associated data, if any
     if (flags & ESCH_DRW_OWNSDATA)
     {
-//ÄÄ Free associated data, if any
         if (hfield)
-        {
             delete [] hfield;
-            hfield=0;
-        }
         if (htable)
-        {
             delete [] htable;
-            htable=0;
-        }
         if (surfinfo)
-        {
             delete [] surfinfo;
-            surfinfo=0;
-        }
         if (hsurfnorml)
-        {
             ivory_hfree(&hsurfnorml);
-            hsurfnorml=0;
-        }
         if (txtcolor)
-        {
             delete [] txtcolor;
-            txtcolor=0;
-        }
         if (txt)
         {
             for(ulong i=0; i < tmax; i++)
@@ -1690,12 +1675,19 @@ void EschTerrain::release()
                     delete txt[i];
             }
             delete [] txt;
-            txt=0;
-            tmax=0;
         }
-
-        flags &= ~ESCH_DRW_OWNSDATA;
     }
+
+//ÄÄ Clear pointers
+    hfield=0;
+    htable=0;
+    surfinfo=0;
+    hsurfnorml=0;
+    txtcolor=0;
+    txt=0;
+    tmax=0;
+
+    flags &= ~ESCH_DRW_OWNSDATA;
 }
 
 
@@ -1741,7 +1733,7 @@ float EschTerrain::get_height(float x, float z) const
     if (!((lx ^ lz) & 0x1)) // determine which triangle pattern to follow
     {                       // __
                             // |/  or /|
-        c2 = scale;        
+        c2 = scale;
         if (x < z)
         {
             x0 = 0;
@@ -1774,10 +1766,10 @@ float EschTerrain::get_height(float x, float z) const
             t2 = (x0 + (a1 * t1) - x) / -a2;
         }
     }
-    else                    
+    else
     {                       // |\
                             // ---
-        c2 = scale;        
+        c2 = scale;
 
         if ((x+z) > scale)
         {
@@ -1830,7 +1822,7 @@ ushort EschTerrain::get_surface_flags(float x, float z) const
 {
     float _x = x - origin.x;
     float _z = z - origin.z;
-          
+
     assertMyth("EschTerrain::get_surface_flags needs surface information",
                surfinfo);
 
@@ -1853,12 +1845,45 @@ ushort EschTerrain::get_surface_flags(float x, float z) const
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// EschTerrain - get_surface_color                                          ³
+//                                                                          ³
+// Return the surface color associated with the given x,z world location.   ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+dword EschTerrain::get_surface_color(float x, float z) const
+{
+    float _x = x - origin.x;
+    float _z = z - origin.z;
+
+    assertMyth("EschTerrain::get_surface_color needs surface information and texture array",
+               surfinfo != 0 && txtcolor != 0);
+
+    int     lx = (int)_x >> (scaleshift+surfshift);
+    int     lz = (int)_z >> (scaleshift+surfshift);
+
+    int swidth = width >> surfshift;
+
+//ÄÄÄÄ Check that point is on map
+    if ((lx < 0)
+        || (lz < 0)
+        || (lx >= swidth)
+        || (lz >= (depth >> surfshift)))
+        return 0;
+
+//ÄÄÄÄ Return surface information
+    esch_surf_type *sptr = surfinfo + (lz*swidth) + lx;
+
+    return (sptr->flags & ESCH_SURF_CINDISTXT)
+           ? txtcolor[sptr->cind-1] : sptr->cind;
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // EschTerrain - check_LOS                                                  ³
 //                                                                          ³
 // Check to see if the terrain obstructs the line of sight between two      ³
 // points.                                                                  ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-int EschTerrain::check_LOS (EschPoint *pt1, EschPoint *pt2, 
+int EschTerrain::check_LOS (EschPoint *pt1, EschPoint *pt2,
                            int precision,float *ndist) const
 {
 //ÄÄÄ Form vector
@@ -1933,7 +1958,8 @@ void EschTerrain::set_scale(const float i)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // EschTerrain - load                                                       ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-esch_error_codes EschTerrain::load(const char *fname, const char *tname, ushort *hclr)
+esch_error_codes EschTerrain::load(const char *fname, const char *tname,
+                                   ushort *hclr, VngoPal *pal, dword ctrlfl)
 {
     esch_error_codes    err;
     XFParseIFF          iff;
@@ -1941,7 +1967,7 @@ esch_error_codes EschTerrain::load(const char *fname, const char *tname, ushort 
     release();
 
 //ÄÄ Open file
-    if (iff.open(fname,XF_OPEN_READ))
+    if (iff.open(fname,XF_OPEN_READ | XF_OPEN_DENYWRITE))
         return ESCH_ERR_FILEERROR;
 
 //ÄÄ Loop until a header with the correct name is found
@@ -1954,13 +1980,14 @@ esch_error_codes EschTerrain::load(const char *fname, const char *tname, ushort 
             if (!iff.depth)
                 return ESCH_ERR_NOTFOUND;
             iff.leaveform();
+            continue;
         }
 
         if (iff.chunkid == iff.makeid('F','O','R','M'))
         {
             if (iff.formid == iff.makeid('E','T','E','R'))
             {
-                err=load(&iff,tname,hclr);
+                err=load(&iff,tname,hclr,pal,ctrlfl);
                 if (!err
                     || err != ESCH_ERR_NOTFOUND)
                     break;
@@ -1979,12 +2006,14 @@ esch_error_codes EschTerrain::load(const char *fname, const char *tname, ushort 
     return err;
 }
 
-esch_error_codes EschTerrain::load(XFParseIFF *iff, const char *tname, ushort *hclr)
+esch_error_codes EschTerrain::load(XFParseIFF *iff, const char *tname,
+                                   ushort *hclr, VngoPal *pal, dword ctrlfl)
 {
-    ulong               nt=0;
     esch_error_codes    err;
+    ulong               i;
     float               hscale;
     ulong               ntxts=0;
+    EschFileTerrMTL     *emtl=0;
 
     assertMyth("EschTerrain::load requires an iff pointer",
                iff);
@@ -2133,7 +2162,7 @@ esch_error_codes EschTerrain::load(XFParseIFF *iff, const char *tname, ushort *h
                     iff->leaveform();
                     return ESCH_ERR_NOTSUPPORTED;
                 }
-            } 
+            }
 
             break;
         }
@@ -2275,7 +2304,7 @@ esch_error_codes EschTerrain::load(XFParseIFF *iff, const char *tname, ushort *h
         else if (iff->chunkid == iff->makeid('N','R','M','2')
                  || iff->chunkid == iff->makeid('N','R','M','1')
                  || iff->chunkid == iff->makeid('N','R','M','L'))
-        {   
+        {
             if (hsurfnorml)
             {
                 err=ESCH_ERR_INVALIDSRFDATA;
@@ -2355,7 +2384,7 @@ esch_error_codes EschTerrain::load(XFParseIFF *iff, const char *tname, ushort *h
                     sptr++;
 
                     ptr->i = i / 65536.0f;
-                    ptr->j = j / 65536.0f; 
+                    ptr->j = j / 65536.0f;
                     ptr->k = k / 65536.0f;
                 }
 
@@ -2452,12 +2481,62 @@ esch_error_codes EschTerrain::load(XFParseIFF *iff, const char *tname, ushort *h
                 goto error_exit;
             }
         }
+        //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Materials
+        else if (ntxts
+                 && (iff->chunkid == iff->makeid('M','T','L',' ')))
+        {
+            if (emtl || txt
+                || iff->chunkSize != (sizeof(EschFileTerrMTL)*ntxts))
+            {
+                err=ESCH_ERR_INVALIDDATA;
+                goto error_exit;
+            }
+            emtl = new EschFileTerrMTL[ntxts];
+            if (!emtl)
+            {
+                err=ESCH_ERR_NOMEMORY;
+                goto error_exit;
+            }
+            if (iff->read(emtl))
+            {
+                err=ESCH_ERR_FILEERROR;
+                goto error_exit;
+            }
+
+            //ÄÄÄ Allocate texture array
+            txt = new EschTexture*[ntxts];
+            if (!txt)
+            {
+                err=ESCH_ERR_NOMEMORY;
+                goto error_exit;
+            }
+            tmax = ntxts;
+
+            //ÄÄÄ Fill out from texture cache/file systems
+            for(i=0; i < ntxts; i++)
+            {
+                txt[i] = 0;
+
+                if (ctrlfl & ESCH_TRNLD_SHARETXT)
+                    txt[i] = EschTexture::cache_new(emtl[i].name);
+
+                if (!txt[i] && (ctrlfl & ESCH_TRNLD_FILETXT))
+                {
+                    dword tfl = ESCH_TXTLD_ALL;
+                    if (!(ctrlfl & ESCH_MSHLD_SHARETXT))
+                        tfl &= ~ESCH_TXTLD_SHARE;
+
+                    txt[i] = EschTexture::file_load(emtl[i].name,pal,tfl);
+                }
+            }
+        }
         //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Material Form
         else if (ntxts
                  && (iff->chunkid == iff->makeid('F','O','R','M'))
-                 && (iff->formid == iff->makeid('E','M','T','L')))
+                 && (iff->formid == iff->makeid('E','M','T','L')
+                     || iff->formid == iff->makeid('E','M','T','1')))
         {
-            // Allocate texture memory, if not already allocated.
+            //ÄÄÄ Allocate texture memory, if not already allocated.
             if (!txt)
             {
                 txt = new EschTexture*[ntxts];
@@ -2466,24 +2545,44 @@ esch_error_codes EschTerrain::load(XFParseIFF *iff, const char *tname, ushort *h
                     err=ESCH_ERR_NOMEMORY;
                     goto error_exit;
                 }
+                memset(txt,0,sizeof(EschTexture*)*ntxts);
                 tmax = ntxts;
             }
 
-            if (nt < tmax)
+            //ÄÄÄ Figure out next texture we are looking for.
+            for(i=0; i < tmax; i++)
             {
-                EschTexture *t = new EschStaticTexture;
+                if (!txt[i])
+                    break;
+            }
+
+            //ÄÄÄ Load texture
+            if (i < tmax)
+            {
+                EschTexture *t = ((ctrlfl & ESCH_TRNLD_USEMFTXT)
+                                   && iff->formid == iff->makeid('E','M','T','1'))
+                                  ? (EschTexture *) new EschMultiFrameTexture
+                                  : (EschTexture *) new EschStaticTexture;
                 if (!t)
                 {
                     err=ESCH_ERR_NOMEMORY;
                     goto error_exit;
                 }
-                if (err=t->load(iff))
+
+                dword tfl = ESCH_TXTLD_ALL;
+                if (!(ctrlfl & ESCH_TRNLD_SHARETXT))
+                    tfl &= ~ESCH_TXTLD_SHARE;
+
+                err=t->load(iff, (emtl) ? emtl[i].name : 0, tfl, pal);
+
+                if (!err)
+                    txt[i]=t;
+                else
                 {
                     delete t;
-                    goto error_exit;
+                    if (err != ESCH_ERR_NOTFOUND)
+                        goto error_exit;
                 }
-
-                txt[nt++] = t;
             }
         }
     }
@@ -2494,6 +2593,23 @@ esch_error_codes EschTerrain::load(XFParseIFF *iff, const char *tname, ushort *h
         goto error_exit;
     }
 
+    if (txt)
+    {
+        for(i=0; i < ntxts; i++)
+        {
+            if (!txt[i])
+            {
+                err=ESCH_ERR_MISSINGDATA;
+                goto error_exit;
+            }
+        }
+    }
+
+    if (emtl)
+    {
+        delete [] emtl;
+        emtl=0;
+    }
 
 //ÄÄ Return ok
     iff->leaveform();
@@ -2539,6 +2655,8 @@ error_exit : ;
         ivory_hfree(&hsurfnorml);
         hsurfnorml=0;
     }
+    if (emtl)
+        delete [] emtl;
 
     iff->leaveform();
     return err;

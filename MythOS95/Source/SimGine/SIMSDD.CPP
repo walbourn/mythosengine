@@ -91,79 +91,120 @@ SimScreen::error_codes SimScreenDD::init (ushort w, ushort h,
 {
     assertMyth("SimScreenDD::init needs SimApp", SimApp != 0);
 
+//ÄÄÄ Verify bit-depth
+    switch (bd)
+    {
+        case 8:
+        case 15:
+        case 16:
+            break;
+        default:
+            return ERROR_INVALIDPARMS;
+    }
+
+//ÄÄÄ Determine screen manager init flags
+    dword init_flags = 0;
+    if (flags & FULLSCREEN)
+    {
+        init_flags |= VNGO_SET_RESOLUTION;
+
+        if (w == 320 && h == 240)
+            init_flags |= VNGO_TRUE_FLIP | VNGO_FORCE_SYSTEMMEMORY;
+    }
+    if (flags & TRUEFLIP)
+    {
+        init_flags |= VNGO_TRUE_FLIP;
+    }
+
+//ÄÄÄ Bit-depth error retry loop
+    for (;;)
+    {
+        release();
+
+        //ÄÄÄ Create screen manager
+        vgs = new VngoDirectDraw (SimApp->hWndClient);
+        if (!vgs)
+            return ERROR_NOMEMORY;
+
+        if (vgs->get_initstate())
+        {
+            release();
+            return ERROR_SCNRMNGRINIT;
+        }
+
+        //ÄÄÄ Create palette
+        switch(bd)
+        {
+            case 8:
+                pal = new VngoPal8;
+                if (!pal)
+                {
+                    release();
+                    return ERROR_NOMEMORY;
+                }
+                if (((VngoPal8*)pal)->init(0) != 0)
+                {
+                    release();
+                    return ERROR_PALINIT;
+                }
+                break;
+            case 15:
+                pal = new VngoPal15;
+                if (!pal)
+                {
+                    release();
+                    return ERROR_NOMEMORY;
+                }
+                if (((VngoPal15*)pal)->init(0) != 0)
+                {
+                    release();
+                    return ERROR_PALINIT;
+                }
+                break;
+            case 16:
+                pal = new VngoPal16;
+                if (!pal)
+                {
+                    release();
+                    return ERROR_NOMEMORY;
+                }
+                if (((VngoPal16*)pal)->init(0) != 0)
+                {
+                    release();
+                    return ERROR_PALINIT;
+                }
+                break;
+            default:
+                release();
+                return ERROR_INVALIDPARMS;
+        }
+
+        //ÄÄÄ Setup mode
+        int cdepth = (bd != 8) ? 16 : 8;
+
+        VNGError err = vgs->set_mode (w, h, cdepth, pal, init_flags);
+        if (err == VNGO_NEEDS_PAL16)
+            bd = 16;
+        else if (err == VNGO_NEEDS_PAL15)
+            bd = 15;
+        else if (err == VNGO_NEEDS_PAL8)
+            bd = 8;
+        else if (err)
+        {
+            release();
+            return ERROR_MODEFAIL;
+        }
+        else
+            break;
+    }
+
 //ÄÄÄ Call base
     error_codes err = SimScreen::init(w,h,bd,flags);
     if (err)
         return err;
 
-//ÄÄÄ Create screen manager
-    vgs = new VngoDirectDraw (SimApp->hWndClient);
-    if (!vgs)
-        return ERROR_NOMEMORY;
-
-//ÄÄÄ Create palette
-    switch(bit_depth)
-    {
-        case 8:
-            pal = new VngoPal8;
-            if (!pal)
-            {
-                err = ERROR_NOMEMORY;
-                goto leave_error;
-            }
-            if (((VngoPal8*)pal)->init(0) != 0)
-            {
-                err = ERROR_PALINIT;
-                goto leave_error;
-            }
-            break;
-        case 15:
-            pal = new VngoPal15;
-            if (!pal)
-            {
-                err = ERROR_NOMEMORY;
-                goto leave_error;
-            }
-            if (((VngoPal15*)pal)->init(0) != 0)
-            {
-                err = ERROR_PALINIT;
-                goto leave_error;
-            }
-            break;
-        case 16:
-            pal = new VngoPal16;
-            if (!pal)
-            {
-                err = ERROR_NOMEMORY;
-                goto leave_error;
-            }
-            if (((VngoPal16*)pal)->init(0) != 0)
-            {
-                err = ERROR_PALINIT;
-                goto leave_error;
-            }
-            break;
-        default:
-            err = ERROR_MODENOTSUPP;
-            goto leave_error;
-    }
-
-//ÄÄÄ Setup mode
-    {
-        dword init_flags = (flags & FULLSCREEN) ? VNGO_SET_RESOLUTION : 0;
-
-        if (w == 320 && h == 240)
-            init_flags |= VNGO_TRUE_FLIP | VNGO_FORCE_SYSTEMMEMORY;
-
-        dword tbd = 16;
-        if (bit_depth == 8)
-            tbd = 8;
-
-        vgs->set_mode (width, height, tbd, pal, init_flags);
-    }
-
 //ÄÄÄ Setup viewport
-    if (bit_depth == 8)
+    if (bd == 8)
     {
         gvport = new VngoVportDD8 (((VngoDirectDraw*)vgs)->SurfaceManager,
                                    NULL, pal, 0);
@@ -176,38 +217,19 @@ SimScreen::error_codes SimScreenDD::init (ushort w, ushort h,
 
     if (!gvport)
     {
-        err = ERROR_NOMEMORY;
-        goto leave_error;
+        release();
+        return ERROR_NOMEMORY;
     }
 
     if (gvport->get_init_state())
     {
-        err = ERROR_VPORTINIT;
-        goto leave_error;
+        release();
+        return ERROR_VPORTINIT;
     }
 
     clear();
 
     return ERROR_NONE;
-
-leave_error: ;
-    if (gvport)
-    {
-        delete gvport;
-        gvport=0;
-    }
-    if (pal)
-    {
-        delete pal;
-        pal=0;
-    }
-    if (vgs)
-    {
-        delete vgs;
-        vgs=0;
-    }
-
-    return err;
 }
 
 
@@ -231,6 +253,24 @@ VngoVport *SimScreenDD::create_subviewport(VngoRect &srect, dword flags)
                                  NULL,srect,
                                  pal, flags);
     }
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// SimScreenDD - lock
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+long SimScreenDD::lock ()
+{
+    return 1;
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// SimScreenDD - unlock
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+int SimScreenDD::unlock ()
+{
+    return 0;
 }
 
 //°±² End of module - simsdd.cpp ²±°
