@@ -1,0 +1,44 @@
+
+char EschQry_name[128];
+char EschQry_orgsize[128];
+
+/* Tree Dialog: EschQry */
+
+Dialog EschQry[]=
+{
+{ -1, 1, -1, -1, 0, 5, 5, 320, 260, NULL, NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
+{ 0, -1, -1, 2, 4, 75, 16, 178, 18, " Texture Resize Query ", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
+{ 0, -1, 1, 3, 4, 39, 48, 242, 18, EschQry_name, NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
+{ 0, -1, 2, 4, 4, 47, 68, 226, 18, EschQry_orgsize, NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
+{ 0, 5, 3, 6, 4, 144, 96, 66, 18, " X ", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
+{ 4, -1, -1, -1, 4, 0, 0, 66, 18, " X ", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
+{ 0, -1, 4, 7, 4, 238, 96, 66, 18, " Y ", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
+{ 0, -1, 6, 8, 1, 144, 120, 66, 18, " 16 ", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
+{ 0, -1, 7, 9, 1, 238, 120, 66, 18, " 16 ", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
+{ 0, -1, 8, 10, 1, 144, 140, 66, 18, " 32 ", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
+{ 0, -1, 9, 11, 1, 238, 140, 66, 18, " 32 ", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
+{ 0, -1, 10, 12, 4, 14, 148, 114, 18, " Target Size: ", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
+{ 0, -1, 11, 13, 1, 144, 160, 66, 18, " 64 ", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
+{ 0, -1, 12, 14, 1, 238, 160, 66, 18, " 64 ", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
+{ 0, -1, 13, 15, 1, 144, 180, 66, 18, " 128 ", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
+{ 0, -1, 14, 16, 1, 238, 180, 66, 18, " 128 ", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
+{ 0, -1, 15, 17, 1, 144, 200, 66, 18, " 256 ", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
+{ 0, -1, 16, 18, 1, 238, 200, 66, 18, " 256 ", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
+{ 0, -1, 17, -1, 1, 127, 236, 66, 18, " OK ", NULL, 0, 0, 13, 0, FNULL, FNULL, 0 },
+};
+
+/* Tree Identifiers: EschQry */
+
+#define NAME                            2
+#define ORGSIZE                         3
+#define X16                             7
+#define Y16                             8
+#define X32                             9
+#define Y32                             10
+#define X64                             12
+#define Y64                             13
+#define X128                            14
+#define Y128                            15
+#define X256                            16
+#define Y256                            17
+#define OK                              18

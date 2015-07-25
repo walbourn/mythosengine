@@ -1,0 +1,867 @@
+//Microsoft Developer Studio generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#include ""res\\eshtool.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
+    "\r\n"
+    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "#include ""afxres.rc""  \t// Standard components\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDR_MAINFRAME           ICON    DISCARDABLE     "res\\eshtool.ico"
+IDR_ESCHERTYPE          ICON    DISCARDABLE     "res\\eshdoc.ico"
+IDR_ICON_LIGHT          ICON    DISCARDABLE     "res\\light.ico"
+IDR_ICON_CAMERA         ICON    DISCARDABLE     "res\\camera.ico"
+IDR_ICON_MESH           ICON    DISCARDABLE     "res\\mesh.ico"
+IDR_ICON_CAMERAS        ICON    DISCARDABLE     "res\\cameras.ico"
+IDR_ICON_LIGHTS         ICON    DISCARDABLE     "res\\light_s.ico"
+IDR_ICON_MESHS          ICON    DISCARDABLE     "res\\mesh_s.ico"
+IDR_ICON_SCENE          ICON    DISCARDABLE     "res\\scene.ico"
+IDR_ICON_SCENES         ICON    DISCARDABLE     "res\\scene_s.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDR_MAINFRAME           BITMAP  MOVEABLE PURE   "res\\toolbar.bmp"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Menu
+//
+
+IDR_MAINFRAME MENU PRELOAD DISCARDABLE 
+BEGIN
+    POPUP "&File"
+    BEGIN
+        MENUITEM "&New\tCtrl+N",                ID_FILE_NEW
+        MENUITEM "&Open...\tCtrl+O",            ID_FILE_OPEN
+        MENUITEM "&Save\tCtrl+S",               ID_FILE_SAVE
+        MENUITEM "Save &As...",                 ID_FILE_SAVE_AS
+        MENUITEM SEPARATOR
+        MENUITEM "&Import...\tShift+I",         ID_FILE_IMPORT
+        MENUITEM "&Palette...\tShift+P",        ID_FILE_PALETTE
+        MENUITEM SEPARATOR
+        MENUITEM "Sen&d...",                    ID_FILE_SEND_MAIL
+        MENUITEM SEPARATOR
+        MENUITEM "Recent File",                 ID_FILE_MRU_FILE1, GRAYED
+        MENUITEM SEPARATOR
+        MENUITEM "E&xit\tAlt+X",                ID_APP_EXIT
+    END
+    POPUP "&Edit"
+    BEGIN
+        MENUITEM "Cu&t\tCtrl+X",                ID_EDIT_CUT
+        MENUITEM "&Copy\tCtrl+C",               ID_EDIT_COPY
+        MENUITEM "&Paste\tCtrl+V",              ID_EDIT_PASTE
+        MENUITEM "&Delete\tDel",                ID_EDIT_DELETE
+        MENUITEM SEPARATOR
+        POPUP "Ne&w"
+        BEGIN
+            MENUITEM "&Camera...",                  ID_EDIT_NEW_CAM
+            MENUITEM "&Light...",                   ID_EDIT_NEW_LIGHT
+        END
+        MENUITEM SEPARATOR
+        MENUITEM "Pr&operties...\tAlt+Enter",   ID_EDIT_PROP
+    END
+    POPUP "&View"
+    BEGIN
+        MENUITEM "&Toolbar",                    ID_VIEW_TOOLBAR
+        MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
+        MENUITEM SEPARATOR
+        MENUITEM "Re&fresh\t`",                 ID_VIEW_REFRESH
+        MENUITEM SEPARATOR
+        POPUP "Re&nder"
+        BEGIN
+            MENUITEM "&Wireframe\tF4",              ID_VIEW_RND_WIREFRAME
+            MENUITEM "&Solid\tF5",                  ID_VIEW_RND_SOLID
+            MENUITEM "&Flat\tF6",                   ID_VIEW_RND_FLAT
+            MENUITEM "S&mooth\tF7",                 ID_VIEW_RND_SMOOTH
+            MENUITEM "S&pecular\tF8",               ID_VIEW_RND_SPECULAR
+            MENUITEM SEPARATOR
+            MENUITEM "Show &All Lines\tAlt+F1",     ID_VIEW_RND_ALL_LINES
+            MENUITEM "&Model Space\tF2",            ID_VIEW_RND_MSPACE
+            MENUITEM "&Backface\tF3",               ID_VIEW_RND_BACKFACE
+            MENUITEM "&Textures\tF9",               ID_VIEW_RND_TEXTURES
+            MENUITEM "Perspecti&ve\tF10",           ID_VIEW_RND_PERSPECTIVE
+        END
+        MENUITEM "&Attach Camera\tC",           ID_VIEW_ATTACHCAM
+        MENUITEM SEPARATOR
+        MENUITEM "&Rotate X/Y\tQ",              ID_VIEW_ROTXY
+        MENUITEM "&Move X/Y\tA",                ID_VIEW_MOVEXY
+        MENUITEM "Rotate &Z/Move Z\tZ",         ID_VIEW_ROTMOVEZ
+        MENUITEM SEPARATOR
+        POPUP "A&uto-Rotate"
+        BEGIN
+            MENUITEM "&Off\tNum *",                 ID_VIEW_AUTOOFF
+            MENUITEM SEPARATOR
+            MENUITEM "Rotate &X\tCtrl+I",           ID_VIEW_AUTOROTX
+            MENUITEM "Rotate &Y\tCtrl+J",           ID_VIEW_AUTOROTY
+            MENUITEM "Rotate &Z\tCtrl+J",           ID_VIEW_AUTOROTZ
+            MENUITEM SEPARATOR
+            MENUITEM "&Fast\tNum +",                ID_VIEW_AUTOFAST
+            MENUITEM "&Slow\tNum -",                ID_VIEW_AUTOSLOW
+        END
+    END
+    POPUP "Meshes"
+    BEGIN
+        MENUITEM "&Rotate I/J\tW",              ID_MESH_ROTIJ
+        MENUITEM "&Move I/J\tS",                ID_MESH_MOVEIJ
+        MENUITEM "Rotate &K/Move K\tX",         ID_MESH_ROTMOVEK
+    END
+    POPUP "&Lighting"
+    BEGIN
+        MENUITEM "&Adjust X/Y\tE",              ID_LGT_ADJUSTXY
+        MENUITEM "Adjust &Intensity\tI",        ID_LGT_ABRIGHT
+    END
+    POPUP "&Help"
+    BEGIN
+        MENUITEM "&Help...\tShift+F1",          ID_APP_HELP
+        MENUITEM SEPARATOR
+        MENUITEM "&About Tool...\t?",           ID_APP_ABOUT
+    END
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Accelerator
+//
+
+IDR_MAINFRAME ACCELERATORS PRELOAD MOVEABLE PURE 
+BEGIN
+    "?",            ID_APP_ABOUT,           ASCII,  NOINVERT
+    "A",            ID_VIEW_MOVEXY,         VIRTKEY, NOINVERT
+    "C",            ID_VIEW_ATTACHCAM,      VIRTKEY, NOINVERT
+    "C",            ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
+    "E",            ID_LGT_ADJUSTXY,        VIRTKEY, NOINVERT
+    "I",            ID_LGT_ABRIGHT,         VIRTKEY, NOINVERT
+    "I",            ID_VIEW_AUTOROTX,       VIRTKEY, CONTROL, NOINVERT
+    "I",            ID_FILE_IMPORT,         VIRTKEY, SHIFT, NOINVERT
+    "J",            ID_VIEW_AUTOROTY,       VIRTKEY, CONTROL, NOINVERT
+    "K",            ID_VIEW_AUTOROTZ,       VIRTKEY, CONTROL, NOINVERT
+    "N",            ID_FILE_NEW,            VIRTKEY, CONTROL, NOINVERT
+    "O",            ID_FILE_OPEN,           VIRTKEY, CONTROL, NOINVERT
+    "P",            ID_FILE_PALETTE,        VIRTKEY, SHIFT, NOINVERT
+    "Q",            ID_VIEW_ROTXY,          VIRTKEY, NOINVERT
+    "S",            ID_MESH_MOVEIJ,         VIRTKEY, NOINVERT
+    "S",            ID_FILE_SAVE,           VIRTKEY, CONTROL, NOINVERT
+    "V",            ID_EDIT_PASTE,          VIRTKEY, CONTROL, NOINVERT
+    VK_ADD,         ID_VIEW_AUTOFAST,       VIRTKEY, NOINVERT
+    VK_BACK,        ID_EDIT_UNDO,           VIRTKEY, ALT, NOINVERT
+    VK_DELETE,      ID_EDIT_DELETE,         VIRTKEY, NOINVERT
+    VK_DELETE,      ID_EDIT_CUT,            VIRTKEY, SHIFT, NOINVERT
+    VK_F1,          ID_VIEW_RND_ALL_LINES,  VIRTKEY, ALT, NOINVERT
+    VK_F1,          ID_APP_HELP,            VIRTKEY, SHIFT, NOINVERT
+    VK_F10,         ID_VIEW_RND_PERSPECTIVE, VIRTKEY, NOINVERT
+    VK_F2,          ID_VIEW_RND_MSPACE,     VIRTKEY, NOINVERT
+    VK_F3,          ID_VIEW_RND_BACKFACE,   VIRTKEY, NOINVERT
+    VK_F4,          ID_VIEW_RND_WIREFRAME,  VIRTKEY, NOINVERT
+    VK_F5,          ID_VIEW_RND_SOLID,      VIRTKEY, NOINVERT
+    VK_F6,          ID_VIEW_RND_FLAT,       VIRTKEY, NOINVERT
+    VK_F7,          ID_VIEW_RND_SMOOTH,     VIRTKEY, NOINVERT
+    VK_F8,          ID_VIEW_RND_SPECULAR,   VIRTKEY, NOINVERT
+    VK_F9,          ID_VIEW_RND_TEXTURES,   VIRTKEY, NOINVERT
+    VK_INSERT,      ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
+    VK_INSERT,      ID_EDIT_PASTE,          VIRTKEY, SHIFT, NOINVERT
+    VK_MULTIPLY,    ID_VIEW_AUTOOFF,        VIRTKEY, NOINVERT
+    VK_RETURN,      ID_EDIT_PROP,           VIRTKEY, ALT, NOINVERT
+    VK_SUBTRACT,    ID_VIEW_AUTOSLOW,       VIRTKEY, NOINVERT
+    "W",            ID_MESH_ROTIJ,          VIRTKEY, NOINVERT
+    "X",            ID_MESH_ROTMOVEK,       VIRTKEY, NOINVERT
+    "X",            ID_EDIT_CUT,            VIRTKEY, CONTROL, NOINVERT
+    "X",            ID_APP_EXIT,            VIRTKEY, ALT, NOINVERT
+    "Z",            ID_VIEW_ROTMOVEZ,       VIRTKEY, NOINVERT
+    "`",            ID_VIEW_REFRESH,        ASCII,  NOINVERT
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+IDD_ABOUTBOX DIALOG DISCARDABLE  34, 22, 269, 138
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "About Escher Tool"
+FONT 8, "MS Sans Serif"
+BEGIN
+    ICON            IDR_MAINFRAME,IDC_STATIC,11,17,18,20
+    CONTROL         "Escher Tool",IDC_STATIC,"Static",SS_SIMPLE | WS_GROUP,
+                    55,30,119,8
+    CONTROL         "Copyright © 1995, 1996 by Charybdis Enterprises, Inc.",
+                    IDC_STATIC,"Static",SS_SIMPLE | WS_GROUP,55,60,181,8
+    DEFPUSHBUTTON   "OK",IDOK,219,11,32,14,WS_GROUP
+    CONTROL         "Version X.X\tMon DD YYYY",IDC_ABOUT_VERSION,"Static",
+                    SS_SIMPLE | WS_GROUP,55,45,111,8
+    CTEXT           "Escher is a component of the MythOS collection",
+                    IDC_STATIC,50,100,185,11
+    CTEXT           "MythOS is a trademark of Charybdis Enterprises, Inc.",
+                    IDC_STATIC,55,115,175,14
+END
+
+IDD_CAMPROP_GEN DIALOG DISCARDABLE  0, 0, 258, 141
+STYLE WS_CHILD | WS_VISIBLE | WS_DISABLED | WS_CAPTION
+CAPTION "General"
+FONT 8, "MS Sans Serif"
+BEGIN
+    RTEXT           "Name:",ID_STATIC,20,15,30,10
+    EDITTEXT        IDC_CPROP_NAME,55,15,80,12,ES_AUTOHSCROLL
+    RTEXT           "Position:  X ",ID_STATIC,5,40,45,10
+    EDITTEXT        IDC_CPROP_XPOS,55,40,50,12,ES_AUTOHSCROLL
+    LTEXT           "Y",ID_STATIC,115,40,8,10
+    EDITTEXT        IDC_CPROP_YPOS,125,40,50,12,ES_AUTOHSCROLL
+    LTEXT           "Z",ID_STATIC,185,40,8,10
+    EDITTEXT        IDC_CPROP_ZPOS,195,40,50,12,ES_AUTOHSCROLL
+    RTEXT           "Top: I ",ID_STATIC,25,65,25,10
+    EDITTEXT        IDC_CPROP_ITOP,55,65,50,12,ES_AUTOHSCROLL
+    LTEXT           "J",ID_STATIC,115,65,8,10
+    EDITTEXT        IDC_CPROP_JTOP,125,65,50,12,ES_AUTOHSCROLL
+    LTEXT           "K",ID_STATIC,185,65,8,10
+    EDITTEXT        IDC_CPROP_KTOP,195,65,50,12,ES_AUTOHSCROLL
+    RTEXT           "Direction: I ",ID_STATIC,10,86,40,10
+    EDITTEXT        IDC_CPROP_IDIR,55,86,50,12,ES_AUTOHSCROLL
+    LTEXT           "J",ID_STATIC,115,86,8,10
+    EDITTEXT        IDC_CPROP_JDIR,125,86,50,12,ES_AUTOHSCROLL
+    LTEXT           "K",ID_STATIC,185,86,8,10
+    EDITTEXT        IDC_CPROP_KDIR,195,86,50,12,ES_AUTOHSCROLL
+    RTEXT           "Field-of-view:",ID_STATIC,5,110,45,10
+    EDITTEXT        IDC_CPROP_FOV,55,110,50,12,ES_AUTOHSCROLL
+END
+
+IDD_CAMPROP_MISC DIALOG DISCARDABLE  0, 0, 258, 141
+STYLE WS_CHILD | WS_VISIBLE | WS_DISABLED | WS_CAPTION
+CAPTION "Misc"
+FONT 8, "MS Sans Serif"
+BEGIN
+    RTEXT           "Hither Plane:",ID_STATIC,20,20,45,10
+    EDITTEXT        IDC_CPROP_HITHER,70,20,50,12,ES_AUTOHSCROLL
+    RTEXT           "Yon Plane:",ID_STATIC,20,45,45,10
+    EDITTEXT        IDC_CPROP_YON,70,45,50,12,ES_AUTOHSCROLL
+    RTEXT           "Scale Factor:",ID_STATIC,20,70,45,10
+    EDITTEXT        IDC_CPROP_SCALEF,70,70,50,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "&Background Color...",IDC_CPROP_BCOLR,160,80,80,15
+    LTEXT           "These settings are not saved into the Escher Data file at the present",
+                    ID_STATIC,15,110,225,10
+    LTEXT           "time.  They may be added to the format in the future.",
+                    ID_STATIC,15,120,225,10
+END
+
+IDD_CAMPROP_APPFLAGS DIALOG DISCARDABLE  0, 0, 258, 141
+STYLE WS_CHILD | WS_VISIBLE | WS_DISABLED | WS_CAPTION
+CAPTION "Application"
+FONT 8, "MS Sans Serif"
+BEGIN
+    CONTROL         "Application Bit 0",IDC_CPROP_FLAGS_APP0,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,45,25,65,10
+    CONTROL         "Application Bit 1",IDC_CPROP_FLAGS_APP1,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,45,40,65,10
+    CONTROL         "Application Bit 2",IDC_CPROP_FLAGS_APP2,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,45,56,65,10
+    CONTROL         "Application Bit 3",IDC_CPROP_FLAGS_APP3,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,45,70,65,10
+    CONTROL         "Application Bit 4",IDC_CPROP_FLAGS_APP4,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,150,25,65,10
+    CONTROL         "Application Bit 5",IDC_CPROP_FLAGS_APP5,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,150,40,65,10
+    CONTROL         "Application Bit 6",IDC_CPROP_FLAGS_APP6,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,150,56,65,10
+    CONTROL         "Application Bit 7",IDC_CPROP_FLAGS_APP7,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,150,70,65,10
+    CONTROL         "The meaning of these flags is defined by the application and therefore",
+                    IDC_STATIC,"Static",SS_LEFTNOWORDWRAP | WS_GROUP,20,100,
+                    220,10
+    LTEXT           "do not directly effect Escher's operation.",IDC_STATIC,
+                    20,111,220,10
+END
+
+IDD_LGTPROP_GEN DIALOG DISCARDABLE  0, 0, 258, 141
+STYLE WS_CHILD | WS_VISIBLE | WS_DISABLED | WS_CAPTION
+CAPTION "General"
+FONT 8, "MS Sans Serif"
+BEGIN
+    RTEXT           "Name:",ID_STATIC,25,15,25,10
+    EDITTEXT        IDC_LPROP_NAME,55,15,80,12,ES_AUTOHSCROLL
+    RTEXT           "Type:",ID_STATIC,30,40,20,10
+    COMBOBOX        IDC_LPROP_TYPE,55,40,55,50,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    RTEXT           "Intensity:",ID_STATIC,20,70,30,10
+    CONTROL         "Generic2",IDC_LPROP_INTENSITY,"msctls_trackbar32",
+                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,50,70,110,15
+    CONTROL         "Active",IDC_LPROP_ON,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,190,70,40,10
+    CONTROL         "Attenuate",IDC_LPROP_ATTEN,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,190,85,47,10
+    RTEXT           "Position/",ID_STATIC,5,100,30,10
+    RTEXT           "Vector:",ID_STATIC,5,110,30,10
+    LTEXT           "X/I",ID_STATIC,41,110,15,10
+    EDITTEXT        IDC_LPROP_XI,55,110,50,12,ES_AUTOHSCROLL
+    LTEXT           "Y/J",ID_STATIC,111,110,15,10
+    EDITTEXT        IDC_LPROP_YJ,125,110,50,12,ES_AUTOHSCROLL
+    LTEXT           "Z/K",ID_STATIC,181,110,15,10
+    EDITTEXT        IDC_LPROP_ZK,195,110,50,12,ES_AUTOHSCROLL
+END
+
+IDD_LGTPROP_APPFLAGS DIALOG DISCARDABLE  0, 0, 258, 141
+STYLE WS_CHILD | WS_VISIBLE | WS_DISABLED | WS_CAPTION
+CAPTION "Application"
+FONT 8, "MS Sans Serif"
+BEGIN
+    CONTROL         "Application Bit 0",IDC_LPROP_FLAGS_APP0,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,45,25,65,10
+    CONTROL         "Application Bit 1",IDC_LPROP_FLAGS_APP1,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,45,41,65,10
+    CONTROL         "Application Bit 2",IDC_LPROP_FLAGS_APP2,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,45,57,65,10
+    CONTROL         "Application Bit 3",IDC_LPROP_FLAGS_APP3,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,45,70,65,10
+    CONTROL         "Application Bit 4",IDC_LPROP_FLAGS_APP4,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,150,25,65,10
+    CONTROL         "Application Bit 5",IDC_LPROP_FLAGS_APP5,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,150,40,65,10
+    CONTROL         "Application Bit 6",IDC_LPROP_FLAGS_APP6,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,150,56,65,10
+    CONTROL         "Application Bit 7",IDC_LPROP_FLAGS_APP7,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,150,70,65,10
+    CONTROL         "The meaning of these flags is defined by the application and therefore",
+                    IDC_STATIC,"Static",SS_LEFTNOWORDWRAP | WS_GROUP,20,100,
+                    220,10
+    LTEXT           "do not directly effect Escher's operation.",IDC_STATIC,
+                    20,111,220,10
+END
+
+IDD_MSHPROP_GEN DIALOG DISCARDABLE  0, 0, 258, 141
+STYLE WS_CHILD | WS_VISIBLE | WS_DISABLED | WS_CAPTION
+CAPTION "General"
+FONT 8, "MS Sans Serif"
+BEGIN
+    RTEXT           "Name:",ID_STATIC,20,15,30,10,NOT WS_GROUP
+    EDITTEXT        IDC_MPROP_NAME,55,15,80,12,ES_AUTOHSCROLL
+    RTEXT           "Faces:",ID_STATIC,135,16,25,10
+    EDITTEXT        IDC_MPROP_NFACES,165,15,30,12,ES_AUTOHSCROLL | 
+                    WS_DISABLED
+    RTEXT           "Vrts:",ID_STATIC,200,16,15,10
+    EDITTEXT        IDC_MPROP_NVERTS,220,15,30,12,ES_AUTOHSCROLL | 
+                    WS_DISABLED
+    RTEXT           "Position:  X ",ID_STATIC,10,40,40,10
+    EDITTEXT        IDC_MPROP_XPOS,55,40,50,12,ES_AUTOHSCROLL
+    LTEXT           "Y",ID_STATIC,115,40,8,10
+    EDITTEXT        IDC_MPROP_YPOS,125,40,50,12,ES_AUTOHSCROLL
+    LTEXT           "Z",ID_STATIC,185,40,8,10
+    EDITTEXT        IDC_MPROP_ZPOS,195,40,50,12,ES_AUTOHSCROLL
+    GROUPBOX        "Hierarchy",ID_STATIC,20,75,125,45
+    RTEXT           "Parent:",ID_STATIC,25,85,25,10,NOT WS_GROUP
+    EDITTEXT        IDC_MPROP_PARENT,55,85,80,12,ES_AUTOHSCROLL | 
+                    WS_DISABLED
+    RTEXT           "Child",ID_STATIC,29,105,20,10,NOT WS_GROUP
+    EDITTEXT        IDC_MPROP_CHILD,55,105,80,12,ES_AUTOHSCROLL | 
+                    WS_DISABLED
+    GROUPBOX        "Draw Flags",ID_STATIC,155,65,90,65
+    CONTROL         "Visible",IDC_MPROP_VISIBLE,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,165,75,40,10
+    CONTROL         "Check Extents",IDC_MPROP_CHKEXT,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,165,91,60,10
+    LTEXT           "These flags are not",ID_STATIC,165,105,65,10
+    LTEXT           "saved in the data file.",ID_STATIC,165,115,75,10
+END
+
+IDD_MSHPROP_APPFLAGS DIALOG DISCARDABLE  0, 0, 258, 141
+STYLE WS_CHILD | WS_VISIBLE | WS_DISABLED | WS_CAPTION
+CAPTION "Application"
+FONT 8, "MS Sans Serif"
+BEGIN
+    CONTROL         "Application Bit 0",IDC_MPROP_FLAGS_APP0,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,40,15,65,10
+    CONTROL         "Application Bit 1",IDC_MPROP_FLAGS_APP1,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,40,25,65,10
+    CONTROL         "Application Bit 2",IDC_MPROP_FLAGS_APP2,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,40,35,65,10
+    CONTROL         "Application Bit 3",IDC_MPROP_FLAGS_APP3,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,40,45,65,10
+    CONTROL         "Application Bit 4",IDC_MPROP_FLAGS_APP4,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,40,55,65,10
+    CONTROL         "Application Bit 5",IDC_MPROP_FLAGS_APP5,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,40,65,65,10
+    CONTROL         "Application Bit 6",IDC_MPROP_FLAGS_APP6,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,40,75,65,10
+    CONTROL         "Application Bit 7",IDC_MPROP_FLAGS_APP7,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,40,85,65,10
+    CONTROL         "Application Bit 8",IDC_MPROP_FLAGS_APP8,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,145,15,65,10
+    CONTROL         "Application Bit 9",IDC_MPROP_FLAGS_APP9,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,145,25,65,10
+    CONTROL         "Application Bit A",IDC_MPROP_FLAGS_APPA,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,145,35,65,10
+    CONTROL         "Application Bit B",IDC_MPROP_FLAGS_APPB,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,145,45,65,10
+    CONTROL         "Application Bit C",IDC_MPROP_FLAGS_APPC,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,145,55,65,10
+    CONTROL         "Application Bit D",IDC_MPROP_FLAGS_APPD,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,145,65,65,10
+    CONTROL         "Application Bit E",IDC_MPROP_FLAGS_APPE,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,145,75,65,10
+    CONTROL         "Application Bit F",IDC_MPROP_FLAGS_APPF,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,145,85,65,10
+    CONTROL         "The meaning of these flags is defined by the application and therefore",
+                    IDC_STATIC,"Static",SS_LEFTNOWORDWRAP | WS_GROUP,20,100,
+                    220,10
+    LTEXT           "do not directly effect Escher's operation.",IDC_STATIC,
+                    20,111,220,10
+END
+
+IDD_MSHPROP_EXT DIALOG DISCARDABLE  0, 0, 258, 141
+STYLE WS_CHILD | WS_VISIBLE | WS_DISABLED | WS_CAPTION
+CAPTION "Extents"
+FONT 8, "MS Sans Serif"
+BEGIN
+    GROUPBOX        "Spherical/Radial",IDC_STATIC,5,5,245,55
+    RTEXT           "Center:  X",IDC_STATIC,10,20,36,10
+    EDITTEXT        IDC_MPROP_XCEN,51,20,50,12,ES_AUTOHSCROLL
+    LTEXT           "Y",IDC_STATIC,111,20,8,10
+    EDITTEXT        IDC_MPROP_YCEN,121,20,50,12,ES_AUTOHSCROLL
+    LTEXT           "Z",IDC_STATIC,181,20,8,10
+    EDITTEXT        IDC_MPROP_ZCEN,191,20,50,12,ES_AUTOHSCROLL
+    RTEXT           "Radius:",IDC_STATIC,15,40,30,10
+    EDITTEXT        IDC_MPROP_RADIUS,50,40,50,12,ES_AUTOHSCROLL
+    GROUPBOX        "Box",IDC_STATIC,5,65,245,55
+    RTEXT           "Min:  X",IDC_STATIC,15,81,31,10
+    EDITTEXT        IDC_MPROP_XMIN,51,80,50,12,ES_AUTOHSCROLL
+    LTEXT           "Y",IDC_STATIC,111,80,8,10
+    EDITTEXT        IDC_MPROP_YMIN,121,80,50,12,ES_AUTOHSCROLL
+    LTEXT           "Z",IDC_STATIC,181,80,8,10
+    EDITTEXT        IDC_MPROP_ZMIN,191,80,50,12,ES_AUTOHSCROLL
+    RTEXT           "Max:  X",IDC_STATIC,15,102,31,10
+    EDITTEXT        IDC_MPROP_XMAX,51,100,50,12,ES_AUTOHSCROLL
+    LTEXT           "Y",IDC_STATIC,111,100,8,10
+    EDITTEXT        IDC_MPROP_YMAX,121,100,50,12,ES_AUTOHSCROLL
+    LTEXT           "Z",IDC_STATIC,181,100,8,10
+    EDITTEXT        IDC_MPROP_ZMAX,191,100,50,12,ES_AUTOHSCROLL
+    LTEXT           "All extents should be expressed in local coordinates",
+                    IDC_STATIC,55,125,170,10
+END
+
+IDD_MSHPROP_ORIENT DIALOG DISCARDABLE  0, 0, 258, 141
+STYLE WS_CHILD | WS_VISIBLE | WS_DISABLED | WS_CAPTION
+CAPTION "Orientation"
+FONT 8, "MS Sans Serif"
+BEGIN
+    RTEXT           "A",IDC_STATIC,25,25,10,10
+    EDITTEXT        IDC_MPROP_MTXA,41,25,50,12,ES_AUTOHSCROLL
+    RTEXT           "B",IDC_STATIC,95,25,10,10
+    EDITTEXT        IDC_MPROP_MTXB,111,25,50,12,ES_AUTOHSCROLL
+    RTEXT           "C",IDC_STATIC,165,25,10,10
+    EDITTEXT        IDC_MPROP_MTXC,181,25,50,12,ES_AUTOHSCROLL
+    RTEXT           "D",IDC_STATIC,25,50,10,10
+    EDITTEXT        IDC_MPROP_MTXD,41,50,50,12,ES_AUTOHSCROLL
+    RTEXT           "E",IDC_STATIC,95,50,10,10
+    EDITTEXT        IDC_MPROP_MTXE,111,50,50,12,ES_AUTOHSCROLL
+    RTEXT           "F",IDC_STATIC,165,50,10,10
+    EDITTEXT        IDC_MPROP_MTXF,181,50,50,12,ES_AUTOHSCROLL
+    RTEXT           "G",IDC_STATIC,25,75,10,10
+    EDITTEXT        IDC_MPROP_MTXG,41,75,50,12,ES_AUTOHSCROLL
+    RTEXT           "H",IDC_STATIC,95,75,10,10
+    EDITTEXT        IDC_MPROP_MTXH,111,75,50,12,ES_AUTOHSCROLL
+    RTEXT           "I",IDC_STATIC,165,75,10,10
+    EDITTEXT        IDC_MPROP_MTXI,181,75,50,12,ES_AUTOHSCROLL
+    LTEXT           "The position portion of the matrix is set on the General page.",
+                    IDC_STATIC,40,120,190,10
+    LTEXT           "This is relative to the parent's orientation and position.",
+                    IDC_STATIC,50,105,170,10
+END
+
+IDD_SNPROP_GEN DIALOG DISCARDABLE  0, 0, 258, 141
+STYLE WS_CHILD | WS_VISIBLE | WS_DISABLED | WS_CAPTION
+CAPTION "General"
+FONT 8, "MS Sans Serif"
+BEGIN
+    RTEXT           "Name:",ID_STATIC,35,15,30,10,NOT WS_GROUP
+    EDITTEXT        IDC_SPROP_NAME,71,15,80,12,ES_AUTOHSCROLL
+    RTEXT           "# Cameras:",ID_STATIC,25,40,40,10,NOT WS_GROUP
+    EDITTEXT        IDC_SPROP_NCAMERAS,70,40,25,12,ES_AUTOHSCROLL | 
+                    WS_DISABLED
+    RTEXT           "# Meshes:",ID_STATIC,105,40,35,10,NOT WS_GROUP
+    EDITTEXT        IDC_SPROP_NMESHES,145,40,25,12,ES_AUTOHSCROLL | 
+                    WS_DISABLED
+    GROUPBOX        "Lights",ID_STATIC,5,60,245,80
+    RTEXT           "# Vector:",ID_STATIC,15,76,35,10,NOT WS_GROUP
+    EDITTEXT        IDC_SPROP_NVLIGHTS,55,75,25,12,ES_AUTOHSCROLL | 
+                    WS_DISABLED
+    RTEXT           "# FPoint:",ID_STATIC,15,96,30,10,NOT WS_GROUP
+    EDITTEXT        IDC_SPROP_NFPLIGHTS,55,95,25,12,ES_AUTOHSCROLL | 
+                    WS_DISABLED
+    RTEXT           "# FAtten:",ID_STATIC,95,96,30,10,NOT WS_GROUP
+    EDITTEXT        IDC_SPROP_NFALIGHTS,135,95,25,12,ES_AUTOHSCROLL | 
+                    WS_DISABLED
+    RTEXT           "# FSpot:",ID_STATIC,175,96,30,10,NOT WS_GROUP
+    EDITTEXT        IDC_SPROP_NFSLIGHTS,215,95,25,12,ES_AUTOHSCROLL | 
+                    WS_DISABLED
+    RTEXT           "# Point:",ID_STATIC,15,117,35,10,NOT WS_GROUP
+    EDITTEXT        IDC_SPROP_NPLIGHTS,55,116,25,12,ES_AUTOHSCROLL | 
+                    WS_DISABLED
+    RTEXT           "# Atten:",ID_STATIC,95,116,30,10,NOT WS_GROUP
+    EDITTEXT        IDC_SPROP_NALIGHTS,135,115,25,12,ES_AUTOHSCROLL | 
+                    WS_DISABLED
+    RTEXT           "# Spot:",ID_STATIC,175,116,30,10,NOT WS_GROUP
+    EDITTEXT        IDC_SPROP_NSLIGHTS,215,115,25,12,ES_AUTOHSCROLL | 
+                    WS_DISABLED
+END
+
+IDD_SNPROP_MISC DIALOG DISCARDABLE  0, 0, 258, 141
+STYLE WS_CHILD | WS_VISIBLE | WS_DISABLED | WS_CAPTION
+CAPTION "Misc"
+FONT 8, "MS Sans Serif"
+BEGIN
+    RTEXT           "Description",IDC_STATIC,10,25,44,8
+    EDITTEXT        IDC_SPROP_DESC,60,25,192,12,ES_AUTOHSCROLL
+    RTEXT           "Author",IDC_STATIC,10,50,44,8
+    EDITTEXT        IDC_SPROP_AUTH,60,50,192,12,ES_AUTOHSCROLL
+    RTEXT           "Copyright",IDC_STATIC,10,75,44,8
+    EDITTEXT        IDC_SPROP_COPY,60,75,192,12,ES_AUTOHSCROLL
+END
+
+IDD_LGTPROP_EXTRA DIALOG DISCARDABLE  0, 0, 258, 141
+STYLE WS_CHILD | WS_VISIBLE | WS_DISABLED | WS_CAPTION
+CAPTION "Extra"
+FONT 8, "MS Sans Serif"
+BEGIN
+    GROUPBOX        "Attenuation",ID_STATIC,15,10,230,40
+    RTEXT           "Inner Range:",ID_STATIC,25,26,45,10
+    EDITTEXT        IDC_LPROP_INNER,75,25,50,12,ES_AUTOHSCROLL
+    RTEXT           "Outer Range:",ID_STATIC,135,26,45,10
+    EDITTEXT        IDC_LPROP_OUTER,185,25,50,12,ES_AUTOHSCROLL
+    GROUPBOX        "Spot",ID_STATIC,15,60,230,70
+    CTEXT           "I",ID_STATIC,30,81,15,10
+    EDITTEXT        IDC_LPROP_XI,44,80,50,12,ES_AUTOHSCROLL
+    CTEXT           "J",ID_STATIC,100,81,15,10
+    EDITTEXT        IDC_LPROP_YJ,114,80,50,12,ES_AUTOHSCROLL
+    CTEXT           "K",ID_STATIC,170,81,15,10
+    EDITTEXT        IDC_LPROP_ZK,184,80,50,12,ES_AUTOHSCROLL
+    RTEXT           "Hotspot:",ID_STATIC,25,106,45,10
+    EDITTEXT        IDC_LPROP_HOTSPOT,75,105,50,12,ES_AUTOHSCROLL
+    RTEXT           "Falloff:",ID_STATIC,135,106,45,10
+    EDITTEXT        IDC_LPROP_FALLOFF,185,105,50,12,ES_AUTOHSCROLL
+END
+
+IDD_CAMPROP_EX DIALOG DISCARDABLE  0, 0, 258, 141
+STYLE WS_CHILD | WS_VISIBLE | WS_DISABLED | WS_CAPTION
+CAPTION "Extended"
+FONT 8, "MS Sans Serif"
+BEGIN
+    GROUPBOX        "Background",IDC_STATIC,10,5,235,30
+    CONTROL         "Active",IDC_CPROP_BMBACK,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,25,15,45,15
+    PUSHBUTTON      "Select &Bitmap",IDC_CPROP_BITMAP,160,15,60,15
+    GROUPBOX        "Hazing/Fogging",IDC_STATIC,10,40,235,65
+    CONTROL         "Active",IDC_CPROP_HAZE,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,25,50,45,15
+    PUSHBUTTON      "&Hazing Target Color",IDC_CPROP_HCOLR,150,50,80,15
+    RTEXT           "Shade-levels:",IDC_STATIC,15,72,60,10
+    EDITTEXT        IDC_CPROP_LEVEL,75,70,40,15,ES_AUTOHSCROLL
+    RTEXT           "Unaffected level:",IDC_STATIC,120,72,70,10
+    EDITTEXT        IDC_CPROP_SLEVEL,195,70,41,15,ES_AUTOHSCROLL
+    RTEXT           "'Break-point' level:",IDC_STATIC,15,87,60,10
+    EDITTEXT        IDC_CPROP_BLEVEL,75,85,40,15,ES_AUTOHSCROLL
+    RTEXT           "'Break-point' precent:",IDC_STATIC,120,87,70,10
+    EDITTEXT        IDC_CPROP_BPERC,195,85,41,15,ES_AUTOHSCROLL
+    LTEXT           "These settings are not saved into the Escher Data file at the present",
+                    IDC_STATIC,15,110,225,10
+    LTEXT           "time.  They may be added to the format in the future.",
+                    IDC_STATIC,15,120,225,10
+END
+
+
+#ifndef _MAC
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,0,2,0
+ PRODUCTVERSION 1,0,2,0
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904b0"
+        BEGIN
+            VALUE "Comments", "by Chuck Walbourn\0"
+            VALUE "CompanyName", "Charybdis Enterprises, Inc.\0"
+            VALUE "FileDescription", "Escher Tool MFC Application\0"
+            VALUE "FileVersion", "1.02\0"
+            VALUE "InternalName", "EschTool\0"
+            VALUE "LegalCopyright", "Copyright © 1995, 1996\0"
+            VALUE "LegalTrademarks", "MythOS is a trademark of Charybdis Enterprises, Inc.\0"
+            VALUE "OriginalFilename", "ESHTOOL.EXE\0"
+            VALUE "ProductName", "Escher Tool\0"
+            VALUE "ProductVersion", "1.02\0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END
+
+#endif    // !_MAC
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog Info
+//
+
+IDD_LGTPROP_GEN DLGINIT
+BEGIN
+    IDC_LPROP_TYPE, 0x403, 8, 0
+0x6d41, 0x6962, 0x6e65, 0x0074, 
+    IDC_LPROP_TYPE, 0x403, 7, 0
+0x6556, 0x7463, 0x726f, "\000" 
+    IDC_LPROP_TYPE, 0x403, 11, 0
+0x6146, 0x7473, 0x5020, 0x696f, 0x746e, "\000" 
+    IDC_LPROP_TYPE, 0x403, 11, 0
+0x6146, 0x7473, 0x4120, 0x7474, 0x6e65, "\000" 
+    IDC_LPROP_TYPE, 0x403, 10, 0
+0x6146, 0x7473, 0x5320, 0x6f70, 0x0074, 
+    IDC_LPROP_TYPE, 0x403, 6, 0
+0x6f50, 0x6e69, 0x0074, 
+    IDC_LPROP_TYPE, 0x403, 11, 0
+0x7441, 0x6574, 0x756e, 0x7461, 0x6465, "\000" 
+    IDC_LPROP_TYPE, 0x403, 5, 0
+0x7053, 0x746f, "\000" 
+    0
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE PRELOAD DISCARDABLE 
+BEGIN
+    IDR_MAINFRAME           "Escher Tool\n\nEscher\nEscher Data Files (*.iff)\n.IFF\nEshtool.Document\nEscher Document"
+END
+
+STRINGTABLE PRELOAD DISCARDABLE 
+BEGIN
+    AFX_IDS_APP_TITLE       "Escher Tool"
+    AFX_IDS_IDLEMESSAGE     "Ready"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_INDICATOR_EXT        "EXT"
+    ID_INDICATOR_CAPS       "CAP"
+    ID_INDICATOR_NUM        "NUM"
+    ID_INDICATOR_SCRL       "SCRL"
+    ID_INDICATOR_OVR        "OVR"
+    ID_INDICATOR_REC        "REC"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_FILE_NEW             "Create a new document\nNew"
+    ID_FILE_OPEN            "Open an existing document\nOpen"
+    ID_FILE_CLOSE           "Close the active document\nClose"
+    ID_FILE_SAVE            "Save the active document\nSave"
+    ID_FILE_SAVE_AS         "Save the active document with a new name\nSave As"
+    ID_FILE_SEND_MAIL       "Send the active document through electronic mail\nSend Mail"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_APP_ABOUT            "Display program information, version number and copyright\nAbout"
+    ID_APP_EXIT             "Quit the application; prompts to save documents\nExit"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_FILE_MRU_FILE1       "Open this document"
+    ID_FILE_MRU_FILE2       "Open this document"
+    ID_FILE_MRU_FILE3       "Open this document"
+    ID_FILE_MRU_FILE4       "Open this document"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_NEXT_PANE            "Switch to the next window pane\nNext Pane"
+    ID_PREV_PANE            "Switch back to the previous window pane\nPrevious Pane"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_WINDOW_SPLIT         "Split the active window into panes\nSplit"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_EDIT_CLEAR           "Erase the selection\nErase"
+    ID_EDIT_CLEAR_ALL       "Erase everything\nErase All"
+    ID_EDIT_COPY            "Copy the selection and put it on the Clipboard\nCopy"
+    ID_EDIT_CUT             "Cut the selection and put it on the Clipboard\nCut"
+    ID_EDIT_FIND            "Find the specified text\nFind"
+    ID_EDIT_PASTE           "Insert Clipboard contents\nPaste"
+    ID_EDIT_REPEAT          "Repeat the last action\nRepeat"
+    ID_EDIT_REPLACE         "Replace specific text with different text\nReplace"
+    ID_EDIT_SELECT_ALL      "Select the entire document\nSelect All"
+    ID_EDIT_REDO            "Redo the previously undone action\nRedo"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_VIEW_TOOLBAR         "Show or hide the toolbar\nToggle ToolBar"
+    ID_VIEW_STATUS_BAR      "Show or hide the status bar\nToggle StatusBar"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    AFX_IDS_SCSIZE          "Change the window size"
+    AFX_IDS_SCMOVE          "Change the window position"
+    AFX_IDS_SCMINIMIZE      "Reduce the window to an icon"
+    AFX_IDS_SCMAXIMIZE      "Enlarge the window to full size"
+    AFX_IDS_SCNEXTWINDOW    "Switch to the next document window"
+    AFX_IDS_SCPREVWINDOW    "Switch to the previous document window"
+    AFX_IDS_SCCLOSE         "Close the active window and prompts to save the documents"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    AFX_IDS_SCRESTORE       "Restore the window to normal size"
+    AFX_IDS_SCTASKLIST      "Activate Task List"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_VIEW_RND_SPECULAR    "Render using colored, smoothly lit polygons with specular highlight\nSpecular"
+    ID_VIEW_RND_WIREFRAME   "Render using colored wireframe (no lighting)\nWireframe"
+    ID_VIEW_RND_FLAT        "Render using colored, lit polygons\nFlat"
+    ID_VIEW_RND_SMOOTH      "Render using colored, smoothly lit polygons\nSmooth"
+    ID_VIEW_RND_BACKFACE    "Render with back-facing polygons removed\nBackface"
+    ID_VIEW_RND_TEXTURES    "Render using texture maps (if any)\nTextures"
+    ID_VIEW_RND_SOLID       "Render using colored polygons (no lighting)\nSolid"
+    ID_VIEW_RND_PERSPECTIVE "Render using true persepective texture mapping\nPerspective"
+    ID_VIEW_ROTXY           "Render view scroll bars control camera rotation about X and Y\nRotate X/Y"
+    ID_VIEW_MOVEXY          "Render view scroll bars control camera translation in X and Y\nMove X/Y"
+    ID_VIEW_ROTMOVEZ        "Render view scroll bars control camera rotation about and translation in Z\nRotate Z/Move Z"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_VIEW_REFRESH         "Redraw the current views\nRefresh"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_FILE_PALETTE         "Select a Van Gogh palette for color references\nSelect Palette"
+    ID_EDIT_PROP            "Edit mesh, light, or camera properties\nProperties"
+    ID_VIEW_RND_ALL_LINES   "Rendering wireframe displays all lines of triangle faces\nAll Lines"
+    ID_EDIT_DELETE          "Delete mesh, camera, or light from scene\nDelete"
+    ID_MESH_ROTIJ           "Render view scroll bars control mesh object rotation about I and J\nRotate I/J"
+    ID_MESH_MOVEIJ          "Render view scroll bars control mesh object translation in I and J\nMove I/J"
+    ID_MESH_ROTMOVEK        "Render view scroll bars control mesh object rotation about and translation in K\nRotate K/Move K"
+    ID_VIEW_ATTACHCAM       "Sets the camera to use for the render view\nAttach"
+    ID_EDIT_NEW_CAM         "Creates a new camera within the scene\nNew Camera"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_LGT_ADJUSTXY         "Render view scroll bars adjust the light source in X and Y\nAdjust Light X/Y"
+    ID_LGT_ABRIGHT          "Render view scroll bars adjust the light source intensity value\nAdjust Light Intensity"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_EDIT_NEW_LIGHT       "Creates a new light within the scene\nNew Light"
+    ID_FILE_IMPORT          "Imports cameras, lights, or mesh objects into the scene\nImport"
+    ID_APP_HELP             "Displays the help topic for this tool\nHelp"
+    ID_VIEW_AUTOROTX        "Rotates the base meshes in the scene about X each frame.\nAuto X"
+    ID_VIEW_AUTOROTZ        "Rotates the base meshes in the scene about Z each frame.\nAuto Z"
+    ID_VIEW_AUTOROTY        "Rotates the base meshes in the scene about Y each frame.\nAuto Y"
+    ID_VIEW_AUTOFAST        "Sets to a 'fast' rotation\nAuto Fast"
+    ID_VIEW_AUTOSLOW        "Sets to a slow rotation\tAuto Slow"
+    ID_VIEW_AUTOOFF         "Turns off all automatic rotations\nAuto Off"
+    ID_VIEW_RND_MSPACE      "Render with lighting computations in model space."
+END
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#include "res\eshtool.rc2"  // non-Microsoft Visual C++ edited resources
+
+#define _AFX_NO_SPLITTER_RESOURCES
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+#include "afxres.rc"  	// Standard components
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

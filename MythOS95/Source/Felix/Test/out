@@ -1,0 +1,65 @@
+obj\flxtest
+°±² Felix Tester (C) 1994, 1995 Charybdis Enterprises, Inc. ²±°
+
+
+MUL_DIV Section-------
+(-32760.000000 * -32.000000) /  67.000000 = 15646.567154
+
+
+MUL Section-------
+(47.000000 * 131.000000) = 6157.000000
+
+
+DIV Section-------
+-0.000107 / -3.917068 = 2047.999985
+
+
+SIN Section-------
+SIN of 17.000000 is 0.292358 
+ASIN of 0.292358 is 17.000000 
+SIN of 128.000000 is 0.788010 
+ASIN of 0.788010 is 52.000000 
+SIN of 234.000000 is -0.809006 
+ASIN of -0.809006 is -54.000000 
+
+
+COS Section-------
+COS of 17.000000 is 0.956299 
+ACOS of 0.956299 is 17.000000 
+COS of 128.000000 is -0.615646 
+ACOS of -0.615646 is 128.000000 
+COS of 234.000000 is -0.587784 
+ACOS of -0.587784 is 126.000000 
+
+
+TAN Section-------
+TAN of 17.000000 is 0.305710 
+COT of 17.000000 is 2047.999985 
+TAN of 128.000000 is 2048.000000 
+COT of 128.000000 is 2048.000000 
+TAN of 234.000000 is 2047.999985 
+COT of 234.000000 is 2047.999985 
+
+
+SQRT Section-------
+Hit any key to begin Benchmark Timings.
+It took 2047.999985 seconds to do 3000000 sqrt operations!
+That is 1464.843761 sqrt operations per second.
+Checking precision on 500000 sqrt operations.
+Flx sqrt average percent error is 0.013557 
+
+
+2317.460983 is represented as 90d7603
+--->sqrt is 48.135223 (30229e)
+--->Coprocessor verification is 48.140014
+
+23515.660461 is represented as 5bdba914
+--->sqrt is 153.310135 (994f65)
+--->Coprocessor verification is 153.348167
+
+1885.606430 is represented as 75d9b3f
+--->sqrt is 43.416580 (2b6aa5)
+--->Coprocessor verification is 43.423570
+
+
+Complete!

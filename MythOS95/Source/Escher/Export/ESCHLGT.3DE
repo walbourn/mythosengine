@@ -1,0 +1,39 @@
+
+/* Tree Dialog: EschLgt */
+
+Dialog EschLgt[]=
+{
+{ -1, 1, -1, -1, 0, 5, 5, 366, 244, NULL, NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
+{ 0, -1, -1, 2, 4, 94, 8, 178, 18, " Escher Data Exporter ", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
+{ 0, -1, 1, 3, 4, 122, 28, 122, 18, " Lights Control ", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
+{ 0, -1, 2, 4, 2, 13, 52, 340, 32, NULL, NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
+{ 0, -1, 3, 5, 4, 36, 60, 114, 18, "Export Lights:", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
+{ 0, -1, 4, 6, 1, 166, 60, 66, 18, " Yes ", NULL, 0, 0, 89, 0, FNULL, FNULL, 0 },
+{ 0, -1, 5, 7, 1, 250, 60, 66, 18, " No ", NULL, 0, 0, 78, 0, FNULL, FNULL, 0 },
+{ 0, -1, 6, 8, 4, 44, 88, 114, 18, "Omni Lights:", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
+{ 0, -1, 7, 9, 1, 166, 88, 66, 18, " Fast ", NULL, 0, 0, 70, 0, FNULL, FNULL, 0 },
+{ 0, -1, 8, 10, 1, 250, 88, 66, 18, " Point ", NULL, 0, 0, 80, 0, FNULL, FNULL, 0 },
+{ 0, -1, 9, 11, 4, 44, 116, 114, 18, "Spot Lights:", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
+{ 0, -1, 10, 12, 1, 166, 116, 66, 18, " Fast ", NULL, 0, 0, 6, 0, FNULL, FNULL, 0 },
+{ 0, -1, 11, 13, 1, 250, 116, 66, 18, " Spot ", NULL, 0, 0, 83, 0, FNULL, FNULL, 0 },
+{ 0, -1, 12, 14, 1, 166, 140, 66, 18, " Vector ", NULL, 0, 0, 86, 0, FNULL, FNULL, 0 },
+{ 0, -1, 13, 15, 4, 92, 168, 66, 18, "Other:", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
+{ 0, -1, 14, 16, 1, 166, 168, 74, 18, " Ambient ", NULL, 0, 0, 65, 0, FNULL, FNULL, 0 },
+{ 0, -1, 15, 17, 1, 250, 168, 98, 18, " Attenuated ", NULL, 0, 0, 84, 0, FNULL, FNULL, 0 },
+{ 0, -1, 16, 18, 1, 150, 212, 66, 18, " OK ", NULL, 0, 0, 13, 0, FNULL, FNULL, 0 },
+{ 0, -1, 17, -1, 1, 324, 212, 20, 20, "!", NULL, 0, 0, 33, 0, FNULL, FNULL, 0 },
+};
+
+/* Tree Identifiers: EschLgt */
+
+#define YES                             5
+#define NO                              6
+#define OMNIFAST                        8
+#define OMNIPNT                         9
+#define SPOTFAST                        11
+#define SPOTSPOT                        12
+#define SPOTVEC                         13
+#define AMBIENT                         15
+#define ATTEN                           16
+#define OK                              17
+#define ABOUT                           18
