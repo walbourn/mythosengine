@@ -6,7 +6,7 @@
 //    (_)       ^          * *     *      *   *    *            (_)
 //             (_)       **   **   *    ***** **** ****
 //
-//            Copyright (c) 1994-1996 by Charybdis Enterprises, Inc.
+//            Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.
 //                              All Rights Reserved.
 //                        Microsoft Windows '95 Version
 //
@@ -31,7 +31,7 @@
 //
 // xuiffcp.cpp
 //
-//     This is the parse module for the IFF compiler.
+// This is the parse module for the IFF compiler.
 //
 //อออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออ
 
@@ -1102,10 +1102,10 @@ STATIC void merge(void)
                 cout << "   merging '" << yytext << "'\n";
             }
      
-            if (iffm.open(yytext,XF_OPEN_READ))
+            if (iffm.open(yytext,XF_OPEN_READ | XF_OPEN_DENYWRITE))
             {
-                print_error(&iffm,"Cannot open merge file");
-                exit(1);
+                cout << "Error merging '" << yytext << "'\n";
+                error("Cannot open merge file");
             }
             else
             {
@@ -1276,42 +1276,65 @@ STATIC void bitmap(void)
         XFParseBMP  bmp(&bm);
 
         if (bmp.nameread(yytext))
+        {
+            cout << " Error inserting bitmap '" << yytext << "'\n";
             error("Failed to read file as Windows BMP format");
+        }
     }
     else if (!strcmp(buff,"pcx"))
     {
         XFParsePCX  pcx(&bm);
 
         if (pcx.nameread(yytext))
+        {
+            cout << " Error inserting bitmap '" << yytext << "'\n";
             error("Failed to read file as PCX format");
+        }
     }
     else if (!strcmp(buff,"lbm"))
     {
         XFParseLBM  lbm(&bm);
 
         if (lbm.nameread(yytext))
+        {
+            cout << " Error inserting bitmap '" << yytext << "'\n";
             error("Failed to read file as LBM format");
+        }
     }
     else if (!strcmp(buff,"cel"))
     {
         XFParseCEL  cel(&bm);
 
         if (cel.nameread(yytext))
+        {
+            cout << " Error inserting bitmap '" << yytext << "'\n";
             error("Failed to read file as CEL format");
+        }
     }
     else if (!strcmp(buff,"tga"))
     {
         XFParseTGA  tga(&bm);
 
         if (tga.nameread(yytext))
+        {
+            cout << " Error inserting bitmap '" << yytext << "'\n";
             error("Failed to read file as TGA format");
+        }
     }
     else if (!strcmp(buff,"xeb"))
     {
         XFParseXEB  xeb(&bm);
 
         if (xeb.nameread(yytext))
+        {
+            cout << " Error inserting bitmap '" << yytext << "'\n";
             error("Failed to read file as XEB format");
+        }
+    }
+    else
+    {
+        cout << " Error inserting bitmap '" << yytext << "'\n";
+        error("Unknown bitmap extension");
     }
 
 //ฤฤฤ Output image info
@@ -1330,9 +1353,15 @@ STATIC void bitmap(void)
 
         err=xeb.write(IFF);
         if (err == XF_ERR_NOTSUPPORTED)
+        {
+            cout << " Error inserting bitmap '" << yytext << "'\n";
             error("Image format not supported for write by XFile as XEB");
+        }
         else if (err)
+        {
+            cout << " Error inserting bitmap '" << yytext << "'\n";
             error("Failed to insert image as XEB");
+        }
     }
     else
     {
@@ -1340,9 +1369,15 @@ STATIC void bitmap(void)
 
         err=lbm.write(IFF);
         if (err == XF_ERR_NOTSUPPORTED)
+        {
+            cout << " Error inserting bitmap '" << yytext << "'\n";
             error("Image format not supported for write by XFile as LBM");
+        }
         else if (err)
+        {
+            cout << " Error inserting bitmap '" << yytext << "'\n";
             error("Failed to insert image as LBM");
+        }
     }
 
     match(YY_STRING);
@@ -1802,7 +1837,7 @@ STATIC void add_to_work_file(const char *fname)
     ulong       size;
     XFileDisk   xf;
 
-    if (xf.open(fname,XF_OPEN_READ))
+    if (xf.open(fname,XF_OPEN_READ | XF_OPEN_DENYWRITE))
     {
         error("Failed to open binary file");
     }

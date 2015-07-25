@@ -2,11 +2,11 @@
 //
 //                                                           %__________%
 //                                                          %/ . .  .   \%
-//           Van Gogh 2D-Display Library                     |  . .  o. | 
+//           Van Gogh 2D-Display Library                     |  . .  o. |
 //                                                           |. _  .   .|
-//          Microsoft Windows '95 Version                    | / \   .  | 
+//          Microsoft Windows '95 Version                    | / \   .  |
 //                                                           |_|_|_._._.|
-// Copyright (c) 1994-1996 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
+// Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
 //              All rights reserved.                        %\__________/%
 //                                                           %          %
 //
@@ -25,9 +25,9 @@
 //
 //ฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤ
 //
-// Vngpal.hpp  
+// Vngpal.hpp
 //
-//     This file has all of the various palette definitions.    
+//     This file has all of the various palette definitions.
 //
 //อออออออออออออออออออออออออออออ Revision History ออออออออออออออออออออออออออออ
 //อออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออ
@@ -38,9 +38,9 @@
 #define FLX_ONLY   1       // force the use of Felix for the HLS calcs.
 
 //ฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐ
-//             
+//
 //                                Includes
-//                                
+//
 //ฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐ
 
 #include "portable.h"
@@ -88,6 +88,8 @@ public:
         long    mid_point;
     };
 };
+
+
 
 class VngoShadePal8 : public VngoShadePal
 {
@@ -217,13 +219,12 @@ class VngoPal
 {
 public:
     VngoShadePal    *shd_pal;
-
     dword           flags;
     dword           type;
     char            name[16];
 
 
-    VngoPal() {shd_pal=NULL; }
+    VngoPal(): shd_pal(0) { }
     virtual ~VngoPal();
 
 // Virtual Utility functions.
@@ -247,9 +248,9 @@ public:
     VngoHwPal       hw_pal;
     VngoClrConvert  convert;
 
-//    VngoPal8() {shd_pal=NULL;}
-//   ~VngoPal8();
-
+    VngoPal8();
+    virtual ~VngoPal8();
+    virtual void release();
 
 // Inline functions.
 
@@ -265,7 +266,7 @@ public:
 };
 
 
-class VngoPalIFF 
+class VngoPalIFF
 {
 public:
     VngoPal         *pal;

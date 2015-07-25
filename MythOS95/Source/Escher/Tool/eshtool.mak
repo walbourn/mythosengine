@@ -32,9 +32,9 @@ NULL=nul
 ################################################################################
 # Begin Project
 # PROP Target_Last_Scanned "eshtool - Win32 Release"
-MTL=mktyplib.exe
 RSC=rc.exe
 CPP=cl.exe
+MTL=mktyplib.exe
 
 !IF  "$(CFG)" == "eshtool - Win32 Debug"
 
@@ -192,8 +192,6 @@ LINK32_OBJS= \
 
 !ENDIF 
 
-MTL_PROJ=
-
 .c{$(CPP_OBJS)}.obj:
    $(CPP) $(CPP_PROJ) $<  
 
@@ -212,6 +210,7 @@ MTL_PROJ=
 .cxx{$(CPP_SBRS)}.sbr:
    $(CPP) $(CPP_PROJ) $<  
 
+MTL_PROJ=
 ################################################################################
 # Begin Target
 
@@ -228,11 +227,16 @@ MTL_PROJ=
 # Begin Source File
 
 SOURCE=.\stdafx.cpp
+
+!IF  "$(CFG)" == "eshtool - Win32 Debug"
+
 DEP_CPP_STDAF=\
 	"..\..\inc\bozo.h"\
 	"..\..\inc\bozo.hpp"\
 	"..\..\inc\chronos.hpp"\
+	"..\..\Inc\esbuild.hpp"\
 	"..\..\inc\escher.hpp"\
+	"..\..\Inc\espartn.hpp"\
 	"..\..\inc\felix.hpp"\
 	"..\..\inc\felix.ipp"\
 	"..\..\inc\gutenbrg.hpp"\
@@ -290,9 +294,6 @@ DEP_CPP_STDAF=\
 	".\..\..\Inc\XFINI.HPP"\
 	".\stdafx.h"\
 	
-
-!IF  "$(CFG)" == "eshtool - Win32 Debug"
-
 # ADD BASE CPP /Yc"stdafx.h"
 # ADD CPP /Yc"stdafx.h"
 
@@ -310,6 +311,70 @@ BuildCmds= \
 
 !ELSEIF  "$(CFG)" == "eshtool - Win32 Release"
 
+DEP_CPP_STDAF=\
+	"..\..\inc\bozo.h"\
+	"..\..\inc\bozo.hpp"\
+	"..\..\inc\chronos.hpp"\
+	"..\..\Inc\esbuild.hpp"\
+	"..\..\inc\escher.hpp"\
+	"..\..\Inc\espartn.hpp"\
+	"..\..\inc\felix.hpp"\
+	"..\..\inc\felix.ipp"\
+	"..\..\inc\gutenbrg.hpp"\
+	"..\..\inc\ivory.h"\
+	"..\..\inc\ivory.hpp"\
+	"..\..\inc\max.hpp"\
+	"..\..\Inc\maxvmap.hpp"\
+	"..\..\inc\mythos.hpp"\
+	"..\..\inc\portable.h"\
+	"..\..\inc\vangogh.hpp"\
+	"..\..\inc\xfile.hpp"\
+	"..\..\inc\xfio.h"\
+	".\..\..\Inc\BZARTN.H"\
+	".\..\..\Inc\BZQUEUE.H"\
+	".\..\..\Inc\BZSEMAP.H"\
+	".\..\..\Inc\BZTASK.H"\
+	".\..\..\Inc\BZWRAP.HPP"\
+	".\..\..\Inc\DEBUG.H"\
+	".\..\..\Inc\esbasic.hpp"\
+	".\..\..\Inc\ESCAMERA.HPP"\
+	".\..\..\Inc\ESCONTXT.HPP"\
+	".\..\..\Inc\ESDEFS.H"\
+	".\..\..\Inc\ESDRAW.HPP"\
+	".\..\..\Inc\esexts.hpp"\
+	".\..\..\Inc\ESGEOM.HPP"\
+	".\..\..\Inc\ESLIGHT.HPP"\
+	".\..\..\Inc\ESMATH.HPP"\
+	".\..\..\Inc\esmisc.hpp"\
+	".\..\..\Inc\ESPARTIK.HPP"\
+	".\..\..\Inc\ESSCENE.HPP"\
+	".\..\..\Inc\ESSYSTEM.HPP"\
+	".\..\..\Inc\ESTERRAN.HPP"\
+	".\..\..\Inc\ESTXTURE.HPP"\
+	".\..\..\Inc\GUTENBRG.H"\
+	".\..\..\Inc\IVMem.h"\
+	".\..\..\Inc\Ivory.ipp"\
+	".\..\..\Inc\MaxDevs.HPP"\
+	".\..\..\Inc\MaxESrc.HPP"\
+	".\..\..\Inc\MaxEvt.HPP"\
+	".\..\..\Inc\MYTHOS.H"\
+	".\..\..\Inc\VNGBD.HPP"\
+	".\..\..\Inc\VNGCOLOR.HPP"\
+	".\..\..\Inc\VNGDEFS.H"\
+	".\..\..\Inc\VNGPAL.HPP"\
+	".\..\..\Inc\VNGSTRCT.HPP"\
+	".\..\..\Inc\VNGVP.HPP"\
+	".\..\..\Inc\vngvpdb8.hpp"\
+	".\..\..\Inc\VNGVPDD8.HPP"\
+	".\..\..\Inc\vngvvp16.hpp"\
+	".\..\..\Inc\VNGVVP8.HPP"\
+	".\..\..\Inc\XFBASE.HPP"\
+	".\..\..\Inc\XFBITMAP.HPP"\
+	".\..\..\Inc\XFDEFS.H"\
+	".\..\..\Inc\XFIFF.HPP"\
+	".\..\..\Inc\XFINI.HPP"\
+	".\stdafx.h"\
+	
 # ADD BASE CPP /Yc"stdafx.h"
 # ADD CPP /Yc"stdafx.h"
 
@@ -332,11 +397,16 @@ BuildCmds= \
 # Begin Source File
 
 SOURCE=.\eshtool.cpp
+
+!IF  "$(CFG)" == "eshtool - Win32 Debug"
+
 DEP_CPP_ESHTO=\
 	"..\..\inc\bozo.h"\
 	"..\..\inc\bozo.hpp"\
 	"..\..\inc\chronos.hpp"\
+	"..\..\Inc\esbuild.hpp"\
 	"..\..\inc\escher.hpp"\
+	"..\..\Inc\espartn.hpp"\
 	"..\..\inc\felix.hpp"\
 	"..\..\inc\felix.ipp"\
 	"..\..\inc\gutenbrg.hpp"\
@@ -405,16 +475,100 @@ DEP_CPP_ESHTO=\
  "$(INTDIR)\eshtool.pch"
 
 
+!ELSEIF  "$(CFG)" == "eshtool - Win32 Release"
+
+DEP_CPP_ESHTO=\
+	"..\..\inc\bozo.h"\
+	"..\..\inc\bozo.hpp"\
+	"..\..\inc\chronos.hpp"\
+	"..\..\Inc\esbuild.hpp"\
+	"..\..\inc\escher.hpp"\
+	"..\..\Inc\espartn.hpp"\
+	"..\..\inc\felix.hpp"\
+	"..\..\inc\felix.ipp"\
+	"..\..\inc\gutenbrg.hpp"\
+	"..\..\inc\ivory.h"\
+	"..\..\inc\ivory.hpp"\
+	"..\..\inc\max.hpp"\
+	"..\..\Inc\maxvmap.hpp"\
+	"..\..\inc\mythos.hpp"\
+	"..\..\inc\portable.h"\
+	"..\..\inc\vangogh.hpp"\
+	"..\..\inc\xfile.hpp"\
+	"..\..\inc\xfio.h"\
+	".\..\..\Inc\BZARTN.H"\
+	".\..\..\Inc\BZQUEUE.H"\
+	".\..\..\Inc\BZSEMAP.H"\
+	".\..\..\Inc\BZTASK.H"\
+	".\..\..\Inc\BZWRAP.HPP"\
+	".\..\..\Inc\DEBUG.H"\
+	".\..\..\Inc\esbasic.hpp"\
+	".\..\..\Inc\ESCAMERA.HPP"\
+	".\..\..\Inc\ESCONTXT.HPP"\
+	".\..\..\Inc\ESDEFS.H"\
+	".\..\..\Inc\ESDRAW.HPP"\
+	".\..\..\Inc\esexts.hpp"\
+	".\..\..\Inc\ESGEOM.HPP"\
+	".\..\..\Inc\ESLIGHT.HPP"\
+	".\..\..\Inc\ESMATH.HPP"\
+	".\..\..\Inc\esmisc.hpp"\
+	".\..\..\Inc\ESPARTIK.HPP"\
+	".\..\..\Inc\ESSCENE.HPP"\
+	".\..\..\Inc\ESSYSTEM.HPP"\
+	".\..\..\Inc\ESTERRAN.HPP"\
+	".\..\..\Inc\ESTXTURE.HPP"\
+	".\..\..\Inc\GUTENBRG.H"\
+	".\..\..\Inc\IVMem.h"\
+	".\..\..\Inc\Ivory.ipp"\
+	".\..\..\Inc\MaxDevs.HPP"\
+	".\..\..\Inc\MaxESrc.HPP"\
+	".\..\..\Inc\MaxEvt.HPP"\
+	".\..\..\Inc\MYTHOS.H"\
+	".\..\..\Inc\VNGBD.HPP"\
+	".\..\..\Inc\VNGCOLOR.HPP"\
+	".\..\..\Inc\VNGDEFS.H"\
+	".\..\..\Inc\VNGPAL.HPP"\
+	".\..\..\Inc\VNGSTRCT.HPP"\
+	".\..\..\Inc\VNGVP.HPP"\
+	".\..\..\Inc\vngvpdb8.hpp"\
+	".\..\..\Inc\VNGVPDD8.HPP"\
+	".\..\..\Inc\vngvvp16.hpp"\
+	".\..\..\Inc\VNGVVP8.HPP"\
+	".\..\..\Inc\XFBASE.HPP"\
+	".\..\..\Inc\XFBITMAP.HPP"\
+	".\..\..\Inc\XFDEFS.H"\
+	".\..\..\Inc\XFIFF.HPP"\
+	".\..\..\Inc\XFINI.HPP"\
+	".\eshtdoc.h"\
+	".\eshtmfrm.h"\
+	".\eshtool.h"\
+	".\eshttree.h"\
+	".\eshtview.h"\
+	".\eshtvp.h"\
+	".\stdafx.h"\
+	
+
+"$(INTDIR)\eshtool.obj" : $(SOURCE) $(DEP_CPP_ESHTO) "$(INTDIR)"\
+ "$(INTDIR)\eshtool.pch"
+
+
+!ENDIF 
+
 # End Source File
 ################################################################################
 # Begin Source File
 
 SOURCE=.\eshtmfrm.cpp
+
+!IF  "$(CFG)" == "eshtool - Win32 Debug"
+
 DEP_CPP_ESHTM=\
 	"..\..\inc\bozo.h"\
 	"..\..\inc\bozo.hpp"\
 	"..\..\inc\chronos.hpp"\
+	"..\..\Inc\esbuild.hpp"\
 	"..\..\inc\escher.hpp"\
+	"..\..\Inc\espartn.hpp"\
 	"..\..\inc\felix.hpp"\
 	"..\..\inc\felix.ipp"\
 	"..\..\inc\gutenbrg.hpp"\
@@ -483,6 +637,85 @@ DEP_CPP_ESHTM=\
  "$(INTDIR)\eshtool.pch"
 
 
+!ELSEIF  "$(CFG)" == "eshtool - Win32 Release"
+
+DEP_CPP_ESHTM=\
+	"..\..\inc\bozo.h"\
+	"..\..\inc\bozo.hpp"\
+	"..\..\inc\chronos.hpp"\
+	"..\..\Inc\esbuild.hpp"\
+	"..\..\inc\escher.hpp"\
+	"..\..\Inc\espartn.hpp"\
+	"..\..\inc\felix.hpp"\
+	"..\..\inc\felix.ipp"\
+	"..\..\inc\gutenbrg.hpp"\
+	"..\..\inc\ivory.h"\
+	"..\..\inc\ivory.hpp"\
+	"..\..\inc\max.hpp"\
+	"..\..\Inc\maxvmap.hpp"\
+	"..\..\inc\mythos.hpp"\
+	"..\..\inc\portable.h"\
+	"..\..\inc\vangogh.hpp"\
+	"..\..\inc\xfile.hpp"\
+	"..\..\inc\xfio.h"\
+	".\..\..\Inc\BZARTN.H"\
+	".\..\..\Inc\BZQUEUE.H"\
+	".\..\..\Inc\BZSEMAP.H"\
+	".\..\..\Inc\BZTASK.H"\
+	".\..\..\Inc\BZWRAP.HPP"\
+	".\..\..\Inc\DEBUG.H"\
+	".\..\..\Inc\esbasic.hpp"\
+	".\..\..\Inc\ESCAMERA.HPP"\
+	".\..\..\Inc\ESCONTXT.HPP"\
+	".\..\..\Inc\ESDEFS.H"\
+	".\..\..\Inc\ESDRAW.HPP"\
+	".\..\..\Inc\esexts.hpp"\
+	".\..\..\Inc\ESGEOM.HPP"\
+	".\..\..\Inc\ESLIGHT.HPP"\
+	".\..\..\Inc\ESMATH.HPP"\
+	".\..\..\Inc\esmisc.hpp"\
+	".\..\..\Inc\ESPARTIK.HPP"\
+	".\..\..\Inc\ESSCENE.HPP"\
+	".\..\..\Inc\ESSYSTEM.HPP"\
+	".\..\..\Inc\ESTERRAN.HPP"\
+	".\..\..\Inc\ESTXTURE.HPP"\
+	".\..\..\Inc\GUTENBRG.H"\
+	".\..\..\Inc\IVMem.h"\
+	".\..\..\Inc\Ivory.ipp"\
+	".\..\..\Inc\MaxDevs.HPP"\
+	".\..\..\Inc\MaxESrc.HPP"\
+	".\..\..\Inc\MaxEvt.HPP"\
+	".\..\..\Inc\MYTHOS.H"\
+	".\..\..\Inc\VNGBD.HPP"\
+	".\..\..\Inc\VNGCOLOR.HPP"\
+	".\..\..\Inc\VNGDEFS.H"\
+	".\..\..\Inc\VNGPAL.HPP"\
+	".\..\..\Inc\VNGSTRCT.HPP"\
+	".\..\..\Inc\VNGVP.HPP"\
+	".\..\..\Inc\vngvpdb8.hpp"\
+	".\..\..\Inc\VNGVPDD8.HPP"\
+	".\..\..\Inc\vngvvp16.hpp"\
+	".\..\..\Inc\VNGVVP8.HPP"\
+	".\..\..\Inc\XFBASE.HPP"\
+	".\..\..\Inc\XFBITMAP.HPP"\
+	".\..\..\Inc\XFDEFS.H"\
+	".\..\..\Inc\XFIFF.HPP"\
+	".\..\..\Inc\XFINI.HPP"\
+	".\eshtdoc.h"\
+	".\eshtmfrm.h"\
+	".\eshtool.h"\
+	".\eshttree.h"\
+	".\eshtview.h"\
+	".\eshtvp.h"\
+	".\stdafx.h"\
+	
+
+"$(INTDIR)\eshtmfrm.obj" : $(SOURCE) $(DEP_CPP_ESHTM) "$(INTDIR)"\
+ "$(INTDIR)\eshtool.pch"
+
+
+!ENDIF 
+
 # End Source File
 ################################################################################
 # Begin Source File
@@ -492,8 +725,10 @@ DEP_CPP_ESHTD=\
 	"..\..\inc\bozo.h"\
 	"..\..\inc\bozo.hpp"\
 	"..\..\inc\chronos.hpp"\
+	"..\..\Inc\esbuild.hpp"\
 	"..\..\inc\escher.hpp"\
 	"..\..\inc\esfile.hpp"\
+	"..\..\Inc\espartn.hpp"\
 	"..\..\inc\felix.hpp"\
 	"..\..\inc\felix.ipp"\
 	"..\..\inc\gutenbrg.hpp"\
@@ -567,7 +802,9 @@ DEP_CPP_ESHTV=\
 	"..\..\inc\bozo.h"\
 	"..\..\inc\bozo.hpp"\
 	"..\..\inc\chronos.hpp"\
+	"..\..\Inc\esbuild.hpp"\
 	"..\..\inc\escher.hpp"\
+	"..\..\Inc\espartn.hpp"\
 	"..\..\inc\felix.hpp"\
 	"..\..\inc\felix.ipp"\
 	"..\..\inc\gutenbrg.hpp"\
@@ -642,6 +879,7 @@ DEP_CPP_ESHTV=\
 
 SOURCE=.\eshtool.rc
 DEP_RSC_ESHTOO=\
+	".\res\about.bmp"\
 	".\res\camera.ico"\
 	".\res\cameras.ico"\
 	".\res\eshdoc.ico"\
@@ -649,6 +887,7 @@ DEP_RSC_ESHTOO=\
 	".\res\eshtool.rc2"\
 	".\res\light.ico"\
 	".\res\light_s.ico"\
+	".\res\logo.bmp"\
 	".\res\mesh.ico"\
 	".\res\mesh_s.ico"\
 	".\res\scene.ico"\
@@ -681,7 +920,9 @@ DEP_CPP_ESHTVP=\
 	"..\..\inc\bozo.h"\
 	"..\..\inc\bozo.hpp"\
 	"..\..\inc\chronos.hpp"\
+	"..\..\Inc\esbuild.hpp"\
 	"..\..\inc\escher.hpp"\
+	"..\..\Inc\espartn.hpp"\
 	"..\..\inc\felix.hpp"\
 	"..\..\inc\felix.ipp"\
 	"..\..\inc\gutenbrg.hpp"\
@@ -756,7 +997,9 @@ DEP_CPP_ESHTT=\
 	"..\..\inc\bozo.h"\
 	"..\..\inc\bozo.hpp"\
 	"..\..\inc\chronos.hpp"\
+	"..\..\Inc\esbuild.hpp"\
 	"..\..\inc\escher.hpp"\
+	"..\..\Inc\espartn.hpp"\
 	"..\..\inc\felix.hpp"\
 	"..\..\inc\felix.ipp"\
 	"..\..\inc\gutenbrg.hpp"\
@@ -833,7 +1076,9 @@ DEP_CPP_ESHTDL=\
 	"..\..\inc\bozo.h"\
 	"..\..\inc\bozo.hpp"\
 	"..\..\inc\chronos.hpp"\
+	"..\..\Inc\esbuild.hpp"\
 	"..\..\inc\escher.hpp"\
+	"..\..\Inc\espartn.hpp"\
 	"..\..\inc\felix.hpp"\
 	"..\..\inc\felix.ipp"\
 	"..\..\inc\gutenbrg.hpp"\
@@ -890,6 +1135,7 @@ DEP_CPP_ESHTDL=\
 	".\..\..\Inc\XFIFF.HPP"\
 	".\..\..\Inc\XFINI.HPP"\
 	".\eshtdlg.h"\
+	".\eshtdoc.h"\
 	".\eshtool.h"\
 	".\stdafx.h"\
 	

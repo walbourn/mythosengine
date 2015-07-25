@@ -4,7 +4,7 @@
 //
 //                        For Microsoft Windows '95
 //
-//           Copyright (c) 1995, 1996 by Charybdis Enterprises, Inc.
+//          Copyright (c) 1995 - 1997 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved.
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -38,7 +38,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 // {1E6E9FA3-1200-11cf-887E-00400516ED44}
-const GUID LANDER_GUID = 
+const GUID LANDER_GUID =
 { 0x1e6e9fa3, 0x1200, 0x11cf, { 0x88, 0x7e, 0x0, 0x40, 0x5, 0x16, 0xed, 0x44 } };
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°

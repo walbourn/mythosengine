@@ -11,7 +11,9 @@
 #define IDR_ICON_CAMERAS                136
 #define IDR_ICON_LIGHTS                 137
 #define IDR_ICON_MESHS                  138
+#define IDB_ABOUT                       138
 #define IDR_ICON_SCENE                  139
+#define IDB_LOGO                        139
 #define IDD_CAMPROP_GEN                 140
 #define IDR_ICON_SCENES                 140
 #define IDD_CAMPROP_MISC                141
@@ -26,6 +28,14 @@
 #define IDD_SNPROP_MISC                 150
 #define IDD_LGTPROP_EXTRA               151
 #define IDD_CAMPROP_EX                  152
+#define IDD_MSHPROP_TXTS                153
+#define IDD_TXTPROP_GEN                 154
+#define IDD_TXTPROP_APPFLAGS            155
+#define IDD_MSHPROP_VERTS               156
+#define IDD_MSHPROP_FACE                157
+#define IDD_FPROP_GEN                   158
+#define IDD_FPROP_APPFLAGS              159
+#define IDD_FPROP_FLAGS                 160
 #define IDC_LPROP_NAME                  1001
 #define IDC_LPROP_TYPE                  1002
 #define IDC_LPROP_INTENSITY             1004
@@ -135,7 +145,46 @@
 #define IDC_SPROP_NFSLIGHTS             1055
 #define IDC_CPROP_BLEVEL                1055
 #define IDC_CPROP_SLEVEL                1056
+#define IDC_MPROP_TXTLIST               1056
 #define IDC_CPROP_BPERC                 1057
+#define IDC_MPROP_TXTPROP               1057
+#define IDC_TPROP_NAME                  1058
+#define IDC_TPROP_TYPE                  1059
+#define IDC_TPROP_ANIMATE               1060
+#define IDC_TPROP_WIDTH                 1061
+#define IDC_TPROP_HEIGHT                1062
+#define IDC_MPROP_VLIST                 1062
+#define IDC_TPROP_NFRAMES               1063
+#define IDC_MPROP_FLIST                 1063
+#define IDC_MPROP_FPROP                 1064
+#define IDC_FPROP_A                     1065
+#define IDC_FPROP_B                     1066
+#define IDC_FPROP_C                     1067
+#define IDC_FPROP_TXT                   1068
+#define IDC_FPROP_U0                    1069
+#define IDC_FPROP_FLAGS_APP0            1069
+#define IDC_FPROP_V0                    1070
+#define IDC_FPROP_FLAGS_APP1            1070
+#define IDC_FPROP_U1                    1071
+#define IDC_FPROP_FLAGS_APP2            1071
+#define IDC_FPROP_V1                    1072
+#define IDC_FPROP_FLAGS_APP3            1072
+#define IDC_FPROP_U2                    1073
+#define IDC_FPROP_WIRE                  1073
+#define IDC_FPROP_V2                    1074
+#define IDC_FPROP_SOLID                 1074
+#define IDC_FPROP_I                     1075
+#define IDC_FPROP_FLAT                  1075
+#define IDC_FPROP_J                     1076
+#define IDC_FPROP_SMOOTH                1076
+#define IDC_FPROP_K                     1077
+#define IDC_FPROP_SPECULAR              1077
+#define IDC_FPROP_1SIDED                1078
+#define IDC_FPROP_APERSP                1079
+#define IDC_FPROP_SELFILLM              1080
+#define IDC_FPROP_ABLINE                1081
+#define IDC_FPROP_BCLINE                1082
+#define IDC_FPROP_CALINE                1083
 #define ID_FILE_PALETTE                 32772
 #define ID_EDIT_PROP                    32774
 #define ID_VIEW_RND_ALL_LINES           32775
@@ -155,6 +204,10 @@
 #define ID_VIEW_AUTOSLOW                32794
 #define ID_VIEW_AUTOOFF                 32795
 #define ID_VIEW_RND_MSPACE              32796
+#define ID_VIEW_SHOW_SPHEXTS            32797
+#define ID_VIEW_SHOW_BOXEXTS            32798
+#define ID_FILE_COMPRESS                32799
+#define ID_FILE_TRUECOLOR               32800
 #define ID_VIEW_REFRESH                 32809
 #define ID_VIEW_RND_SPECULAR            32816
 #define ID_VIEW_RND_WIREFRAME           32820
@@ -176,9 +229,9 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        137
-#define _APS_NEXT_COMMAND_VALUE         32797
-#define _APS_NEXT_CONTROL_VALUE         1055
+#define _APS_NEXT_RESOURCE_VALUE        143
+#define _APS_NEXT_COMMAND_VALUE         32801
+#define _APS_NEXT_CONTROL_VALUE         1081
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

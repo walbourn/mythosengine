@@ -6,7 +6,7 @@
 //                                                           |. _  .   .|
 //          Microsoft Windows '95 Version                    | / \   .  | 
 //                                                           |_|_|_._._.|
-// Copyright (c) 1994-1996 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
+// Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
 //              All rights reserved.                        %\__________/%
 //                                                           %          %
 //
@@ -49,10 +49,26 @@
 
 inline void SWAP (int &a, int &b) 
 {
+#if 0
     a = a ^ b;
     b = a ^ b;
     a = a ^ b;    
+#else   // This is safer if a & b are references to the same variable.
+    int t;
+    t = a;
+    a = b;
+    b = t;
+#endif
 }
+
+inline void COPYPOINT (VngoPoint *p1,VngoPoint *p2)
+{
+    p1->x = p2->x;
+    p1->y = p2->y;
+    p1->z = p2->z;
+    p1->shade = p2->shade;
+    p1->clr = p2->clr;
+}     
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
@@ -72,27 +88,27 @@ void vngo_line (VngoVport *vp, VngoPoint *p1,VngoPoint *p2,VngoColor24bit *rgb_v
     {
         if (p1->x <= p2->x)
         {
-            pt1 = *p1;
-            pt2 = *p2;
+            COPYPOINT(&pt1,p1);
+            COPYPOINT(&pt2,p2);
         }
         else
         {
-            pt2 = *p1;
-            pt1 = *p2;
+            COPYPOINT(&pt2, p1);
+            COPYPOINT(&pt1, p2);
         }
     }
     else
     {
         if (p1->y <= p2->y)
         {
-            pt1 = *p1;
-            pt2 = *p2;
-        }
-        else
-        {
-            pt1 = *p2;
-            pt2 = *p1;
-        }
+            COPYPOINT(&pt1, p1);
+            COPYPOINT(&pt2, p2);
+        }                  
+        else               
+        {                  
+            COPYPOINT(&pt1, p2);
+            COPYPOINT(&pt2, p1);
+        }                  
     }
 
     int x1 = pt1.x;
@@ -100,6 +116,18 @@ void vngo_line (VngoVport *vp, VngoPoint *p1,VngoPoint *p2,VngoColor24bit *rgb_v
     int y1 = pt1.y;
     int y2 = pt2.y;
     int color = p1->clr;
+    int shade = p1->shade;
+
+    if (rgb_val)
+    {
+        color = vp->vbuff.pal->get_index(*rgb_val);
+        shade = vp->vbuff.pal->shd_pal->mid_point - 1; 
+    }
+
+    pt1.clr = color;
+    pt2.clr = color;
+    pt1.shade = shade;
+    pt2.shade = shade;
 
     int d,x,y,x3,y3,ydir=1,xdir=1;
     int i;
@@ -231,10 +259,13 @@ void vngo_line (VngoVport *vp, VngoPoint *p1,VngoPoint *p2,VngoColor24bit *rgb_v
             }
         }
     }
-    vp->pixel(p1);
-    pt2 = *p2;
-    pt2.shade = p1->shade;
-    pt2.clr = p1->clr;
+    COPYPOINT(&pt1,p1);
+    COPYPOINT(&pt2,p2);
+    pt1.clr = color;
+    pt2.clr = color;
+    pt1.shade = shade;
+    pt2.shade = shade;
+    vp->pixel(&pt1);
     vp->pixel(&pt2);
 }
 
@@ -253,26 +284,26 @@ void vngo_gline (VngoVport *vp, VngoPoint *p1,VngoPoint *p2,VngoColor24bit *rgb_
     {
         if (p1->x <= p2->x)
         {
-            pt1 = *p1;
-            pt2 = *p2;
-        }
-        else
-        {
-            pt2 = *p1;
-            pt1 = *p2;
-        }
-    }
-    else
-    {
+            COPYPOINT(&pt1, p1);
+            COPYPOINT(&pt2, p2);
+        }                  
+        else               
+        {                  
+            COPYPOINT(&pt2, p1);
+            COPYPOINT(&pt1, p2);
+        }                  
+    }                      
+    else                   
+    {                      
         if (p1->y <= p2->y)
-        {
-            pt1 = *p1;
-            pt2 = *p2;
-        }
-        else
-        {
-            pt1 = *p2;
-            pt2 = *p1;
+        {                  
+            COPYPOINT(&pt1, p1);
+            COPYPOINT(&pt2, p2);
+        }                  
+        else               
+        {                  
+            COPYPOINT(&pt1, p2);
+            COPYPOINT(&pt2, p1);
         }
     }
 
@@ -281,6 +312,9 @@ void vngo_gline (VngoVport *vp, VngoPoint *p1,VngoPoint *p2,VngoColor24bit *rgb_
     int y1 = pt1.y;
     int y2 = pt2.y;
     int color = p1->clr;
+
+    if (rgb_val)
+        color = vp->vbuff.pal->get_index(*rgb_val);
 
     int d,x,y,x3,y3,ydir=1,xdir=1;
     int i;
@@ -451,8 +485,12 @@ void vngo_gline (VngoVport *vp, VngoPoint *p1,VngoPoint *p2,VngoColor24bit *rgb_
             }
         }
     }
-    vp->pixel(p1);
-    vp->pixel(p2);
+    COPYPOINT(&pt1,p1);
+    COPYPOINT(&pt2,p2);
+    pt1.clr = color;
+    pt2.clr = color;
+    vp->pixel(&pt1);
+    vp->pixel(&pt2);
 }
 
 //°±² End of module - vnggen.cpp ²±°

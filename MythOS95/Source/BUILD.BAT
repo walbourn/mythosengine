@@ -56,6 +56,21 @@ cd newton
 call mk %1
 if ERRORLEVEL 1 goto error
 cd ..
+rem ÄÄÄÄ Bach '95 ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+cd bach
+call mk %1
+if ERRORLEVEL 1 goto error
+cd ..
+rem ÄÄÄÄ Profiler '95 ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+rem cd profiler
+rem call mk %1
+rem if ERRORLEVEL 1 goto error
+rem cd ..
+rem ÄÄÄÄ Speilberg '95 ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+rem cd spielbrg
+rem call mk %1
+rem if ERRORLEVEL 1 goto error
+rem cd ..
 rem ÄÄÄÄ System '95 ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 cd system
 call mk %1
@@ -91,6 +106,7 @@ cd gutenbrg
 call mk tools
 if ERRORLEVEL 1 goto error
 cd ..      
+rem ÄÄÄÄ Bach '95 ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 rem ÄÄÄÄ MythOS '95 ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 cd util
 call mk tools
@@ -152,6 +168,13 @@ if ERRORLEVEL 1 goto error
 cd ..\..
 rem ÄÄÄÄ Turner '95 ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 rem ÄÄÄÄ Newton '95 ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+rem ÄÄÄÄ Bach '95 ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+rem ÄÄÄÄ Speilberg '95 ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+rem cd speilbrg\test
+rem call mk clean
+rem call mk
+rem if ERRORLEVEL 1 goto error
+rem cd ..\..
 rem ÄÄÄÄ Gameframe '95 ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 cd gameframe
 call mk clean

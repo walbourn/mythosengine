@@ -2,11 +2,11 @@
 //
 //                                                           %__________%
 //                                                          %/ . .  .   \%
-//           Van Gogh 2D-Display Library                     |  . .  o. | 
+//           Van Gogh 2D-Display Library                     |  . .  o. |
 //                                                           |. _  .   .|
-//          Microsoft Windows '95 Version                    | / \   .  | 
+//          Microsoft Windows '95 Version                    | / \   .  |
 //                                                           |_|_|_._._.|
-// Copyright (c) 1994-1996 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
+// Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
 //              All rights reserved.                        %\__________/%
 //                                                           %          %
 //
@@ -25,7 +25,7 @@
 //
 //ฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤ
 //
-// vngvpdd8.hpp  
+// vngvpdd8.hpp
 //
 //
 //อออออออออออออออออออออออออออออ Revision History ออออออออออออออออออออออออออออ
@@ -44,16 +44,16 @@ public:
     IDirectDrawSurface      *ddsurf;
 
     VngoSurfaceManager() {lock_status = 0;}
-    VngoSurfaceManager(IDirectDrawSurface *_ddsurf) 
+    VngoSurfaceManager(IDirectDrawSurface *_ddsurf)
     {
-        ddsurf = _ddsurf; 
+        ddsurf = _ddsurf;
         lock_status = 0;
     }
 
     int get_lock_status() {return lock_status;}
 
-    int lock() 
-    { 
+    int lock()
+    {
         int t = lock_status;
         lock_status = 1;
         return t;
@@ -84,7 +84,7 @@ public:
 
     virtual ~VngoVportDD8();
 
-    VNGError init (VngoSurfaceManager *_pddsurf, 
+    VNGError init (VngoSurfaceManager *_pddsurf,
                            VngoSurfaceManager *zbptr,
                            VngoPal *my_pal,dword flags);
 

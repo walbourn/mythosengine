@@ -8,7 +8,7 @@
 //ששששש²±²ששששששש²±²שששש²±²ש²±²שששש²±²ש²±²שששש²±²ש²±²שששששששש²±²שששש²±²שששששש
 //שששש²²²²²²²²²²ש²²²²²²²²ששש²²²²²²²²שש²²²שששש²²²ש²²²²²²²²²²ש²²²שששש²²²ששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//שששששששששששCopyrightש(c)ש1994-1996שbyשCharybdisשEnterprises,שInc.שששששששששש
+//שששששששששששCopyrightש(c)ש1994-1997שbyשCharybdisשEnterprises,שInc.שששששששששש
 //ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
 //ששששששששששששששששששששש Microsoft Windows '95 Version ששששששששששששששששששששששש
@@ -75,8 +75,13 @@
 #include "esgeom.hpp"                   // EschGeometry and associated classes
 
 #include "esterran.hpp"                 // EschTerrain
+#include "esternex.hpp"                 // EschTerrainEx
+
+#include "espartn.hpp"                  // EschParition and associated classes
 
 #include "esscene.hpp"                  // EschScene
+
+#include "esbuild.hpp"                  // EschBuild classes
 
 #include "esmisc.hpp"                   // Misc. Escher classes.
 

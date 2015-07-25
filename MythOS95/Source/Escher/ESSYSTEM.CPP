@@ -8,7 +8,7 @@
 //ששששש²±²ששששששש²±²שששש²±²ש²±²שששש²±²ש²±²שששש²±²ש²±²שששששששש²±²שששש²±²שששששש
 //שששש²²²²²²²²²²ש²²²²²²²²ששש²²²²²²²²שש²²²שששש²²²ש²²²²²²²²²²ש²²²שששש²²²ששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//שששששששששששCopyrightש(c)ש1994-1996שbyשCharybdisשEnterprises,שInc.שששששששששש
+//שששששששששששCopyrightש(c)ש1994-1997שbyשCharybdisשEnterprises,שInc.שששששששששש
 //ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
 //ששששששששששששששששששששש Microsoft Windows '95 Version ששששששששששששששששששששששש
@@ -67,7 +67,10 @@ EschSystem::EschSystem(ulong arena_size) :
     diag_verts(0),
     diag_ifaces(0),
     diag_iverts(0),
-    diag_ntxts(0)
+    diag_ntxts(0),
+    tcache_hi(0),
+    tcache_max(0),
+    tcache(0)
 {
     esch_error_codes    err;
 
@@ -82,7 +85,7 @@ EschSystem::EschSystem(ulong arena_size) :
         err=init(arena_size);
         assert (err == ESCH_ERR_NONE);
     }
-};
+}
 
 
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ¿
@@ -95,6 +98,23 @@ EschSystem::~EschSystem()
     assertMyth("~EschSystem: EschSysInstance points to invalid data",
                EschSysInstance == this);
 
+    //ִִ Destroy texture cache
+    if (tcache)
+    {
+        for(ulong i=0; i < tcache_hi; i++)
+        {
+            assertMyth("~EschSystem:  Texture cache not empty",
+                       tcache[i].handle == 0);
+
+            if (tcache[i].handle)
+            {
+                ivory_hfree(&tcache[i].handle);
+            }
+        }
+
+        delete [] tcache;
+    }
+
     //ִִ Destroy workspace
     if (wspace)
     {
@@ -102,7 +122,7 @@ EschSystem::~EschSystem()
     }
 
     EschSysInstance=0;
-};
+}
 
 
 

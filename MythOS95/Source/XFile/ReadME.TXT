@@ -7,7 +7,7 @@
 
                           Microsoft Windows '95 Version
  
-             Copyright (c) 1994-1996 by Charybdis Enterprises, Inc.
+             Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.
                                All Rights Reserved.
  
  ---------------------------------------------------------------------------
@@ -35,27 +35,25 @@
                              _Library Status_
 
  Notes by: Chuck Walbourn
- Updated: July 1, 1996
+ Updated: Febuary 2, 1997
 
  Changes for this release --------------------------------------------------
 
-   o XFBitmap now has a 'create' helper routine to properly allocate and
-     lock data space.
+   o General cleanup and rearrangement of source tree.
 
-     Added 'generate_mono' helper routine to create a Van Gogh compatable
-     monochrome bitmap from an 8-bit image.
+   o Changed XFParseXEB to expose the supporting compression routines
+     for use by other classes and added support for 16-bit, 24-bit,
+     and 32-bit compressed images and uncompressed usage if compressed
+     information larger than original.
 
-   o XFParseLBM can now be used with XFParseIFF instances configured for
-     Microsoft's RIFF format.
+   o XFParseIFF::topofcontext now accepts a donext flag to control the
+     call of next() after resetting the top of context.
 
-   o XFParseXEB implemented and documented.
-   
-   o IFFC updated to support XEB format and added -e option to prevent
-     'Empty Chunk' warnings.
+   o Added XFParseCEL::read/write routines to access the x- and y-coordinate
+     information in the CEL header.
 
-     Added new keywords 'maxsize' and 'ntext'.
-     
-     Added alias names for common data types: 'char', 'short', and 'ushort'
+   o Changed IFFC so that merge/binary chunks open the file with read share
+     priviledges.
 
 
 
@@ -77,6 +75,9 @@
 
    o XFile compression support
 
-   o XFParse bitmap writer objects to output compressed images
+   o XFParse bitmap writer objects to output compressed images and support
+     for 2bpp and 4bpp.
+
+   o Additional XFParse bitmaps objects for new formats.
 
 *** END OF FILE ***

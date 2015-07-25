@@ -2,11 +2,11 @@
 //
 //                                                           %__________%
 //                                                          %/ . .  .   \%
-//           Van Gogh 2D-Display Library                     |  . .  o. | 
+//           Van Gogh 2D-Display Library                     |  . .  o. |
 //                                                           |. _  .   .|
-//          Microsoft Windows '95 Version                    | / \   .  | 
+//          Microsoft Windows '95 Version                    | / \   .  |
 //                                                           |_|_|_._._.|
-// Copyright (c) 1994-1996 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
+// Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
 //              All rights reserved.                        %\__________/%
 //                                                           %          %
 //
@@ -34,7 +34,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include <assert.h>
@@ -81,7 +81,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// VngoHwPal::init(VngoColor24bit pal[],int count,dword flags);             ³
+// VngoHwPal::init(VngoColor24bit pal[],int count);                         ³
 //     This function sets the first count number of palette entries to the  ³
 //     the values stored in the pal array that is passed in.  It does not   ³
 //     modeify the current state of the hardware, it simply modifies the    ³
@@ -108,10 +108,11 @@ int VngoHwPal::init(VngoColor24bit pal[],int count)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 void VngoPal::release()
 {
-    if (flags & VNGO_MYMEM_SHADE && shd_pal)
+    if ((flags & VNGO_MYMEM_SHADE) && shd_pal)
     {
         delete shd_pal;
         shd_pal = NULL;
+        flags &= ~VNGO_MYMEM_SHADE;
     }
 }
 
@@ -123,23 +124,72 @@ void VngoPal::release()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 VngoPal::~VngoPal()
 {
-    if (flags & VNGO_MYMEM_SHADE && shd_pal)
+    if ((flags & VNGO_MYMEM_SHADE) && shd_pal)
     {
         delete shd_pal;
         shd_pal = NULL;
+        flags &= ~VNGO_MYMEM_SHADE;
     }
 #if 0
-    if (flags & VNGO_MYMEM_HAZE)
+    if ((flags & VNGO_MYMEM_HAZE) && hz_pal)
     {
         delete hz_pal;
         hz_pal = NULL;
+        flags &= ~VNGO_MYMEM_HAZE;
     }
 #endif
 }
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// VngoPal::init(dword flags,VngoHwPal *hw,VngoShadePal *hz);               ³
+// VngoPal8::VngoPal8();                                                    ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+VngoPal8::VngoPal8()
+{
+    // No special construction, just the ol' vtable stuff
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// VngoPal8::~VngoPal8();                                                   ³
+//     This is the destructor for the VngoPal.  It will delete any memory   ³
+//     that was allocated during the construction of this class.            ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+VngoPal8::~VngoPal8()
+{
+    if ((flags & VNGO_MYMEM_SHADE) && shd_pal)
+    {
+        delete (VngoShadePal8 *)shd_pal;
+        shd_pal = NULL;
+        flags &= ~VNGO_MYMEM_SHADE;
+    }
+#if 0
+    if ((flags & VNGO_MYMEM_HAZE) && hz_pal)
+    {
+        delete hz_pal;
+        hz_pal = NULL;
+        flags &= ~VNGO_MYMEM_HAZE;
+    }
+#endif
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// VngoPal8::release                                                        ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+void VngoPal8::release()
+{
+    if ((flags & VNGO_MYMEM_SHADE) && shd_pal)
+    {
+        delete (VngoShadePal8 *)shd_pal;
+        shd_pal = NULL;
+        flags &= ~VNGO_MYMEM_SHADE;
+    }
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// VngoPal::init(dword _flags,VngoHwPal *hw,VngoShadePal *hz);              ³
 //     This function will allocate memory for any of the structures that    ³
 //     you do not pass a buffer in for.                                     ³
 //     If you pass in the VNGO_PAL_HWINIT flag, it will write the passed in ³
@@ -151,7 +201,7 @@ VngoPal::~VngoPal()
 //         2)  Shade Palette table.                                         ³
 //         3)  Haze Palette table.                                          ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-int VngoPal8::init(dword flags,VngoHwPal *hw,VngoShadePal8 *sh)
+int VngoPal8::init(dword _flags,VngoHwPal *hw,VngoShadePal8 *sh)
 {
     if (hw)
     {
@@ -167,7 +217,7 @@ int VngoPal8::init(dword flags,VngoHwPal *hw,VngoShadePal8 *sh)
             shd_pal = (VngoShadePal *)new VngoShadePal8 (32);
             flags |= VNGO_MYMEM_SHADE;
         }
-        // Once there is a mechanism to initialize the palette with a specified 
+        // Once there is a mechanism to initialize the palette with a specified
         // number of shade levels rather than the hard coded 32, then more
         // checking will need to be done here.
     }
@@ -177,7 +227,7 @@ int VngoPal8::init(dword flags,VngoHwPal *hw,VngoShadePal8 *sh)
     }
 
 
-    if (flags & VNGO_PAL_CALC)
+    if (_flags & VNGO_PAL_CALC)
     {
         convert.init(this,1);
     }
@@ -191,14 +241,14 @@ int VngoPal8::init(dword flags,VngoHwPal *hw,VngoShadePal8 *sh)
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// VngoPal::init(dword flags,const char *palfile);                          ³
+// VngoPal::init(dword _flags,const char *palfile);                         ³
 //     This function will load a palette from a file whos name is passed in.³
 //     It will fist initialize a palette to get all of the required memory  ³
 //     allocated, and will not do any of the calculations.  It will then    ³
 //     read the palette from the specified file, and write it to the        ³
 //     physical device if the VNGO_PAL_HWINIT flag was passed to it.        ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-int VngoPal8::init(dword flags,const char *palfile)
+int VngoPal8::init(dword _flags,const char *palfile)
 {
     int         err;
     VngoPalIFF8 loadpal(this);
@@ -211,14 +261,14 @@ int VngoPal8::init(dword flags,const char *palfile)
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// VngoPal::init(dword flags,char *palfile);                                ³
+// VngoPal::init(dword _flags,char *palfile);                               ³
 //     This function will load a palette from a file whos name is passed in.³
 //     It will fist initialize a palette to get all of the required memory  ³
 //     allocated, and will not do any of the calculations.  It will then    ³
 //     read the palette from the specified file, and write it to the        ³
 //     physical device if the VNGO_PAL_HWINIT flag was passed to it.        ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-int VngoPal8::init(dword flags,XFParseIFF *palfile)
+int VngoPal8::init(dword _flags,XFParseIFF *palfile)
 {
     int         err;
     VngoPalIFF8 loadpal(this);
@@ -286,7 +336,7 @@ int VngoPalIFF8::save(const char *filename)
 {
     XFParseIFF  iffp;
     int         err=0;
-   
+
     // Assert that there is memory allocated for all fields.
     assert(pal != NULL);
     assert(pal->shd_pal != NULL);
@@ -315,7 +365,7 @@ int VngoPalIFF8::save(XFParseIFF *iffp)
 {
     int             err=0;
     VngoShadePal8   *tpal = (VngoShadePal8 *)pal->shd_pal;
-   
+
     // Assert that there is memory allocated for all fields.
     assert(pal != NULL);
     assert(pal->shd_pal != NULL);

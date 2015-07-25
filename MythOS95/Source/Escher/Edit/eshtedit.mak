@@ -32,9 +32,9 @@ NULL=nul
 ################################################################################
 # Begin Project
 # PROP Target_Last_Scanned "eshtedit - Win32 Release"
-MTL=mktyplib.exe
-CPP=cl.exe
 RSC=rc.exe
+CPP=cl.exe
+MTL=mktyplib.exe
 
 !IF  "$(CFG)" == "eshtedit - Win32 Debug"
 
@@ -243,8 +243,6 @@ LINK32_OBJS= \
 
 !ENDIF 
 
-MTL_PROJ=
-
 .c{$(CPP_OBJS)}.obj:
    $(CPP) $(CPP_PROJ) $<  
 
@@ -263,6 +261,7 @@ MTL_PROJ=
 .cxx{$(CPP_SBRS)}.sbr:
    $(CPP) $(CPP_PROJ) $<  
 
+MTL_PROJ=
 ################################################################################
 # Begin Target
 
@@ -283,6 +282,7 @@ DEP_CPP_STDAF=\
 	"..\..\inc\bozo.h"\
 	"..\..\inc\bozo.hpp"\
 	"..\..\inc\chronos.hpp"\
+	"..\..\inc\esbuild.hpp"\
 	"..\..\inc\escher.hpp"\
 	"..\..\inc\felix.hpp"\
 	"..\..\inc\felix.ipp"\
@@ -387,10 +387,14 @@ BuildCmds= \
 # Begin Source File
 
 SOURCE=.\eshtedit.cpp
+
+!IF  "$(CFG)" == "eshtedit - Win32 Debug"
+
 DEP_CPP_ESHTE=\
 	"..\..\inc\bozo.h"\
 	"..\..\inc\bozo.hpp"\
 	"..\..\inc\chronos.hpp"\
+	"..\..\inc\esbuild.hpp"\
 	"..\..\inc\escher.hpp"\
 	"..\..\inc\felix.hpp"\
 	"..\..\inc\felix.ipp"\
@@ -457,9 +461,6 @@ DEP_CPP_ESHTE=\
 	".\stdafx.h"\
 	
 
-!IF  "$(CFG)" == "eshtedit - Win32 Debug"
-
-
 "$(INTDIR)\eshtedit.obj" : $(SOURCE) $(DEP_CPP_ESHTE) "$(INTDIR)"\
  "$(INTDIR)\Eshtedit.pch"
 
@@ -469,6 +470,56 @@ DEP_CPP_ESHTE=\
 
 !ELSEIF  "$(CFG)" == "eshtedit - Win32 Release"
 
+DEP_CPP_ESHTE=\
+	"..\..\inc\bozo.h"\
+	"..\..\inc\bozo.hpp"\
+	"..\..\inc\chronos.hpp"\
+	"..\..\inc\felix.hpp"\
+	"..\..\inc\felix.ipp"\
+	"..\..\inc\ivory.h"\
+	"..\..\inc\ivory.hpp"\
+	"..\..\inc\max.hpp"\
+	"..\..\Inc\maxvmap.hpp"\
+	"..\..\inc\mythos.hpp"\
+	"..\..\inc\portable.h"\
+	"..\..\inc\vangogh.hpp"\
+	"..\..\Inc\vngvvp16.hpp"\
+	"..\..\inc\xfile.hpp"\
+	"..\..\inc\xfio.h"\
+	".\..\..\Inc\BZARTN.H"\
+	".\..\..\Inc\BZQUEUE.H"\
+	".\..\..\Inc\BZSEMAP.H"\
+	".\..\..\Inc\BZTASK.H"\
+	".\..\..\Inc\BZWRAP.HPP"\
+	".\..\..\Inc\DEBUG.H"\
+	".\..\..\Inc\IVMem.h"\
+	".\..\..\Inc\Ivory.ipp"\
+	".\..\..\Inc\MaxDevs.HPP"\
+	".\..\..\Inc\MaxESrc.HPP"\
+	".\..\..\Inc\MaxEvt.HPP"\
+	".\..\..\Inc\VNGBD.HPP"\
+	".\..\..\Inc\VNGCOLOR.HPP"\
+	".\..\..\Inc\VNGDEFS.H"\
+	".\..\..\Inc\VNGPAL.HPP"\
+	".\..\..\Inc\VNGSTRCT.HPP"\
+	".\..\..\Inc\VNGVP.HPP"\
+	".\..\..\Inc\vngvpdb8.hpp"\
+	".\..\..\Inc\VNGVPDD8.HPP"\
+	".\..\..\Inc\VNGVVP8.HPP"\
+	".\..\..\Inc\XFBASE.HPP"\
+	".\..\..\Inc\XFBITMAP.HPP"\
+	".\..\..\Inc\XFDEFS.H"\
+	".\..\..\Inc\XFIFF.HPP"\
+	".\..\..\Inc\XFINI.HPP"\
+	".\Eshtdoc.h"\
+	".\Eshtedit.h"\
+	".\Eshtgrid.h"\
+	".\Eshtlist.h"\
+	".\Eshtmfrm.h"\
+	".\Eshtrend.h"\
+	".\Eshtview.h"\
+	".\stdafx.h"\
+	
 
 "$(INTDIR)\eshtedit.obj" : $(SOURCE) $(DEP_CPP_ESHTE) "$(INTDIR)"\
  "$(INTDIR)\Eshtedit.pch"
@@ -485,6 +536,7 @@ DEP_CPP_ESHTM=\
 	"..\..\inc\bozo.h"\
 	"..\..\inc\bozo.hpp"\
 	"..\..\inc\chronos.hpp"\
+	"..\..\inc\esbuild.hpp"\
 	"..\..\inc\escher.hpp"\
 	"..\..\inc\felix.hpp"\
 	"..\..\inc\felix.ipp"\
@@ -581,6 +633,7 @@ DEP_CPP_ESHTD=\
 	"..\..\inc\bozo.h"\
 	"..\..\inc\bozo.hpp"\
 	"..\..\inc\chronos.hpp"\
+	"..\..\inc\esbuild.hpp"\
 	"..\..\inc\escher.hpp"\
 	"..\..\inc\esfile.hpp"\
 	"..\..\inc\felix.hpp"\
@@ -676,6 +729,7 @@ DEP_CPP_ESHTV=\
 	"..\..\inc\bozo.h"\
 	"..\..\inc\bozo.hpp"\
 	"..\..\inc\chronos.hpp"\
+	"..\..\inc\esbuild.hpp"\
 	"..\..\inc\escher.hpp"\
 	"..\..\inc\felix.hpp"\
 	"..\..\inc\felix.ipp"\
@@ -799,6 +853,7 @@ DEP_CPP_ESHTDL=\
 	"..\..\inc\bozo.h"\
 	"..\..\inc\bozo.hpp"\
 	"..\..\inc\chronos.hpp"\
+	"..\..\inc\esbuild.hpp"\
 	"..\..\inc\escher.hpp"\
 	"..\..\inc\felix.hpp"\
 	"..\..\inc\felix.ipp"\
@@ -890,6 +945,7 @@ DEP_CPP_ESHTL=\
 	"..\..\inc\bozo.h"\
 	"..\..\inc\bozo.hpp"\
 	"..\..\inc\chronos.hpp"\
+	"..\..\inc\esbuild.hpp"\
 	"..\..\inc\escher.hpp"\
 	"..\..\inc\felix.hpp"\
 	"..\..\inc\felix.ipp"\
@@ -984,6 +1040,7 @@ DEP_CPP_ESHTG=\
 	"..\..\inc\bozo.h"\
 	"..\..\inc\bozo.hpp"\
 	"..\..\inc\chronos.hpp"\
+	"..\..\inc\esbuild.hpp"\
 	"..\..\inc\escher.hpp"\
 	"..\..\inc\felix.hpp"\
 	"..\..\inc\felix.ipp"\
@@ -1078,6 +1135,7 @@ DEP_CPP_ESHTR=\
 	"..\..\inc\bozo.h"\
 	"..\..\inc\bozo.hpp"\
 	"..\..\inc\chronos.hpp"\
+	"..\..\inc\esbuild.hpp"\
 	"..\..\inc\escher.hpp"\
 	"..\..\inc\felix.hpp"\
 	"..\..\inc\felix.ipp"\
@@ -1173,6 +1231,7 @@ DEP_CPP_ESHTU=\
 	"..\..\inc\bozo.h"\
 	"..\..\inc\bozo.hpp"\
 	"..\..\inc\chronos.hpp"\
+	"..\..\inc\esbuild.hpp"\
 	"..\..\inc\escher.hpp"\
 	"..\..\inc\felix.hpp"\
 	"..\..\inc\felix.ipp"\
@@ -1263,6 +1322,7 @@ DEP_CPP_ESHTDO=\
 	"..\..\inc\bozo.h"\
 	"..\..\inc\bozo.hpp"\
 	"..\..\inc\chronos.hpp"\
+	"..\..\inc\esbuild.hpp"\
 	"..\..\inc\escher.hpp"\
 	"..\..\inc\esfile.hpp"\
 	"..\..\inc\felix.hpp"\
@@ -1360,6 +1420,7 @@ DEP_CPP_ESHTDLG=\
 	"..\..\inc\bozo.h"\
 	"..\..\inc\bozo.hpp"\
 	"..\..\inc\chronos.hpp"\
+	"..\..\inc\esbuild.hpp"\
 	"..\..\inc\escher.hpp"\
 	"..\..\inc\felix.hpp"\
 	"..\..\inc\felix.ipp"\
@@ -1451,6 +1512,7 @@ DEP_CPP_ESHTDLGX=\
 	"..\..\inc\bozo.h"\
 	"..\..\inc\bozo.hpp"\
 	"..\..\inc\chronos.hpp"\
+	"..\..\inc\esbuild.hpp"\
 	"..\..\inc\escher.hpp"\
 	"..\..\inc\felix.hpp"\
 	"..\..\inc\felix.ipp"\

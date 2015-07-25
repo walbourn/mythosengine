@@ -4,7 +4,7 @@
 #
 #                         Microsoft Windows '95 Version
 #
-#               Copyright (c) 1995 by Charybdis Enterprises, Inc.
+#            Copyright (c) 1995-1997 by Charybdis Enterprises, Inc.
 #                            All Rights Reserved.
 #
 #ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -29,7 +29,7 @@
 #°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 #
 #                               Variables
-#                                
+#
 #°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 !if "$(DEBUG)" == ""
@@ -51,7 +51,7 @@ EXE = ivtest
 
 OBJS = ivtest.obj
 
-LIBS = ivory.lib
+LIBS = ivory.lib user32.lib
 
 #ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 # First target                                                             ³

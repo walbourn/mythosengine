@@ -11,7 +11,7 @@
 //                     Text Output and Font Management System
 //                          Microsoft Windows '95 Version
 //
-//            Copyright (c) 1995, 1996 by Charybdis Enterprises, Inc.
+//            Copyright (c) 1995-1997 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved.
 //
 //컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
@@ -198,7 +198,7 @@ STATIC gberg_error_codes igberg_install_font(XFParseIFF *iff, const char *fntnam
 
 //컴 Verify header
     if ( (header.type != GBERG_FNT_MONOFIXED 
-          && header.type != GBERG_FNT_COLORFIXED)
+          && header.type != GBERG_FNT_MONOFIXEDEX)
          || header.compression)
     {
         iff->leaveform();
@@ -218,7 +218,10 @@ STATIC gberg_error_codes igberg_install_font(XFParseIFF *iff, const char *fntnam
         return GBERG_ERR_INVALIDDATA;
     }
 
-    if ((fnt->data=ivory_halloc(128*fnt->bpc))==0)
+
+    int numchars = (header.type == GBERG_FNT_MONOFIXEDEX) ? 256 : 128;
+
+    if ((fnt->data=ivory_halloc(numchars*fnt->bpc))==0)
     {
         iff->leaveform();
         return GBERG_ERR_NOMEMORY;
@@ -240,7 +243,7 @@ STATIC gberg_error_codes igberg_install_font(XFParseIFF *iff, const char *fntnam
             assertMyth("igberg_install_font only loads monochrome fonts",
                        header.type == GBERG_FNT_MONOFIXED);
 
-            if (iff->chunkSize != (ulong)(128 * fnt->bpc))
+            if (iff->chunkSize != (ulong)(numchars * fnt->bpc))
             {
                 err=GBERG_ERR_INVALIDDATA;
                 goto error_exit;

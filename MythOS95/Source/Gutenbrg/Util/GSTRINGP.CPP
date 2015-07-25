@@ -11,7 +11,7 @@
 //                     Text Output and Font Management System
 //                          Microsoft Windows '95 Version
 //
-//            Copyright (c) 1995, 1996 by Charybdis Enterprises, Inc.
+//            Copyright (c) 1995-1997 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved.
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -129,7 +129,7 @@ STATIC char         cpp_comment[] =
 {
     "//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿\r\n"
     "// Gutenberg -- Font and external string support                            ³\r\n"
-    "// (C) 1995, 1996 by Charybdis Enterprises, Inc.  All Rights Reserved.            ³\r\n"
+    "// (C) 1995-1997 by Charybdis Enterprises, Inc.  All Rights Reserved.            ³\r\n"
     "//                                                                          ³\r\n"
     "// String identifier header file for C++                                    ³\r\n"
     "//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ\r\n"
@@ -139,7 +139,7 @@ STATIC char         c_comment[] =
 {
     "/*ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿\r\n"
     " * Gutenberg -- Font and external string support                            ³\r\n"
-    " * (C) 1995, 1996 by Charybdis Enterprises, Inc.  All Rights Reserved.            ³\r\n"
+    " * (C) 1995-1997 by Charybdis Enterprises, Inc.  All Rights Reserved.            ³\r\n"
     " *                                                                          ³\r\n"
     " * String identifier header file for C/C++                                  ³\r\n"
     " *ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ\r\n"

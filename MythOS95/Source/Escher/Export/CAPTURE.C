@@ -8,7 +8,7 @@
 //ששששש²±²ששששששש²±²שששש²±²ש²±²שששש²±²ש²±²שששש²±²ש²±²שששששששש²±²שששש²±²שששששש
 //שששש²²²²²²²²²²ש²²²²²²²²ששש²²²²²²²²שש²²²שששש²²²ש²²²²²²²²²²ש²²²שששש²²²ששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//שששששששששששCopyrightש(c)ש1994-1996שbyשCharybdisשEnterprises,שInc.שששששששששש
+//שששששששששששCopyrightש(c)ש1994-1997שbyשCharybdisשEnterprises,שInc.שששששששששש
 //ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
@@ -48,7 +48,10 @@
 #include <i86.h>
 #include <float.h>
 
+#include "portable.h"
 #include "debug.h"
+
+#include <pjbasics.h>
 
 #include "pxp.h"
 
@@ -127,9 +130,9 @@ typedef struct mtl
 int inverse_mtx(float *m, float *inv);
 void concat_mtx(float *ina, float *b, float *res);
 
-void do_query(char *image, int orgxsize, int orgysize);
+void do_query(char *image, int orgxsize, int orgysize, int orgframes);
 
-STATIC char *locate_map(char *fname, char *fullname);
+char *locate_map(char *fname, char *fullname);
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
@@ -715,12 +718,11 @@ int capture_mtlfile(int ind, char *fname, char *tfname)
 
 
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ¿
-//                              *** Static ***                              ³
 // locate_map                                                               ³
 //                                                                          ³
 // Attempts to locate a map file.                                           ³
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִÙ
-STATIC char *locate_map(char *fname, char *fullname)
+char *locate_map(char *fname, char *fullname)
 {
     int     i;
     char    path[128];
@@ -798,7 +800,7 @@ BXPColor *capture_mtlbitmap(char *fname, ushort *xs, ushort *ys, int forcesize)
     }
     else if (mtl_sizemode == 3)
     {
-        do_query(fname,binfo.width,binfo.height);
+        do_query(fname,binfo.width,binfo.height,1);
 
         desirex = query_xsize;
         desirey = query_ysize;
@@ -865,6 +867,127 @@ BXPColor *capture_mtlbitmap(char *fname, ushort *xs, ushort *ys, int forcesize)
     *ys = desirey;
 
     return bm;
+}
+
+
+//ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ¿
+// capture_flcframe                                                         ³
+//                                                                          ³
+// Loads the next frame in the flic as a bitmap.                            ³
+//ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִÙ
+BXPColor *capture_flcframe(char *fname, Flic *flic,
+                           FlicRaster *raster, byte *pix,
+                           ushort *xs, ushort *ys, int forcesize)
+{
+    int         i;
+    int         desirex;
+    int         desirey;
+    BXPColor    *bm=0;
+
+//ִִִ Load frame
+    pj_flic_play_next(flic,raster);
+
+//ִִִ Expand into RGB bitmap buffer
+    bm=malloc(raster->width * raster->height * sizeof(BXPColor));
+    if (!bm)
+        goto error_exit;
+
+    {
+        BXPColor *dptr=bm;
+        byte *sptr=pix;
+        PjRgb *rgb = &raster->cmap->ctab;
+        for(i=0; i < raster->width*raster->height; i++)
+        {
+            dptr->r = rgb[*sptr].r;
+            dptr->g = rgb[*sptr].g;
+            dptr->b = rgb[*sptr].b;
+            dptr++;
+            sptr++;
+        }
+    }
+
+//ִִִ Check for resize
+    if (forcesize)
+    {
+        desirex = *xs;
+        desirey = *ys;
+    }
+    else if (mtl_sizemode == 3)
+    {
+        AnimInfo info;
+        pj_flic_info(flic,&info);
+
+        do_query(fname,info.width,info.height,info.num_frames);
+
+        desirex = query_xsize;
+        desirey = query_ysize;
+    }
+    else if (mtl_sizemode == 2)
+    {
+        desirex = mtl_sizex;
+        desirey = mtl_sizey;
+    }
+    else
+    {
+        // Must set size to 16, 32, 64, 128, or 256
+        desirex=16;
+        desirey=16;
+
+        if (raster->width > desirex)
+            desirex=32;
+        if (raster->height > desirey)
+            desirey=32;
+
+        if (raster->width > desirex)
+            desirex=64;
+        if (raster->height > desirey)
+            desirey=64;
+
+        if (raster->width > desirex)
+            desirex=128;
+        if (raster->height > desirey)
+            desirey=128;
+
+        if (raster->width > desirex)
+            desirex=256;
+        if (raster->height > desirey)
+            desirey=256;
+    }
+
+//ִִִ Perform resize
+    if (desirex != raster->width
+        || desirey != raster->height)
+    {
+        BXPColor *tbm = bm;
+
+        if ((bm = malloc(desirex * desirey * sizeof(BXPColor)))==0)
+        {
+            free(tbm);
+            goto error_exit;
+        }
+        
+        gfx_resize_bitmap(tbm, raster->width, raster->height,
+                          bm, desirex, desirey, i);
+
+        free(tbm);
+        
+        if (i < 1)
+        {
+            goto error_exit;
+        }
+    }
+
+//ִִִ Return final image
+    *xs = desirex;
+    *ys = desirey;
+
+    return bm;
+
+error_exit:;
+    if (bm)
+        free(bm);
+
+    return 0;
 }
 
 

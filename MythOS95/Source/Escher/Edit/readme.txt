@@ -7,7 +7,7 @@
  ששששש///ששששששש///שששש///ש///שששש///ש///שששש///ש///שששששששש///שששש///שששששש
  שששש//////////ש////////ששש////////שש///.ששש///.//////////ש///שששש///.שששששש
  ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
- שששששששששששCopyrightש(c)ש1994-1996שbyשCharybdisשEnterprises,שInc.שששששששששש
+ שששששששששששCopyrightש(c)ש1994-1997שbyשCharybdisשEnterprises,שInc.שששששששששש
  ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
  ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
  ששששששששששששששששששששש Microsoft Windows '95 Version ששששששששששששששששששששששש
@@ -38,84 +38,15 @@
 
  Notes by: Chuck Walbourn
 
- Last Updated: August 16, 1996
+ Last Updated: September 16, 1996
 
  Escher Terrain Editor - MFC Application
 
  Changes for this release --------------------------------------------------
 
- Version 1.31
+ Version 1.41
 
- o The shift left-click shortcut for assigning textures now supports a
-   rectangle area set.  Colors may be set by selecting a color in the
-   Color Definitions listbox instead of a texture.
-
- o Added new bits for applications and for new terrain system--dropping
-   water/fire/smoke bits from terrain data--to surface, texture, and color
-   flags property sheets.  A new view mode displays the application bits
-   on shaded terrain.
-
- o Added Load and Save Textures commands to read and write the texture
-   definitions to an ASCII file and two similar commands for color
-   definitions.
-
- o The texture definition dialog now includes a View button to view the
-   currently selected bitmap file as it would appear in the current palette.
-   Also includes a 'Create New Texture' button for generating a new texture
-   from a 'transparent' master texture or from base colors or another
-   bitmap.
-
- o Added one-level undo for the surface information grid (surface colors,
-   attributes, and texture assignments).
-
- o Terrain level-of-detail controls have been added to the View Properties
-   dialog.
-
- o Added 'hover' mode which causes the camera to maintain a fixed height
-   above the terran and can be moved in X and Z.  The hover height can be
-   set in the view properites dialog.
-
- o Added light properties dialog and support for Point, Attenuated, and Spot
-   lights to the render view (Ambient and fast lights are not allowed since
-   do not work well with terrain drawables).
-
- o Added option to display surface information as basic colors, shaded
-   colors, textures only, height-based colors, or based on application bits.
-
- o Surface information display has been 'flipped' to allow easier setup
-   of texture bitmaps.
-
- o Added terrain properties page for assignment of heights to color bands. 
-   Data is included in the terrain export.
-
- o CST file now includes camera and lights data, height-color bands
-   information, and other misc. settings.
-
- o Custom color dialog picker is now in use.
-
- o Cleaned up dialogs.
-
- o Added compressed normals output for export.
-
- o Automatic use of the VR Labs DECOMP utility when importing a compressed
-   VistaPro DEM file.
-
- o Added new methods for converting VistaPro DEMs to Escher terrain using
-   a height table instead of a direct scale value.  Fixed problem with
-   inversing of DEM data on import.
-
- o Added USGS DEM terrain import for height data.
-
- o Added Edit/Flip Horizontal, Edit/Flip Vertical, and Edit Rotate 90
-   commands.
-
- o Added Edit/Assign by commands for assiging textures/colors based
-   on elevations, random roll, and surface angle.
-
- o Added Terrain/Set base elevation option to control height-table values.
-
- o Added support for extended camera features including bitmap backgrounds
-   and hazing.
+ o Added support for compressed texture export.
 
 
 
@@ -135,6 +66,8 @@
 
  o Texturing tools for assigning textures by elevation, by picking from
    a random roll, and based on slope.
+
+ o Need to add support for compressed data output.
 
 
 

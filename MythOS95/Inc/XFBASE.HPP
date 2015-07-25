@@ -6,7 +6,7 @@
 //    (_)       ^          * *     *      *   *    *            (_)
 //             (_)       **   **   *    ***** **** ****
 //
-//            Copyright (c) 1994-1996 by Charybdis Enterprises, Inc.
+//            Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.
 //                             All Rights Reserved.
 //                        Microsoft Windows '95 Version
 //
@@ -29,8 +29,8 @@
 //
 // xfbase.hpp
 //
-//      This contains the base file object tree.  These objects are operated
-//      upon by the various parsers.
+// This contains the base file object tree.  These objects are operated
+// upon by the various parsers.
 //
 //ммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммм
 
@@ -64,7 +64,7 @@
 //╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟
 
 //дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
-// Abstract base class for XFile file objects.                              Ё
+// XFile - Abstract base class for XFile file objects.                      Ё
 //дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
 class XFile
 {
@@ -74,91 +74,55 @@ protected:
     char            fName[XF_MAX_PATH];
 
 public:
+    //дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+    // Constructor/Destructors                                              Ё
+    //дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
     XFile();
     virtual ~XFile();
   
-           //ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
-           // Returns status information about the XFile instance.          Ё
-           //ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
-    dword status ()         { return(sFlags); }
+    //дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+    // Accessor functions                                                   Ё
+    //дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+    dword status() const { return(sFlags); }
+    xf_error_codes error() const { return(errorn); }
+    const char *getname() const { return fName; }
 
-           //ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
-           // Returns the XF_ERR_ value for the last error that occurred.   Ё
-           //ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
-    xf_error_codes error () { return(errorn); }
+    //дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+    // Operations                                                           Ё
+    //дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+    ulong tell () { return (seek_cur(0)); }
 
-           //ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
-           // Get the current location of the file from the beginning.      Ё
-           //ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
-    ulong tell ()           { return (seek_cur(0)); }
-
-           //ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
-           // Returns the name of the current XFile.                        Ё
-           //ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
-    char *getname ()        { return fName; }
-
-           //ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
-           // Create a new file and open it for reading/writing.            Ё
-           //ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
     xf_error_codes create (const char *name, dword flags)
         { return open(name,flags | XF_OPEN_CREATE | XF_OPEN_WRITE); }
 
-           //ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
-           // Generic file operations: copyto, copyfrom                     Ё
-           //ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
     xf_error_codes copyto (XFile *to);
     xf_error_codes copyfrom (XFile *from);
 
-           //ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
-           // Open a file using the given flags.                            Ё
-           //ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
     virtual xf_error_codes open (const char *name, dword flags) = 0;
 
-           //ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
-           // Close the open file, if any.                                  Ё
-           //ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
     virtual xf_error_codes close () = 0;
 
-           //ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
-           // Flush any pending changes to a write file.                    Ё
-           //ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
     virtual xf_error_codes flush ();
 
-           //ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
-           // Read a block of the given size from the open file.            Ё
-           //ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
     virtual ulong read (void *ptr, ulong size) = 0;
 
-           //ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
-           // Write a block of the given size to the open file.             Ё
-           //ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
     virtual ulong write (const void *ptr, ulong size) = 0;
 
-           //ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
-           // Seek to a given position, relative to the beginning, end, or  Ё
-           // current location of the file.                                 Ё
-           //ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
     ulong seek_set (long offset) { return seek (offset, 0); }
     ulong seek_cur (long offset) { return seek (offset, 1); }
     ulong seek_end (long offset) { return seek (offset, 2); }
     virtual ulong seek (long offset, int mode) = 0;
 
-           //ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
-           // Total file size control                                       Ё
-           //ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
     virtual ulong getsize () = 0;
     virtual ulong setsize (ulong size) = 0;
 
-           //ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
-           // Lock/Unlock the file for sharing control                      Ё
-           //ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
     virtual xf_error_codes lock (ulong offset, ulong nbytes);
     virtual xf_error_codes unlock (ulong offset, ulong nbytes);
 };                                                        
 
 
 //дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
-// Disk File objects.                                                       Ё
+// XFileDisk - Disk file class.                                             Ё
 //дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
 #define XFileDOS XFileDisk
 
@@ -168,9 +132,15 @@ protected:
     HANDLE  fHandle;
 
 public:
+    //дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+    // Constructor/Destructors                                              Ё
+    //дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
     XFileDisk();
     virtual ~XFileDisk();
 
+    //дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+    // Operations                                                           Ё
+    //дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
     virtual xf_error_codes open (const char *name, dword flags);
     virtual xf_error_codes close ();
     virtual xf_error_codes flush ();
@@ -182,13 +152,14 @@ public:
 
     virtual xf_error_codes opentmp (const char *name, dword flags);
 
-           //ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
-           // Date/time stamp control                                       Ё
-           //ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
     virtual word getfdate ();
     virtual word getftime ();
 };                                                        
 
+
+//дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+// XFileDiskBuf - Buffered disk file class.                                 Ё
+//дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
 #define XFileDOSBuff XFileDiskBuf
 
 class XFileDiskBuf : public XFileDisk
@@ -200,9 +171,15 @@ protected:
     byte    *data;
 
 public:
+    //дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+    // Constructor/Destructors                                              Ё
+    //дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
     XFileDiskBuf();
     virtual ~XFileDiskBuf();
 
+    //дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+    // Operations                                                           Ё
+    //дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
     virtual xf_error_codes open (const char *name, dword flags);
     virtual xf_error_codes close ();
     virtual xf_error_codes flush ();
@@ -218,7 +195,7 @@ public:
 
 
 //дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
-// RAM File object.                                                         Ё
+// XFileRAM - RAM File object.                                              Ё
 //дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
 class XFileRAM : public XFile
 {
@@ -231,9 +208,15 @@ protected:
     xf_error_codes expand (ulong nsize);
 
 public:
+    //дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+    // Constructor/Destructors                                              Ё
+    //дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
     XFileRAM();
     virtual ~XFileRAM();
 
+    //дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+    // Operations                                                           Ё
+    //дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
     virtual xf_error_codes open (const char *name, dword flags);
     virtual xf_error_codes close ();
     virtual ulong read  (void *ptr, ulong size);

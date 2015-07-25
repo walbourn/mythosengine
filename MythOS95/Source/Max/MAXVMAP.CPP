@@ -1,15 +1,15 @@
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
-//                  ooo        ooooo                       
-//                  `88.       .888'                       
-//                   888b     d'888   .oooo.   oooo    ooo 
-//                   8 Y88. .P  888  `P  )88b   `88b..8P'  
-//                   8  `888'   888   .oP"888     Y888'    
-//                   8    Y     888  d8(  888   .o8"'88b   
-//                  o8o        o888o `Y888""8o o88'   888o 
+//                  ooo        ooooo
+//                  `88.       .888'
+//                   888b     d'888   .oooo.   oooo    ooo
+//                   8 Y88. .P  888  `P  )88b   `88b..8P'
+//                   8  `888'   888   .oP"888     Y888'
+//                   8    Y     888  d8(  888   .o8"'88b
+//                  o8o        o888o `Y888""8o o88'   888o
 //
 //                          Across the event horizon...
 //
-//            Copyright (c) 1994, 1995 by Charybdis Enterprises, Inc.
+//           Copyright (c) 1994 - 1997 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved.
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -40,10 +40,10 @@
 //
 //  Each response "curve" is described by a table of three or more values
 // representing the shape of the desired response curve.  This table is
-// effectively a function mapping input values to output values.  
+// effectively a function mapping input values to output values.
 // Values not present in the table are linearly interpolated between the
 // two closest values present.  For instance, linear response is described
-// by MaxValueMap (3, [0, 32767, 65535]), and inverse linear by 
+// by MaxValueMap (3, [0, 32767, 65535]), and inverse linear by
 // MaxValueMap (3, [65535, 32767, 0]) (in pseudo-C, naturally).
 // The appearance of nonlinearity can be introduced to the mapping
 // by adding additional sample points between the ends.  The exact number
@@ -64,7 +64,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include <portable.h>

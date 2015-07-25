@@ -8,7 +8,7 @@
 //ùùùùù²±²ùùùùùùù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùùùùùù²±²ùùùù²±²ùùùùùù
 //ùùùù²²²²²²²²²²ù²²²²²²²²ùùù²²²²²²²²ùù²²²ùùùù²²²ù²²²²²²²²²²ù²²²ùùùù²²²ùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùCopyrightù(c)ù1994-1996ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
+//ùùùùùùùùùùùCopyrightù(c)ù1994-1997ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùù Microsoft Windows '95 Version ùùùùùùùùùùùùùùùùùùùùùùù
@@ -114,7 +114,8 @@ public:
     Flx16           fov;                    // Field of view (degrees)
     dword           bcolor;                 // Background color for clear
     Flx16           radius_factor;          // Extent radius factor
-    Flx16           z_factor;               // scale to appropriate z range.
+    Flx16           z_factor;               // scale to appropriate z range
+    EschPlane       frustrum[6];            // View frustrum planes
     char            name[ESCH_MAX_NAME];    // Camera name
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
@@ -220,20 +221,20 @@ public:
     void set_dir(const EschVector *d, dword update=ESCH_UPD_ALL);
     void set_dir(const Flx16 ii, const Flx16 ij, const Flx16 ik,
                  dword update=ESCH_UPD_ALL);
- 
+
     void set_vects(const EschVector *t,const EschVector *d,
                    dword update=ESCH_UPD_ALL);
     void set_vects(const Flx16 ti, const Flx16 tj, const Flx16 tk,
                    const Flx16 di, const Flx16 dj, const Flx16 dk,
                    dword update=ESCH_UPD_ALL);
- 
+
     void get_position(EschPoint *pt) const
     {
         pt->x.flx = eye.orient.mtx[ESCH_MTX_J].flx;
         pt->y.flx = eye.orient.mtx[ESCH_MTX_K].flx;
         pt->z.flx = eye.orient.mtx[ESCH_MTX_L].flx;
     }
- 
+
     void set_position(const EschPoint *pt, dword update=ESCH_UPD_ALL)
          { eye.set_position(pt,update); }
     void set_position(const Flx16 ix, const Flx16 iy, const Flx16 iz, dword update=ESCH_UPD_ALL)
@@ -242,27 +243,27 @@ public:
     void set_lookat(const EschPoint *pt, dword update=ESCH_UPD_ALL);
     void set_lookat(const Flx16 ix, const Flx16 iy, const Flx16 iz,
                     dword update=ESCH_UPD_ALL);
- 
+
     void rotatex(const Flx16 degrees, dword update=ESCH_UPD_ALL);
     void rotatey(const Flx16 degrees, dword update=ESCH_UPD_ALL);
     void rotatez(const Flx16 degrees, dword update=ESCH_UPD_ALL);
- 
+
     void pitch(const Flx16 degrees, dword update=ESCH_UPD_ALL);
     void yaw(const Flx16 degrees, dword update=ESCH_UPD_ALL);
     void roll(const Flx16 degrees, dword update=ESCH_UPD_ALL);
- 
+
     void translate(const EschVector *v, dword update=ESCH_UPD_ALL)
          { eye.translate(v->i,v->j,v->k,update); }
     void translate(const Flx16 ii, const Flx16 ij, const Flx16 ik,
                    dword update=ESCH_UPD_ALL)
          { eye.translate(ii,ij,ik,update); }
- 
+
     void move(const EschVector *v, dword update=ESCH_UPD_ALL)
          { eye.move(v->i,v->j,v->k,update); }
     void move(const Flx16 ii, const Flx16 ij, const Flx16 ik,
               dword update=ESCH_UPD_ALL)
          { eye.move(ii,ij,ik,update); }
- 
+
     void orthogonalize(dword update=ESCH_UPD_ALL);
     void orthogonalize_top(dword update=ESCH_UPD_ALL);
 
@@ -270,59 +271,75 @@ public:
     {
         factor=f;
         if (update & ESCH_UPD_SCALAR)
+        {
             compute_scalar();
+            compute_frustrum();
+        }
     }
- 
+
     void zoom(const Flx16 f, dword update=ESCH_UPD_ALL)
     {
         factor=factor * f;
         if (update & ESCH_UPD_SCALAR)
+        {
             compute_scalar();
+            compute_frustrum();
+        }
     }
- 
+
     void set_fov(const Flx16 f, dword update=ESCH_UPD_ALL)
     {
         fov=f;
         if (update & ESCH_UPD_SCALAR)
+        {
             compute_scalar();
+            compute_frustrum();
+        }
     }
 
     void set_hither(const Flx16 h, dword update=ESCH_UPD_ALL)
     {
         hither=h;
         if (update & ESCH_UPD_SCALAR)
+        {
+            compute_frustrum();
             compute_z_factor();
+        }
     }
- 
+
     void set_yon(const Flx16 y, dword update=ESCH_UPD_ALL) 
     { 
         yon=y; 
         if (update & ESCH_UPD_SCALAR)
+        {
+            compute_frustrum();
             compute_z_factor();
+        }
     }
- 
-    void set_bcolor(const dword c=0)
-    {
-        bcolor=c;
-    }
- 
+
+    void set_bcolor(const dword c=0) { bcolor=c; }
+
     void set_flags(const dword f) { flags=f; }
 
     void set_aspect_ratio(const Flx16 ar, dword update=ESCH_UPD_ALL)
     {
         aspect_ratio=ar;
         if (update & ESCH_UPD_SCALAR)
+        {
             compute_scalar();
+            compute_frustrum();
+        }
     }
- 
+
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Compute functions to calculate viewing constants.                    ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
     void compute_scalar();
     void compute_z_factor();
+    void compute_frustrum();
     void compute_eye(dword update=ESCH_UPD_ALL);
     void compute_inverse() { eye.compute_inverse(); }
- 
+
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // I/O routines.                                                        ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
@@ -351,6 +368,8 @@ public:
     short           bg_offy;
     XFBitmap        *bg_bitmap;             // Bitmap background
     VngoShadePal    *hz_pal;                // Haze shade palette
+    long            hz_startz;              // Haze near cut-off (scaled)
+    VngoShadePal    *grd_pal;               // Gradient shade palette
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Constructor/Destructors                                              ³
@@ -376,11 +395,17 @@ public:
     void set_bg_offset(short x, short y) { bg_offx=x; bg_offy=y; }
     int set_bg_bitmap(XFBitmap *bm, int owns=1);
 
-    int set_haze(VngoShadePal *hzp, int owns=1);
+    int set_haze(VngoShadePal *hzp, int owns=1, long startz=0);
     esch_error_codes create_haze(ushort levels,
                                  ushort slevel,
                                  ushort blevel, Flx16 bpercent,
                                  VngoColor24bit tcolor);
+
+    int set_gradient(VngoShadePal *grdp, int owns=1);
+    esch_error_codes create_gradient(ushort levels,
+                                     ushort blevel, Flx16 bpercent,
+                                     VngoColor24bit color1,
+                                     VngoColor24bit color2);
 };
 
 #ifdef __WATCOMC__

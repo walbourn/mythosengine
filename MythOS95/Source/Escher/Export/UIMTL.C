@@ -8,7 +8,7 @@
 //ששששש²±²ששששששש²±²שששש²±²ש²±²שששש²±²ש²±²שששש²±²ש²±²שששששששש²±²שששש²±²שששששש
 //שששש²²²²²²²²²²ש²²²²²²²²ששש²²²²²²²²שש²²²שששש²²²ש²²²²²²²²²²ש²²²שששש²²²ששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//שששששששששששCopyrightש(c)ש1994-1996שbyשCharybdisשEnterprises,שInc.שששששששששש
+//שששששששששששCopyrightש(c)ש1994-1997שbyשCharybdisשEnterprises,שInc.שששששששששש
 //ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
@@ -108,11 +108,34 @@ int mtl_sizemode=1;                         // 1=just to power of 2,
                                             // 2=force to mtl_sizex/y
                                             // 3=query on each
 
+int mtl_format=1;                           // 1=8-bit
+                                            // 2=True-color (24/32-bit)
+
+int mtl_compress=0;                         // 0=none
+                                            // 1=rle
+
+int mtl_animatedtxt=0;                      // 0=first-frame only
+                                            // 1=multiframe
+
+int mtl_perspmode=1;                        // 1=never
+                                            // 2=^ in name
+                                            // 3=always
+
 static RadSub EschMtl_rad[] =
 {
     POWER2, feel_radio, &mtl_sizemode, 1,
     SET, feel_radio, &mtl_sizemode, 2,
     QUERY, feel_radio, &mtl_sizemode, 3,
+
+    F8BIT, feel_radio, &mtl_format, 1,
+    FTC, feel_radio, &mtl_format, 2,
+
+    PNEVER, feel_radio, &mtl_perspmode, 1,
+    PCARET, feel_radio, &mtl_perspmode, 2,
+    PALWAYS, feel_radio, &mtl_perspmode, 3,
+
+    AFIRST, feel_radio, &mtl_animatedtxt, 0,
+    AMFRAME, feel_radio, &mtl_animatedtxt, 1,
 
     -1, FNULL, NULL, -1
 };
@@ -152,6 +175,8 @@ void do_mtl()
     loop_done=0;
 
     EschMtl[PALETTE].text=mtl_palname;
+    EschMtl[PALETTE].radio=0;
+    EschMtl[COMPRESS].radio = (mtl_compress) ? 1 : 0;
 
     ready_dialog(EschMtl, EschMtl_edit, NULL, EschMtl_feel, EschMtl_rad,
                 NULL, NULL);
@@ -164,7 +189,8 @@ void do_mtl()
 
 startover: ;
 
-    while (!loop_done) {
+    while (!loop_done)
+    {
         center_dialog(EschMtl);
         save_under_dialog(EschMtl);
         draw_dialog(EschMtl);
@@ -205,6 +231,8 @@ startover: ;
 
     mtl_sizex=sizex;
     mtl_sizey=sizey;
+
+    mtl_compress = (EschMtl[COMPRESS].radio) ? 1 : 0;
 }
 
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ¿

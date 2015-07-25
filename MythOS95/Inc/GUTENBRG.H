@@ -11,7 +11,7 @@
 //                     Text Output and Font Management System
 //                          Microsoft Windows '95 Version
 //
-//            Copyright (c) 1995, 1996 by Charybdis Enterprises, Inc.
+//            Copyright (c) 1995-1997 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved.
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -93,6 +93,8 @@ typedef enum _gberg_error_codes {
 //ÄÄÄ Font Types
 #define GBERG_FNT_MONOFIXED         0 // 128 chars, monochrome, fixed size
 #define GBERG_FNT_COLORFIXED        1 // 128 chars, 256 color, fixed size
+
+#define GBERG_FNT_MONOFIXEDEX       10 // 256 chars, monochrone, fixed size
 
 //ÄÄÄ Flags for gberg_outf
 #define GBERG_FMT_LEFT              0x1

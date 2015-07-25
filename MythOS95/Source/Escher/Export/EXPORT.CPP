@@ -8,7 +8,7 @@
 //ùùùùù²±²ùùùùùùù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùùùùùù²±²ùùùù²±²ùùùùùù
 //ùùùù²²²²²²²²²²ù²²²²²²²²ùùù²²²²²²²²ùù²²²ùùùù²²²ù²²²²²²²²²²ù²²²ùùùù²²²ùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùCopyrightù(c)ù1994-1996ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
+//ùùùùùùùùùùùCopyrightù(c)ù1994-1997ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -42,6 +42,8 @@
 //                                
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
+#define assert(a)
+
 #include <float.h>
 #include <stdlib.h>
 #include <stdio.h>
@@ -61,7 +63,10 @@
 #include <esgeom.hpp>
 #include <esfile.hpp>
 
-extern "C" {
+extern "C"
+{
+#include <pjbasics.h>
+
 #include "pxp.h"
 #include "keys.h"
 }
@@ -89,6 +94,18 @@ extern "C" MtlData *capture_mtlget(int ind, ushort *selfi);
 extern "C" int capture_mtlfile(int ind, char *fname, char *tfname);
 
 extern "C" BXPColor *capture_mtlbitmap(char *fname, ushort *xs, ushort *ys, int forcesize);
+extern "C" BXPColor *capture_flcframe(char *fname, Flic *flic,
+                                      FlicRaster *raster, byte *pix,
+                                      ushort *xs, ushort *ys, int forcesize);
+
+extern "C" char *locate_map(char *fname, char *fullname);
+
+STATIC int export_camera(XFParseIFF &iff, ItemData *idata);
+STATIC int export_ambient(XFParseIFF &iff, ItemData *idata);
+STATIC int export_spot_light(XFParseIFF &iff, ItemData *idata);
+STATIC int export_omni_light(XFParseIFF &iff, ItemData *idata);
+STATIC int export_mesh(XFParseIFF &iff, ItemData *idata,
+                       XVData *verts, XFData *faces, VngoPal *pal);
 
 STATIC void compute_box_extents( ItemData *idata,
                                  XVData *verts,
@@ -99,7 +116,13 @@ STATIC void compute_quick_extents( ItemData *idata,
 STATIC int compute_optimal_extents( ItemData *idata,
                                     XVData *verts,
                                     EschFileMeshEXNT *mextents );
+
+STATIC ulong compress_rle_8bpp(ushort w, ushort h, byte *data, byte *cdata);
+STATIC ulong compress_rle_24bpp(ushort w, ushort h, byte *data, byte *cdata);
+STATIC ulong compress_rle_32bpp(ushort w, ushort h, byte *data, byte *cdata);
+
 STATIC int load_pal(VngoPal *pal,char *infile);
+
 STATIC int check_abort();
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
@@ -135,6 +158,11 @@ extern "C" int count_objects;
 
 // Material export information
 
+extern "C" int mtl_format;
+extern "C" int mtl_compress;
+extern "C" int mtl_animatedtxt;
+extern "C" int mtl_perspmode;
+
 extern "C" char mtl_palpath[];
 extern "C" char mtl_palname[];
 
@@ -158,33 +186,12 @@ extern "C" int lgt_atten;
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 extern "C" void export()
 {
-    int                 i, j, k;
-    int                 nmtls;
-    int                 steps;
-    float               tx, ty, tz;
-    float               cx, cy, cz;
-    float               cs, sn, dot;
     ItemData            *idata;
     XVData              *verts;
     XFData              *faces;
-    MtlData             *mtl;
-    EschVertex          *everts;
-    EschFace            *efaces;
-    EschFileMeshMTL     *emtls;
-    char                *mtlfnames;
     VngoPal             *pal=0;
-    EschFileMeshHDR     mheader;
-    EschFileMeshEXNT    mextents;
-    EschFileSceneHDR    sdata;
-    EschFileMeshHIER    ehier;
-    EschMatrix          mtx;
     XFParseIFF          iff;
-    ushort              selfi;
-    char                fname[13];
-    char                tfname[13];
     char                buff[128];
-
-    float               v1[3],v2[3],vr[3], mag;
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Get initial data information, check for outputable data.
     switch(capture_setup())
@@ -216,6 +223,7 @@ extern "C" void export()
  
     gfx_stand_by("Exporting...");
  
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Create Scene
     if (iff.newform(iff.makeid('E','S','E','N')))
     {
         sprintf(buff,"ERROR:  Cannot create scene form, error #%d",
@@ -224,26 +232,29 @@ extern "C" void export()
         goto error_exit;
     }
  
-    memset(&sdata,0,sizeof(EschFileSceneHDR));
-    strcpy(sdata.name,scene_name);
- 
-    sdata.ncameras = count_camera;
-    sdata.nobjects = count_objects;
-    sdata.nvectorlights = count_vectlights;
-    sdata.nfpointlights = (ushort) count_fpointlights;
-    sdata.nfattenlights = (ushort) count_fattenlights;
-    sdata.nfspotlights = (ushort) count_fspotlights;
-    sdata.npointlights = count_pointlights;
-    sdata.nattenlights = (ushort) count_attenlights;
-    sdata.nspotlights = (ushort) count_spotlights;
- 
-    if (iff.write(iff.makeid('H','D','R',' '),
-                  &sdata,sizeof(EschFileSceneHDR)))
     {
-         sprintf(buff,"Error writing HDR chunk, error #%d",
-                 iff.error());
-         gfx_continu_line(buff);
-         goto error_exit;
+        EschFileSceneHDR    sdata;
+        memset(&sdata,0,sizeof(EschFileSceneHDR));
+
+        strncpy(sdata.name,scene_name,ESCH_MAX_NAME);
+        sdata.ncameras = count_camera;
+        sdata.nobjects = count_objects;
+        sdata.nvectorlights = count_vectlights;
+        sdata.nfpointlights = (ushort) count_fpointlights;
+        sdata.nfattenlights = (ushort) count_fattenlights;
+        sdata.nfspotlights = (ushort) count_fspotlights;
+        sdata.npointlights = count_pointlights;
+        sdata.nattenlights = (ushort) count_attenlights;
+        sdata.nspotlights = (ushort) count_spotlights;
+ 
+        if (iff.write(iff.makeid('H','D','R',' '),
+                      &sdata,sizeof(sdata)))
+        {
+            sprintf(buff,"Error writing HDR chunk, error #%d",
+                    iff.error());
+            gfx_continu_line(buff);
+            goto error_exit;
+        }
     }
  
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Loop through captureable objects, exporting FORM for each
@@ -260,974 +271,70 @@ extern "C" void export()
  
 //ÄÄÄ Cameras ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
             case PXPCAMERA:
-                {
-                    EschFileCamera      cdata;
-                    sprintf(buff,"Exporting Camera: %s",idata->name);
-                    gfx_stand_by(buff);
-                    gfx_report(buff);
-             
-                    memset(&cdata,0,sizeof(EschFileCamera));
-                    strcpy(cdata.name,idata->name);
-                    cdata.x = (Flx16) (idata->item.c.x * scale_3ds2esch);
-                    cdata.y = (Flx16) (idata->item.c.z * scale_3ds2esch);
-                    cdata.z = (Flx16) (idata->item.c.y * scale_3ds2esch);
-                    cdata.fov = (Flx16) (2400.0 / idata->item.c.focal);
-
-                    // Z rotate a [0 1 0] top vector for bank angle
-                    tx=0;
-                    ty=1;
-                    tz=0;
-
-                    cs = cos(idata->item.c.bank);
-                    sn = sin(idata->item.c.bank);
-
-                    tx = tx*cs + ty*sn;
-                    ty = tx*sn + ty*cs;
-
-                    // Normalize top vector
-                    mag = sqrt(tx*tx + ty*ty + tz*tz);
-                    tx /= mag;
-                    ty /= mag;
-                    tz /= mag;
-
-                    // Create direction vector
-                    vr[0] = idata->item.c.tx - idata->item.c.x;
-                    vr[1] = idata->item.c.tz - idata->item.c.z;
-                    vr[2] = idata->item.c.ty - idata->item.c.y;
-
-                    // Normalize direction vector
-                    mag = sqrt(vr[0]*vr[0] + vr[1]*vr[1] + vr[2]*vr[2]);
-                    vr[0] /= mag;
-                    vr[1] /= mag;
-                    vr[2] /= mag;
-
-                    // Ortho top vs. the direction vector
-                    //
-                    //     top = top - dir*(top DOT dir)
-                    //
-                    dot = (tx*vr[0]) + (ty*vr[1]) + (tz*vr[2]);
-                    tx -= vr[0]*dot;
-                    ty -= vr[1]*dot;
-                    tz -= vr[2]*dot;
-
-                    // Normalize top vector again
-                    mag = sqrt(tx*tx + ty*ty + tz*tz);
-                    tx /= mag;
-                    ty /= mag;
-                    tz /= mag;
-
-                    // Store into struct
-                    cdata.diri = (Flx16) vr[0];
-                    cdata.dirj = (Flx16) vr[1];
-                    cdata.dirk = (Flx16) vr[2];
-
-                    cdata.topi = (Flx16) tx;
-                    cdata.topj = (Flx16) ty;
-                    cdata.topk = (Flx16) tz;
-             
-                    // Write chunk
-                    if (iff.write(iff.makeid('E','C','A','M'),
-                                &cdata,sizeof(EschFileCamera)))
-                    {
-                        sprintf(buff,"ERROR:  Writing ECAM chunk, error #%d",
-                            iff.error());
-                        gfx_continu_line(buff);
-                        goto error_exit;
-                    }
-                }
-
+                //ÄÄÄ Export camera
+                if (export_camera(iff,idata))
+                    goto error_exit;
                 break;
 
 //ÄÄÄ Lights ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ  
            case PXPAMBIENT:
+                //ÄÄÄ Export ambient light
                 if (lgt_ambient)
                 {
-                    EschFileLightAmbi   adata;
-
-                    sprintf(buff,"Exporting Ambient: %s",idata->name);
-                    gfx_stand_by(buff);
-                    gfx_report(buff);
-
-                    memset(&adata,0,sizeof(EschFileLightAmbi));
-                    strcpy(adata.name,idata->name);
-                    ((VngoColor24bit*)&adata.color)->r = (byte)(idata->item.a.color.r*255.0);
-                    ((VngoColor24bit*)&adata.color)->g = (byte)(idata->item.a.color.g*255.0);
-                    ((VngoColor24bit*)&adata.color)->b = (byte)(idata->item.a.color.b*255.0);
-            
-                    if (iff.write(iff.makeid('E','A','M','B'),
-                                &adata,sizeof(EschFileLightAmbi)))
-                    {
-                        sprintf(buff,"ERROR:  Writing EAMB chunk, error #%d",
-                            iff.error());
-                        gfx_continu_line(buff);
+                    if (export_ambient(iff,idata))
                         goto error_exit;
-                    }
                 }
-
                 break;
 
            case PXPLIGHT:
-                sprintf(buff,"Exporting Light: %s",idata->name);
-                gfx_stand_by(buff);
-                gfx_report(buff);
-
-                //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Spot
+                //ÄÄÄ Export light
                 if (idata->item.l.hotsize != 360.0
                     || idata->item.l.fallsize != 360.0)
                 {
-                    //ÄÄÄ Vector
-                    if (lgt_spotas == 3)
-                    {
-                        EschFileLightVect   vdata;
-                        memset(&vdata,0,sizeof(EschFileLightVect));
-                        strcpy(vdata.name,idata->name);
-
-                        if (!(idata->item.l.flags & LIGHT_ON))
-                            vdata.flags |= ESCH_LGT_OFF;
-
-                        vr[0] = idata->item.l.tx - idata->item.l.x;
-                        vr[1] = idata->item.l.tz - idata->item.l.z;
-                        vr[2] = idata->item.l.ty - idata->item.l.y;
-                        mag = sqrt(vr[0]*vr[0] + vr[1]*vr[1] + vr[2]*vr[2]);
-
-                        vdata.i = (Flx16) (vr[0] / mag);
-                        vdata.j = (Flx16) (vr[1] / mag);
-                        vdata.k = (Flx16) (vr[2] / mag);
-
-                        ((VngoColor24bit*)&vdata.color)->r = (byte)(idata->item.l.color.r
-                                                                * idata->item.l.mult * 255.0);
-                        ((VngoColor24bit*)&vdata.color)->g = (byte)(idata->item.l.color.g
-                                                                * idata->item.l.mult * 255.0);
-                        ((VngoColor24bit*)&vdata.color)->b = (byte)(idata->item.l.color.b
-                                                                * idata->item.l.mult * 255.0);
-                   
-                        if (iff.write(iff.makeid('E','V','E','C'),
-                                    &vdata,sizeof(EschFileLightVect)))
-                        {
-                            sprintf(buff,"ERROR:  Writing EVEC chunk, error #%d",
-                                iff.error());
-                            gfx_continu_line(buff);
-                            goto error_exit;
-                        }
-                    }
-                    //ÄÄÄ Fast or Spot
-                    else // lgt_spot == 1 or lgt_spotas == 2
-                    {
-                        EschFileLightSpot  sdata;
-                        memset(&sdata,0,sizeof(EschFileLightSpot));
-                        strcpy(sdata.name,idata->name);
-
-                        if (!(idata->item.l.flags & LIGHT_ON))
-                            sdata.flags |= ESCH_LGT_OFF;
-
-                        sdata.x = (Flx16) (idata->item.l.x * scale_3ds2esch);
-                        sdata.y = (Flx16) (idata->item.l.z * scale_3ds2esch);
-                        sdata.z = (Flx16) (idata->item.l.y * scale_3ds2esch);
-
-                        vr[0] = idata->item.l.tx - idata->item.l.x;
-                        vr[1] = idata->item.l.tz - idata->item.l.z;
-                        vr[2] = idata->item.l.ty - idata->item.l.y;
-                        mag = sqrt(vr[0]*vr[0] + vr[1]*vr[1] + vr[2]*vr[2]);
-
-                        sdata.i = (Flx16) (vr[0] / mag);
-                        sdata.j = (Flx16) (vr[1] / mag);
-                        sdata.k = (Flx16) (vr[2] / mag);
-
-                        sdata.hotspot = (Flx16) idata->item.l.hotsize;
-                        sdata.falloff = (Flx16) idata->item.l.fallsize;
-
-                        ((VngoColor24bit*)&sdata.color)->r = (byte)(idata->item.l.color.r
-                                                                * idata->item.l.mult * 255.0);
-                        ((VngoColor24bit*)&sdata.color)->g = (byte)(idata->item.l.color.g
-                                                                * idata->item.l.mult * 255.0);
-                        ((VngoColor24bit*)&sdata.color)->b = (byte)(idata->item.l.color.b
-                                                                * idata->item.l.mult * 255.0);
-
-                        if (lgt_atten
-                            && idata->item.l.flags & LIGHT_ATTEN)
-                        {
-                            sdata.flags |= ESCH_LGT_ATTEN;
-                            sdata.inner = (Flx16) (idata->item.l.in_range * scale_3ds2esch);
-                            sdata.outer = (Flx16) (idata->item.l.out_range * scale_3ds2esch);
-                        }
-                        else
-                            sdata.outer = Flx16(0x1000);
-
-                        if (lgt_spotas == 2)
-                        {
-                            if (iff.write(iff.makeid('E','S','P','T'),
-                                        &sdata,sizeof(EschFileLightSpot)))
-                            {
-                                sprintf(buff,"ERROR:  Writing ESPT chunk, error #%d",
-                                    iff.error());
-                                gfx_continu_line(buff);
-                                goto error_exit;
-                            }
-                        }
-                        else
-                        {
-                            if (iff.write(iff.makeid('E','F','S','P'),
-                                        &sdata,sizeof(EschFileLightSpot)))
-                            {
-                                sprintf(buff,"ERROR:  Writing EFSP chunk, error #%d",
-                                    iff.error());
-                                gfx_continu_line(buff);
-                                goto error_exit;
-                            }
-                        }
-                    }
+                    if (export_spot_light(iff,idata))
+                        goto error_exit;
                 }
-                //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Omni
                 else
                 {
-                    //ÄÄÄ Attenuated version
-                    if (lgt_atten
-                        && idata->item.l.flags & LIGHT_ATTEN)
-                    {
-                        EschFileLightAtten  adata;
-                        memset(&adata,0,sizeof(EschFileLightAtten));
-                        strcpy(adata.name,idata->name);
-
-                        adata.flags |= ESCH_LGT_ATTEN;
-                        if (!(idata->item.l.flags & LIGHT_ON))
-                            adata.flags |= ESCH_LGT_OFF;
-
-                        adata.x = (Flx16) (idata->item.l.x * scale_3ds2esch);
-                        adata.y = (Flx16) (idata->item.l.z * scale_3ds2esch);
-                        adata.z = (Flx16) (idata->item.l.y * scale_3ds2esch);
-
-                        adata.inner = (Flx16) (idata->item.l.in_range * scale_3ds2esch);
-                        adata.outer = (Flx16) (idata->item.l.out_range * scale_3ds2esch);
-
-                        ((VngoColor24bit*)&adata.color)->r = (byte)(idata->item.l.color.r
-                                                                * idata->item.l.mult * 255.0);
-                        ((VngoColor24bit*)&adata.color)->g = (byte)(idata->item.l.color.g
-                                                                * idata->item.l.mult * 255.0);
-                        ((VngoColor24bit*)&adata.color)->b = (byte)(idata->item.l.color.b
-                                                                * idata->item.l.mult * 255.0);
-
-                        if (lgt_omnias == 2)
-                        {
-                            if (iff.write(iff.makeid('E','A','T','N'),
-                                        &adata,sizeof(EschFileLightAtten)))
-                            {
-                                sprintf(buff,"ERROR:  Writing EATN chunk, error #%d",
-                                    iff.error());
-                                gfx_continu_line(buff);
-                                goto error_exit;
-                            }
-                        }
-                        else // lgt_omnias == 1
-                        {
-                            if (iff.write(iff.makeid('E','F','A','T'),
-                                        &adata,sizeof(EschFileLightAtten)))
-                            {
-                                sprintf(buff,"ERROR:  Writing EFAT chunk, error #%d",
-                                    iff.error());
-                                gfx_continu_line(buff);
-                                goto error_exit;
-                            }
-                        }
-                    }
-                    //ÄÄÄ Nonattenuated version
-                    else
-                    {
-                        EschFileLightPoint  pdata;
-                        memset(&pdata,0,sizeof(EschFileLightPoint));
-                        strcpy(pdata.name,idata->name);
-
-                        if (!(idata->item.l.flags & LIGHT_ON))
-                            pdata.flags |= ESCH_LGT_OFF;
-
-                        pdata.x = (Flx16) (idata->item.l.x * scale_3ds2esch);
-                        pdata.y = (Flx16) (idata->item.l.z * scale_3ds2esch);
-                        pdata.z = (Flx16) (idata->item.l.y * scale_3ds2esch);
-
-                        ((VngoColor24bit*)&pdata.color)->r = (byte)(idata->item.l.color.r
-                                                                * idata->item.l.mult * 255.0);
-                        ((VngoColor24bit*)&pdata.color)->g = (byte)(idata->item.l.color.g
-                                                                * idata->item.l.mult * 255.0);
-                        ((VngoColor24bit*)&pdata.color)->b = (byte)(idata->item.l.color.b
-                                                                * idata->item.l.mult * 255.0);
-
-                        if (lgt_omnias == 2)
-                        {
-                            if (iff.write(iff.makeid('E','P','N','T'),
-                                        &pdata,sizeof(EschFileLightPoint)))
-                            {
-                                sprintf(buff,"ERROR:  Writing EPNT chunk, error #%d",
-                                    iff.error());
-                                gfx_continu_line(buff);
-                                goto error_exit;
-                            }
-                        }
-                        else // lgt_omnias == 1
-                        {
-                            if (iff.write(iff.makeid('E','F','P','T'),
-                                        &pdata,sizeof(EschFileLightPoint)))
-                            {
-                                sprintf(buff,"ERROR:  Writing EFPT chunk, error #%d",
-                                    iff.error());
-                                gfx_continu_line(buff);
-                                goto error_exit;
-                            }
-                        }
-                    }
+                    if (export_omni_light(iff,idata))
+                        goto error_exit;
                 }
                 break;
 
 //ÄÄÄ Meshs ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ 
            case PXPMESH:
-                sprintf(buff,"Exporting Object: %s",idata->name);
-                gfx_show_gasgauge(buff);
-                gfx_report(buff);
-
-                steps = idata->item.m.verts + idata->item.m.faces;
-
-                //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Create mesh form
-                if (iff.newform(iff.makeid('E','M','S','H')))
+                //ÄÄÄ Load palette, if not already loaded once
+                if (material_mode == 2 && mtl_format == 1 && !pal)
                 {
-                    sprintf(buff,"ERROR:  Cannot create FORM, error #%d",
-                            iff.error());
-                    gfx_continu_line(buff);
-                    goto error_exit;
-                }
-            
-                // Create Header
-                memset(&mheader,0,sizeof(EschFileMeshHDR));
-                strcpy(mheader.name,idata->name);
-                mheader.flags = object_flags;
-                mheader.nverts = idata->item.m.verts;
-                mheader.nfaces = idata->item.m.faces;
-
-                //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Compute extents
-                memset(&mextents,0,sizeof(EschFileMeshEXNT));
-
-                // Box extents
-                sprintf(buff,"Object '%s': Computing box extents...",idata->name);
-                gfx_set_gasgauge(buff,0,1);
-
-                compute_box_extents( idata, verts, &mextents);
-
-                // Radial extents
-                sprintf(buff,"Object '%s': Computing radial extents...",idata->name);
-                gfx_set_gasgauge(buff,0,1);
-                if (extent_mode==2)
-                {
-                    // Optimal
-                    if (compute_optimal_extents( idata, verts,
-                                                 &mextents ))
+                    char pname[256];
+                    pal = new VngoPal8;
+                    if (!pal)
+                    {
+                        gfx_continu_line("Out of Memory!");
                         goto error_exit;
-                }
-                else
-                {
-                    // Quick
-                    compute_quick_extents( idata,
-                                           verts,
-                                           &mextents );
-                }
-
-                //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Compute matrix
-                if (orientation_mode == 2)
-                {
-                    sprintf(buff,"Object '%s': Computing matrix...",idata->name);
-                    gfx_set_gasgauge(buff,0,1);
-
-                    if (hierarchy_mode == 2)
-                    {
-                        float m[4][3];
-
-                        capture_gethier(idata,ehier.parent,&m[0][0]);
-
-                        cx = m[3][0];
-                        cy = m[3][1];
-                        cz = m[3][2];
-
-                        // Rest of matrix has already been applied to all
-                        // verticies as captured in get_verts
-                    }
-                    else
-                    {
-                        cx = idata->item.m.matrix[3][0];
-                        cy = idata->item.m.matrix[3][1];
-                        cz = idata->item.m.matrix[3][2];
-
-                        if (coord_mode == 1
-                            && capture_getpivot(idata, &tx, &ty, &tz))
-                        {
-                            cx += tx;
-                            cy += ty;
-                            cz += tz;
-                        }
-
-                        // Rest of matrix has already been applied to all
-                        // verticies as captured in get_verts
                     }
 
-                    mtx.mtx[ESCH_MTX_J] = (Flx16) (cx * scale_3ds2esch);
-                    mtx.mtx[ESCH_MTX_K] = (Flx16) (cz * scale_3ds2esch);
-                    mtx.mtx[ESCH_MTX_L] = (Flx16) (cy * scale_3ds2esch);
-                }
-
-                //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Compute Faces/Verts
-                // Allocate space for EschVerts & Eschfaces
-                everts = new EschVertex[idata->item.m.verts];
-                if (!everts)
-                {
-                    gfx_continu_line("Out of Memory!");
-                    goto error_exit;
-                }
-                memset(everts,0,idata->item.m.verts*sizeof(EschVertex));
-
-                efaces = new EschFace[idata->item.m.faces];
-                if (!efaces)
-                {
-                    gfx_continu_line("Out of Memory!");
-                    goto error_exit;
-                }
-                memset(efaces,0,idata->item.m.faces*sizeof(EschFace));
-
-                emtls = new EschFileMeshMTL[256];
-                if (!emtls)
-                {
-                    gfx_continu_line("Out of Memory!");
-                    goto error_exit;
-                }
-
-                mtlfnames = new char[256*14*2];
-                if (!mtlfnames)
-                {
-                    gfx_continu_line("Out of Memory!");
-                    goto error_exit;
-                }
-               
-                //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Compute Faces
-                sprintf(buff,"Object '%s': Computing faces...",idata->name);
-                gfx_set_gasgauge(buff,0,steps);
-
-                nmtls=0;
-
-                for(i=0; i < idata->item.m.faces; i++)
-                {
-                    gfx_set_gasgauge("",i,steps);
-
-                    if (check_abort())
-                        goto error_exit;
-
-                    // Setup line visiblity flags
-                    if (faces[i].flags & XF_ABLINE)
-                        efaces[i].flags |= ESCH_FACE_ABLINE;
-                    if (faces[i].flags & XF_BCLINE)
-                        efaces[i].flags |= ESCH_FACE_BCLINE;
-                    if (faces[i].flags & XF_CALINE)
-                        efaces[i].flags |= ESCH_FACE_CALINE;
+                    strcpy(pname,mtl_palpath);
+                    if (mtl_palpath[strlen(mtl_palpath)-1] != '\\')
+                        strcat(pname,"\\");
+                    strcat(pname,mtl_palname);
             
-                    // Fill out vertex indecies.
-                    efaces[i].a = faces[i].a;
-                    efaces[i].b = faces[i].b;
-                    efaces[i].c = faces[i].c;
-            
-                    // Compute face normal (ABC is in counter-clockwise order)
-                    v1[0] = verts[faces[i].a].x - verts[faces[i].b].x; 
-                    v1[1] = verts[faces[i].a].z - verts[faces[i].b].z;
-                    v1[2] = verts[faces[i].a].y - verts[faces[i].b].y;
-            
-                    v2[0] = verts[faces[i].c].x - verts[faces[i].b].x; 
-                    v2[1] = verts[faces[i].c].z - verts[faces[i].b].z;
-                    v2[2] = verts[faces[i].c].y - verts[faces[i].b].y;
-            
-                    // Cross-product
-                    vr[0] = (v1[1] * v2[2]) - (v1[2] * v2[1]);
-                    vr[1] = (v1[2] * v2[0]) - (v1[0] * v2[2]);
-                    vr[2] = (v1[0] * v2[1]) - (v1[1] * v2[0]);
-            
-                    mag = sqrt(vr[0]*vr[0] + vr[1]*vr[1] + vr[2]*vr[2]);
-            
-                    efaces[i].normal.i = (Flx16) (vr[0] / mag);
-                    efaces[i].normal.j = (Flx16) (vr[1] / mag);
-                    efaces[i].normal.k = (Flx16) (vr[2] / mag);
-            
-                    // Fill out vertex mapping parameters
-                    if (idata->item.m.tverts)
+                    sprintf(buff,"Loading Van Gogh palette %s...",
+                            pname);
+                    gfx_prompt(buff);
+
+                    int j;
+                    if ((j=load_pal(pal,pname))!=0)
                     {
-                        efaces[i].u[0] = (Flx16) (verts[faces[i].a].u);
-                        efaces[i].u[1] = (Flx16) (verts[faces[i].b].u);
-                        efaces[i].u[2] = (Flx16) (verts[faces[i].c].u);
-
-                        // 3DS Uses the opposite definition of v, so we
-                        // have to negate it to result in right-side up
-                        // images.
-
-                        efaces[i].v[0] = (Flx16) (-verts[faces[i].a].v);
-                        efaces[i].v[1] = (Flx16) (-verts[faces[i].b].v);
-                        efaces[i].v[2] = (Flx16) (-verts[faces[i].c].v);
-                    }   
-            
-                    efaces[i].flags |= ESCH_FACE_WIRE
-                                       | ESCH_FACE_SOLID
-                                       | ESCH_FACE_ALLOWPERSP;
-
-                    // Fill out material information
-                    mtl = capture_mtlget(faces[i].material,&selfi);
-                    if (mtl)
-                    {
-                        // Fill out face associated information
-                        efaces[i].color=0;
-                        ((VngoColor24bit*)&efaces[i].color)->r = mtl->diff.r;
-                        ((VngoColor24bit*)&efaces[i].color)->g = mtl->diff.g;
-                        ((VngoColor24bit*)&efaces[i].color)->b = mtl->diff.b;
-
-                        if (!(mtl->flags & MTL_TWOSIDE))
-                            efaces[i].flags |= ESCH_FACE_ONESIDED;
-
-                        if (selfi)
-                        {
-                            dword slevel = (dword)( ((float)selfi * 15.0) / 100.0);
-
-                            efaces[i].flags |= (slevel << 20)
-                                               & ESCH_FACE_SELFILUM_MASK;
-                        }
-
-                        if (!(mtl->flags & MTL_WIRE))
-                        {
-                            switch (mtl->shading)
-                            {
-                                case 1:
-                                    efaces[i].flags |= ESCH_FACE_FLAT;
-                                    break;
-                                case 2:
-                                    efaces[i].flags |= ESCH_FACE_SMOOTH
-                                                       | ESCH_FACE_FLAT;
-                                    break;
-                                case 3:
-                                case 4:
-                                    efaces[i].flags |= ESCH_FACE_SPECULAR
-                                                       | ESCH_FACE_SMOOTH
-                                                       | ESCH_FACE_FLAT;
-                                    break;
-                            }
-                        }
-
-                        // Check for maps
-                        j=capture_mtlfile(faces[i].material,fname,tfname);
-
-                        // Warning if ignored maps
-                        if (j==2)
-                        {
-                            char name[ESCH_MAX_NAME+1];
-                            strncpy(name,mtl->name,ESCH_MAX_NAME);
-                            name[ESCH_MAX_NAME] = 0;
-
-                            sprintf(buff,"%s: non-Texture1/Opacity maps ignored",
-                                    name);
-                            gfx_prompt(buff);
-                        }
-
-                        if (!*fname && *tfname)
-                        {
-                            char name[ESCH_MAX_NAME+1];
-                            strncpy(name,mtl->name,ESCH_MAX_NAME);
-                            name[ESCH_MAX_NAME] = 0;
-                        
-                            sprintf(buff,"%s: Opacity maps without Texture1 maps ignored",
-                                    name);
-                            gfx_prompt(buff);
-                        }
-
-                        // Handle valid map definition
-                        if (*fname && (j==1 || j ==2))
-                        {
-                            if (!strstr(fname,".SXP") && !strstr(tfname,".SXP")
-                                && !strstr(fname,".IFL") && !strstr(tfname,".IFL"))
-                            {
-                                // Add to local mtl's list for object.
-                                for(j=0; j < nmtls; j++)
-                                {
-                                    if (!strncmp(mtl->name,emtls[j].name,ESCH_MAX_NAME))
-                                    {
-                                        efaces[i].txt=(word)(j+1);
-                                        efaces[i].flags |= ESCH_FACE_TEXTURED;
-                                        memset(&mtlfnames[14*2*j],0,14*2);
-                                        strncpy(&mtlfnames[14*2*j],fname,13);
-                                        strncpy(&mtlfnames[14*2*j+14],tfname,13);
-                                        break;
-                                    }
-                                }
-                                
-                                if (!nmtls || (j >= nmtls))
-                                {
-                                    strncpy(emtls[nmtls].name,mtl->name,ESCH_MAX_NAME);
-                                    efaces[i].txt=(word)(nmtls+1);
-                                    efaces[i].flags |= ESCH_FACE_TEXTURED;
-                                    memset(&mtlfnames[14*2*nmtls],0,14*2);
-                                    strncpy(&mtlfnames[14*2*nmtls],fname,13);
-                                    strncpy(&mtlfnames[14*2*nmtls+14],tfname,13);
-                                    nmtls++;
-                                }
-                            }
-                            else
-                            {
-                                char name[ESCH_MAX_NAME+1];
-                                strncpy(name,mtl->name,ESCH_MAX_NAME);
-                                name[ESCH_MAX_NAME] = 0;
-                                sprintf(buff,"ERROR: %s: .SXP/.IFL not supported, texture skipped",
-                                        name);
-                                gfx_continu_line(buff);
-                                goto error_exit;
-                            }
-                        }
-                    }
-                    else
-                    {
-                        // If no material, then assume smoothable specular
-                        // single-sided material with grey color
-
-                        efaces[i].color=0;
-                        ((VngoColor24bit*)&efaces[i].color)->r = 128;
-                        ((VngoColor24bit*)&efaces[i].color)->g = 128;
-                        ((VngoColor24bit*)&efaces[i].color)->b = 128;
-
-                        efaces[i].flags |= ESCH_FACE_SPECULAR
-                                           | ESCH_FACE_SMOOTH
-                                           | ESCH_FACE_FLAT
-                                           | ESCH_FACE_ONESIDED;
-                    }
-                }
-                mheader.nmtls = nmtls;
-
-                //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Compute Verticies
-                sprintf(buff,"Object '%s': Computing vertices...",idata->name);
-                gfx_set_gasgauge(buff,idata->item.m.faces+i,steps);
-
-                // Get center of object from orientation matrix
-                cx = idata->item.m.matrix[3][0];
-                cy = idata->item.m.matrix[3][1];
-                cz = idata->item.m.matrix[3][2];
-
-                // Adjust center for pivot points, if any
-                if (coord_mode == 1
-                    && capture_getpivot(idata, &tx, &ty, &tz))
-                {
-                    cx += tx;
-                    cy += ty;
-                    cz += tz;
-                }
-            
-                // Compute EschVerts
-                for(i=0; i < idata->item.m.verts; i++)
-                {
-                    gfx_set_gasgauge("",idata->item.m.faces+i,steps);
-
-                    if (check_abort())
-                        goto error_exit;
-
-                    tx = verts[i].x;
-                    ty = verts[i].y;
-                    tz = verts[i].z;
-            
-                    // Handle adjustment to center, if not exporting world coords.
-                    if (coord_mode == 1)
-                    {
-                        tx -= cx;
-                        ty -= cy;
-                        tz -= cz;
-                    }
-            
-                    everts[i].x = (Flx16) (tx * scale_3ds2esch);
-                    everts[i].y = (Flx16) (tz * scale_3ds2esch);
-                    everts[i].z = (Flx16) (ty * scale_3ds2esch);
-
-                    vr[0]=vr[1]=vr[2]=0.0;
-                    for(j=0; j < idata->item.m.faces; j++)
-                    {
-                        if (efaces[j].a == i
-                            || efaces[j].b == i
-                            || efaces[j].c == i)
-                        {
-                            vr[0] += efaces[j].normal.i;
-                            vr[1] += efaces[j].normal.j;
-                            vr[2] += efaces[j].normal.k;
-                        }
-                    }
-
-                    mag = sqrt(vr[0]*vr[0] + vr[1]*vr[1] + vr[2]*vr[2]);
-            
-                    everts[i].normal.i = (Flx16) (vr[0] / mag);
-                    everts[i].normal.j = (Flx16) (vr[1] / mag);
-                    everts[i].normal.k = (Flx16) (vr[2] / mag);
-                }
-
-                //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Output Data
-                sprintf(buff,"Object '%s': Writing...",idata->name);
-                gfx_set_gasgauge(buff,steps,steps);
-
-                // Output header
-                if (iff.write(iff.makeid('H','D','R',' '),
-                            &mheader,sizeof(EschFileMeshHDR)))
-                {
-                    sprintf(buff,"ERROR:  Writing HDR chunk, error #%d",
-                           iff.error());
-                    gfx_continu_line(buff);
-                    goto error_exit;
-                }
-
-                // Matrix
-                if ((orientation_mode == 2) &&
-                    iff.write(iff.makeid('M','T','R','X'),
-                             &mtx,sizeof(EschMatrix)))
-                {
-                    sprintf(buff,"ERROR:  Writing MTRX chunk, error #%d",
-                           iff.error());
-                    gfx_continu_line(buff);
-                    goto error_exit;
-                }
-
-                // Hierarchy
-                if (hierarchy_mode == 2)
-                {
-                    memset(&ehier,0,sizeof(EschFileMeshHIER));
-                    if (capture_gethier(idata,ehier.parent,0)
-                        && iff.write(iff.makeid('H','I','E','R'),
-                             &ehier,sizeof(EschFileMeshHIER)))
-                    {
-                        sprintf(buff,"ERROR:  Writing HIER chunk, error #%d",
-                                iff.error());
+                        sprintf(buff,"ERROR:  Error %d loading palette",j);
                         gfx_continu_line(buff);
                         goto error_exit;
                     }
                 }
 
-                // Output Extents/Face/Vert blocks
-                if (iff.write(iff.makeid('E','X','N','T'),
-                         &mextents,sizeof(EschFileMeshEXNT)))
-                {
-                    sprintf(buff,"ERROR:  Writing EXNT chunk, error #%d",
-                            iff.error());
-                    gfx_continu_line(buff);
+                //ÄÄÄ Export mesh
+                if (export_mesh(iff,idata,verts,faces,pal))
                     goto error_exit;
-                }
-                if (iff.write(iff.makeid('V','E','R','T'),
-                         everts,idata->item.m.verts * sizeof(EschVertex)))
-                {
-                    sprintf(buff,"ERROR:  Writing VERT chunk, error #%d",
-                           iff.error());
-                    gfx_continu_line(buff);
-                    goto error_exit;
-                }
-                if (nmtls && iff.write(iff.makeid('M','T','L',' '),
-                                      emtls,nmtls * sizeof(EschFileMeshMTL)))
-                {
-                    sprintf(buff,"ERROR:  Writing MTL chunk, error #%d",
-                           iff.error());
-                    gfx_continu_line(buff);
-                    goto error_exit;
-                }
-                if (iff.write(iff.makeid('F','A','C','E'),
-                         efaces,idata->item.m.faces * sizeof(EschFace)))
-                {
-                    sprintf(buff,"ERROR:  Writing FACE chunk, error #%d",
-                           iff.error());
-                    gfx_continu_line(buff);
-                    goto error_exit;
-                }
-
-                //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Materials
-                if (nmtls && material_mode == 2)
-                {
-                    char        pname[256];
-                    BXPColor    *bm, *tbm;
-                    EschFileMtlMHDR mtlhdr;
-
-                    sprintf(buff,"Object '%s': Outputing materials...",idata->name);
-                    gfx_set_gasgauge(buff,0,nmtls);
-
-                    //ÄÄÄ Load palette, if not already loaded once
-                    if (!pal)
-                    {
-                        pal = new VngoPal8;
-                        if (!pal)
-                        {
-                            gfx_continu_line("Out of Memory!");
-                            goto error_exit;
-                        }
-
-                        strcpy(pname,mtl_palpath);
-                        if (mtl_palpath[strlen(mtl_palpath)-1] != '\\')
-                            strcat(pname,"\\");
-                        strcat(pname,mtl_palname);
-                        
-                        sprintf(buff,"Loading Van Gogh palette %s...",
-                                pname);
-                        gfx_prompt(buff);
-
-                        if ((j=load_pal(pal,pname))!=0)
-                        {
-                            sprintf(buff,"ERROR:  Error %d loading palette",j);
-                            gfx_continu_line(buff);
-                            goto error_exit;
-                        }
-                    }
-
-                    //ÄÄÄ Output each material
-                    for(j=0; j < nmtls; j++)
-                    {
-                        gfx_set_gasgauge("",j,nmtls);
-
-                        char *fname=&mtlfnames[14*2*j];
-                        char *tfname=&mtlfnames[14*2*j+14];
-
-                        char name[ESCH_MAX_NAME+1];
-                        strncpy(name,emtls[j].name,ESCH_MAX_NAME);
-                        name[ESCH_MAX_NAME] = 0;
-
-                        if (*tfname)
-                        {
-                            sprintf(buff,"%s <= T1: %s, O: %s...",
-                                    name,fname,tfname);
-                        }
-                        else
-                        {
-                            sprintf(buff,"%s <= T1: %s...",
-                                    name,fname);
-                        }
-                        gfx_prompt(buff);
-
-                        if (check_abort())
-                            goto error_exit;
-
-                        memset(&mtlhdr,0,sizeof(EschFileMtlMHDR));
-                        strncpy(mtlhdr.name,emtls[j].name,ESCH_MAX_NAME);
-                        strncpy(mtlhdr.pname,pal->name,16);
-
-                        if (strstr(fname,".FLI") || strstr(fname,".FLC")
-                            || strstr(tfname,".FLI") || strstr(tfname,".FLC"))
-                        {
-                            sprintf(buff,"%s: FLI/FLC not yet supported, skipped",
-                                    name);
-                            gfx_continu_line(buff);
-                            goto error_exit;
-                        }
-                        else
-                        {
-                            //ÄÄÄ Handle single-frame Texture 1 (and optionally Opacity)
-                            mtlhdr.type = 1;
-                            mtlhdr.nframes = 1;
-                            if ((bm=capture_mtlbitmap(fname,
-                                                      &mtlhdr.xsize,
-                                                      &mtlhdr.ysize,
-                                                      0))==0)
-                            {
-                                sprintf(buff,"ERROR:  Error loading Texture 1 bitmap %s",fname);
-                                gfx_continu_line(buff);
-                                goto error_exit;
-                            }
-                            else
-                            {
-                                byte            *b;
-                                VngoColor24bit  clr;
-
-                                // Load Opacity
-                                tbm=0;
-                                if (*tfname)
-                                {
-                                    if ((tbm=capture_mtlbitmap(tfname,
-                                                               &mtlhdr.xsize,
-                                                               &mtlhdr.ysize,
-                                                               1))==0)
-                                    {
-                                        sprintf(buff,"ERROR:  Error loading Opacity bitmap %s",tfname);
-                                        gfx_continu_line(buff);
-                                        goto error_exit;
-                                    }
-                                    else
-                                    {
-                                        mtlhdr.type = 2;
-                                    }
-                                }
-                    
-                                // Recolor with VnGo Palette
-                                b = new byte[mtlhdr.xsize * mtlhdr.ysize];
-                                if (b)
-                                {
-                                    for(k=0; k < mtlhdr.xsize * mtlhdr.ysize; k++)
-                                    {
-                                        if (tbm
-                                            && tbm[k].r == 0
-                                            && tbm[k].g == 0
-                                            && tbm[k].b == 0)
-                                        {
-                                            b[k] = (byte)VNGO_TRANSPARENT_COLOR;
-                                        }
-                                        else
-                                        {
-                                            clr.r = bm[k].r;
-                                            clr.g = bm[k].g;
-                                            clr.b = bm[k].b;
-
-                                            b[k] = (byte)pal->get_index(clr);
-                                        }
-                                    }
-
-                                    if (iff.newform(iff.makeid('E','M','T','L')))
-                                    {
-                                        sprintf(buff,"ERROR:  Cannot create FORM, error #%d",
-                                                iff.error());
-                                        gfx_continu_line(buff);
-                                        goto error_exit;     
-                                    }
-
-                                    // Output header
-                                    if (iff.write(iff.makeid('M','H','D','R'),
-                                                  &mtlhdr,sizeof(EschFileMtlMHDR)))
-                                    {
-                                        sprintf(buff,"ERROR:  Writing MHDR chunk, error #%d",
-                                            iff.error());
-                                        gfx_continu_line(buff);
-                                        goto error_exit;     
-                                    }
-
-                                    // Output body
-                                    if (iff.write(iff.makeid('B','O','D','Y'),
-                                                  b,mtlhdr.xsize * mtlhdr.ysize))
-                                    {
-                                        sprintf(buff,"ERROR:  Writing BODY chunk, error #%d",
-                                            iff.error());
-                                        gfx_continu_line(buff);
-                                        goto error_exit;     
-                                    }
-
-                                    iff.leaveform();
-
-                                    delete [] b;
-                                }
-                                else
-                                {
-                                    sprintf("ERROR:  Converting bitmap %s, skipped",fname);
-                                    gfx_continu_line(buff);
-                                    goto error_exit;
-                                }
-
-                                free(bm);
-                                if (tbm)
-                                    free(tbm);
-                            }
-                        }
-                    }
-                }
-
-                sprintf(buff,"Object '%s': Export Complete",idata->name);
-                gfx_set_gasgauge(buff,1,1);
-
-                //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Free efaces, everts, and emtls
-                delete [] everts;
-                delete [] efaces;
-                delete [] emtls;
-                delete [] mtlfnames;
-
-                //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ End mesh form
-                iff.leaveform();
-
-                break;
         }
     }
 
@@ -1252,6 +359,1311 @@ error_exit:;
     gfx_report("");
 
     gfx_put_hole();
+}
+
+
+
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°° Cameras °°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// export_camera                                                            ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+STATIC int export_camera(XFParseIFF &iff, ItemData *idata)
+{
+    EschFileCamera      cdata;
+    char                buff[128];
+
+    sprintf(buff,"Exporting Camera: %s",idata->name);
+    gfx_stand_by(buff);
+    gfx_report(buff);
+
+    memset(&cdata,0,sizeof(EschFileCamera));
+    strncpy(cdata.name,idata->name,ESCH_MAX_NAME);
+    cdata.x = (Flx16) (idata->item.c.x * scale_3ds2esch);
+    cdata.y = (Flx16) (idata->item.c.z * scale_3ds2esch);
+    cdata.z = (Flx16) (idata->item.c.y * scale_3ds2esch);
+    cdata.fov = (Flx16) (2400.0 / idata->item.c.focal);
+
+    // Z rotate a [0 1 0] top vector for bank angle
+    float tx=0;
+    float ty=1;
+    float tz=0;
+
+    float cs = cos(idata->item.c.bank);
+    float sn = sin(idata->item.c.bank);
+
+    tx = tx*cs + ty*sn;
+    ty = tx*sn + ty*cs;
+
+    // Normalize top vector
+    float mag = sqrt(tx*tx + ty*ty + tz*tz);
+    tx /= mag;
+    ty /= mag;
+    tz /= mag;
+
+    // Create direction vector
+    float vr[3];
+    vr[0] = idata->item.c.tx - idata->item.c.x;
+    vr[1] = idata->item.c.tz - idata->item.c.z;
+    vr[2] = idata->item.c.ty - idata->item.c.y;
+
+    // Normalize direction vector
+    mag = sqrt(vr[0]*vr[0] + vr[1]*vr[1] + vr[2]*vr[2]);
+    vr[0] /= mag;
+    vr[1] /= mag;
+    vr[2] /= mag;
+
+    // Ortho top vs. the direction vector
+    //
+    //     top = top - dir*(top DOT dir)
+    //
+    float dot = (tx*vr[0]) + (ty*vr[1]) + (tz*vr[2]);
+    tx -= vr[0]*dot;
+    ty -= vr[1]*dot;
+    tz -= vr[2]*dot;
+
+    // Normalize top vector again
+    mag = sqrt(tx*tx + ty*ty + tz*tz);
+    tx /= mag;
+    ty /= mag;
+    tz /= mag;
+
+    // Store into struct
+    cdata.diri = (Flx16) vr[0];
+    cdata.dirj = (Flx16) vr[1];
+    cdata.dirk = (Flx16) vr[2];
+
+    cdata.topi = (Flx16) tx;
+    cdata.topj = (Flx16) ty;
+    cdata.topk = (Flx16) tz;
+
+    // Write chunk
+    if (iff.write(iff.makeid('E','C','A','M'),
+                &cdata,sizeof(EschFileCamera)))
+    {
+        sprintf(buff,"ERROR:  Writing ECAM chunk, error #%d",
+            iff.error());
+        gfx_continu_line(buff);
+        return 1;
+    }
+
+    return 0;
+}
+
+
+
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°° Lights  °°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// export_ambient                                                           ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+STATIC int export_ambient(XFParseIFF &iff, ItemData *idata)
+{
+    EschFileLightAmbi   adata;
+    char                buff[128];
+
+    sprintf(buff,"Exporting Ambient: %s",idata->name);
+    gfx_stand_by(buff);
+    gfx_report(buff);
+
+    memset(&adata,0,sizeof(EschFileLightAmbi));
+    strncpy(adata.name,idata->name,ESCH_MAX_NAME);
+    ((VngoColor24bit*)&adata.color)->r = (byte)(idata->item.a.color.r*255.0);
+    ((VngoColor24bit*)&adata.color)->g = (byte)(idata->item.a.color.g*255.0);
+    ((VngoColor24bit*)&adata.color)->b = (byte)(idata->item.a.color.b*255.0);
+
+    if (iff.write(iff.makeid('E','A','M','B'),
+                &adata,sizeof(EschFileLightAmbi)))
+    {
+        sprintf(buff,"ERROR:  Writing EAMB chunk, error #%d",
+            iff.error());
+        gfx_continu_line(buff);
+        return 1;
+    }
+
+    return 0;
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// export_spot_light                                                        ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+STATIC int export_spot_light(XFParseIFF &iff, ItemData *idata)
+{
+    char    buff[128];
+    float   vr[3];
+    float   mag;
+
+    sprintf(buff,"Exporting Spot Light: %s",idata->name);
+    gfx_stand_by(buff);
+    gfx_report(buff);
+
+//ÄÄÄ Vector
+    if (lgt_spotas == 3)
+    {
+        EschFileLightVect   vdata;
+        memset(&vdata,0,sizeof(EschFileLightVect));
+        strncpy(vdata.name,idata->name,ESCH_MAX_NAME);
+
+        if (!(idata->item.l.flags & LIGHT_ON))
+            vdata.flags |= ESCH_LGT_OFF;
+
+        vr[0] = idata->item.l.tx - idata->item.l.x;
+        vr[1] = idata->item.l.tz - idata->item.l.z;
+        vr[2] = idata->item.l.ty - idata->item.l.y;
+        mag = sqrt(vr[0]*vr[0] + vr[1]*vr[1] + vr[2]*vr[2]);
+
+        vdata.i = (Flx16) (vr[0] / mag);
+        vdata.j = (Flx16) (vr[1] / mag);
+        vdata.k = (Flx16) (vr[2] / mag);
+
+        ((VngoColor24bit*)&vdata.color)->r = (byte)(idata->item.l.color.r
+                                                * idata->item.l.mult * 255.0);
+        ((VngoColor24bit*)&vdata.color)->g = (byte)(idata->item.l.color.g
+                                                * idata->item.l.mult * 255.0);
+        ((VngoColor24bit*)&vdata.color)->b = (byte)(idata->item.l.color.b
+                                                * idata->item.l.mult * 255.0);
+    
+        if (iff.write(iff.makeid('E','V','E','C'),
+                    &vdata,sizeof(EschFileLightVect)))
+        {
+            sprintf(buff,"ERROR:  Writing EVEC chunk, error #%d",
+                iff.error());
+            gfx_continu_line(buff);
+            return 1;
+        }
+    }
+//ÄÄÄ Fast or Spot
+    else // lgt_spot == 1 or lgt_spotas == 2
+    {
+        EschFileLightSpot  sdata;
+        memset(&sdata,0,sizeof(EschFileLightSpot));
+        strncpy(sdata.name,idata->name,ESCH_MAX_NAME);
+
+        if (!(idata->item.l.flags & LIGHT_ON))
+            sdata.flags |= ESCH_LGT_OFF;
+
+        sdata.x = (Flx16) (idata->item.l.x * scale_3ds2esch);
+        sdata.y = (Flx16) (idata->item.l.z * scale_3ds2esch);
+        sdata.z = (Flx16) (idata->item.l.y * scale_3ds2esch);
+
+        vr[0] = idata->item.l.tx - idata->item.l.x;
+        vr[1] = idata->item.l.tz - idata->item.l.z;
+        vr[2] = idata->item.l.ty - idata->item.l.y;
+        mag = sqrt(vr[0]*vr[0] + vr[1]*vr[1] + vr[2]*vr[2]);
+
+        sdata.i = (Flx16) (vr[0] / mag);
+        sdata.j = (Flx16) (vr[1] / mag);
+        sdata.k = (Flx16) (vr[2] / mag);
+
+        sdata.hotspot = (Flx16) idata->item.l.hotsize;
+        sdata.falloff = (Flx16) idata->item.l.fallsize;
+
+        ((VngoColor24bit*)&sdata.color)->r = (byte)(idata->item.l.color.r
+                                                * idata->item.l.mult * 255.0);
+        ((VngoColor24bit*)&sdata.color)->g = (byte)(idata->item.l.color.g
+                                                * idata->item.l.mult * 255.0);
+        ((VngoColor24bit*)&sdata.color)->b = (byte)(idata->item.l.color.b
+                                                * idata->item.l.mult * 255.0);
+
+        if (lgt_atten
+            && idata->item.l.flags & LIGHT_ATTEN)
+        {
+            sdata.flags |= ESCH_LGT_ATTEN;
+            sdata.inner = (Flx16) (idata->item.l.in_range * scale_3ds2esch);
+            sdata.outer = (Flx16) (idata->item.l.out_range * scale_3ds2esch);
+        }
+        else
+            sdata.outer = Flx16(0x1000);
+
+        if (lgt_spotas == 2)
+        {
+            if (iff.write(iff.makeid('E','S','P','T'),
+                        &sdata,sizeof(EschFileLightSpot)))
+            {
+                sprintf(buff,"ERROR:  Writing ESPT chunk, error #%d",
+                    iff.error());
+                gfx_continu_line(buff);
+                return 1;
+            }
+        }
+        else
+        {
+            if (iff.write(iff.makeid('E','F','S','P'),
+                        &sdata,sizeof(EschFileLightSpot)))
+            {
+                sprintf(buff,"ERROR:  Writing EFSP chunk, error #%d",
+                    iff.error());
+                gfx_continu_line(buff);
+                return 1;
+            }
+        }
+    }
+
+    return 0;
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// export_omni_light                                                        ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+STATIC int export_omni_light(XFParseIFF &iff, ItemData *idata)
+{
+    char    buff[128];
+
+    sprintf(buff,"Exporting Omni Light: %s",idata->name);
+    gfx_stand_by(buff);
+    gfx_report(buff);
+
+    //ÄÄÄ Attenuated version
+    if (lgt_atten
+        && idata->item.l.flags & LIGHT_ATTEN)
+    {
+        EschFileLightAtten  adata;
+        memset(&adata,0,sizeof(EschFileLightAtten));
+        strncpy(adata.name,idata->name,ESCH_MAX_NAME);
+
+        adata.flags |= ESCH_LGT_ATTEN;
+        if (!(idata->item.l.flags & LIGHT_ON))
+            adata.flags |= ESCH_LGT_OFF;
+
+        adata.x = (Flx16) (idata->item.l.x * scale_3ds2esch);
+        adata.y = (Flx16) (idata->item.l.z * scale_3ds2esch);
+        adata.z = (Flx16) (idata->item.l.y * scale_3ds2esch);
+
+        adata.inner = (Flx16) (idata->item.l.in_range * scale_3ds2esch);
+        adata.outer = (Flx16) (idata->item.l.out_range * scale_3ds2esch);
+
+        ((VngoColor24bit*)&adata.color)->r = (byte)(idata->item.l.color.r
+                                                * idata->item.l.mult * 255.0);
+        ((VngoColor24bit*)&adata.color)->g = (byte)(idata->item.l.color.g
+                                                * idata->item.l.mult * 255.0);
+        ((VngoColor24bit*)&adata.color)->b = (byte)(idata->item.l.color.b
+                                                * idata->item.l.mult * 255.0);
+
+        if (lgt_omnias == 2)
+        {
+            if (iff.write(iff.makeid('E','A','T','N'),
+                        &adata,sizeof(EschFileLightAtten)))
+            {
+                sprintf(buff,"ERROR:  Writing EATN chunk, error #%d",
+                    iff.error());
+                gfx_continu_line(buff);
+                return 1;
+            }
+        }
+        else // lgt_omnias == 1
+        {
+            if (iff.write(iff.makeid('E','F','A','T'),
+                        &adata,sizeof(EschFileLightAtten)))
+            {
+                sprintf(buff,"ERROR:  Writing EFAT chunk, error #%d",
+                    iff.error());
+                gfx_continu_line(buff);
+                return 1;
+            }
+        }
+    }
+    //ÄÄÄ Nonattenuated version
+    else
+    {
+        EschFileLightPoint  pdata;
+        memset(&pdata,0,sizeof(EschFileLightPoint));
+        strncpy(pdata.name,idata->name,ESCH_MAX_NAME);
+
+        if (!(idata->item.l.flags & LIGHT_ON))
+            pdata.flags |= ESCH_LGT_OFF;
+
+        pdata.x = (Flx16) (idata->item.l.x * scale_3ds2esch);
+        pdata.y = (Flx16) (idata->item.l.z * scale_3ds2esch);
+        pdata.z = (Flx16) (idata->item.l.y * scale_3ds2esch);
+
+        ((VngoColor24bit*)&pdata.color)->r = (byte)(idata->item.l.color.r
+                                                * idata->item.l.mult * 255.0);
+        ((VngoColor24bit*)&pdata.color)->g = (byte)(idata->item.l.color.g
+                                                * idata->item.l.mult * 255.0);
+        ((VngoColor24bit*)&pdata.color)->b = (byte)(idata->item.l.color.b
+                                                * idata->item.l.mult * 255.0);
+
+        if (lgt_omnias == 2)
+        {
+            if (iff.write(iff.makeid('E','P','N','T'),
+                        &pdata,sizeof(EschFileLightPoint)))
+            {
+                sprintf(buff,"ERROR:  Writing EPNT chunk, error #%d",
+                    iff.error());
+                gfx_continu_line(buff);
+                return 1;
+            }
+        }
+        else // lgt_omnias == 1
+        {
+            if (iff.write(iff.makeid('E','F','P','T'),
+                        &pdata,sizeof(EschFileLightPoint)))
+            {
+                sprintf(buff,"ERROR:  Writing EFPT chunk, error #%d",
+                    iff.error());
+                gfx_continu_line(buff);
+                return 1;
+            }
+        }
+    }
+
+    return 0;
+}
+
+
+
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°° Meshes °°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// export_mesh                                                              ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+STATIC int export_mesh(XFParseIFF &iff, ItemData *idata,
+                       XVData *verts, XFData *faces, VngoPal *pal)
+{
+    float   cx, cy, cz;
+    float   v1[3],v2[3],vr[3];
+    char    buff[128];
+
+    sprintf(buff,"Exporting Object: %s",idata->name);
+    gfx_show_gasgauge(buff);
+    gfx_report(buff);
+
+    int steps = idata->item.m.verts + idata->item.m.faces;
+
+//ÄÄÄ Create mesh form
+    if (iff.newform(iff.makeid('E','M','S','H')))
+    {
+        sprintf(buff,"ERROR:  Cannot create EMSH, error #%d",
+                iff.error());
+        gfx_continu_line(buff);
+        return 1;
+    }
+
+//ÄÄÄ Create Header
+    EschFileMeshHDR mheader;
+    memset(&mheader,0,sizeof(mheader));
+
+    strncpy(mheader.name,idata->name,ESCH_MAX_NAME);
+    mheader.flags = object_flags;
+    mheader.nverts = idata->item.m.verts;
+    mheader.nfaces = idata->item.m.faces;
+
+//ÄÄÄÄ Compute extents
+    EschFileMeshEXNT    mextents;
+    memset(&mextents,0,sizeof(mextents));
+
+    //ÄÄÄÄ Box extents
+    sprintf(buff,"Object '%s': Computing box extents...",idata->name);
+    gfx_set_gasgauge(buff,0,1);
+
+    compute_box_extents( idata, verts, &mextents);
+
+    //ÄÄÄÄ Radial extents
+    sprintf(buff,"Object '%s': Computing radial extents...",idata->name);
+    gfx_set_gasgauge(buff,0,1);
+    if (extent_mode==2)
+    {
+        // Optimal
+        if (compute_optimal_extents( idata, verts, &mextents ))
+            return 1;
+    }
+    else
+    {
+        // Quick
+        compute_quick_extents( idata, verts, &mextents );
+    }
+
+//ÄÄÄ Compute matrix/heirachy
+    EschMatrix          mtx;
+
+    EschFileMeshHIER    ehier;
+    memset(&ehier,0,sizeof(ehier));
+
+    if (orientation_mode == 2)
+    {
+        sprintf(buff,"Object '%s': Computing matrix...",idata->name);
+        gfx_set_gasgauge(buff,0,1);
+
+        if (hierarchy_mode == 2)
+        {
+            float m[4][3];
+
+            capture_gethier(idata,ehier.parent,&m[0][0]);
+
+            cx = m[3][0];
+            cy = m[3][1];
+            cz = m[3][2];
+
+            // Rest of matrix has already been applied to all
+            // verticies as captured in get_verts
+        }
+        else
+        {
+            cx = idata->item.m.matrix[3][0];
+            cy = idata->item.m.matrix[3][1];
+            cz = idata->item.m.matrix[3][2];
+
+            float tx, ty, tz;
+            if (coord_mode == 1
+                && capture_getpivot(idata, &tx, &ty, &tz))
+            {
+                cx += tx;
+                cy += ty;
+                cz += tz;
+            }
+
+            // Rest of matrix has already been applied to all
+            // verticies as captured in get_verts
+        }
+
+        mtx.mtx[ESCH_MTX_J] = (Flx16) (cx * scale_3ds2esch);
+        mtx.mtx[ESCH_MTX_K] = (Flx16) (cz * scale_3ds2esch);
+        mtx.mtx[ESCH_MTX_L] = (Flx16) (cy * scale_3ds2esch);
+    }
+    else if (hierarchy_mode == 2)
+    {
+        capture_gethier(idata,ehier.parent,0);
+    }
+
+//ÄÄÄ Allocate Space
+    EschVertex *everts = new EschVertex[idata->item.m.verts];
+    if (!everts)
+    {
+        gfx_continu_line("Out of Memory!");
+        return 1;
+    }
+    memset(everts,0,idata->item.m.verts*sizeof(EschVertex));
+
+    EschFace *efaces = new EschFace[idata->item.m.faces];
+    if (!efaces)
+    {
+        gfx_continu_line("Out of Memory!");
+        return 1;
+    }
+    memset(efaces,0,idata->item.m.faces*sizeof(EschFace));
+
+    EschFileMeshMTL *emtls = new EschFileMeshMTL[256];
+    if (!emtls)
+    {
+        gfx_continu_line("Out of Memory!");
+        return 1;
+    }
+
+    char *mtlfnames = new char[256*14*2];
+    if (!mtlfnames)
+    {
+        gfx_continu_line("Out of Memory!");
+        return 1;
+    }
+    
+//ÄÄÄ Compute Faces
+    sprintf(buff,"Object '%s': Computing faces...",idata->name);
+    gfx_set_gasgauge(buff,0,steps);
+
+    int nmtls=0;
+    for(int i=0; i < idata->item.m.faces; i++)
+    {
+        gfx_set_gasgauge("",i,steps);
+
+        if (check_abort())
+            goto error_exit;
+
+        // Setup line visiblity flags
+        if (faces[i].flags & XF_ABLINE)
+            efaces[i].flags |= ESCH_FACE_ABLINE;
+        if (faces[i].flags & XF_BCLINE)
+            efaces[i].flags |= ESCH_FACE_BCLINE;
+        if (faces[i].flags & XF_CALINE)
+            efaces[i].flags |= ESCH_FACE_CALINE;
+
+        // Fill out vertex indecies.
+        efaces[i].a = faces[i].a;
+        efaces[i].b = faces[i].b;
+        efaces[i].c = faces[i].c;
+
+        // Compute face normal (ABC is in counter-clockwise order)
+        v1[0] = verts[faces[i].a].x - verts[faces[i].b].x; 
+        v1[1] = verts[faces[i].a].z - verts[faces[i].b].z;
+        v1[2] = verts[faces[i].a].y - verts[faces[i].b].y;
+
+        v2[0] = verts[faces[i].c].x - verts[faces[i].b].x; 
+        v2[1] = verts[faces[i].c].z - verts[faces[i].b].z;
+        v2[2] = verts[faces[i].c].y - verts[faces[i].b].y;
+
+        // Cross-product
+        vr[0] = (v1[1] * v2[2]) - (v1[2] * v2[1]);
+        vr[1] = (v1[2] * v2[0]) - (v1[0] * v2[2]);
+        vr[2] = (v1[0] * v2[1]) - (v1[1] * v2[0]);
+
+        float mag = sqrt(vr[0]*vr[0] + vr[1]*vr[1] + vr[2]*vr[2]);
+
+        efaces[i].normal.i = (Flx16) (vr[0] / mag);
+        efaces[i].normal.j = (Flx16) (vr[1] / mag);
+        efaces[i].normal.k = (Flx16) (vr[2] / mag);
+
+        // Fill out vertex mapping parameters
+        if (idata->item.m.tverts)
+        {
+            efaces[i].u[0] = (Flx16) (verts[faces[i].a].u);
+            efaces[i].u[1] = (Flx16) (verts[faces[i].b].u);
+            efaces[i].u[2] = (Flx16) (verts[faces[i].c].u);
+
+            // 3DS Uses the opposite definition of v, so we
+            // have to negate it to result in right-side up
+            // images.
+
+            efaces[i].v[0] = (Flx16) (-verts[faces[i].a].v);
+            efaces[i].v[1] = (Flx16) (-verts[faces[i].b].v);
+            efaces[i].v[2] = (Flx16) (-verts[faces[i].c].v);
+        }   
+
+        efaces[i].flags |= ESCH_FACE_WIRE
+                           | ESCH_FACE_SOLID;
+
+        if (mtl_perspmode == 3)
+            efaces[i].flags |= ESCH_FACE_ALLOWPERSP;
+
+        // Fill out material information
+        ushort selfi;
+        MtlData *mtl = capture_mtlget(faces[i].material,&selfi);
+        if (mtl)
+        {
+            // Fill out face associated information
+            efaces[i].color=0;
+            ((VngoColor24bit*)&efaces[i].color)->r = mtl->diff.r;
+            ((VngoColor24bit*)&efaces[i].color)->g = mtl->diff.g;
+            ((VngoColor24bit*)&efaces[i].color)->b = mtl->diff.b;
+
+            if (!(mtl->flags & MTL_TWOSIDE))
+                efaces[i].flags |= ESCH_FACE_ONESIDED;
+
+            if (mtl_perspmode == 2 && *(mtl->name) == '^')
+                efaces[i].flags |= ESCH_FACE_ALLOWPERSP;
+
+            if (selfi)
+            {
+                dword slevel = (dword)( ((float)selfi * 15.0) / 100.0);
+
+                efaces[i].flags |= (slevel << 20)
+                                    & ESCH_FACE_SELFILUM_MASK;
+            }
+
+            if (!(mtl->flags & MTL_WIRE))
+            {
+                switch (mtl->shading)
+                {
+                    case 1:
+                        efaces[i].flags |= ESCH_FACE_FLAT;
+                        break;
+                    case 2:
+                        efaces[i].flags |= ESCH_FACE_SMOOTH
+                                           | ESCH_FACE_FLAT;
+                        break;
+                    case 3:
+                    case 4:
+                        efaces[i].flags |= ESCH_FACE_SPECULAR
+                                           | ESCH_FACE_SMOOTH
+                                           | ESCH_FACE_FLAT;
+                        break;
+                }
+            }
+
+            // Check for maps
+            char fname[13];
+            char tfname[13];
+            int j=capture_mtlfile(faces[i].material,fname,tfname);
+
+            // Warning if ignored maps
+            if (j==2)
+            {
+                char name[ESCH_MAX_NAME+1];
+                strncpy(name,mtl->name,ESCH_MAX_NAME);
+                name[ESCH_MAX_NAME] = 0;
+
+                sprintf(buff,"%s: non-Texture1/Opacity maps ignored",
+                        name);
+                gfx_prompt(buff);
+            }
+
+            if (!*fname && *tfname)
+            {
+                char name[ESCH_MAX_NAME+1];
+                strncpy(name,mtl->name,ESCH_MAX_NAME);
+                name[ESCH_MAX_NAME] = 0;
+            
+                sprintf(buff,"%s: Opacity maps without Texture1 maps ignored",
+                        name);
+                gfx_prompt(buff);
+            }
+
+            // Handle valid map definition
+            if (*fname && (j==1 || j ==2))
+            {
+                if (!strstr(fname,".SXP") && !strstr(tfname,".SXP")
+                    && !strstr(fname,".IFL") && !strstr(tfname,".IFL"))
+                {
+                    // Add to local mtl's list for object.
+                    for(j=0; j < nmtls; j++)
+                    {
+                        if (!strncmp(mtl->name,emtls[j].name,ESCH_MAX_NAME))
+                        {
+                            efaces[i].txt=(word)(j+1);
+                            efaces[i].flags |= ESCH_FACE_TEXTURED;
+                            memset(&mtlfnames[14*2*j],0,14*2);
+                            strncpy(&mtlfnames[14*2*j],fname,13);
+                            strncpy(&mtlfnames[14*2*j+14],tfname,13);
+                            break;
+                        }
+                    }
+                    
+                    if (!nmtls || (j >= nmtls))
+                    {
+                        strncpy(emtls[nmtls].name,mtl->name,ESCH_MAX_NAME);
+                        efaces[i].txt=(word)(nmtls+1);
+                        efaces[i].flags |= ESCH_FACE_TEXTURED;
+                        memset(&mtlfnames[14*2*nmtls],0,14*2);
+                        strncpy(&mtlfnames[14*2*nmtls],fname,13);
+                        strncpy(&mtlfnames[14*2*nmtls+14],tfname,13);
+                        nmtls++;
+                    }
+                }
+                else
+                {
+                    char name[ESCH_MAX_NAME+1];
+                    strncpy(name,mtl->name,ESCH_MAX_NAME);
+                    name[ESCH_MAX_NAME] = 0;
+                    sprintf(buff,"ERROR: %s: .SXP/.IFL not supported, texture skipped",
+                                 name);
+                    gfx_continu_line(buff);
+                    goto error_exit;
+                }
+            }
+        }
+        else
+        {
+            // If no material, then assume smoothable specular
+            // single-sided material with grey color
+
+            efaces[i].color=0;
+            ((VngoColor24bit*)&efaces[i].color)->r = 128;
+            ((VngoColor24bit*)&efaces[i].color)->g = 128;
+            ((VngoColor24bit*)&efaces[i].color)->b = 128;
+
+            efaces[i].flags |= ESCH_FACE_SPECULAR
+                                | ESCH_FACE_SMOOTH
+                                | ESCH_FACE_FLAT
+                                | ESCH_FACE_ONESIDED;
+        }
+    }
+    mheader.nmtls = nmtls;
+
+//ÄÄÄ Compute Vertices
+    sprintf(buff,"Object '%s': Computing vertices...",idata->name);
+    gfx_set_gasgauge(buff,idata->item.m.faces+i,steps);
+
+    // Get center of object from orientation matrix
+    cx = idata->item.m.matrix[3][0];
+    cy = idata->item.m.matrix[3][1];
+    cz = idata->item.m.matrix[3][2];
+
+    // Adjust center for pivot points, if any
+    float tx, ty, tz;
+    if (coord_mode == 1
+        && capture_getpivot(idata, &tx, &ty, &tz))
+    {
+        cx += tx;
+        cy += ty;
+        cz += tz;
+    }
+
+    for(i=0; i < idata->item.m.verts; i++)
+    {
+        gfx_set_gasgauge("",idata->item.m.faces+i,steps);
+
+        if (check_abort())
+            goto error_exit;
+
+        tx = verts[i].x;
+        ty = verts[i].y;
+        tz = verts[i].z;
+
+        // Handle adjustment to center, if not exporting world coords.
+        if (coord_mode == 1)
+        {
+            tx -= cx;
+            ty -= cy;
+            tz -= cz;
+        }
+
+        everts[i].x = (Flx16) (tx * scale_3ds2esch);
+        everts[i].y = (Flx16) (tz * scale_3ds2esch);
+        everts[i].z = (Flx16) (ty * scale_3ds2esch);
+
+        vr[0]=vr[1]=vr[2]=0.0;
+        for(int j=0; j < idata->item.m.faces; j++)
+        {
+            if (efaces[j].a == i
+                || efaces[j].b == i
+                || efaces[j].c == i)
+            {
+                vr[0] += efaces[j].normal.i;
+                vr[1] += efaces[j].normal.j;
+                vr[2] += efaces[j].normal.k;
+            }
+        }
+
+        float mag = sqrt(vr[0]*vr[0] + vr[1]*vr[1] + vr[2]*vr[2]);
+        everts[i].normal.i = (Flx16) (vr[0] / mag);
+        everts[i].normal.j = (Flx16) (vr[1] / mag);
+        everts[i].normal.k = (Flx16) (vr[2] / mag);
+    }
+
+//ÄÄÄ Output Data
+    sprintf(buff,"Object '%s': Writing...",idata->name);
+    gfx_set_gasgauge(buff,steps,steps);
+
+    // Output header
+    if (iff.write(iff.makeid('H','D','R',' '),&mheader,sizeof(mheader)))
+    {
+        sprintf(buff,"ERROR:  Writing HDR chunk, error #%d", iff.error());
+        gfx_continu_line(buff);
+        goto error_exit;
+    }
+
+    // Matrix
+    if ((orientation_mode == 2)
+         && iff.write(iff.makeid('M','T','R','X'),&mtx,sizeof(mtx)))
+    {
+        sprintf(buff,"ERROR:  Writing MTRX chunk, error #%d", iff.error());
+        gfx_continu_line(buff);
+        goto error_exit;
+    }
+
+    // Hierarchy
+    if (hierarchy_mode == 2 && *ehier.parent
+        && iff.write(iff.makeid('H','I','E','R'),&ehier,sizeof(ehier)))
+    {
+        sprintf(buff,"ERROR:  Writing HIER chunk, error #%d", iff.error());
+        gfx_continu_line(buff);
+        goto error_exit;
+    }
+
+    // Extents
+    if (iff.write(iff.makeid('E','X','N','T'),&mextents,sizeof(mextents)))
+    {
+        sprintf(buff,"ERROR:  Writing EXNT chunk, error #%d", iff.error());
+        gfx_continu_line(buff);
+        goto error_exit;
+    }
+
+    // Verticies
+    if (iff.write(iff.makeid('V','E','R','T'),everts,
+                  idata->item.m.verts * sizeof(EschVertex)))
+    {
+        sprintf(buff,"ERROR:  Writing VERT chunk, error #%d", iff.error());
+        gfx_continu_line(buff);
+        goto error_exit;
+    }
+
+    // Material names
+    if (nmtls && iff.write(iff.makeid('M','T','L',' '),
+                           emtls,nmtls * sizeof(EschFileMeshMTL)))
+    {
+        sprintf(buff,"ERROR:  Writing MTL chunk, error #%d", iff.error());
+        gfx_continu_line(buff);
+        goto error_exit;
+    }
+
+    // Faces
+    if (iff.write(iff.makeid('F','A','C','E'), efaces,
+                  idata->item.m.faces * sizeof(EschFace)))
+    {
+        sprintf(buff,"ERROR:  Writing FACE chunk, error #%d", iff.error());
+        gfx_continu_line(buff);
+        goto error_exit;
+    }
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Materials
+    if (nmtls && material_mode == 2)
+    {
+        sprintf(buff,"Object '%s': Outputing materials...",idata->name);
+        gfx_set_gasgauge(buff,0,nmtls);
+
+        //ÄÄÄ Output each material
+        for(int j=0; j < nmtls; j++)
+        {
+            gfx_set_gasgauge("",j,nmtls);
+
+            char *fname=&mtlfnames[14*2*j];
+            char *tfname=&mtlfnames[14*2*j+14];
+
+            char name[ESCH_MAX_NAME+1];
+            strncpy(name,emtls[j].name,ESCH_MAX_NAME);
+            name[ESCH_MAX_NAME] = 0;
+
+            if (*tfname)
+            {
+                sprintf(buff,"%s <= T1: %s, O: %s...",
+                        name,fname,tfname);
+            }
+            else
+            {
+                sprintf(buff,"%s <= T1: %s...",
+                        name,fname);
+            }
+            gfx_prompt(buff);
+
+            if (check_abort())
+                goto error_exit;
+
+            //ÄÄÄ Setup header
+            EschFileMtlMHDR mtlhdr;
+            memset(&mtlhdr,0,sizeof(EschFileMtlMHDR));
+
+            strncpy(mtlhdr.name,emtls[j].name,ESCH_MAX_NAME);
+            mtlhdr.nframes = 1;
+
+            if (pal)
+                strncpy(mtlhdr.pname,pal->name,16);
+
+            //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Texture 1
+            BXPColor *bm=0;
+            Flic flc;
+            FlicRaster *raster=0;
+            byte *raster_pix=0;
+
+            if (mtl_animatedtxt
+                && strstr(fname,".FLI") || strstr(fname,".FLC"))
+            {
+                AnimInfo info;
+                char     path[128];
+
+                if (!locate_map(fname,path)
+                    || pj_flic_open_info(path,&flc,&info)
+                    || pj_flic_rewind(&flc))
+                {
+                    sprintf(buff,"ERROR:  Could not open Texture 1 flic '%s'",
+                                 fname);
+                    gfx_continu_line(buff);
+                    goto error_exit;
+                }
+                
+                raster_pix = (byte*)malloc(info.width * info.height);
+                if (!raster_pix
+                    || pj_raster_bind_ram(&raster, info.width, info.height, raster_pix))
+                {
+                    gfx_continu_line("Out of Memory!");
+                    goto error_exit;
+                }
+
+                mtlhdr.nframes = (ushort)info.num_frames;
+
+                bm=capture_flcframe(fname, &flc, raster, raster_pix,
+                                    &mtlhdr.xsize, &mtlhdr.ysize, 0);
+                if (!bm)
+                {
+                    sprintf(buff,"ERROR:  Error loading Texture 1 flic '%s'",
+                                 fname);
+                    gfx_continu_line(buff);
+                    goto error_exit;
+                }
+            }
+            else if (strchr(fname,'*'))
+            {
+                gfx_continu_line("ERROR: Sequentially numbered bitmaps not yet supported");
+                goto error_exit;
+            }
+            else
+            {
+                bm=capture_mtlbitmap(fname,
+                                     &mtlhdr.xsize, &mtlhdr.ysize, 0);
+                if (!bm)
+                {
+                    sprintf(buff,"ERROR:  Error loading Texture 1 bitmap %s",fname);
+                    gfx_continu_line(buff);
+                    goto error_exit;
+                }
+            }
+
+            //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Opacity
+            BXPColor *tbm=0;
+            Flic tflc;
+            FlicRaster *traster=0;
+            byte *traster_pix=0;
+
+            if (*tfname)
+            {
+                if (mtl_animatedtxt
+                    && strstr(tfname,".FLI") || strstr(tfname,".FLC"))
+                {
+                    AnimInfo info;
+                    char     path[128];
+
+                    if (!locate_map(tfname,path)
+                        || pj_flic_open_info(path,&tflc,&info)
+                        || pj_flic_rewind(&tflc))
+                    {
+                        sprintf(buff,"ERROR:  Could not open Opacity flic '%s'",
+                                     tfname);
+                        gfx_continu_line(buff);
+                        goto error_exit;
+                    }
+
+                    traster_pix = (byte*)malloc(info.width * info.height);
+                    if (!traster_pix
+                        || pj_raster_bind_ram(&traster, info.width, info.height, traster_pix))
+                    {
+                        gfx_continu_line("Out of Memory!");
+                        goto error_exit;
+                    }
+
+                    if (info.num_frames > (long)mtlhdr.nframes)
+                        mtlhdr.nframes = (ushort)info.num_frames;
+
+                    tbm=capture_flcframe(tfname, &tflc, traster, traster_pix,
+                                         &mtlhdr.xsize, &mtlhdr.ysize, 1);
+                    if (!tbm)
+                    {
+                        sprintf(buff,"ERROR:  Error loading Opacity flic '%s'",
+                                     tfname);
+                        gfx_continu_line(buff);
+                        goto error_exit;
+                    }
+                }
+                else if (strchr(tfname,'*'))
+                {
+                    gfx_continu_line("ERROR: Sequentially numbered bitmaps not yet supported");
+                    goto error_exit;
+                }
+                else
+                {
+                    tbm=capture_mtlbitmap(tfname,
+                                          &mtlhdr.xsize, &mtlhdr.ysize, 1);
+                    if (!tbm)
+                    {
+                        sprintf(buff,"ERROR:  Error loading Opacity bitmap %s",tfname);
+                        gfx_continu_line(buff);
+                        goto error_exit;
+                    }
+                }
+            }
+
+            int bpp=1;
+
+            //ÄÄÄ Finish header
+            if (mtl_format == 2)
+            {
+                mtlhdr.type = (tbm) ? ESCH_MTL_TYPE_32BIT
+                                    : ESCH_MTL_TYPE_24BIT;
+                bpp = (tbm) ? 4 : 3;
+            }
+            else
+            {
+                mtlhdr.type = (tbm) ? ESCH_MTL_TYPE_8BIT_TRANSP
+                                    : ESCH_MTL_TYPE_8BIT;
+            }
+            mtlhdr.compress = (mtl_compress)
+                              ? ESCH_MTL_COMPRESS_RLE
+                              : ESCH_MTL_COMPRESS_NONE;
+
+            //ÄÄÄ Generate material form
+            if (iff.newform((mtlhdr.nframes > 1)
+                            ? iff.makeid('E','M','T','1')
+                            : iff.makeid('E','M','T','L')))
+            {
+                sprintf(buff,"ERROR:  Cannot create EMTL/EMT1, error #%d", iff.error());
+                gfx_continu_line(buff);
+                goto error_exit;
+            }
+
+            //ÄÄÄ Output header
+            if (iff.write(iff.makeid('M','H','D','R'),&mtlhdr,sizeof(mtlhdr)))
+            {
+                sprintf(buff,"ERROR:  Writing MHDR chunk, error #%d", iff.error());
+                gfx_continu_line(buff);
+                goto error_exit;
+            }
+
+            //ÄÄÄ Create body
+            byte *body = new byte[mtlhdr.xsize * mtlhdr.ysize * bpp];
+            if (!body)
+            {
+                gfx_continu_line("Out of memory!");
+                goto error_exit;
+            }
+
+            byte *work = new byte[mtlhdr.xsize * mtlhdr.ysize * bpp];
+            if (!work)
+            {
+                gfx_continu_line("Out of memory!");
+                goto error_exit;
+            }
+
+            for(ushort frame=0;;)
+            {
+                switch (bpp)
+                {
+                    case 3:
+                        {
+                            BXPColor *bptr = bm;
+                            byte *ptr = body;
+                            for(int k=0; k < mtlhdr.xsize*mtlhdr.ysize; k++)
+                            {
+                                *(ptr++) = bptr->r;
+                                *(ptr++) = bptr->g;
+                                *(ptr++) = bptr->b;
+                                bptr++;
+                            }
+                        }
+                        break;
+                    case 4:
+                        {
+                            BXPColor *bptr = bm, *tptr = tbm;
+                            byte *ptr = body;
+                            for(int k=0; k < mtlhdr.xsize*mtlhdr.ysize; k++)
+                            {
+                                *(ptr++) = bptr->r;
+                                *(ptr++) = bptr->g;
+                                *(ptr++) = bptr->b;
+
+                                byte alpha = tptr->r;
+                                if (alpha > tptr->g)
+                                    alpha = tptr->g;
+                                if (alpha > tptr->b)
+                                    alpha = tptr->b;
+
+                                *(ptr++) = alpha;
+                                bptr++;
+                                tptr++;
+                            }
+                        }
+                        break;
+                    default:
+                        if (!pal)
+                        {
+                            gfx_continu_line("Need Palette!");
+                            goto error_exit;
+                        }
+                        if (tbm)
+                        {
+                            BXPColor *bptr = bm, *tptr = tbm;
+                            byte *ptr = body;
+                            for(int k=0; k < mtlhdr.xsize*mtlhdr.ysize; k++)
+                            {
+                                if (tptr->r <= 10 
+                                    && tptr->g <= 10
+                                    && tptr->b <= 10)
+                                {
+                                    *(ptr++) = (byte)VNGO_TRANSPARENT_COLOR;
+                                }
+                                else
+                                {
+                                    *(ptr++) = (byte)pal->get_index(
+                                                        VngoColor24bit(bptr->r,
+                                                                    bptr->g,
+                                                                    bptr->b));
+                                }
+                                bptr++;
+                                tptr++;
+                            }
+                        }
+                        else
+                        {
+                            BXPColor *bptr = bm;
+                            byte *ptr = body;
+                            for(int k=0; k < mtlhdr.xsize*mtlhdr.ysize; k++)
+                            {
+                                *(ptr++) = (byte)pal->get_index(
+                                                    VngoColor24bit(bptr->r,
+                                                                bptr->g,
+                                                                bptr->b));
+                                bptr++;
+                            }
+                        }
+                        break;
+                }
+
+                //ÄÄÄ Compress
+                dword size=0;
+                if (mtl_compress)
+                {
+                    switch (bpp)
+                    {
+                        case 3:
+                            size = compress_rle_24bpp(mtlhdr.xsize, mtlhdr.ysize,
+                                                    body, work);
+                            break;
+                        case 4:
+                            size = compress_rle_32bpp(mtlhdr.xsize, mtlhdr.ysize,
+                                                    body, work);
+                            break;
+                        default:
+                            size = compress_rle_8bpp(mtlhdr.xsize, mtlhdr.ysize,
+                                                    body, work);
+                            break;
+                    }
+                }
+
+                //ÄÄÄ Output body
+                if (size)
+                {
+                    if (iff.write(iff.makeid('B','O','D','Y'),work,size))
+                    {
+                        sprintf(buff,"ERROR:  Writing BODY chunk, error #%d",
+                                iff.error());
+                        gfx_continu_line(buff);
+                        goto error_exit;
+                    }
+                }
+                else
+                {
+                    if (iff.write(iff.makeid('B','O','D','Y'),
+                                body,mtlhdr.xsize * mtlhdr.ysize * bpp))
+                    {
+                        sprintf(buff,"ERROR:  Writing BODY chunk, error #%d",
+                                iff.error());
+                        gfx_continu_line(buff);
+                        goto error_exit;
+                    }
+                }
+
+                //ÄÄÄ Progress
+                sprintf(buff,"%s [%d/%d]",
+                             name,frame+1,mtlhdr.nframes);
+                gfx_prompt(buff);
+
+                //ÄÄÄ Advance frame
+                frame++;
+                if (frame >= mtlhdr.nframes)
+                    break;
+
+                if (raster)
+                {
+                    free(bm);
+                    bm = capture_flcframe(fname, &flc, raster, raster_pix,
+                                          &mtlhdr.xsize, &mtlhdr.ysize, 1);
+                    if (!bm)
+                    {
+                        sprintf(buff,"ERROR:  Error loading Texture 1 flic '%s'",
+                                     fname);
+                        gfx_continu_line(buff);
+                        goto error_exit;
+                    }
+                }
+                if (traster)
+                {
+                    free(tbm);
+                    tbm = capture_flcframe(tfname, &tflc, traster, traster_pix,
+                                           &mtlhdr.xsize, &mtlhdr.ysize, 1);
+                    if (!tbm)
+                    {
+                        sprintf(buff,"ERROR:  Error loading Opacity flic '%s'",
+                                     tfname);
+                        gfx_continu_line(buff);
+                        goto error_exit;
+                    }
+                }
+            }
+
+            //ÄÄÄ Finish form and cleanup
+            if (work)
+                delete [] work;
+
+            if (body)
+                delete [] body;
+
+            if (raster)
+            {
+                pj_raster_unbind_ram(&raster);
+                free(raster_pix);
+                pj_flic_close(&flc);
+            }
+            if (traster)
+            {
+                pj_raster_unbind_ram(&traster);
+                free(traster_pix);
+                pj_flic_close(&tflc);
+            }
+
+            iff.leaveform();
+
+            if (bm)
+                free(bm);
+
+            if (tbm)
+                free(tbm);
+
+            sprintf(buff,"%s written (%d by %d, %d frames) as ",
+                         name,mtlhdr.xsize,mtlhdr.ysize,mtlhdr.nframes);
+            switch(mtlhdr.type)
+            {
+                case ESCH_MTL_TYPE_32BIT:
+                    strcat(buff,"32-bit");
+                    break;
+                case ESCH_MTL_TYPE_24BIT:
+                    strcat(buff,"24-bit");
+                    break;
+                case ESCH_MTL_TYPE_8BIT_TRANSP:
+                    strcat(buff,"8-bit xparent");
+                    break;
+                case ESCH_MTL_TYPE_8BIT:
+                    strcat(buff,"8-bit");
+                    break;
+                default:
+                    strcat(buff,"*unknown*");
+            }
+
+            if (mtlhdr.compress)
+                strcat(buff," compressed");
+
+            gfx_prompt(buff);
+        }
+    }
+
+//ÄÄÄ Clean up and Return OK
+    sprintf(buff,"Object '%s': Export Complete",idata->name);
+    gfx_set_gasgauge(buff,1,1);
+
+    if (everts)
+        delete [] everts;
+
+    if (efaces)
+        delete [] efaces;
+
+    if (emtls)
+        delete [] emtls;
+
+    if (mtlfnames)
+        delete [] mtlfnames;
+
+    iff.leaveform();
+
+    return 0;
+
+//ÄÄÄ Error Exit
+error_exit:;
+
+    if (everts)
+        delete [] everts;
+
+    if (efaces)
+        delete [] efaces;
+
+    if (emtls)
+        delete [] emtls;
+
+    if (mtlfnames)
+        delete [] mtlfnames;
+
+    return 1;
 }
 
 
@@ -1617,6 +2029,255 @@ STATIC int compute_optimal_extents(  ItemData *idata,
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// compress_rle_8bpp                                                        ³
+//                                                                          ³
+// Compresses a 8bpp pixel data set into a compressed worked buffer.        ³
+// Returns the number of bytes in the compressed result or 0 if the         ³
+// compressed version would take more than the original image size in bytes.³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+STATIC ulong compress_rle_8bpp(ushort w, ushort h, byte *data, byte *cdata)
+{
+    ulong   size = w*h;
+    ulong   count = 0;
+    
+    byte *wptr = cdata;
+    byte *ptr = data;
+
+    for(int y=0; y < h; y++)
+    {
+        byte *lptr = 0;
+        for(int i=0; i < w; ptr++)
+        {
+            //ÄÄÄ Scan for run
+            byte *s=ptr;
+            for(int j=0;
+                (j < 127) && ((j+i+1) < w) && (*s == *(ptr+1));
+                j++)
+            {
+                ptr++;
+            }
+
+            //ÄÄÄ Found run
+            if (j > 0)
+            {
+                // Close last literal
+                lptr=0;
+
+                // Add rep run
+                count += 2;
+                if (count >= size)
+                    return 0;
+
+                *(wptr++) = (byte) (-(char)j);
+                *(wptr++) = *ptr;
+
+                i += j+1;
+            }
+            //ÄÄÄ Store literal
+            else
+            {
+                if (lptr && *lptr < 127)
+                {
+                    // Add to literal
+                    (*lptr)++;
+                }
+                else
+                {
+                    // Create new literal
+                    if (++count >= size)
+                        return 0;
+
+                    lptr=wptr++;
+                    *lptr = 0;
+                }
+
+                if (++count >= size)
+                    return 0;
+
+                *(wptr++) = *ptr;
+                i++;
+            }
+        }
+    }
+
+    return count;
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// compress_rle_24bpp                                                       ³
+//                                                                          ³
+// Compresses a 24bpp pixel data set into a compressed worked buffer.       ³
+// Returns the number of bytes in the compressed result or 0 if the         ³
+// compressed version would take more than the original image size in bytes.³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+STATIC ulong compress_rle_24bpp(ushort w, ushort h, byte *data, byte *cdata)
+{
+    ulong   size = w*h*3;
+    ulong   count = 0;
+    
+    byte *wptr = cdata;
+    byte *ptr = data;
+
+    for(int y=0; y < h; y++)
+    {
+        byte *lptr = 0;
+        for(int i=0; i < w; ptr += 3)
+        {
+            //ÄÄÄ Scan for run
+            byte *s=ptr;
+            for(int j=0;
+                (j < 127) && ((j+i+1) < w)
+                && (*s == *(ptr+3))
+                && (*(s+1) == *(ptr+4))
+                && (*(s+2) == *(ptr+5));
+                j++)
+            {
+                ptr += 3;
+            }
+
+            //ÄÄÄ Found run
+            if (j > 0)
+            {
+                // Close last literal
+                lptr=0;
+
+                // Add rep run
+                count += 4;
+                if (count >= size)
+                    return 0;
+
+                *(wptr++) = (byte) (-(char)j);
+                *(wptr++) = *ptr;
+                *(wptr++) = *(ptr+1);
+                *(wptr++) = *(ptr+2);
+
+                i += j+1;
+            }
+            //ÄÄÄ Store literal
+            else
+            {
+                if (lptr && *lptr < 127)
+                {
+                    // Add to literal
+                    (*lptr)++;
+                }
+                else
+                {
+                    // Create new literal
+                    if (++count >= size)
+                        return 0;
+
+                    lptr=wptr++;
+                    *lptr = 0;
+                }
+
+                count += 3;
+                if (count >= size)
+                    return 0;
+
+                *(wptr++) = *ptr;
+                *(wptr++) = *(ptr+1);
+                *(wptr++) = *(ptr+2);
+                i++;
+            }
+        }
+    }
+
+    return count;
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// compress_rle_32bpp                                                       ³
+//                                                                          ³
+// Compresses a 32bpp pixel data set into a compressed worked buffer.       ³
+// Returns the number of bytes in the compressed result or 0 if the         ³
+// compressed version would take more than the original image size in bytes.³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+STATIC ulong compress_rle_32bpp(ushort w, ushort h, byte *data, byte *cdata)
+{
+    ulong   size = w*h*4;
+    ulong   count = 0;
+    
+    byte *wptr = cdata;
+    dword *ptr = (dword*)data;
+
+    for(int y=0; y < h; y++)
+    {
+        byte *lptr = 0;
+        for(int i=0; i < w; ptr++)
+        {
+            //ÄÄÄ Scan for run
+            dword *s=ptr;
+            for(int j=0;
+                (j < 127) && ((j+i+1) < w)
+                && (*s == *(ptr+1));
+                j++)
+            {
+                ptr++;
+            }
+
+            //ÄÄÄ Found run
+            if (j > 0)
+            {
+                // Close last literal
+                lptr=0;
+
+                // Add rep run
+                count += 5;
+                if (count >= size)
+                    return 0;
+
+                *(wptr++) = (byte) (-(char)j);
+                *(wptr++) = *((byte*)ptr);
+                *(wptr++) = *(((byte*)ptr)+1);
+                *(wptr++) = *(((byte*)ptr)+2);
+                *(wptr++) = *(((byte*)ptr)+3);
+
+                i += j+1;
+            }
+            //ÄÄÄ Store literal
+            else
+            {
+                if (lptr && *lptr < 127)
+                {
+                    // Add to literal
+                    (*lptr)++;
+                }
+                else
+                {
+                    // Create new literal
+                    if (++count >= size)
+                        return 0;
+
+                    lptr=wptr++;
+                    *lptr = 0;
+                }
+
+                count += 4;
+                if (count >= size)
+                    return 0;
+
+                *(wptr++) = *((byte*)ptr);
+                *(wptr++) = *(((byte*)ptr)+1);
+                *(wptr++) = *(((byte*)ptr)+2);
+                *(wptr++) = *(((byte*)ptr)+3);
+                i++;
+            }
+        }
+    }
+
+    return count;
+}
+
+
+
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°° Misc °°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // load_pal                                                                 ³
 //                                                                          ³
 //     Palette loader...                                                    ³
@@ -1684,26 +2345,6 @@ void ivory_free (void **ptr)
 {
     free(*ptr);
     *ptr=0;
-}
-
-IvoryHandle ivory_halloc (size_t size)
-{
-    return (IvoryHandle)malloc(size);
-}
-
-void ivory_hfree (IvoryHandle *ptr)
-{
-    free((void*)*ptr);
-    *ptr=0;
-}
-
-void *ivory_hlock (IvoryHandle ptr)
-{
-    return (void *)ptr;
-}
-
-void ivory_hunlock (IvoryHandle ptr)
-{
 }
 
 //°±² End of module - export.cpp ²±°

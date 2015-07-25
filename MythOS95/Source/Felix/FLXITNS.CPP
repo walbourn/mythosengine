@@ -3,13 +3,13 @@
 //
 //            _,'|             _.-''``-...___..--';)
 //           /_ \'.      __..-' ,      ,--...--'''
-//          <\    .`--'''       `     /'     
+//          <\    .`--'''       `     /'
 //           `-';'               ;   ; ;  Felix the Fixed-point Library
 //     __...--''     ___...--_..'  .;.'
 //    (,__....----'''       (,..--''
 //
 //                      Microsoft Windows '95 Version
-//   
+//
 //           Copyright (c) 1994, 1995 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved.
 //
@@ -33,9 +33,9 @@
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-//             
+//
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include "portable.h"
@@ -43,46 +43,38 @@
 #include "felix.hpp"
 
 
-Flx16 flx_asin (const Flx16  a)
+Flx16 flx_asin (const Flx16 a)
 {
-    int     not_found = 1;
     int     top = SIN_TABLE_SIZE;
     int     target;
     int     bottom = 0;
     Flx16   *data = &Flx16_sin_data;
     Flx16   t = flx_abs(a);
-    Flx16   current;
 
-    while (not_found)
+    for (;;)
     {
         target = (top + bottom) >> 1;
-        if ((target == bottom) || (target == top))
-        {
-            not_found = 0;
-            continue;
-        }
-        current = data[target];
+        if (target == bottom || target == top)
+            break;
+
+        const Flx16 current = data[target];
         if (t == current)
-        {
-            not_found = 0;
-            continue;
-        }
+            break;
+
         else if (t > current)
-        {
             bottom = target;
-        }
+
         else
-        {
             top = target;
-        }
     }
+
     t = target;
-    t.flx = t.flx >> FLX_DEGREES_SHIFT;
+    t.flx >>= FLX_DEGREES_SHIFT;
 
     if (a < 0)
-        return (-t);
+        return -t;
     else
-        return (t);
+        return t;
 }
 
 
@@ -106,13 +98,13 @@ Flx16 flx_atan (const Flx16 a)
         {
             c   = -PI_2;
             x   = ax;
-            neg = FLX16_ZERO;
+            neg = 0;
         }
         else
         {
             c   = PI_2;
             x   = -ax;
-            neg = FLX16_ONE;
+            neg = 1;
         }
     }
 
@@ -142,7 +134,7 @@ Flx16 flx_atan (const Flx16 a)
                            - Flx16 (0.05160454) * x2);
 
     // Return the adjusted atan
-    return c + res;
+    return (c + res) * Flx16 (90) / PI_2;
 }
 
 // eof - Flxitns.cpp

@@ -7,7 +7,7 @@
  ששששש///ששששששש///שששש///ש///שששש///ש///שששש///ש///שששששששש///שששש///שששששש
  שששש//////////ש////////ששש////////שש///.ששש///.//////////ש///שששש///.שששששש
  ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
- שששששששששששCopyrightש(c)ש1994-1996שbyשCharybdisשEnterprises,שInc.שששששששששש
+ שששששששששששCopyrightש(c)ש1994-1997שbyשCharybdisשEnterprises,שInc.שששששששששש
  ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
  ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
  ששששששששששששששששששששש Microsoft Windows '95 Version ששששששששששששששששששששששש
@@ -37,106 +37,141 @@
                              _Library Status_
 
  Notes by: Chuck Walbourn
- Updated: August 26, 1996
+ Updated: March 4, 1997
 
  Changes for this release --------------------------------------------------
 
-    o Documentation updated.
-        - Release 1.1 didn't have complete documentation for
-          EschParticleSystem or EschParticleGeometry.
-        - Reorganized a few of the classes in the contents for easier
-          reference.
-        - Updated docs for changes.
-
     o Directory
-        - Updated for new lights and terrain changes.
+        - Updated for new data files.
 
-    o Exporter
-        - See Exporter\ReadME.TXT
+    o Edit
+        - See Edit/ReadME.TXT
 
-    o Editor
-        - See Edit\ReadME.TXT
+    o Export
+        - See Export/ReadME.TXT
 
     o Tool
-        - See Tool\ReadME.TXT
+        - See Tool/ReadME.TXT
 
-    o Lights
-        - Added EschFastPointLight for point source approximation with
-          the same lighting cost as vector lights.
-        - Added EschFastAttenLight and EschAttenLight for attenuated
-          point sources.
-        - Added EschFastSpotLight and EschSpotLight for directional
-          point sources with attenuation.
-        - Added copy constructor and operator =.
+    o Utility
+        - Added Escher Lightwave converter as an example of using the
+          new mesh builder class.
 
-    o Sprite
-        - A new sprite drawable was added for objects drawn as a 
-          scaled 2D bitmap, including a mode for extremely distant
-          objects.
-
-    o Drawable
-        - Fixed problem with picking returning incorrect drawables
-          due to errors in result sorting.
-        - Added copy constructor and operator =.
-
-    o MeshDraw
-        - Added use of ESCH_FACE_SELFILUM levels.
-        - Added copy constructor and operator =.
-
-    o Scene
-        - Updated for new lights.
-        - Added ESCH_SCENELD_CAMSEX to create extended camera instances.
-
-    o Terrain
-        - Changed height-field to use lookup-table instead of direct
-          linear scale value.
-        - Load has optional parameter to get at 'height-color' assignments
-          used in the terrain editor.
-        - Fixed 'black' triangles along one edge of the High/Medium
-          detail boundary.
-        - Added routine to check for a clear 'line-of-sight' relative
-          to the terrain.
-        - Added support for loading compressed normals.
-        - Redefined some surface bits and added 4 application bits.
-        - Added low level of detail usage.
-
-    o Geometry
-        - 'find' didn't always work correctly.  This has been corrected.
-          This caused problems when loading some models with hierarchial
-          links.
-        - Added copy constructor and operator =.
-
-    o Clip
-        - Fixed clipping problems for U, V, Z, and shading caused by
-          perspective on long polygons.
-        - Fixed minor edge condition for clip.
-        - Performance enhancement to the backface culling within the
-          clip routine.
+    o Build
+        - Added a new BuildMesh class to create new objects directly
+          under program control and save the data into IFF files for
+          later use.
+        - Added a supporting BuildTexture class for creating
+          texture data files.
 
     o Camera
-        - Changed internal interface for render() to use
-          pre_rend(), rend(), and post_rend() internal protected members.
-        - Added render control bits for new render().
-        - Added support for scrolling bitmap backgrounds with offsets.
-        - Added hazing using post-processing software-only solution.
-        - Added usage of update flags for scalar values.
-        - Added copy constructor and operator =.
+        - Changed hazing interface to take a cut-off Z value
+          for performance.
+        - Added a gradient-background mechanism which is sensitive
+          to camera view-angle for use as a gradient-sky effect
+          with the terrain system.
+        - Added view frustrum information for use by 3D clipping code.
+
+    o Drawable
+        - Added data pointer to for use by the application.
+        - Added ESCH_DRW_VISIBLE bit which is set when a drawable
+          has determined that it is not being rejected due to clipping.
+          The application must clear this bit for any drawable it
+          needs to track this information for.
+
+    o Geometry
+        - Was not passing animate calls down to children drawables.
+        - Some performance fixes for ray/hit.
+
+    o Meshes
+        - Fixed minor bug which prevented early trivial rejection of
+          child objects based on the extents check.
+        - Fixed minor bug with loading object data file without
+          an orientation matrix.
+        - Added control flags and parameters for texture changes.
+        - Added special owns bits to control deletion of meshdraw owned
+          texture instances.
+        - Some performance fixes for ray/hit.
+
+    o Extents
+        - Some performance fixes for hit/ray tests.
+
+    o Partition
+        - Defined basic partitioning interface and implemented most
+          of Grid paritioning (no traverse function yet).
+
+    o Scenes
+        - Added control flags for texture changes.
+
+    o Sprites
+        - Added some early rejection and fully visible tests for sprites.
+        - Added Alpha Blending support.
+
+    o Explosions
+        - Added a 'circular' mode to the EschPlosion class.
+        - Was missing set_top/set_direction function bodies.
 
     o Textures
-        - Added copy constructor and operator =.
+        - Added create member and time-based animation logic to
+          multi-frame texture.
+        - Fixed problem with multi-frame texture lock.
+        - Added extra parameters to load needed for texture changes.
+        - Added multi-frame texture load.
+        - Added support for compressed data and 24/32-bit dynamically
+          recolored formats.
+        - Added run-time type.
+        - Added texture cache for sharing texture data between
+          instances.
 
-    o Misc.
-        - Starfield completed and documented.
-        - Matrix and FrameRef's now have contructors that do not
-          initialize any data members.  These can be used when the
-          instance is a target of a concat operation, but not a source.
-        - Added 'create' member to EschStaticTexture for creating textures
-          directly from XFile bitmaps.
-        - Minor change to texture code for new Van Gogh.
-        - Fixed minor problem with clearing of EschFireTexture.
+    o Terrain
+        - Added optional parameter for check_LOS to return approx
+          distance of hit from first point.
+        - Added get_surface_flags() function.
 
-         
-          
+    o Tester
+        - Cleaned up tester and added support for new features.
+
+    o Restructured source directories to split some source files into
+      sub-directories
+     
+        Build\      - Builder classes
+        Draw\       - Drawables and support
+        Light\      - Lights
+        Math\       - Math support
+        Texture\    - Textures
+
+    o Some minor cleanup: Added a few missing copy constructors/operator =
+      overloads and fixed up some 'const' issues.
+
+    o Changed find() implementation for Camera, Light, and Drawable to
+      use 'find' function to call down the chain.  This makes the find()
+      functions easier to overload.
+
+    o Added Alpha-blending support.  This is controlled on a face-by-face
+      basis.
+
+    o Fixed a memory problem with the Fire Texture.
+
+    o Added EschProposedTris and EschDrawnTris variables to
+      esch_clipdraw_face for benchmarking.
+
+    o Some extensions to EschPlosion.
+
+    o Fixed problem with orthogonalize in some circumstances.
+
+    o Added EschParticleSprite, EschMetabox, and EschLineDraw drawables.
+
+    o Added EschPlane math support class.
+
+    o Updated for new Van Gogh release with change to Texture::create
+      for controlling transparent vs. non-transparent textures.
+
+    o EschLevelOfDetail drawable has been implemented.
+
+    o Updated documentation.
+
+
+
  Pending changes -----------------------------------------------------------
 
     o Textures

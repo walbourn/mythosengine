@@ -9,7 +9,7 @@
 ;    (,__....----'''       (,..--''
 ;
 ;   
-;           Copyright (c) 1994, 1995 by Charybdis Enterprises, Inc.
+;           Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.
 ;                           All Rights Reserved.
 ;
 ;컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�

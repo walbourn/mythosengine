@@ -8,7 +8,7 @@
 //ùùùùù²±²ùùùùùùù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùùùùùù²±²ùùùù²±²ùùùùùù
 //ùùùù²²²²²²²²²²ù²²²²²²²²ùùù²²²²²²²²ùù²²²ùùùù²²²ù²²²²²²²²²²ù²²²ùùùù²²²ùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùCopyrightù(c)ù1994-1996ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
+//ùùùùùùùùùùùCopyrightù(c)ù1994-1997ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùù Microsoft Windows '95 Version ùùùùùùùùùùùùùùùùùùùùùùù
@@ -84,20 +84,40 @@ extern char EschNoName[];
 // Initializes the scene pointers, loading from a file if a filename is     ³
 // given.                                                                   ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+EschScene::EschScene() :
+    flags(0),
+    cameras(0),
+    lights(0),
+    meshes(0)
+{
+    strcpy(name,EschNoName);
+}
+
+
 EschScene::EschScene(const char *fname, const char *sname,
                      VngoPal *pal, dword flgs) :
     flags(0),
-    ncameras(0),
     cameras(0),
-    nlights(0),
     lights(0),
-    nmeshes(0),
     meshes(0)
 {
     strcpy(name,EschNoName);
 
     if (fname)
         load(fname,sname,pal,flgs);
+}
+
+
+EschScene::EschScene(const EschScene &s) :
+    flags(s.flags & ~ESCH_SCENE_OWNSDATA),
+    ncameras(s.ncameras),
+    cameras(s.cameras),
+    nlights(s.nlights),
+    lights(s.lights),
+    nmeshes(s.nmeshes),
+    meshes(s.meshes)
+{
+    strncpy(name,s.name,ESCH_MAX_NAME);
 }
 
 
@@ -118,6 +138,29 @@ EschScene::~EschScene()
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// EschScene - operator =                                                   ³
+//                                                                          ³
+// Copies the data from another scene.                                      ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+const EschScene &EschScene::operator = (const EschScene &s)
+{
+    if (this != &s)
+    {
+        flags = s.flags & ~ESCH_SCENE_OWNSDATA;
+        ncameras = s.ncameras;
+        cameras = s.cameras;
+        nlights = s.nlights;
+        lights = s.lights;
+        nmeshes = s.nmeshes;
+        meshes = s.meshes;
+
+        strncpy(name,s.name,ESCH_MAX_NAME);
+    }
+    return *this;
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // EschScene - release                                                      ³
 //                                                                          ³
 // Frees any data owned by the scene.                                       ³
@@ -126,7 +169,6 @@ void EschScene::release()
 {
     if (flags & ESCH_SCENE_OWNSDATA)
     {
-
         for (EschLight *lptr=lights; lptr;)
         {
             EschLight   *t=lptr;
@@ -150,7 +192,8 @@ void EschScene::release()
         }
     }
 
-    flags=0;
+    flags &= ~ESCH_SCENE_OWNSDATA;
+
     cameras=0;
     lights=0;
     meshes=0;
@@ -311,7 +354,16 @@ esch_error_codes EschScene::load(XFParseIFF *iff, const char *sname,
             }
 
 
-            if ((err=m->load(iff,0,pal,0,pname))!=ESCH_ERR_NONE)
+            dword ctrlfl = ESCH_MSHLD_ALL;
+
+            if (flgs & ESCH_SCENELD_NOMFTXT)
+                ctrlfl &= ~ESCH_MSHLD_USEMFTXT;
+
+            if (flgs & ESCH_SCENELD_NOSHARETXT)
+                ctrlfl &= ~ESCH_MSHLD_SHARETXT;
+
+            err=m->load(iff,0,pal,0,pname,ctrlfl);
+            if (err)
             {
                 delete m;
                 goto error_exit;

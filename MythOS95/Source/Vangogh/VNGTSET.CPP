@@ -6,7 +6,7 @@
 //                                                           |. _  .   .|
 //          Microsoft Windows '95 Version                    | / \   .  | 
 //                                                           |_|_|_._._.|
-// Copyright (c) 1994-1996 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
+// Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
 //              All rights reserved.                        %\__________/%
 //                                                           %          %
 //
@@ -76,7 +76,7 @@
 //
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 
-
+#if 0
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 //  This section of code contains all of the code that is used for all      ³
 //  triangle types.                                                         ³
@@ -259,6 +259,112 @@ void triangle_setup(VngoPoint2 *pts,VngoTriangle *tri)
         tri->short_bottom = &pts[1];
     }
 }
+#endif
+
+
+void calc_order(int &high_pt, int &mid_pt, int &low_pt, VngoPoint2 *pts)
+{
+    high_pt = 0;
+    mid_pt = 1;
+    low_pt = 2;
+
+// Start by ordering the points.
+    if (pts[0].y < pts[1].y)
+    {
+        if (pts[2].y < pts[0].y)
+        {
+            high_pt = 2;
+            low_pt = 1;
+            mid_pt = 0;
+            return;
+        }
+        else
+        {
+            if (pts[1].y > pts[2].y)
+            {
+                low_pt = 1;
+                mid_pt = 2;
+            }
+            return;
+        }
+    }
+    else if (pts[1].y < pts[2].y)
+    {
+        high_pt = 1;
+        if(pts[0].y < pts[2].y)
+        {
+            low_pt = 2;
+            mid_pt = 0;
+            return;
+        }
+        else
+        {
+            low_pt = 0;
+            mid_pt = 2;
+            return;
+        }
+    }
+    else
+    {
+        high_pt = 2;
+        low_pt = 0;
+        mid_pt = 1;
+        return;
+    }
+}
+
+
+void calc_order(int &high_pt, int &mid_pt, int &low_pt, VngoPoint *pts)
+{
+    high_pt = 0;
+    mid_pt = 1;
+    low_pt = 2;
+
+// Start by ordering the points.
+    if (pts[0].y < pts[1].y)
+    {
+        if (pts[2].y < pts[0].y)
+        {
+            high_pt = 2;
+            low_pt = 1;
+            mid_pt = 0;
+            return;
+        }
+        else
+        {
+            if (pts[1].y > pts[2].y)
+            {
+                low_pt = 1;
+                mid_pt = 2;
+            }
+            return;
+        }
+    }
+    else if (pts[1].y < pts[2].y)
+    {
+        high_pt = 1;
+        if(pts[0].y < pts[2].y)
+        {
+            low_pt = 2;
+            mid_pt = 0;
+            return;
+        }
+        else
+        {
+            low_pt = 0;
+            mid_pt = 2;
+            return;
+        }
+    }
+    else
+    {
+        high_pt = 2;
+        low_pt = 0;
+        mid_pt = 1;
+        return;
+    }
+}
+
 
 //°±² End of module - vngtset.cpp ²±°
 

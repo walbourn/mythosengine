@@ -8,7 +8,7 @@
 //ששששש²±²ששששששש²±²שששש²±²ש²±²שששש²±²ש²±²שששש²±²ש²±²שששששששש²±²שששש²±²שששששש
 //שששש²²²²²²²²²²ש²²²²²²²²ששש²²²²²²²²שש²²²שששש²²²ש²²²²²²²²²²ש²²²שששש²²²ששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//שששששששששששCopyrightש(c)ש1994-1996שbyשCharybdisשEnterprises,שInc.שששששששששש
+//שששששששששששCopyrightש(c)ש1994-1997שbyשCharybdisשEnterprises,שInc.שששששששששש
 //ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
 //ששששששששששששששששששששש Microsoft Windows '95 Version ששששששששששששששששששששששש
@@ -64,9 +64,9 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #if defined (WIN32)
-	#define IS_WIN32 TRUE
+        #define IS_WIN32 TRUE
 #else
-	#define IS_WIN32 FALSE
+        #define IS_WIN32 FALSE
 #endif
 #define IS_NT      IS_WIN32 && (BOOL)(GetVersion() < 0x80000000)
 #define IS_WIN32S  IS_WIN32 && (BOOL)(!(IS_NT) && (LOBYTE(LOWORD(GetVersion()))<4))
@@ -84,8 +84,7 @@
 //
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
-// The game class
-class GameState
+class EscherTest
 {
 protected:
     TCHAR   szFileName[MAX_PATH];
@@ -99,11 +98,12 @@ protected:
     MaxEventList    toggle_events;
 
 public:     // Construction/Destruction
-#ifdef DEBUG
-    enum { MAP_XSIZE = 320, MAP_YSIZE = 200 };
-#else
-    enum { MAP_XSIZE = 640, MAP_YSIZE = 480 };
-#endif
+//    enum { MAP_XSIZE = 320, MAP_YSIZE = 240 };
+//    enum { MAP_XSIZE = 640, MAP_YSIZE = 480 };
+    enum { MAP_XSIZE = 284, MAP_YSIZE = 256 };
+//    enum { MAP_XSIZE = 144, MAP_YSIZE = 128 };
+//    enum { MAP_XSIZE = 400, MAP_YSIZE = 400};
+
     BITMAPINFO      *bmi;
     BYTE            *gmap;
     VngoVport       *gvp;
@@ -111,41 +111,72 @@ public:     // Construction/Destruction
     HPALETTE        hpal;
     HDC             hdc;
 
-    GameState (MaxDevices &);
-    ~GameState ();
+    VngoScreenManager  *screen;
+    int             map_xsize;
+    int             map_ysize;
+
+    EscherTest (MaxDevices &);
+    ~EscherTest ();
 
     BOOL    active;
 
+    BOOL    show_fps;
     BOOL    pick_test;
     BOOL    collide_test;
-    BOOL    fire_test;
+    BOOL    use_new_terrain;
+    Flx16   mbox_size;
+    long    alpha;
 
-    EschCameraEx        *cam;
-    EschLight           *light;
-    EschDrawable        *draws;
-    EschScene           *scene;
-    EschTerrain         *terrain;
-    EschParticleSystem  *prtsystem;
-    EschStarfield       *starfield;
-    EschMeshDraw        *curmesh;
-    EschFireTexture     *fire;
-    EschSprite          *sprite;
-    int                 drawexts;
-    dword               exts_color;
-    Flx16               RotateDegrees;
-    Flx16               ScriptRotateDegrees;
-    int                 kind_of_particles;
-    XFBitmap            *backgrnd;
+    EschCameraEx            *cam;
+    EschLight               *light;
+    EschDrawable            *draws;
+    EschScene               *scene;
+    EschTerrain             *terrain;
+    EschParticleSystem      *prtsystem;
+    EschStarfield           *starfield;
+    EschPlosion             *explosion;
+    EschMeshDraw            *curmesh;
+    EschFireTexture         *fire;
+    EschPartition           *partn;
+    EschSprite              *sprite;
+    EschMetabox             *metabox;
+    EschMultiFrameTexture   *mtxt;
+    int                     drawexts;
+    dword                   exts_color;
+    Flx16                   RotateDegrees;
+    Flx16                   ScriptRotateDegrees;
 
-    Chronometer         render_timer;
-    ulong               frames;
-    ulong               ticks;
+    enum
+    {
+        POINTS      =0,
+        PYRAMIDS    =1,
+        SPRITES     =2,
+    };
+
+    int                     kind_of_particles;
+    XFBitmap                *backgrnd;
+
+    Chronometer             fps_clock;
+    long                    frames;
+    long                    total_frames;
+    long                    total_time;
+
+    Chronometer             clock;
+
+    BOOL SetupFireTest();
+    BOOL SetupPartitionTest();
+    BOOL SetupMultiTest(const char *name);
+    BOOL SetupSprite(const char *name);
 
     BOOL LoadScene(char *fn);
     BOOL LoadTerrain(char *fn);
     BOOL SetupParticleSystem(const char *name);
     BOOL SetupStarfield(BOOL fixed, BOOL brights);
-    BOOL SetupSprite(const char *name);
+    BOOL SetupExplosion(const char *buff);
+    BOOL SetupMetabox(const char *buff);
+
+    void Begin();
+    void End(char *buff);
 
             // Per-Frame Members
     virtual BOOL    PumpWindows ();
@@ -154,6 +185,8 @@ public:     // Construction/Destruction
     virtual void    ProcessEvents();
     virtual void    Render();
     virtual void    Display();
+
+    int MessageBox(LPCSTR lpText, UINT nType);
 };
 
 
@@ -172,7 +205,7 @@ public:     // Construction/Destruction
 extern HINSTANCE   hInst;         // current instance
 extern HWND        hWndClient;    // Main window handle
 extern const char  szAppName[];
-extern GameState   *game;
+extern EscherTest   *game;
 
 
 #endif

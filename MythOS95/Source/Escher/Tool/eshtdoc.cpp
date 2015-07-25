@@ -8,7 +8,7 @@
 //ùùùùù²±²ùùùùùùù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùùùùùù²±²ùùùù²±²ùùùùùù
 //ùùùù²²²²²²²²²²ù²²²²²²²²ùùù²²²²²²²²ùù²²²ùùùù²²²ù²²²²²²²²²²ù²²²ùùùù²²²ùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùCopyrightù(c)ù1994-1996ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
+//ùùùùùùùùùùùCopyrightù(c)ù1994-1997ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùù Microsoft Windows '95 Version ùùùùùùùùùùùùùùùùùùùùùùù
@@ -133,15 +133,16 @@ END_MESSAGE_MAP()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // ToolDoc - Constructor                                                    ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-ToolDoc::ToolDoc()
+ToolDoc::ToolDoc() :
+    ncameras(0),
+    cameras(0),
+    nlights(0),
+    lights(0),
+    nmeshes(0),
+    meshes(0),
+    hpal(0),
+    flags(COMPRESS)
 {
-    cameras=0;
-    lights=0;
-    meshes=0;
-    ncameras=nlights=nmeshes=0;
-
-    hpal=0;
-
     int     i;
     char    *c;
   
@@ -324,9 +325,7 @@ void ToolDoc::GetCounts(ulong *ncams,
 esch_error_codes ToolDoc::serialize_store_mesh(XFParseIFF *iff, EschMeshDraw *msh)
 {
     int                 i;
-    EschTexture         *t;
     EschFileMeshHDR     header;
-    EschFileMeshEXNT    extent;
 
     for(; msh; msh = (EschMeshDraw*)msh->next())
     {
@@ -379,24 +378,27 @@ esch_error_codes ToolDoc::serialize_store_mesh(XFParseIFF *iff, EschMeshDraw *ms
         }
 
         //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Extent
-        memset(&extent,0,sizeof(EschFileMeshEXNT));
-
-        extent.cenx.flx          = msh->mesh->sphere.center.x.flx;
-        extent.ceny.flx          = msh->mesh->sphere.center.y.flx;
-        extent.cenz.flx          = msh->mesh->sphere.center.z.flx;
-        extent.extent_radius.flx = msh->mesh->sphere.radius.flx;
-        extent.minx.flx          = msh->mesh->box.mins[0].flx;
-        extent.miny.flx          = msh->mesh->box.mins[1].flx;
-        extent.minz.flx          = msh->mesh->box.mins[2].flx;
-        extent.maxx.flx          = msh->mesh->box.maxs[0].flx;
-        extent.maxy.flx          = msh->mesh->box.maxs[1].flx;
-        extent.maxz.flx          = msh->mesh->box.maxs[2].flx;
-        
-        if (iff->write(iff->makeid('E','X','N','T'),
-                       &extent,sizeof(EschFileMeshEXNT)))
         {
-            iff->leaveform();
-            return ESCH_ERR_FILEERROR;
+            EschFileMeshEXNT    extent;
+            memset(&extent,0,sizeof(EschFileMeshEXNT));
+
+            extent.cenx.flx          = msh->mesh->sphere.center.x.flx;
+            extent.ceny.flx          = msh->mesh->sphere.center.y.flx;
+            extent.cenz.flx          = msh->mesh->sphere.center.z.flx;
+            extent.extent_radius.flx = msh->mesh->sphere.radius.flx;
+            extent.minx.flx          = msh->mesh->box.mins[0].flx;
+            extent.miny.flx          = msh->mesh->box.mins[1].flx;
+            extent.minz.flx          = msh->mesh->box.mins[2].flx;
+            extent.maxx.flx          = msh->mesh->box.maxs[0].flx;
+            extent.maxy.flx          = msh->mesh->box.maxs[1].flx;
+            extent.maxz.flx          = msh->mesh->box.maxs[2].flx;
+        
+            if (iff->write(iff->makeid('E','X','N','T'),
+                        &extent,sizeof(EschFileMeshEXNT)))
+            {
+                iff->leaveform();
+                return ESCH_ERR_FILEERROR;
+            }
         }
 
         //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Material
@@ -481,7 +483,11 @@ esch_error_codes ToolDoc::serialize_store_mesh(XFParseIFF *iff, EschMeshDraw *ms
             {
                 EschFileMtlMHDR mheader;
 
-                t=msh->mesh->txt[i];
+                EschTexture *t=msh->mesh->txt[i];
+
+                // Make sure it is frame 0.
+                if (t->get_type() == ESCH_TXTT_MFRAME)
+                    ((EschMultiFrameTexture*)t)->reset();
 
                 // Must lock texture to output data
                 t->lock();
@@ -490,9 +496,25 @@ esch_error_codes ToolDoc::serialize_store_mesh(XFParseIFF *iff, EschMeshDraw *ms
                     iff->leaveform();
                     return ESCH_ERR_LOCKFAILED;
                 }
+
+                ASSERT(t->ptr->tex);
+
+                // Determine if transparent
+                BOOL transp=FALSE;
+                byte *tptr=t->ptr->tex;
+                for(int j=0; j < (t->ptr->width*t->ptr->height); j++)
+                {
+                    if (*(tptr++) == VNGO_TRANSPARENT_COLOR)
+                    {
+                        transp=TRUE;
+                        break;
+                    }
+                }
                
                 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Create EMTL form
-                if (iff->newform(iff->makeid('E','M','T','L')))
+                if (iff->newform((t->get_type() == ESCH_TXTT_MFRAME)
+                                 ? iff->makeid('E','M','T','1')
+                                 : iff->makeid('E','M','T','L')))
                 {
                     iff->leaveform();
                     t->unlock();
@@ -503,10 +525,33 @@ esch_error_codes ToolDoc::serialize_store_mesh(XFParseIFF *iff, EschMeshDraw *ms
                 memset(&mheader,0,sizeof(EschFileMtlMHDR));
 
                 strncpy(mheader.name,t->name,ESCH_MAX_NAME);
+
                 strncpy(mheader.pname,"Default",16);
 
-                mheader.nframes = 1;
-                mheader.type = (t->ptr->flags & VNGO_TRANSPARENT) ? 2 : 1;
+                mheader.nframes = (t->get_type() == ESCH_TXTT_MFRAME)
+                                  ? ((EschMultiFrameTexture*)t)->max
+                                  : 1;
+
+                if (flags & TRUECOLOR)
+                {
+                    mheader.type = (transp)
+                                   ? ESCH_MTL_TYPE_32BIT
+                                   : ESCH_MTL_TYPE_24BIT;
+                }
+                else
+                {
+                    mheader.type = (transp)
+                                   ? ESCH_MTL_TYPE_8BIT_TRANSP 
+                                   : ESCH_MTL_TYPE_8BIT;
+                }
+                mheader.compress = (flags & COMPRESS)
+                                   ? ESCH_MTL_COMPRESS_RLE
+                                   : ESCH_MTL_COMPRESS_NONE;
+
+                mheader.flags = t->flags & ~(ESCH_TXT_LOCKED
+                                             | ESCH_TXT_OWNSDATA
+                                             | ESCH_TXT_SHARED);
+
                 mheader.xsize = t->ptr->width;
                 mheader.ysize = t->ptr->height;
 
@@ -521,15 +566,117 @@ esch_error_codes ToolDoc::serialize_store_mesh(XFParseIFF *iff, EschMeshDraw *ms
                 }
                 
                 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Body
-                ASSERT(t->ptr->tex);
+                int bpp=1;
+                if (flags & TRUECOLOR)
+                    bpp = (transp) ? 4 : 3;
 
-                if (iff->write(iff->makeid('B','O','D','Y'),
-                               (byte*)t->ptr + sizeof(VngoTexture),
-                               (ulong)(mheader.xsize*mheader.ysize)))
+                tptr = t->ptr->tex;
+                for(j=0; j < (int)mheader.nframes; j++)
                 {
-                    iff->leaveform();
-                    t->unlock();
-                    return ESCH_ERR_FILEERROR;
+                    byte *body=tptr;
+
+                    if (flags & TRUECOLOR)
+                    {
+                        body=new byte[mheader.xsize*mheader.ysize*bpp];
+                        if (!body)
+                        {
+                            iff->leaveform();
+                            t->unlock();
+                            return ESCH_ERR_NOMEMORY;
+                        }
+
+                        byte *sptr=tptr;
+                        byte *dptr=body;
+                        for(int k=0; k < (int)(mheader.xsize*mheader.ysize); k++)
+                        {
+                            if (*sptr == VNGO_TRANSPARENT_COLOR)
+                            {
+                                assert(transp);
+                                *(dptr++) = 0;
+                                *(dptr++) = 0;
+                                *(dptr++) = 0;
+                                *(dptr++) = 0;
+                            }
+                            else
+                            {
+                                VngoColor24bit clr = palette.hw_pal.p[*sptr];
+                                *(dptr++) = clr.r;
+                                *(dptr++) = clr.g;
+                                *(dptr++) = clr.b;
+
+                                if (transp)
+                                    *(dptr++) = 255;
+                            }
+                            sptr++;
+                        }
+                    }
+
+                    byte *work = new byte[mheader.xsize*mheader.ysize*bpp];
+                    if (!work)
+                    {
+                        if (flags & TRUECOLOR)
+                            delete [] body;
+                        iff->leaveform();
+                        t->unlock();
+                        return ESCH_ERR_NOMEMORY;
+                    }
+
+                    dword size=0;
+                    if (flags & COMPRESS)
+                    {
+                        if (flags & TRUECOLOR)
+                        {
+                            if (transp)
+                            {
+                                size=XFParseXEB::compress_rle_32bpp(mheader.xsize,
+                                                                    mheader.ysize,
+                                                                    body,work);
+                            }
+                            else
+                            {
+                                size=XFParseXEB::compress_rle_24bpp(mheader.xsize,
+                                                                    mheader.ysize,
+                                                                    body,work);
+                            }
+                        }
+                        else
+                        {
+                            size=XFParseXEB::compress_rle_8bpp(mheader.xsize,
+                                                               mheader.ysize,
+                                                               body,work);
+                        }
+                    }
+
+                    if (size)
+                    {
+                        if (flags & TRUECOLOR)
+                            delete [] body;
+
+                        if (iff->write(iff->makeid('B','O','D','Y'),work,size))
+                        {
+                            iff->leaveform();
+                            t->unlock();
+                            return ESCH_ERR_FILEERROR;
+                        }
+                    }
+                    else
+                    {
+                        delete [] work;
+                        if (iff->write(iff->makeid('B','O','D','Y'), body,
+                                       (ulong)(mheader.xsize*mheader.ysize*bpp)))
+                        {
+                            if (flags & TRUECOLOR)
+                                delete [] body;
+                            iff->leaveform();
+                            t->unlock();
+                            return ESCH_ERR_FILEERROR;
+                        }
+
+                        if (flags & TRUECOLOR)
+                            delete [] body;
+                    }
+
+                    tptr += (mheader.xsize*mheader.ysize);
                 }
 
                 iff->leaveform();
@@ -1010,7 +1157,8 @@ save_error_exit: ;
                         return;
                     }
 
-                    if ((err=m->load(&iff,0,&palette,0,pname))!=ESCH_ERR_NONE)
+                    err=m->load(&iff,0,&palette,0,pname,ESCH_MSHLD_USEMFTXT);
+                    if (err!=ESCH_ERR_NONE)
                     {
                         delete m;
                         goto load_error_exit;
@@ -1265,6 +1413,8 @@ BOOL ToolDoc::OnNewDocument()
     strcpy(name,"NoName");
     *desc = 0;
     SetTitle(name);
+
+    flags = COMPRESS;
 
 //ÄÄÄ Load default palette (required)
     if (!LoadPalette(pfname))

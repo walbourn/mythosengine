@@ -6,7 +6,7 @@
 //                                                           |. _  .   .|
 //          Microsoft Windows '95 Version                    | / \   .  | 
 //                                                           |_|_|_._._.|
-// Copyright (c) 1994-1996 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
+// Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
 //              All rights reserved.                        %\__________/%
 //                                                           %          %
 //
@@ -114,8 +114,7 @@ VNGError VngoVportDB8::init (long width,long height,void *vbptr,
         vbuff.zpitch = _zpitch;
     else
         vbuff.zpitch = vbuff.pitch << 1;
-    vbuff.left = 0;
-    vbuff.top = 0;
+
     vflags = flags;
     vflags |= VNGO_PAL_MAPPED_DEV;
     size_in_bytes = width * height;
@@ -182,8 +181,35 @@ VNGError VngoVportDB8::init (long width,long height,void *vbptr,
     {
         vbuff.ztable = NULL;
     }
+    long max_dem = vbuff.width;
+    if (vbuff.height > vbuff.width)
+        max_dem = vbuff.height;
 
-    vbuff.invert = vngo_get_invert();
+    vbuff.edge1 = (VngoPoint2*)ivory_alloc(max_dem * sizeof(VngoPoint2));
+    if (vbuff.edge1 == NULL)
+    {
+        if(vflags & VNGO_ZBUFFER_DEV)
+        {
+            ivory_free((void **)&(vbuff.zbuff_ptr));
+            ivory_free((void **)&(vbuff.ztable));
+        }   
+        ivory_free((void**)&(vbuff.ytable));
+        return (VNGO_MEMALLOC_ERROR);
+    }
+
+    vbuff.edge2 = (VngoPoint2*)ivory_alloc(max_dem * sizeof(VngoPoint2));
+    if (vbuff.edge2 == NULL)
+    {
+        if(vflags & VNGO_ZBUFFER_DEV)
+        {
+            ivory_free((void **)&(vbuff.zbuff_ptr));
+            ivory_free((void **)&(vbuff.ztable));
+        }   
+        ivory_free((void**)&(vbuff.ytable));
+        ivory_free((void**)&(vbuff.edge1));
+        return (VNGO_MEMALLOC_ERROR);
+    }
+
 
     if (my_pal)
     {
@@ -240,6 +266,15 @@ VngoVportDB8::~VngoVportDB8()
     {
         ivory_free((void **)&(vbuff.ztable));
     }
+    if (vbuff.edge1)
+    {
+        ivory_free((void **)&(vbuff.edge1));
+    }
+    if (vbuff.edge2)
+    {
+        ivory_free((void **)&(vbuff.edge2));
+    }
+
 }
 
 

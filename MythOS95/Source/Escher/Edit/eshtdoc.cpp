@@ -8,7 +8,7 @@
 //ùùùùù²±²ùùùùùùù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùùùùùù²±²ùùùù²±²ùùùùùù
 //ùùùù²²²²²²²²²²ù²²²²²²²²ùùù²²²²²²²²ùù²²²ùùùù²²²ù²²²²²²²²²²ù²²²ùùùù²²²ùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùCopyrightù(c)ù1994-1996ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
+//ùùùùùùùùùùùCopyrightù(c)ù1994-1997ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùù Microsoft Windows '95 Version ùùùùùùùùùùùùùùùùùùùùùùù
@@ -88,10 +88,10 @@ extern TerrEditApp  theApp;
 IMPLEMENT_DYNCREATE(TerrEditDoc, CDocument)
 
 BEGIN_MESSAGE_MAP(TerrEditDoc, CDocument)
-	//{{AFX_MSG_MAP(TerrEditDoc)
-		// NOTE - the ClassWizard will add and remove mapping macros here.
-		//    DO NOT EDIT what you see in these blocks of generated code!
-	//}}AFX_MSG_MAP
+        //{{AFX_MSG_MAP(TerrEditDoc)
+                // NOTE - the ClassWizard will add and remove mapping macros here.
+                //    DO NOT EDIT what you see in these blocks of generated code!
+        //}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 static int FirstNew=1;                  // Hack to avoid 'New' dialog on startup
@@ -120,6 +120,7 @@ TerrEditDoc::TerrEditDoc() :
     surfinfo(0),
     surfcolr(0),
     hsurfnorml(0),
+    hsurfnormlflat(0),
     undo_valid(FALSE),
     undo_surfinfo(0),
     undo_surfcolr(0),
@@ -155,7 +156,7 @@ TerrEditDoc::~TerrEditDoc()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 void TerrEditDoc::AssertValid() const
 {
-	CDocument::AssertValid();
+        CDocument::AssertValid();
 }
 
 
@@ -164,7 +165,7 @@ void TerrEditDoc::AssertValid() const
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 void TerrEditDoc::Dump(CDumpContext& dc) const
 {
-	CDocument::Dump(dc);
+        CDocument::Dump(dc);
 }
 #endif //_DEBUG
 
@@ -238,6 +239,11 @@ void TerrEditDoc::DeleteContents()
         ivory_hfree(&hsurfnorml);
     }
 
+    if (hsurfnormlflat)
+    {
+        ivory_hfree(&hsurfnormlflat);
+    }
+
     undo_valid=FALSE;
     if (undo_surfinfo)
     {
@@ -255,8 +261,8 @@ void TerrEditDoc::DeleteContents()
         DeleteObject(hpal);
         hpal=0;
     }
-	
-	CDocument::DeleteContents();
+
+        CDocument::DeleteContents();
 }
 
 
@@ -283,7 +289,7 @@ BOOL TerrEditDoc::LoadPalette(const char *fname, int doupdate)
     }  
 
     strcpy(pfname,fname);
- 
+
     LOGPALETTE *lpal = (LOGPALETTE *) ivory_alloc(sizeof(LOGPALETTE)
                                                   + 256*sizeof(PALETTEENTRY));
 
@@ -404,7 +410,7 @@ BOOL TerrEditDoc::SetTexture(int ind, const char *name, const char *fname,
     //
     // Assumes new name is unique
     //
- 
+
     if (ind >= txtNumb)
         return FALSE;
 
@@ -525,7 +531,7 @@ void TerrEditDoc::DeleteTexture(int ind)
     //
     // Update view
     //
-    
+
     SetModifiedFlag();
     UpdateAllViews(NULL,HINT_UPDATETXTS | HINT_UPDATECOLR,NULL);
 }
@@ -583,7 +589,7 @@ found: ;
     //
     // Update view
     //
-    
+
     SetModifiedFlag();
     UpdateAllViews(NULL,HINT_UPDATETXTS | HINT_UPDATECOLR,NULL);
 }
@@ -659,7 +665,7 @@ void TerrEditDoc::LoadTextures(const char *fname)
         char fname[256];
         dword color;
         dword dflags;
-        
+
         // Read texture name
         c=fgetc(fptr);
         while (c != EOF && c != '\"')
@@ -682,7 +688,7 @@ void TerrEditDoc::LoadTextures(const char *fname)
             c=fgetc(fptr);
         if (c == EOF)
             goto read_error;
-                     
+
         // Read texture filename
         c=fgetc(fptr);
         while (c != EOF && c != '\"')
@@ -804,7 +810,7 @@ BOOL TerrEditDoc::SetColor(int ind, const char *name, dword color, dword flags)
     //
     // Assumes new name is unique
     //
- 
+
     if (ind >= colorNumb)
         return FALSE;
 
@@ -865,7 +871,7 @@ void TerrEditDoc::DeleteColor(int ind)
     //
     // Update view
     //
-    
+
     SetModifiedFlag();
     UpdateAllViews(NULL,HINT_UPDATETXTS,NULL);
 }
@@ -940,7 +946,7 @@ void TerrEditDoc::LoadColors(const char *fname)
         char name[16];
         dword color;
         dword dflags;
-        
+
         // Read texture name
         c=fgetc(fptr);
         while (c != EOF && c != '\"')
@@ -963,7 +969,7 @@ void TerrEditDoc::LoadColors(const char *fname)
             c=fgetc(fptr);
         if (c == EOF)
             goto read_error;
-                     
+
         // Read color and flags
         if (fscanf(fptr," 0x%x 0x%x\n",
                         &color,&dflags) != 2)
@@ -1058,7 +1064,7 @@ void TerrEditDoc::ExportToIFF(const char *fname)
         char    str[512];
 
         sprintf(str,"Error #%x while opening output file:\n\n%s",(int)iff.error(),fname);
-                                                  
+
         MessageBox((AfxGetMainWnd()) ? AfxGetMainWnd()->GetSafeHwnd() : NULL,
                str,"Export Error",MB_OK | MB_ICONEXCLAMATION);
         return;
@@ -1070,7 +1076,7 @@ void TerrEditDoc::ExportToIFF(const char *fname)
         char    str[64];
 
         sprintf(str,"Error #%x while trying to create new form ETER",(int)iff.error());
-                                                  
+
         MessageBox((AfxGetMainWnd()) ? AfxGetMainWnd()->GetSafeHwnd() : NULL,
                str,"Export Error",MB_OK | MB_ICONEXCLAMATION);
         return;
@@ -1082,7 +1088,7 @@ void TerrEditDoc::ExportToIFF(const char *fname)
         char    str[64];
 
         sprintf(str,"Error #%x while trying to write header chunk",(int)iff.error());
-                                                  
+
         MessageBox((AfxGetMainWnd()) ? AfxGetMainWnd()->GetSafeHwnd() : NULL,
                str,"Export Error",MB_OK | MB_ICONEXCLAMATION);
         return;
@@ -1096,7 +1102,7 @@ void TerrEditDoc::ExportToIFF(const char *fname)
         char    str[64];
 
         sprintf(str,"Error #%x while trying to write description chunk",(int)iff.error());
-                                                  
+
         MessageBox((AfxGetMainWnd()) ? AfxGetMainWnd()->GetSafeHwnd() : NULL,
                str,"Export Error",MB_OK | MB_ICONEXCLAMATION);
         return;
@@ -1108,7 +1114,7 @@ void TerrEditDoc::ExportToIFF(const char *fname)
         char    str[64];
 
         sprintf(str,"Error #%x while trying to write author chunk",(int)iff.error());
-                                                  
+
         MessageBox((AfxGetMainWnd()) ? AfxGetMainWnd()->GetSafeHwnd() : NULL,
                str,"Export Error",MB_OK | MB_ICONEXCLAMATION);
         return;
@@ -1120,7 +1126,7 @@ void TerrEditDoc::ExportToIFF(const char *fname)
         char    str[64];
 
         sprintf(str,"Error #%x while trying to write copyright chunk",(int)iff.error());
-                                                  
+
         MessageBox((AfxGetMainWnd()) ? AfxGetMainWnd()->GetSafeHwnd() : NULL,
                str,"Export Error",MB_OK | MB_ICONEXCLAMATION);
         return;
@@ -1143,7 +1149,7 @@ void TerrEditDoc::ExportToIFF(const char *fname)
         char    str[64];
 
         sprintf(str,"Error #%x while trying to write color bands chunk",(int)iff.error());
-                                                  
+
         MessageBox((AfxGetMainWnd()) ? AfxGetMainWnd()->GetSafeHwnd() : NULL,
                str,"Export Error",MB_OK | MB_ICONEXCLAMATION);
         return;
@@ -1157,14 +1163,14 @@ void TerrEditDoc::ExportToIFF(const char *fname)
             char    str[64];
 
             sprintf(str,"Error #%x while trying to write heights chunk",(int)iff.error());
-                                                  
+
             MessageBox((AfxGetMainWnd()) ? AfxGetMainWnd()->GetSafeHwnd() : NULL,
                    str,"Export Error",MB_OK | MB_ICONEXCLAMATION);
             return;
         }
         status |= EXPSTAT_HGTS;
     }
- 
+
     // Write height table
     if (htable)
     {
@@ -1173,7 +1179,7 @@ void TerrEditDoc::ExportToIFF(const char *fname)
             char    str[64];
 
             sprintf(str,"Error #%x while trying to write height table chunk",(int)iff.error());
-                                                  
+
             MessageBox((AfxGetMainWnd()) ? AfxGetMainWnd()->GetSafeHwnd() : NULL,
                    str,"Export Error",MB_OK | MB_ICONEXCLAMATION);
             return;
@@ -1245,7 +1251,7 @@ void TerrEditDoc::ExportToIFF(const char *fname)
 
                 sprintf(str,"Error #%x while trying to write surface normals chunk",
                             (int)iff.error());
-                                                  
+
                 MessageBox((AfxGetMainWnd()) ? AfxGetMainWnd()->GetSafeHwnd() : NULL,
                            str,"Export Error",MB_OK | MB_ICONEXCLAMATION);
                 delete cnrmls;
@@ -1261,7 +1267,7 @@ void TerrEditDoc::ExportToIFF(const char *fname)
 
                 sprintf(str,"Error #%x while trying to write surface normals chunk",
                             (int)iff.error());
-                                                  
+
                 MessageBox((AfxGetMainWnd()) ? AfxGetMainWnd()->GetSafeHwnd() : NULL,
                            str,"Export Error",MB_OK | MB_ICONEXCLAMATION);
                 return;
@@ -1281,7 +1287,7 @@ void TerrEditDoc::ExportToIFF(const char *fname)
 
             sprintf(str,"Error #%x while trying to write surface information chunk",
                         (int)iff.error());
-                                                  
+
             MessageBox((AfxGetMainWnd()) ? AfxGetMainWnd()->GetSafeHwnd() : NULL,
                 str,"Export Error",MB_OK | MB_ICONEXCLAMATION);
             return;
@@ -1301,7 +1307,7 @@ void TerrEditDoc::ExportToIFF(const char *fname)
 
             sprintf(str,"Error #%x while trying to write texture color information chunk",
                         (int)iff.error());
-                                                      
+
             MessageBox(NULL,
                 str,"Export Error",MB_OK | MB_ICONEXCLAMATION);
                 return;
@@ -1322,7 +1328,7 @@ void TerrEditDoc::ExportToIFF(const char *fname)
                           str,"Export Error",MB_OK | MB_ICONEXCLAMATION);
                 return;
             }
-            
+
             assert(txtEsch[i]);
 
             txtEsch[i]->lock();
@@ -1334,7 +1340,8 @@ void TerrEditDoc::ExportToIFF(const char *fname)
             mhdr.xsize = ptr->width;
             mhdr.ysize = ptr->height;
             mhdr.nframes = 1;
-            mhdr.type = 1;
+            mhdr.type = ESCH_MTL_TYPE_8BIT;
+            mhdr.compress = ESCH_MTL_COMPRESS_RLE;
 
             if (iff.write(iff.makeid('M','H','D','R'),&mhdr,sizeof(EschFileMtlMHDR)))
             {
@@ -1344,31 +1351,64 @@ void TerrEditDoc::ExportToIFF(const char *fname)
                             "Texture: %s",
                             (int)iff.error(),
                             txtName[i]);
-                                                  
-                MessageBox(NULL,
-                           str,"Export Error",MB_OK | MB_ICONEXCLAMATION);
-                txtEsch[i]->unlock();
-                return;
-            }
- 
-            if (iff.write(iff.makeid('B','O','D','Y'),ptr->tex,mhdr.xsize*mhdr.ysize))
-            {
-                char    str[128];
 
-                sprintf(str,"Error #%x while trying to write texture body chunk\n\n"
-                            "Texture: %s",
-                            (int)iff.error(),txtName[i]);
-                                                  
                 MessageBox(NULL,
                            str,"Export Error",MB_OK | MB_ICONEXCLAMATION);
                 txtEsch[i]->unlock();
                 return;
             }
-            
+
+            byte *work=new byte[mhdr.xsize*mhdr.ysize];
+            if (!work)
+            {
+                MessageBox((AfxGetMainWnd()) ? AfxGetMainWnd()->GetSafeHwnd() : NULL,
+                           "Out of Memory","Export Error",MB_OK | MB_ICONEXCLAMATION);
+                return;
+            }
+
+            dword size=XFParseXEB::compress_rle_8bpp(mhdr.xsize,mhdr.ysize,
+                                                     ptr->tex,work);
+
+            if (size)
+            {
+                if (iff.write(iff.makeid('B','O','D','Y'),work,size))
+                {
+                    char    str[128];
+
+                    sprintf(str,"Error #%x while trying to write texture body chunk\n\n"
+                                "Texture: %s",
+                                (int)iff.error(),txtName[i]);
+
+                    MessageBox(NULL,
+                            str,"Export Error",MB_OK | MB_ICONEXCLAMATION);
+                    txtEsch[i]->unlock();
+                    delete [] work;
+                    return;
+                }
+            }
+            else
+            {
+                delete [] work;
+
+                if (iff.write(iff.makeid('B','O','D','Y'),ptr->tex,mhdr.xsize*mhdr.ysize))
+                {
+                    char    str[128];
+
+                    sprintf(str,"Error #%x while trying to write texture body chunk\n\n"
+                                "Texture: %s",
+                                (int)iff.error(),txtName[i]);
+
+                    MessageBox(NULL,
+                            str,"Export Error",MB_OK | MB_ICONEXCLAMATION);
+                    txtEsch[i]->unlock();
+                    return;
+                }
+            }
+
             iff.leaveform();
             txtEsch[i]->unlock();
         }        
-        
+
         status |= EXPSTAT_TXTS;
     }
 
@@ -1386,7 +1426,7 @@ void TerrEditDoc::ExportToIFF(const char *fname)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrEditDoc - ComputeNormals                                             ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrEditDoc::ComputeNormals()
+void TerrEditDoc::ComputeNormals(dword flags)
 {
     int             x, y, cx, cy;
     double          cenh, mag;
@@ -1395,11 +1435,21 @@ void TerrEditDoc::ComputeNormals()
     EschVector      *dptr;
 
     ASSERT(width && depth && hsurfnorml);
+    ASSERT((flags & ESCH_NORMALS_SMOOTH) || (flags & ESCH_NORMALS_FLAT));
 
 //ÄÄÄ Setup memory for normals
     dword surfsize = (width * depth) >> (surfshift*2);
 
-    EschVector *nml = (EschVector*)ivory_hlock(hsurfnorml);
+    EschVector  *nml;
+    if (flags & ESCH_NORMALS_SMOOTH)
+    {
+        nml = (EschVector*)ivory_hlock(hsurfnorml);
+    }
+    else if (flags & ESCH_NORMALS_FLAT)
+    {
+        nml = (EschVector*)ivory_hlock(hsurfnormlflat);
+    }
+
     if (!nml)
     {
         MessageBox((AfxGetMainWnd()) ? AfxGetMainWnd()->GetSafeHwnd() : NULL,
@@ -1415,7 +1465,7 @@ void TerrEditDoc::ComputeNormals()
     dlg.m_pbar.SetPos(0);
     dlg.SetWindowText("Computing Surface Normals...");
     dlg.ShowWindow(SW_SHOW);
-       
+
     for(y=0, cy=0; y < depth;)
     {
         dlg.m_pbar.SetPos(y);
@@ -1426,130 +1476,242 @@ void TerrEditDoc::ComputeNormals()
         {
             sum[0]=sum[1]=sum[2]=0.0;
 
-            cenh = (float)(*sptr) * 16;
-
+            cenh = (double)(htable[*sptr]);
+            double tv[3];
             if (y < depth-1 && x < width-1)
             {
                 // Face 1 (N - NE)
                 v1[0] = 0.0;
-                v1[1] = (float)(*(sptr + width)) * 16 - cenh;
-                v1[2] = 30.0;
+                v1[1] = (double)(htable[*(sptr + width)]) - cenh;
+                v1[2] = (double)scale;
 
-                v2[0] = 30.0;
-                v2[1] = (float)(*(sptr + width + 1)) * 16 - cenh;
-                v2[2] = 30.0;
+                v2[0] = (double)scale;
+                v2[1] = (double)(htable[*(sptr + width + 1)]) - cenh;
+                v2[2] = (double)scale;
 
                 // Cross-product
-                sum[0] += (v1[1] * v2[2]) - (v1[2] * v2[1]);
-                sum[1] += (v1[2] * v2[0]) - (v1[0] * v2[2]);
-                sum[2] += (v1[0] * v2[1]) - (v1[1] * v2[0]);
+                tv[0] = (v1[1] * v2[2]) - (v1[2] * v2[1]);
+                tv[1] = (v1[2] * v2[0]) - (v1[0] * v2[2]);
+                tv[2] = (v1[0] * v2[1]) - (v1[1] * v2[0]);
+                mag = sqrt (tv[0] * tv[0] + tv[1]*tv[1] + tv[2]*tv[2]);
+
+                if (mag <=0)
+                {
+                    sum[0] += 0;
+                    sum[1] += 1;
+                    sum[0] += 0;
+                }
+                else
+                {
+                    sum[0] += (tv[0] / mag);
+                    sum[1] += (tv[1] / mag);
+                    sum[2] += (tv[2] / mag);
+                }
 
                 // Face 2 (NE - E)
-                v1[0] = 30.0;
-                v1[1] = (float)(*(sptr + width + 1)) * 16 - cenh;
-                v1[2] = 30.0;
+                v1[0] = (double)scale;
+                v1[1] = (double)(htable[*(sptr + width + 1)]) - cenh;
+                v1[2] = (double)scale;
 
-                v2[0] = 30.0;
-                v2[1] = (float)(*(sptr + 1)) * 16 - cenh;
+                v2[0] = (double)scale;
+                v2[1] = (double)(htable[*(sptr + 1)]) - cenh;
                 v2[2] = 0.0;
 
                 // Cross-product
-                sum[0] += (v1[1] * v2[2]) - (v1[2] * v2[1]);
-                sum[1] += (v1[2] * v2[0]) - (v1[0] * v2[2]);
-                sum[2] += (v1[0] * v2[1]) - (v1[1] * v2[0]);
+                tv[0] = (v1[1] * v2[2]) - (v1[2] * v2[1]);
+                tv[1] = (v1[2] * v2[0]) - (v1[0] * v2[2]);
+                tv[2] = (v1[0] * v2[1]) - (v1[1] * v2[0]);
+                mag = sqrt (tv[0] * tv[0] + tv[1]*tv[1] + tv[2]*tv[2]);
+
+                if (mag <=0)
+                {
+                    sum[0] += 0;
+                    sum[1] += 1;
+                    sum[0] += 0;
+                }
+                else
+                {
+                    sum[0] += (tv[0] / mag);
+                    sum[1] += (tv[1] / mag);
+                    sum[2] += (tv[2] / mag);
+                }
             }
 
-            if (y > 0 && x < width-1)
+            if ((y > 0 && x < width-1) && (flags & ESCH_NORMALS_SMOOTH))
             {
                 // Face 3 (E - SE)
-                v1[0] = 30.0;
-                v1[1] = (float)(*(sptr + 1)) * 16 - cenh;
+                v1[0] = (double)scale;
+                v1[1] = (double)(htable[*(sptr + 1)]) - cenh;
                 v1[2] = 0.0;
 
                 v2[0] = 30.0;
-                v2[1] = (float)(*(sptr - width + 1)) * 16 - cenh;
-                v2[2] = -30.0;
+                v2[1] = (double)(htable[*(sptr - width + 1)]) * 16 - cenh;
+                v2[2] = -(double)scale;
 
                 // Cross-product
-                sum[0] += (v1[1] * v2[2]) - (v1[2] * v2[1]);
-                sum[1] += (v1[2] * v2[0]) - (v1[0] * v2[2]);
-                sum[2] += (v1[0] * v2[1]) - (v1[1] * v2[0]);
+                tv[0] = (v1[1] * v2[2]) - (v1[2] * v2[1]);
+                tv[1] = (v1[2] * v2[0]) - (v1[0] * v2[2]);
+                tv[2] = (v1[0] * v2[1]) - (v1[1] * v2[0]);
+                mag = sqrt (tv[0] * tv[0] + tv[1]*tv[1] + tv[2]*tv[2]);
+
+                if (mag <=0)
+                {
+                    sum[0] += 0;
+                    sum[1] += 1;
+                    sum[0] += 0;
+                }
+                else
+                {
+                    sum[0] += (tv[0] / mag);
+                    sum[1] += (tv[1] / mag);
+                    sum[2] += (tv[2] / mag);
+                }
 
                 // Face 4 (SE - S)
-                v1[0] = 30.0;
-                v1[1] = (float)(*(sptr - width + 1)) * 16 - cenh;
-                v1[2] = -30.0;
+                v1[0] = (double)scale;
+                v1[1] = (double)(htable[*(sptr - width + 1)]) - cenh;
+                v1[2] = -(double)scale;
 
                 v2[0] = 0.0;
-                v2[1] = (float)(*(sptr -width)) * 16 - cenh;
-                v2[2] = -30.0;
+                v2[1] = (double)(htable[*(sptr -width)]) - cenh;
+                v2[2] = -(double)scale;
 
                 // Cross-product
-                sum[0] += (v1[1] * v2[2]) - (v1[2] * v2[1]);
-                sum[1] += (v1[2] * v2[0]) - (v1[0] * v2[2]);
-                sum[2] += (v1[0] * v2[1]) - (v1[1] * v2[0]);
+                tv[0] = (v1[1] * v2[2]) - (v1[2] * v2[1]);
+                tv[1] = (v1[2] * v2[0]) - (v1[0] * v2[2]);
+                tv[2] = (v1[0] * v2[1]) - (v1[1] * v2[0]);
+                mag = sqrt (tv[0] * tv[0] + tv[1]*tv[1] + tv[2]*tv[2]);
+
+                if (mag <=0)
+                {
+                    sum[0] += 0;
+                    sum[1] += 1;
+                    sum[0] += 0;
+                }
+                else
+                {
+                    sum[0] += (tv[0] / mag);
+                    sum[1] += (tv[1] / mag);
+                    sum[2] += (tv[2] / mag);
+                }
             }
 
-            if (y > 0 && x > 0)
+            if ((y > 0 && x > 0) && (flags & ESCH_NORMALS_SMOOTH)) 
             {
                 // Face 5 (S - SW)
                 v1[0] = 0.0;
-                v1[1] = (float)(*(sptr - width)) * 16 - cenh;
-                v1[2] = -30.0;
+                v1[1] = (double)(htable[*(sptr - width)]) - cenh;
+                v1[2] = -(double)scale;
 
-                v2[0] = -30.0;
-                v2[1] = (float)(*(sptr - width - 1)) * 16 - cenh;
-                v2[2] = -30.0;
+                v2[0] = -(double)scale;
+                v2[1] = (float)(htable[*(sptr - width - 1)]) - cenh;
+                v2[2] = -(double)scale;
 
                 // Cross-product
-                sum[0] += (v1[1] * v2[2]) - (v1[2] * v2[1]);
-                sum[1] += (v1[2] * v2[0]) - (v1[0] * v2[2]);
-                sum[2] += (v1[0] * v2[1]) - (v1[1] * v2[0]);
+                tv[0] = (v1[1] * v2[2]) - (v1[2] * v2[1]);
+                tv[1] = (v1[2] * v2[0]) - (v1[0] * v2[2]);
+                tv[2] = (v1[0] * v2[1]) - (v1[1] * v2[0]);
+                mag = sqrt (tv[0] * tv[0] + tv[1]*tv[1] + tv[2]*tv[2]);
+
+                if (mag <=0)
+                {
+                    sum[0] += 0;
+                    sum[1] += 1;
+                    sum[0] += 0;
+                }
+                else
+                {
+                    sum[0] += (tv[0] / mag);
+                    sum[1] += (tv[1] / mag);
+                    sum[2] += (tv[2] / mag);
+                }
 
                 // Face 6 (SW - E)
-                v1[0] = -30.0;
-                v1[1] = (float)(*(sptr - width - 1)) * 16 - cenh;
-                v1[2] = -30.0;
+                v1[0] = -(double)scale;
+                v1[1] = (double)(htable[*(sptr - width - 1)]) - cenh;
+                v1[2] = -(double)scale;
 
-                v2[0] = -30.0;
-                v2[1] = (float)(*(sptr - 1)) * 16 - cenh;
+                v2[0] = -(double)scale;
+                v2[1] = (double)(htable[*(sptr - 1)]) - cenh;
                 v2[2] = 0.0;
 
                 // Cross-product
-                sum[0] += (v1[1] * v2[2]) - (v1[2] * v2[1]);
-                sum[1] += (v1[2] * v2[0]) - (v1[0] * v2[2]);
-                sum[2] += (v1[0] * v2[1]) - (v1[1] * v2[0]);
+                tv[0] = (v1[1] * v2[2]) - (v1[2] * v2[1]);
+                tv[1] = (v1[2] * v2[0]) - (v1[0] * v2[2]);
+                tv[2] = (v1[0] * v2[1]) - (v1[1] * v2[0]);
+                mag = sqrt (tv[0] * tv[0] + tv[1]*tv[1] + tv[2]*tv[2]);
+
+                if (mag <=0)
+                {
+                    sum[0] += 0;
+                    sum[1] += 1;
+                    sum[0] += 0;
+                }
+                else
+                {
+                    sum[0] += (tv[0] / mag);
+                    sum[1] += (tv[1] / mag);
+                    sum[2] += (tv[2] / mag);
+                }
             }
 
-            if (y < depth-1 && x > 0)
+            if ((y < depth-1 && x > 0) && (flags & ESCH_NORMALS_SMOOTH)) 
             {
                 // Face 7 (E - NW)
-                v1[0] = -30.0;
-                v1[1] = (float)(*(sptr - 1)) * 16 - cenh;
+                v1[0] = -(double)scale;
+                v1[1] = (double)(htable[*(sptr - 1)]) - cenh;
                 v1[2] = 0.0;
 
-                v2[0] = -30.0;
-                v2[1] = (float)(*(sptr + width - 1)) * 16 - cenh;
+                v2[0] = -(double)scale;
+                v2[1] = (double)(htable[*(sptr + width - 1)]) - cenh;
                 v2[2] = 30.0;
 
                 // Cross-product
-                sum[0] += (v1[1] * v2[2]) - (v1[2] * v2[1]);
-                sum[1] += (v1[2] * v2[0]) - (v1[0] * v2[2]);
-                sum[2] += (v1[0] * v2[1]) - (v1[1] * v2[0]);
+                tv[0] = (v1[1] * v2[2]) - (v1[2] * v2[1]);
+                tv[1] = (v1[2] * v2[0]) - (v1[0] * v2[2]);
+                tv[2] = (v1[0] * v2[1]) - (v1[1] * v2[0]);
+                mag = sqrt (tv[0] * tv[0] + tv[1]*tv[1] + tv[2]*tv[2]);
+
+                if (mag <=0)
+                {
+                    sum[0] += 0;
+                    sum[1] += 1;
+                    sum[0] += 0;
+                }
+                else
+                {
+                    sum[0] += (tv[0] / mag);
+                    sum[1] += (tv[1] / mag);
+                    sum[2] += (tv[2] / mag);
+                }
 
                 // Face 8 (NW - N)
-                v1[0] = -30.0;
-                v1[1] = (float)(*(sptr + width - 1)) * 16 - cenh;
-                v1[2] = 30.0;
+                v1[0] = -(double)scale;
+                v1[1] = (double)(htable[*(sptr + width - 1)]) - cenh;
+                v1[2] = (double) scale;
 
                 v2[0] = 0.0;
-                v2[1] = (float)(*(sptr + width)) * 16 - cenh;
-                v2[2] = 30.0;
+                v2[1] = (double)(htable[*(sptr + width)]) - cenh;
+                v2[2] = (double)scale;
 
                 // Cross-product
-                sum[0] += (v1[1] * v2[2]) - (v1[2] * v2[1]);
-                sum[1] += (v1[2] * v2[0]) - (v1[0] * v2[2]);
-                sum[2] += (v1[0] * v2[1]) - (v1[1] * v2[0]);
+                tv[0] = (v1[1] * v2[2]) - (v1[2] * v2[1]);
+                tv[1] = (v1[2] * v2[0]) - (v1[0] * v2[2]);
+                tv[2] = (v1[0] * v2[1]) - (v1[1] * v2[0]);
+                mag = sqrt (tv[0] * tv[0] + tv[1]*tv[1] + tv[2]*tv[2]);
+
+                if (mag <=0)
+                {
+                    sum[0] += 0;
+                    sum[1] += 1;
+                    sum[0] += 0;
+                }
+                else
+                {
+                    sum[0] += (tv[0] / mag);
+                    sum[1] += (tv[1] / mag);
+                    sum[2] += (tv[2] / mag);
+                }
             }
 
             // Compute & Store final normal
@@ -1581,7 +1743,11 @@ void TerrEditDoc::ComputeNormals()
             break;
     }
 
-    ivory_hunlock(hsurfnorml);
+    if (flags & ESCH_NORMALS_SMOOTH)
+        ivory_hunlock(hsurfnorml);
+    else if (flags & ESCH_NORMALS_FLAT)
+        ivory_hunlock(hsurfnormlflat); 
+
 
     SetModifiedFlag();
     SetLightsModifiedFlag();
@@ -1715,7 +1881,7 @@ void TerrEditDoc::Flip(BOOL horz)
 
     undo_valid=FALSE;
 
-    ASSERT(hfield && surfinfo && surfcolr && hsurfnorml);
+    ASSERT(hfield && surfinfo && surfcolr && hsurfnorml && hsurfnormlflat);
 
 //ÄÄ Flip heights
     {
@@ -1761,7 +1927,7 @@ void TerrEditDoc::Flip(BOOL horz)
         delete [] t;
     }
 
-//ÄÄ Flip normals
+//ÄÄ Flip smooth normals
     {
         EschVector *nml = (EschVector*)ivory_hlock(hsurfnorml);
         if (!nml)
@@ -1815,6 +1981,62 @@ void TerrEditDoc::Flip(BOOL horz)
 
         ivory_hunlock(hsurfnorml);
     }
+
+//ÄÄ Flip flat normals
+    {
+        EschVector *nml = (EschVector*)ivory_hlock(hsurfnormlflat);
+        if (!nml)
+        {
+            MessageBox((AfxGetMainWnd()) ? AfxGetMainWnd()->GetSafeHwnd() : NULL,
+                      "Could not lock normals memory",
+                      "Flip Error",MB_OK | MB_ICONEXCLAMATION);
+            return;
+        }
+
+        EschVector *sptr, *dptr;
+        EschVector *t = new EschVector[(horz) ? idepth : iwidth];
+        ASSERT(t);
+
+        if (horz)
+        {
+            for(i=0; i < (ulong)(iwidth >> 1); i++)
+            {
+                for(j=0, sptr=nml+i, dptr=t;
+                    j < idepth; j++, sptr += iwidth, dptr++)
+                    *dptr = *sptr;
+
+                for(j=0, sptr=nml+(iwidth-i-1), dptr=nml+i;
+                    j < idepth; j++, sptr += iwidth, dptr += iwidth)
+                    *dptr = *sptr;
+
+                for(j=0, sptr=t, dptr=nml+(iwidth-i-1);
+                    j < idepth; j++, sptr++, dptr += iwidth)
+                    *dptr = *sptr;
+            }
+        }
+        else
+        {
+            for(i=0; i < (ulong)(idepth >> 1); i++)
+            {
+                for(j=0, sptr=nml+(i*iwidth), dptr=t;
+                    j < iwidth; j++, sptr++, dptr++)
+                    *dptr = *sptr;
+
+                for(j=0, sptr=nml+((idepth-i-1)*iwidth), dptr=nml+(i*iwidth);
+                    j < iwidth; j++, sptr++, dptr++)
+                    *dptr = *sptr;
+
+                for(j=0, sptr=t, dptr=nml+((idepth-i-1)*iwidth);
+                    j < iwidth; j++, sptr++, dptr++)
+                    *dptr = *sptr;
+            }
+        }
+
+        delete [] t;
+
+        ivory_hunlock(hsurfnormlflat);
+    }
+
 
 //ÄÄ Flip surface info
     {
@@ -1937,7 +2159,7 @@ void TerrEditDoc::Rotate(BOOL right)
 
     undo_valid=FALSE;
 
-    ASSERT(hfield && surfinfo && surfcolr && hsurfnorml);
+    ASSERT(hfield && surfinfo && surfcolr && hsurfnorml && hsurfnormlflat);
 
 //ÄÄ Rotate heights
     {
@@ -1982,7 +2204,7 @@ void TerrEditDoc::Rotate(BOOL right)
         hfield=t;
     }
 
-//ÄÄ Rotate normals
+//ÄÄ Rotate smooth normals
     {
         IvoryHandle th = ivory_halloc((ulong)(surfsize * sizeof(EschVector)));
         ASSERT(th);
@@ -1990,7 +2212,7 @@ void TerrEditDoc::Rotate(BOOL right)
         EschVector *t = (EschVector*) ivory_hlock(th);
         ASSERT(t);
         memset(t,0,(ulong)(surfsize * sizeof(EschVector)));
-        
+
         EschVector *nml = (EschVector*) ivory_hlock(hsurfnorml);
         ASSERT(nml);
 
@@ -2032,6 +2254,58 @@ void TerrEditDoc::Rotate(BOOL right)
         hsurfnorml=th;
         ivory_hunlock(th);
     }
+
+//ÄÄ Rotate flat normals
+    {
+        IvoryHandle th = ivory_halloc((ulong)(surfsize * sizeof(EschVector)));
+        ASSERT(th);
+
+        EschVector *t = (EschVector*) ivory_hlock(th);
+        ASSERT(t);
+        memset(t,0,(ulong)(surfsize * sizeof(EschVector)));
+
+        EschVector *nml = (EschVector*) ivory_hlock(hsurfnormlflat);
+        ASSERT(nml);
+
+        for(j=0; j < (ulong)idepth; j++)
+        {
+            EschVector *sptr=nml+((idepth-j-1)*iwidth);
+
+            if (j >= iwidth)
+                break;
+
+            if (right)
+            {
+                EschVector *dptr=t+(iwidth-j-1)+(idepth-1)*iwidth;
+                for(i=0; i < (ulong)iwidth;
+                    i++, sptr++, dptr -= iwidth)
+                {
+                    if (i >= idepth)
+                        break;
+
+                    *dptr = *sptr;
+                }
+            }
+            else
+            {
+                EschVector *dptr=t+j;
+                for(i=0; i < (ulong)iwidth;
+                    i++, sptr++, dptr += iwidth)
+                {
+                    if (i >= idepth)
+                        break;
+
+                    *dptr = *sptr;
+                }
+            }
+        }
+
+        ivory_hunlock(hsurfnormlflat);
+        ivory_hfree(&hsurfnormlflat);
+        hsurfnormlflat=th;
+        ivory_hunlock(th);
+    }
+
 
 //ÄÄ Rotate surface info
     {
@@ -2158,7 +2432,7 @@ void TerrEditDoc::UITerrainProperities(CWnd *parent, UINT ipage, int edit)
     hdlg.m_lbrown = color_bands[8];
     hdlg.m_brown = color_bands[9];
     hdlg.m_red = color_bands[10];
-    
+
 //ÄÄÄ Height-table
     TerrPropHTablePage  htdlg;
     if (htable && !edit)
@@ -2215,7 +2489,7 @@ void TerrEditDoc::UITerrainProperities(CWnd *parent, UINT ipage, int edit)
                 break;
         }
         scale = (Flx16)(int)gdlg.m_scale;
-        
+
         autocenter = (gdlg.m_autoCenterOrg) ? 1 : 0;
         if (autocenter)
         {
@@ -2573,13 +2847,13 @@ void TerrEditDoc::UICameraProperties(CWnd *parent, UINT ipage)
     gdlg.m_ypos = pt.y;
     gdlg.m_zpos = pt.z;
 
-	gdlg.m_diri = cam.eye.dir.i;
-	gdlg.m_dirj = cam.eye.dir.j;
-	gdlg.m_dirk = cam.eye.dir.k;
+        gdlg.m_diri = cam.eye.dir.i;
+        gdlg.m_dirj = cam.eye.dir.j;
+        gdlg.m_dirk = cam.eye.dir.k;
 
-	gdlg.m_topi = cam.top.i;
-	gdlg.m_topj = cam.top.j;
-	gdlg.m_topk = cam.top.k;
+        gdlg.m_topi = cam.top.i;
+        gdlg.m_topj = cam.top.j;
+        gdlg.m_topk = cam.top.k;
 
     gdlg.m_fov = cam.fov;
 
@@ -2595,7 +2869,7 @@ void TerrEditDoc::UICameraProperties(CWnd *parent, UINT ipage)
     mdlg.m_bcolor = cam_bcolor;
     mdlg.m_hither = cam.hither;
     mdlg.m_yon = cam.yon;
-	mdlg.m_scalef = cam.factor;
+        mdlg.m_scalef = cam.factor;
     mdlg.m_hover = hover_offset;
 
 //ÄÄÄ Extended
@@ -2716,7 +2990,7 @@ void TerrEditDoc::map_surfcolor_to_palette()
     {
         txtColrIndx[i] = (byte)palette.get_index((VngoColor24bit)txtColr[i]);
     }
-     
+
     for(i=0; i < colorNumb; i++)
     {
         colorColrIndx[i] = (byte)palette.get_index((VngoColor24bit)colorColr[i]);
@@ -2790,7 +3064,7 @@ BOOL TerrEditDoc::load_and_recolor_texture(int ind, const char *fname)
     }
 
     assert(txt);
-      
+
     // Allocate memory for texture
 
     if ( ((txt->handle = ivory_halloc(sizeof(VngoTexture) + (bm.width*bm.height))) == 0)
@@ -2812,7 +3086,7 @@ BOOL TerrEditDoc::load_and_recolor_texture(int ind, const char *fname)
     // Recolor image using current palette
 
     ASSERT(bm.bpp == 1 || bm.bpp == 3);
-        
+
     if (bm.bpp == 1)
     {
         int mypal[256];
@@ -2915,9 +3189,13 @@ BOOL TerrEditDoc::OnNewDocument()
     if (!surfcolr)
         return FALSE;
     memset(surfcolr,0,surfsize * sizeof(dword));
- 
+
     hsurfnorml = ivory_halloc((ulong)(surfsize * sizeof(EschVector)));
     if (!hsurfnorml)
+        return FALSE;
+
+    hsurfnormlflat = ivory_halloc((ulong)(surfsize * sizeof(EschVector)));
+    if (!hsurfnormlflat)
         return FALSE;
 
     EschVector *vptr = (EschVector*) ivory_hlock(hsurfnorml);
@@ -2925,6 +3203,12 @@ BOOL TerrEditDoc::OnNewDocument()
         return FALSE;
     memset(vptr,0,(ulong)(surfsize * sizeof(EschVector)));
     ivory_hunlock(hsurfnorml);
+
+    vptr = (EschVector*) ivory_hlock(hsurfnormlflat);
+    if (!vptr)
+        return FALSE;
+    memset(vptr,0,(ulong)(surfsize * sizeof(EschVector)));
+    ivory_hunlock(hsurfnormlflat);
 
 // Allocate undo buffers
     undo_valid = FALSE;
@@ -2976,7 +3260,7 @@ BOOL TerrEditDoc::OnNewDocument()
     int     i;
     char    *c;
     char    fname[256];
-  
+
     GetModuleFileName(NULL, fname, 256);
 
     for (i=strlen(fname), c = &fname[i-1]; i > 0; i--, c--)
@@ -3015,8 +3299,8 @@ void TerrEditDoc::Serialize(CArchive& ar)
 {
     int i;
 
-	if (ar.IsStoring())
-	{
+        if (ar.IsStoring())
+        {
         EschPoint   pnt;
         EschLight   *lgt;
 
@@ -3051,7 +3335,7 @@ void TerrEditDoc::Serialize(CArchive& ar)
 
         // Height table
         ar.Write(htable,sizeof(Flx16)*256);
-        
+
         // Surface information
         dword surfsize = (width * depth) >> (surfshift*2);
 
@@ -3147,9 +3431,9 @@ void TerrEditDoc::Serialize(CArchive& ar)
         ar << lod_active;
         ar << (float)lod_medium;
         ar << (float)lod_low;
-	}
-	else
-	{
+        }
+        else
+        {
         float       f;
         ushort      magic;
         ushort      version;
@@ -3504,14 +3788,24 @@ void TerrEditDoc::Serialize(CArchive& ar)
         memset(vptr,0,(ulong)(surfsize * sizeof(EschVector)));
         ivory_hunlock(hsurfnorml);
 
-        ComputeNormals();
+        ComputeNormals(ESCH_NORMALS_SMOOTH);
+
+        hsurfnormlflat = ivory_halloc((ulong)(surfsize * sizeof(EschVector)));
+        ASSERT(hsurfnormlflat);
+
+        vptr = (EschVector*) ivory_hlock(hsurfnormlflat);
+        ASSERT(vptr);
+        memset(vptr,0,(ulong)(surfsize * sizeof(EschVector)));
+        ivory_hunlock(hsurfnormlflat);
+
+        ComputeNormals(ESCH_NORMALS_FLAT);
 
         // Set default camera flags
         cam.set_flags(ESCH_CAM_SHADE_WIRE
                       | ESCH_CAM_SHADE_SOLID
                       | ESCH_CAM_SHADE_FLAT
                       | ESCH_CAM_TEXTURED | ESCH_CAM_BACKCULL);
-	}
+        }
 }
 
 //°±² eof - eshtdoc.cpp ²±°

@@ -1,15 +1,15 @@
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
-//                  ooo        ooooo                       
-//                  `88.       .888'                       
-//                   888b     d'888   .oooo.   oooo    ooo 
-//                   8 Y88. .P  888  `P  )88b   `88b..8P'  
-//                   8  `888'   888   .oP"888     Y888'    
-//                   8    Y     888  d8(  888   .o8"'88b   
-//                  o8o        o888o `Y888""8o o88'   888o 
+//                  ooo        ooooo
+//                  `88.       .888'
+//                   888b     d'888   .oooo.   oooo    ooo
+//                   8 Y88. .P  888  `P  )88b   `88b..8P'
+//                   8  `888'   888   .oP"888     Y888'
+//                   8    Y     888  d8(  888   .o8"'88b
+//                  o8o        o888o `Y888""8o o88'   888o
 //
 //                          Across the event horizon...
 //
-//            Copyright (c) 1994, 1995 by Charybdis Enterprises, Inc.
+//           Copyright (c) 1994 - 1997 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved.
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -38,7 +38,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include <conio.h>
@@ -107,7 +107,7 @@ extern byte        *Work;
 extern ulong       Work_size;
 extern dword       Flags;
 
-//ÄÄ Local         
+//ÄÄ Local
 STATIC int  CurrentToken;
 
 MaxTrigger  theTrigger;
@@ -130,7 +130,7 @@ STATIC char cpp_header[] =
 {
     "//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿\r\n"
     "// MaxC -- Event and Trigger Definition System                              ³\r\n"
-    "// (C) 1995 by Charybdis Enterprises, Inc.  All Rights Reserved.            ³\r\n"
+    "// (C) 1995-1997 by Charybdis Enterprises, Inc.  All Rights Reserved.       ³\r\n"
     "//                                                                          ³\r\n"
     "// Event Constants header file for C++                                      ³\r\n"
     "//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ\r\n"
@@ -186,7 +186,7 @@ STATIC void event()
     ostrstream s;
     char ident[64];
 
-    switch (CurrentToken) 
+    switch (CurrentToken)
     {
     case YY_EVENT:
         match (YY_EVENT);
@@ -207,7 +207,7 @@ STATIC void event()
         else
         {
             // store the event number with the specified trigger
-            s << "const MaxEvent "<< ident << "(" << event_id << ");\r\n";
+            s << "#define " << ident << " MaxEvent (" << event_id << ")\r\n";
             header.write (s.str(), s.pcount());
 
             match (YY_LBRACE);
@@ -227,7 +227,7 @@ STATIC void event()
 
     default:
         error("Invalid operation, expected an event");
-        break;                  
+        break;
    }
 }
 

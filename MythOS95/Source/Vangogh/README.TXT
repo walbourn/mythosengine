@@ -3,7 +3,7 @@
                                                             %/ . .  .   \%
              Van Gogh 2D-Display Library                     |  . .  o. | 
                                                              |. _  .   .|
-   Copyright (c) 1994-1996 by Charybdis Enterprises, Inc.    | / \   .  | 
+   Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.    | / \   .  | 
                 All rights reserved.                         |_|_|_._._.|
                                                              |.-.-.-.-..|
                                                             %\__________/%
@@ -27,10 +27,10 @@
                             _Library Status_
 
   Notes by:  Tim Little
-  Updated:   August 26, 1996
+  Updated:   November 5, 1996
 
   This library is not yet complete.  It is functional using the DIB engine 
-  present in Win95, but does not yet utilize any of the 3D-DDI features
+  present in Win95, but does not yet utilize any of the D3D features
   of Win95.
 
   
@@ -43,6 +43,12 @@
     o All new directory structure.
 
     o Fixes a z-buffer bug in the linear flat shadded texture mapper.
+
+    o First cut of new screen managers.
+
+    o Added new vngo_stretch_blt functions.
+
+    o New sub-pixel accurate polygon scan-converters.
 
     
   Pending changes -----------------------------------------------------------

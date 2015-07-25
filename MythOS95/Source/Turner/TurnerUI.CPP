@@ -2,7 +2,7 @@
 //
 //                           Turner - Networking
 //
-//                Copyright (c) 1995 by Charybdis Enterprises, Inc.
+//            Copyright (c) 1995-1997 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved.
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -32,7 +32,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include <assert.h>
@@ -66,6 +66,7 @@
 //
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 
+TurnerNetworkUI *TurnerNetworkUI::g_this = 0;
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
@@ -77,10 +78,22 @@
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 // TurnerNetworkUI - Constructor
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-TurnerNetworkUI::TurnerNetworkUI (HWND _hWnd, TurnerNetwork *_net):
+TurnerNetworkUI::TurnerNetworkUI (HWND _hWnd,
+                                  TurnerNetwork *_net,
+                                  int _max_sessions):
     hWnd (_hWnd),
-    net (_net)
+    net (_net),
+    max_sessions (_max_sessions),
+    current_session (0),
+    sessions (0)
 {
+    // There can only be one of these created at a a time
+    assert (!g_this);
+
+    g_this = this;
+
+    if (max_sessions != 0)
+        sessions = new GUID[max_sessions];
 }
 
 
@@ -89,6 +102,12 @@ TurnerNetworkUI::TurnerNetworkUI (HWND _hWnd, TurnerNetwork *_net):
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 TurnerNetworkUI::~TurnerNetworkUI ()
 {
+    g_this = 0;
+    if (sessions)
+    {
+        delete [] sessions;
+        sessions = 0;
+    }
 }
 
 
@@ -97,7 +116,7 @@ TurnerNetworkUI::~TurnerNetworkUI ()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 int TurnerNetworkUI::create_or_join ()
 {
-    return DialogBoxParam (NULL, (LPCTSTR) IDD_MAXNETWORK_Q_CREATE, hWnd, 
+    return DialogBoxParam (NULL, (LPCTSTR) IDD_MAXNETWORK_Q_CREATE, hWnd,
                            (DLGPROC) DlgProcQCreate, (LPARAM)net);
 }
 
@@ -150,9 +169,11 @@ int TurnerNetworkUI::get_provider ()
 // TurnerNetworkUI - static EnumSP
 //  Used by DlgProcChooseProvider
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-BOOL CALLBACK TurnerNetworkUI::EnumSP (LPGUID lpGuid, LPSTR lpDesc,
-                                    DWORD dwMajorVersion, DWORD dwMinorVersion,
-                                    LPVOID lpv)
+BOOL CALLBACK TurnerNetworkUI::EnumSP (LPGUID lpGuid,
+                                       LPSTR  lpDesc,
+                                       DWORD  dwMajorVersion,
+                                       DWORD  dwMinorVersion,
+                                       LPVOID lpv)
 {
     HWND hWnd = (HWND)lpv;
 
@@ -176,7 +197,7 @@ BOOL CALLBACK TurnerNetworkUI::DlgProcChooseProvider (HWND hDlg, UINT msg, WPARA
     static  LONG iIndex;
     static  HWND hWndCtl;
     static  TurnerNetwork  *net;
-    
+
     switch (msg)
     {
     case WM_INITDIALOG:
@@ -261,24 +282,33 @@ int TurnerNetworkUI::select_session ()
 // TurnerNetworkUI - static EnumSession
 //  session enumeration proc used by DlgProcSelSession
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-BOOL CALLBACK TurnerNetworkUI::EnumSession (LPDPSESSIONDESC lpDPGameDesc,
-                                         LPVOID lpContext,
-                                         LPDWORD lpdwTimeOut,
-                                         DWORD dwFlags)
+BOOL CALLBACK TurnerNetworkUI::EnumSession (LPCDPSESSIONDESC2 lpDPGameDesc,
+                                            LPDWORD lpdwTimeOut,
+                                            DWORD dwFlags,
+                                            LPVOID lpContext)
 {
-    LONG iIndex;
-    HWND hWnd = (HWND) lpContext;
+    HWND hWndCtl = (HWND)lpContext;
 
     if (dwFlags & DPESC_TIMEDOUT)
         return FALSE;       // don't try again
 
-    iIndex = SendMessage (hWnd, LB_ADDSTRING, 0, (LPARAM) lpDPGameDesc->szSessionName);
-    if (iIndex != LB_ERR)
-        SendMessage (hWnd, LB_SETITEMDATA, iIndex, (LPARAM) lpDPGameDesc->dwSession);
+    int session_index = g_this->current_session++;
+    if (session_index < g_this->max_sessions)
+    {
+        g_this->sessions[session_index] = lpDPGameDesc->guidInstance;
 
-    SetFocus (hWnd);
-    SendMessage (hWnd, LB_SETCURSEL, 0, 0);
-    return TRUE;
+        LONG iIndex = SendMessage (hWndCtl, LB_ADDSTRING, 0, (LPARAM) lpDPGameDesc->lpszSessionNameA);
+        if (iIndex != LB_ERR)
+            SendMessage (hWndCtl, LB_SETITEMDATA, iIndex, (LPARAM) session_index);
+
+        SetFocus (g_this->hWnd);
+        SendMessage (hWndCtl, LB_SETCURSEL, 0, 0);
+        return TRUE;
+    }
+    else
+    {
+        return FALSE;
+    }
 }
 
 
@@ -292,7 +322,7 @@ BOOL CALLBACK TurnerNetworkUI::DlgProcSelSession (HWND hDlg, UINT msg, WPARAM wP
     static  LONG        iIndex  = 0;
     static  HWND        hWndCtl = 0;
 
-    DPSESSIONDESC dpDesc;
+    DPSESSIONDESC2 dpDesc;
 
     switch (msg)
     {
@@ -306,10 +336,10 @@ BOOL CALLBACK TurnerNetworkUI::DlgProcSelSession (HWND hDlg, UINT msg, WPARAM wP
         }
         memset (&dpDesc, 0, sizeof (dpDesc));
         dpDesc.dwSize = sizeof (dpDesc);
-        dpDesc.guidSession = net->session.guidSession;
+        dpDesc.guidInstance = net->session.guidInstance;
 
         // enum sessions with 5 second timeout
-        net->pIDP->EnumSessions (&dpDesc, (DWORD)5000, EnumSession, (LPVOID) hWndCtl, (DWORD)NULL);
+        net->pIDP->EnumSessions (&dpDesc, (DWORD)5000, EnumSession, (LPVOID)hWndCtl, (DWORD)NULL);
 
         SetFocus (hWndCtl);
         return FALSE;
@@ -349,7 +379,7 @@ BOOL CALLBACK TurnerNetworkUI::DlgProcSelSession (HWND hDlg, UINT msg, WPARAM wP
                     return TRUE;
                 }
 
-                HRESULT hr = net->connect_game (session);
+                HRESULT hr = net->connect_game (g_this->sessions[session]);
                 if (hr != DP_OK)
                 {
                     net->close ();
@@ -398,6 +428,4 @@ BOOL TurnerNetworkUI::connect ()
 }
 
 
-
 //°±² End of module - turnerui.cpp ²±°
-

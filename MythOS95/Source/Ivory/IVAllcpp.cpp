@@ -4,7 +4,7 @@
 //
 //                          Microsoft Windows '95 Version
 //
-//            Copyright (c) 1994, 1995 by Charybdis Enterprises, Inc.
+//            Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved.
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -22,6 +22,10 @@
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
+// Created by Dan Higdon
+//
+// ivallcpp.cpp
+//
 // Ivory Allocation - Primary allocation routines for C++.
 //
 //      These routines provide a simple operator replacement for the
@@ -33,7 +37,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #define WIN32_LEAN_AND_MEAN
@@ -41,33 +45,9 @@
 #include <malloc.h>
 
 #include <iostream.h>
+#include <assert.h>
 
 #include "ivory.hpp"
-
-//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-//
-//                                Equates
-//
-//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-
-//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-//
-//                               Structures
-//
-//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-
-//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-//
-//                           External Routines
-//
-//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-
-
-//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-//
-//                               Routines
-//
-//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
@@ -90,34 +70,24 @@ extern "C" void *main_memory;
 //
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 
+#if 1
 void *operator new (size_t size)
 {
+    assertMyth("Ivory operator new needs valid size", size > 0);
     if (main_memory)
         return ivory_alloc (size);
     else
         return malloc (size);
 }
 
-#if 0
-void *operator new [] (size_t size)
-{
-    return ivory_alloc (size);
-}
-#endif
-
 void operator delete (void *ptr)
 {
+    assertMyth("Ivory operator delete needs valid pointer", ptr != 0);
     if (main_memory)
         ivory_free (&ptr);
     else
         free (ptr);
 }
-
-#if 0
-void operator delete [] (void *ptr)
-{
-    ivory_free (&ptr);
-}
 #endif
 
-//°±² End of module - ivalloc.cpp ²±°
+//°±² End of module - ivallcpp.cpp ²±°

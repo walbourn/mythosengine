@@ -8,7 +8,7 @@
 //ùùùùù²±²ùùùùùùù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùùùùùù²±²ùùùù²±²ùùùùùù
 //ùùùù²²²²²²²²²²ù²²²²²²²²ùùù²²²²²²²²ùù²²²ùùùù²²²ù²²²²²²²²²²ù²²²ùùùù²²²ùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùCopyrightù(c)ù1994-1996ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
+//ùùùùùùùùùùùCopyrightù(c)ù1994-1997ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùù Microsoft Windows '95 Version ùùùùùùùùùùùùùùùùùùùùùùù
@@ -78,6 +78,13 @@ typedef enum _esch_error_codes
 
     //ÄÄÄ Shade-table generation error codes
     ESCH_ERR_NEEDVPORT              =40,    // Camera needs viewport
+
+    //ÄÄÄ Texture errors
+    ESCH_ERR_INVALIDSIZE            =50,    // Input size invalid
+
+    //ÄÄÄ Builder errors
+    ESCH_ERR_NOMORE                 =60,    // No more room
+
 } esch_error_codes;
 
 
@@ -89,6 +96,7 @@ typedef enum _esch_error_codes
 #define ESCH_CDF_BFCULL         0x2
 #define ESCH_CDF_INFINITEZ      0x4
 #define ESCH_CDF_MUSTTXT        0x8
+
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // Update flags                                                             ³
@@ -124,6 +132,8 @@ typedef enum _esch_error_codes
 #define ESCH_TXT_LOCKED             0x1     // Texture ptr valid
 #define ESCH_TXT_SKIPANIMATE        0x2     // Skip texture for animate()
 #define ESCH_TXT_OWNSDATA           0x10000 // Texture should free data on destruct
+#define ESCH_TXT_SHARED             0x20000 // Texture instance shares
+                                            // data in texture cache
 
 #define ESCH_TXT_APP0               0x1000000   // Application defined bits
 #define ESCH_TXT_APP1               0x2000000
@@ -133,6 +143,23 @@ typedef enum _esch_error_codes
 #define ESCH_TXT_APP5               0x20000000
 #define ESCH_TXT_APP6               0x40000000
 #define ESCH_TXT_APP7               0x80000000
+
+//ÄÄÄ Multi-frame Textures
+#define ESCH_MFTXT_TIMEBASED        0x100   // Animated based on rate/interval
+
+//ÄÄÄ Types
+#define ESCH_TXTT_BASE              0x0000
+#define ESCH_TXTT_STATIC            0x0100
+#define ESCH_TXTT_MFRAME            0x0200
+#define ESCH_TXTT_PRC               0x0300
+#define ESCH_TXTT_PRCFIRE           0x0301
+
+#define ESCH_TXTT_BASEMASK          0xff00
+
+//ÄÄÄ Load flags
+#define ESCH_TXTLD_SHARE            0x1
+
+#define ESCH_TXTLD_ALL              0xf
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
@@ -148,6 +175,7 @@ typedef enum _esch_error_codes
 #define ESCH_CAM_BACKCULL           0x100   // Backface culling
 #define ESCH_CAM_TEXTURED           0x200   // If set, textures on faces drawn
 #define ESCH_CAM_PERSPECTIVE        0x400   // Draw with perspective routines
+#define ESCH_CAM_ALPHA              0x800   // If set, alpha on faces is used
 
 #define ESCH_CAM_SHOW_ALL_LINES     0x1000  // Don't use visibility flags for 
                                             // wireframe mode
@@ -161,9 +189,11 @@ typedef enum _esch_error_codes
 
 #define ESCH_CAM_HAZE               0x10000 // Hazing effect active (Ex)
 #define ESCH_CAM_IGNORE_BMAP        0x20000 // Ignore's background bitmap if defined (Ex)
+#define ESCH_CAM_GRADIENT           0x40000 // Gradient background (Ex)
 
 #define ESCH_CAM_OWNSBITMAP         0x100000// Owns background bitmap (Ex)
 #define ESCH_CAM_OWNSHAZE           0x200000// Owns haze palette (Ex)
+#define ESCH_CAM_OWNSGRADIENT       0x400000// Owns gradient palette (Ex)
 
 #define ESCH_CAM_APP0               0x1000000   // Application defined bits
 #define ESCH_CAM_APP1               0x2000000
@@ -173,6 +203,13 @@ typedef enum _esch_error_codes
 #define ESCH_CAM_APP5               0x20000000
 #define ESCH_CAM_APP6               0x40000000
 #define ESCH_CAM_APP7               0x80000000
+
+#define ESCH_CAM_FRUSTRUM_HITHER    0
+#define ESCH_CAM_FRUSTRUM_YON       1
+#define ESCH_CAM_FRUSTRUM_LEFT      2
+#define ESCH_CAM_FRUSTRUM_RIGHT     3
+#define ESCH_CAM_FRUSTRUM_TOP       4
+#define ESCH_CAM_FRUSTRUM_BOTTOM    5
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
@@ -193,16 +230,6 @@ typedef enum _esch_error_codes
 #define ESCH_LGT_APP7               0x80000000
 
 //ÄÄÄ Types
-#ifdef __cplusplus
-const word ESCH_LGTT_AMBIENT        =0x0000;
-const word ESCH_LGTT_VECTOR         =0x0100;
-const word ESCH_LGTT_FPOINT         =0x0200;
-const word ESCH_LGTT_FATTEN         =0x0210;
-const word ESCH_LGTT_FSPOT          =0x0211;
-const word ESCH_LGTT_POINT          =0x0300;
-const word ESCH_LGTT_ATTEN          =0x0310;
-const word ESCH_LGTT_SPOT           =0x0311;
-#else
 #define  ESCH_LGTT_AMBIENT          0x0000
 #define  ESCH_LGTT_VECTOR           0x0100
 #define  ESCH_LGTT_FPOINT           0x0200
@@ -211,7 +238,7 @@ const word ESCH_LGTT_SPOT           =0x0311;
 #define  ESCH_LGTT_POINT            0x0300
 #define  ESCH_LGTT_ATTEN            0x0310
 #define  ESCH_LGTT_SPOT             0x0311
-#endif
+
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // EschCollision                                                            ³
@@ -273,6 +300,14 @@ const word ESCH_LGTT_SPOT           =0x0311;
                                             // deleted on destruction.
 #define ESCH_DRW_SKIPTEST           0x4     // Skip this drawable during
                                             // collide/pick tests only
+#define ESCH_DRW_SKIPANIMATE        0x8     // Skip this drawable during
+                                            // animate calls.
+
+#define ESCH_DRW_VISIBLE            0x100   // Set if a drawable is not rejected
+                                            // by clipping.
+
+#define ESCH_DRW_PARTNSTATIC        0x200   // Partition should skip on updates
+                                            // since the position won't change
 
 #define ESCH_DRW_APP0               0x1000000   // Application defined bits
 #define ESCH_DRW_APP1               0x2000000
@@ -284,33 +319,24 @@ const word ESCH_LGTT_SPOT           =0x0311;
 #define ESCH_DRW_APP7               0x80000000
 
 //ÄÄÄ Types
-#ifdef __cplusplus
-const word ESCH_DRWT_BASE           =0x0000;
-const word ESCH_DRWT_POINTDRAW      =0x0100;
-const word ESCH_DRWT_PARTICLE       =0x0200;
-const word ESCH_DRWT_PRTPYRAMID     =0x0210;
-const word ESCH_DRWT_PRTGEOMETRY    =0x0220;
-const word ESCH_DRWT_PSYSTEM        =0x0300;
-const word ESCH_DRWT_GEOM           =0x0400;
-const word ESCH_DRWT_MESH           =0x0410;
-const word ESCH_DRWT_TERRAIN        =0x0500;
-const word ESCH_DRWT_SPRITE         =0x0600;
-const word ESCH_DRWT_STARFIELD      =0x1000;
-const word ESCH_DRWT_EXPLOSION      =0x1100;
-#else
 #define ESCH_DRWT_BASE              0x0000
 #define ESCH_DRWT_POINTDRAW         0x0100
 #define ESCH_DRWT_PARTICLE          0x0200
 #define ESCH_DRWT_PRTPYRAMID        0x0210
 #define ESCH_DRWT_PRTGEOMETRY       0x0220
+#define ESCH_DRWT_PRTSPRITE         0x0230
 #define ESCH_DRWT_PSYSTEM           0x0300
 #define ESCH_DRWT_GEOM              0x0400
 #define ESCH_DRWT_MESH              0x0410
 #define ESCH_DRWT_TERRAIN           0x0500
 #define ESCH_DRWT_SPRITE            0x0600
+#define ESCH_DRWT_PARTITION         0x0700
+#define ESCH_DRWT_PRTN_GRID         0x0710
+#define ESCH_DRWT_LINEDRAW          0x0800
 #define ESCH_DRWT_STARFIELD         0x1000
 #define ESCH_DRWT_EXPLOSION         0x1100
-#endif
+#define ESCH_DRWT_METABOX           0x1200
+#define ESCH_DRWT_LOD               0x1300
 
 //ÄÄÄ EschMeshDraw
 
@@ -318,10 +344,18 @@ const word ESCH_DRWT_EXPLOSION      =0x1100;
                                             // delete on detach.
 #define ESCH_MSHD_NOEXTENTSCHK      0x20000 // Don't perform extent's check
 
+#define ESCH_MSHD_OWNSNOSTCTXT      0x100000 // If OWNSTEXTURE is set,
+                                             // don't delete any Static textures
+#define ESCH_MSHD_OWNSNOMFTXT       0x200000 // If OWNSTEXTURE is set,
+                                             // don't delete any MultiFrame textures
+#define ESCH_MSHD_OWNSNOPRCTXT      0x400000 // If OWNSTEXTURE is set,
+                                             // don't delete any Procedural textures
+
 //ÄÄÄ EschTerrain
 
 #define ESCH_TRN_DOTS               0x10000 // Draws height field as dots 
 #define ESCH_TRN_LOD                0x20000 // Draw w/ Level Of Detail adjustments
+#define ESCH_TRN_DEBUG              0x40000 // Draw the debug info.
 
 //ÄÄÄ EschSprite
 
@@ -329,10 +363,47 @@ const word ESCH_DRWT_EXPLOSION      =0x1100;
                                             // as if it is at an infinite
                                             // distance.
 
+//ÄÄÄ EschPartition
+
+#define ESCH_PARTN_OWNSDRAWS        0x10000 // Own's drawables within
+                                            // partition, so delete on release.
+#define ESCH_PARTN_OFF              0x20000 // Causes draw(), pick(), and
+                                            // and collide() to call all
+                                            // drawables in partition
+
 //ÄÄÄ EschStarfield
 
 #define ESCH_SFLD_FTL               0x10000 // Causes stars to move with
                                             // translation.
+
+//ÄÄÄ EschPlosion
+
+#define ESCH_PLSN_CIRCULAR          0x10000 // Causes the explosion to be
+                                            // circular instead of upwards.
+#define ESCH_PLSN_TRIANGULAR        0x20000 // Causes the explosion to be
+                                            // pointed at the bottom.
+
+//ÄÄÄ EschMetabox
+
+#define ESCH_MBOX_TOP               0x10000
+#define ESCH_MBOX_BOTTOM            0x20000
+#define ESCH_MBOX_FRONT             0x40000
+#define ESCH_MBOX_BACK              0x80000
+#define ESCH_MBOX_LEFT              0x100000
+#define ESCH_MBOX_RIGHT             0x200000
+
+#define ESCH_MBOX_FACE_TOP          0
+#define ESCH_MBOX_FACE_BOTTOM       1
+#define ESCH_MBOX_FACE_FRONT        2
+#define ESCH_MBOX_FACE_BACK         3
+#define ESCH_MBOX_FACE_LEFT         4
+#define ESCH_MBOX_FACE_RIGHT        5
+
+//ÄÄÄ EschLevelOfDetail
+
+#define ESCH_LOD_AUTOSWITCH         0x10000
+
+#define ESCH_LOD_MAX_LEVELS         4
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
@@ -367,6 +438,8 @@ const word ESCH_DRWT_EXPLOSION      =0x1100;
 
 #define ESCH_FACE_ALLOWPERSP        0x400   // Allow perspective mode
 
+#define ESCH_FACE_ALPHA             0x800   // Face has Alpha value
+
 #define ESCH_FACE_ABLINE            0x1000  // Visiblity for wireframe mode
 #define ESCH_FACE_BCLINE            0x2000
 #define ESCH_FACE_CALINE            0x4000
@@ -374,6 +447,10 @@ const word ESCH_DRWT_EXPLOSION      =0x1100;
 #define ESCH_FACE_SELFILUM_MASK     0xf00000 // Face self illum level
                                              // (0 is no self-illumination,
                                              //  f is fully self-illuminated)
+
+#define ESCH_FACE_ALPHA_MASK        0xf000000  // Face alpha level
+                                               // (0 is transparent
+                                               //  f is opaque)
 
 #define ESCH_FACE_APP0              0x10000000 // Application defined bits
 #define ESCH_FACE_APP1              0x20000000
@@ -408,6 +485,12 @@ const word ESCH_DRWT_EXPLOSION      =0x1100;
 #define ESCH_MSH_OWNSTEXTURE        0x20000 // Textures should be freed
                                             // by the destructor
 
+//ÄÄÄ Load flags
+#define ESCH_MSHLD_USEMFTXT         0x1
+#define ESCH_MSHLD_SHARETXT         0x2
+
+#define ESCH_MSHLD_ALL              0xf
+
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // EschScene                                                                ³
@@ -433,6 +516,8 @@ const word ESCH_DRWT_EXPLOSION      =0x1100;
 #define ESCH_SCENELD_ALL            0xf
 
 #define ESCH_SCENELD_CAMSEX         0x10
+#define ESCH_SCENELD_NOMFTXT        0x20
+#define ESCH_SCENELD_NOSHARETXT     0x40
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
@@ -458,17 +543,52 @@ const word ESCH_DRWT_EXPLOSION      =0x1100;
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// EschTraverse                                                             ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+#define ESCH_TRAV_DIRECTION         0x1         // Use direction vector
+#define ESCH_TRAV_DIST              0x2         // Use distance value
+
+#define ESCH_TRAV_APP0              0x1000000   // Application defined bits
+#define ESCH_TRAV_APP1              0x2000000
+#define ESCH_TRAV_APP2              0x4000000
+#define ESCH_TRAV_APP3              0x8000000
+#define ESCH_TRAV_APP4              0x10000000
+#define ESCH_TRAV_APP5              0x20000000
+#define ESCH_TRAV_APP6              0x40000000
+#define ESCH_TRAV_APP7              0x80000000
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// EschBuildTexture                                                         ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+#define ESCH_TBLD_8BIT              0x1
+#define ESCH_TBLD_TC                0x2
+#define ESCH_TBLD_COMPRESS          0x4
+
+#define ESCH_TBLD_TRANSP            0x10
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// EschBuildMesh                                                            ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+#define ESCH_MBLD_MATRIX            0x1
+#define ESCH_MBLD_EXTENTS           0x2
+#define ESCH_MBLD_HEIR              0x4
+#define ESCH_MBLD_MTLS              0x8
+#define ESCH_MBLD_ALL               0xf
+
+#define ESCH_MBLD_INSCENE           0x10
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // Misc. constants                                                          ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
-#ifdef __cplusplus
-const ulong ESCH_MAX_NAME           =16;    // maximum name length
-const ulong ESCH_MAX_ORTHOCOUNT     =8;
-
-#else
 #define ESCH_MAX_NAME               16      // maximum name length
-#define ESCH_MAX_ORTHOCOUNT         8
-#endif
+#define ESCH_MAX_ORTHOCOUNT         16
 
 #endif
 

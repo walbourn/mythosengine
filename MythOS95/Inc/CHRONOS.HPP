@@ -17,7 +17,7 @@
 //         같께께께께께께께께같
 //        같같같같같같같같같같같
 //
-//          Copyright (c) 1994, 1995 by Charybdis Enterprises, Inc.
+//          Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved.
 //
 //                      Microsoft Windows '95 Version

@@ -2,11 +2,11 @@
 //
 //                                                           %__________%
 //                                                          %/ . .  .   \%
-//           Van Gogh 2D-Display Library                     |  . .  o. | 
+//           Van Gogh 2D-Display Library                     |  . .  o. |
 //                                                           |. _  .   .|
-//          Microsoft Windows '95 Version                    | / \   .  | 
+//          Microsoft Windows '95 Version                    | / \   .  |
 //                                                           |_|_|_._._.|
-// Copyright (c) 1994-1996 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
+// Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
 //              All rights reserved.                        %\__________/%
 //                                                           %          %
 //
@@ -38,7 +38,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 #include <string.h>
 #include "vngpal.hpp"
@@ -61,6 +61,9 @@
 //                               Structures
 //
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+struct VngoVbuffer;
+class VngoTextureInfo;
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // vngo_point is a 2D draw point, it contains all of the needed information ³
@@ -86,10 +89,10 @@ public:
 
     VngoPoint () {}
     VngoPoint (int _x, int _y, dword _clr) {x = _x; y = _y; clr = _clr;}
-    VngoPoint (int _x, int _y, int _z, dword _clr,int _shade) 
+    VngoPoint (int _x, int _y, int _z, dword _clr,int _shade)
     {
-        x = _x; 
-        y = _y; 
+        x = _x;
+        y = _y;
         z = _z;
         clr = _clr;
         shade = _shade;
@@ -110,7 +113,7 @@ class VngoPoint2
 public:
     long    x;
     long    y;
-    long    z;
+    dword   z;
     dword   clr;
     long    shade;
     long    u;
@@ -119,10 +122,10 @@ public:
 
     VngoPoint2 () {}
     VngoPoint2 (int _x, int _y, dword _clr) {x = _x; y = _y; clr = _clr;}
-    VngoPoint2 (int _x, int _y, int _z, dword _clr,int _shade) 
+    VngoPoint2 (int _x, int _y, int _z, dword _clr,int _shade)
     {
-        x = _x; 
-        y = _y; 
+        x = _x;
+        y = _y;
         z = _z;
         clr = _clr;
         shade = _shade;
@@ -142,6 +145,74 @@ public:
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// VngoPointF is a 2D draw point, it contains all of the needed information ³
+// needed to draw into the view port for most drawing types.                ³
+// This structure is intentionaly 32 BYTES long.  Uses floating point (u,v) ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+class VngoPointF
+{
+public:
+    long    x;
+    long    y;
+    dword   z;
+    dword   clr;
+    long    shade;
+    float   u;
+    float   v;
+    float   w;
+};
+
+struct VngoTriangle
+{
+    // Info pointers.
+    void            *sptr;
+    void            *zptr;
+    VngoVbuffer     *vbuff;
+    VngoPoint2      *left_edge;
+    VngoPoint2      *right_edge;
+
+    VngoTextureInfo *tex;
+
+    // Raw info.
+    long            start_y;
+    long            height;
+    long            color;
+    long            shade;
+    long            alpha;
+    long            pitch;
+    long            zpitch;
+
+    // Perspective interpolants.
+    long            wstep;
+
+    // Shading interpolants.
+    long            sstep_dx1;
+    long            sstep_dx2;
+    long            sstep_edge;
+    long            sstep_edge_start;
+
+    // Z interpolants.
+    long            zstep_dx1;
+    long            zstep_dx2;
+    long            zstep_edge;
+    long            zstep_edge_start;
+
+    // Texture U innterpolants.
+    long            ustep_dx1;
+    long            ustep_dx2;
+    long            ustep_edge;
+    long            ustep_edge_start;
+
+    // Texture V innterpolants.
+    long            vstep_dx1;
+    long            vstep_dx2;
+    long            vstep_edge;
+    long            vstep_edge_start;
+};
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // vngo_rect is a 2D filled rectangle, which has its uper left hand corner  ³
 // defined by the point (x,y), it's width in dx, and it's height in dy.     ³
 // This structure is intentionaly 16 BYTES long.                            ³
@@ -155,11 +226,11 @@ struct VngoRect
     long    dy;
 
     VngoRect () {}
-    VngoRect (long _x, long _y, long _dx, long _dy) 
-    { 
-        x = _x; 
-        y = _y; 
-        dx = _dx; 
+    VngoRect (long _x, long _y, long _dx, long _dy)
+    {
+        x = _x;
+        y = _y;
+        dx = _dx;
         dy = _dy;
     }
 
@@ -167,8 +238,8 @@ struct VngoRect
 
     int point_in(int _x,int _y)
     {
-        if (_x >= x && _x <= x + dx)
-            if (_y >= y && _y <= y + dy)
+        if (_x >= x && _x < x + dx)
+            if (_y >= y && _y < y + dy)
                 return 1;
         return 0;
     }
@@ -177,88 +248,29 @@ struct VngoRect
 };
 
 
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// VngoTriangle structure holds all of the information that needs to be used³
-//  to draw a triangle.  All of the parameters fit in this behemoth.        ³
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-class VngoTriangle
-{
-public:
-    VngoPoint2  *long_top;
-    VngoPoint2  *long_bottom;
-    VngoPoint2  *short_top;
-    VngoPoint2  *short_bottom;
-    byte        *hline_bptr;
-    word        *hline_zptr;
-    byte        *stable_ptr;
-
-    // Horizontal line info.
-    long        x_dir;
-    long        z_step;
-    long        shade_step;
-    long        u_step1;
-    long        u_step2;
-    long        v_step1;
-    long        v_step2;
-
-    // Texture information
-    long        u_upshift;      // how far to shift to cause automatic tiling.
-    long        u_downshift;    // how far to shift to get to non-fixed point.
-    long        v_upshift;      // how far to shift to cause automatic tiling.  
-    long        v_downshift;    // how far to shift to get to non-fixed point.
-    long        widthshift;     // shift up by this to multiply width.
-
-    // Long edge info.
-    long        long_x;
-    long        long_x_step;
-    long        long_z;
-    long        long_z_step;
-    long        long_s;
-    long        long_s_step;
-    long        long_u;
-    long        long_u_step1;
-    long        long_u_step2;
-    long        long_v;
-    long        long_v_step1;
-    long        long_v_step2;
-    long        long_w;
-    long        long_w_step;
-
-    // Short edge info.
-    long        short_x;
-    long        short_x_step;
-    long        short_u;
-    long        short_u_step1;
-    long        short_u_step2;
-    long        short_v;
-    long        short_v_step1;
-    long        short_v_step2;
-    long        short_w;
-    long        short_w_step;
-
-};
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // vngo_vbuffer is a view port structure which contains all of the info     ³
 // needed to draw into the view port.                                       ³
-// This structure is intentionaly 40 BYTES long.                            ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
 struct VngoVbuffer
 {
-    long    width;      // width of actual buffer.
-    long    height;     // height of the actual buffer.
-    long    left;       // left edge of buffer's clipping window.
-    long    top;        // top edge of buffer's clipping window.
-    byte    *scrn_ptr;  // view buffer pointer.
-    VngoPal *pal;       // pointer to the palette for this Vbuffer.
-    dword   *ytable;    // pointer to the table of pre-calculated y offsets.
-    dword   *invert;    // table of 1/max(xres,yres) values to save divides.
-    word    *zbuff_ptr; // pointer to the ZBuffer if it exist.
-    dword   pitch;
-    dword   zpitch;
-    dword   *ztable;
+    long        width;      // width of actual buffer.
+    long        height;     // height of the actual buffer.
+    VngoPal     *pal;       // pointer to the palette for this Vbuffer.
+
+    byte        *scrn_ptr;  // view buffer pointer.
+    dword       pitch;      // Number of bytes to add to advance 1 scan line in the Frame Buffer.
+    dword       *ytable;    // pointer to the table of pre-calculated y offsets.
+
+    word        *zbuff_ptr; // pointer to the ZBuffer if it exist.
+    dword       zpitch;     // Number of bytes to add to advance 1 scan line in the Z-Buffer.
+    dword       *ztable;    // Offsets in bytes to each line in the Z-Buffer.
+
+    VngoPoint2  *edge1;     // Edge arrays for the scan converters to use.
+    VngoPoint2  *edge2;     // Edge arrays for the scan converters to use.
 };
 
 
@@ -286,24 +298,24 @@ class VngoTextureInfo
     dword       iflags;
 public:
     VngoTexture *vtxt;
-    long		widthshift;
+    long        widthshift;
     long        heightshift;
-    long		u_upshift;
-    long		v_upshift;
-    long		u_downshift;
-    long		v_downshift;
+    long        u_upshift;
+    long        v_upshift;
+    long        u_downshift;
+    long        v_downshift;
 };
 
 class VngoZMap
 {
-    dword           flags;
+    dword       flags;
 public:
-    int             color;          // This is the color that all Zeros in
-                                    // the map should be drawn.
-    dword           depth;          // This is the depth that should be
-                                    // assigned to all Zeros in the map.
-    char            name[16];
-    VngoTexture     zmap;
+    int         color;          // This is the color that all Zeros in
+                                // the map should be drawn.
+    dword       depth;          // This is the depth that should be
+                                // assigned to all Zeros in the map.
+    char        name[16];
+    VngoTexture zmap;
 
     // This is the "persistant" format header.
     struct HDR

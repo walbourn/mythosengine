@@ -48,7 +48,7 @@ Class36=TerrEditView
 
 ResourceCount=31
 Resource1=IDR_MAINFRAME
-Resource2=IDD_ABOUTBOX
+Resource2=IDD_SETBASEELV
 Resource3=IDD_TERRPROP_GEN
 Resource4=IDD_TERRPROP_MISC
 Resource5=IDD_PROGRESS
@@ -79,7 +79,7 @@ Resource29=IDD_TOOL_ANGLE
 Class37=LocateDlg
 Resource30=IDD_LOCATE
 Class38=SetBaseElvDlg
-Resource31=IDD_SETBASEELV
+Resource31=IDD_ABOUTBOX
 
 [CLS:TerrPropGenPage]
 Type=0
@@ -801,18 +801,6 @@ Control28=IDC_TOOL_ELVHIGH,edit,1350631552
 Control29=IDOK,button,1342242817
 Control30=IDCANCEL,button,1342242816
 
-[DLG:IDD_ABOUTBOX]
-Type=1
-Class=CAboutDlg
-ControlCount=7
-Control1=IDC_STATIC,static,1342177283
-Control2=IDC_STATIC,static,1342308363
-Control3=IDC_STATIC,static,1342308363
-Control4=IDOK,button,1342373889
-Control5=IDC_ABOUT_VERSION,static,1342308363
-Control6=IDC_STATIC,static,1342308353
-Control7=IDC_STATIC,static,1342308353
-
 [MNU:IDR_MAINFRAME]
 Type=1
 Class=TerrEditView
@@ -989,4 +977,16 @@ BaseClass=CDialog
 Filter=D
 VirtualFilter=dWC
 LastObject=IDC_SETBASE_ELV
+
+[DLG:IDD_ABOUTBOX]
+Type=1
+ControlCount=8
+Control1=IDC_STATIC,static,1342177294
+Control2=IDC_STATIC,static,1342177294
+Control3=IDC_ABOUT_VERSION,static,1342308363
+Control4=IDC_STATIC,static,1342308363
+Control5=IDOK,button,1342373889
+Control6=IDC_STATIC,button,1342177287
+Control7=IDC_STATIC,static,1342308353
+Control8=IDC_STATIC,static,1342308353
 

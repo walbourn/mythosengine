@@ -8,7 +8,7 @@
 //ששששש²±²ששששששש²±²שששש²±²ש²±²שששש²±²ש²±²שששש²±²ש²±²שששששששש²±²שששש²±²שששששש
 //שששש²²²²²²²²²²ש²²²²²²²²ששש²²²²²²²²שש²²²שששש²²²ש²²²²²²²²²²ש²²²שששש²²²ששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//שששששששששששCopyrightש(c)ש1994-1996שbyשCharybdisשEnterprises,שInc.שששששששששש
+//שששששששששששCopyrightש(c)ש1994-1997שbyשCharybdisשEnterprises,שInc.שששששששששש
 //ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
 //ששששששששששששששששששששש Microsoft Windows '95 Version ששששששששששששששששששששששש
@@ -85,26 +85,34 @@ extern EschSystem *EschSysInstance;
 //
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
+struct EschTextureCache;
+
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ¿
 // EschSystem - Main control class.                                         ³
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִÙ
-class EschSystem {
+class EschSystem
+{
 
 public:
     //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ¿
     // Public data members.                                                 ³
     //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִÙ
     //ִִ Workspace information
-    ulong           wspace_mbytes;          // Work-space need by objects.
-    ulong           wspace_sbytes;          // Size of work-space.
-    IvoryArena      *wspace;
+    ulong               wspace_mbytes;  // Work-space need by objects.
+    ulong               wspace_sbytes;  // Size of work-space.
+    IvoryArena          *wspace;
 
     //ִִ Diagnostic information
-    ulong           diag_faces;             // Count of faces in Meshes
-    ulong           diag_verts;             // Count of verts in Meshes
-    ulong           diag_ifaces;            // Count of faces in MeshDraws
-    ulong           diag_iverts;            // Count of verts in MeshDraws
-    ulong           diag_ntxts;             // Count of loaded textures
+    ulong               diag_faces;     // Count of faces in Meshes
+    ulong               diag_verts;     // Count of verts in Meshes
+    ulong               diag_ifaces;    // Count of faces in MeshDraws
+    ulong               diag_iverts;    // Count of verts in MeshDraws
+    ulong               diag_ntxts;     // Count of texture instances`
+
+    //ִִ Texture cache
+    ulong               tcache_hi;
+    ulong               tcache_max;
+    EschTextureCache    *tcache;
 
     //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ¿
     // Constructor/Destructors                                              ³

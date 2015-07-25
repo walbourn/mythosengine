@@ -6,7 +6,7 @@
 //    (_)       ^          * *     *      *   *    *            (_)
 //             (_)       **   **   *    ***** **** ****
 //
-//            Copyright (c) 1994-1996 by Charybdis Enterprises, Inc.
+//            Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.
 //                             All Rights Reserved.
 //                        Microsoft Windows '95 Version
 //
@@ -29,7 +29,7 @@
 // 
 // xfiff.hpp
 //
-//     Contains the header for the IFF parsing object.
+// Contains the header for the IFF parsing object.
 //
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
 
@@ -62,7 +62,7 @@
 #define XF_IFFFORM_DIRTY    0x1
 
 //ÄÄÄ Maximum supported depth for form embedding ÄÄÄ
-const ulong XF_MAX_IFFDEPTH =16;
+#define XF_MAX_IFFDEPTH     16
 
 //ÄÄÄ XFParseIFF control flags ÄÄÄ
 #define XF_IFF_NOPAD        0x1
@@ -75,7 +75,8 @@ const ulong XF_MAX_IFFDEPTH =16;
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 //ÄÄÄ Form Context Structure ÄÄÄ
-struct XFForm {
+struct XFForm
+{
     dword   id;                     
     dword   flags;
     dword   start;
@@ -88,109 +89,143 @@ struct XFForm {
 //
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
-class XFParseIFF {         
-   dword            cflags; 
-   ulong            idepth;
-   ulong            icurPos;
-   ulong            ilength;
-   ulong            ichunkSize;
-   struct XFForm    iforms[XF_MAX_IFFDEPTH];
-   XFileDisk        xfile;
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// XFParseIFF - IFF reader/writer class.                                    ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+class XFParseIFF
+{
+    dword            cflags; 
+    ulong            idepth;
+    ulong            icurPos;
+    ulong            ilength;
+    ulong            ichunkSize;
+    struct XFForm    iforms[XF_MAX_IFFDEPTH];
+    XFileDisk        xfile;
 
-   void initvars(void);
+    void initvars(void);
 
 protected:
-   XFile            *xf;
+    XFile            *xf;
 
-   xf_error_codes   errorn;
+    xf_error_codes   errorn;
 
 public:
-   XFParseIFF(dword cf = 0);
-   XFParseIFF(XFile *f, dword cf = 0);
-   ~XFParseIFF();
+    dword formid;
+    dword chunkid;
+    ulong chunkSize;
+    ulong depth;
 
-   void attach(XFile *f) { if (!f) {xf=&xfile;} else {xf=f;} };
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    // Constructor/Destructors                                              ³
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+    XFParseIFF(dword cf = 0);
+    XFParseIFF(XFile *f, dword cf = 0);
 
-   xf_error_codes error(void) { return errorn; };
+    ~XFParseIFF();
 
-           //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-           // Various data status members.                                  ³
-           //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-   dword formid;
-   dword chunkid;
-   ulong chunkSize;
-   ulong depth;
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    // Operations                                                           ³
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+    xf_error_codes error(void) const { return errorn; };
+
+    void attach(XFile *f) { xf = (f) ? f : &xfile; }
 
            //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
            // Quick access functions for the XFile object embedded.         ³
            //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-   xf_error_codes open(const char *name, dword flags)
-           { xf_error_codes err=xf->open(name,flags|XF_OPEN_READ);
-             if (!err) {return begin();}
-             errorn=err;
-             return err; };
-   xf_error_codes create(const char *name, dword flags)
-           { xf_error_codes err=xf->create(name,flags|XF_OPEN_READ);
-             if (!err) {return begin();}
-             errorn=err;
-             return err; };
-   xf_error_codes close(void)
-           {  end();
-              xf_error_codes err=xf->close();
-              if (err) errorn=err;
-              return err; };
-
-           //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-           // Public utilitiy routines.                                     ³
-           //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-   dword swapendian(dword c) { return ( ((c & 0xff) << 24) |
-                                        ((c & 0xff00) << 8) |
-                                        ((c & 0xff0000) >> 8) |
-                                        ((c & 0xff000000) >> 24) ); };
-   dword makeid(char c1, char c2, char c3, char c4) { return ( (c4 << 24) |
-                                                               (c3 << 16) |
-                                                               (c2 << 8) |
-                                                               c1); };
-   char *strid(dword id, char *buff) { buff[0] = (char)((id & 0xff));
-                                       buff[1] = (char)((id & 0xff00) >> 8);
-                                       buff[2] = (char)((id & 0xff0000) >> 16);
-                                       buff[3] = (char)((id & 0xff000000) >> 24);
-                                       buff[4] = 0;
-                                       return buff; };
+    xf_error_codes open(const char *name, dword flags)
+    {
+        xf_error_codes err=xf->open(name,flags|XF_OPEN_READ);
+        if (!err)
+        {
+            return begin();
+        }
+        errorn=err;
+        return err;
+    }
+    xf_error_codes create(const char *name, dword flags)
+    {
+        xf_error_codes err=xf->create(name,flags|XF_OPEN_READ);
+        if (!err)
+        {
+            return begin();
+        }
+        errorn=err;
+        return err;
+    }
+    xf_error_codes close(void)
+    {
+        end();
+        xf_error_codes err=xf->close();
+        if (err) errorn=err;
+        return err;
+    }
 
            //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
            // These must be called if the XFile object is not opened/closed ³
            // via the member functions for this object.                     ³
            //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-   xf_error_codes begin(void);
-   xf_error_codes end(void);
+    xf_error_codes begin(void);
+    xf_error_codes end(void);
 
            //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
            // Form-based file movement.                                     ³
            //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-   xf_error_codes seekform(dword id);
+    xf_error_codes seekform(dword id);
 
-   xf_error_codes newform(dword id);
-   xf_error_codes enterform(void);
+    xf_error_codes newform(dword id);
+    xf_error_codes enterform(void);
 
-   xf_error_codes leaveform(void);
+    xf_error_codes leaveform(void);
 
            //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
            // Chunk-based file movement.                                    ³
            //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-   xf_error_codes seekchunk(dword id);
+    xf_error_codes seekchunk(dword id);
 
            //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
            // Item movement.                                                ³
            //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-   xf_error_codes next(void);
-   xf_error_codes topofcontext(void);
+    xf_error_codes next(void);
+    xf_error_codes topofcontext(int donext=1);
 
            //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
            // Reads/writes a chunk in the current position.                 ³
            //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-   xf_error_codes read(void *ptr);
-   xf_error_codes write(dword id, const void *ptr, ulong size);
+    xf_error_codes read(void *ptr);
+    xf_error_codes write(dword id, const void *ptr, ulong size);
+
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    // Utility functions.                                                   ³
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+    static word swapendian(word c)
+    {
+        return ( ((c & 0xff) << 8)
+                 | ((c & 0xff00) >> 8) );
+    }
+    static dword swapendian(dword c)
+    {
+        return ( ((c & 0xff) << 24)
+                 | ((c & 0xff00) << 8)
+                 | ((c & 0xff0000) >> 8)
+                 | ((c & 0xff000000) >> 24) );
+    }
+    static dword makeid(char c1, char c2, char c3, char c4)
+    {
+        return ( (c4 << 24)
+                 | (c3 << 16)
+                 | (c2 << 8)
+                 | c1);
+    }
+    static char *strid(dword id, char *buff)
+    {
+        buff[0] = (char)((id & 0xff));
+        buff[1] = (char)((id & 0xff00) >> 8);
+        buff[2] = (char)((id & 0xff0000) >> 16);
+        buff[3] = (char)((id & 0xff000000) >> 24);
+        buff[4] = 0;
+        return buff;
+    }
 };
 
 #ifdef __WATCOMC__

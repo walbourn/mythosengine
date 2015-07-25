@@ -8,7 +8,7 @@
 //
 // A Framework for Microsoft Windows '95 Entertainment Software Using MythOS
 //
-//           Copyright (c) 1995, 1996 by Charybdis Enterprises, Inc.
+//          Copyright (c) 1995 - 1997 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -36,9 +36,9 @@
 #define __GLOBAL_HPP    1
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-//             
+//
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 //ÄÄÄ Standard headers

@@ -8,7 +8,7 @@
 //ששששש²±²ששששששש²±²שששש²±²ש²±²שששש²±²ש²±²שששש²±²ש²±²שששששששש²±²שששש²±²שששששש
 //שששש²²²²²²²²²²ש²²²²²²²²ששש²²²²²²²²שש²²²שששש²²²ש²²²²²²²²²²ש²²²שששש²²²ששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//שששששששששששCopyrightש(c)ש1994-1996שbyשCharybdisשEnterprises,שInc.שששששששששש
+//שששששששששששCopyrightש(c)ש1994-1997שbyשCharybdisשEnterprises,שInc.שששששששששש
 //ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
 //ששששששששששששששששששששש Microsoft Windows '95 Version ששששששששששששששששששששששש
@@ -178,12 +178,12 @@ int EschBoxExtents::hit(const EschPoint *pt) const
     assertMyth("EschBoxExtents::hit needs point",
                pt != 0);
 
-    return ( (pt->x < mins[0])
-             || (pt->x > maxs[0])
-             || (pt->y < mins[1])
-             || (pt->y > maxs[1])
-             || (pt->z < mins[2])
-             || (pt->z > maxs[2]) ) ? 0 : 1;
+    return ( (pt->x.flx < mins[0].flx)
+              || (pt->x.flx > maxs[0].flx)
+              || (pt->z.flx < mins[2].flx)
+              || (pt->z.flx > maxs[2].flx)
+              || (pt->y.flx < mins[1].flx)
+              || (pt->y.flx > maxs[1].flx) ) ? 0 : 1;
 }
 
 int EschBoxExtents::hit(const EschPoint *pt, const Flx16 r) const
@@ -191,12 +191,12 @@ int EschBoxExtents::hit(const EschPoint *pt, const Flx16 r) const
     assertMyth("EschBoxExtents::hit needs point and radius",
                pt != 0 && r >= 0);
 
-    return ( (mins[0] > (pt->x + r))
-             || (maxs[0] < (pt->x - r))
-             || (mins[1] > (pt->y + r)) 
-             || (maxs[1] < (pt->y - r))
-             || (mins[2] > (pt->z + r)) 
-             || (maxs[2] < (pt->z - r)) ) ? 0 : 1;
+    return ( (mins[0].flx > (pt->x.flx + r.flx))
+              || (maxs[0].flx < (pt->x.flx - r.flx))
+              || (mins[2].flx > (pt->z.flx + r.flx)) 
+              || (maxs[2].flx < (pt->z.flx - r.flx))
+              || (mins[1].flx > (pt->y.flx + r.flx)) 
+              || (maxs[1].flx < (pt->y.flx - r.flx)) ) ? 0 : 1;
 }
 
 
@@ -214,35 +214,39 @@ Flx16 EschBoxExtents::ray(const EschPoint *pt, const EschVector *v) const
 
     int     i;
     int     inside = 1;
-    enum    { right=0, left=1, middle=2 } quad[3];
+    enum
+    {
+        RIGHT=0,
+        LEFT=1,
+        MIDDLE=2
+    }       quad[3];
     Flx16   candidate[3];
     Flx16   origin[3] = { pt->x, pt->y, pt->z };
-    Flx16   dir[3] = { v->i, v->j, v->k};
-
+    Flx16   dir[3] = { v->i, v->j, v->k };
 
 //ִִִ Find canidate planes
     for(i=0; i < 3 ; i++)
     {
-        if (origin[i] < mins[i])
+        if (origin[i].flx < mins[i].flx)
         {
-            quad[i] = left;
-            if (dir[i] <= 0)
+            quad[i] = LEFT;
+            if (dir[i].flx <= 0)
                 return 0;
 
-            candidate[i] = mins[i];
+            candidate[i].flx = mins[i].flx;
             inside = 0;
         }
-        else if (origin[i] > maxs[i])
+        else if (origin[i].flx > maxs[i].flx)
         {
-            if (dir[i] >= 0)
+            if (dir[i].flx >= 0)
                 return 0;
-            quad[i] = right;
-            candidate[i] = maxs[i];
+            quad[i] = RIGHT;
+            candidate[i].flx = maxs[i].flx;
             inside = 0;
         }
         else
         {
-            quad[i] = middle;
+            quad[i] = MIDDLE;
         }
     }
 
@@ -263,19 +267,19 @@ Flx16 EschBoxExtents::ray(const EschPoint *pt, const EschVector *v) const
     int whichplane = 0;
     for(i=0; i < 3; i++)
     {
-        if (quad[i] != middle && dir[i] != 0)
+        if (quad[i] != MIDDLE && dir[i].flx != 0)
         {
             Flx16 m = (candidate[i] - origin[i]) / dir[i];
 
-            if (dist < m)
+            if (dist.flx < m.flx)
             {
                 whichplane = i;
-                dist = m;
+                dist.flx = m.flx;
             }
         }
     }
 
-    if (dist < 0)
+    if (dist.flx < 0)
         return 0;
 
     Flx16   coord[3];
@@ -285,14 +289,14 @@ Flx16 EschBoxExtents::ray(const EschPoint *pt, const EschVector *v) const
         if (whichplane != i)
         {
             coord[i] = origin[i] + dist * dir[i];
-            if ((coord[i] < mins[i]) ||
-                (coord[i] > maxs[i]))
+            if ((coord[i].flx < mins[i].flx)
+                || (coord[i].flx > maxs[i].flx))
             {
                 return 0;
             }
             else
             {
-                coord[i] = candidate[i];
+                coord[i].flx = candidate[i].flx;
             }
         }
     }

@@ -4,7 +4,7 @@
 //
 //                          Microsoft Windows '95 Version
 //
-//            Copyright (c) 1994, 1995 by Charybdis Enterprises, Inc.
+//            Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved.
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -22,8 +22,11 @@
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
-// Ivory Sub Allocation - Allocation in a fixed, specified region
+// Created by Dan Higdon
 //
+// ivsalloc.c
+//
+// Ivory Sub Allocation - Allocation in a fixed, specified region
 //
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
 
@@ -41,35 +44,13 @@
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
-//                                Pragmas
-//
-//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-
-//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-//
 //                                Equates
 //
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
-
 // This is the size of a single page of memory.  It MUST be a power of 2!
 #define PAGE_SIZE  (4096*4)
 #define PAGE_MASK  (~(PAGE_SIZE-1))
-
-
-//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-//
-//                               Structures
-//
-//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-
-
-//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-//
-//                           External Routines
-//
-//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
@@ -77,19 +58,10 @@
 //
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
-
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 // A routine to construct a dword from two words
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 #define MAKEDWORD(a,b) ((((dword)a) << 16) | (b))
-
-
-//±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
-//
-//                                 Data
-//
-//±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
-
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
@@ -98,33 +70,32 @@
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-//  ivory_sub_initialize
-//      Initialize the memory arena.  Must be called first.
+// ivory_sub_initialize
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 void ivory_sub_initialize (IvorySubAlloc *memory, size_t mem_size)
 {
-    assert (memory != 0);
-    assert (mem_size > sizeof (IvorySubAlloc) + 1024);
+    assertMyth("ivory_sub_initialize needs valid input",
+               memory != 0 && (mem_size > sizeof (IvorySubAlloc) + 1024));
 
-    // Once we have the block, set up the allocation header
-    // Fill in the "public" fields
+//ÄÄÄ Once we have the block, set up the allocation header
+//ÄÄÄ Fill in the "public" fields
     memory->memory_size = mem_size - sizeof (*memory);
 
-    // Initialize the counters
+//ÄÄÄ Initialize the counters
 #ifdef DEBUG
     memory->allocation_count = 0;
     memory->free_count = 0;
     memory->memory_alloced = 0;
 #endif
 
-    // Now, the internal fields (memory is allocated from the top)
+//ÄÄÄ Now, the internal fields (memory is allocated from the top)
     memory->next_free = (byte *)memory + mem_size - sizeof (AllocationHeader);
     memory->freelist = 0;
 }
 
+
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-//  ivory_sub_terminate
-//      Free all ivory-allocated resources and shut down the library.
+// ivory_sub_terminate
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 void ivory_sub_terminate (IvorySubAlloc *memmory)
 {
@@ -132,24 +103,22 @@ void ivory_sub_terminate (IvorySubAlloc *memmory)
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-//  ivory_alloc
-//      Allocate a block out of main memory.
+// ivory_alloc
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 void *ivory_sub_alloc (IvorySubAlloc *memory, size_t size)
 {
     AllocationHeader **pph, *ph;
 	size_t	alloc_size;
 
-    assert (memory);
-    assert (size > 0);
+    assertMyth("ivory_sub_alloc needs valid inputs", memory != 0 && size > 0);
 
-    // Now, make sure there is room for the AllocationHeader, and
-    // then round the size to the nearest (greater) 16 byte alignment
+//ÄÄÄ Now, make sure there is room for the AllocationHeader, and
+//ÄÄÄ then round the size to the nearest (greater) 16 byte alignment
     alloc_size  = size + sizeof (AllocationHeader) + 0x0f;
     alloc_size &= ~0x0f;
 
-    // First, scan the free list to see if we can find a suitable block
-    // Will this be fast enough, with the double pointer scheme?
+//ÄÄÄ First, scan the free list to see if we can find a suitable block
+//ÄÄÄ Will this be fast enough, with the double pointer scheme?
     pph = &memory->freelist;
     ph  = *pph;
 
@@ -159,51 +128,51 @@ void *ivory_sub_alloc (IvorySubAlloc *memory, size_t size)
         ph  = ph->next;
     }
 
-    // If we have found a suitable block....
+//ÄÄÄ If we have found a suitable block....
     if (ph)
     {
-        // If this block is large enough to split, do so
+        //ÄÄÄ If this block is large enough to split, do so
         if (ph->size - alloc_size > sizeof (AllocationHeader) + 16)
         {
-            // Remove our block from the end, so as to preserve the chain.
+            //ÄÄÄ Remove our block from the end, so as to preserve the chain.
             ph->size -= alloc_size;
             ph = (AllocationHeader *)((char *)ph + ph->size);
         }
-        // Otherwise, claim it as our own by overwriting 
-        // whatever pointed to it.
+        //ÄÄÄ Otherwise, claim it as our own by overwriting 
+        //ÄÄÄ whatever pointed to it.
         else
             *pph = ph->next;
     }
     else
     {
-        // Allocate a new block from the unused memory
+        //ÄÄÄ Allocate a new block from the unused memory
 
-        // If there isn't enough memory....
+        //ÄÄÄ If there isn't enough memory....
         if (memory->next_free - alloc_size <= &memory->wildspace_start)
         {
             return 0;
         }
         else
         {
-            // Otherwise, take as much as we need (but no more!)
-            // Allocate the memory from wildspace
+            //ÄÄÄ Otherwise, take as much as we need (but no more!)
+            //ÄÄÄ Allocate the memory from wildspace
             memory->next_free -= alloc_size;
             ph = (AllocationHeader *)memory->next_free;
         }
     }
 
-    // Now, 'ph' points to a usable chunk of memory.
+//ÄÄÄ Now, 'ph' points to a usable chunk of memory.
     assert (ph != 0);
     ph->size = alloc_size;
     ph->next = 0;
 
 #ifdef DEBUG
-    // Now, return the area past the buffer (our user's memory)
+    //ÄÄÄ Now, return the area past the buffer (our user's memory)
     memory->allocation_count++;
     memory->memory_alloced += alloc_size;
 
-    // Make sure the block actually contains as many bytes as we want!
-    // (Testing by protfault! :-)
+    //ÄÄÄ Make sure the block actually contains as many bytes as we want!
+    //ÄÄÄ (Testing by protfault! :-)
     memset (ph + 1, 0, size);
 #endif
 
@@ -212,48 +181,51 @@ void *ivory_sub_alloc (IvorySubAlloc *memory, size_t size)
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-//  ivory_sub_zalloc
-//      Allocate and zero a block from standard memory.
+// ivory_sub_zalloc
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 void *ivory_sub_zalloc (IvorySubAlloc *memory, size_t size)
 {
-    void *ptr = ivory_sub_alloc (memory, size);
+    void *ptr;
 
-    assert (ptr != 0);
+    assertMyth("ivory_sub_zalloc needs valid inputs", memory != 0 && size > 0);
+
+    ptr = ivory_sub_alloc (memory, size);
+    if (!ptr)
+        return 0;
+
     memset (ptr, 0, size);
-
     return ptr;
 }
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-//  ivory_sub_free
+// ivory_sub_free
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 void ivory_sub_free (IvorySubAlloc *memory, void **ptr)
 {
     AllocationHeader    *freeblk, *prevprev, *prevblk, *nextblk;
 
-    // Verify the arguments
-	assert (memory);
-	assert (ptr && *ptr);
+    assertMyth("ivory_sub_free needs valid inputs", memory != 0 && ptr != 0 && *ptr != 0);
 
-    // Make sure this is our pointer!
-    assert (*ptr > (void *)memory);
-    assert (*ptr < (void *)(((char *)memory) + memory->memory_size));
+//ÄÄÄ Make sure this is our pointer!
+    assertMyth ("ivory_sub_free given pointer out of range",
+                *ptr > (void *)memory);
+    assertMyth ("ivory_sub_free given pointer out of range",
+                *ptr < (void *)(((char *)memory) + memory->memory_size));
 
-    // Get a pointer to the header info in front of this block
+//ÄÄÄ Get a pointer to the header info in front of this block
     freeblk = (AllocationHeader *)*ptr;
     freeblk--;
 
-    // Record the free for statistical purposes
+//ÄÄÄ Record the free for statistical purposes
 #ifdef DEBUG
     memory->memory_alloced -= freeblk->size;
     memory->free_count++;
 #endif
 
-    // Scan until we are past all free blocks lower in memory than
-    // ourselves.  This is the most expensive part of this deallocator.
-    // Note: the '== 0' case is ok, since 0 is not greater than anything!
+//ÄÄÄ Scan until we are past all free blocks lower in memory than
+//ÄÄÄ ourselves.  This is the most expensive part of this deallocator.
+//ÄÄÄ Note: the '== 0' case is ok, since 0 is not greater than anything!
     prevprev  = prevblk = 0;
     nextblk   = memory->freelist;
     while (nextblk > freeblk)
@@ -263,16 +235,19 @@ void ivory_sub_free (IvorySubAlloc *memory, void **ptr)
         nextblk  = nextblk->next;
     }
 
-    // Now, we have either a point in the list to add our link, or
-    // the end of the list.
-    // 'ph2' points to the link we want to point to our
-    // free region, and prevblk points to the block containing
-    // that pointer.
+    assertMyth("ivory_sub_free told to free memory already in free list",
+               nextblk != freeblk);
+
+//ÄÄÄ Now, we have either a point in the list to add our link, or
+//ÄÄÄ the end of the list.
+//ÄÄÄ 'ph2' points to the link we want to point to our
+//ÄÄÄ free region, and prevblk points to the block containing
+//ÄÄÄ that pointer.
     assert ((prevblk == 0 && nextblk == memory->freelist) ||
             (prevblk != 0 && prevblk->next == nextblk));
     assert (prevprev == 0 || prevprev->next == prevblk);
 
-    // If the next block is adjacent, merge.  Otherwise chain it.
+//ÄÄÄ If the next block is adjacent, merge.  Otherwise chain it.
     if (nextblk)
     {
         if (freeblk == end_of (nextblk))
@@ -290,49 +265,49 @@ void ivory_sub_free (IvorySubAlloc *memory, void **ptr)
     }
 #endif
 
-    // At this point, we know that....
+//ÄÄÄ At this point, we know that....
     assert (freeblk == nextblk ||       // We have merged, or
             freeblk->next == nextblk);  // we are linked in.
 
-    // If there's a previous block, and it's adjacent, eat our block
+//ÄÄÄ If there's a previous block, and it's adjacent, eat our block
     if (prevblk)
     {
         if (prevblk == end_of (freeblk))
         {
             freeblk->size += prevblk->size;
 
-            // Patch our pointer, which is the freelist head if there is no previous block
+            //ÄÄÄ Patch our pointer, which is the freelist head if there is no previous block
             if (prevprev)
                 prevprev->next = freeblk;
             else
                 memory->freelist = freeblk;
 
-            // Back up our previous block pointer for the next step
+            //ÄÄÄ Back up our previous block pointer for the next step
             prevblk = prevprev;
         }
-        // Otherwise, put our block into place
+        //ÄÄÄ Otherwise, put our block into place
         else
             prevblk->next = freeblk;
     }
-    // Otherwise, set this as the first block
+    //ÄÄÄ Otherwise, set this as the first block
     else
         memory->freelist = freeblk;
 
 
-    // If our block is now the last thing in memory, return it to wildspace
+//ÄÄÄ If our block is now the last thing in memory, return it to wildspace
     if (freeblk == (AllocationHeader *)memory->next_free)
     {
         memory->next_free += freeblk->size;
 
-        // Make sure that we no longer point at this memory.
+        //ÄÄÄ Make sure that we no longer point at this memory.
         if (prevblk)
             prevblk->next = 0;
         else
             memory->freelist = 0;
     }
 
-    // Lastly, zero out the pointer so we don't get into trouble later
+//ÄÄÄ Lastly, zero out the pointer so we don't get into trouble later
     *ptr = 0;
 }
 
-//°±² End of module - ivsalloc.cpp ²±°
+//°±² End of module - ivsalloc.c ²±°

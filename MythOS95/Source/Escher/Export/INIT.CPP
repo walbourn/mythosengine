@@ -8,7 +8,7 @@
 //ששששש²±²ששששששש²±²שששש²±²ש²±²שששש²±²ש²±²שששש²±²ש²±²שששששששש²±²שששש²±²שששששש
 //שששש²²²²²²²²²²ש²²²²²²²²ששש²²²²²²²²שש²²²שששש²²²ש²²²²²²²²²²ש²²²שששש²²²ששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//שששששששששששCopyrightש(c)ש1994-1996שbyשCharybdisשEnterprises,שInc.שששששששששש
+//שששששששששששCopyrightש(c)ש1994-1997שbyשCharybdisשEnterprises,שInc.שששששששששש
 //ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
@@ -80,6 +80,19 @@ extern "C" int mtl_sizemode;                // 1=just to power of 2,
                                             // 3=query
 extern "C" int mtl_sizex;
 extern "C" int mtl_sizey;
+
+extern "C" int mtl_format;                  // 1=8-bit
+                                            // 2=True-color (24/32-bit)
+
+extern "C" int mtl_compress;                // 0=none
+                                            // 1=rle
+
+extern "C" int mtl_animatedtxt;             // 0=first-frame only
+                                            // 1=multiframe
+
+extern "C" int mtl_perspmode;               // 1=never
+                                            // 2=^ in name
+                                            // 3=always
 
 extern "C" int query_xsize;
 extern "C" int query_ysize;
@@ -233,7 +246,6 @@ extern "C" void load_from_ini(char *inifname)
 //ִִִ Read material section
     if (!ini.section("Material"))
     {
-
         // Palette
         if (!ini.read("Palette",buff))
         {
@@ -304,6 +316,48 @@ extern "C" void load_from_ini(char *inifname)
                     query_ysize=y;
                     break;
             }
+        }
+
+        // Format: '8bit' or 'truecolor'
+        if (!ini.read("Format",buff))
+        {
+            strlwr(buff);
+            if (!strcmp(buff,"truecolor"))
+                mtl_format=2;
+            else if (!strcmp(buff,"8bit"))
+                mtl_format=1;
+        }
+
+        // Compress: 'none' or 'rle'
+        if (!ini.read("Compress",buff))
+        {
+            strlwr(buff);
+            if (!strcmp(buff,"rle"))
+                mtl_compress=1;
+            else if (!strcmp(buff,"none"))
+                mtl_compress=0;
+        }
+
+        // AnimatedTextures: '1st' or 'multiframe'
+        if (!ini.read("AnimatedTextures",buff))
+        {
+            strlwr(buff);
+            if (!strcmp(buff,"multiframe"))
+                mtl_animatedtxt=1;
+            else if (!strcmp(buff,"1st"))
+                mtl_animatedtxt=0;
+        }
+
+        // PerspectiveCorrection: 'never', 'caret', or 'always'
+        if (!ini.read("PerspectiveCorrection",buff))
+        {
+            strlwr(buff);
+            if (!strcmp(buff,"always"))
+                mtl_perspmode=3;
+            else if (!strcmp(buff,"caret"))
+                mtl_perspmode=2;
+            else if (!strcmp(buff,"never"))
+                mtl_perspmode=1;
         }
     }
 

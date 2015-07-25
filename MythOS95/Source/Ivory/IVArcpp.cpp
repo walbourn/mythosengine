@@ -4,7 +4,7 @@
 //
 //                          Microsoft Windows '95 Version
 //
-//            Copyright (c) 1994, 1995 by Charybdis Enterprises, Inc.
+//            Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved.
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -22,6 +22,10 @@
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
+// Created by Dan Higdon
+//
+// ivarcppc.cpp
+//
 // Ivory Allocation - Arena allocation routines for C++.
 //
 // These routines provide a C++ wrapper for the Ivory Arena allocation
@@ -33,35 +37,14 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
+#include <malloc.h>
+#include <memory.h>
 #include <new.h>
+#include <assert.h>
 #include "ivory.hpp"
-
-//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-//
-//                                Equates
-//
-//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-
-//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-//
-//                               Structures
-//
-//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-
-//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-//
-//                               Routines
-//
-//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-
-//±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
-//
-//                                 Data
-//
-//±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
@@ -78,11 +61,15 @@
 
 void *operator new (size_t size, IvoryArena *arena)
 {
+    assertMyth("Ivory Arena operator new needs valid inputs",
+                size > 0 && arena != 0);
     return ivory_arena_alloc (arena, size);
 }
 
 void *operator new (size_t size, IvorySubAlloc *suballoc)
 {
+    assertMyth("Ivory Sub Alloc operator new needs valid inputs",
+                size > 0 && suballoc != 0);
     return ivory_sub_alloc (suballoc, size);
 }
 
@@ -93,4 +80,4 @@ void *operator new [] (size_t size, IvoryArena *arena)
 }
 #endif
 
-//°±² End of module - ivarena.cpp ²±°
+//°±² End of module - ivarcpp.cpp ²±°

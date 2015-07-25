@@ -6,7 +6,7 @@
 //    (_)       ^          * *     *      *   *    *            (_)
 //             (_)       **   **   *    ***** **** ****
 //
-//            Copyright (c) 1994-1996 by Charybdis Enterprises, Inc.
+//            Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.
 //                            All Rights Reserved.
 //                        Microsoft Windows '95 Version
 //
@@ -69,6 +69,7 @@ void bitmap()
    XFParseCEL     cel;
    XFParseLBM     lbm;
    XFParsePCX     pcx;
+   XFParseTGA     tga;
    XFParseXEB     xeb;
 
    cout << "\n\n\n°°°°°°±±±±±±²²²²²² XFParseBitmap object tests ²²²²²²±±±±±±°°°°°°\n";
@@ -148,7 +149,7 @@ void bitmap()
    cout << "Testing CEL writer...\n";
    if (cel.namewrite("OUT.CEL"))
    {
-       print_error(&bmp,"Error writing OUT.CEL");
+       print_error(&cel,"Error writing OUT.CEL");
    }
    else
    {
@@ -156,7 +157,7 @@ void bitmap()
 
        if (cel.nameread("OUT.CEL"))
        {
-           print_error(&bmp,"Error name-reading OUT.CEL");
+           print_error(&cel,"Error name-reading OUT.CEL");
        }
    }
 
@@ -243,6 +244,32 @@ void bitmap()
        }
    }
 
+//ÄÄÄÄ TGA
+
+   //ÄÄÄÄ Read
+   cout << "Testing TGA reader...\n";
+
+   if (tga.nameread("EARTH.TGA"))
+   {
+       print_error(&tga,"Error name-reading EARTH.TGA");
+   }
+
+   //ÄÄÄÄ Write
+   cout << "Testing TGA writer...\n";
+   if (tga.namewrite("OUT.TGA"))
+   {
+       print_error(&tga,"Error writing OUT.TGA");
+   }
+   else
+   {
+       cout << "OUT.TGA written...\n";
+
+       if (tga.nameread("OUT.TGA"))
+       {
+           print_error(&tga,"Error name-reading OUT.TGA");
+       }
+   }
+
 //ÄÄÄÄ XEB
 
    //ÄÄÄÄ Convert
@@ -306,7 +333,39 @@ void bitmap()
    {
        cout << "BOUNXEB.BMP written...\n";
    }
-};
+
+   //ÄÄÄÄ Convert
+   cout << "Converting EARTH.TGA to EARTH.XEB...\n";
+   if (tga.nameread("EARTH.TGA"))
+   {
+       print_error(&tga,"Error name-reading EARTH.TGA");
+   }
+
+   if (xeb.namewrite("EARTH.XEB",tga.bm))
+   {
+       print_error(&xeb,"Error writing EARTH.XEB");
+   }
+   else
+   {
+       cout << "EARTH.XEB written...\n";
+   }
+
+   cout << "Converting EARTH.XEB to EARTXEB.TGA...\n";
+   if (xeb.nameread("EARTH.XEB"))
+   {
+       print_error(&xeb,"Error name-reading EARTH.XEB");
+   }
+
+   if (tga.namewrite("EARTXEB.TGA",xeb.bm))
+   {
+       print_error(&tga,"Error writing EARTXEB.TGA");
+   }
+   else
+   {
+       cout << "EARTXEB.TGA written...\n";
+   }
+
+}
 
 //°±² End of module - xtbitmap.cpp ²±°
 

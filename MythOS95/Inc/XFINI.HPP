@@ -6,7 +6,7 @@
 //    (_)       ^          * *     *      *   *    *            (_)
 //             (_)       **   **   *    ***** **** ****
 //
-//            Copyright (c) 1994-1996 by Charybdis Enterprises, Inc.
+//            Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.
 //                             All Rights Reserved.
 //                        Microsoft Windows '95 Version
 //
@@ -29,12 +29,12 @@
 //
 // xfini.hpp
 //
-//      This contains an object for parsingg .INI-style files.  These
-//      are text-based data files with headings and subsections of the
-//      format:
+// This contains an object for parsingg .INI-style files.  These
+// are text-based data files with headings and subsections of the
+// format:
 //
-//         [heading-name]
-//         item=value
+//    [heading-name]
+//    item=value
 //
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
 
@@ -63,10 +63,8 @@
 //
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
-//--- Compile time value ---
-
-const ulong XF_MAX_ININAME=256;    // Maximum size of item or section name.
-const ulong XF_MAX_INIVALUE=1024;  // Maximum size of a value
+#define XF_MAX_ININAME  256     // Maximum size of item or section name.
+#define XF_MAX_INIVALUE 1024    // Maximum size of a value
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
@@ -74,90 +72,107 @@ const ulong XF_MAX_INIVALUE=1024;  // Maximum size of a value
 //
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
-class XFParseINI {
-   XFileDisk xfile;
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// XFParseINI - INI reader/writer class.                                    ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+class XFParseINI
+{
+    XFileDisk xfile;
 
 protected:
-   XFile           *xf;
+    XFile           *xf;
 
-   xf_error_codes  errorn;
+    xf_error_codes  errorn;
 
-   ulong           buffsize;
-   char            *buff;
-   char            sectname[XF_MAX_ININAME];
+    ulong           buffsize;
+    char            *buff;
+    char            sectname[XF_MAX_ININAME];
 
-           //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-           // Loads the internal buffer from the open file handle.          ³
-           //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-   xf_error_codes load(void);
+    //ÄÄÄ Loads the internal buffer from the open file handle.
+    xf_error_codes load(void);
    
-           //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-           // Returns the start position in buffer for active section       ³
-           //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-   char *start(void);
+    //ÄÄÄ Returns the start position in buffer for active section
+    char *start(void);
 
-           //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-           // Scans the buffer for the variable starting with 'start'.  0   ³
-           // is returned if not found.                                     ³
-           //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-   char *find(char *ptr, const char *item);
+    //ÄÄÄ Scans the buffer for the variable starting with 'start'.
+    //ÄÄÄ 0 is returned if not found.
+    char *find(char *ptr, const char *item);
 
 public:
-   XFParseINI();
-   XFParseINI(XFile *f);
-   ~XFParseINI();
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    // Constructor/Destructors                                              ³
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+    XFParseINI();
+    XFParseINI(XFile *f);
 
-   void attach(XFile *f) { if (!f) {xf=&xfile;} else {xf=f;} };
+    ~XFParseINI();
 
-   xf_error_codes error(void) { return errorn; };
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    // Operations                                                           ³
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+    xf_error_codes error() const { return errorn; };
+
+    void attach(XFile *f) { xf = (f) ? f : &xfile; }
 
            //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
            // Quick access functions for the XFile object embedded.         ³
            //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-   xf_error_codes open(const char *name, dword flags)
-           { xf_error_codes err=xf->open(name,flags|XF_OPEN_READ);
-             if (!err) {return begin();}
-             errorn=err;
-             return err; };
-   xf_error_codes create(const char *name, dword flags)
-           { xf_error_codes err=xf->create(name,flags|XF_OPEN_READ);
-             if (!err) {return begin();}
-             errorn=err;
-             return err; };
-   xf_error_codes close(void)
-           {  end();
-              xf_error_codes err=xf->close();
-              if (err) errorn=err;
-              return err; };
+    xf_error_codes open(const char *name, dword flags)
+    {
+        xf_error_codes err=xf->open(name,flags|XF_OPEN_READ);
+        if (!err)
+        {
+            return begin();
+        }
+        errorn=err;
+        return err;
+    }
+    xf_error_codes create(const char *name, dword flags)
+    {
+        xf_error_codes err=xf->create(name,flags|XF_OPEN_READ);
+        if (!err)
+        {
+            return begin();
+        }
+        errorn=err;
+        return err;
+    }
+    xf_error_codes close(void)
+    {
+        end();
+        xf_error_codes err=xf->close();
+        if (err) errorn=err;
+        return err;
+    }
 
            //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
            // These must be called if the XFile object is not opened/closed ³
            // via the member functions for this object.                     ³
            //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-   xf_error_codes begin(void);
-   xf_error_codes end(void);
+    xf_error_codes begin(void);
+    xf_error_codes end(void);
 
            //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
            // Sets processing to the given named section.  If writing, and  ³
            // the section doesn't exist, a new section is created.          ³
            //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-   xf_error_codes section(const char *name);
+    xf_error_codes section(const char *name);
 
            //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
            // Reads an item=value pair from the file, using the current     ³
            // section, if any set.                                          ³
            //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-   xf_error_codes read(const char *item, char *value);
-   xf_error_codes read(const char **item, char **value);
-   int read(const char *item);
+    xf_error_codes read(const char *item, char *value);
+    xf_error_codes read(const char **item, char **value);
+    int read(const char *item);
 
            //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
            // Writes an item=value pair to the file, using the current      ³
            // section, if any set.                                          ³
            //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-   xf_error_codes write(const char *item, const char *value);
-   xf_error_codes write(const char **item, const char **value);
-   xf_error_codes write(const char *item, int value);
+    xf_error_codes write(const char *item, const char *value);
+    xf_error_codes write(const char **item, const char **value);
+    xf_error_codes write(const char *item, int value);
 };
 
 #ifdef __WATCOMC__

@@ -6,7 +6,7 @@
 //    (_)       ^          * *     *      *   *    *            (_)
 //             (_)       **   **   *    ***** **** ****
 //
-//            Copyright (c) 1994-1996 by Charybdis Enterprises, Inc.
+//            Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.
 //                            All Rights Reserved.
 //                        Microsoft Windows '95 Version
 //
@@ -99,6 +99,7 @@ void print_error(class XFParseIFF *xp, char *s)
     printf("ÍÍÍÍ Error %x %s\n",xp->error(),s);
 }
 
+
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // main                                                                     ³
 //                                                                          ³
@@ -109,7 +110,7 @@ void main(int argc, char *argv[])
     IvorySystem ivory;
 
 //ÄÄÄÄ Print welcome banner ÄÄÄÄ
-    cout << "°± XFile Tester - (C) 1994-1996 Charybdis Enterprises, Inc. ±°\n"
+    cout << "°± XFile Tester - (C) 1994-1997 Charybdis Enterprises, Inc. ±°\n"
             "                  All Rights Reserved.  "  __DATE__ "\n";
 
     if (argc > 1
@@ -157,6 +158,7 @@ void main(int argc, char *argv[])
        iff();
     }
 }
+
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 // _charybdis_assert

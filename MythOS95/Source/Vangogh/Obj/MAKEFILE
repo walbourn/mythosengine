@@ -6,7 +6,7 @@
 #                                                            |. _  .   .|
 #           Microsoft Windows '95 Version                    | / \   .  | 
 #                                                            |_|_|_._._.|
-#  Copyright (c) 1994, 1995 by Charybdis Enterprises, Inc.   |.-.-.-.-..|
+#  Copyright (c) 1994 - 1997 by Charybdis Enterprises, Inc.  |.-.-.-.-..|
 #               All rights reserved.                        %\__________/%
 #                                                           %          %
 #
@@ -53,8 +53,7 @@ LIBPATH = $(MYTH95ROOT)\lib;
 LIB = VanGogh
 
 
-OBJS=vngline.obj\
-vngclip.obj\
+OBJS=vngclip.obj\
 vngitrns.obj\
 vngzrect.obj\
 vngpcalc.obj\
@@ -70,15 +69,53 @@ vngpix8.obj\
 vngrect8.obj\
 vngitrn8.obj\
 vngtri8.obj\
+tri8.obj\
+ztri8.obj\
+atri8.obj\
+aztri8.obj\
 vnggtri8.obj\
+gtri8.obj\
+agtri8.obj\
+azgtri8.obj\
+zgtri8.obj\
+vnggrtr8.obj\
+zgrtri8.obj\
+grtri8.obj\
 vngttri8.obj\
+lttri8.obj\
+zlttri8.obj\
+azltt8.obj\
+altt8.obj\
+lgttri8.obj\
+zlgttri8.obj\
+azlgtt8.obj\
+algtt8.obj\
 vngptri8.obj\
+pttri8.obj\
+zpttri8.obj\
+pgttri8.obj\
+zpgttri8.obj\
 vngvpdd8.obj\
 vngvpdb8.obj\
+vngsblt8.obj\
 vngvvp8.obj\
+vngpoly8.obj\
+vngitns8.obj\
 vngrct16.obj\
 vngpix16.obj\
-vngvvp16.obj
+ddrwscrn.obj\
+zpghlin8.obj\
+dibscrn.obj
+
+#pttri8.obj\
+#zpttri8.obj\
+#pgttri8.obj\
+#zpgttri8.obj\
+#zlgttri8.obj\
+
+#vngvvp16.obj\
+#vng3dfx.obj\
+#3dfxscrn.obj
 
 
 #ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
@@ -134,6 +171,19 @@ all: setstden $(LIB).lib
 # define how we compile a .CPP file
 {..\24bpp\}.cpp{}.obj:
 	$(CPP) $(CCOPTIONS) $<
+
+# define how we compile a .ASM file
+{..\screen\}.asm{}.obj:
+   $(ASM) $(ASMOPTS) $<
+
+# define how we compile a .C file
+{..\screen\}.c{}.obj:
+	$(CC) $(CCOPTIONS) $<
+
+# define how we compile a .CPP file
+{..\screen}.cpp{}.obj:
+	$(CPP) $(CCOPTIONS) $<
+
 
 #±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 #

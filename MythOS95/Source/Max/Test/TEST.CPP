@@ -1,15 +1,15 @@
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
-//                  ooo        ooooo                       
-//                  `88.       .888'                       
-//                   888b     d'888   .oooo.   oooo    ooo 
-//                   8 Y88. .P  888  `P  )88b   `88b..8P'  
-//                   8  `888'   888   .oP"888     Y888'    
-//                   8    Y     888  d8(  888   .o8"'88b   
-//                  o8o        o888o `Y888""8o o88'   888o 
+//                  ooo        ooooo
+//                  `88.       .888'
+//                   888b     d'888   .oooo.   oooo    ooo
+//                   8 Y88. .P  888  `P  )88b   `88b..8P'
+//                   8  `888'   888   .oP"888     Y888'
+//                   8    Y     888  d8(  888   .o8"'88b
+//                  o8o        o888o `Y888""8o o88'   888o
 //
 //                          Across the event horizon...
 //
-//            Copyright (c) 1994, 1995 by Charybdis Enterprises, Inc.
+//           Copyright (c) 1994 - 1997 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved.
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -36,7 +36,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include <stdlib.h>
@@ -73,12 +73,13 @@ MaxValueMap vmap (VMAP_SIZE, vmap_table);
 
 void main ()
 {
-    IvorySystem ivory (1024*1024);
-
 //ÄÄÄÄ Print welcome banner ÄÄÄÄ
-    cout << "Max Tester - (C) 1994, 1995 by Charybdis Enterprises, Inc.\n\n";
+    cout << "Max Tester - (C) 1994 - 1997 by Charybdis Enterprises, Inc.\n\n";
 
     cout << "Load the events" << endl;
+
+    // Allocate Ivory her, so the stream io stuff doesn't use it
+    IvorySystem ivory (1024*1024);
 
     // Create a user event system and initialize it.
     MaxDevices devs;
@@ -126,7 +127,7 @@ void main ()
 
             evt.get_mouse_pos (&x, &y);
             evt.get_mouse_movement (&dx, &dy);
-            cout << "Mouse: (" << x << ", " << y << ") (" 
+            cout << "Mouse: (" << x << ", " << y << ") ("
                  << dx << ", " << dy << ")" << endl;
         }
 
@@ -137,12 +138,12 @@ void main ()
             evt.get_joystick (&stat);
             cout << "Joystick: (" ;
 
-            cout << vmap (short (stat.dwXpos - 32767)) << ", ";
-            cout << vmap (short (stat.dwYpos - 32767)) << ", ";
-            cout << vmap (short (stat.dwZpos - 32767)) << ", ";
-            cout << vmap (short (stat.dwRpos - 32767)) << ", ";
-            cout << vmap (short (stat.dwUpos - 32767)) << ", ";
-            cout << vmap (short (stat.dwVpos - 32767)) << ") ";
+            cout << short (stat.dwXpos - 32767) << ", ";
+            cout << short (stat.dwYpos - 32767) << ", ";
+            cout << short (stat.dwZpos - 32767) << ", ";
+            cout << short (stat.dwRpos - 32767) << ", ";
+            cout << short (stat.dwUpos - 32767) << ", ";
+            cout << short (stat.dwVpos - 32767) << ") ";
             cout << "Hat = " << stat.dwPOV;
             cout << endl;
         }
@@ -182,16 +183,20 @@ void main ()
         if (ones.check (wepselect))
         {
             cout << "Weapons Select" << endl;
+            break;
         }
+
 
         if (ones.check (targselect))
         {
             cout << "Target Select" << endl;
+            break;
         }
 
         if (ones.check (otherselect))
         {
             cout << "Other Select" << endl;
+            break;
         }
 
         // Empty the keyboard buffer
@@ -216,7 +221,7 @@ extern "C" int mythos_atexit( register void ( *__func )( void ) )
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 // _charybdis_assert
-// 
+//
 // Handler for failed asserts.  If msg is set to non-NULL, then an assertMyth
 // was used with a comment.
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ

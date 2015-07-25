@@ -6,7 +6,7 @@
 //    (_)       ^          * *     *      *   *    *            (_)
 //             (_)       **   **   *    ***** **** ****
 //
-//            Copyright (c) 1994-1996 by Charybdis Enterprises, Inc.
+//            Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.
 //                             All Rights Reserved.
 //                        Microsoft Windows '95 Version
 //
@@ -28,6 +28,8 @@
 // Created by Chuck Walbourn
 // 
 // xfbitmap.hpp
+//
+// Contains the classes for working with bitmap files.
 //
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
 
@@ -59,8 +61,11 @@
 //
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
-const ulong    XF_MAX_WIDTH    =65535;
-const ulong    XF_MAX_HEIGHT   =65535;
+#define XF_MAX_WIDTH    65535
+#define XF_MAX_HEIGHT   65535
+
+#define XF_XEB_COMPRESS_RLE     0
+#define XF_XEB_COMPRESS_NONE    1
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
@@ -74,7 +79,8 @@ struct XFXEBHeader
     ushort  width;
     ushort  height;
     byte    bpp;
-    char    na[9];
+    byte    compress;
+    char    na[8];
 };
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
@@ -84,9 +90,10 @@ struct XFXEBHeader
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// Bitmap Object read/written by XFileBitmap.                               ³
+// XFBitmap - Bitmap container class.                                       ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-class XFBitmap {
+class XFBitmap
+{
 public:         
     word        flags;          // Flags for bitmap.
     ushort      width;          // X-size of bitmap
@@ -98,11 +105,14 @@ public:
     IvoryHandle palhandle;      // Palette data handle (256 dword table) 
     IvoryHandle handle;         // Bitmap handle
 
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    // Constructor/Destructors                                              ³
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
     XFBitmap();
     ~XFBitmap();
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-    // Operations on bitmap objects.                                        ³
+    // Operations                                                           ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
     void release();
 
@@ -116,9 +126,10 @@ public:
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// Abstract base object for reading/writing bitmap files.                   ³
+// XFParseBitmap - Abstract base object for reading/writing bitmap files.   ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-class XFParseBitmap {
+class XFParseBitmap
+{
     XFileDiskBuf    xfile;
     XFBitmap        bitmap;
 
@@ -129,68 +140,95 @@ protected:
 public:
     XFBitmap        *bm;
 
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    // Constructor/Destructors                                              ³
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
     XFParseBitmap();
     XFParseBitmap(XFile *f);
     XFParseBitmap(XFBitmap *b);
     XFParseBitmap(XFile *f, XFBitmap *b);
+
     virtual ~XFParseBitmap();
    
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    // Operations                                                           ³
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
     void attach(XFile *f) { if (!f) {xf=&xfile;} else {xf=f;} };
 
     xf_error_codes error(void) { return errorn; };
 
-           //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-           // Reads the given data into the object, freeing up any          ³
-           // previously loaded bitmap in the object's memory.              ³
-           //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
     xf_error_codes nameread(const char *name, XFBitmap *bm=0);
     virtual xf_error_codes read(XFBitmap *bm=0)=0;
 
-
-           //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-           // Writes the bitmap in the object's memory to the given file.   ³
-           //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
     xf_error_codes namewrite(const char *name, XFBitmap *b=0);
     virtual xf_error_codes write(XFBitmap *b=0)=0;
 };
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// Bitmap reading/writing objects for various formats.                      ³
+// XFParseBMP - Windows BMP format.                                         ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-
-//ÄÄ Windows BMP
-class XFParseBMP : public XFParseBitmap {
+class XFParseBMP : public XFParseBitmap
+{
 public:
-    XFParseBMP() {};
-    XFParseBMP(XFile *f) : XFParseBitmap(f) {};
-    XFParseBMP(XFBitmap *b) : XFParseBitmap(b) {};
-    XFParseBMP(XFile *f, XFBitmap *b) : XFParseBitmap(f,b) {};
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    // Constructor/Destructors                                              ³
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+    XFParseBMP() : XFParseBitmap() {}
+    XFParseBMP(XFile *f) : XFParseBitmap(f) {}
+    XFParseBMP(XFBitmap *b) : XFParseBitmap(b) {}
+    XFParseBMP(XFile *f, XFBitmap *b) : XFParseBitmap(f,b) {}
 
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    // Operations                                                           ³
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
     virtual xf_error_codes read(XFBitmap *b=0);
     virtual xf_error_codes write(XFBitmap *b=0);
 };
 
-//ÄÄ Autodesk's CEL
-class XFParseCEL : public XFParseBitmap {
-public:
-    XFParseCEL() {};
-    XFParseCEL(XFile *f) : XFParseBitmap(f) {};
-    XFParseCEL(XFBitmap *b) : XFParseBitmap(b) {};
-    XFParseCEL(XFile *f, XFBitmap *b) : XFParseBitmap(f,b) {};
 
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// XFParseCEL - Autodesk's CEL format.                                      ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+class XFParseCEL : public XFParseBitmap
+{
+public:
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    // Constructor/Destructors                                              ³
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+    XFParseCEL() : XFParseBitmap()  {}
+    XFParseCEL(XFile *f) : XFParseBitmap(f) {}
+    XFParseCEL(XFBitmap *b) : XFParseBitmap(b) {}
+    XFParseCEL(XFile *f, XFBitmap *b) : XFParseBitmap(f,b) {}
+
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    // Operations                                                           ³
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
     virtual xf_error_codes read(XFBitmap *b=0);
     virtual xf_error_codes write(XFBitmap *b=0);
+
+    xf_error_codes read(ushort &xcoord, ushort &ycoord, XFBitmap *b=0);
+    xf_error_codes write(ushort xcoord, ushort ycoord, XFBitmap *b=0);
 };
 
-//ÄÄ IFF Standard ILBM
-class XFParseLBM : public XFParseBitmap {
-public:
-    XFParseLBM() {};
-    XFParseLBM(XFile *f) : XFParseBitmap(f) {};
-    XFParseLBM(XFBitmap *b) : XFParseBitmap(b) {};
-    XFParseLBM(XFile *f, XFBitmap *b) : XFParseBitmap(f,b) {};
 
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// XFParseLBM - IFF Standard ILBM format.                                   ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+class XFParseLBM : public XFParseBitmap
+{
+public:
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    // Constructor/Destructors                                              ³
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+    XFParseLBM() : XFParseBitmap()  {}
+    XFParseLBM(XFile *f) : XFParseBitmap(f) {}
+    XFParseLBM(XFBitmap *b) : XFParseBitmap(b) {}
+    XFParseLBM(XFile *f, XFBitmap *b) : XFParseBitmap(f,b) {}
+
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    // Operations                                                           ³
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
     virtual xf_error_codes read(XFBitmap *b=0);
     virtual xf_error_codes write(XFBitmap *b=0);
 
@@ -198,43 +236,96 @@ public:
     xf_error_codes write(XFParseIFF *iff, XFBitmap *b=0);
 };
 
-//ÄÄ Zsoft's PCX
-class XFParsePCX : public XFParseBitmap {
-public:
-    XFParsePCX() {};
-    XFParsePCX(XFile *f) : XFParseBitmap(f) {};
-    XFParsePCX(XFBitmap *b) : XFParseBitmap(b) {};
-    XFParsePCX(XFile *f, XFBitmap *b) : XFParseBitmap(f,b) {};
 
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// XFParsePCX - Zsoft's PCX format.                                         ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+class XFParsePCX : public XFParseBitmap
+{
+public:
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    // Constructor/Destructors                                              ³
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+    XFParsePCX() : XFParseBitmap() {}
+    XFParsePCX(XFile *f) : XFParseBitmap(f) {}
+    XFParsePCX(XFBitmap *b) : XFParseBitmap(b) {}
+    XFParsePCX(XFile *f, XFBitmap *b) : XFParseBitmap(f,b) {}
+
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    // Operations                                                           ³
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
     virtual xf_error_codes read(XFBitmap *b=0);
     virtual xf_error_codes write(XFBitmap *b=0);
 };
 
-//ÄÄ Targa TrueVision TGA
-class XFParseTGA : public XFParseBitmap {
-public:
-    XFParseTGA() {};
-    XFParseTGA(XFile *f) : XFParseBitmap(f) {};
-    XFParseTGA(XFBitmap *b) : XFParseBitmap(b) {};
-    XFParseTGA(XFile *f, XFBitmap *b) : XFParseBitmap(f,b) {};
 
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// XFParseTGA - TrueVision's Targa Format.                                  ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+class XFParseTGA : public XFParseBitmap
+{
+public:
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    // Constructor/Destructors                                              ³
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+    XFParseTGA() : XFParseBitmap()  {}
+    XFParseTGA(XFile *f) : XFParseBitmap(f) {}
+    XFParseTGA(XFBitmap *b) : XFParseBitmap(b) {}
+    XFParseTGA(XFile *f, XFBitmap *b) : XFParseBitmap(f,b) {}
+
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    // Operations                                                           ³
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
     virtual xf_error_codes read(XFBitmap *b=0);
     virtual xf_error_codes write(XFBitmap *b=0);
 };
 
-//ÄÄ Charybdis' XEB format
-class XFParseXEB : public XFParseBitmap {
-public:
-    XFParseXEB() {};
-    XFParseXEB(XFile *f) : XFParseBitmap(f) {};
-    XFParseXEB(XFBitmap *b) : XFParseBitmap(b) {};
-    XFParseXEB(XFile *f, XFBitmap *b) : XFParseBitmap(f,b) {};
 
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// XFParseXEB - Charybdis' XFile Encoded Bitmap format.                     ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+class XFParseXEB : public XFParseBitmap
+{
+public:
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    // Constructor/Destructors                                              ³
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+    XFParseXEB() : XFParseBitmap()  {}
+    XFParseXEB(XFile *f) : XFParseBitmap(f) {}
+    XFParseXEB(XFBitmap *b) : XFParseBitmap(b) {}
+    XFParseXEB(XFile *f, XFBitmap *b) : XFParseBitmap(f,b) {}
+
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    // Operations                                                           ³
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
     virtual xf_error_codes read(XFBitmap *b=0);
     virtual xf_error_codes write(XFBitmap *b=0);
 
     xf_error_codes read(XFParseIFF *iff, XFBitmap *b=0);
     xf_error_codes write(XFParseIFF *iff, XFBitmap *b=0);
+
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    // Utility members                                                      ³
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+    static ulong compress_rle_8bpp(ushort w, ushort h,
+                                   byte *data, byte *cdata);
+    static int uncompress_rle_8bpp(ushort w, ushort h, ulong csize,
+                                   byte *cdata, byte *data);
+
+    static ulong compress_rle_16bpp(ushort w, ushort h,
+                                    byte *data, byte *cdata);
+    static int uncompress_rle_16bpp(ushort w, ushort h, ulong csize,
+                                    byte *cdata, byte *data);
+
+    static ulong compress_rle_24bpp(ushort w, ushort h,
+                                    byte *data, byte *cdata);
+    static int uncompress_rle_24bpp(ushort w, ushort h, ulong csize,
+                                    byte *cdata, byte *data);
+
+    static ulong compress_rle_32bpp(ushort w, ushort h,
+                                    byte *data, byte *cdata);
+    static int uncompress_rle_32bpp(ushort w, ushort h, ulong csize,
+                                    byte *cdata, byte *data);
 };
 
 #ifdef __WATCOMC__

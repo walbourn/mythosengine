@@ -8,7 +8,7 @@
 //ùùùùù²±²ùùùùùùù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùùùùùù²±²ùùùù²±²ùùùùùù
 //ùùùù²²²²²²²²²²ù²²²²²²²²ùùù²²²²²²²²ùù²²²ùùùù²²²ù²²²²²²²²²²ù²²²ùùùù²²²ùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùCopyrightù(c)ù1994-1996ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
+//ùùùùùùùùùùùCopyrightù(c)ù1994-1997ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -74,6 +74,7 @@
 
 //ÄÄÄ Feel functions
 static void feel_ok(Dialog *d, int mouse);
+static void feel_xy(Dialog *d, int mouse);
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
@@ -102,20 +103,22 @@ int query_ysize=128;
 
 static RadSub EschQry_rad[] =
 {
-    X16, feel_radio, &query_xsize, 16,
-    X32, feel_radio, &query_xsize, 32,
-    X64, feel_radio, &query_xsize, 64,
-    X128, feel_radio, &query_xsize, 128,
-    X256, feel_radio, &query_xsize, 256,
+    X16, feel_xy, &query_xsize, 16,
+    X32, feel_xy, &query_xsize, 32,
+    X64, feel_xy, &query_xsize, 64,
+    X128, feel_xy, &query_xsize, 128,
+    X256, feel_xy, &query_xsize, 256,
 
-    Y16, feel_radio, &query_ysize, 16,
-    Y32, feel_radio, &query_ysize, 32,
-    Y64, feel_radio, &query_ysize, 64,
-    Y128, feel_radio, &query_ysize, 128,
-    Y256, feel_radio, &query_ysize, 256,
+    Y16, feel_xy, &query_ysize, 16,
+    Y32, feel_xy, &query_ysize, 32,
+    Y64, feel_xy, &query_ysize, 64,
+    Y128, feel_xy, &query_ysize, 128,
+    Y256, feel_xy, &query_ysize, 256,
 
     -1, FNULL, NULL, -1
 };
+
+static int nframes;
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
@@ -128,7 +131,7 @@ static RadSub EschQry_rad[] =
 //                                                                          ³
 // Do texture resize query dialog.                                          ³     
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void do_query(char *image, int orgxsize, int orgysize)
+void do_query(char *image, int orgxsize, int orgysize, int orgframes)
 {
     static int  inited = 0;
 
@@ -143,11 +146,23 @@ void do_query(char *image, int orgxsize, int orgysize)
     ready_dialog(EschQry, NULL, NULL, EschQry_feel, EschQry_rad,
                 NULL, NULL);
 
-#if 1
-    sprintf(EschQry_name,"Image name: %-16s",image);
+    strcpy(EschQry_name,image);
 
-    sprintf(EschQry_orgsize,"Original image: %d by %d",orgxsize,orgysize);
-#endif
+    nframes = orgframes;
+    if (orgframes > 1)
+    {
+        sprintf(EschQry_orgsize,"%d by %d   %d frames",
+                                orgxsize,orgysize,orgframes);
+        sprintf(EschQry_bytes,"%5d bytes (%7d total)",
+                               query_xsize * query_ysize,
+                               query_xsize * query_ysize * orgframes);
+    }
+    else
+    {
+        sprintf(EschQry_orgsize,"%d by %d",
+                                orgxsize,orgysize);
+        sprintf(EschQry_bytes,"%5d bytes",query_xsize * query_ysize);
+    }
 
     while (!loop_done)
     {
@@ -173,6 +188,24 @@ static void feel_ok(Dialog *d, int mouse)
     restore_under_dialog();
 
     loop_done=1;
+}
+
+static void feel_xy(Dialog *d, int mouse)
+{
+    feel_radio(d,mouse);
+
+    if (nframes > 1)
+    {
+        sprintf(EschQry_bytes,"%5d bytes (%7d total)",
+                               query_xsize * query_ysize,
+                               query_xsize * query_ysize * nframes);
+    }
+    else
+    {
+        sprintf(EschQry_bytes,"%5d bytes",query_xsize * query_ysize);
+    }
+
+    draw_dialog_entry(EschQry, BYTES);
 }
 
 //°±² End of module - uiquery.c ²±°

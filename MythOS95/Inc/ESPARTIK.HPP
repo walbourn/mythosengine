@@ -8,7 +8,7 @@
 //ùùùùù²±²ùùùùùùù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùùùùùù²±²ùùùù²±²ùùùùùù
 //ùùùù²²²²²²²²²²ù²²²²²²²²ùùù²²²²²²²²ùù²²²ùùùù²²²ù²²²²²²²²²²ù²²²ùùùù²²²ùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùCopyrightù(c)ù1994-1996ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
+//ùùùùùùùùùùùCopyrightù(c)ù1994-1997ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùù Microsoft Windows '95 Version ùùùùùùùùùùùùùùùùùùùùùùù
@@ -88,14 +88,10 @@ public:
     // Constructor/Destructors                                              ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
     EschParticle() : EschDrawable(ESCH_DRWT_PARTICLE) {}
-
     EschParticle(Flx16 ix, Flx16 iy, Flx16 iz, dword c, ulong l=0);
-
     EschParticle(Flx16 ix, Flx16 iy, Flx16 iz,
                  Flx16 ii, Flx16 ij, Flx16 ik, dword c, ulong l=0);
     EschParticle(const EschPoint *p, const EschVector *v, dword c, ulong l=0);
-
-    // EschParticle(EschParticle *p) { *this = *p; }
 
     virtual ~EschParticle() {}
     
@@ -166,14 +162,10 @@ public:
     // Constructor/Destructors                                              ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
     EschParticlePyramid() : EschParticle() { dtyp=ESCH_DRWT_PRTPYRAMID; }
-
     EschParticlePyramid(Flx16 s, Flx16 ix, Flx16 iy, Flx16 iz, dword c, ulong l=0);
-
     EschParticlePyramid(Flx16 s, Flx16 ix, Flx16 iy, Flx16 iz,
                  Flx16 ii, Flx16 ij, Flx16 ik, dword c, ulong l=0);
     EschParticlePyramid(Flx16 s, const EschPoint *p, const EschVector *v, dword c, ulong l=0);
-
-    // EschParticlePyramid(EschParticlePyramid *p) { *this = *p; }
 
     virtual ~EschParticlePyramid() {}
     
@@ -208,6 +200,58 @@ public:
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// EschParticleSprite - A dynamic sprite in 3-space.                        ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+class EschParticleSprite : public EschParticle
+{
+protected:
+    EschSprite    *sprite;
+
+public:
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    // Public data members                                                  ³
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+    Flx16       alpha;
+    Flx16       alpha_rate;
+
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    // Constructor/Destructors                                              ³
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+    EschParticleSprite() : EschParticle(), sprite(0) { dtyp=ESCH_DRWT_PRTSPRITE; }
+    EschParticleSprite(EschSprite *s, ulong l=0);
+    EschParticleSprite(EschSprite *s, Flx16 ii, Flx16 ij, Flx16 ik, ulong l=0);
+    EschParticleSprite(EschSprite *s, const EschVector *v, ulong l=0);
+
+    virtual ~EschParticleSprite();
+    
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    // Operations                                                           ³
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+    const EschParticleSprite &operator = (const EschParticleSprite &ps);
+
+    virtual void draw();
+    virtual void animate();
+
+    virtual void release();
+
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    // Utility routines.                                                    ³
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+    void set_position(Flx16 ix, Flx16 iy, Flx16 iz);
+    void set_position(EschPoint *pnt)
+    {
+        set_position(pnt->x, pnt->y, pnt->z);
+    }
+
+    void set_lifetime(dword l)
+    {
+        life = l;
+        alpha_rate = Flx16(255) / Flx16((long)l);
+    }
+};
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // EschParticleGeometry - A dynamic geometry in 3-space.                    ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 class EschGeometry;
@@ -229,20 +273,17 @@ public:
     // Constructor/Destructors                                              ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
     EschParticleGeometry() : EschParticle(), geom(0) { dtyp=ESCH_DRWT_PRTGEOMETRY; }
-
     EschParticleGeometry(EschGeometry *g, ulong l=0);
-
     EschParticleGeometry(EschGeometry *g, Flx16 ii, Flx16 ij, Flx16 ik, ulong l=0);
-
     EschParticleGeometry(EschGeometry *g, const EschVector *v, ulong l=0);
-
-    // EschParticleGeometry(EschParticleGeometry *p) { *this = *p; }
 
     virtual ~EschParticleGeometry();
     
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Operations                                                           ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+    const EschParticleGeometry &operator = (const EschParticleGeometry &pg);
+
     virtual void draw();
     virtual void animate();
 
@@ -270,7 +311,6 @@ public:
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 class EschParticleSystem : public EschDrawable
 {
-
 protected:
     Flx16       interval;
 
@@ -303,6 +343,8 @@ public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Operations                                                           ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+    const EschParticleSystem &operator = (const EschParticleSystem &ps);
+
     virtual void draw();
     virtual void animate();
 

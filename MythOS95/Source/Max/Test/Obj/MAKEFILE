@@ -86,7 +86,7 @@ all: setstden ..\maxtest.iff $(EXE).exe
 #±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 
 ..\maxtest.iff: ..\maxtest.cel
-    $(MYTH95ROOT)\util\maxc ..\maxtest.cel
+    $(MYTH95ROOT)\bin\maxc ..\maxtest.cel
 
 ..\maxtest.hpp: ..\maxtest.cel
 

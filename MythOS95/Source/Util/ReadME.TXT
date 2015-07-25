@@ -8,7 +8,7 @@
                            /  /            \  \
                           /__/              \__\
  
-             Copyright (c) 1994,1995 by Charybdis Enterprises, Inc.
+             Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.
                             All Rights Reserved.
 
  ---------------------------------------------------------------------------
@@ -36,15 +36,11 @@
                                   _Status_
 
  Notes by: Chuck Walbourn
- Updated: April 30, 1996
+ Updated: September 3, 1996
 
  Changes for this release --------------------------------------------------
 
-    o Added support for converting 24-bit images to 8-bit images with 
-      transparency.  If it finds (255,0,255) while the -x switch is being
-      used, it makes that index 255 automaticaly.
-
-    o Added support for the Charybdis XEB format.
+    o Added some flush calls so that prompts are visible on command-line.
 
 
 

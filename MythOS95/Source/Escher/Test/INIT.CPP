@@ -8,7 +8,7 @@
 //ששששש²±²ששששששש²±²שששש²±²ש²±²שששש²±²ש²±²שששש²±²ש²±²שששששששש²±²שששש²±²שששששש
 //שששש²²²²²²²²²²ש²²²²²²²²ששש²²²²²²²²שש²²²שששש²²²ש²²²²²²²²²²ש²²²שששש²²²ששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//שששששששששששCopyrightש(c)ש1994-1996שbyשCharybdisשEnterprises,שInc.שששששששששש
+//שששששששששששCopyrightש(c)ש1994-1997שbyשCharybdisשEnterprises,שInc.שששששששששש
 //ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
 //ששששששששששששששששששששש Microsoft Windows '95 Version ששששששששששששששששששששששש
@@ -30,10 +30,6 @@
 //
 // init.cpp
 //
-//      This is the "generic" application framework from which all
-// non-MFC applications are traditionally created.  This module contains
-// the initialization code for the app.
-//
 //ֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽ
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
@@ -44,7 +40,9 @@
 
 #define WIN32_LEAN_AND_MEAN
 #include "global.hpp"
+
 #include <commctrl.h>
+
 #include "resource.h"
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
@@ -69,10 +67,8 @@ extern MaxDevices Devs;
 //
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 
-
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
 // InitApplication
-//
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
 BOOL InitApplication (HINSTANCE hInstance, int nCmdShow)
 {
@@ -132,13 +128,56 @@ BOOL InitApplication (HINSTANCE hInstance, int nCmdShow)
     // Save the instance handle in static variable, which will be used in
     // many subsequence calls from this application to Windows.
     hInst = hInstance;
+    int map_xsize = EscherTest::MAP_XSIZE;
+    int map_ysize = EscherTest::MAP_YSIZE;
+
+#if 1
+    char buff[128];
+    XFParseINI  ini;
+
+    if (ini.open(".\\ET.INI",XF_OPEN_READ) == XF_ERR_NONE)
+    {
+        ini.section("Screen");
+        if (!ini.read("Resolution",buff))
+        {
+            strlwr(buff);
+            if (strstr(buff,"640x480"))
+            {
+                map_xsize = 640;
+                map_ysize = 480;
+            }
+            if (strstr(buff,"320x240"))
+            {
+                map_xsize = 320;
+                map_ysize = 240;
+            }
+            if (strstr(buff,"320x200"))
+            {
+                map_xsize = 320;
+                map_ysize = 200;
+            }
+            if (strstr(buff,"800x600"))
+            {
+                map_xsize = 800;
+                map_ysize = 600;
+            }
+            if (strstr(buff,"1024x768"))
+            {
+                map_xsize = 1024;
+                map_ysize = 768;
+            }
+        }
+        ini.close();
+    }
+#endif
+
 
     LoadString (hInstance, IDS_TITLE, szTitle, sizeof (szTitle));
     hWndClient = CreateWindowEx (0, //WS_EX_TOPMOST,
                                 szAppName, szTitle,
                                 WS_VISIBLE | WS_POPUP,
-                                0, 0, GameState::MAP_XSIZE, 
-                                      GameState::MAP_YSIZE,
+                                0, 0, map_xsize, 
+                                      map_ysize,
                                 NULL, NULL, hInstance, NULL);
 
     if (hWndClient == 0)
@@ -155,11 +194,7 @@ BOOL InitApplication (HINSTANCE hInstance, int nCmdShow)
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
 // ClientWndProc
 //
-//  This is the Main Application Window's procedure.
-//  Mostly, this just allows a black rectangle to overlay GDI.
-//  In a game, very little else happens here, but some inter-app interaction
-//  must be processed here; most importantly activation and termination.
-//
+// This is the Main Application Window's procedure.
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
 LRESULT CALLBACK ClientWndProc (HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {

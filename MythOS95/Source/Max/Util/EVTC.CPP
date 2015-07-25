@@ -1,15 +1,15 @@
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
-//                  ooo        ooooo                       
-//                  `88.       .888'                       
-//                   888b     d'888   .oooo.   oooo    ooo 
-//                   8 Y88. .P  888  `P  )88b   `88b..8P'  
-//                   8  `888'   888   .oP"888     Y888'    
-//                   8    Y     888  d8(  888   .o8"'88b   
-//                  o8o        o888o `Y888""8o o88'   888o 
+//                  ooo        ooooo
+//                  `88.       .888'
+//                   888b     d'888   .oooo.   oooo    ooo
+//                   8 Y88. .P  888  `P  )88b   `88b..8P'
+//                   8  `888'   888   .oP"888     Y888'
+//                   8    Y     888  d8(  888   .o8"'88b
+//                  o8o        o888o `Y888""8o o88'   888o
 //
 //                          Across the event horizon...
 //
-//            Copyright (c) 1994, 1995 by Charybdis Enterprises, Inc.
+//           Copyright (c) 1994 - 1997 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved.
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -38,7 +38,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include <conio.h>
@@ -88,7 +88,7 @@ extern void compile (const char *evt_name);
 extern "C" FILE *yyin;
 
 STATIC char Util_name[]
-       = "°± Max CEL Compiler - (C) 1994 Charybdis Enterprises, Inc. ±°\n";
+       = "°± Max CEL Compiler - (C) 1994 - 1997 Charybdis Enterprises, Inc. ±°\n";
 
 XFParseIFF  IFF;
 XFileDOS    header;
@@ -120,7 +120,7 @@ void main (int argc, char *argv[])
     char        ext[XF_MAX_EXT];
 
 //ÄÄÄ Handle no filename for source file...
-    if (argc < 2) 
+    if (argc < 2)
     {
         print_help (0);
         return;
@@ -202,7 +202,7 @@ void main (int argc, char *argv[])
     }
 
 //ÄÄÄ Open source file
-    if ((yyin = fopen (ifn,"r"))==NULL) 
+    if ((yyin = fopen (ifn,"r"))==NULL)
     {
         cout << Util_name;
         cout << "±±± Could not open " << ifn << "\n";
@@ -293,10 +293,10 @@ STATIC void print_help (int full)
 void print_error (XFParseIFF &xp, char *s)
 {
     cout << "±±± ";
-   
+
     if (s)
         cout << s << ", ";
-   
+
     switch (xp.error())
     {
     case XF_ERR_NOTIFF:
@@ -333,17 +333,17 @@ void print_error (XFParseIFF &xp, char *s)
         cout << "error " << int (xp.error());
         break;
    }
-   
+
    cout << "\n";
 }
 
 void print_error (XFile &xp, char *s)
 {
     cout << "±±± ";
-   
+
     if (s)
         cout << s << ", ";
-   
+
     switch (xp.error())
     {
     case XF_ERR_NOTIFF:
@@ -380,13 +380,13 @@ void print_error (XFile &xp, char *s)
         cout << "error " << int (xp.error());
         break;
    }
-   
+
    cout << "\n";
 }
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 // _charybdis_assert
-// 
+//
 // Handler for failed asserts.  If msg is set to non-NULL, then an assertMyth
 // was used with a comment.
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ

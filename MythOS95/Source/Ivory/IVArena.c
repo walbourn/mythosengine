@@ -4,7 +4,7 @@
 //
 //                          Microsoft Windows '95 Version
 //
-//            Copyright (c) 1994, 1995 by Charybdis Enterprises, Inc.
+//            Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved.
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -21,6 +21,10 @@
 // INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//
+// Created by Dan Higdon
+//
+// ivarena.c
 //
 // Ivory Allocation - Arena allocation routines.
 //
@@ -65,41 +69,25 @@
 
 #define max(a,b) ((a)>(b)?(a):(b))
 
-//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-//
-//                               Structures
-//
-//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-
-//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-//
-//                               Routines
-//
-//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-
-//±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
-//
-//                                 Data
-//
-//±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
-
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
 //                                 Code
 //
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-//  ivory_arena_initialize                                                  ³
-//      Prepare the provided block to be used as an arena.                  ³
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// ivory_arena_initialize                                                  
+//
+// Prepare the provided block to be used as an arena.                 
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 IvoryArena *ivory_arena_initialize (IvoryArena *arena, size_t arena_size)
 {
     IvoryArena *p = arena;
 
-    assert (arena && arena_size > 0);
+    assertMyth("ivory_arena_initialize needs valid inputs",
+               arena != 0 && arena_size > 0);
 
-    // Set up the arena fields
+//ÄÄÄ Set up the arena fields
     p->size = arena_size;
     p->end	= p->data + arena_size - sizeof (IvoryArena);
     p->current = p->data;
@@ -108,17 +96,19 @@ IvoryArena *ivory_arena_initialize (IvoryArena *arena, size_t arena_size)
     return p;
 }
 
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-//  ivory_arena_clear                                                       ³
-//      Returns the arena to an empty state, freeing any additional "tags". ³
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// ivory_arena_clear
+//
+// Returns the arena to an empty state, freeing any additional "tags".
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 void ivory_arena_clear (IvoryArena *arena)
 {
     IvoryArena *arena_chain;
 
-    assert (arena);
+    assertMyth("ivory_arena_clear needs arena", arena != 0);
 
-    // Wipe out any "hanger-on" tag blocks
+//ÄÄÄ Wipe out any "hanger-on" tag blocks
     arena_chain = arena->next;
     while (arena_chain != 0)
     {
@@ -127,35 +117,41 @@ void ivory_arena_clear (IvoryArena *arena)
         ivory_free (&tmp);
     }
 
-    // Now, reset the internal pointers.
+//ÄÄÄ Now, reset the internal pointers.
     assert (arena->end == arena->data + arena->size - sizeof (IvoryArena));
     arena->current = arena->data;
     arena->next = 0;
 }
 
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-//  ivory_arena_alloc_internal                                              ³
-//      Allocate a block from the provided arena.  Does not assume that     ³
-//      the requested block will fit in the current arena.  However, it     ³
-//      does assume that the requested item is not larger than the TOTAL    ³
-//      arena size.  If this is the case, an assertion error will result.   ³
-//      Should I maybe be more forgiving of this error?                     ³
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// ivory_arena_alloc_internal
+//
+// Allocate a block from the provided arena.  Does not assume that
+// the requested block will fit in the current arena.  However, it
+// does assume that the requested item is not larger than the TOTAL
+// arena size.  If this is the case, an assertion error will result.
+// Should I maybe be more forgiving of this error?
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 void *ivory_arena_alloc_internal (IvoryArena *arena, size_t size)
 {
     void *new_object;
 
-    assert (arena && size > 0 && size < arena->size);
+    assertMyth("ivory_arena_alloc_internal needs valid inputs",
+               arena != 0 && size > 0 && size < arena->size); 
 
     while (arena->current + size > arena->end)
     {
         if (arena->next == 0)
         {
-            // If we are at the end of a chain, add a new link of the same
-            // size, or 'size', whichever is larger.
+            //ÄÄÄ If we are at the end of a chain, add a new link of the same
+            //ÄÄÄ size, or 'size', whichever is larger.
             int new_size = max (arena->size, size + sizeof (IvoryArena));
 
             arena->next = (IvoryArena *)ivory_alloc (new_size);
+            if (!arena->next)
+                return 0;
+
             ivory_arena_initialize (arena->next, new_size);
             arena = arena->next;
             break;
@@ -164,7 +160,7 @@ void *ivory_arena_alloc_internal (IvoryArena *arena, size_t size)
             arena = arena->next;
     }
 
-    // Now, arena points to a block that can hold our new allocation.
+//ÄÄÄ Now, arena points to a block that can hold our new allocation.
     assert (arena && arena->current + size <= arena->end);
 
     new_object = arena->current;
@@ -172,38 +168,44 @@ void *ivory_arena_alloc_internal (IvoryArena *arena, size_t size)
     return new_object;
 }
 
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-//  ivory_arena_zalloc                                                      ³
-//      Allocate and zero-out a block from the provided arena.              ³
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// ivory_arena_zalloc
+//
+// Allocate and zero-out a block from the provided arena.
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 void *ivory_arena_zalloc (IvoryArena *arena, size_t size)
 {
     void *new_arena;
 
-    assert (arena && size > 0);
+    assertMyth("ivory_arena_zalloc needs valid inputs", arena != 0 && size > 0);
 
     new_arena = ivory_arena_alloc (arena, size);
-    if (new_arena)
-        memset (new_arena, 0, size);
+    if (!new_arena)
+        return 0;
+
+    memset (new_arena, 0, size);
     return new_arena;
 }
 
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-//  ivory_arena_chainlength                                                 ³
-//      Return the length of the arena chain.  If no chaining is            ³
-//      necessary, the length will be 0.                                    ³
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// ivory_arena_chainlength
+//
+// Return the length of the arena chain.  If no chaining is
+// necessary, the length will be 0.
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 int ivory_arena_chainlength (const IvoryArena *arena)
 {
     int chain_count = 0;
 
-    assert (arena);
+    assertMyth("ivory_arena_chainlength needs arena", arena != 0);
 
-    // Iterate through the arena list, accumulating the count.
+    //ÄÄÄ Iterate through the arena list, accumulating the count.
     while ((arena = arena->next) != 0)
         chain_count++;
 
     return chain_count;
 }
 
-//°±² End of module - ivarena.cpp ²±°
+//°±² End of module - ivarena.c ²±°

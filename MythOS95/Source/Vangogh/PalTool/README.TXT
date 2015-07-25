@@ -3,7 +3,7 @@
                                                             %/ . .  .   \%
                       Van Gogh                               |  . .  o. | 
                                                              |. _  .   .|
-  Copyright (c) 1995,1996 by Charybdis Enterprises, Inc.     | / \   .  | 
+  Copyright (c) 1995-1997 by Charybdis Enterprises, Inc.     | / \   .  | 
                 All rights reserved.                         |_|_|_._._.|
                                                              |.-.-.-.-..|
                                                             %\__________/%

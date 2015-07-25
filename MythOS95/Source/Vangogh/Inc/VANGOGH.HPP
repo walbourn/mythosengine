@@ -2,11 +2,11 @@
 //
 //                                                           %__________%
 //                                                          %/ . .  .   \%
-//           Van Gogh 2D-Display Library                     |  . .  o. | 
+//           Van Gogh 2D-Display Library                     |  . .  o. |
 //                                                           |. _  .   .|
-//          Microsoft Windows '95 Version                    | / \   .  | 
+//          Microsoft Windows '95 Version                    | / \   .  |
 //                                                           |_|_|_._._.|
-// Copyright (c) 1994-1996 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
+// Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
 //              All rights reserved.                        %\__________/%
 //                                                           %          %
 //
@@ -25,7 +25,7 @@
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
-// VanGogh.hpp  
+// VanGogh.hpp
 //
 //     The Generic include file for users to include to use the
 //     Van Gogh 2D draw library.
@@ -38,9 +38,9 @@
 
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-//             
+//
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include "portable.h"
@@ -51,6 +51,8 @@
 #include "vngvpdd8.hpp"
 #include "vngvpdb8.hpp"
 #include "vngvvp16.hpp"
+//#include "vng3dfx.hpp"
+#include "vngscrn.hpp"
 
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
@@ -61,18 +63,31 @@
 
 extern dword *vngo_get_invert();
 extern void triangle_setup(VngoPoint2 *pts, VngoTriangle *tri);
+extern void vngo_circle(VngoVport *vp,VngoPoint *center,long r);
 extern void vngo_circle(VngoVport *vp,long xoffset, long yoffset,long r,dword color);
 extern void vngo_circle(VngoVport *vp,long xoffset, long yoffset,long r,dword color, int width);
+extern void vngo_clip_circle(VngoVport *vp,VngoPoint *center,long r);
 extern void vngo_clip_circle(VngoVport *vp,long xoffset, long yoffset,long r,dword color);
 extern void vngo_clip_circle(VngoVport *vp,long xoffset, long yoffset,long r,dword color, int width);
 extern void vngo_smooth_rect(VngoVport *vp, VngoPoint *pts, VngoRect *clip = NULL);
 extern void vngo_line(VngoVport *vp, VngoPoint *p1, VngoPoint *p2, VngoColor24bit *rgv_val=NULL);
 extern void vngo_gline(VngoVport *vp, VngoPoint *p1, VngoPoint *p2, VngoColor24bit *rgv_val=NULL);
 
+extern void vngo_stretch_blt8 (VngoVport *vp, VngoRect *dest_rect, VngoTexture *img,
+                               dword flags = VNGO_TRANSPARENT);
+extern void vngo_stretch_zblt8 (VngoVport *vp, VngoRect *dest_rect, VngoTexture *img,
+                                word *zsource,dword flags = VNGO_TRANSPARENT);
+
 extern void vngo_poly8 (VngoVport *vp, int count, VngoPoint2 *pts);
+extern void vngo_apoly8 (VngoVport *vp, int count, VngoPoint2 *pts);
+extern void vngo_apoly8 (VngoVport *vp, int count, VngoPoint2 *pts,long alpha);
 extern void vngo_gpoly8 (VngoVport *vp, int count, VngoPoint2 *pts);
+extern void vngo_grpoly8 (VngoVport *vp, int count, VngoPoint2 *pts);
+extern void vngo_agpoly8 (VngoVport *vp, int count, VngoPoint2 *pts,long alpha);
 extern void vngo_tpoly8 (VngoVport *vp, int count, VngoPoint2 *pts, VngoTextureInfo *tex);
+extern void vngo_atpoly8 (VngoVport *vp, int count, VngoPoint2 *pts, VngoTextureInfo *tex,long alpha);
 extern void vngo_tgpoly8 (VngoVport *vp, int count, VngoPoint2 *pts, VngoTextureInfo *tex);
+extern void vngo_atgpoly8 (VngoVport *vp, int count, VngoPoint2 *pts, VngoTextureInfo *tex,long alpha);
 extern void vngo_tpoly_persp8 (VngoVport *vp, int count, VngoPoint2 *pts, VngoTextureInfo *tex);
 extern void vngo_tgpoly_persp8 (VngoVport *vp, int count, VngoPoint2 *pts, VngoTextureInfo *tex);
 
@@ -83,24 +98,27 @@ extern void vngo_tgpoly16 (VngoVport *vp, int count, VngoPoint2 *pts, VngoTextur
 extern void vngo_tpoly_persp16 (VngoVport *vp, int count, VngoPoint2 *pts, VngoTextureInfo *ttex);
 extern void vngo_tgpoly_persp16 (VngoVport *vp, int count, VngoPoint2 *pts, VngoTextureInfo *ttex);
 
-extern void vngo_ttriangle8 (VngoVport *vp,VngoPoint2 *pts, VngoTextureInfo *ttex);
-extern void vngo_zttriangle8 (VngoVport *vp,VngoPoint2 *pts, VngoTextureInfo *ttex);
-extern void vngo_ztgtriangle8 (VngoVport *vp,VngoPoint2 *pts, VngoTextureInfo *ttex);
-extern void vngo_tgtriangle8 (VngoVport *vp,VngoPoint2 *pts, VngoTextureInfo *ttex);
+extern void vngo_ttriangle8 (VngoVport *vp,VngoPoint *pts, VngoTextureInfo *ttex);
+extern void vngo_zttriangle8 (VngoVport *vp,VngoPoint *pts, VngoTextureInfo *ttex);
+extern void vngo_ztgtriangle8 (VngoVport *vp,VngoPoint *pts, VngoTextureInfo *ttex);
+extern void vngo_tgtriangle8 (VngoVport *vp,VngoPoint *pts, VngoTextureInfo *ttex);
 
 
 // Function declarations.
 extern "C" {
-extern long vngo_calc_xstep(int x1,int x2,int dy);                              
-extern long vngo_calc_zstep(int z1,int z2,int dy);                              
-extern long vngo_calc_sstep(int s1,int s2,int dy);                              
-extern long vngo_calc_uvstep(int uv1,int uv2,int dy);                              
-extern long vngo_calc_wstep(int w1,int w2,int dy);                              
-extern long vngo_calc_quadratic(long w1,long w2,long t1,long t2,long step, 
+extern void calc_order(int &high_pt,int &mid_pt, int &low_pt, VngoPoint2 *pts);
+extern long vngo_calc_xstep(int x1,int x2,int dy);
+extern long vngo_calc_zstep(int z1,int z2,int dy);
+extern long vngo_calc_sstep(int s1,int s2,int dy);
+extern long vngo_calc_uvstep(int uv1,int uv2,int dy);
+extern long vngo_calc_wstep(int w1,int w2,int dy);
+extern long vngo_calc_quadratic(long w1,long w2,long t1,long t2,long step,
                                 long *step1,long *step2);
+extern long vngo_calc_quadratic2(long w1,long w2,long t1,long t2,long step,
+                                 long *step1,long *step2,long ushift);
 extern void vngo_midpt(VngoPoint2 *p1, VngoPoint2 *p2, VngoPoint2 *outpt);
 extern void vngo_line8(VngoVbuffer *vbuf,VngoPoint *p1,VngoPoint *p2);
-extern void vngo_zline8(VngoVbuffer *vbuf,VngoPoint *p1,VngoPoint *p2);
+//extern void vngo_zline8(VngoVbuffer *vbuf,VngoPoint *p1,VngoPoint *p2);
 extern void vngo_pixel8(VngoVbuffer *vbuf,VngoPoint *pt);
 extern void vngo_zpixel8(VngoVbuffer *vbuf,VngoPoint *pt);
 extern void vngo_rect8(VngoVbuffer *vbuf,VngoRect *rect, dword color);
@@ -111,10 +129,12 @@ extern void vngo_iline_z8(char *lptr,void *zptr,char *tptr,long xcount,dword dep
 extern void vngo_iline8(char *lptr,char *tptr,long xcount,dword flags);
 extern void vngo_ilinemono8(byte *lptr,byte *tptr,long xcount,dword tskip,dword fgcol,dword bgcol);
 
-extern void vngo_line16(VngoVbuffer *vbuf,VngoPoint *p1,VngoPoint *p2);
-extern void vngo_zline16(VngoVbuffer *vbuf,VngoPoint *p1,VngoPoint *p2);
+//extern void vngo_line16(VngoVbuffer *vbuf,VngoPoint *p1,VngoPoint *p2);
+//extern void vngo_zline16(VngoVbuffer *vbuf,VngoPoint *p1,VngoPoint *p2);
 extern void vngo_pixel16(VngoVbuffer *vbuf,VngoPoint *pt);
 extern void vngo_zpixel16(VngoVbuffer *vbuf,VngoPoint *pt);
+extern void vngo_pixel_rgb16(VngoVbuffer *vbuf,VngoPoint *pt,dword color);
+extern void vngo_zpixel_rgb16(VngoVbuffer *vbuf,VngoPoint *pt,dword color);
 extern void vngo_rect16(VngoVbuffer *vbuf,VngoRect *rect, dword color);
 extern void vngo_itrans16 (VngoVbuffer *vbuf,VngoRect *dest_rect, VngoTexture *img,dword flags);
 extern void vngo_itrans_s16 (VngoVbuffer *vbuf,VngoRect *dest_rect, VngoTexture *img,dword shade, dword flags);

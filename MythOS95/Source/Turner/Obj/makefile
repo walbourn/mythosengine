@@ -2,7 +2,7 @@
 #
 #                            Turner - Networking
 #
-#                Copyright (c) 1995 by Charybdis Enterprises, Inc.
+#           Copyright (c) 1995 - 1997 by Charybdis Enterprises, Inc.
 #                            All Rights Reserved.
 #
 #ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -27,7 +27,7 @@
 #°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 #
 #                               Variables
-#                                
+#
 #°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 !if "$(DEBUG)" == ""

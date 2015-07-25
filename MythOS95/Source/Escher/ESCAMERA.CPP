@@ -8,7 +8,7 @@
 //ששששש²±²ששששששש²±²שששש²±²ש²±²שששש²±²ש²±²שששש²±²ש²±²שששששששש²±²שששש²±²שששששש
 //שששש²²²²²²²²²²ש²²²²²²²²ששש²²²²²²²²שש²²²שששש²²²ש²²²²²²²²²²ש²²²שששש²²²ששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//שששששששששששCopyrightש(c)ש1994-1996שbyשCharybdisשEnterprises,שInc.שששששששששש
+//שששששששששששCopyrightש(c)ש1994-1997שbyשCharybdisשEnterprises,שInc.שששששששששש
 //ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
 //ששששששששששששששששששששש Microsoft Windows '95 Version ששששששששששששששששששששששש
@@ -47,7 +47,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include "escher.hpp"
@@ -196,6 +196,7 @@ void EschCamera::attach(VngoVport *vp)
         return;
 
     compute_scalar();
+    compute_frustrum();
 }
 
 
@@ -252,26 +253,16 @@ void EschCamera::remove()
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִÙ
 EschCamera *EschCamera::find(const char *cname) const
 {
-    const EschCamera *ptr;
-
     if (!cname)
         return 0;
 
-//ִִִ First scan up previous chain to find first camera in list.
-    for(ptr=iprev; ptr != 0 && ptr->iprev; ptr = ptr->iprev);
+    if (!strncmp(cname,name,ESCH_MAX_NAME))
+        return (EschCamera*)this;
 
-    if (!ptr)
-        ptr=this;
+    if (!inext)
+        return 0;
 
-//ִִִ Now scan all cameras searching for first camera that matches the
-//ִִִ given name.
-    for(; ptr != 0; ptr = ptr->inext)
-    {
-        if (!strncmp(cname,ptr->name,ESCH_MAX_NAME))
-            return (EschCamera*)ptr;
-    }
-
-    return 0;
+    return inext->find(cname);
 }
 
 
@@ -290,8 +281,8 @@ int EschCamera::pre_rend()
 //ִִִ Lock viewport (save old state)
     int waslocked = vport->lock();
 
-	if (waslocked == -1)
-		return 1;
+        if (waslocked == -1)
+                return 1;
 
     if (waslocked)
         flags |= ESCH_CAM_VPWASLOCKED;
@@ -368,6 +359,7 @@ void EschCamera::reset()
 
 //ִִִ Call computation functions
     compute_scalar();
+    compute_frustrum();
     compute_eye();
 }
 
@@ -750,7 +742,7 @@ void EschCamera::compute_scalar()
     radius_factor.flx = flx_16div16( factor, angle.cos()).flx;
 
 //ִִִ Compute 1/2 size of projection-plane from FOV angle
-//                          
+//
 //                         /|
 //                        / |
 //                       /  |
@@ -782,6 +774,64 @@ void EschCamera::compute_scalar()
     yscalar.flx = flx_16div16(xscalar,aspect_ratio).flx;
 
     compute_z_factor();
+}
+
+
+//ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ¿
+// EschCamera - compute_frustrum                                            ³
+//                                                                          ³
+// Recomputes the planes for the view frustrum, which are used for 3D       ³
+// clipping.                                                                ³
+//ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִÙ
+void EschCamera::compute_frustrum()
+{
+    Flx16   xangle = flx_atan (xsize);
+    Flx16   yangle = flx_atan (ysize);
+
+    xangle = (Flx16(90) - xangle);  // Get the perpendicular to the frustrum.
+    yangle = (Flx16(90) - yangle);  // Get the perpendicular to the frustrum.
+
+    Flx16   top_cos = flx_cos(yangle);
+    Flx16   top_sin = flx_sin(yangle);
+    Flx16   left_cos = flx_cos(xangle);
+    Flx16   left_sin = flx_sin(xangle);
+    Flx16   epsilon(0.000);
+
+    // Near
+    frustrum[ESCH_CAM_FRUSTRUM_HITHER].normal.i = 0;
+    frustrum[ESCH_CAM_FRUSTRUM_HITHER].normal.j = 0;
+    frustrum[ESCH_CAM_FRUSTRUM_HITHER].normal.k = 1;
+    frustrum[ESCH_CAM_FRUSTRUM_HITHER].dist = -hither;
+
+    // Far
+    frustrum[ESCH_CAM_FRUSTRUM_YON].normal.i = 0;
+    frustrum[ESCH_CAM_FRUSTRUM_YON].normal.j = 0;
+    frustrum[ESCH_CAM_FRUSTRUM_YON].normal.k = -1;
+    frustrum[ESCH_CAM_FRUSTRUM_YON].dist = -(yon * Flx16(.99));
+
+    // Left
+    frustrum[ESCH_CAM_FRUSTRUM_LEFT].normal.i = left_sin;
+    frustrum[ESCH_CAM_FRUSTRUM_LEFT].normal.j = 0;
+    frustrum[ESCH_CAM_FRUSTRUM_LEFT].normal.k = left_cos;
+    frustrum[ESCH_CAM_FRUSTRUM_LEFT].dist = epsilon;
+
+    // Right
+    frustrum[ESCH_CAM_FRUSTRUM_RIGHT].normal.i = -left_sin;
+    frustrum[ESCH_CAM_FRUSTRUM_RIGHT].normal.j = 0;
+    frustrum[ESCH_CAM_FRUSTRUM_RIGHT].normal.k = left_cos;
+    frustrum[ESCH_CAM_FRUSTRUM_RIGHT].dist = epsilon;
+
+    // Top
+    frustrum[ESCH_CAM_FRUSTRUM_TOP].normal.i = 0;
+    frustrum[ESCH_CAM_FRUSTRUM_TOP].normal.j = -top_sin;
+    frustrum[ESCH_CAM_FRUSTRUM_TOP].normal.k = top_cos;
+    frustrum[ESCH_CAM_FRUSTRUM_TOP].dist = epsilon;
+
+    // Bottom
+    frustrum[ESCH_CAM_FRUSTRUM_BOTTOM].normal.i = 0;
+    frustrum[ESCH_CAM_FRUSTRUM_BOTTOM].normal.j = top_sin;
+    frustrum[ESCH_CAM_FRUSTRUM_BOTTOM].normal.k = top_cos;
+    frustrum[ESCH_CAM_FRUSTRUM_BOTTOM].dist = epsilon;
 }
 
 
@@ -819,7 +869,7 @@ void EschCamera::compute_eye(dword update)
 
     eye.ortho_count=0;
 
-//ִִִ Create right vector 
+//ִִִ Create right vector
     right = top CROSS eye.dir;
 
 //ִִִ Fill in matrix for ortho rotation
@@ -869,7 +919,7 @@ esch_error_codes EschCamera::load(const char *fname, const char *cname)
 //ִִ Loop until a header with the correct name is found
     err=ESCH_ERR_NONE;
 
-    for(;;) 
+    for(;;)
     {
         if (iff.next() != XF_ERR_NONE)
         {
@@ -933,15 +983,16 @@ esch_error_codes EschCamera::load(XFParseIFF *iff, const char *cname)
     eye.dir.i.flx = cam.diri.flx;
     eye.dir.j.flx = cam.dirj.flx;
     eye.dir.k.flx = cam.dirk.flx;
-    
+
     top.i.flx = cam.topi.flx;
     top.j.flx = cam.topj.flx;
     top.k.flx = cam.topk.flx;
 
 //ִִִ Call computation functions
     compute_scalar();
+    compute_frustrum();
     compute_eye();
-   
+
 //ִִ Return ok
     return ESCH_ERR_NONE;
 }

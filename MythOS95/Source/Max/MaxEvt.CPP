@@ -1,15 +1,15 @@
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
-//                  ooo        ooooo                       
-//                  `88.       .888'                       
-//                   888b     d'888   .oooo.   oooo    ooo 
-//                   8 Y88. .P  888  `P  )88b   `88b..8P'  
-//                   8  `888'   888   .oP"888     Y888'    
-//                   8    Y     888  d8(  888   .o8"'88b   
-//                  o8o        o888o `Y888""8o o88'   888o 
+//                  ooo        ooooo
+//                  `88.       .888'
+//                   888b     d'888   .oooo.   oooo    ooo
+//                   8 Y88. .P  888  `P  )88b   `88b..8P'
+//                   8  `888'   888   .oP"888     Y888'
+//                   8    Y     888  d8(  888   .o8"'88b
+//                  o8o        o888o `Y888""8o o88'   888o
 //
 //                          Across the event horizon...
 //
-//            Copyright (c) 1994, 1995 by Charybdis Enterprises, Inc.
+//           Copyright (c) 1994 - 1997 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved.
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -44,7 +44,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include <assert.h>
@@ -76,13 +76,6 @@
 //                                 Data
 //
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
-
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-//  The Event internal counter, used to ensure that events are unique.      ³
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-int MaxEvent::last_bit = 0;
-
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
@@ -171,7 +164,7 @@ MaxEventList MaxEventList::operator & (const MaxEventList &el) const
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 MaxEventList &MaxEventList::operator = (const MaxEventList &el)
-{ 
+{
     memcpy (mask, el.mask, sizeof (mask));
     return *this;
 }
@@ -182,7 +175,7 @@ MaxEventList &MaxEventList::operator = (const MaxEventList &el)
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 MaxEventList &MaxEventList::operator ^= (const MaxEventList &el)
-{ 
+{
     for (int i = 0; i < EVENT_DWORDS; i++)
         ((pdword)mask)[i] ^= ((pdword)el.mask)[i];
     return *this;
@@ -194,7 +187,7 @@ MaxEventList &MaxEventList::operator ^= (const MaxEventList &el)
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 MaxEventList &MaxEventList::operator |= (const MaxEventList &el)
-{ 
+{
     for (int i = 0; i < EVENT_DWORDS; i++)
         ((pdword)mask)[i] |= ((pdword)el.mask)[i];
     return *this;
@@ -206,7 +199,7 @@ MaxEventList &MaxEventList::operator |= (const MaxEventList &el)
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 MaxEventList &MaxEventList::operator &= (const MaxEventList &el)
-{ 
+{
     for (int i = 0; i < EVENT_DWORDS; i++)
         ((pdword)mask)[i] &= ((pdword)el.mask)[i];
     return *this;

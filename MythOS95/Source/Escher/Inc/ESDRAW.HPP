@@ -8,7 +8,7 @@
 //ששששש²±²ששששששש²±²שששש²±²ש²±²שששש²±²ש²±²שששש²±²ש²±²שששששששש²±²שששש²±²שששששש
 //שששש²²²²²²²²²²ש²²²²²²²²ששש²²²²²²²²שש²²²שששש²²²ש²²²²²²²²²²ש²²²שששש²²²ששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//שששששששששששCopyrightש(c)ש1994-1996שbyשCharybdisשEnterprises,שInc.שששששששששש
+//שששששששששששCopyrightש(c)ש1994-1997שbyשCharybdisשEnterprises,שInc.שששששששששש
 //ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
 //ששששששששששששששששששששש Microsoft Windows '95 Version ששששששששששששששששששששששש
@@ -94,18 +94,17 @@ struct EschCollision
     EschDrawable        *ilist;     // Input list
     IvoryArena          *arena;     // Arena for DrawList structures
     ulong               maxcount;   // Maximum number of returns (otherwise 1)
-    EschSphereExtents   sphere;     // Test extents (set by setup)
+    EschSphereExtents   sphere;     // Test extents (usually set by setup)
+    EschDrawable        *orig;      // Original object (usually set by setup)
 
     //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ¿
     // Constructor/Destructors                                              ³
     //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִÙ
-    EschCollision() { flags=0; }
-    EschCollision(EschDrawable *i, ulong mcount=1)
-    {
-        flags = ESCH_CLSN_ILIST | ESCH_CLSN_MAXCOUNT;
-        ilist = i;
-        maxcount = mcount;
-    }
+    EschCollision() : flags(0) {}
+    EschCollision(EschDrawable *i, ulong mcount=1) :
+        flags(ESCH_CLSN_ILIST | ESCH_CLSN_MAXCOUNT),
+        ilist(i),
+        maxcount(mcount) {}
 };
 
 
@@ -129,69 +128,52 @@ struct EschPicking
     //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ¿
     // Constructor/Destructors                                              ³
     //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִÙ
-    EschPicking() { flags=0; }
+    EschPicking() : flags(0) {}
     EschPicking(EschCamera *cam,
                 long x, long y,
                 EschDrawable *i,
-                ulong mcount=1)
-    {
-        flags = ESCH_PICK_ILIST
-                | ESCH_PICK_MAXCOUNT
-                | ESCH_PICK_CAMERA
-                | ESCH_PICK_VPORT;
-        ilist = i;
-        maxcount = mcount;
-        sx = x;
-        sy = y;
-        camera = cam;
-    }
+                ulong mcount=1) :
+        flags(ESCH_PICK_ILIST | ESCH_PICK_MAXCOUNT
+              | ESCH_PICK_CAMERA | ESCH_PICK_VPORT),
+        ilist(i),
+        maxcount(mcount),
+        sx(x),
+        sy(y),
+        camera(cam) {}
     EschPicking(EschCamera *cam,
                 long x, long y,
                 EschDrawable *i,
                 Flx16 maxd,
-                ulong mcount=1)
-    {
-        flags = ESCH_PICK_ILIST
-                | ESCH_PICK_MAXCOUNT
-                | ESCH_PICK_CAMERA
-                | ESCH_PICK_VPORT
-                | ESCH_PICK_MAXDIST;
-        ilist = i;
-        maxcount = mcount;
-        sx = x;
-        sy = y;
-        camera = cam;
-        maxdist = maxd;
-    }
+                ulong mcount=1) :
+        flags(ESCH_PICK_ILIST | ESCH_PICK_MAXCOUNT
+              | ESCH_PICK_CAMERA | ESCH_PICK_VPORT | ESCH_PICK_MAXDIST),
+        ilist(i),
+        maxcount(mcount),
+        sx(x),
+        sy(y),
+        camera(cam),
+        maxdist(maxd) {}
     EschPicking(EschPoint &s,
                 EschVector &dir,
                 EschDrawable *i,
-                ulong mcount=1)
-    {
-        flags = ESCH_PICK_ILIST
-                | ESCH_PICK_MAXCOUNT
-                | ESCH_PICK_WORLD;
-        ilist = i;
-        maxcount = mcount;
-        start = s;
-        direction = dir;
-    }
+                ulong mcount=1) :
+        flags(ESCH_PICK_ILIST | ESCH_PICK_MAXCOUNT | ESCH_PICK_WORLD),
+        ilist(i),
+        maxcount(mcount),
+        start(s),
+        direction(dir) {}
     EschPicking(EschPoint &s,
                 EschVector &dir,
                 EschDrawable *i,
                 Flx16 maxd,
-                ulong mcount=1)
-    {
-        flags = ESCH_PICK_ILIST
-                | ESCH_PICK_MAXCOUNT
-                | ESCH_PICK_WORLD
-                | ESCH_PICK_MAXDIST;
-        ilist = i;
-        maxcount = mcount;
-        start = s;
-        direction = dir;
-        maxdist = maxd;
-    }
+                ulong mcount=1) :
+        flags(ESCH_PICK_ILIST | ESCH_PICK_MAXCOUNT
+              | ESCH_PICK_WORLD | ESCH_PICK_MAXDIST),
+        ilist(i),
+        maxcount(mcount),
+        start(s),
+        direction(dir),
+        maxdist(maxd) {}
 };
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
@@ -221,11 +203,15 @@ public:
     word    limits;             // Shading-limit mask
     dword   flags;              // Status flags
     char    *name;              // Pointer to obj name, if any
+    void    *app_data;          // Application data pointer
 
     //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ¿
     // Constructor/Destructors                                              ³
     //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִÙ
+protected:
     EschDrawable(word t);
+
+public:
     EschDrawable(const EschDrawable &drw);
 
     virtual ~EschDrawable();
@@ -266,6 +252,7 @@ public:
     //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִÙ
     void set_flags(dword f) { flags = f; }
     void set_limits(word l) { limits = l; }
+    void set_app_data(void *p) { app_data = p; }
 };
 
 #ifdef __WATCOMC__

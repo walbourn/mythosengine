@@ -2,11 +2,11 @@
 //
 //                                                           %__________%
 //                                                          %/ . .  .   \%
-//           Van Gogh 2D-Display Library                     |  . .  o. | 
+//           Van Gogh 2D-Display Library                     |  . .  o. |
 //                                                           |. _  .   .|
-//          Microsoft Windows '95 Version                    | / \   .  | 
+//          Microsoft Windows '95 Version                    | / \   .  |
 //                                                           |_|_|_._._.|
-// Copyright (c) 1994-1996 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
+// Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
 //              All rights reserved.                        %\__________/%
 //                                                           %          %
 //
@@ -36,7 +36,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include <string.h>
@@ -69,6 +69,27 @@
 //                                 Data
 //
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+long RedDitherMatrix[4][4] =
+{
+    0 << 16,  8 << 16,  2 << 16, 10 << 16,
+   12 << 16,  4 << 16, 14 << 16,  6 << 16,
+    3 << 16, 11 << 16,  1 << 16,  9 << 16,
+   15 << 16,  7 << 16, 13 << 16,  5 << 16
+};
+long GreenDitherMatrix[4][4] =
+{
+   10 << 16,  6 << 16,  9 << 16,  5 << 16,
+    2 << 16, 14 << 16,  1 << 16, 13 << 16,
+    8 << 16,  4 << 16, 11 << 16,  7 << 16,
+    0 << 16, 12 << 16,  3 << 16, 15 << 16
+};
+long BlueDitherMatrix[4][4] =
+{
+    5 << 16, 13 << 16,  7 << 16, 15 << 16,
+    9 << 16,  1 << 16, 11 << 16,  3 << 16,
+    6 << 16,  6 << 16, 14 << 16, 12 << 16,
+   10 << 16,  2 << 16,  8 << 16,  0 << 16
+};
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
@@ -86,13 +107,13 @@ void vngo_smooth_rect (VngoVport *vp,
 
     if (dx < 1 && dy < 1)
     {
-        if ((pts[0].x >= 0) && (pts[0].y >= 0) 
+        if ((pts[0].x >= 0) && (pts[0].y >= 0)
             && (pts[0].x < vp->vbuff.width)
             && (pts[0].y < vp->vbuff.height))
         {
             if (clip)
             {
-                if ((pts[0].x < clip->x) || (pts[0].y < clip->y) 
+                if ((pts[0].x < clip->x) || (pts[0].y < clip->y)
                     || (pts[0].x > (clip->x + clip->dx))
                     || (pts[0].y > (clip->y + clip->dy)))
                 {
@@ -104,7 +125,7 @@ void vngo_smooth_rect (VngoVport *vp,
         return;
     }
 
-    VngoRect    trect (vp->vbuff.left,vp->vbuff.top,vp->vbuff.width,vp->vbuff.height);
+    VngoRect    trect (0,0,vp->vbuff.width,vp->vbuff.height);
 
 
 // Clip to the viewport and the rectangle.
@@ -320,7 +341,11 @@ void vngo_smooth_rect (VngoVport *vp,
             {
                 tpoint.x = xstart + j;
                 tpoint.y = ystart + i;
-                VngoColor24bit tclr (tr >> 16,tg >> 16, tb >> 16); 
+//                VngoColor24bit tclr (tr >> 16,tg >> 16, tb >> 16);
+                VngoColor24bit tclr (byte((tr + RedDitherMatrix[tpoint.x&3][tpoint.y&3]) >> 16),
+                                     byte((tg + GreenDitherMatrix[tpoint.x&3][tpoint.y&3]) >> 16),
+                                     byte((tb + BlueDitherMatrix[tpoint.x&3][tpoint.y&3]) >> 16));
+
                 vp->pixel(&tpoint,&tclr);
 
                 tr += trs;
@@ -350,7 +375,11 @@ void vngo_smooth_rect (VngoVport *vp,
             {
                 tpoint.x = xstart + j;
                 tpoint.y = ystart + i;
-                VngoColor24bit tclr (tr >> 16,tg >> 16, tb >> 16); 
+
+                VngoColor24bit tclr (byte((tr + RedDitherMatrix[tpoint.x&3][tpoint.y&3]) >> 16),
+                                     byte((tg + GreenDitherMatrix[tpoint.x&3][tpoint.y&3]) >> 16),
+                                     byte((tb + BlueDitherMatrix[tpoint.x&3][tpoint.y&3]) >> 16));
+
                 vp->pixel(&tpoint,&tclr);
 
                 tr += trs;

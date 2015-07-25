@@ -11,7 +11,7 @@
 //                     Text Output and Font Management System
 //                          Microsoft Windows '95 Version
 //
-//            Copyright (c) 1995, 1996 by Charybdis Enterprises, Inc.
+//            Copyright (c) 1995-1997 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved.
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -94,7 +94,7 @@ void bitmap(char *name, XFBitmap *bm,
             ushort width, ushort height,
             ushort startx, ushort starty,
             ushort spacer,
-            char startc, char numc, char cpr)
+            byte startc, byte numc, byte cpr)
 {
     int                 i, j, k, t;
     byte                *font, *fptr;
@@ -105,6 +105,14 @@ void bitmap(char *name, XFBitmap *bm,
 
     memset(&header,0,sizeof(GBergFileFontHDR));
     strcpy(header.name,name);
+
+    if (((int)startc+(int)numc-1) > 256)
+    {
+        cout << "±±± Error: number of characters in set must fit in 128 or 256 chars";
+        exit(1);
+    }
+
+    int numchars = (((int)startc+(int)numc-1) > 128) ? 256 : 128;
 
     if (!(Flags & FLAGS_QUIET))
     {
@@ -125,14 +133,14 @@ void bitmap(char *name, XFBitmap *bm,
 //ÄÄ Font Header
     // For now, only supports MONOFIXED non-COMPRESSED fonts.
     header.compression = 0;
-    header.type = GBERG_FNT_MONOFIXED;
+    header.type = (numchars > 128) ? GBERG_FNT_MONOFIXEDEX : GBERG_FNT_MONOFIXED;
 
     header.width = width;
     header.height = height;
 
     if (width > 32)
     {
-        cout << "Error: width must be less than or equal to 32";
+        cout << "±±± Error: width must be less than or equal to 32";
         exit(1);
     }
 
@@ -147,7 +155,7 @@ void bitmap(char *name, XFBitmap *bm,
     }
 
 //ÄÄ Character encode
-    fontSize = 128*header.bpc;
+    fontSize = numchars*header.bpc;
     font = new byte[fontSize];
     if (!font)
     {
@@ -160,7 +168,7 @@ void bitmap(char *name, XFBitmap *bm,
     ulong y = starty;
     int crow=0;
     
-    for(int ch=startc; ch < 128; ch++)
+    for(int ch=startc; ch < numchars; ch++)
     {
         if (!(Flags & FLAGS_QUIET))
             cout << ".";

@@ -23,7 +23,7 @@
 
                      Newtonian Physics Simulation Library
 
-            Copyright (c) 1995, 1996 by Charybdis Enterprises, Inc.
+            Copyright (c) 1995-1997 by Charybdis Enterprises, Inc.
                            All Rights Reserved.
 
                        Microsoft Windows '95 Version
@@ -53,12 +53,10 @@
                              _Library Status_
 
  Notes by: Dan Higdon
- Updated: Jan 25, 1996
+ Updated: Febuary 2, 1997
 
  Changes for this release --------------------------------------------------
 
-   o Simple point-mass simulation in place.
-
-   o Documentation completed.
+ o Fixed problems with NewtObject step routine.
 
 *** END OF FILE ***

@@ -8,7 +8,7 @@
 //ùùùùù²±²ùùùùùùù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùùùùùù²±²ùùùù²±²ùùùùùù
 //ùùùù²²²²²²²²²²ù²²²²²²²²ùùù²²²²²²²²ùù²²²ùùùù²²²ù²²²²²²²²²²ù²²²ùùùù²²²ùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùCopyrightù(c)ù1994-1996ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
+//ùùùùùùùùùùùCopyrightù(c)ù1994-1997ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùù Microsoft Windows '95 Version ùùùùùùùùùùùùùùùùùùùùùùù
@@ -46,6 +46,7 @@
 
 #include "stdafx.h"
 #include "eshtool.h"
+#include "eshtdoc.h"
 #include "eshtdlg.h"
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
@@ -563,6 +564,12 @@ void CameraPropExPage::OnHazeColor()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 IMPLEMENT_DYNCREATE(LightPropGeneralPage, CPropertyPage)
 
+BEGIN_MESSAGE_MAP(LightPropGeneralPage, CPropertyPage)
+	//{{AFX_MSG_MAP(LightPropGeneralPage)
+	ON_CBN_SELCHANGE(IDC_LPROP_TYPE, OnTypeSelectChange)
+	//}}AFX_MSG_MAP
+END_MESSAGE_MAP()
+
 LightPropGeneralPage::LightPropGeneralPage() : CPropertyPage(LightPropGeneralPage::IDD)
 {
 	//{{AFX_DATA_INIT(LightPropGeneralPage)
@@ -629,12 +636,6 @@ void LightPropGeneralPage::DoDataExchange(CDataExchange* pDX)
     }
 }
 
-BEGIN_MESSAGE_MAP(LightPropGeneralPage, CPropertyPage)
-	//{{AFX_MSG_MAP(LightPropGeneralPage)
-	ON_CBN_SELCHANGE(IDC_LPROP_TYPE, OnTypeSelectChange)
-	//}}AFX_MSG_MAP
-END_MESSAGE_MAP()
-
 void LightPropGeneralPage::OnTypeSelectChange() 
 {
     m_xiCtrl.EnableWindow( (m_typeList.GetCurSel()) ? 1 : 0);
@@ -647,6 +648,12 @@ void LightPropGeneralPage::OnTypeSelectChange()
 // LightPropExtraPage                                                       ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 IMPLEMENT_DYNCREATE(LightPropExtraPage, CPropertyPage)
+
+BEGIN_MESSAGE_MAP(LightPropExtraPage, CPropertyPage)
+	//{{AFX_MSG_MAP(LightPropExtraPage)
+		// NOTE: the ClassWizard will add message map macros here
+	//}}AFX_MSG_MAP
+END_MESSAGE_MAP()
 
 LightPropExtraPage::LightPropExtraPage() : CPropertyPage(LightPropExtraPage::IDD)
 {
@@ -691,17 +698,17 @@ void LightPropExtraPage::DoDataExchange(CDataExchange* pDX)
 	//}}AFX_DATA_MAP
 }
 
-BEGIN_MESSAGE_MAP(LightPropExtraPage, CPropertyPage)
-	//{{AFX_MSG_MAP(LightPropExtraPage)
-		// NOTE: the ClassWizard will add message map macros here
-	//}}AFX_MSG_MAP
-END_MESSAGE_MAP()
-
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // LightPropAppFlagsPage                                                    ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 IMPLEMENT_DYNCREATE(LightPropAppFlagsPage, CPropertyPage)
+
+BEGIN_MESSAGE_MAP(LightPropAppFlagsPage, CPropertyPage)
+	//{{AFX_MSG_MAP(LightPropAppFlagsPage)
+		// NOTE: the ClassWizard will add message map macros here
+	//}}AFX_MSG_MAP
+END_MESSAGE_MAP()
 
 LightPropAppFlagsPage::LightPropAppFlagsPage() : CPropertyPage(LightPropAppFlagsPage::IDD)
 {
@@ -736,11 +743,319 @@ void LightPropAppFlagsPage::DoDataExchange(CDataExchange* pDX)
 	//}}AFX_DATA_MAP
 }
 
-BEGIN_MESSAGE_MAP(LightPropAppFlagsPage, CPropertyPage)
-	//{{AFX_MSG_MAP(LightPropAppFlagsPage)
+
+
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°°°° Face Properties °°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// FacePropGeneralPage                                                      ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+IMPLEMENT_DYNCREATE(FacePropGeneralPage, CPropertyPage)
+
+BEGIN_MESSAGE_MAP(FacePropGeneralPage, CPropertyPage)
+	//{{AFX_MSG_MAP(FacePropGeneralPage)
+	ON_CBN_SELCHANGE(IDC_FPROP_TXT, OnTextureChange)
+	//}}AFX_MSG_MAP
+END_MESSAGE_MAP()
+
+FacePropGeneralPage::FacePropGeneralPage() :
+    CPropertyPage(FacePropGeneralPage::IDD),
+    tmax(0),
+    txt(0),
+    tind(0)
+{
+	//{{AFX_DATA_INIT(FacePropGeneralPage)
+	m_a = 0;
+	m_b = 0;
+	m_c = 0;
+	m_i = 0.0f;
+	m_k = 0.0f;
+	m_j = 0.0f;
+	m_u0 = 0.0f;
+	m_u1 = 0.0f;
+	m_u2 = 0.0f;
+	m_v0 = 0.0f;
+	m_v1 = 0.0f;
+	m_v2 = 0.0f;
+	//}}AFX_DATA_INIT
+}
+
+FacePropGeneralPage::~FacePropGeneralPage()
+{
+}
+
+void FacePropGeneralPage::DoDataExchange(CDataExchange* pDX)
+{
+	CPropertyPage::DoDataExchange(pDX);
+	//{{AFX_DATA_MAP(FacePropGeneralPage)
+	DDX_Control(pDX, IDC_FPROP_V2, m_v2Ctl);
+	DDX_Control(pDX, IDC_FPROP_V1, m_v1Ctl);
+	DDX_Control(pDX, IDC_FPROP_V0, m_v0Ctl);
+	DDX_Control(pDX, IDC_FPROP_U2, m_u2Ctl);
+	DDX_Control(pDX, IDC_FPROP_U1, m_u1Ctl);
+	DDX_Control(pDX, IDC_FPROP_U0, m_u0Ctl);
+	DDX_Control(pDX, IDC_FPROP_TXT, m_txtList);
+	DDX_Text(pDX, IDC_FPROP_A, m_a);
+	DDX_Text(pDX, IDC_FPROP_B, m_b);
+	DDX_Text(pDX, IDC_FPROP_C, m_c);
+	DDX_Text(pDX, IDC_FPROP_I, m_i);
+	DDV_MinMaxFloat(pDX, m_i, -32768.f, 32768.f);
+	DDX_Text(pDX, IDC_FPROP_K, m_k);
+	DDV_MinMaxFloat(pDX, m_k, -32768.f, 32768.f);
+	DDX_Text(pDX, IDC_FPROP_J, m_j);
+	DDV_MinMaxFloat(pDX, m_j, -32768.f, 32768.f);
+	DDX_Text(pDX, IDC_FPROP_U0, m_u0);
+	DDV_MinMaxFloat(pDX, m_u0, -32768.f, 32768.f);
+	DDX_Text(pDX, IDC_FPROP_U1, m_u1);
+	DDV_MinMaxFloat(pDX, m_u1, -32768.f, 32768.f);
+	DDX_Text(pDX, IDC_FPROP_U2, m_u2);
+	DDV_MinMaxFloat(pDX, m_u2, -32768.f, 32768.f);
+	DDX_Text(pDX, IDC_FPROP_V0, m_v0);
+	DDV_MinMaxFloat(pDX, m_v0, -32768.f, 32768.f);
+	DDX_Text(pDX, IDC_FPROP_V1, m_v1);
+	DDV_MinMaxFloat(pDX, m_v1, -32768.f, 32768.f);
+	DDX_Text(pDX, IDC_FPROP_V2, m_v2);
+	DDV_MinMaxFloat(pDX, m_v2, -32768.f, 32768.f);
+	//}}AFX_DATA_MAP
+
+    if (!pDX->m_bSaveAndValidate)
+    {
+        m_txtList.ResetContent();
+        m_txtList.AddString("None");
+        m_txtList.SetCurSel(0);
+
+        if (txt)
+        {
+            for(ulong i=0; i < tmax; i++)
+            {
+                CString name = (txt[i]) ? txt[i]->name : "?";
+                name = name.Left(ESCH_MAX_NAME);
+                m_txtList.AddString(name);
+            }
+
+            if (tind < (int)tmax+1)
+                m_txtList.SetCurSel(tind);
+        }
+
+        m_u0Ctl.EnableWindow(tind > 0 ? 1 : 0);
+        m_u1Ctl.EnableWindow(tind > 0 ? 1 : 0);
+        m_u2Ctl.EnableWindow(tind > 0 ? 1 : 0);
+        m_v0Ctl.EnableWindow(tind > 0 ? 1 : 0);
+        m_v1Ctl.EnableWindow(tind > 0 ? 1 : 0);
+        m_v2Ctl.EnableWindow(tind > 0 ? 1 : 0);
+    }
+    else
+    {
+        int s= m_txtList.GetCurSel();
+
+        if (s < (int)tmax+1)
+            tind = s;
+    }
+}
+
+void FacePropGeneralPage::OnTextureChange() 
+{
+    int s = m_txtList.GetCurSel();
+
+    m_u0Ctl.EnableWindow(s > 0 ? 1 : 0);
+    m_u1Ctl.EnableWindow(s > 0 ? 1 : 0);
+    m_u2Ctl.EnableWindow(s > 0 ? 1 : 0);
+    m_v0Ctl.EnableWindow(s > 0 ? 1 : 0);
+    m_v1Ctl.EnableWindow(s > 0 ? 1 : 0);
+    m_v2Ctl.EnableWindow(s > 0 ? 1 : 0);
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// FacePropFlagsPage                                                        ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+IMPLEMENT_DYNCREATE(FacePropFlagsPage, CPropertyPage)
+
+BEGIN_MESSAGE_MAP(FacePropFlagsPage, CPropertyPage)
+	//{{AFX_MSG_MAP(FacePropFlagsPage)
 		// NOTE: the ClassWizard will add message map macros here
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
+
+FacePropFlagsPage::FacePropFlagsPage() : CPropertyPage(FacePropFlagsPage::IDD)
+{
+	//{{AFX_DATA_INIT(FacePropFlagsPage)
+	m_1sided = FALSE;
+	m_abline = FALSE;
+	m_allow_persp = FALSE;
+	m_bcline = FALSE;
+	m_caline = FALSE;
+	m_flat = FALSE;
+	m_selfi = -1;
+	m_smooth = FALSE;
+	m_solid = FALSE;
+	m_specular = FALSE;
+	m_wire = FALSE;
+	//}}AFX_DATA_INIT
+}
+
+FacePropFlagsPage::~FacePropFlagsPage()
+{
+}
+
+void FacePropFlagsPage::DoDataExchange(CDataExchange* pDX)
+{
+	CPropertyPage::DoDataExchange(pDX);
+	//{{AFX_DATA_MAP(FacePropFlagsPage)
+	DDX_Check(pDX, IDC_FPROP_1SIDED, m_1sided);
+	DDX_Check(pDX, IDC_FPROP_ABLINE, m_abline);
+	DDX_Check(pDX, IDC_FPROP_APERSP, m_allow_persp);
+	DDX_Check(pDX, IDC_FPROP_BCLINE, m_bcline);
+	DDX_Check(pDX, IDC_FPROP_CALINE, m_caline);
+	DDX_Check(pDX, IDC_FPROP_FLAT, m_flat);
+	DDX_CBIndex(pDX, IDC_FPROP_SELFILLM, m_selfi);
+	DDX_Check(pDX, IDC_FPROP_SMOOTH, m_smooth);
+	DDX_Check(pDX, IDC_FPROP_SOLID, m_solid);
+	DDX_Check(pDX, IDC_FPROP_SPECULAR, m_specular);
+	DDX_Check(pDX, IDC_FPROP_WIRE, m_wire);
+	//}}AFX_DATA_MAP
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// FacePropAppFlagsPage                                                     ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+IMPLEMENT_DYNCREATE(FacePropAppFlagsPage, CPropertyPage)
+
+BEGIN_MESSAGE_MAP(FacePropAppFlagsPage, CPropertyPage)
+	//{{AFX_MSG_MAP(FacePropAppFlagsPage)
+		// NOTE: the ClassWizard will add message map macros here
+	//}}AFX_MSG_MAP
+END_MESSAGE_MAP()
+
+FacePropAppFlagsPage::FacePropAppFlagsPage() : CPropertyPage(FacePropAppFlagsPage::IDD)
+{
+	//{{AFX_DATA_INIT(FacePropAppFlagsPage)
+	m_app0 = FALSE;
+	m_app1 = FALSE;
+	m_app2 = FALSE;
+	m_app3 = FALSE;
+	//}}AFX_DATA_INIT
+}
+
+FacePropAppFlagsPage::~FacePropAppFlagsPage()
+{
+}
+
+void FacePropAppFlagsPage::DoDataExchange(CDataExchange* pDX)
+{
+	CPropertyPage::DoDataExchange(pDX);
+	//{{AFX_DATA_MAP(FacePropAppFlagsPage)
+	DDX_Check(pDX, IDC_FPROP_FLAGS_APP0, m_app0);
+	DDX_Check(pDX, IDC_FPROP_FLAGS_APP1, m_app1);
+	DDX_Check(pDX, IDC_FPROP_FLAGS_APP2, m_app2);
+	DDX_Check(pDX, IDC_FPROP_FLAGS_APP3, m_app3);
+	//}}AFX_DATA_MAP
+}
+
+
+
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°° Texture Properties °°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// TexturePropGenPage                                                       ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+IMPLEMENT_DYNCREATE(TexturePropGenPage, CPropertyPage)
+
+BEGIN_MESSAGE_MAP(TexturePropGenPage, CPropertyPage)
+	//{{AFX_MSG_MAP(TexturePropGenPage)
+		// NOTE: the ClassWizard will add message map macros here
+	//}}AFX_MSG_MAP
+END_MESSAGE_MAP()
+
+TexturePropGenPage::TexturePropGenPage() : CPropertyPage(TexturePropGenPage::IDD)
+{
+	//{{AFX_DATA_INIT(TexturePropGenPage)
+	m_animate = FALSE;
+	m_height = 0;
+	m_name = _T("");
+	m_nframes = 0;
+	m_type = -1;
+	m_width = 0;
+	//}}AFX_DATA_INIT
+}
+
+TexturePropGenPage::~TexturePropGenPage()
+{
+}
+
+void TexturePropGenPage::DoDataExchange(CDataExchange* pDX)
+{
+	CPropertyPage::DoDataExchange(pDX);
+	//{{AFX_DATA_MAP(TexturePropGenPage)
+	DDX_Check(pDX, IDC_TPROP_ANIMATE, m_animate);
+	DDX_Text(pDX, IDC_TPROP_HEIGHT, m_height);
+	DDX_Text(pDX, IDC_TPROP_NAME, m_name);
+	DDV_MaxChars(pDX, m_name, 16);
+	DDX_Text(pDX, IDC_TPROP_NFRAMES, m_nframes);
+	DDX_CBIndex(pDX, IDC_TPROP_TYPE, m_type);
+	DDX_Text(pDX, IDC_TPROP_WIDTH, m_width);
+	//}}AFX_DATA_MAP
+
+    if (pDX->m_bSaveAndValidate)
+    {
+        pDX->PrepareEditCtrl(IDC_TPROP_NAME);
+
+/////////////////////////////////////////////////////////////////////
+// ADD CHECK FOR UNIQUE TEXTURE NAME!!!
+/////////////////////////////////////////////////////////////////////
+
+    }
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// TexturePropAppFlagsPage                                                  ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+IMPLEMENT_DYNCREATE(TexturePropAppFlagsPage, CPropertyPage)
+
+BEGIN_MESSAGE_MAP(TexturePropAppFlagsPage, CPropertyPage)
+	//{{AFX_MSG_MAP(TexturePropAppFlagsPage)
+		// NOTE: the ClassWizard will add message map macros here
+	//}}AFX_MSG_MAP
+END_MESSAGE_MAP()
+
+TexturePropAppFlagsPage::TexturePropAppFlagsPage() : CPropertyPage(TexturePropAppFlagsPage::IDD)
+{
+	//{{AFX_DATA_INIT(TexturePropAppFlagsPage)
+	m_app0 = FALSE;
+	m_app1 = FALSE;
+	m_app2 = FALSE;
+	m_app3 = FALSE;
+	m_app4 = FALSE;
+	m_app5 = FALSE;
+	m_app6 = FALSE;
+	m_app7 = FALSE;
+	//}}AFX_DATA_INIT
+}
+
+TexturePropAppFlagsPage::~TexturePropAppFlagsPage()
+{
+}
+
+void TexturePropAppFlagsPage::DoDataExchange(CDataExchange* pDX)
+{
+	CPropertyPage::DoDataExchange(pDX);
+	//{{AFX_DATA_MAP(TexturePropAppFlagsPage)
+	DDX_Check(pDX, IDC_LPROP_FLAGS_APP0, m_app0);
+	DDX_Check(pDX, IDC_LPROP_FLAGS_APP1, m_app1);
+	DDX_Check(pDX, IDC_LPROP_FLAGS_APP2, m_app2);
+	DDX_Check(pDX, IDC_LPROP_FLAGS_APP3, m_app3);
+	DDX_Check(pDX, IDC_LPROP_FLAGS_APP4, m_app4);
+	DDX_Check(pDX, IDC_LPROP_FLAGS_APP5, m_app5);
+	DDX_Check(pDX, IDC_LPROP_FLAGS_APP6, m_app6);
+	DDX_Check(pDX, IDC_LPROP_FLAGS_APP7, m_app7);
+	//}}AFX_DATA_MAP
+}
 
 
 
@@ -753,6 +1068,12 @@ END_MESSAGE_MAP()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
 IMPLEMENT_DYNCREATE(MeshPropGeneralPage, CPropertyPage)
+
+BEGIN_MESSAGE_MAP(MeshPropGeneralPage, CPropertyPage)
+	//{{AFX_MSG_MAP(MeshPropGeneralPage)
+		// NOTE: the ClassWizard will add message map macros here
+	//}}AFX_MSG_MAP
+END_MESSAGE_MAP()
 
 MeshPropGeneralPage::MeshPropGeneralPage() : CPropertyPage(MeshPropGeneralPage::IDD)
 {
@@ -807,17 +1128,17 @@ void MeshPropGeneralPage::DoDataExchange(CDataExchange* pDX)
     }
 }
 
-BEGIN_MESSAGE_MAP(MeshPropGeneralPage, CPropertyPage)
-	//{{AFX_MSG_MAP(MeshPropGeneralPage)
-		// NOTE: the ClassWizard will add message map macros here
-	//}}AFX_MSG_MAP
-END_MESSAGE_MAP()
-
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // MeshPropOrientPage                                                       ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 IMPLEMENT_DYNCREATE(MeshPropOrientPage, CPropertyPage)
+
+BEGIN_MESSAGE_MAP(MeshPropOrientPage, CPropertyPage)
+	//{{AFX_MSG_MAP(MeshPropOrientPage)
+		// NOTE: the ClassWizard will add message map macros here
+	//}}AFX_MSG_MAP
+END_MESSAGE_MAP()
 
 MeshPropOrientPage::MeshPropOrientPage() : CPropertyPage(MeshPropOrientPage::IDD)
 {
@@ -863,17 +1184,17 @@ void MeshPropOrientPage::DoDataExchange(CDataExchange* pDX)
 	//}}AFX_DATA_MAP
 }
 
-BEGIN_MESSAGE_MAP(MeshPropOrientPage, CPropertyPage)
-	//{{AFX_MSG_MAP(MeshPropOrientPage)
-		// NOTE: the ClassWizard will add message map macros here
-	//}}AFX_MSG_MAP
-END_MESSAGE_MAP()
-
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // MeshPropExtPage                                                          ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 IMPLEMENT_DYNCREATE(MeshPropExtPage, CPropertyPage)
+
+BEGIN_MESSAGE_MAP(MeshPropExtPage, CPropertyPage)
+	//{{AFX_MSG_MAP(MeshPropExtPage)
+		// NOTE: the ClassWizard will add message map macros here
+	//}}AFX_MSG_MAP
+END_MESSAGE_MAP()
 
 MeshPropExtPage::MeshPropExtPage() : CPropertyPage(MeshPropExtPage::IDD)
 {
@@ -922,17 +1243,532 @@ void MeshPropExtPage::DoDataExchange(CDataExchange* pDX)
 	//}}AFX_DATA_MAP
 }
 
-BEGIN_MESSAGE_MAP(MeshPropExtPage, CPropertyPage)
-	//{{AFX_MSG_MAP(MeshPropExtPage)
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// MeshPropVertsPage                                                        ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+IMPLEMENT_DYNCREATE(MeshPropVertsPage, CPropertyPage)
+
+BEGIN_MESSAGE_MAP(MeshPropVertsPage, CPropertyPage)
+	//{{AFX_MSG_MAP(MeshPropVertsPage)
 		// NOTE: the ClassWizard will add message map macros here
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
+
+MeshPropVertsPage::MeshPropVertsPage() :
+    CPropertyPage(MeshPropVertsPage::IDD),
+    nverts(0),
+    v(0)
+{
+	//{{AFX_DATA_INIT(MeshPropVertsPage)
+		// NOTE: the ClassWizard will add member initialization here
+	//}}AFX_DATA_INIT
+}
+
+MeshPropVertsPage::~MeshPropVertsPage()
+{
+}
+
+void MeshPropVertsPage::DoDataExchange(CDataExchange* pDX)
+{
+	CPropertyPage::DoDataExchange(pDX);
+	//{{AFX_DATA_MAP(MeshPropVertsPage)
+	DDX_Control(pDX, IDC_MPROP_VLIST, m_vList);
+	//}}AFX_DATA_MAP
+
+    if (!pDX->m_bSaveAndValidate)
+    {
+        m_vList.ResetContent();
+
+        ASSERT(v);
+        EschVertex *vtx = (EschVertex*) ivory_hlock(v);
+        if (!vtx)
+            m_vList.AddString("Lock Failed!");
+        else
+        {
+            for(ulong i=0; i < nverts; i++)
+            {
+                char buff[128];
+                sprintf(buff,
+                        "[%03d]   X: %8.2f  Y: %8.2f  Z: %8.2f    Nrml: (%5.3f,%5.3f,%5.3f)",
+                        i,
+                        float(vtx[i].x),
+                        float(vtx[i].y),
+                        float(vtx[i].z),
+                        float(vtx[i].normal.i),
+                        float(vtx[i].normal.j),
+                        float(vtx[i].normal.k));
+                m_vList.AddString(buff);                        
+            }
+
+            ivory_hunlock(v);
+        }
+    }
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// MeshPropFacePage                                                         ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+IMPLEMENT_DYNCREATE(MeshPropFacePage, CPropertyPage)
+
+BEGIN_MESSAGE_MAP(MeshPropFacePage, CPropertyPage)
+	//{{AFX_MSG_MAP(MeshPropFacePage)
+	ON_BN_CLICKED(IDC_MPROP_FPROP, OnProperties)
+	ON_LBN_DBLCLK(IDC_MPROP_FLIST, OnDblClick)
+	//}}AFX_MSG_MAP
+END_MESSAGE_MAP()
+
+MeshPropFacePage::MeshPropFacePage() :
+    CPropertyPage(MeshPropFacePage::IDD),
+    nfaces(0),
+    f(0),
+    nverts(0),
+    tmax(0),
+    txt(0),
+    cursel(0),
+    pDoc(0)
+{
+	//{{AFX_DATA_INIT(MeshPropFacePage)
+	//}}AFX_DATA_INIT
+}
+
+MeshPropFacePage::~MeshPropFacePage()
+{
+}
+
+void MeshPropFacePage::DoDataExchange(CDataExchange* pDX)
+{
+	CPropertyPage::DoDataExchange(pDX);
+	//{{AFX_DATA_MAP(MeshPropFacePage)
+	DDX_Control(pDX, IDC_MPROP_FPROP, m_fProp);
+	DDX_Control(pDX, IDC_MPROP_FLIST, m_fList);
+	//}}AFX_DATA_MAP
+
+    if (!pDX->m_bSaveAndValidate)
+    {
+        if (cursel < 0 || cursel > (int)nfaces)
+            cursel = 0;
+
+        m_fList.ResetContent();
+
+        ASSERT(f);
+        EschFace *face = (EschFace*) ivory_hlock(f);
+        if (!face)
+            m_fList.AddString("Lock Failed!");
+        else
+        {
+            for(ulong i=0; i < nfaces; i++)
+            {
+                char buff[128];
+                sprintf(buff,
+                        "[%03d]   A: %4d  B: %4d  C: %4d  TXT: %4d      Nrml: (%5.3f,%5.3f,%5.3f)",
+                        i,
+                        face[i].a,
+                        face[i].b,
+                        face[i].c,
+                        face[i].txt,
+                        float(face[i].normal.i),
+                        float(face[i].normal.j),
+                        float(face[i].normal.k));
+                m_fList.AddString(buff);                        
+            }
+            if (i > 0)
+            {
+                m_fProp.EnableWindow(1);
+                m_fList.SetCurSel(cursel);
+            }
+            else
+            {
+                m_fProp.EnableWindow(0);
+            }
+
+            ivory_hunlock(f);
+        }
+    }
+}
+
+void MeshPropFacePage::ui_face_properties()
+{
+    if (cursel != LB_ERR && cursel < (int)nfaces)
+    {
+        assert(f);
+
+        EschFace *face = (EschFace*)ivory_hlock(f);
+        if (f)
+        {
+            //ÄÄÄ General
+            FacePropGeneralPage gdlg;
+
+            gdlg.m_a = face->a;
+            gdlg.m_b = face->b;
+            gdlg.m_c = face->c;
+
+            gdlg.m_i = face->normal.i;
+            gdlg.m_j = face->normal.j;
+            gdlg.m_k = face->normal.k;
+            
+            gdlg.tind = (face->flags & ESCH_FACE_TEXTURED) ? face->txt : 0;
+
+            gdlg.m_u0 = face->u[0];
+            gdlg.m_u1 = face->u[1];
+            gdlg.m_u2 = face->u[2];
+            
+            gdlg.m_v0 = face->v[0];
+            gdlg.m_v1 = face->v[1];
+            gdlg.m_v2 = face->v[2];
+
+            gdlg.tmax = tmax;
+            gdlg.txt = txt;
+
+            //ÄÄÄ Flags
+            FacePropFlagsPage   fdlg;
+
+            fdlg.m_wire = (face->flags & ESCH_FACE_WIRE) ? 1 : 0;
+            fdlg.m_solid = (face->flags & ESCH_FACE_SOLID) ? 1 : 0;
+            fdlg.m_flat = (face->flags & ESCH_FACE_FLAT) ? 1 : 0;
+            fdlg.m_smooth = (face->flags & ESCH_FACE_SMOOTH) ? 1 : 0;
+            fdlg.m_specular = (face->flags & ESCH_FACE_SPECULAR) ? 1 : 0;
+
+            fdlg.m_abline = (face->flags & ESCH_FACE_ABLINE) ? 1 : 0;
+            fdlg.m_bcline = (face->flags & ESCH_FACE_BCLINE) ? 1 : 0;
+            fdlg.m_caline = (face->flags & ESCH_FACE_CALINE) ? 1 : 0;
+
+            fdlg.m_1sided = (face->flags & ESCH_FACE_ONESIDED) ? 1 : 0;
+
+            fdlg.m_allow_persp = (face->flags & ESCH_FACE_ALLOWPERSP) ? 1 : 0;
+
+            assert(ESCH_FACE_SELFILUM_MASK == 0xf00000);
+
+            fdlg.m_selfi = (face->flags & ESCH_FACE_SELFILUM_MASK) >> 20;
+
+            //ÄÄÄ Application Flags
+            FacePropAppFlagsPage   afdlg;
+
+            afdlg.m_app0 = (face->flags & ESCH_FACE_APP0) ? 1 : 0;
+            afdlg.m_app1 = (face->flags & ESCH_FACE_APP1) ? 1 : 0;
+            afdlg.m_app2 = (face->flags & ESCH_FACE_APP2) ? 1 : 0;
+            afdlg.m_app3 = (face->flags & ESCH_FACE_APP3) ? 1 : 0;
+
+            //ÄÄÄ Interact
+            CPropertySheet  sh("Face Properties");
+            sh.AddPage(&gdlg);
+            sh.AddPage(&fdlg);
+            sh.AddPage(&afdlg);
+
+            //ÄÄÄ Store results, if OK
+            if (sh.DoModal() == IDOK)
+            {
+                //ÄÄÄ General
+                face->normal.i = Flx16(gdlg.m_i);
+                face->normal.j = Flx16(gdlg.m_j);
+                face->normal.k = Flx16(gdlg.m_k);
+                face->normal.normalize();
+
+                if (gdlg.tind)
+                {
+                    face->flags |= ESCH_FACE_TEXTURED;
+                    face->txt = gdlg.tind;
+                }
+                else
+                {
+                    face->flags &= ~ESCH_FACE_TEXTURED;
+                    face->txt = 0;
+                }
+
+                face->u[0] = Flx16(gdlg.m_u0);
+                face->u[1] = Flx16(gdlg.m_u1);
+                face->u[2] = Flx16(gdlg.m_u2);
+
+                face->v[0] = Flx16(gdlg.m_v0);
+                face->v[1] = Flx16(gdlg.m_v1);
+                face->v[2] = Flx16(gdlg.m_v2);
+
+                dword flags = face->flags;
+
+                //ÄÄÄ Flags
+                flags &= ~(ESCH_FACE_WIRE
+                           | ESCH_FACE_SOLID
+                           | ESCH_FACE_FLAT
+                           | ESCH_FACE_SMOOTH
+                           | ESCH_FACE_SPECULAR
+                           | ESCH_FACE_ABLINE
+                           | ESCH_FACE_BCLINE
+                           | ESCH_FACE_ABLINE
+                           | ESCH_FACE_SELFILUM_MASK);
+
+                if (fdlg.m_wire)
+                    flags |= ESCH_FACE_WIRE;
+                if (fdlg.m_solid)
+                    flags |= ESCH_FACE_SOLID;
+                if (fdlg.m_flat)
+                    flags |= ESCH_FACE_FLAT;
+                if (fdlg.m_smooth)
+                    flags |= ESCH_FACE_SMOOTH;
+                if (fdlg.m_specular)
+                    flags |= ESCH_FACE_SPECULAR;
+
+                if (fdlg.m_abline)
+                    flags |= ESCH_FACE_ABLINE;
+                if (fdlg.m_bcline)
+                    flags |= ESCH_FACE_BCLINE;
+                if (fdlg.m_caline)
+                    flags |= ESCH_FACE_CALINE;
+
+                if (fdlg.m_1sided)
+                    flags |= ESCH_FACE_ONESIDED;
+
+                if (fdlg.m_allow_persp)
+                    flags |= ESCH_FACE_ALLOWPERSP;
+
+                assert(ESCH_FACE_SELFILUM_MASK == 0xf00000);
+
+                flags |= (fdlg.m_selfi << 20) & ESCH_FACE_SELFILUM_MASK;
+
+                //ÄÄÄ Application Flags
+                flags &= ~(ESCH_FACE_APP0
+                           | ESCH_FACE_APP1
+                           | ESCH_FACE_APP2
+                           | ESCH_FACE_APP3);
+
+                if (afdlg.m_app0)
+                    flags |= ESCH_FACE_APP0;
+                if (afdlg.m_app1)
+                    flags |= ESCH_FACE_APP1;
+                if (afdlg.m_app2)
+                    flags |= ESCH_FACE_APP2;
+                if (afdlg.m_app3)
+                    flags |= ESCH_FACE_APP3;
+
+                face->flags = flags;
+
+                assert(pDoc);
+                pDoc->SetModifiedFlag();
+                
+                UpdateData(FALSE);
+            }
+
+            ivory_hunlock(f);
+        }
+        else
+        {
+            AfxMessageBox("Face Locked Failed",MB_OK | MB_ICONEXCLAMATION);
+        }
+    }
+}
+
+
+void MeshPropFacePage::OnDblClick() 
+{
+    cursel = m_fList.GetCurSel();
+    ui_face_properties();
+}
+
+void MeshPropFacePage::OnProperties() 
+{
+    cursel = m_fList.GetCurSel();
+    ui_face_properties();
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// MeshPropTexturePage                                                      ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+IMPLEMENT_DYNCREATE(MeshPropTexturePage, CPropertyPage)
+
+BEGIN_MESSAGE_MAP(MeshPropTexturePage, CPropertyPage)
+	//{{AFX_MSG_MAP(MeshPropTexturePage)
+	ON_BN_CLICKED(IDC_MPROP_TXTPROP, OnProperties)
+	ON_LBN_DBLCLK(IDC_MPROP_TXTLIST, OnDblClick)
+	//}}AFX_MSG_MAP
+END_MESSAGE_MAP()
+
+MeshPropTexturePage::MeshPropTexturePage() :
+     CPropertyPage(MeshPropTexturePage::IDD),
+     tmax(0),
+     txt(0),
+     cursel(0),
+     pDoc(0)
+{
+	//{{AFX_DATA_INIT(MeshPropTexturePage)
+		// NOTE: the ClassWizard will add member initialization here
+	//}}AFX_DATA_INIT
+}
+
+MeshPropTexturePage::~MeshPropTexturePage()
+{
+}
+
+void MeshPropTexturePage::DoDataExchange(CDataExchange* pDX)
+{
+	CPropertyPage::DoDataExchange(pDX);
+	//{{AFX_DATA_MAP(MeshPropTexturePage)
+	DDX_Control(pDX, IDC_MPROP_TXTPROP, m_txtProp);
+	DDX_Control(pDX, IDC_MPROP_TXTLIST, m_txtList);
+	//}}AFX_DATA_MAP
+
+    if (!pDX->m_bSaveAndValidate)
+    {
+        if (cursel < 0 || cursel > (int)tmax)
+            cursel = 0;
+
+        m_txtList.ResetContent();
+        if (txt)
+        {
+            for(ulong i=0; i < tmax; i++)
+            {
+                char buff[32];
+                wsprintf(buff,"[%03d]   %16s",i,(txt[i]) ? txt[i]->name : "?");
+                m_txtList.AddString(buff);
+            }
+            if (i > 0)
+            {
+                m_txtProp.EnableWindow(1);
+                m_txtList.SetCurSel(cursel);
+            }
+            else
+            {
+                m_txtProp.EnableWindow(0);
+            }
+        }
+    }
+}
+
+void MeshPropTexturePage::ui_texture_properties()
+{
+    if (cursel != LB_ERR && cursel < (int)tmax)
+    {
+        assert(txt);
+
+        EschTexture *t=txt[cursel];
+
+        if (t)
+        {
+            //ÄÄÄ General
+            TexturePropGenPage gdlg;
+            gdlg.m_name = t->name;
+            gdlg.m_name = gdlg.m_name.Left(ESCH_MAX_NAME);
+
+            switch (t->get_type())
+            {
+                case ESCH_TXTT_STATIC:
+                    gdlg.m_type = 1;
+                    break;
+                case ESCH_TXTT_MFRAME:
+                    gdlg.m_type = 2;
+                    break;
+                default:
+                    gdlg.m_type = 0;
+                    break;
+            }
+
+            t->lock();
+            if (t->ptr)
+            {
+                gdlg.m_width = t->ptr->width;
+                gdlg.m_height = t->ptr->height;
+            }
+            t->unlock();
+
+            gdlg.m_nframes = (t->get_type() == ESCH_TXTT_MFRAME)
+                             ? ((EschMultiFrameTexture*)t)->max
+                             : 1;
+
+            gdlg.m_animate = (t->flags & ESCH_TXT_SKIPANIMATE) ? 0 : 1;
+
+            //ÄÄÄ Application Flags
+            TexturePropAppFlagsPage  afdlg;
+            afdlg.m_app0 = (t->flags & ESCH_TXT_APP0) ? 1 : 0;
+            afdlg.m_app1 = (t->flags & ESCH_TXT_APP1) ? 1 : 0;
+            afdlg.m_app2 = (t->flags & ESCH_TXT_APP2) ? 1 : 0;
+            afdlg.m_app3 = (t->flags & ESCH_TXT_APP3) ? 1 : 0;
+            afdlg.m_app4 = (t->flags & ESCH_TXT_APP4) ? 1 : 0;
+            afdlg.m_app5 = (t->flags & ESCH_TXT_APP5) ? 1 : 0;
+            afdlg.m_app6 = (t->flags & ESCH_TXT_APP6) ? 1 : 0;
+            afdlg.m_app7 = (t->flags & ESCH_TXT_APP7) ? 1 : 0;
+
+            //ÄÄÄ Interact
+            CPropertySheet  sh("Texture Properties");
+            sh.AddPage(&gdlg);
+            sh.AddPage(&afdlg);
+
+            //ÄÄÄ Store results, if OK
+            if (sh.DoModal() == IDOK)
+            {
+                //ÄÄÄ General
+                strncpy(t->name,gdlg.m_name,ESCH_MAX_NAME);
+
+                if (gdlg.m_animate)
+                    t->flags &= ~ESCH_TXT_SKIPANIMATE;
+                else
+                    t->flags |= ESCH_TXT_SKIPANIMATE;
+
+                //ÄÄÄ Application Flags
+                dword flags = t->flags;
+                flags &= ~(ESCH_TXT_APP0
+                           | ESCH_TXT_APP1
+                           | ESCH_TXT_APP2
+                           | ESCH_TXT_APP3
+                           | ESCH_TXT_APP4
+                           | ESCH_TXT_APP5
+                           | ESCH_TXT_APP6
+                           | ESCH_TXT_APP7);
+
+                if (afdlg.m_app0)
+                    flags |= ESCH_TXT_APP0;
+                if (afdlg.m_app1)
+                    flags |= ESCH_TXT_APP1;
+                if (afdlg.m_app2)
+                    flags |= ESCH_TXT_APP2;
+                if (afdlg.m_app3)
+                    flags |= ESCH_TXT_APP3;
+                if (afdlg.m_app4)
+                    flags |= ESCH_TXT_APP4;
+                if (afdlg.m_app5)
+                    flags |= ESCH_TXT_APP5;
+                if (afdlg.m_app6)
+                    flags |= ESCH_TXT_APP6;
+                if (afdlg.m_app7)
+                    flags |= ESCH_TXT_APP7;
+                
+                t->set_flags(flags);
+
+                assert(pDoc);
+                pDoc->SetModifiedFlag();
+
+                UpdateData(FALSE);
+            }
+        }
+        else
+        {
+            AfxMessageBox("No Texture Data",MB_OK | MB_ICONEXCLAMATION);
+        }
+    }
+}
+
+void MeshPropTexturePage::OnDblClick() 
+{
+    cursel = m_txtList.GetCurSel();
+    ui_texture_properties();
+}
+
+void MeshPropTexturePage::OnProperties() 
+{
+    cursel = m_txtList.GetCurSel();
+    ui_texture_properties();
+}
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // MeshPropAppFlagsPage                                                     ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 IMPLEMENT_DYNCREATE(MeshPropAppFlagsPage, CPropertyPage)
+
+BEGIN_MESSAGE_MAP(MeshPropAppFlagsPage, CPropertyPage)
+	//{{AFX_MSG_MAP(MeshPropAppFlagsPage)
+		// NOTE: the ClassWizard will add message map macros here
+	//}}AFX_MSG_MAP
+END_MESSAGE_MAP()
 
 MeshPropAppFlagsPage::MeshPropAppFlagsPage() : CPropertyPage(MeshPropAppFlagsPage::IDD)
 {
@@ -983,10 +1819,5 @@ void MeshPropAppFlagsPage::DoDataExchange(CDataExchange* pDX)
 	//}}AFX_DATA_MAP
 }
 
-BEGIN_MESSAGE_MAP(MeshPropAppFlagsPage, CPropertyPage)
-	//{{AFX_MSG_MAP(MeshPropAppFlagsPage)
-		// NOTE: the ClassWizard will add message map macros here
-	//}}AFX_MSG_MAP
-END_MESSAGE_MAP()
-
 //°±² eof - eshtdlg.cpp ²±°
+

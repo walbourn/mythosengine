@@ -8,7 +8,7 @@
 //ששששש²±²ששששששש²±²שששש²±²ש²±²שששש²±²ש²±²שששש²±²ש²±²שששששששש²±²שששש²±²שששששש
 //שששש²²²²²²²²²²ש²²²²²²²²ששש²²²²²²²²שש²²²שששש²²²ש²²²²²²²²²²ש²²²שששש²²²ששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//שששששששששששCopyrightש(c)ש1994-1996שbyשCharybdisשEnterprises,שInc.שששששששששש
+//שששששששששששCopyrightש(c)ש1994-1997שbyשCharybdisשEnterprises,שInc.שששששששששש
 //ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
 //ששששששששששששששששששששש Microsoft Windows '95 Version ששששששששששששששששששששששש
@@ -214,7 +214,7 @@ struct EschFileMeshMTL
 
 
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ¿
-// FORM 'EMTL' - Material Data Form.                                        ³
+// FORM 'EMTL', 'EMT1' - Material Data Form.                                ³
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִÙ
 
 //ִִִ 'HDR ' - Material Header
@@ -223,11 +223,21 @@ struct EschFileMtlMHDR
     char    name[ESCH_MAX_NAME];
     ushort  xsize;
     ushort  ysize;
-    ushort  nframes;
-    word    type;
-    char    na[8];
+    ushort  nframes;        // Always 1 for EMTL
+    byte    type;
+    byte    compress;
+    dword   flags;
+    char    na[4];
     char    pname[16];
 };
+
+#define ESCH_MTL_TYPE_8BIT          1
+#define ESCH_MTL_TYPE_8BIT_TRANSP   2
+#define ESCH_MTL_TYPE_24BIT         3
+#define ESCH_MTL_TYPE_32BIT         4
+
+#define ESCH_MTL_COMPRESS_NONE      0
+#define ESCH_MTL_COMPRESS_RLE       1
 
 //ִִִ 'BODY' - Material Body
 // Raw data for the bitmap (use type in header to decode)

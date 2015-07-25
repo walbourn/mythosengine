@@ -8,7 +8,7 @@
                            /  /            \  \
                           /__/              \__\
  
-             Copyright (c) 1994-1996 by Charybdis Enterprises, Inc.
+             Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.
                             All Rights Reserved.
 
                             Windows '95 Version
@@ -41,11 +41,11 @@
 
  ---------------------------------------------------------------------------
 
-                         *** Version 1.2 Release ***
+                         *** Version 1.3 Release ***
 
-                                August 27, 1996
+                                March 11, 1997
 
- This is the third full release of the MythOS collection.  Usage of this 
+ This is the fourth full release of the MythOS collection.  Usage of this 
  library is subject to your license agreement.  All materials herein 
  should be treated as confidential information.
 
@@ -75,6 +75,11 @@
  |  +--Assert                       Assert version of libraries
  |
  +--Source
+    +--Bach                         Bach (Sound library)
+    |  +--Inc (source only)
+    |  |
+    |  +--Obj (source only)
+    |   
     +--Bozo                         Bozo (Task switcher)
     |  +--Inc (source only)
     |  |
@@ -216,16 +221,22 @@
     README.TXT's are in each of the library component directories with
     current status and work notes.
 
-    This version of MythOS was built with Microsoft Visual C++ v4.1.  The
+    This version of MythOS was built with Microsoft Visual C++ v4.2.  The
     MFC-based tools will therefore not compile with v2.x MSVC.
 
     Note: The Escher Exporter must be built using Watcom v10 and the 
           Autodesk IPAS4 Toolkit, since it is a 3D Studio Plug-In module.
+          It also uses the Autodesk Animation Support Libraries R2.0.
 
     MFC Version 4.x support DLLs are installed as part of the MythOS
     installation procedure since they are required by the MFC-based tools.
 
-    The Van Gogh library documentation is not yet complete.
+    The Van Gogh library documentation is not complete.  Van Gogh v2 is
+    under development and is being documented as part of this effort.
+
+    The Bach library has been included with this release, although this
+    is still under development.  The documentation is only a basic
+    template.
     
     Several of the utilities require a PD utility, Flex, which must be 
     located in C:\FLEX in order to build the executable.  Unzip the FLEX.ZIP

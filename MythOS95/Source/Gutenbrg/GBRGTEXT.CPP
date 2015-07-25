@@ -11,7 +11,7 @@
 //                     Text Output and Font Management System
 //                          Microsoft Windows '95 Version
 //
-//            Copyright (c) 1995, 1996 by Charybdis Enterprises, Inc.
+//            Copyright (c) 1995-1997 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved.
 //
 //컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
@@ -155,8 +155,8 @@ void GBergText::out_wrap (const char *text, const VngoRect *rct)
     // If we have no rectangle, default to the viewport rectangle
     if (rct == 0)
     {
-        trct.x  = vport->vbuff.left;
-        trct.y  = vport->vbuff.top;
+        trct.x  = 0;
+        trct.y  = 0;
         trct.dx = vport->vbuff.width;
         trct.dy = vport->vbuff.height;
         rct = &trct;

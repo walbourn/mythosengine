@@ -2,11 +2,11 @@
 //
 //                                                           %__________%
 //                                                          %/ . .  .   \%
-//           Van Gogh 2D-Display Library                     |  . .  o. | 
+//           Van Gogh 2D-Display Library                     |  . .  o. |
 //                                                           |. _  .   .|
-//          Microsoft Windows '95 Version                    | / \   .  | 
+//          Microsoft Windows '95 Version                    | / \   .  |
 //                                                           |_|_|_._._.|
-// Copyright (c) 1994-1996 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
+// Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
 //              All rights reserved.                        %\__________/%
 //                                                           %          %
 //
@@ -35,7 +35,7 @@
 //같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같�
 //
 //                                Includes
-//                                
+//
 //같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같�
 
 #include <string.h>
@@ -51,7 +51,7 @@
 //
 //같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같�
 
-#define MIN(a,b)  ((a) < (b)) ? (a) : (b)  
+#define MIN(a,b)  ((a) < (b)) ? (a) : (b)
 
 
 //같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같�
@@ -98,8 +98,6 @@ VNGError VngoVVport8::init (long width,long height,long org_x,long org_y,VngoPal
     vbuff.pitch = width;
     vbuff.height = height;
     vbuff.zpitch = vbuff.pitch << 1;
-    vbuff.left = org_x;
-    vbuff.top = org_y;
     vflags = flags;
     vflags |= VNGO_PAL_MAPPED_DEV;
     size_in_bytes = width * height;
@@ -144,8 +142,35 @@ VNGError VngoVVport8::init (long width,long height,long org_x,long org_y,VngoPal
             return (VNGO_MEMALLOC_ERROR);
         }
     }
+    long max_dem = width;
+    if (height > width)
+        max_dem = height;
 
-    vbuff.invert = vngo_get_invert();
+    vbuff.edge1 = (VngoPoint2*)ivory_alloc(max_dem * sizeof(VngoPoint2));
+    if (vbuff.edge1 == NULL)
+    {
+        if(vflags & VNGO_ZBUFFER_DEV)
+        {
+            ivory_free((void **)&(vbuff.zbuff_ptr));
+            ivory_free((void **)&(vbuff.ztable));
+        }
+        ivory_free((void**)&(vbuff.ytable));
+        return (VNGO_MEMALLOC_ERROR);
+    }
+
+    vbuff.edge2 = (VngoPoint2*)ivory_alloc(max_dem * sizeof(VngoPoint2));
+    if (vbuff.edge2 == NULL)
+    {
+        if(vflags & VNGO_ZBUFFER_DEV)
+        {
+            ivory_free((void **)&(vbuff.zbuff_ptr));
+            ivory_free((void **)&(vbuff.ztable));
+        }
+        ivory_free((void**)&(vbuff.ytable));
+        ivory_free((void**)&(vbuff.edge1));
+        return (VNGO_MEMALLOC_ERROR);
+    }
+
 
     if (my_pal)
     {
@@ -199,6 +224,14 @@ VngoVVport8::~VngoVVport8()
     if (vbuff.ztable && vflags & VNGO_ZBUFFER_DEV)
     {
         ivory_free((void **)&(vbuff.ztable));
+    }
+    if (vbuff.edge1)
+    {
+        ivory_free((void **)&vbuff.edge1);
+    }
+    if (vbuff.edge2)
+    {
+        ivory_free((void **)&vbuff.edge2);
     }
 }
 
@@ -262,7 +295,7 @@ void VngoVVport8::reset(dword c,dword farz)
 
 VNGError VngoVVport8::clip_pixel (VngoPoint *pt, VngoColor24bit *rgb_val, VngoRect *clip_rect)
 {
-    VngoRect vprect(vbuff.left,vbuff.top,vbuff.width,vbuff.height);
+    VngoRect vprect(0,0,vbuff.width,vbuff.height);
 
     if (clip_rect)
     {
@@ -277,9 +310,9 @@ VNGError VngoVVport8::pixel(VngoPoint *pt, VngoColor24bit *rgb_val)
 {
     assert(lock_status);
 
-    assert (pt->x < vbuff.width);  
+    assert (pt->x < vbuff.width);
     assert (pt->x >= 0);
-    assert (pt->y < vbuff.height); 
+    assert (pt->y < vbuff.height);
     assert (pt->y >= 0);
     if (!rgb_val)
     {
@@ -308,6 +341,40 @@ VNGError VngoVVport8::pixel(VngoPoint *pt, VngoColor24bit *rgb_val)
         }
     }
     return VNGO_NO_ERROR;
+}
+
+
+VNGError VngoVVport8::clip_pixel (VngoPoint2 *pt, VngoColor24bit *rgb_val, VngoRect *clip_rect)
+{
+    VngoRect vprect(0,0,vbuff.width,vbuff.height);
+
+    VngoPoint   tpt;
+    tpt.x = (pt->x + 0x8000) >> 16;
+    tpt.x = (pt->y + 0x8000) >> 16;
+    tpt.z = pt->z;
+    tpt.clr = pt->clr;
+    tpt.shade = pt->shade;
+
+    if (clip_rect)
+    {
+        vprect.clip_to(*clip_rect);
+    }
+    if (vprect.point_in(tpt))
+        return pixel(&tpt,rgb_val);
+
+    return VNGO_NO_ERROR;
+}
+
+VNGError VngoVVport8::pixel(VngoPoint2 *pt, VngoColor24bit *rgb_val)
+{
+    VngoPoint   tpt;
+    tpt.x = (pt->x + 0x8000) >> 16;
+    tpt.x = (pt->y + 0x8000) >> 16;
+    tpt.z = pt->z;
+    tpt.clr = pt->clr;
+    tpt.shade = pt->shade;
+
+    return pixel(&tpt,rgb_val);
 }
 
 dword VngoVVport8::read_pixel(int x, int y, VngoPoint *dest)
@@ -360,7 +427,7 @@ VNGError VngoVVport8::clip_frect(VngoRect *rect,dword color, VngoRect *clip)
 {
     assert(lock_status);
 
-    VngoRect vprect(vbuff.left,vbuff.top,vbuff.width,vbuff.height);
+    VngoRect vprect(0,0,vbuff.width,vbuff.height);
     VngoRect trect = *rect;
     if (clip)
     {
@@ -397,25 +464,62 @@ VNGError VngoVVport8::line(VngoPoint *p1,VngoPoint *p2, VngoColor24bit *rgb_val)
         tp1.clr = vbuff.pal->get_index(*rgb_val);
         tp1.shade = vbuff.pal->shd_pal->mid_point - 1;
     }
-    if (vflags & VNGO_ZBUFFER_ACTIVE)
-    {
-        vngo_line(this,&tp1,p2);
-    }
-    else
-    {
-        vngo_line8(&vbuff,&tp1,p2);
-    }
+
+    vngo_line(this,&tp1,p2);
+
     return VNGO_NO_ERROR;
 }
 
 
-VNGError VngoVVport8::clip_line(VngoPoint *p1,VngoPoint *p2, 
+VNGError VngoVVport8::line(VngoPoint2 *p1,VngoPoint2 *p2, VngoColor24bit *rgb_val)
+{
+    VngoPoint tp1,tp2;
+
+    tp1.x = (p1->x + 0x8000) >> 16;
+    tp1.y = (p1->y + 0x8000) >> 16;
+    tp1.z = p1->z;
+    tp1.clr = p1->clr;
+    tp1.shade = p1->clr;
+
+    tp2.x = (p2->x + 0x8000) >> 16;
+    tp2.y = (p2->y + 0x8000) >> 16;
+    tp2.z = p2->z;
+    tp2.clr = p2->clr;
+    tp2.shade = p2->clr;
+
+    return line(&tp1,&tp2,rgb_val);
+}
+
+VNGError VngoVVport8::clip_line(VngoPoint2 *p1,VngoPoint2 *p2,
+                                VngoColor24bit *rgb_val,
+                                VngoRect *clip_rect)
+{
+    VngoPoint tp1,tp2;
+
+    tp1.x = (p1->x + 0x8000) >> 16;
+    tp1.y = (p1->y + 0x8000) >> 16;
+    tp1.z = p1->z;
+    tp1.clr = p1->clr;
+    tp1.shade = p1->clr;
+
+    tp2.x = (p2->x + 0x8000) >> 16;
+    tp2.y = (p2->y + 0x8000) >> 16;
+    tp2.z = p2->z;
+    tp2.clr = p2->clr;
+    tp2.shade = p2->clr;
+
+    return clip_line(&tp1,&tp2,rgb_val,clip_rect);
+}
+
+
+
+VNGError VngoVVport8::clip_line(VngoPoint *p1,VngoPoint *p2,
                                 VngoColor24bit *rgb_val,
                                 VngoRect *clip_rect)
 {
     assert(lock_status);
 
-    VngoRect    crect(vbuff.left,vbuff.top,vbuff.width-1,vbuff.height-1);
+    VngoRect    crect(0,0,vbuff.width-1,vbuff.height-1);
 
     if (clip_rect)
         crect.clip_to(*clip_rect);
@@ -539,7 +643,7 @@ VNGError VngoVVport8::clip_line(VngoPoint *p1,VngoPoint *p2,
         dy = flx_16mul16(dy, scale);
 
         if (vflags & VNGO_ZBUFFER_ACTIVE)
-        {   
+        {
             dz = flx_16mul16(dz,scale);
             tp1.z += dz.flx;
         }
@@ -583,14 +687,9 @@ VNGError VngoVVport8::clip_line(VngoPoint *p1,VngoPoint *p2,
         tp1.shade = vbuff.pal->shd_pal->mid_point - 1;
         tp2.shade = tp1.shade;
     }
-    if (vflags & VNGO_ZBUFFER_ACTIVE)
-    {
-        vngo_line(this,&tp1,&tp2);
-    }
-    else
-    {
-        vngo_line8(&vbuff,&tp1,&tp2);
-    }
+
+    vngo_line(this,&tp1,&tp2);
+
     return VNGO_NO_ERROR;
 }
 
@@ -620,11 +719,50 @@ VNGError VngoVVport8::gline(VngoPoint *p1,VngoPoint *p2)
     return VNGO_NO_ERROR;
 }
 
+VNGError VngoVVport8::gline(VngoPoint2 *p1,VngoPoint2 *p2)
+{
+    VngoPoint tp1,tp2;
+
+    tp1.x = (p1->x + 0x8000) >> 16;
+    tp1.y = (p1->y + 0x8000) >> 16;
+    tp1.z = p1->z;
+    tp1.clr = p1->clr;
+    tp1.shade = p1->clr;
+
+    tp2.x = (p2->x + 0x8000) >> 16;
+    tp2.y = (p2->y + 0x8000) >> 16;
+    tp2.z = p2->z;
+    tp2.clr = p2->clr;
+    tp2.shade = p2->clr;
+
+    return gline(&tp1,&tp2);
+}
+
+VNGError VngoVVport8::clip_gline(VngoPoint2 *p1,VngoPoint2 *p2,
+                                VngoRect *clip_rect)
+{
+    VngoPoint tp1,tp2;
+
+    tp1.x = (p1->x + 0x8000) >> 16;
+    tp1.y = (p1->y + 0x8000) >> 16;
+    tp1.z = p1->z;
+    tp1.clr = p1->clr;
+    tp1.shade = p1->clr;
+
+    tp2.x = (p2->x + 0x8000) >> 16;
+    tp2.y = (p2->y + 0x8000) >> 16;
+    tp2.z = p2->z;
+    tp2.clr = p2->clr;
+    tp2.shade = p2->clr;
+
+    return clip_gline(&tp1,&tp2,clip_rect);
+}
+
 VNGError VngoVVport8::clip_gline(VngoPoint *p1, VngoPoint *p2, VngoRect *clip_rect)
 {
     assert(lock_status);
 
-    VngoRect    crect(vbuff.left,vbuff.top,vbuff.width-1,vbuff.height-1);
+    VngoRect    crect(0,0,vbuff.width-1,vbuff.height-1);
 
     if (clip_rect)
         crect.clip_to(*clip_rect);
@@ -829,974 +967,43 @@ VNGError VngoVVport8::clip_gline_persp(VngoPoint *p1,VngoPoint *p2,VngoRect *cli
     return VNGO_NOT_SUPPORTED;
 }
 
-VNGError VngoVVport8::image_trans (VngoRect *dest_rect,VngoTexture *img,dword flags)
+VNGError VngoVVport8::gline_persp(VngoPoint2 *p1,VngoPoint2 *p2)
 {
-    assert(lock_status);
+    VngoPoint tp1,tp2;
 
-    long        w,h;
-    VngoRect    dr;
+    tp1.x = (p1->x + 0x8000) >> 16;
+    tp1.y = (p1->y + 0x8000) >> 16;
+    tp1.z = p1->z;
+    tp1.clr = p1->clr;
+    tp1.shade = p1->clr;
 
-    if (!(img->flags & VNGO_TEXTURE_8BIT))
-    {
-        // For now, we only support 8bpp textures here.
-        return (VNGO_UNSUPPORTED_TEXTURE);
-    }
+    tp2.x = (p2->x + 0x8000) >> 16;
+    tp2.y = (p2->y + 0x8000) >> 16;
+    tp2.z = p2->z;
+    tp2.clr = p2->clr;
+    tp2.shade = p2->clr;
 
-    w = MIN(img->width,dest_rect->dx);
-    h = MIN(img->height,dest_rect->dy);
-
-    dr.x = dest_rect->x;
-    dr.y = dest_rect->y;
-    dr.dx = w;
-    dr.dy = h;
-
-    if (((dest_rect->x + w) < vbuff.width) &&
-        ((dest_rect->y + h) < vbuff.height) &&
-        (dest_rect->x >= 0) && (dest_rect->y >= 0))
-    {
-        vngo_itrans8 (&vbuff,&dr,img,flags);
-    }
-    else
-    {
-        if ((dest_rect->x < vbuff.width) && (dest_rect->y < vbuff.height) &&
-            (dest_rect->x + w >= 0) && (dest_rect->y + h >= 0))
-        {
-            char    *lptr,*tptr;
-            dword   t;
-            dword   tx=0,ty=0;
-            long    xcount,ycount;
-
-            if (dest_rect->y >= 0)
-            {
-                t = vbuff.ytable[dest_rect->y];
-                if ((dest_rect->y + h) < vbuff.height)
-                    ycount = h;
-                else
-                    ycount = vbuff.height - dest_rect->y;
-            }
-            else        // starting Y is negative in this case.
-            {
-                ty = -dest_rect->y;
-                t = vbuff.ytable[0];
-                if ((dest_rect->y + h) > vbuff.height)
-                {
-                    ycount = vbuff.height;
-                }
-                else
-                {
-                    ycount = h + dest_rect->y;  
-                }
-
-            }
-            t += (dword)(vbuff.scrn_ptr);
-
-            // At this point t = the pointer to the begining of the first
-            // scan line to be drawn.
-
-            if (dest_rect->x >= 0)
-            {
-                t += dest_rect->x;
-                if ((dest_rect->x + w) < vbuff.width)
-                    xcount = w;
-                else
-                    xcount = vbuff.width - dest_rect->x;
-            }
-            else        // starting X is negative in this case.
-            {
-                tx = -dest_rect->x;
-                if ((dest_rect->x + w) > vbuff.width)
-                {
-                    xcount = vbuff.width;
-                }
-                else
-                {
-                    xcount = w + dest_rect->x;  
-                }
-            }
-            lptr = (char *)t;
-            tptr = (char *)((ty * img->width) + tx + (dword)img->tex);
-            for (int i=0;i < ycount;i++)
-            {
-                vngo_iline8(lptr,tptr,xcount,flags);
-                lptr += vbuff.pitch;
-                tptr += img->width;
-            }
-
-        }
-    }
-    return VNGO_NO_ERROR;
+    return gline_persp(&tp1,&tp2);
 }
 
-VNGError VngoVVport8::image_trans_s (VngoRect *dest_rect,VngoTexture *img,
-                                 dword shade, dword flags)
+VNGError VngoVVport8::clip_gline_persp(VngoPoint2 *p1,VngoPoint2 *p2,VngoRect *clip_rect)
 {
-    assert(lock_status);
+    VngoPoint tp1,tp2;
 
-    long        w,h;
-    VngoRect    dr;
+    tp1.x = (p1->x + 0x8000) >> 16;
+    tp1.y = (p1->y + 0x8000) >> 16;
+    tp1.z = p1->z;
+    tp1.clr = p1->clr;
+    tp1.shade = p1->clr;
 
-    if (!(img->flags & VNGO_TEXTURE_8BIT))
-    {
-        return (VNGO_UNSUPPORTED_TEXTURE);
-    }
+    tp2.x = (p2->x + 0x8000) >> 16;
+    tp2.y = (p2->y + 0x8000) >> 16;
+    tp2.z = p2->z;
+    tp2.clr = p2->clr;
+    tp2.shade = p2->clr;
 
-    w = MIN(img->width,dest_rect->dx);
-    h = MIN(img->height,dest_rect->dy);
-
-    dr.x = dest_rect->x;
-    dr.y = dest_rect->y;
-    dr.dx = w;
-    dr.dy = h;
-
-    if (((dest_rect->x + w) < vbuff.width) &&
-        ((dest_rect->y + h) < vbuff.height) &&
-        (dest_rect->x >= 0) && (dest_rect->y >= 0))
-    {
-        vngo_itrans_s8 (&vbuff,&dr,img,shade,flags);
-    }
-    else
-    {
-        if ((dest_rect->x < vbuff.width) && (dest_rect->y < vbuff.height) &&
-            (dest_rect->x + w >= 0) && (dest_rect->y + h >= 0))
-        {
-            char    *lptr,*tptr;
-            dword   t;
-            dword   tx=0,ty=0;
-            long    xcount,ycount;
-
-            if (dest_rect->y >= 0)
-            {
-                t = vbuff.ytable[dest_rect->y];
-                if ((dest_rect->y + h) < vbuff.height)
-                    ycount = h;
-                else
-                    ycount = vbuff.height - dest_rect->y;
-            }
-            else        // starting Y is negative in this case.
-            {
-                ty = -dest_rect->y;
-                t = vbuff.ytable[0];
-                if ((dest_rect->y + h) > vbuff.height)
-                {
-                    ycount = vbuff.height;
-                }
-                else
-                {
-                    ycount = h + dest_rect->y;  
-                }
-
-            }
-            t += (dword)(vbuff.scrn_ptr);
-
-            // At this point t = the pointer to the begining of the first
-            // scan line to be drawn.
-
-            if (dest_rect->x >= 0)
-            {
-                t += dest_rect->x;
-                if ((dest_rect->x + w) < vbuff.width)
-                    xcount = w;
-                else
-                    xcount = vbuff.width - dest_rect->x;
-            }
-            else        // starting X is negative in this case.
-            {
-                tx = -dest_rect->x;
-                if ((dest_rect->x + w) > vbuff.width)
-                {
-                    xcount = vbuff.width;
-                }
-                else
-                {
-                    xcount = w + dest_rect->x;  
-                }
-            }
-            lptr = (char *)t;
-            tptr = (char *)((ty * img->width) + tx + (dword)img->tex);
-            for (int i=0;i < ycount;i++)
-            {
-                vngo_iline_s8(lptr,tptr,xcount,(void *)shade,flags);
-                lptr += vbuff.pitch;
-                tptr += img->width;
-            }
-
-        }
-    }
-    return VNGO_NO_ERROR;
+    return clip_gline_persp(&tp1,&tp2,clip_rect);
 }
 
-
-VNGError VngoVVport8::image_trans_z (VngoRect *dest_rect,VngoTexture *img,
-                                 dword depth, dword flags)
-{
-#if 1
-    assert(lock_status);
-
-    long        w,h;
-    VngoRect    dr;
-
-    if (!(img->flags & VNGO_TEXTURE_8BIT))
-    {
-        return (VNGO_UNSUPPORTED_TEXTURE);
-    }
-
-    w = MIN(img->width,dest_rect->dx);
-    h = MIN(img->height,dest_rect->dy);
-
-    dr.x = dest_rect->x;
-    dr.y = dest_rect->y;
-    dr.dx = w;
-    dr.dy = h;
-
-#if 0   // for now draw it all by scan lines.
-    if (((dest_rect->x + w) < vbuff.width) &&
-        ((dest_rect->y + h) < vbuff.height) &&
-        (dest_rect->x >= 0) && (dest_rect->y >= 0))
-    {
-        vngo_itrans_z8 (&vbuff,&dr,img,depth,flags);
-    }
-    else
-#endif
-    {
-        if ((dest_rect->x < vbuff.width) && (dest_rect->y < vbuff.height) &&
-            (dest_rect->x + w >= 0) && (dest_rect->y + h >= 0))
-        {
-            char    *lptr,*tptr;
-            dword   t,tz;
-            dword   tx=0,ty=0;
-            long    xcount,ycount;
-
-            if (dest_rect->y >= 0)
-            {
-                t = vbuff.ytable[dest_rect->y];
-                tz = vbuff.ztable[dest_rect->y];
-                if ((dest_rect->y + h) < vbuff.height)
-                    ycount = h;
-                else
-                    ycount = vbuff.height - dest_rect->y;
-            }
-            else        // starting Y is negative in this case.
-            {
-                ty = -dest_rect->y;
-                t = vbuff.ytable[0];
-                tz = vbuff.ztable[0];
-                if ((dest_rect->y + h) > vbuff.height)
-                {
-                    ycount = vbuff.height;
-                }
-                else
-                {
-                    ycount = h + dest_rect->y;  
-                }
-
-            }
-            t += (dword)(vbuff.scrn_ptr);
-            tz += (dword)(vbuff.zbuff_ptr);
-
-            // At this point t = the pointer to the begining of the first
-            // scan line to be drawn.
-
-            if (dest_rect->x >= 0)
-            {
-                t += dest_rect->x;
-                // Don't shift if zbuffer is 8 bits deep.
-                if (vzdepth_in_bits == 16)
-                    tz += (dest_rect->x << 1);
-                else if (vzdepth_in_bits == 32)
-                    tz += dest_rect->x << 2;
-
-                if ((dest_rect->x + w) < vbuff.width)
-                    xcount = w;
-                else
-                    xcount = vbuff.width - dest_rect->x;
-            }
-            else        // starting X is negative in this case.
-            {
-                tx = -dest_rect->x;
-                if ((dest_rect->x + w) > vbuff.width)
-                {
-                    xcount = vbuff.width;
-                }
-                else
-                {
-                    xcount = w + dest_rect->x;  
-                }
-            }
-            lptr = (char *)t;
-            tptr = (char *)((ty * img->width) + tx + (dword)img->tex);
-            for (int i=0;i < ycount;i++)
-            {
-                vngo_iline_z8(lptr,(void *)tz,tptr,xcount,depth,flags);
-                lptr += vbuff.pitch;
-                tz   += vbuff.zpitch;
-                tptr += img->width;
-            }
-
-        }
-    }
-    return VNGO_NO_ERROR;
-#else
-    assert(lock_status);
-    return VNGO_NOT_SUPPORTED;
-#endif
-}
-
-VNGError VngoVVport8::image_trans_zs (VngoRect *dest_rect,VngoTexture *img, 
-                                 dword depth, dword shade, dword flags)
-{
-    assert(lock_status);
-    if (!(img->flags & VNGO_TEXTURE_8BIT))
-    {
-        return (VNGO_UNSUPPORTED_TEXTURE);
-    }
-
-    return VNGO_NOT_SUPPORTED;
-}
-
-
-
-VNGError VngoVVport8::zblit_mono (VngoRect *dest_rect,VngoZMap *img,dword fgcol,dword bgcol)
-{
-    long    w,h,x,y;
-
-    w = MIN(img->zmap.width,dest_rect->dx);
-    h = MIN(img->zmap.height,dest_rect->dy);
-
-    long    pitch;
-    long    xskip,yskip,t2;
-    byte    *ptr;
-    dword   t;
-
-    if (!(img->zmap.flags & VNGO_TEXTURE_MONO))
-    {
-        return (VNGO_UNSUPPORTED_TEXTURE);
-    }
-
-    xskip = yskip = 0;
-
-    if ((dest_rect->x < vbuff.width) && (dest_rect->y < vbuff.height) &&
-        (dest_rect->x + w >= 0) && (dest_rect->y + h >= 0))
-    {
-        pitch = img->zmap.width >> 3;
-        if (img->zmap.width & 0x7)
-        {
-            ++pitch;
-        }
-
-        // Clip to negative conditions.
-        if (dest_rect->y >=0)
-        {   // Starting Y is on the screen.
-            y = dest_rect->y;
-        }
-        else
-        {   // Starting Y is off the screen (negative).
-            t2 = h + (dest_rect->y); // Since dest_rect->y is always negative. 
-            yskip = h - t2;
-            h = t2;
-            y = 0;
-        }
-
-        t = vbuff.ytable[y];
-
-        if (dest_rect->x >= 0)
-        {   // Starting X is on the screen.
-            x = dest_rect->x;  
-        }
-        else
-        {   // Starting X is off the screen (negative).
-            t2 = w + (dest_rect->x); // Since dest_rect->x is always negative.
-            xskip = w - t2;
-            w = t2;
-            x = 0;
-        }
-
-        // Clip to positive conditions.
-        if ((y + h) > vbuff.height)
-        {
-            h = vbuff.height - y;
-        }
-        if ((x + w) > vbuff.width)
-        {
-            w = vbuff.width - x;
-        }
-
-        t += x;
-
-        if ((dest_rect->x + w) > vbuff.width)
-        {   // Ending X is off the screen.
-            w = w - (dest_rect->x - vbuff.width);
-        }
-        if ((dest_rect->y + h) > vbuff.height)
-        {   // Ending Y is off the screen.
-            h = h - (dest_rect->y - vbuff.height);
-        }
-
-        ptr = img->zmap.tex;
-        ptr += (yskip * pitch);
-        t = (t << 1) + (dword)vbuff.zbuff_ptr;
-        while (h > 0)
-        {
-            vngo_zlinemono16 ((word *)t,ptr,w,xskip,fgcol,bgcol);
-            ptr += pitch;
-            t += vbuff.zpitch;
-            --h;
-        }
-
-    }
-    return VNGO_NO_ERROR;
-}
-
-
-VNGError VngoVVport8::image_trans_mono (VngoRect *dest_rect,VngoTexture *img,dword fgcol,dword bgcol)
-{
-    assert(lock_status);
-
-    long    w,h,x,y;
-
-    if (!(img->flags & VNGO_TEXTURE_MONO))
-    {
-        return (VNGO_UNSUPPORTED_TEXTURE);
-    }
-
-    w = MIN(img->width,dest_rect->dx);
-    h = MIN(img->height,dest_rect->dy);
-
-    long    pitch;
-    long    xskip,yskip,t2;
-    byte    *ptr;
-    dword   t;
-
-    xskip = yskip = 0;
-
-    if ((dest_rect->x < vbuff.width) && (dest_rect->y < vbuff.height) &&
-        (dest_rect->x + w >= 0) && (dest_rect->y + h >= 0))
-    {
-        pitch = img->width >> 3;
-        if (img->width & 0x7)
-        {
-            ++pitch;
-        }
-
-        // Clip to negative conditions.
-        if (dest_rect->y >=0)
-        {   // Starting Y is on the screen.
-            y = dest_rect->y;
-        }
-        else
-        {   // Starting Y is off the screen (negative).
-            t2 = h + (dest_rect->y); // Since dest_rect->y is always negative. 
-            yskip = h - t2;
-            h = t2;
-            y = 0;
-        }
-
-        t = vbuff.ytable[y];
-
-        if (dest_rect->x >= 0)
-        {   // Starting X is on the screen.
-            x = dest_rect->x;  
-        }
-        else
-        {   // Starting X is off the screen (negative).
-            t2 = w + (dest_rect->x); // Since dest_rect->x is always negative.
-            xskip = w - t2;
-            w = t2;
-            x = 0;
-        }
-
-        // Clip to positive conditions.
-        if ((y + h) > vbuff.height)
-        {
-            h = vbuff.height - y;
-        }
-        if ((x + w) > vbuff.width)
-        {
-            w = vbuff.width - x;
-        }
-
-        t += x;
-
-        if ((dest_rect->x + w) > vbuff.width)
-        {   // Ending X is off the screen.
-            w = w - (dest_rect->x - vbuff.width);
-        }
-        if ((dest_rect->y + h) > vbuff.height)
-        {   // Ending Y is off the screen.
-            h = h - (dest_rect->y - vbuff.height);
-        }
-
-        ptr = img->tex;
-        ptr += (yskip * pitch);
-        t += (dword)vbuff.scrn_ptr;
-        while (h > 0)
-        {
-            vngo_ilinemono8((byte *)t,ptr,w,xskip,fgcol,bgcol);
-            ptr += pitch;
-            t += vbuff.pitch;
-            --h;
-        }
-
-    }
-    return VNGO_NO_ERROR;
-}
-
-
-VNGError VngoVVport8::vpcopy(int destx,int desty,VngoBaseDev *vp)
-{
-    assert(lock_status);
-
-#if 0   // This function is now obsolete, and not guarantied to work.
-    VngoRect r;
-    VngoTexture t;
-
-    sync();
-
-    if ((vp->vflags & VNGO_PAL_MAPPED_DEV) || 1)
-    {
-        r.x = destx;
-        r.y = desty;
-        r.dx = vbuff.width;
-        r.dy = vbuff.height;
-        t.width = (short)r.dx;
-        t.height = (short)r.dy;
-        t.tex = vbuff.scrn_ptr;
-        vp->image_trans(&r,&t);
-    }
-    return VNGO_NO_ERROR;
-#endif
-    return VNGO_NOT_SUPPORTED;
-}
-
-VNGError VngoVVport8::poly (int count,VngoPoint pts[])
-{
-    assert(lock_status);
-    assert (count < VNGO_MAX_VERTCOUNT);
-
-    VngoPoint2 tpts[VNGO_MAX_VERTCOUNT];
-    for (int i = 0; i < count; i++)
-    {
-        tpts[i].x = pts[i].x << 20;
-        tpts[i].y = pts[i].y << 20;
-        tpts[i].z = pts[i].z;
-        tpts[i].w = pts[i].w;
-        tpts[i].clr = pts[i].clr;
-        tpts[i].shade = pts[i].shade;
-        assert (pts[i].x >= 0);
-        assert (pts[i].x < vbuff.width);
-        assert (pts[i].y >= 0);
-        assert (pts[i].y < vbuff.height);
-    }
-    vngo_poly8(this,count,tpts);
-    return VNGO_NO_ERROR;
-}
-
-VNGError VngoVVport8::gpoly (int count,VngoPoint pts[])
-{
-    assert(lock_status);
-    assert (count <= VNGO_MAX_VERTCOUNT);
-
-    VngoPoint2 tpts[VNGO_MAX_VERTCOUNT];
-    for (int i=0;i < count; i++)
-    {
-        tpts[i].x = pts[i].x << 20;
-        tpts[i].y = pts[i].y << 20;
-        tpts[i].z = pts[i].z;
-        tpts[i].w = pts[i].w;
-        tpts[i].clr = pts[i].clr;
-        tpts[i].shade = pts[i].shade << 20;
-        assert (pts[i].x >= 0);
-        assert (pts[i].x < vbuff.width);
-        assert (pts[i].y >= 0);
-        assert (pts[i].y < vbuff.height);
-    }
-    vngo_gpoly8(this,count,tpts);
-    return VNGO_NO_ERROR;
-}
-
-VNGError VngoVVport8::gpoly_persp (int count,VngoPoint pts[])
-{
-    assert(lock_status);
-    assert(count < VNGO_MAX_VERTCOUNT);
-    VngoPoint2 tpts[VNGO_MAX_VERTCOUNT];
-    for (int i=0;i < count; i++)
-    {
-        tpts[i].x = pts[i].x << 20;
-        tpts[i].y = pts[i].y << 20;
-        tpts[i].z = pts[i].z;
-        tpts[i].w = pts[i].w;
-        tpts[i].clr = pts[i].clr;
-        tpts[i].shade = pts[i].shade << 20;
-        assert (pts[i].x >= 0);
-        assert (pts[i].x < vbuff.width);
-        assert (pts[i].y >= 0);
-        assert (pts[i].y < vbuff.height);
-    }
-    vngo_gpoly8(this,count,tpts);
-    return VNGO_NO_ERROR;
-}
-
-VNGError VngoVVport8::tpoly (int count,VngoPoint pts[],VngoTexture *tex)
-{
-    assert(lock_status);
-    assert (count <= VNGO_MAX_VERTCOUNT);
-
-    if (!(tex->flags & VNGO_TEXTURE_8BIT))
-    {
-        return (VNGO_UNSUPPORTED_TEXTURE);
-    }
-
-    VngoTextureInfo tptr;
-
-    tptr.vtxt = tex;
-    switch (tex->width)
-    {
-        case    32:
-            tptr.widthshift     = 5;
-            tptr.u_upshift      = 11;
-            break;
-        case    64:
-            tptr.widthshift     = 6;
-            tptr.u_upshift      = 10;
-            break;
-        case    128:
-            tptr.widthshift     = 7;
-            tptr.u_upshift      = 9;
-            break;
-        case    256:        
-            tptr.widthshift     = 8;
-            tptr.u_upshift      = 8;
-            break;
-        case    16:
-            tptr.widthshift     = 4;
-            tptr.u_upshift      = 12;
-            break;
-        default:
-            return (VNGO_UNSUPPORTED_TEXTURE);
-    }
-    tptr.u_downshift    = 32 - tptr.widthshift;
-
-    switch (tex->height)
-    {
-        case    32:
-            tptr.heightshift    = 5;
-            tptr.v_upshift      = 11;
-            tptr.v_downshift    = 27;
-            break;
-        case    64:
-            tptr.heightshift    = 6;
-            tptr.v_upshift      = 10;
-            tptr.v_downshift    = 26;
-            break;
-        case    128:
-            tptr.heightshift    = 7;
-            tptr.v_upshift      = 9;
-            tptr.v_downshift    = 25;
-            break;
-        case    256:        
-            tptr.heightshift    = 8;
-            tptr.v_upshift      = 8;
-            tptr.v_downshift    = 24;
-            break;
-        case    16:
-            tptr.heightshift    = 4;
-            tptr.v_upshift      = 12;
-            tptr.v_downshift    = 28;
-            break;
-        default:
-            return (VNGO_UNSUPPORTED_TEXTURE);
-    }
-
-    VngoPoint2 tpts[VNGO_MAX_VERTCOUNT];
-    for (int i=0;i < count;i++)
-    {
-        tpts[i].x = pts[i].x << 20;
-        tpts[i].y = pts[i].y << 20;
-        tpts[i].z = pts[i].z;
-        tpts[i].w = pts[i].w;
-        tpts[i].shade = pts[i].shade;
-        tpts[i].u = pts[i].u << tptr.widthshift;
-        tpts[i].v = pts[i].v << tptr.heightshift;
-        assert (pts[i].x >= 0);
-        assert (pts[i].x < vbuff.width);
-        assert (pts[i].y >= 0);
-        assert (pts[i].y < vbuff.height);
-    }
-
-    vngo_tpoly8(this,count,tpts,&tptr);
-    return VNGO_NO_ERROR;
-}
-
-VNGError VngoVVport8::tpoly_persp (int count,VngoPoint pts[],VngoTexture *tex)
-{
-    assert(lock_status);
-    assert (count <= VNGO_MAX_VERTCOUNT);
-
-    if (!(tex->flags & VNGO_TEXTURE_8BIT))
-    {
-        return (VNGO_UNSUPPORTED_TEXTURE);
-    }
-
-    VngoTextureInfo tptr;
-
-    tptr.vtxt = tex;
-    switch (tex->width)
-    {
-        case    32:
-            tptr.widthshift     = 5;
-            tptr.u_upshift      = 11;
-            break;
-        case    64:
-            tptr.widthshift     = 6;
-            tptr.u_upshift      = 10;
-            break;
-        case    128:
-            tptr.widthshift     = 7;
-            tptr.u_upshift      = 9;
-            break;
-        case    256:        
-            tptr.widthshift     = 8;
-            tptr.u_upshift      = 8;
-            break;
-        case    16:
-            tptr.widthshift     = 4;
-            tptr.u_upshift      = 12;
-            break;
-        default:
-            return (VNGO_UNSUPPORTED_TEXTURE);
-    }
-    tptr.u_downshift    = 32 - tptr.widthshift;
-
-    switch (tex->height)
-    {
-        case    32:
-            tptr.heightshift    = 5;
-            tptr.v_upshift      = 11;
-            tptr.v_downshift    = 27;
-            break;
-        case    64:
-            tptr.heightshift    = 6;
-            tptr.v_upshift      = 10;
-            tptr.v_downshift    = 26;
-            break;
-        case    128:
-            tptr.heightshift    = 7;
-            tptr.v_upshift      = 9;
-            tptr.v_downshift    = 25;
-            break;
-        case    256:        
-            tptr.heightshift    = 8;
-            tptr.v_upshift      = 8;
-            tptr.v_downshift    = 24;
-            break;
-        case    16:
-            tptr.heightshift    = 4;
-            tptr.v_upshift      = 12;
-            tptr.v_downshift    = 28;
-            break;
-        default:
-            return (VNGO_UNSUPPORTED_TEXTURE);
-    }
-
-
-    VngoPoint2 tpts[VNGO_MAX_VERTCOUNT];
-    for (int i=0;i < count;i++)
-    {
-        tpts[i].x = pts[i].x << 20;
-        tpts[i].y = pts[i].y << 20;
-        tpts[i].z = pts[i].z;
-        tpts[i].w = pts[i].w;
-        tpts[i].shade = pts[i].shade;
-        tpts[i].u = pts[i].u << tptr.widthshift;
-        tpts[i].v = pts[i].v << tptr.heightshift;
-        assert (pts[i].x >= 0);
-        assert (pts[i].x < vbuff.width);
-        assert (pts[i].y >= 0);
-        assert (pts[i].y < vbuff.height);
-    }
-
-    vngo_tpoly_persp8(this,count,tpts,&tptr);
-    return VNGO_NO_ERROR;
-}
-
-VNGError VngoVVport8::gtpoly (int count,VngoPoint pts[],VngoTexture *tex)
-{
-    assert( lock_status);
-    assert (count <= VNGO_MAX_VERTCOUNT);
-
-    if (!(tex->flags & VNGO_TEXTURE_8BIT))
-    {
-        return (VNGO_UNSUPPORTED_TEXTURE);
-    }
-
-    VngoTextureInfo tptr;
-
-    tptr.vtxt = tex;
-    switch (tex->width)
-    {
-        case    32:
-            tptr.widthshift     = 5;
-            tptr.u_upshift      = 11;
-            break;
-        case    64:
-            tptr.widthshift     = 6;
-            tptr.u_upshift      = 10;
-            break;
-        case    128:
-            tptr.widthshift     = 7;
-            tptr.u_upshift      = 9;
-            break;
-        case    256:        
-            tptr.widthshift     = 8;
-            tptr.u_upshift      = 8;
-            break;
-        case    16:
-            tptr.widthshift     = 4;
-            tptr.u_upshift      = 12;
-            break;
-        default:
-            return (VNGO_UNSUPPORTED_TEXTURE);
-    }
-    tptr.u_downshift    = 32 - tptr.widthshift;
-
-    switch (tex->height)
-    {
-        case    32:
-            tptr.heightshift    = 5;
-            tptr.v_upshift      = 11;
-            tptr.v_downshift    = 27;
-            break;
-        case    64:
-            tptr.heightshift    = 6;
-            tptr.v_upshift      = 10;
-            tptr.v_downshift    = 26;
-            break;
-        case    128:
-            tptr.heightshift    = 7;
-            tptr.v_upshift      = 9;
-            tptr.v_downshift    = 25;
-            break;
-        case    256:        
-            tptr.heightshift    = 8;
-            tptr.v_upshift      = 8;
-            tptr.v_downshift    = 24;
-            break;
-        case    16:
-            tptr.heightshift    = 4;
-            tptr.v_upshift      = 12;
-            tptr.v_downshift    = 28;
-            break;
-        default:
-            return (VNGO_UNSUPPORTED_TEXTURE);
-    }
-
-
-    VngoPoint2 tpts[VNGO_MAX_VERTCOUNT];
-    for (int i=0;i < count;i++)
-    {
-        tpts[i].x = pts[i].x << 20;
-        tpts[i].y = pts[i].y << 20;
-        tpts[i].z = pts[i].z;
-        tpts[i].w = pts[i].w;
-        tpts[i].shade = pts[i].shade << 20;
-        tpts[i].u = pts[i].u << tptr.widthshift;
-        tpts[i].v = pts[i].v << tptr.heightshift;
-        assert (pts[i].x >= 0);
-        assert (pts[i].x < vbuff.width);
-        assert (pts[i].y >= 0);
-        assert (pts[i].y < vbuff.height);
-    }
-    vngo_tgpoly8(this,count,tpts,&tptr);
-    return VNGO_NO_ERROR;
-}
-VNGError VngoVVport8::gtpoly_persp (int count,VngoPoint pts[],VngoTexture *tex)
-{
-    assert(lock_status);
-    assert (count <= VNGO_MAX_VERTCOUNT);
-
-    if (!(tex->flags & VNGO_TEXTURE_8BIT))
-    {
-        return (VNGO_UNSUPPORTED_TEXTURE);
-    }
-
-    VngoTextureInfo tptr;
-
-    tptr.vtxt = tex;
-    switch (tex->width)
-    {
-        case    32:
-            tptr.widthshift     = 5;
-            tptr.u_upshift      = 11;
-            break;
-        case    64:
-            tptr.widthshift     = 6;
-            tptr.u_upshift      = 10;
-            break;
-        case    128:
-            tptr.widthshift     = 7;
-            tptr.u_upshift      = 9;
-            break;
-        case    256:        
-            tptr.widthshift     = 8;
-            tptr.u_upshift      = 8;
-            break;
-        case    16:
-            tptr.widthshift     = 4;
-            tptr.u_upshift      = 12;
-            break;
-        default:
-            return (VNGO_UNSUPPORTED_TEXTURE);
-    }
-    tptr.u_downshift    = 32 - tptr.widthshift;
-
-    switch (tex->height)
-    {
-        case    32:
-            tptr.heightshift    = 5;
-            tptr.v_upshift      = 11;
-            tptr.v_downshift    = 27;
-            break;
-        case    64:
-            tptr.heightshift    = 6;
-            tptr.v_upshift      = 10;
-            tptr.v_downshift    = 26;
-            break;
-        case    128:
-            tptr.heightshift    = 7;
-            tptr.v_upshift      = 9;
-            tptr.v_downshift    = 25;
-            break;
-        case    256:        
-            tptr.heightshift    = 8;
-            tptr.v_upshift      = 8;
-            tptr.v_downshift    = 24;
-            break;
-        case    16:
-            tptr.heightshift    = 4;
-            tptr.v_upshift      = 12;
-            tptr.v_downshift    = 28;
-            break;
-        default:
-            return (VNGO_UNSUPPORTED_TEXTURE);
-    }
-
-
-    VngoPoint2 tpts[VNGO_MAX_VERTCOUNT];
-    for (int i=0;i < count;i++)
-    {
-        tpts[i].x = pts[i].x << 20;
-        tpts[i].y = pts[i].y << 20;
-        tpts[i].z = pts[i].z;
-        tpts[i].w = pts[i].w;
-        tpts[i].shade = pts[i].shade << 20;
-        tpts[i].u = pts[i].u << tptr.widthshift;
-        tpts[i].v = pts[i].v << tptr.heightshift;
-        assert (pts[i].x >= 0);
-        assert (pts[i].x < vbuff.width);
-        assert (pts[i].y >= 0);
-        assert (pts[i].y < vbuff.height);
-    }
-    vngo_tgpoly_persp8(this,count,tpts,&tptr);
-    return VNGO_NO_ERROR;
-}
 
 //갚� End of module - vngvvp8.cpp 껑�

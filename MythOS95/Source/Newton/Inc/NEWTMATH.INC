@@ -24,7 +24,7 @@
 ;
 ;                     Newtonian Physics Simulation Library
 ;
-;            Copyright (c) 1995, 1996 by Charybdis Enterprises, Inc.
+;            Copyright (c) 1995-1997 by Charybdis Enterprises, Inc.
 ;                           All Rights Reserved.
 ;
 ;                       Microsoft Windows '95 Version

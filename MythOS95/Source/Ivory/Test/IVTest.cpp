@@ -2,7 +2,7 @@
 //
 //            Ivory 95 -- A Memory Management Library for Windows 95
 //
-//            Copyright (c) 1994, 1995 by Charybdis Enterprises, Inc.
+//            Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved.
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -33,11 +33,12 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include <iostream.h>
 #include <stdlib.h>
+#include <stdio.h>
 #include <time.h>
 #include <memory.h>
 #include <assert.h>
@@ -90,7 +91,7 @@ void main ()
     const       swap_space = 1024 * 1024;
     void        *ptrs[100]; // A very handy little local
     int         i;
-    IvoryHandle h[10];
+    IvoryHandle h[100];
 
 //ÄÄÄÄ Print welcome banner ÄÄÄÄ
     cerr << "Ivory Tester - (C) 1994, 1995 by Charybdis Enterprises, Inc.\n\n";
@@ -122,7 +123,7 @@ void main ()
             memset (ptrs[j], 0xff, 0x1000 - 8);
 
             // Ensure paragraph alignment
-            assert (((ulong)ptrs[j] & 0x0f) == 0);
+//            assert (((ulong)ptrs[j] & 0x0f) == 0);
         }
     }
 
@@ -130,6 +131,33 @@ void main ()
     for (i = 0; i < 10; i++)
         if (ptrs[i])
             ivory_free (&ptrs[i]);
+
+    cerr << "Time = " << (clock() - start);
+    cerr << "Passed" << endl;
+
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+    // Handle space speed test
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+    cerr << "Testing handle space speed... ";
+    memset (ptrs, 0, sizeof (ptrs));
+    start = clock();
+    for (i = 0; i < 100; i++)
+        h[i] = ivory_halloc (0x1000 - 8);
+
+    // Test 100000 iterations
+    for (i = 0; i < 1000; i++)
+    {
+        for (int j = 0; j < 100; j++)
+        {
+            void *lock = ivory_hlock (h[j]);
+            ivory_hunlock (h[j]);
+        }
+    }
+
+    // Now, clean up any stragglers.
+    for (i = 0; i < 100; i++)
+        if (h[i])
+            ivory_hfree (&h[i]);
 
     cerr << "Time = " << (clock() - start);
     cerr << "Passed" << endl;
@@ -294,6 +322,33 @@ void main ()
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
     cerr << "Complete!" << endl;
     ivory_terminate ();
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// _charybdis_assert
+//
+// Handler for failed asserts.  If msg is set to non-NULL, then an assertMyth
+// was used with a comment.
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+extern "C" void _charybdis_assert(char *msg, char *exp, char *f, unsigned ln)
+{
+    static loop_check = 0;
+
+    if (!loop_check)
+    {
+        loop_check++;
+        cout.flush();
+        printf("\n\n±±± Assertion Failed ±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±\n"
+               "Expr:\t%s\n"
+               "File:\t%s\t\tLine %d\n",exp,f,ln);
+        if (msg)
+        {
+            printf("Comment:\n%s\n",msg);
+        }
+    }
+
+    exit(1);
 }
 
 // A support function (usually provided by MythosSystem)

@@ -18,7 +18,7 @@
 
                         Microsoft Windows '95 Version
   
-            Copyright (c) 1994, 1995 by Charybdis Enterprises, Inc.
+            Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.
                              All Rights Reserved.
   
   ---------------------------------------------------------------------------
@@ -50,5 +50,8 @@
   Pending changes -----------------------------------------------------------
 
     o Load-balancing of timer-callbacks.
+
+    o Allow use of 64-bit performance timer in Pentiums instead of
+      Windows Multi-media timer services as basis.
 
 *** END OF FILE ***

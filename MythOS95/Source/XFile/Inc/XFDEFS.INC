@@ -6,7 +6,7 @@
 ;    (_)       ^          * *     *      *   *    *            (_)
 ;             (_)       **   **   *    ***** **** ****
 ;
-;            Copyright (c) 1994-1996 by Charybdis Enterprises, Inc.
+;            Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.
 ;                              All Rights Reserved.
 ;                        Microsoft Windows '95 Version
 ;
@@ -29,7 +29,7 @@
 ;
 ; xfdefs.inc
 ;
-;      This contains the public defines used by the XFile library.
+; This contains the public defines used by the XFile library.
 ;
 ;ммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммм
 
@@ -39,7 +39,9 @@
 ;
 ;╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟
 
-;--- Error values ---
+;ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд
+; Error values
+;ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд
 XF_ERR_NONE                    EQU 0
 
 XF_ERR_FUNCINVALID             EQU 01h      ;MS-DOS errors
@@ -147,8 +149,10 @@ XF_ERR_TRUNCATEDCHUNK          EQU 20003007h
 XF_ERR_WRITENOTALLOWED         EQU 20003008h
 XF_ERR_MAXDEPTHREACHED         EQU 20003009h
 
-;--- Flags for open/create ---
 
+;ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд
+; Flags for open/create
+;ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд
 XF_OPEN_READ                   EQU 01h      ; Read-mode
 XF_OPEN_WRITE                  EQU 02h      ; Write-mode
 XF_OPEN_APPEND                 EQU 04h      ; Append to current file, if any
@@ -172,9 +176,9 @@ XF_OPEN_DENYNONE               EQU 040000000h
 
 XF_OPEN_PRIVATE                EQU 080000000h; Inheritance for open (high bit)
 
-
-;--- Attributes
-
+;ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд
+; Attributes
+;ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд
 XF_ATTRIB_NORMAL               EQU 0h
 XF_ATTRIB_READONLY             EQU 01h
 XF_ATTRIB_HIDDEN               EQU 02h
@@ -184,9 +188,9 @@ XF_ATTRIB_DIRECTORY            EQU 010h
 XF_ATTRIB_ARCHIVE              EQU 020h
 XF_ATTRIB_SHAREABLE            EQU 0100h
 
-
-;--- Values for status ---
-
+;ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд
+; Values for status
+;ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд
 XF_STATUS_READ                 EQU 01h      ; Readable
 XF_STATUS_WRITE                EQU 02h      ; Writable
 XF_STATUS_OPEN                 EQU 04h      ; Open file
@@ -197,7 +201,10 @@ XF_STATUS_DIRTY                EQU 010000h  ; Buffer needs flushing
 XF_STATUS_LASTREAD             EQU 020000h  ; Last action was a read
 XF_STATUS_LASTWRITE            EQU 040000h  ; Last action was a write
 
-;--- File related maximums
+
+;ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд
+; File path related maximums
+;ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд
 XF_MAX_PATH                    EQU 260      ; maximum length of full pathname
 XF_MAX_DRIVE                   EQU 3        ; maximum length of drive component
 XF_MAX_DIR                     EQU 256      ; maximum length of path component

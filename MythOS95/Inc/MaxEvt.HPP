@@ -1,15 +1,15 @@
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
-//                  ooo        ooooo                       
-//                  `88.       .888'                       
-//                   888b     d'888   .oooo.   oooo    ooo 
-//                   8 Y88. .P  888  `P  )88b   `88b..8P'  
-//                   8  `888'   888   .oP"888     Y888'    
-//                   8    Y     888  d8(  888   .o8"'88b   
-//                  o8o        o888o `Y888""8o o88'   888o 
+//                  ooo        ooooo
+//                  `88.       .888'
+//                   888b     d'888   .oooo.   oooo    ooo
+//                   8 Y88. .P  888  `P  )88b   `88b..8P'
+//                   8  `888'   888   .oP"888     Y888'
+//                   8    Y     888  d8(  888   .o8"'88b
+//                  o8o        o888o `Y888""8o o88'   888o
 //
 //                          Across the event horizon...
 //
-//            Copyright (c) 1994, 1995 by Charybdis Enterprises, Inc.
+//           Copyright (c) 1994 - 1997 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved.
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -53,9 +53,9 @@
 #endif
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-//             
+//
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include <string.h>
@@ -88,7 +88,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 
-const int EVENT_MAX_EVENT = 256;
+const int EVENT_MAX_EVENT = 512;
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 // The notion of a unique event.
@@ -96,15 +96,10 @@ const int EVENT_MAX_EVENT = 256;
 class MaxEvent
 {
 private:
-
-static  int     last_bit;
         word    packed;
 
 public:
-        // A standard constructor, which guarantees uniqueness of events.
-        MaxEvent ();
-
-        // We may need a constructor which can create a specific Event.
+        // Constructor to create a specific Event.
         MaxEvent (int event_number);
 
         // Events can be compared for equality
@@ -305,20 +300,10 @@ public:
 
 // These members are inlined for efficiency since the compiler can
 // often do fun things with the code if we give it some leeway.
-
-inline MaxEvent::MaxEvent ():
-    packed (word (((last_bit >> 3) << 8) + 
-                  (1 << (last_bit & 0x7))))
-{
-    last_bit++;
-}
-
 inline MaxEvent::MaxEvent (int event_number):
-    packed (word (((event_number >> 3) << 8) + 
+    packed (word (((event_number >> 3) << 8) +
                   (1 << (event_number & 0x7))))
 {
-    if (event_number > last_bit)
-        last_bit = event_number;
 }
 
 inline int MaxEvent::operator == (const MaxEvent &evt) const
@@ -344,18 +329,18 @@ inline MaxEventList::MaxEventList (int init)
     memset (mask, init ? 0xff: 0, sizeof (mask));
 }
 
-inline void MaxEventList::add (const MaxEvent evt) 
+inline void MaxEventList::add (const MaxEvent evt)
 {
     mask[evt.offset()] |= byte (evt.mask());
 }
 
 inline void MaxEventList::remove (const MaxEvent evt)
-{ 
+{
     mask[evt.offset()] &= byte (~evt.mask());
 }
 
 inline int MaxEventList::check (const MaxEvent evt) const
-{ 
+{
     return (mask[evt.offset()] & evt.mask()) != 0;
 }
 

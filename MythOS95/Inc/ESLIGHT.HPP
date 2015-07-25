@@ -8,7 +8,7 @@
 //ששששש²±²ששששששש²±²שששש²±²ש²±²שששש²±²ש²±²שששש²±²ש²±²שששששששש²±²שששש²±²שששששש
 //שששש²²²²²²²²²²ש²²²²²²²²ששש²²²²²²²²שש²²²שששש²²²ש²²²²²²²²²²ש²²²שששש²²²ששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//שששששששששששCopyrightש(c)ש1994-1996שbyשCharybdisשEnterprises,שInc.שששששששששש
+//שששששששששששCopyrightש(c)ש1994-1997שbyשCharybdisשEnterprises,שInc.שששששששששש
 //ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
 //ששששששששששששששששששששש Microsoft Windows '95 Version ששששששששששששששששששששששש
@@ -192,7 +192,6 @@ public:
     EschVectorLight(const char *fname=0, const char *lname=0);
     EschVectorLight(const EschVector *vec);
     EschVectorLight(Flx16 ix, Flx16 iy, Flx16 iz);
-    // EschVectorLight(const EschVectorLight *l) { *this = *l; }
 
     virtual ~EschVectorLight() {};
 
@@ -266,7 +265,6 @@ public:
     EschFastPointLight(const char *fname=0, const char *lname=0);
     EschFastPointLight(const EschPoint *pnt);
     EschFastPointLight(Flx16 ix, Flx16 iy, Flx16 iz);
-    // EschFastPointLight(const EschFastPointLight *l) { *this = *l; }
 
     virtual ~EschFastPointLight() {};
 
@@ -297,6 +295,12 @@ public:
         pos.y.flx = pos.y.flx + ty.flx;
         pos.z.flx = pos.z.flx + tz.flx;
     }
+    void translate(const EschVector *v)
+    {
+        pos.x.flx = pos.x.flx + v->i.flx;
+        pos.y.flx = pos.y.flx + v->j.flx;
+        pos.z.flx = pos.z.flx + v->k.flx;
+    }
 
     //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ¿
     // I/O routines.                                                        ³
@@ -324,7 +328,6 @@ public:
     EschFastAttenLight(const char *fname=0, const char *lname=0);
     EschFastAttenLight(const EschPoint *pnt, Flx16 i, Flx16 o);
     EschFastAttenLight(Flx16 ix, Flx16 iy, Flx16 iz, Flx16 i, Flx16 o);
-    // EschFastAttenLight(EschAttenLight *l) { *this = *l; }
 
     virtual ~EschFastAttenLight() {};
 
@@ -370,7 +373,6 @@ public:
     EschFastSpotLight(Flx16 ix, Flx16 iy, Flx16 iz,
                       Flx16 ii, Flx16 ij, Flx16 ik,
                       Flx16 h, Flx16 f, Flx16 i=0, Flx16 o=0x1000);
-    // EschFastSpotLight(EschFastSpotLight *l) { *this = *l; }
 
     virtual ~EschFastSpotLight() {};
 
@@ -445,7 +447,6 @@ public:
     EschPointLight(const char *fname=0, const char *lname=0);
     EschPointLight(const EschPoint *pnt);
     EschPointLight(Flx16 ix, Flx16 iy, Flx16 iz);
-    // EschPointLight(EschPointLight *l) { *this = *l; }
 
     virtual ~EschPointLight() {};
 
@@ -475,6 +476,12 @@ public:
         pos.x.flx = pos.x.flx + tx.flx;
         pos.y.flx = pos.y.flx + ty.flx;
         pos.z.flx = pos.z.flx + tz.flx;
+    }
+    void translate(const EschVector *v)
+    {
+        pos.x.flx = pos.x.flx + v->i.flx;
+        pos.y.flx = pos.y.flx + v->j.flx;
+        pos.z.flx = pos.z.flx + v->k.flx;
     }
 
     //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ¿
@@ -512,7 +519,6 @@ public:
     EschAttenLight(const char *fname=0, const char *lname=0);
     EschAttenLight(const EschPoint *pnt, Flx16 i, Flx16 o);
     EschAttenLight(Flx16 ix, Flx16 iy, Flx16 iz, Flx16 i, Flx16 o);
-    // EschAttenLight(EschAttenLight *l) { *this = *l; }
 
     virtual ~EschAttenLight() {};
 
@@ -570,7 +576,6 @@ public:
     EschSpotLight(Flx16 ix, Flx16 iy, Flx16 iz,
                   Flx16 ii, Flx16 ij, Flx16 ik,
                   Flx16 h, Flx16 f, Flx16 i=0, Flx16 o=0x1000);
-    // EschSpotLight(EschSpotLight *l) { *this = *l; }
 
     virtual ~EschSpotLight() {};
 

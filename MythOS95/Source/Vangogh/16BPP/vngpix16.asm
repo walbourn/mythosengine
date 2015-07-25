@@ -6,7 +6,7 @@
 ;                                                           |. _  .   .|
 ;          Microsoft Windows '95 Version                    | / \   .  | 
 ;                                                           |_|_|_._._.|
-;  Copyright (c) 1994-1996 by Charybdis Enterprises, Inc.   |.-.-.-.-..|
+;  Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.   |.-.-.-.-..|
 ;              All rights reserved.                        %\__________/%
 ;                                                           %          %
 ;
@@ -157,6 +157,79 @@ START_PROC     vngo_zpixel16,	C CurScreen:DWORD,point_ptr:DWORD
         pop     edi
         ret
 END_PROC       vngo_zpixel16
+
+
+;컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+;  vngo_pixel16(vngo_vbuffer *CurScreen, vngo_point *point_ptr);           
+;      Draws to the vbuffer passed to it and the point is drawn in the     
+;      color specified in the vngo_pixel structure.                        
+;컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+START_PROC     vngo_pixel_rgb16,	C CurScreen:DWORD,point_ptr:DWORD,rgb_val:DWORD
+        push    edi
+        push    esi
+        push    ebx
+
+        mov     esi,CurScreen
+        mov     ecx,(VNGO_VBUFFER PTR [esi]).vb_ytable
+        mov     edi,point_ptr
+        mov     eax,(VNGO_POINT PTR [edi]).pt_y
+        lea     ecx,[ecx+eax*4]
+        mov     ebx,[ecx]
+        add     ebx,(VNGO_POINT PTR [edi]).pt_x
+        add     ebx,(VNGO_POINT PTR [edi]).pt_x  	; Since is is 16bpp.
+	mov	eax,rgb_val
+        mov     edi,(VNGO_VBUFFER PTR [esi]).vb_scrn_ptr
+        add     edi,ebx
+        mov     [edi],ax
+
+        pop     ebx
+        pop     esi
+        pop     edi
+        ret
+END_PROC       vngo_pixel_rgb16
+
+;컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+;  vngo_zpixel16(vngo_vbuffer *CurScreen, vngo_point *point_ptr);          
+;      Draws to the vbuffer passed to it and the point is drawn in the     
+;      color specified in the vngo_pixel structure.  It checks the Z-Buffer
+;      prior to drawing the pixel.                                         
+;컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+START_PROC     vngo_zpixel_rgb16,	C CurScreen:DWORD,point_ptr:DWORD,rgb_val:DWORD
+        push    edi
+        push    esi
+        push    ebx
+
+        mov     esi,CurScreen
+        mov     ecx,(VNGO_VBUFFER PTR [esi]).vb_ytable
+        mov     ebx,(VNGO_VBUFFER PTR [esi]).vb_ztable
+        mov     edi,point_ptr
+        mov     eax,(VNGO_POINT PTR [edi]).pt_y
+        lea     ecx,[ecx+eax*4]
+        lea     eax,[ebx+eax*4]
+        mov     eax,[eax]
+        add     eax,(VNGO_POINT PTR [edi]).pt_x
+        add     eax,(VNGO_POINT PTR [edi]).pt_x
+        mov     ebx,[ecx]
+        add     ebx,(VNGO_POINT PTR [edi]).pt_x
+        add     ebx,(VNGO_POINT PTR [edi]).pt_x
+; See if I want to draw it.
+        add     eax,(VNGO_VBUFFER PTR [esi]).vb_zbuff_ptr
+        mov     edx,(VNGO_POINT PTR [edi]).pt_z
+        shr     edx,16
+        cmp     dx,[eax]
+        ja      @f
+; update the with the new Z value.
+        mov     [eax],dx
+	mov	eax,rgb_val
+        mov     edi,(VNGO_VBUFFER PTR [esi]).vb_scrn_ptr
+        add     edi,ebx
+        mov     [edi],ax
+@@:
+        pop     ebx
+        pop     esi
+        pop     edi
+        ret
+END_PROC       vngo_zpixel_rgb16
 
 _text   ends
         end

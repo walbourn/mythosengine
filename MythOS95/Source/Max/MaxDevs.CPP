@@ -1,15 +1,15 @@
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
-//                  ooo        ooooo                       
-//                  `88.       .888'                       
-//                   888b     d'888   .oooo.   oooo    ooo 
-//                   8 Y88. .P  888  `P  )88b   `88b..8P'  
-//                   8  `888'   888   .oP"888     Y888'    
-//                   8    Y     888  d8(  888   .o8"'88b   
-//                  o8o        o888o `Y888""8o o88'   888o 
+//                  ooo        ooooo
+//                  `88.       .888'
+//                   888b     d'888   .oooo.   oooo    ooo
+//                   8 Y88. .P  888  `P  )88b   `88b..8P'
+//                   8  `888'   888   .oP"888     Y888'
+//                   8    Y     888  d8(  888   .o8"'88b
+//                  o8o        o888o `Y888""8o o88'   888o
 //
 //                          Across the event horizon...
 //
-//            Copyright (c) 1994, 1995 by Charybdis Enterprises, Inc.
+//           Copyright (c) 1994 - 1997 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved.
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -48,7 +48,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include <assert.h>
@@ -229,7 +229,7 @@ void MaxKeyboard::init ()
     KeyStat[7] = 0;
 
     clear();
-}     
+}
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 //  Uninit                                                                  ³
@@ -631,7 +631,7 @@ byte MaxMouse::get_buttons () const
         res |= 2;
 
     return res;
-}     
+}
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
@@ -760,6 +760,40 @@ void MaxJoystick::get_stat (JOYINFOEX *stat) const
             stat->dwSize = sizeof (JOYINFOEX);
             stat->dwFlags = JOY_RETURNALL | JOY_RETURNCENTERED | JOY_USEDEADZONE;
             joyGetPosEx (0, stat);
+
+            // Now, cook the values so that they are normalized from 0..65536
+            if (caps.wNumAxes > 0)
+            {
+                dword dwXrange (caps.wXmax - caps.wXmin);
+                if (dwXrange)
+                {
+                    dword xpos (stat->dwXpos - caps.wXmin);
+                    xpos = (xpos << 16) / dwXrange;
+                    stat->dwXpos = xpos;
+                }
+            }
+
+            if (caps.wNumAxes > 1)
+            {
+                dword dwYrange (caps.wYmax - caps.wYmin);
+                if (dwYrange)
+                {
+                    dword ypos (stat->dwYpos - caps.wYmin);
+                    ypos = (ypos << 16) / dwYrange;
+                    stat->dwYpos = ypos;
+                }
+            }
+
+            if (caps.wNumAxes > 2)
+            {
+                dword dwZrange (caps.wZmax - caps.wZmin);
+                if (dwZrange)
+                {
+                    dword zpos (stat->dwZpos - caps.wZmin);
+                    zpos = (zpos << 16) / dwZrange;
+                    stat->dwZpos = zpos;
+                }
+            }
         }
     }
 }

@@ -57,9 +57,9 @@ LIBPATH = $(MYTH95ROOT)\lib;
 EXE = et
 
 OBJS=\
-main.obj\
+et.obj\
 init.obj\
-gstate.obj\
+main.obj\
 resource.res
 
 LIBPATH = ..\..\obj;$(MYTH95ROOT)\lib;
@@ -79,6 +79,7 @@ comctl32.lib\
 comdlg32.lib\
 winmm.lib\
 msacm32.lib\
+ddraw.lib\
 user32.lib
 
 #дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
@@ -107,6 +108,33 @@ all: setstden $(EXE).exe
 #
 #╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠╠
 
+#ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд
+# Event system Files
+#ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд
+
+..\etevt.iff : ..\etevt.hpp
+
+..\etevt.hpp:  ..\etevt.cel
+   $(MYTH95ROOT)\bin\maxc ..\etevt.cel 
+
+#ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд
+# C++ files
+#ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд
+
+et.obj : ..\et.cpp\
+         ..\global.hpp\
+         ..\etevt.hpp
+
+init.obj : ..\init.cpp\
+           ..\global.hpp\
+           ..\resource.h
+
+main.obj : ..\main.cpp\
+           ..\global.hpp\
+           ..\resource.h
+
+resource.res : ..\resource.rc\
+               ..\resource.h
 #дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
 # Executable                                                               Ё
 #дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
@@ -124,6 +152,8 @@ clean:
     del *.ilk
     del *.pdb
     del *.vcp
+    del ..\etevt.hpp
+    del ..\etevt.iff
 
 #╟╠╡ End of makefile ╡╠╟
 

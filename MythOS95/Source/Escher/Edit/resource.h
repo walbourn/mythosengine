@@ -36,6 +36,8 @@
 #define IDD_TOOL_ANGLE                  165
 #define IDD_LOCATE                      166
 #define IDD_SETBASEELV                  167
+#define IDB_ABOUT                       168
+#define IDB_LOGO                        169
 #define IDC_TPROP_WIDTH                 1000
 #define IDC_TPROP_DEPTH                 1001
 #define IDC_LPROP_TYPE                  1002
@@ -295,7 +297,7 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        168
+#define _APS_NEXT_RESOURCE_VALUE        170
 #define _APS_NEXT_COMMAND_VALUE         32872
 #define _APS_NEXT_CONTROL_VALUE         1166
 #define _APS_NEXT_SYMED_VALUE           101

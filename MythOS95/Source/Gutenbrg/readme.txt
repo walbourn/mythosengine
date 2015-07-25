@@ -11,7 +11,7 @@
  
                            Microsoft Windows '95 Version
 
-             Copyright (c) 1995, 1996 by Charybdis Enterprises, Inc.
+             Copyright (c) 1995-1997 by Charybdis Enterprises, Inc.
                             All Rights Reserved.
 
  ----------------------------------------------------------------------------
@@ -32,25 +32,13 @@
                              _Library Status_
 
  Notes by: Chuck Walbourn
- Updated: July 15, 1996
+ Updated: March 10, 1997
 
  Changes for this release ---------------------------------------------------
 
-    o Cleaned up the "const-ness" of a number of parameters, etc.
-
-    o Added out_wrap to allow wrapping a string to a given rectangle
-      (default is the current viewport rectangle);
-
     o Minor change for new Van Gogh release
 
-    o Changed gberg_select_font/strings to keep old data active if new name
-      is not installed.
-
-    o Added gberg_remove_font/strings() calls.
-
-    o GFONT converter now supports creating a font from bitmap and several
-      fonts are included.
-
+    o Added extended monochrome format for 256 character fonts.
 
 
   Proposed changes ----------------------------------------------------------

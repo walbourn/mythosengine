@@ -7,16 +7,16 @@
 
   A Framework for Microsoft Windows '95 Entertainment Software Using MythOS
 
-            Copyright (c) 1995, 1996 by Charybdis Enterprises, Inc.
+           Copyright (c) 1995 - 1997 by Charybdis Enterprises, Inc.
                             All Rights Reserved
 
  ---------------------------------------------------------------------------
- 
+
             *** Charybdis Enterprises, Inc. Company Confidential ***
- 
+
    This file and all associated files are the company proprietary property
          of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
- 
+
   CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
   TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
   IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
@@ -35,11 +35,11 @@
                                    _Status_
 
  Notes by: Chuck Walbourn
- Updated: Febuary 28, 1996
+ Updated: March 11, 1997
 
  Release Notes --------------------------------------------------------------
 
- This version of the Game Frame has been updated with a number of 
+ This version of the Game Frame has been updated with a number of
  improvements for the basic classes.  The GFScreen class has been
  expanded into two subclasses.  GFScreenDD is for DirectDraw usage
  and GFScreenDIB will use GDI's DIB functions, but will use DirectDraw's
@@ -60,5 +60,7 @@
  Main.CPP contains some LLander-specific code as well, but may be used
  as an "outline" for initializing other games.  All other data files
  are LLander-specific as well.
+
+ This library is likely to be supplanted by SimGine.
 
 *** END OF FILE ***

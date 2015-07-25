@@ -8,7 +8,7 @@
 //ששששש²±²ששששששש²±²שששש²±²ש²±²שששש²±²ש²±²שששש²±²ש²±²שששששששש²±²שששש²±²שששששש
 //שששש²²²²²²²²²²ש²²²²²²²²ששש²²²²²²²²שש²²²שששש²²²ש²²²²²²²²²²ש²²²שששש²²²ששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//שששששששששששCopyrightש(c)ש1994-1996שbyשCharybdisשEnterprises,שInc.שששששששששש
+//שששששששששששCopyrightש(c)ש1994-1997שbyשCharybdisשEnterprises,שInc.שששששששששש
 //ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
 //ששששששששששששששששששששש Microsoft Windows '95 Version ששששששששששששששששששששששש
@@ -30,10 +30,6 @@
 //
 // main.cpp
 //
-//      This is the "generic" application framework from which all
-// non-MFC applications are traditionally created.  This is just a
-// bare-bones app that creates a window and has an About dialog.
-//
 //ֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽ
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
@@ -45,6 +41,7 @@
 #define WIN32_LEAN_AND_MEAN
 #include <stdlib.h>
 #include "global.hpp"
+
 #include "resource.h"
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
@@ -67,9 +64,12 @@ BOOL    InitApplication (HINSTANCE, int);
 HINSTANCE   hInst;
 HWND        hWndClient;
 const char  szAppName[] = "Escher";
-GameState   *game;
+EscherTest  *mode;
 
 MaxDevices  Devs;
+
+extern ulong EschProposedTris;
+extern ulong EschDrawnTris;
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
@@ -98,13 +98,13 @@ int APIENTRY WinMain (HINSTANCE hInstance,
                       LPSTR     lpCmdLine,
                       int       nCmdShow)
 {
-	// Perform initializations.
+        // Perform initializations.
     // If we are already running, this routine will reactivate the older
     // application and return FALSE.
-	if (!InitApplication (hInstance, nCmdShow))
-		return FALSE;
+        if (!InitApplication (hInstance, nCmdShow))
+                return FALSE;
 
-    // Initialize game here.
+    // Initialize here.
     IvorySystem ivory (8*1024*1024);
     ChronosSystem   chronos;
     GBergSystem     gberg;
@@ -127,9 +127,9 @@ int APIENTRY WinMain (HINSTANCE hInstance,
         return FALSE;
     }
 
-    game = new GameState (Devs);
-    game->LoadEvents ("gframe.iff");
-    if (!game->active)
+    mode = new EscherTest (Devs);
+    mode->LoadEvents ("etevt.iff");
+    if (!mode->active)
     {
         MessageBeep (0);
         MessageBox(hWndClient,
@@ -147,12 +147,12 @@ int APIENTRY WinMain (HINSTANCE hInstance,
 
     if (!ini.read("BackgroundBMP",buff))
     {
-        game->backgrnd = new XFBitmap;
-        if (!game->backgrnd)
+        mode->backgrnd = new XFBitmap;
+        if (!mode->backgrnd)
             return FALSE;
 
-        XFParseBMP  bm(game->backgrnd);
-        
+        XFParseBMP  bm(mode->backgrnd);
+
         if (bm.nameread(buff))
         {
             MessageBeep(0);
@@ -164,29 +164,64 @@ int APIENTRY WinMain (HINSTANCE hInstance,
         }
     }
 
+    if (!ini.read("TerrainSystem",buff))
+    {
+        strlwr(buff);
+        if (strstr(buff,"new"))
+            mode->use_new_terrain = TRUE;
+    }
+
+
+    if (!ini.read("PartitionTest",buff))
+    {
+        strlwr(buff);
+        if (strstr(buff,"yes") || strstr(buff,"on"))
+        {
+            if (!mode->SetupPartitionTest())
+                return FALSE;
+        }
+    }
+
     if (!ini.read("FireTest",buff))
     {
         strlwr(buff);
         if (strstr(buff,"yes") || strstr(buff,"on"))
-            game->fire_test = TRUE;
+        {
+            if (!mode->SetupFireTest())
+                return FALSE;
+        }
+    }
+
+    if (!ini.read("MultiTest",buff))
+    {
+        strlwr(buff);
+        if (!mode->SetupMultiTest(buff))
+            return FALSE;
+    }
+
+    if (!ini.read("Sprite",buff))
+    {
+        strlwr(buff);
+        if (!mode->SetupSprite(buff))
+            return FALSE;
     }
 
     if (!ini.read("SceneFile",buff))
     {
-        if (!game->LoadScene(buff))
+        if (!mode->LoadScene(buff))
             return FALSE;
     }
 
     if (!ini.read("TerrainFile",buff))
     {
-        if (!game->LoadTerrain(buff))
+        if (!mode->LoadTerrain(buff))
             return FALSE;
     }
 
     if (!ini.read("ParticleSystem",buff))
     {
         strlwr(buff);
-        if (!game->SetupParticleSystem(buff))
+        if (!mode->SetupParticleSystem(buff))
             return FALSE;
     }
 
@@ -194,15 +229,25 @@ int APIENTRY WinMain (HINSTANCE hInstance,
     {
         strlwr(buff);
         if (strstr(buff,"yes") || strstr(buff,"on"))
-            if (!game->SetupStarfield((strstr(buff,"ftl")) ? TRUE : FALSE,
+            if (!mode->SetupStarfield((strstr(buff,"ftl")) ? TRUE : FALSE,
                                       (strstr(buff,"brights")) ? TRUE : FALSE))
                 return FALSE;
     }
 
-    if (!ini.read("Sprite",buff))
+    if (!ini.read("Explosion",buff))
     {
         strlwr(buff);
-        if (!game->SetupSprite(buff))
+        if (strstr(buff,"yes") || strstr(buff,"on"))
+        {
+            if (!mode->SetupExplosion(buff))
+                return FALSE;
+        }
+    }
+
+    if (!ini.read("Metabox",buff))
+    {
+        strlwr(buff);
+        if (!mode->SetupMetabox(buff))
             return FALSE;
     }
 
@@ -210,19 +255,18 @@ int APIENTRY WinMain (HINSTANCE hInstance,
     {
         strlwr(buff);
         if (strstr(buff,"yes") || strstr(buff,"on"))
-            game->pick_test = TRUE;
+            mode->pick_test = TRUE;
     }
 
     if (!ini.read("CollideTest",buff))
     {
         strlwr(buff);
         if (strstr(buff,"yes") || strstr(buff,"on"))
-            game->collide_test = TRUE;
+            mode->collide_test = TRUE;
     }
-
     ini.close();
 
-    if (!game->cam)
+    if (!mode->cam)
     {
         MessageBeep(0);
         MessageBox(hWndClient,
@@ -232,24 +276,34 @@ int APIENTRY WinMain (HINSTANCE hInstance,
         return FALSE;
     }
 
-	// Acquire and dispatch messages until a WM_QUIT message is received.
-    while (game->PumpWindows())
+    mode->Begin();
+
+        // Acquire and dispatch messages until a WM_QUIT message is received.
+    while (mode->PumpWindows())
     {
         // Do per-frame processing here
         Devs.update ();
-        game->GetEvents();
-        game->ProcessEvents();
-        game->Render();
-        game->Display();
+        mode->GetEvents();
+        mode->ProcessEvents();
+        EschProposedTris = 0;
+        EschDrawnTris = 0;
+        mode->Render();
+        mode->Display();
     }
 
-    // Clean up the game here
+//    char buff[128];
+    mode->End(buff);
+
+    // Clean up the mode here
     // (destructors get most of it)
-    delete game;
+    delete mode;
+
+    MessageBox(hWndClient, buff,szAppName,
+               MB_OK | MB_ICONINFORMATION);
 
     delete esys;
 
-	return 0;
+        return 0;
 
     // This shuts up the compiler
     lpCmdLine;

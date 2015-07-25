@@ -6,7 +6,7 @@
 //    (_)       ^          * *     *      *   *    *            (_)
 //             (_)       **   **   *    ***** **** ****
 //
-//            Copyright (c) 1994-1996 by Charybdis Enterprises, Inc.
+//            Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.
 //                             All Rights Reserved.
 //                        Microsoft Windows '95 Version
 //
@@ -29,8 +29,8 @@
 //
 // xfio.h
 //
-//      This contains the C-callable low-level routines used by the
-//      XFile class.
+// This contains the C-callable low-level routines used by the
+// XFile class.
 //
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
 
@@ -110,6 +110,7 @@ ulong xf_setsize (HANDLE hFile, ulong size);
 word xf_getfdate (HANDLE hFile);
 word xf_getftime (HANDLE hFile);
 
+
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // Utility routines for DOS file operations                                 ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
@@ -141,6 +142,7 @@ char *xf_searchenv (const char *filename, const char *env_var, char *path);
 
 char *xf_makepath (char *path, const char *drive, const char *dir, const char *fname, const char *ext);
 void xf_splitpath (const char *path, char *drive, char *dir, char *fname, char *ext);
+
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // Error return routine for low-level i/o functions                         ³

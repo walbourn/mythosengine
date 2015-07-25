@@ -2,7 +2,7 @@
 //
 //                           Turner - Networking
 //
-//                Copyright (c) 1995 by Charybdis Enterprises, Inc.
+//            Copyright (c) 1995-1997 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved.
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -41,9 +41,9 @@
 
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-//             
+//
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include <portable.h>
@@ -95,10 +95,12 @@ protected:
         BOOL    is_opened;
         HANDLE  hMessageEvent;
 
+        char    szSessionName[64];
+
 public:
         // DirectPlay objects
-        IDirectPlay     *pIDP;
-        DPSESSIONDESC   session;
+        IDirectPlay2A   *pIDP;
+        DPSESSIONDESC2  session;
 
         BOOL            is_creator()    { return session.dwFlags == DPOPEN_CREATESESSION; }
 
@@ -117,14 +119,14 @@ public:
 virtual ~TurnerNetwork();
 
         // Information
-        BOOL    active () const;
+        BOOL    is_active () const { return pIDP != 0 && is_opened; }
+        BOOL    is_valid ()  const { return pIDP != 0; }
         BOOL    packet_ready ();    // not const because of DP restriction.
 
         // Initialize and connect to the game
 virtual int     select_provider (LPGUID);
 virtual int     create_game (BOOL bCreateEvent = TRUE);
-virtual int     connect_game (DWORD, BOOL bCreateEvent = TRUE);
-virtual int     allow_players (BOOL = TRUE);
+virtual int     connect_game (GUID, BOOL bCreateEvent = TRUE);
 
 virtual DPID    create_player (const char *, const char *);
 virtual void    destroy_player (DPID);
@@ -164,11 +166,18 @@ virtual int     sys_no_session  ();
 class TurnerNetworkUI
 {
 private:
+static  TurnerNetworkUI *g_this;
+
         TurnerNetwork   *net;
         HWND            hWnd;
+        HWND            hDlg;
+
+        int             max_sessions;
+        int             current_session;
+        GUID            *sessions;
 
 public:
-        TurnerNetworkUI  (HWND, TurnerNetwork *);
+        TurnerNetworkUI  (HWND, TurnerNetwork *, int _max_sessions = 32);
         ~TurnerNetworkUI ();
 
         // Perform the complete connection/initialization of the net object.
@@ -185,7 +194,7 @@ static  BOOL CALLBACK DlgProcQCreate (HWND, UINT, WPARAM, LPARAM);
 
         // Select a session
         int  select_session ();
-static  BOOL CALLBACK EnumSession (LPDPSESSIONDESC, LPVOID, LPDWORD, DWORD);
+static  BOOL CALLBACK EnumSession (LPCDPSESSIONDESC2, LPDWORD, DWORD, LPVOID);
 static  BOOL CALLBACK DlgProcSelSession (HWND, UINT, WPARAM, LPARAM);
 
 

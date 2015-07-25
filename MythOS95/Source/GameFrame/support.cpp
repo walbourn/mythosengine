@@ -8,7 +8,7 @@
 //
 // A Framework for Microsoft Windows '95 Entertainment Software Using MythOS
 //
-//           Copyright (c) 1995, 1996 by Charybdis Enterprises, Inc.
+//          Copyright (c) 1995 - 1997 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -36,7 +36,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #define WIN32_LEAN_AND_MEAN
@@ -115,7 +115,7 @@ BOOL GameState::pump_windows ()
     Devs->wm_clear();
     while (PeekMessage (&msg, NULL, 0, 0, PM_NOREMOVE))
     {
-    	if (GetMessage (&msg, 0, 0, 0) == 0)
+        if (GetMessage (&msg, 0, 0, 0) == 0)
             return FALSE;
 
         TranslateMessage (&msg);
@@ -198,7 +198,7 @@ BOOL InitApplication (HINSTANCE hInstance, int nCmdShow, int w, int h)
 
         char    buff[1024];
 
-        LoadString(hInstance, 
+        LoadString(hInstance,
                    IDS_ERR_MULTINSTANCE,
                    buff,
                    sizeof(buff));
@@ -235,9 +235,9 @@ BOOL InitApplication (HINSTANCE hInstance, int nCmdShow, int w, int h)
     wc.hIconSm = LoadImage (hInstance,
                             szAppName,
                             IMAGE_ICON,
-                            GetSystemMetrics(SM_CXSMICON), 
-                            GetSystemMetrics(SM_CYSMICON), 
-                            LR_DEFAULTCOLOR);              
+                            GetSystemMetrics(SM_CXSMICON),
+                            GetSystemMetrics(SM_CYSMICON),
+                            LR_DEFAULTCOLOR);
 
     if (!RegisterClassEx (&wc))
         return FALSE;
@@ -362,7 +362,7 @@ void fatal_error(ulong id, char *file, int line)
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 // _charybdis_assert
-// 
+//
 // Handler for failed asserts.  If msg is set to non-NULL, then an assertMyth
 // was used with a comment.
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ

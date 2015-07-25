@@ -69,6 +69,8 @@ IDR_ESCHERTYPE          ICON    DISCARDABLE     "res\\eshtdoc.ico"
 //
 
 IDR_MAINFRAME           BITMAP  MOVEABLE PURE   "res\\toolbar.bmp"
+IDB_ABOUT               BITMAP  DISCARDABLE     "RES\\about.bmp"
+IDB_LOGO                BITMAP  DISCARDABLE     "RES\\logo.bmp"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -269,25 +271,6 @@ END
 //
 // Dialog
 //
-
-IDD_ABOUTBOX DIALOG DISCARDABLE  34, 22, 269, 138
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "About Terrain Editor"
-FONT 8, "MS Sans Serif"
-BEGIN
-    ICON            IDR_MAINFRAME,IDC_STATIC,11,17,18,20
-    CONTROL         "Escher Terrain Editor",IDC_STATIC,"Static",SS_SIMPLE | 
-                    WS_GROUP,55,30,119,8
-    CONTROL         "Copyright © 1995, 1996 by Charybdis Enterprises, Inc.",
-                    IDC_STATIC,"Static",SS_SIMPLE | WS_GROUP,55,60,181,8
-    DEFPUSHBUTTON   "OK",IDOK,219,11,32,14,WS_GROUP
-    CONTROL         "Version X.X.X\tMon DD YYYY",IDC_ABOUT_VERSION,"Static",
-                    SS_SIMPLE | WS_GROUP,55,45,111,8
-    CTEXT           "Escher is a component of the MythOS collection",
-                    IDC_STATIC,50,100,185,11
-    CTEXT           "MythOS is a trademark of Charybdis Enterprises, Inc.",
-                    IDC_STATIC,55,115,175,14
-END
 
 IDD_TERRPROP_GEN DIALOG DISCARDABLE  0, 0, 272, 130
 STYLE WS_CHILD | WS_VISIBLE | WS_DISABLED | WS_CAPTION
@@ -981,6 +964,25 @@ BEGIN
     PUSHBUTTON      "Cancel",IDCANCEL,101,90,50,14
 END
 
+IDD_ABOUTBOX DIALOG DISCARDABLE  34, 22, 269, 151
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "About Escher Tool"
+FONT 8, "MS Sans Serif"
+BEGIN
+    CONTROL         168,IDC_STATIC,"Static",SS_BITMAP,5,5,180,47
+    CONTROL         169,IDC_STATIC,"Static",SS_BITMAP,10,65,256,46
+    CONTROL         "Version X.X\tMon DD YYYY",IDC_ABOUT_VERSION,"Static",
+                    SS_SIMPLE | WS_GROUP,120,65,111,8
+    CONTROL         "Copyright © 1995-1997",IDC_STATIC,"Static",SS_SIMPLE | 
+                    WS_GROUP,120,75,80,8
+    DEFPUSHBUTTON   "OK",IDOK,219,11,32,14,WS_GROUP
+    GROUPBOX        "",IDC_STATIC,5,110,255,5
+    CTEXT           "Escher is a component of the MythOS collection",
+                    IDC_STATIC,42,120,185,11
+    CTEXT           "MythOS is a trademark of Charybdis Enterprises, Inc.",
+                    IDC_STATIC,47,135,175,14
+END
+
 
 #ifndef _MAC
 /////////////////////////////////////////////////////////////////////////////
@@ -989,8 +991,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,3,1,0
- PRODUCTVERSION 1,3,1,0
+ FILEVERSION 1,4,1,0
+ PRODUCTVERSION 1,4,1,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -1008,13 +1010,13 @@ BEGIN
             VALUE "Comments", "by Chuck Walbourn\0"
             VALUE "CompanyName", "Charybdis Enterprises, Inc.\0"
             VALUE "FileDescription", "Escher Terrain Editor MFC Application\0"
-            VALUE "FileVersion", "1.31\0"
+            VALUE "FileVersion", "1.41\0"
             VALUE "InternalName", "Terrain Edit\0"
-            VALUE "LegalCopyright", "Copyright © 1995, 1996\0"
+            VALUE "LegalCopyright", "Copyright © 1995-1997\0"
             VALUE "LegalTrademarks", "MythOS is a trademark of Charybdis Enterprises, Inc.\0"
             VALUE "OriginalFilename", "ESHTEDIT.EXE\0"
             VALUE "ProductName", "Escher Terrain Editor\0"
-            VALUE "ProductVersion", "1.31\0"
+            VALUE "ProductVersion", "1.41\0"
         END
     END
     BLOCK "VarFileInfo"

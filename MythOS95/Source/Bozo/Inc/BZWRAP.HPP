@@ -1,18 +1,18 @@
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
-//                oooooooooo.                                 
-//                `888'   `Y8b                                
-//                 888     888  .ooooo.    oooooooo  .ooooo.  
-//                 888oooo888' d88' `88b  d'""7d8P  d88' `88b 
-//                 888    `88b 888   888    .d8P'   888   888 
-//                 888    .88P 888   888  .d8P'  .P 888   888 
-//                o888bood8P'  `Y8bod8P' d8888888P  `Y8bod8P' 
-//                           _                       
-//                          /_\     |    _  _ | _ ._ 
-//                         /   \  \_||_|(_|(_||(/_|  
-//                                       _| _|       
+//                oooooooooo.
+//                `888'   `Y8b
+//                 888     888  .ooooo.    oooooooo  .ooooo.
+//                 888oooo888' d88' `88b  d'""7d8P  d88' `88b
+//                 888    `88b 888   888    .d8P'   888   888
+//                 888    .88P 888   888  .d8P'  .P 888   888
+//                o888bood8P'  `Y8bod8P' d8888888P  `Y8bod8P'
+//                           _
+//                          /_\     |    _  _ | _ ._
+//                         /   \  \_||_|(_|(_||(/_|
+//                                       _| _|
 //                       Microsoft Windows '95 Version
 //
-//            Copyright (c) 1994, 1995 by Charybdis Enterprises, Inc.
+//            Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved.
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -41,9 +41,9 @@
 #endif
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-//             
+//
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include "bozo.h"
@@ -104,12 +104,12 @@ public:
     virtual void run ();
 
     // Some utility members (hide dangerous globals)
-    void    bz_term ()    { bz_task *t = task; task = 0; ::bz_term (t); }
+    void    bz_term ()    { if (task) { bz_task *t = task; task = 0; ::bz_term (t); } }
     void    yield (bz_task_queue *destq = &ReadyQ, bz_task_queue *srcq = &ReadyQ)
             { bz_yield (destq, srcq); }
 
 protected:
-    void    bz_return ()  { task = 0; ::bz_return(); }
+    void    bz_return ()  { if (task) { task = 0; ::bz_return(); } }
 };
 
 

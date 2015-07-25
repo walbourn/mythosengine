@@ -6,7 +6,7 @@
 ;                                                           |. _  .   .|
 ;          Microsoft Windows '95 Version                    | / \   .  | 
 ;                                                           |_|_|_._._.|
-;  Copyright (c) 1994-1996 by Charybdis Enterprises, Inc.   |.-.-.-.-..|
+;  Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.   |.-.-.-.-..|
 ;              All rights reserved.                        %\__________/%
 ;                                                           %          %
 ;
@@ -81,9 +81,7 @@ _TEXT  SEGMENT PARA PUBLIC USE32 'CODE'
 
 ;컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
 ;  vngo_rect8 (rectangle *,dword color);                                   
-;      Expects color to be either an 8bit or 24bit color which it will use 
-;      to fill the screen with.                                            
-;                                                                          
+;      Expects color to be an 8bit color to fill the screen with.                                            
 ;컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
 START_PROC     vngo_rect8, C CurScreen:DWORD, rectptr:DWORD, color:DWORD
         LOCAL   LX1             ; Top left x of the rect to fill.
@@ -113,7 +111,6 @@ START_PROC     vngo_rect8, C CurScreen:DWORD, rectptr:DWORD, color:DWORD
         mov     eax,[eax]
         add     eax,LX1
         add     edi,eax
-        mov     ecx,LDX
 
         mov     eax,color
         mov     ah,al
@@ -122,7 +119,7 @@ START_PROC     vngo_rect8, C CurScreen:DWORD, rectptr:DWORD, color:DWORD
         and     edx,0ffffh
         or      eax,edx
         mov     edx,LDY
-        mov     esi,ecx
+        mov     esi,LDX
         sub     ebx,esi
 
 y_loop:

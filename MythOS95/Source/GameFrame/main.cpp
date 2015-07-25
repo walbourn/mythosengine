@@ -8,7 +8,7 @@
 //
 // A Framework for Microsoft Windows '95 Entertainment Software Using MythOS
 //
-//           Copyright (c) 1995, 1996 by Charybdis Enterprises, Inc.
+//          Copyright (c) 1995 - 1997 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -37,7 +37,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #define WIN32_LEAN_AND_MEAN
@@ -146,7 +146,7 @@ int APIENTRY WinMain (HINSTANCE hInstance,
     for (;;)
     {
         for (;*c != 0 && *c == ' '; c++);       // Skip past whitespace
-        
+
         if (*c == '-')
         {
             c++;
@@ -195,8 +195,8 @@ int APIENTRY WinMain (HINSTANCE hInstance,
 
     //ÄÄÄ If we are already running, this routine will reactivate the older
     //ÄÄÄ application and return failure.
-	if (!InitApplication (hInstance, nCmdShow, width, height))
-		return 1;
+        if (!InitApplication (hInstance, nCmdShow, width, height))
+                return 1;
 
     //ÄÄÄ Initialize the MythOS system
     MythOS = new MythosSystem (MYTHOS_MEM_SIZE);
@@ -294,7 +294,7 @@ int APIENTRY WinMain (HINSTANCE hInstance,
     delete Devs;
     delete MythOS;
 
-	return 0;
+        return 0;
 }
 
 

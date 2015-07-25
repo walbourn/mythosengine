@@ -24,7 +24,7 @@
 //
 //                     Newtonian Physics Simulation Library
 //
-//            Copyright (c) 1995, 1996 by Charybdis Enterprises, Inc.
+//            Copyright (c) 1995-1997 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved.
 //
 //                       Microsoft Windows '95 Version
@@ -59,7 +59,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include <newton.hpp>
@@ -136,37 +136,48 @@ NewtObject::~NewtObject ()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //  NewtObject - step
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-void NewtObject::step (Flx16 time_interval)
+void NewtObject::step (Flx16 t)
 {
-//ÄÄ If no time passed, then nothing should change and temps should
-//ÄÄ not be lost
-    if (time_interval == 0)
+//ÄÄÄ If no time passed, then nothing should change and temps should
+//ÄÄÄ not be lost
+    if (t == 0)
         return;
 
-//ÄÄ Remember our position (for collide detection)
+//ÄÄÄ Remember our position (for collide detection)
     last_position = position;
 
-//ÄÄ Calculate the new velocity (based on acceleration)
-    velocity.i += (acceleration.i + temp_acceleration.i) * time_interval;
-    velocity.j += (acceleration.j + temp_acceleration.j) * time_interval;
-    velocity.k += (acceleration.k + temp_acceleration.k) * time_interval;
+    NewtVector acc (acceleration.i + temp_acceleration.i,
+                    acceleration.j + temp_acceleration.j,
+                    acceleration.k + temp_acceleration.k);
+    NewtVector vel (velocity.i + temp_velocity.i,
+                    velocity.j + temp_velocity.j,
+                    velocity.k + temp_velocity.k);
 
-//ÄÄ Calculate the new velocity after drag (don't bother if there's no drag)
-    if (drag != 0)
-    {
-        const Flx16 momentary_drag = drag * time_interval;
+    // Since we need at for this step, and 1/2 at^2 for the next,
+    // we can combine the computations slightly...
 
-        velocity.i -= velocity.i * momentary_drag;
-        velocity.j -= velocity.j * momentary_drag;
-        velocity.k -= velocity.k * momentary_drag;
-    }
+//ÄÄÄ Calculate the new velocity v += at
+    // Acc == at
+    velocity.i += (acc.i *= t);
+    velocity.j += (acc.j *= t);
+    velocity.k += (acc.k *= t);
 
-//ÄÄ Calculate the new position (based on velocity)
-    position.i += (velocity.i + temp_velocity.i) * time_interval;
-    position.j += (velocity.j + temp_velocity.j) * time_interval;
-    position.k += (velocity.k + temp_velocity.k) * time_interval;
+//ÄÄÄ Calculate the new position d += 1/2at^2 + vt
+    vel.i *= t;     // vt
+    vel.j *= t;
+    vel.k *= t;
 
-//ÄÄ Clear the instantaneous force values
+    // acc == 1/2at^2
+    t.flx >>= 1;    // t = 1/2t
+    acc.i *= t;
+    acc.j *= t;
+    acc.k *= t;
+
+    position.i += acc.i + vel.i;
+    position.j += acc.j + vel.j;
+    position.k += acc.k + vel.k;
+
+//ÄÄÄ Clear the instantaneous force values
     temp_acceleration.i = 0;
     temp_acceleration.j = 0;
     temp_acceleration.k = 0;
@@ -176,5 +187,5 @@ void NewtObject::step (Flx16 time_interval)
     temp_velocity.k = 0;
 }
 
-//°±² End of module - newtobj.cpp ²±°
 
+//°±² End of module - newtobj.cpp ²±°

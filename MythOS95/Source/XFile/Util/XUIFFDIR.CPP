@@ -6,7 +6,7 @@
 //    (_)       ^          * *     *      *   *    *            (_)
 //             (_)       **   **   *    ***** **** ****
 //
-//            Copyright (c) 1994-1996 by Charybdis Enterprises, Inc.
+//            Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.
 //                              All Rights Reserved.
 //                        Microsoft Windows '95 Version
 //
@@ -31,8 +31,8 @@
 //
 // xuiffdir.cpp
 //
-//     This is a utility module for the XFile library for printing out
-//     a directory of the contents of an .IFF file.
+// This is a utility module for the XFile library for printing out
+// a directory of the contents of an .IFF file.
 //
 //อออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออ
 
@@ -83,7 +83,7 @@ STATIC ulong   Line=0;
 STATIC ulong   Maxline=24;
 
 STATIC char Util_name[]
-       = "ฐฑ IFF Directory - (C) 1994-1996 Charybdis Enterprises, Inc. ฑฐ\n"
+       = "ฐฑ IFF Directory - (C) 1994-1997 Charybdis Enterprises, Inc. ฑฐ\n"
          "                   All Rights Reserved.  " __DATE__ "\n";
 
 //ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
@@ -160,7 +160,7 @@ void main(int argc, char *argv[])
                      | ((Flags & FLAGS_NOPAD) ? XF_IFF_NOPAD : 0) );
 
 //ฤฤฤ Open supplied iff file
-    if (iff.open(fn,XF_OPEN_READ))
+    if (iff.open(fn,XF_OPEN_READ | XF_OPEN_DENYWRITE))
     {
         print_error(iff,"Failed to open file");
         return;
@@ -346,6 +346,7 @@ STATIC void directory(XFParseIFF &iff)
         print_error(iff,"Problem processing file");
     }
 }
+
 
 //ฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤ
 // _charybdis_assert

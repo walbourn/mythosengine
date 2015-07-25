@@ -11,7 +11,7 @@
 //
 //                      Microsoft Windows '95 Version
 //
-//            Copyright (c) 1994,1995 by Charybdis Enterprises, Inc.
+//            Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved.
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -268,7 +268,7 @@ void main(int argc, char *argv[])
 //ÄÄÄ Banner
     if (!(Flags & FLAGS_QUIET))
     {
-        cout << "°± MythOS Pic Image Utility - (C) 1994, 1995 Charybdis Enterprises, Inc. ±°\n";
+        cout << "°± MythOS Pic Image Utility - (C) 1994-1997 Charybdis Enterprises, Inc. ±°\n";
     }
 
 //ÄÄÄ Check to see if supplied files exist
@@ -301,6 +301,7 @@ void main(int argc, char *argv[])
         if (!strcmp(fn,outfn))
         {
             cout << "±±± Will overwrite original, ok? (Y/n)";
+            cout.flush();
             for(;;)
             {
                 i=getch();
@@ -439,6 +440,7 @@ void main(int argc, char *argv[])
                 if ((i % 24)==23)
                 {
                     cout << "<more>\r";
+                    cout.flush();
                     getch();
                 }
             }
@@ -623,7 +625,7 @@ error_exit: ;
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 STATIC void print_help(int full)
 {
-   cout << "°± MythOS Pic Image Utility - (C) 1994, 1995 Charybdis Enterprises, Inc. ±°\n";
+   cout << "°± MythOS Pic Image Utility - (C) 1994-1997 Charybdis Enterprises, Inc. ±°\n";
    cout << "                              " __DATE__ "   All Rights Reserved.\n";
    cout << "   Usage: pic [-q |  -i  | -s | -p | -x | -m | -t <fname.pal>] <fname.xxx>\n";
    cout << "              [-o <fname.xxx>]\n";

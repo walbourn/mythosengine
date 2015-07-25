@@ -11,7 +11,7 @@
 //                     Text Output and Font Management System
 //                          Microsoft Windows '95 Version
 //
-//            Copyright (c) 1995, 1996 by Charybdis Enterprises, Inc.
+//            Copyright (c) 1995-1997 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved.
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -70,7 +70,7 @@ extern void bitmap(char *, XFBitmap *,
                    ushort width, ushort height,
                    ushort startx, ushort starty,
                    ushort spacer,
-                   char startc, char numc, char cpr);
+                   byte startc, byte numc, byte cpr);
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
@@ -81,7 +81,7 @@ extern void bitmap(char *, XFBitmap *,
 extern "C" FILE *yyin;
 
 STATIC char Util_name[]
-       = "°± Gutenberg Font Utility - (C) 1995, 1996 Charybdis Enterprises, Inc. ±°\n";
+       = "°± Gutenberg Font Utility - (C) 1995-1997 Charybdis Enterprises, Inc. ±°\n";
 
 XFParseIFF     IFF;
 
@@ -106,7 +106,7 @@ void main(int argc, char *argv[])
     ushort      width=0, height=0;
     ushort      startx=0, starty=0;
     ushort      spacer=0;
-    char        startc=0, numc=0, cpr=0;
+    byte        startc=0, numc=0, cpr=0;
 
     char        fontname[16];
 
@@ -169,15 +169,15 @@ void main(int argc, char *argv[])
                     break;
                 case 'S':
                 case 's':
-                    startc = (char) atoi(&argv[i][2]);
+                    startc = (byte) atoi(&argv[i][2]);
                     break;
                 case 'C':
                 case 'c':
-                    numc = (char) atoi(&argv[i][2]);
+                    numc = (byte) atoi(&argv[i][2]);
                     break;
                 case 'R':
                 case 'r':
-                    cpr = (char) atoi(&argv[i][2]);
+                    cpr = (byte) atoi(&argv[i][2]);
                     break;
                 case 'I':
                 case 'i':

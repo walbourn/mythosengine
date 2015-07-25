@@ -6,7 +6,7 @@
 //    (_)       ^          * *     *      *   *    *            (_)
 //             (_)       **   **   *    ***** **** ****
 //
-//            Copyright (c) 1994-1996 by Charybdis Enterprises, Inc.
+//            Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.
 //                             All Rights Reserved.
 //                        Microsoft Windows '95 Version
 //
@@ -29,7 +29,7 @@
 //
 // xfdefs.h
 //
-//      This contains the public defines used by the XFile library.
+// This contains the public defines used by the XFile library.
 //
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
 
@@ -56,8 +56,11 @@
 //
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
-//--- Error values ---
-typedef enum _xf_error_codes {
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// Error values
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+typedef enum _xf_error_codes
+{
     XF_ERR_NONE                         =0,
 
                                         // 1-255 Reserved for DOS
@@ -172,8 +175,9 @@ typedef enum _xf_error_codes {
 } xf_error_codes;
 
 
-//--- Flags for open/create ---
-
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// Flags for open/create
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 #define XF_OPEN_READ            0x1         // Read-mode
 #define XF_OPEN_WRITE           0x2         // Write-mode
 #define XF_OPEN_APPEND          0x4         // Append to current file, if any
@@ -198,8 +202,9 @@ typedef enum _xf_error_codes {
 #define XF_OPEN_PRIVATE         0x80000000  // Inheritance for open (high bit)
 
 
-//--- Attributes
-
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// Attributes
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 #define XF_ATTRIB_NORMAL        0x0
 #define XF_ATTRIB_READONLY      0x1
 #define XF_ATTRIB_HIDDEN        0x2
@@ -209,8 +214,9 @@ typedef enum _xf_error_codes {
 #define XF_ATTRIB_ARCHIVE       0x20
 #define XF_ATTRIB_SHAREABLE     0x100
 
-//--- Values for status ---
-
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// Values for status
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 #define XF_STATUS_READ          0x1     // Readable
 #define XF_STATUS_WRITE         0x2     // Writable
 #define XF_STATUS_OPEN          0x4     // Open file
@@ -221,31 +227,21 @@ typedef enum _xf_error_codes {
 #define XF_STATUS_LASTREAD      0x20000 // Last action was a read
 #define XF_STATUS_LASTWRITE     0x40000 // Last action was a write
 
-//--- File related maximums
-#ifdef __cplusplus
-const ulong XF_MAX_PATH        =260;    // maximum length of full pathname
-const ulong XF_MAX_DRIVE       =3;      // maximum length of drive component
-const ulong XF_MAX_DIR         =256;    // maximum length of path component
-const ulong XF_MAX_FNAME       =256;   	// maximum length of file name component
-const ulong XF_MAX_EXT         =256;    // maximum length of extension component
-const ulong XF_MAX_NAME        =256;    // maximum length of file name (with extension)
 
-#else
-#ifdef __WATCOMC__
-#pragma off(unreferenced);
-#endif
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// File path related maximums
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 #define XF_MAX_PATH            260      // maximum length of full pathname
 #define XF_MAX_DRIVE           3        // maximum length of drive component
 #define XF_MAX_DIR             256      // maximum length of path component
 #define XF_MAX_FNAME           256      // maximum length of file name component
 #define XF_MAX_EXT             256	    // maximum length of extension component
 #define XF_MAX_NAME            256      // maximum length of file name (with extension)
-#ifdef __WATCOMC__
-#pragma on(unreferenced);
-#endif
-#endif
 
-//--- Misc
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// Misc
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 #define XFEB_VERSION    0x001
 
 #endif

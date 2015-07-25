@@ -8,7 +8,7 @@
 //ששששש²±²ששששששש²±²שששש²±²ש²±²שששש²±²ש²±²שששש²±²ש²±²שששששששש²±²שששש²±²שששששש
 //שששש²²²²²²²²²²ש²²²²²²²²ששש²²²²²²²²שש²²²שששש²²²ש²²²²²²²²²²ש²²²שששש²²²ששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//שששששששששששCopyrightש(c)ש1994-1996שbyשCharybdisשEnterprises,שInc.שששששששששש
+//שששששששששששCopyrightש(c)ש1994-1997שbyשCharybdisשEnterprises,שInc.שששששששששש
 //ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
 //ששששששששששששששששששששש Microsoft Windows '95 Version ששששששששששששששששששששששש
@@ -126,6 +126,10 @@ BEGIN_MESSAGE_MAP(ToolView, CView)
 	ON_COMMAND(ID_VIEW_AUTOOFF, OnViewAutoRotateOff)
 	ON_COMMAND(ID_VIEW_RND_MSPACE, OnViewRndModelSpace)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_RND_MSPACE, OnUpdateViewRndModelSpace)
+	ON_COMMAND(ID_VIEW_SHOW_BOXEXTS, OnViewShowBoxExtents)
+	ON_COMMAND(ID_VIEW_SHOW_SPHEXTS, OnViewShowSphereExtents)
+	ON_UPDATE_COMMAND_UI(ID_VIEW_SHOW_SPHEXTS, OnUpdateViewShowSphereExtents)
+	ON_UPDATE_COMMAND_UI(ID_VIEW_SHOW_BOXEXTS, OnUpdateViewShowBoxExtents)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -208,21 +212,29 @@ void ToolView::OnIdle()
 	ToolDoc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
 
-    if (AutoRotate && pDoc->meshes)
+    if (pDoc->meshes)
     {
-        Flx16 degrees = Flx16(Clock.check() << 6,0) * AutoRotateSpeed;
-        Clock.clear();
-
-        for(EschMeshDraw *m=pDoc->meshes; m != NULL; m=(EschMeshDraw*)m->next())
+        if (AutoRotate)
         {
-            if (AutoRotate & AUTOROTATE_X)
-                m->rotatex(degrees);
-            if (AutoRotate & AUTOROTATE_Y)
-                m->rotatey(degrees);
-            if (AutoRotate & AUTOROTATE_Z)
-                m->rotatez(degrees);
+            Flx16 degrees = Flx16(Clock.check() << 6,0) * AutoRotateSpeed;
+            Clock.clear();
+
+            for(EschMeshDraw *m=pDoc->meshes; m != NULL; m=(EschMeshDraw*)m->next())
+            {
+                if (AutoRotate & AUTOROTATE_X)
+                    m->rotatex(degrees);
+                if (AutoRotate & AUTOROTATE_Y)
+                    m->rotatey(degrees);
+                if (AutoRotate & AUTOROTATE_Z)
+                    m->rotatez(degrees);
+            }
         }
         
+        for(EschMeshDraw *m=pDoc->meshes; m != NULL; m=(EschMeshDraw*)m->next())
+        {
+            m->animate();
+        }
+
         switch (vpmode)
         {
             case VPMODE_NONE:
@@ -826,12 +838,37 @@ BOOL ToolView::ui_mesh_properties(EschMeshDraw *msh, int doupdate)
     afdlg.m_appe = (msh->mesh->flags & ESCH_MSH_APPE) ? 1 : 0;
     afdlg.m_appf = (msh->mesh->flags & ESCH_MSH_APPF) ? 1 : 0;
 
+//ִִִ Verticies
+    MeshPropVertsPage   vdlg;
+    vdlg.nverts = msh->mesh->nverts;
+    vdlg.v = msh->mesh->v;
+
+//ִִִ Faces
+    MeshPropFacePage    fdlg;
+    fdlg.nfaces = msh->mesh->nfaces;
+    fdlg.f = msh->mesh->f;
+    fdlg.nverts = msh->mesh->nverts;
+    fdlg.tmax = msh->mesh->tmax;
+    fdlg.txt = msh->mesh->txt;
+
+    fdlg.setup(pDoc);
+
+//ִִִ Textures
+    MeshPropTexturePage  txdlg;
+    txdlg.tmax = msh->mesh->tmax;
+    txdlg.txt = msh->mesh->txt;
+
+    txdlg.setup(pDoc);
+
 //ִִִ Interact
     CPropertySheet  sh("Mesh Properties");
     sh.AddPage(&gdlg);
     sh.AddPage(&odlg);
     sh.AddPage(&edlg);
     sh.AddPage(&afdlg);
+    sh.AddPage(&vdlg);
+    sh.AddPage(&fdlg);
+    sh.AddPage(&txdlg);
 
 //ִִִ Store results, if OK
     if (sh.DoModal() == IDOK)
@@ -931,6 +968,9 @@ BOOL ToolView::ui_mesh_properties(EschMeshDraw *msh, int doupdate)
         if (afdlg.m_appf)
             flags |= ESCH_MSH_APPF;
         msh->mesh->set_flags(flags);
+
+        //ִִִ Verticies/Faces/Textures
+        // Changes are made while inside the dialog...
 
         //ִִִ Update views
         if (doupdate)
@@ -1819,6 +1859,68 @@ void ToolView::OnUpdateViewRndPerspective(CCmdUI* pCmdUI)
 
 
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ¿
+// ToolView - OnViewShowSphereExtents                                       ³
+//ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִÙ
+void ToolView::OnViewShowSphereExtents() 
+{
+    switch (vpmode)
+    {
+        case VPMODE_STANDARD:
+            wVp[0].extra_flags ^= ToolVPort::SPHERE_EXTS;
+            wVp[0].Render();
+            wVp[0].RedrawWindow();
+            break;
+    }
+}
+
+void ToolView::OnUpdateViewShowSphereExtents(CCmdUI* pCmdUI) 
+{
+    switch (vpmode)
+    {
+        case VPMODE_STANDARD:
+            pCmdUI->Enable(1);
+            pCmdUI->SetCheck( (wVp[0].extra_flags & ToolVPort::SPHERE_EXTS) ? 1 : 0);
+            break;
+        default:
+            pCmdUI->SetCheck(0);
+            pCmdUI->Enable(0);
+            break;
+    }
+}
+
+
+//ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ¿
+// ToolView - OnViewShowBoxExtents                                          ³
+//ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִÙ
+void ToolView::OnViewShowBoxExtents() 
+{
+    switch (vpmode)
+    {
+        case VPMODE_STANDARD:
+            wVp[0].extra_flags ^= ToolVPort::BOX_EXTS;
+            wVp[0].Render();
+            wVp[0].RedrawWindow();
+            break;
+    }
+}
+
+void ToolView::OnUpdateViewShowBoxExtents(CCmdUI* pCmdUI) 
+{
+    switch (vpmode)
+    {
+        case VPMODE_STANDARD:
+            pCmdUI->Enable(1);
+            pCmdUI->SetCheck( (wVp[0].extra_flags & ToolVPort::BOX_EXTS) ? 1 : 0);
+            break;
+        default:
+            pCmdUI->SetCheck(0);
+            pCmdUI->Enable(0);
+            break;
+    }
+}
+
+
+//ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ¿
 // ToolView - On(Update)ViewAttachCamera                                    ³
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִÙ
 void ToolView::OnViewAttachCamera() 
@@ -2181,3 +2283,4 @@ void ToolView::OnUpdateLightIntensity(CCmdUI* pCmdUI)
 }
 
 //°±² eof - eshtview.cpp ²±°
+

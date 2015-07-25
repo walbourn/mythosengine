@@ -1,4 +1,4 @@
-/อออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออ
+//อออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออ
 //
 //                        _/_/_/           _/_/_/_/
 //                      _/                _/
@@ -8,7 +8,7 @@
 //
 // A Framework for Microsoft Windows '95 Entertainment Software Using MythOS
 //
-//           Copyright (c) 1995, 1996 by Charybdis Enterprises, Inc.
+//          Copyright (c) 1995 - 1997 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved
 //
 //ฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤ
@@ -35,7 +35,7 @@
 //ฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐ
 //
 //                                Includes
-//                                
+//
 //ฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐ
 
 #define WIN32_LEAN_AND_MEAN
@@ -108,7 +108,7 @@ STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION
 CAPTION "Choose Connection Mechanism"
 FONT 8, "MS Sans Serif"
 BEGIN
-    LISTBOX         IDC_MAXNETWORK_LIST1,6,7,182,109,LBS_SORT | 
+    LISTBOX         IDC_MAXNETWORK_LIST1,6,7,182,109,LBS_SORT |
                     LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
     PUSHBUTTON      "OK",IDOK,31,130,47,13
     PUSHBUTTON      "Cancel",IDCANCEL,120,130,47,13
@@ -119,7 +119,7 @@ STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
 CAPTION "Select Session"
 FONT 8, "MS Sans Serif"
 BEGIN
-    LISTBOX         IDC_MAXNETWORK_LIST1,10,12,157,129,LBS_SORT | 
+    LISTBOX         IDC_MAXNETWORK_LIST1,10,12,157,129,LBS_SORT |
                     LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
     PUSHBUTTON      "OK",IDOK,10,150,60,15
     PUSHBUTTON      "Cancel",IDCANCEL,100,150,65,15
@@ -171,11 +171,11 @@ BEGIN
             VALUE "CompanyName", "Charybdis Enterprises, Inc.\0"
 
             VALUE "LegalCopyright",
-"Copyright \251 1995, 1996 by Charybdis Enterprises, Inc.\0"
+"Copyright \251 1995 - 1997 by Charybdis Enterprises, Inc.\0"
 
             VALUE "LegalTrademarks",
 "MythOS is a trademark of Charybdis Enterprises, Inc.\n\
-Microsoft and Windows are tradmarks of Microsoft Corp.\0" 
+Microsoft and Windows are tradmarks of Microsoft Corp.\0"
         END
     END
     BLOCK "VarFileInfo"

@@ -134,20 +134,28 @@
 3 Drawable Classes
 4 EschDrawable Class=PG_ESCH_DRAWABLE
 4 EschPointDraw Class=PG_ESCH_POINTDRAW
+4 EschLineDraw Class=PG_ESCH_LINEDRAW
 4 EschSprite Class=PG_ESCH_SPRITE
 4 EschParticle Class=PG_ESCH_PARTICLE
 4 EschParticlePyramid Class=PG_ESCH_PARTICLEPYR
 4 EschParticleGeometry Class=PG_ESCH_PARTICLEGEOM
+4 EschParticleSprite Class=PG_ESCH_PARTICLESPR
 4 EschParticleSystem Class=PG_ESCH_PARTICLESYS
 4 EschGeometry Class=PG_ESCH_GEOMETRY
 4 EschMeshDraw Class=PG_ESCH_MESHDRAW
 4 EschTerrain Class=PG_ESCH_TERRAIN
+4 EschPartition Class=PG_ESCH_PARTITION
+4 EschGridPartition Class=PG_ESCH_GRIDPARTITION
 4 EschStarfield Class=PG_ESCH_STARFIELD
 4 EschPlosion Class=PG_ESCH_PLOSION
+4 EschMetabox=PG_ESCH_METABOX
+4 EschLevelOfDetail=PG_ESCH_LOD
 3 Drawable Support Structures
 4 EschCollision Structure=PG_ESCH_COLLISION
 4 EschPicking Structure=PG_ESCH_PICKING
 4 EschDrawList Structure=PG_ESCH_DRAWLIST
+4 EschPartitionList Structure=PG_ESCH_PARTITIONLIST
+4 EschTraverse Structure=PG_ESCH_TRAVERSE
 3 Drawable Support Classes
 4 EschSphereExtents Class=PG_ESCH_SPHERE_EXTS
 4 EschBoxExtents Class=PG_ESCH_BOX_EXTS
@@ -173,9 +181,13 @@
 4 EschMultiFrameTexture Class=PG_ESCH_MFRAMETEXTURE
 4 EschProceduralTexture Class=PG_ESCH_PROCTEXTURE
 4 EschFireTexture Class=PG_ESCH_FIRETEXTURE
+3 Builder Classes
+4 EschBuildTexture=PG_ESCH_BUILDTEXTURE
+4 EschBuildMesh=PG_ESCH_BUILDMESH
 3 Math Support Classes
 4 EschPoint Class=PG_ESCH_POINT
 4 EschVector Class=PG_ESCH_VECTOR
+4 EschPlane Class=PG_ESCH_PLANE
 4 EschVertex Class=PG_ESCH_VERTEX
 4 EschMatrix Class=PG_ESCH_MATRIX
 4 EschFrameRef Class=PG_ESCH_FRAMEREF
@@ -196,6 +208,12 @@
 3 Object Class=PG_NEWT_OBJECT
 3 Force Class=PG_NEWT_FORCE
 3 Vector Class=PG_NEWT_VECTOR
+2 Bach
+3 Overview=PG_BACH_OVERVIEW
+3 System Class=PG_BACH_SYSTEM
+3 Digital Interface Class=PG_BACH_DIGI_INTERFACE
+3 Digital Class=PG_BACH_DIGI
+3 Sample Class=PG_BACH_SAMPLE
 1 MythOS User's Guide
 2 About this guide=UG_ABOUT
 2 Overview=UG_OVERVIEW
@@ -213,6 +231,7 @@
 3 Overview=UG_ESCH_OVERVIEW
 3 Escher Directory=UG_ESCH_DIR
 3 Escher Exporter=UG_ESCH_EXPORT
+3 Escher Lightwave Converter=UG_ESCH_LW
 3 Escher Tool=UG_ESCH_TOOL
 3 Escher Terrain Editor=UG_ESCH_TERR
 2 Gutenberg

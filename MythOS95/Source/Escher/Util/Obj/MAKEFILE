@@ -8,7 +8,7 @@
 #ששששש²±²ששששששש²±²שששש²±²ש²±²שששש²±²ש²±²שששש²±²ש²±²שששששששש²±²שששש²±²שששששש
 #שששש²²²²²²²²²²ש²²²²²²²²ששש²²²²²²²²שש²²²שששש²²²ש²²²²²²²²²²ש²²²שששש²²²ששששששש
 #ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-#שששששששששששCopyrightש(c)ש1994-1996שbyשCharybdisשEnterprises,שInc.שששששששששש
+#שששששששששששCopyrightש(c)ש1994-1997שbyשCharybdisשEnterprises,שInc.שששששששששש
 #ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
 #ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
 #ששששששששששששששששששששש Microsoft Windows '95 Version ששששששששששששששששששששששש
@@ -66,11 +66,17 @@ EXEDIR = eshdir
 
 OBJSDIR = eshdir.obj
 
+EXELW = eshlw
+
+OBJSLW = eshlw.obj
+
 LIBS = ivory.lib\
 xfile.lib\
-vangogh.lib
+felix.lib\
+vangogh.lib\
+escher.lib
 
-all: setstden $(EXEDIR).exe
+all: setstden $(EXEDIR).exe $(EXELW).exe
 
 #ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ¿
 # Standard make include                                                    ³
@@ -113,6 +119,16 @@ clean:
 $(EXEDIR).exe:   $(OBJSDIR)
    $(LINK) $(LINKOPTS) /OUT:$*.exe @<<
    $(OBJSDIR) $(LIBS)
+<<
+
+
+#ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ¿
+# Escher Lightwave Converter                                               ³
+#ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִÙ
+
+$(EXELW).exe:   $(OBJSLW)
+   $(LINK) $(LINKOPTS) /OUT:$*.exe @<<
+   $(OBJSLW) $(LIBS)
 <<
 
 #°±² End of makefile ²±°

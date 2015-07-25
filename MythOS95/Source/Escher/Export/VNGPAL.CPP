@@ -2,11 +2,11 @@
 //
 //                                                           %__________%
 //                                                          %/ . .  .   \%
-//           Van Gogh 2D-Display Library                     |  . .  o. | 
+//           Van Gogh 2D-Display Library                     |  . .  o. |
 //                                                           |. _  .   .|
-//          Microsoft Windows '95 Version                    | / \   .  | 
+//          Microsoft Windows '95 Version                    | / \   .  |
 //                                                           |_|_|_._._.|
-// Copyright (c) 1994-1996 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
+// Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
 //              All rights reserved.                        %\__________/%
 //                                                           %          %
 //
@@ -29,14 +29,14 @@
 //
 //     The C++ palette classes for the VanGogh Draw library.
 //
-//ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ Revision History ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
 #include <assert.h>
 
 #include "debug.h"
@@ -46,8 +46,8 @@
 #include "xfile.hpp"
 
 #define __VNGVPDD8_HPP
+#define __VNGSCRN_HPP
 #include "vangogh.hpp"
-#include "xfile.hpp"
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
@@ -80,20 +80,18 @@
 //
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°° VngoHwPal °°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// VngoHwPal Class meber functions.                                         ³
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// VngoHwPal::init(VngoColor24bit pal[],int count,dword flags);             ³
+// VngoHwPal::init(VngoColor24bit pal[],int count);                         ³
 //     This function sets the first count number of palette entries to the  ³
 //     the values stored in the pal array that is passed in.  It does not   ³
 //     modeify the current state of the hardware, it simply modifies the    ³
 //     table entries.  If you pass in the flag VNGO_PAL_HWINIT, it will     ³
 //     update the hardware as well.                                         ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-
 int VngoHwPal::init(VngoColor24bit pal[],int count)
 {
     for (int i=0;i < count;i++)
@@ -104,18 +102,24 @@ int VngoHwPal::init(VngoColor24bit pal[],int count)
 }
 
 
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// VngoPal Class meber functions.                                           ³
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°° VngoPal °°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// VngoPal::release                                                         ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 void VngoPal::release()
 {
-    if (flags & VNGO_MYMEM_SHADE && shd_pal)
+    if ((flags & VNGO_MYMEM_SHADE) && shd_pal)
     {
         delete shd_pal;
         shd_pal = NULL;
+        flags &= ~VNGO_MYMEM_SHADE;
     }
 }
+
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // VngoPal::~VngoPal();                                                     ³
@@ -124,23 +128,72 @@ void VngoPal::release()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 VngoPal::~VngoPal()
 {
-    if (flags & VNGO_MYMEM_SHADE && shd_pal)
+    if ((flags & VNGO_MYMEM_SHADE) && shd_pal)
     {
         delete shd_pal;
         shd_pal = NULL;
+        flags &= ~VNGO_MYMEM_SHADE;
     }
 #if 0
-    if (flags & VNGO_MYMEM_HAZE)
+    if ((flags & VNGO_MYMEM_HAZE) && hz_pal)
     {
         delete hz_pal;
         hz_pal = NULL;
+        flags &= ~VNGO_MYMEM_HAZE;
     }
 #endif
 }
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// VngoPal::init(dword flags,VngoHwPal *hw,VngoShadePal *hz);               ³
+// VngoPal8::VngoPal8();                                                    ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+VngoPal8::VngoPal8()
+{
+    // No special construction, just the ol' vtable stuff
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// VngoPal8::~VngoPal8();                                                   ³
+//     This is the destructor for the VngoPal.  It will delete any memory   ³
+//     that was allocated during the construction of this class.            ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+VngoPal8::~VngoPal8()
+{
+    if ((flags & VNGO_MYMEM_SHADE) && shd_pal)
+    {
+        delete (VngoShadePal8 *)shd_pal;
+        shd_pal = NULL;
+        flags &= ~VNGO_MYMEM_SHADE;
+    }
+#if 0
+    if ((flags & VNGO_MYMEM_HAZE) && hz_pal)
+    {
+        delete hz_pal;
+        hz_pal = NULL;
+        flags &= ~VNGO_MYMEM_HAZE;
+    }
+#endif
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// VngoPal8::release                                                        ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+void VngoPal8::release()
+{
+    if ((flags & VNGO_MYMEM_SHADE) && shd_pal)
+    {
+        delete (VngoShadePal8 *)shd_pal;
+        shd_pal = NULL;
+        flags &= ~VNGO_MYMEM_SHADE;
+    }
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// VngoPal::init(dword _flags,VngoHwPal *hw,VngoShadePal *hz);              ³
 //     This function will allocate memory for any of the structures that    ³
 //     you do not pass a buffer in for.                                     ³
 //     If you pass in the VNGO_PAL_HWINIT flag, it will write the passed in ³
@@ -152,7 +205,7 @@ VngoPal::~VngoPal()
 //         2)  Shade Palette table.                                         ³
 //         3)  Haze Palette table.                                          ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-int VngoPal8::init(dword flags,VngoHwPal *hw,VngoShadePal8 *sh)
+int VngoPal8::init(dword _flags,VngoHwPal *hw,VngoShadePal8 *sh)
 {
     if (hw)
     {
@@ -168,7 +221,7 @@ int VngoPal8::init(dword flags,VngoHwPal *hw,VngoShadePal8 *sh)
             shd_pal = (VngoShadePal *)new VngoShadePal8 (32);
             flags |= VNGO_MYMEM_SHADE;
         }
-        // Once there is a mechanism to initialize the palette with a specified 
+        // Once there is a mechanism to initialize the palette with a specified
         // number of shade levels rather than the hard coded 32, then more
         // checking will need to be done here.
     }
@@ -178,7 +231,7 @@ int VngoPal8::init(dword flags,VngoHwPal *hw,VngoShadePal8 *sh)
     }
 
 
-    if (flags & VNGO_PAL_CALC)
+    if (_flags & VNGO_PAL_CALC)
     {
         convert.init(this,1);
     }
@@ -190,15 +243,16 @@ int VngoPal8::init(dword flags,VngoHwPal *hw,VngoShadePal8 *sh)
     return (0);
 }
 
+
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// VngoPal::init(dword flags,const char *palfile);                          ³
+// VngoPal::init(dword _flags,const char *palfile);                         ³
 //     This function will load a palette from a file whos name is passed in.³
 //     It will fist initialize a palette to get all of the required memory  ³
 //     allocated, and will not do any of the calculations.  It will then    ³
 //     read the palette from the specified file, and write it to the        ³
 //     physical device if the VNGO_PAL_HWINIT flag was passed to it.        ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-int VngoPal8::init(dword flags,const char *palfile)
+int VngoPal8::init(dword _flags,const char *palfile)
 {
     int         err;
     VngoPalIFF8 loadpal(this);
@@ -211,14 +265,14 @@ int VngoPal8::init(dword flags,const char *palfile)
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// VngoPal::init(dword flags,char *palfile);                                ³
+// VngoPal::init(dword _flags,char *palfile);                               ³
 //     This function will load a palette from a file whos name is passed in.³
 //     It will fist initialize a palette to get all of the required memory  ³
 //     allocated, and will not do any of the calculations.  It will then    ³
 //     read the palette from the specified file, and write it to the        ³
 //     physical device if the VNGO_PAL_HWINIT flag was passed to it.        ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-int VngoPal8::init(dword flags,XFParseIFF *palfile)
+int VngoPal8::init(dword _flags,XFParseIFF *palfile)
 {
     int         err;
     VngoPalIFF8 loadpal(this);
@@ -231,11 +285,12 @@ int VngoPal8::init(dword flags,XFParseIFF *palfile)
 
 
 
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°° VngoPalIFF8 °°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// VngoPalIFF Class meber functions.                                        ³
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// VngoPalIFF::VngoPalIFF();                                                ³
+// VngoPalIFF8::VngoPalIFF8();                                              ³
 //     This  constructor will set the palettes name to 'Default' and set the³
 //     palette pointer to NULL.  No reading or writing will take place.     ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
@@ -251,10 +306,11 @@ VngoPalIFF8::VngoPalIFF8()
     name[7]=0;
 
     pal = NULL;
-   
 }
+
+
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// VngoPalIFF::VngoPalIFF(VngoPal *p);                                      ³
+// VngoPalIFF8::VngoPalIFF8(VngoPal *p);                                    ³
 //     This  constructor will set the palettes name to 'Default' and set the³
 //     palette pointer to the passed in palette. No file IO will take place.³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
@@ -272,8 +328,9 @@ VngoPalIFF8::VngoPalIFF8(VngoPal *p)
     pal = (VngoPal8 *)p;
 }
 
+
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// VngoPalIFF::save(const char *filename);                                  ³
+// VngoPalIFF8::save(const char *filename);                                 ³
 //     This  will save the palette that is associated with the object to the³
 //     file specified in the parameters.  All fields will be stored to the  ³
 //     file, including the name.                                            ³
@@ -283,7 +340,7 @@ int VngoPalIFF8::save(const char *filename)
 {
     XFParseIFF  iffp;
     int         err=0;
-   
+
     // Assert that there is memory allocated for all fields.
     assert(pal != NULL);
     assert(pal->shd_pal != NULL);
@@ -302,7 +359,7 @@ int VngoPalIFF8::save(const char *filename)
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// VngoPalIFF::save(XFParseIFF *iffp);                                      ³
+// VngoPalIFF8::save(XFParseIFF *iffp);                                     ³
 //     This  will save the palette that is associated with the object to the³
 //     file specified in the parameters.  All fields will be stored to the  ³
 //     file, including the name.                                            ³
@@ -312,7 +369,7 @@ int VngoPalIFF8::save(XFParseIFF *iffp)
 {
     int             err=0;
     VngoShadePal8   *tpal = (VngoShadePal8 *)pal->shd_pal;
-   
+
     // Assert that there is memory allocated for all fields.
     assert(pal != NULL);
     assert(pal->shd_pal != NULL);
@@ -373,7 +430,7 @@ int VngoPalIFF8::save(XFParseIFF *iffp)
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// VngoPalIFF::load(const char *filename);                                  ³
+// VngoPalIFF8::load(const char *filename);                                 ³
 //     This  will load the palette that is associated with the object to the³
 //     file specified in the parameters.  All fields will be read from the  ³
 //     file, including the name.                                            ³
@@ -400,8 +457,9 @@ int VngoPalIFF8::load(const char *filename)
     return (iffp.close() );
 }
 
+
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// VngoPalIFF::load(XFParseIFF *iffp);                                      ³
+// VngoPalIFF8::load(XFParseIFF *iffp);                                     ³
 //     This  will load the palette that is associated with the object to the³
 //     file specified in the parameters.  All fields will be read from the  ³
 //     file, including the name.                                            ³
@@ -412,11 +470,12 @@ int VngoPalIFF8::load(XFParseIFF *iffp)
     int             err=0;
     VngoShadePal8   *tpal = (VngoShadePal8 *)pal->shd_pal;
 
-
     // Assert that there is memory allocated to load into.
     assert(tpal != NULL);
     assert(pal->shd_pal != NULL);
     //assert(pal->hz_pal != NULL);
+
+find_pal:
 
     err = iffp->seekform(iffp->makeid('V','P','A','L'));
     if (err)
@@ -425,6 +484,29 @@ int VngoPalIFF8::load(XFParseIFF *iffp)
     err = iffp->enterform();
     if (err)
         return (err);
+
+    char nbuff[16];
+    err = iffp->seekchunk (iffp->makeid('n','a','m','e'));
+    if (err)
+        return err;
+
+    if (sizeof(nbuff) < iffp->chunkSize)
+        return XF_ERR_CHUNKNOTFOUND;
+
+    err = iffp->read(nbuff);
+    if (err)
+        return err;
+
+    if (strcmp(name,"Default"))
+    {
+        if (strcmp(name,nbuff))
+        {
+            iffp->leaveform();
+            goto find_pal;
+        }
+    }
+
+    strncpy(name,nbuff,16);
 
     // ---- Find and read the shade palette.
 
@@ -442,14 +524,14 @@ int VngoPalIFF8::load(XFParseIFF *iffp)
         return (err);
 
     if (sizeof (hdr) != iffp->chunkSize)
-        return XF_ERR_CHUCKNOTFOUND;
+        return XF_ERR_CHUNKNOTFOUND;
 
     err = iffp->read (&hdr);
     if (err)
         return (err);
 
     if (hdr.type != VNGO_8BIT)
-        return XF_ERR_CHUCKNOTFOUND;
+        return XF_ERR_CHUNKNOTFOUND;
 
     // Get the new information
     tpal->num_shd_lvl = hdr.num_levels;
@@ -464,7 +546,7 @@ int VngoPalIFF8::load(XFParseIFF *iffp)
             return (err);
 
         if (tpal->num_shd_lvl * sizeof (byte) != iffp->chunkSize)
-            return XF_ERR_CHUCKNOTFOUND;
+            return XF_ERR_CHUNKNOTFOUND;
 
         err = iffp->read (&(*tpal)[i]);
         if (err)
@@ -497,4 +579,4 @@ int VngoPalIFF8::load(XFParseIFF *iffp)
     return (err);
 }
 
-//°±² End of module - vngcolor.cpp ²±°
+//°±² End of module - vngpal.cpp ²±°

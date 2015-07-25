@@ -6,7 +6,7 @@
 ;                                                           |. _  .   .|
 ;          Microsoft Windows '95 Version                    | / \   .  | 
 ;                                                           |_|_|_._._.|
-;  Copyright (c) 1994-1996 by Charybdis Enterprises, Inc.   |.-.-.-.-..|
+;  Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.   |.-.-.-.-..|
 ;              All rights reserved.                        %\__________/%
 ;                                                           %          %
 ;
@@ -104,14 +104,14 @@ VNGO_POINT      ENDS
 ;ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
                 
 VNGO_POINT2     STRUCT
-pt2_x           dd ?            ; 2D X value
-pt2_y           dd ?            ; 2D Y value
-pt2_z           dd ?            ; Scaled Z value for z-buffering.
-pt2_clr         dd ?            ; Base color of the point.
-pt2_shade       dd ?            ; The shading percentage of the base color.
-pt2_u           dd ?            ; Texture map U coordiante.
-pt2_v           dd ?            ; Texture map V coordinate.
-pt2_w           dd ?            ; Texture map W (used for perspective.)
+pt_x            dd ?            ; 2D X value
+pt_y            dd ?            ; 2D Y value
+pt_z            dd ?            ; Scaled Z value for z-buffering.
+pt_clr          dd ?            ; Base color of the point.
+pt_shade        dd ?            ; The shading percentage of the base color.
+pt_u            dd ?            ; Texture map U coordiante.
+pt_v            dd ?            ; Texture map V coordinate.
+pt_w            dd ?            ; Texture map W (used for perspective.)
 VNGO_POINT2     ENDS
 
 
@@ -182,16 +182,19 @@ VNGO_TRIANGLE   ENDS
 VNGO_VBUFFER    STRUCT
 vb_width        dd ?            ; width of actual buffer.
 vb_height       dd ?            ; height of the actual buffer.
-vb_left         dd ?            ; left edge of buffer's clipping window.
-vb_top          dd ?            ; top edge of buffer's clipping window.
-vb_scrn_ptr     dd ?            ; view buffer pointer.
 vb_pal          dd ?            ; pointer to the alternate LUT for this mode.
-vb_ytable       dd ?            ; pointer to the table of pre-calculated y offsets.
-vb_invert       dd ?            ; table of 1/max(xres,yres) values to save divides.
-vb_zbuff_ptr    dd ?            ; pointer to the zbuffer if it exist.
+
+vb_scrn_ptr     dd ?            ; view buffer pointer.
 vb_pitch        dd ?            ; screen pitch.
+vb_ytable       dd ?            ; pointer to the table of pre-calculated y offsets.
+
+vb_zbuff_ptr    dd ?            ; pointer to the zbuffer if it exist.
 vb_zpitch       dd ?            ; zbuffer pitch.
 vb_ztable       dd ?            ; y table for the zbuffer.   
+
+vb_edge1	dd ?		; Edge arrays for the scan converters to use.  
+vb_edge2	dd ?		; Edge arrays for the scan converters to use.  
+
 VNGO_VBUFFER    ENDS            
 
 

@@ -8,7 +8,7 @@
 //ששששש²±²ששששששש²±²שששש²±²ש²±²שששש²±²ש²±²שששש²±²ש²±²שששששששש²±²שששש²±²שששששש
 //שששש²²²²²²²²²²ש²²²²²²²²ששש²²²²²²²²שש²²²שששש²²²ש²²²²²²²²²²ש²²²שששש²²²ששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//שששששששששששCopyrightש(c)ש1994-1996שbyשCharybdisשEnterprises,שInc.שששששששששש
+//שששששששששששCopyrightש(c)ש1994-1997שbyשCharybdisשEnterprises,שInc.שששששששששש
 //ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
 //ששששששששששששששששששששש Microsoft Windows '95 Version ששששששששששששששששששששששש
@@ -70,6 +70,8 @@ STATIC void print_help(int full);
 STATIC void print_error(XFParseIFF &xp, char *s=0);
 
 STATIC void directory(XFParseIFF &iff);
+STATIC void directory_EMTL(XFParseIFF &iff);
+
 STATIC void pause(void);
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
@@ -153,7 +155,7 @@ void main(int argc, char *argv[])
     }
    
 //ִִִ Print outline of file contents
-    cout << "°± Escher Directory - (C) 1994-1996 Charybdis Enterprises, Inc. ±°\n";
+    cout << "°± Escher Directory - (C) 1994-1997 Charybdis Enterprises, Inc. ±°\n";
     cout << "   File: " << fn << "\n";
     Line=2;
     directory(iff);
@@ -168,7 +170,7 @@ void main(int argc, char *argv[])
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִÙ
 STATIC void print_help(int full)
 {
-    cout << "°± Escher Directory - (C) 1994-1996 Charybdis Enterprises, Inc. ±°\n";
+    cout << "°± Escher Directory - (C) 1994-1997 Charybdis Enterprises, Inc. ±°\n";
     cout << "                      " __DATE__ "\n";
     cout << "   Usage: eshdir [-p] <filename.iff>\n";
     if (full)
@@ -241,13 +243,6 @@ STATIC void print_error(XFParseIFF &xp, char *s)
 STATIC void directory(XFParseIFF &iff)
 {
     ulong               i;
-    EschFileMeshHDR     mheader;
-    EschFileMeshEXNT    mextents;
-    EschFileMeshMTL     *emtls;
-    EschFileMtlMHDR     mtlhdr;
-    EschFileMeshHIER    ehier;
-    
-    memset(&mheader,0,sizeof(EschFileMeshHDR));
 
 //ִִ Loop through current level
     while (iff.next() == XF_ERR_NONE)
@@ -361,6 +356,7 @@ STATIC void directory(XFParseIFF &iff)
         else if ((iff.makeid('F','O','R','M') == iff.chunkid)
             && (iff.makeid('E','M','S','H') == iff.formid))
         {
+            EschFileMeshHDR     mheader;
 
             if (iff.enterform() != XF_ERR_NONE)
             {
@@ -379,7 +375,6 @@ STATIC void directory(XFParseIFF &iff)
 
                     if (iff.makeid('H','D','R',' ') == iff.chunkid)
                     {
-
                         if (iff.chunkSize != sizeof(EschFileMeshHDR))
                         {
                             print_error(iff,"Object header chunk not valid, incorrect size");
@@ -400,6 +395,8 @@ STATIC void directory(XFParseIFF &iff)
                     }
                     else if (iff.makeid('E','X','N','T') == iff.chunkid)
                     {
+                        EschFileMeshEXNT    mextents;
+
                         if (iff.chunkSize != sizeof(EschFileMeshEXNT))
                         {
                             print_error(iff,"Object extents chunk not valid, incorrect size");
@@ -460,6 +457,8 @@ STATIC void directory(XFParseIFF &iff)
                     }
                     else if (iff.makeid('H','I','E','R') == iff.chunkid)
                     {
+                        EschFileMeshHIER    ehier;
+
                         if (iff.chunkSize != sizeof(EschFileMeshHIER))
                         {
                             print_error(iff,"Hierarchy chunk not valid, incorrect size");
@@ -482,7 +481,7 @@ STATIC void directory(XFParseIFF &iff)
                         }
                         else if (mheader.nmtls)
                         {
-                            emtls = new EschFileMeshMTL[mheader.nmtls];
+                            EschFileMeshMTL *emtls = new EschFileMeshMTL[mheader.nmtls];
 
                             if (iff.read(emtls))
                             {
@@ -506,55 +505,10 @@ STATIC void directory(XFParseIFF &iff)
                         }
                     }
                     else if ((iff.makeid('F','O','R','M') == iff.chunkid)
-                            && (iff.makeid('E','M','T','L') == iff.formid))
+                            && (iff.makeid('E','M','T','L') == iff.formid
+                                || iff.makeid('E','M','T','1') == iff.formid))
                     {
-
-                        cout << "³ MDATA:\n";
-                        pause();
-
-                        iff.enterform();
-
-                        if (iff.seekchunk(iff.makeid('M','H','D','R')))
-                        {
-                            cout << "³ Can't find header\n";
-                            pause();
-                        }
-                        else if (iff.chunkSize != sizeof(EschFileMtlMHDR))
-                        {
-                            print_error(iff,"Object materials data header chunk not valid, incorrect size");
-                        }
-                        else
-                        {
-                            if (iff.read(&mtlhdr))
-                            {
-                                print_error(iff,"Problem reading object materials data header");
-                            }
-                            else
-                            {  
-                                char name[ESCH_MAX_NAME+1];
-                                strncpy(name,mtlhdr.name,ESCH_MAX_NAME);
-                                name[ESCH_MAX_NAME] = 0;
-
-                                cout << "³     " << name;
-                                cout << " x=" << mtlhdr.xsize << " y=" << mtlhdr.ysize;
-                                cout << " nf=" << mtlhdr.nframes << " type=" << mtlhdr.type;
-                                cout << " pal=" << mtlhdr.pname << "\n";
-                                pause();
-                            }
-                        }
-
-                        if (iff.seekchunk(iff.makeid('B','O','D','Y')))
-                        {
-                            cout << "³ Can't find body\n";
-                            pause();
-                        }
-                        else if ((mtlhdr.type==1)
-                                 && (iff.chunkSize != (ulong)(mtlhdr.xsize * mtlhdr.ysize)))
-                        {
-                            print_error(iff,"Object materials data body chunk not valid, incorrect size");
-                        }
-
-                        iff.leaveform();
+                        directory_EMTL(iff);
                     }
                 }
 
@@ -1002,55 +956,10 @@ STATIC void directory(XFParseIFF &iff)
                         cout << "³ Contains normals (compressed)" << endl;
                     }
                     else if ((iff.makeid('F','O','R','M') == iff.chunkid)
-                            && (iff.makeid('E','M','T','L') == iff.formid))
+                            && (iff.makeid('E','M','T','L') == iff.formid
+                                || iff.makeid('E','M','T','1') == iff.formid))
                     {
-
-                        cout << "³ MDATA:\n";
-                        pause();
-
-                        iff.enterform();
-
-                        if (iff.seekchunk(iff.makeid('M','H','D','R')))
-                        {
-                            cout << "³ Can't find header\n";
-                            pause();
-                        }
-                        else if (iff.chunkSize != sizeof(EschFileMtlMHDR))
-                        {
-                            print_error(iff,"Object materials data header chunk not valid, incorrect size");
-                        }
-                        else
-                        {
-                            if (iff.read(&mtlhdr))
-                            {
-                                print_error(iff,"Problem reading object materials data header");
-                            }
-                            else
-                            {  
-                                char name[ESCH_MAX_NAME+1];
-                                strncpy(name,mtlhdr.name,ESCH_MAX_NAME);
-                                name[ESCH_MAX_NAME] = 0;
-
-                                cout << "³     " << name;
-                                cout << " x=" << mtlhdr.xsize << " y=" << mtlhdr.ysize;
-                                cout << " nf=" << mtlhdr.nframes << " type=" << mtlhdr.type;
-                                cout << " pal=" << mtlhdr.pname << "\n";
-                                pause();
-                            }
-                        }
-
-                        if (iff.seekchunk(iff.makeid('B','O','D','Y')))
-                        {
-                            cout << "³ Can't find body\n";
-                            pause();
-                        }
-                        else if ((mtlhdr.type==1)
-                                 && (iff.chunkSize != (ulong)(mtlhdr.xsize * mtlhdr.ysize)))
-                        {
-                            print_error(iff,"Object materials data body chunk not valid, incorrect size");
-                        }
-
-                        iff.leaveform();
+                        directory_EMTL(iff);
                     }
                 }
 
@@ -1070,6 +979,98 @@ STATIC void directory(XFParseIFF &iff)
         print_error(iff,"Problem processing file");
     }
 }
+
+
+//ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ¿
+// directory_EMTL                                                           ³
+//ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִÙ
+STATIC void directory_EMTL(XFParseIFF &iff)
+{
+    EschFileMtlMHDR mtlhdr;
+
+    cout << "³ MDATA:\n";
+    pause();
+
+    iff.enterform();
+
+    if (iff.seekchunk(iff.makeid('M','H','D','R')))
+    {
+        cout << "³ Can't find header\n";
+        pause();
+    }
+    else if (iff.chunkSize != sizeof(EschFileMtlMHDR))
+    {
+        print_error(iff,"Object materials data header chunk not valid, incorrect size");
+    }
+    else
+    {
+        if (iff.read(&mtlhdr))
+        {
+            print_error(iff,"Problem reading object materials data header");
+        }
+        else
+        {  
+            char name[ESCH_MAX_NAME+1];
+            strncpy(name,mtlhdr.name,ESCH_MAX_NAME);
+            name[ESCH_MAX_NAME] = 0;
+
+            cout << "³     " << name << "\n";
+            pause();
+
+            cout << "³               x=" << mtlhdr.xsize << " y=" << mtlhdr.ysize;
+            cout << " nf=" << mtlhdr.nframes;
+
+            switch (mtlhdr.type)
+            {
+                case ESCH_MTL_TYPE_8BIT:
+                    cout << " 8bits";
+                    break;
+                case ESCH_MTL_TYPE_8BIT_TRANSP:
+                    cout << " 8bits xprnt";
+                    break;
+                case ESCH_MTL_TYPE_24BIT:
+                    cout << " 24bits";
+                    break;
+                case ESCH_MTL_TYPE_32BIT:
+                    cout << " 32bits";
+                    break;
+            }
+
+            switch (mtlhdr.compress)
+            {
+                case ESCH_MTL_COMPRESS_NONE:
+                    cout << " Uncompressed";
+                    break;
+                case ESCH_MTL_COMPRESS_RLE:
+                    cout << " Compressed";
+                    break;
+            }
+            cout << " pal='" << mtlhdr.pname << "'\n";
+            pause();
+        }
+    }
+
+    for(int i=0; i < mtlhdr.nframes; i++)
+    {
+        if (iff.seekchunk(iff.makeid('B','O','D','Y')))
+        {
+            cout << "³ Can't find body for frame #" << i+1 << "\n";
+            pause();
+        }
+        else if (!iff.chunkSize)
+        {
+            print_error(iff,"Object materials data body chunk empty");
+        }
+        else
+        {
+            cout << "³               Frame " << i+1 << "  " << iff.chunkSize << " bytes\n";
+            pause();
+        }
+    }
+
+    iff.leaveform();
+}
+
 
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ¿
 // Pause                                                                    ³

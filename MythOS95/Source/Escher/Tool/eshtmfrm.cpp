@@ -8,7 +8,7 @@
 //ùùùùù²±²ùùùùùùù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùùùùùù²±²ùùùù²±²ùùùùùù
 //ùùùù²²²²²²²²²²ù²²²²²²²²ùùù²²²²²²²²ùù²²²ùùùù²²²ù²²²²²²²²²²ù²²²ùùùù²²²ùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùCopyrightù(c)ù1994-1996ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
+//ùùùùùùùùùùùCopyrightù(c)ù1994-1997ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùù Microsoft Windows '95 Version ùùùùùùùùùùùùùùùùùùùùùùù
@@ -73,6 +73,10 @@ BEGIN_MESSAGE_MAP(ToolFrame, CFrameWnd)
 	ON_WM_CREATE()
 	ON_COMMAND(ID_FILE_PALETTE, OnFilePalette)
 	ON_COMMAND(ID_APP_HELP, OnAppHelp)
+	ON_COMMAND(ID_FILE_COMPRESS, OnFileCompress)
+	ON_UPDATE_COMMAND_UI(ID_FILE_COMPRESS, OnUpdateFileCompress)
+	ON_COMMAND(ID_FILE_TRUECOLOR, OnFileTruecolor)
+	ON_UPDATE_COMMAND_UI(ID_FILE_TRUECOLOR, OnUpdateFileTruecolor)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -246,6 +250,48 @@ void ToolFrame::OnFilePalette()
                        MB_OK | MB_ICONINFORMATION);
             pDoc->LoadPalette(pDoc->pfname);
         }
+    }
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// ToolFrame - On(Update)FileCompress                                       ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+void ToolFrame::OnFileCompress() 
+{
+    ToolDoc *pDoc = (ToolDoc*)GetActiveDocument();
+    pDoc->flags ^= ToolDoc::COMPRESS;
+}
+
+void ToolFrame::OnUpdateFileCompress(CCmdUI* pCmdUI) 
+{
+    ToolDoc *pDoc = (ToolDoc*)GetActiveDocument();
+
+    pCmdUI->Enable((pDoc) ? TRUE : FALSE);
+    if (pDoc)
+    {
+        pCmdUI->SetCheck((pDoc->flags & ToolDoc::COMPRESS) ? 1 : 0);
+    }
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// ToolFrame - On(Update)Truecolor                                          ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+void ToolFrame::OnFileTruecolor() 
+{
+    ToolDoc *pDoc = (ToolDoc*)GetActiveDocument();
+    pDoc->flags ^= ToolDoc::TRUECOLOR;
+}
+
+void ToolFrame::OnUpdateFileTruecolor(CCmdUI* pCmdUI) 
+{
+    ToolDoc *pDoc = (ToolDoc*)GetActiveDocument();
+
+    pCmdUI->Enable((pDoc) ? TRUE : FALSE);
+    if (pDoc)
+    {
+        pCmdUI->SetCheck((pDoc->flags & ToolDoc::TRUECOLOR) ? 1 : 0);
     }
 }
 

@@ -8,7 +8,7 @@
 //ùùùùù²±²ùùùùùùù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùùùùùù²±²ùùùù²±²ùùùùùù
 //ùùùù²²²²²²²²²²ù²²²²²²²²ùùù²²²²²²²²ùù²²²ùùùù²²²ù²²²²²²²²²²ù²²²ùùùù²²²ùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùCopyrightù(c)ù1994-1996ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
+//ùùùùùùùùùùùCopyrightù(c)ù1994-1997ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùù Microsoft Windows '95 Version ùùùùùùùùùùùùùùùùùùùùùùù
@@ -40,7 +40,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include "escher.hpp"
@@ -63,31 +63,36 @@
 EschCameraEx::EschCameraEx(VngoVport *vp) :
     EschCamera(vp),
     bg_bitmap(0),
-    hz_pal(0)
+    hz_pal(0),
+    grd_pal(0)
 {
 };
 
 EschCameraEx::EschCameraEx(const char *fname, const char *cname) :
     EschCamera(fname,cname),
     bg_bitmap(0),
-    hz_pal(0)
+    hz_pal(0),
+    grd_pal(0)
 {
 };
 
 EschCameraEx::EschCameraEx(const EschCamera &cam) :
     EschCamera(cam),
     bg_bitmap(0),
-    hz_pal(0)
+    hz_pal(0),
+    grd_pal(0)
 {
 };
 
 EschCameraEx::EschCameraEx(const EschCameraEx &cam) :
     EschCamera(cam),
     bg_bitmap(cam.bg_bitmap),
-    hz_pal(cam.hz_pal)
-
+    hz_pal(cam.hz_pal),
+    grd_pal(cam.grd_pal)
 {
-    flags &= ~(ESCH_CAM_OWNSBITMAP | ESCH_CAM_OWNSHAZE);
+    flags &= ~(ESCH_CAM_OWNSBITMAP
+               | ESCH_CAM_OWNSHAZE
+               | ESCH_CAM_OWNSGRADIENT);
 };
 
 
@@ -133,7 +138,10 @@ const EschCameraEx &EschCameraEx::operator = (const EschCameraEx &cam)
 
         bg_bitmap = cam.bg_bitmap;
         hz_pal = cam.hz_pal;
-        flags &= ~(ESCH_CAM_OWNSBITMAP | ESCH_CAM_OWNSHAZE);
+        grd_pal = cam.grd_pal;
+        flags &= ~(ESCH_CAM_OWNSBITMAP
+                   | ESCH_CAM_OWNSHAZE
+                   | ESCH_CAM_OWNSGRADIENT);
     }
     return *this;
 }
@@ -161,8 +169,17 @@ void EschCameraEx::release()
     }
     hz_pal=0;
 
+//ÄÄÄ Release gradient palette
+    if ((flags & ESCH_CAM_OWNSGRADIENT) && grd_pal)
+    {
+        delete grd_pal;
+    }
+    grd_pal=0;
+
 //ÄÄÄ Clear any owns bits
-    flags &= ~(ESCH_CAM_OWNSBITMAP | ESCH_CAM_OWNSHAZE);
+    flags &= ~(ESCH_CAM_OWNSBITMAP
+               | ESCH_CAM_OWNSHAZE
+               | ESCH_CAM_OWNSGRADIENT);
 }
 
 
@@ -181,8 +198,8 @@ int EschCameraEx::pre_rend()
 //ÄÄÄ Lock viewport (save old state)
     int waslocked = vport->lock();
 
-	if (waslocked == -1)
-		return 1;
+        if (waslocked == -1)
+                return 1;
 
     if (waslocked)
         flags |= ESCH_CAM_VPWASLOCKED;
@@ -190,6 +207,7 @@ int EschCameraEx::pre_rend()
 //ÄÄÄ Clear viewport/reset z-buffer
     if (!(flags & ESCH_CAM_NOCLEAR))
     {
+        //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Bitmap Background
         if ( (!(flags & ESCH_CAM_IGNORE_BMAP)) && bg_bitmap)
         {
             VngoRect rect(-bg_offx,
@@ -220,6 +238,244 @@ int EschCameraEx::pre_rend()
 
             bg_bitmap->unlock();
         }
+        //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Gradient Background
+        else if ((flags & ESCH_CAM_GRADIENT) && grd_pal)
+        {
+            //ÄÄÄ Just clear Z-buffer
+            vport->clear_screen_off();
+            vport->reset();
+#if 0
+#if 0
+            Flx16 pitch_sin = eye.dir.j;
+
+            Flx16 pitch = flx_asin(pitch_sin);
+
+            if (top.j.flx < 0)
+            {
+                pitch = pitch-Flx16(180);
+            }
+
+            Flx16 c_pitch = flx_cos(pitch);
+
+            Flx16 roll_sin = top.i;
+
+
+            Flx16 c_roll = Flx16(1);
+
+            Flx16 c_tilt = c_roll;
+            Flx16 c = c_pitch;
+
+#else
+            //ÄÄÄ Compute view angle
+            Flx16 ti = top.i;
+            Flx16 tj = top.j;
+            Flx16 tk = top.k;
+
+            Flx16 c = tj / flx_sqrt(ti*ti + tj*tj);
+            if (c > Flx16(1))
+                c = Flx16(1);
+            if (c < Flx16(-1))
+                c = Flx16(-1);
+
+            Flx16 c_tilt = tk / flx_sqrt(tj*tj + tk*tk);
+            if (c_tilt > Flx16(1))
+                c_tilt = Flx16(1);
+            if (c_tilt < Flx16(-1))
+                c_tilt = Flx16(-1);
+#endif
+#else
+            EschVector rv1;
+            EschVector rv2 = top;
+            rv1.i = Flx16(1);
+            rv1.j = 0;
+            rv1.k = 0;
+            rv1.transform(&eye.orient);
+
+            Flx16 roll = rv2.i.asin();
+
+            if (rv2.j < 0)
+            {
+                if (rv2.i < 0)
+                {
+                    roll = (Flx16(-180) - roll);
+                }
+                else
+                {
+                    roll = (Flx16(180) - roll);
+                }
+            }
+            Flx16 c_roll = roll.cos();
+            Flx16 s_roll = roll.sin();
+
+
+            EschVector pv1 = top;
+            EschVector pv2 = eye.dir;
+
+            Flx16 pitch = pv2.j.asin();
+
+            if (pv1.j < 0)
+                pitch = Flx16(180)-pitch;
+
+            if (pitch > Flx16(180))
+            {
+                pitch = -(Flx16(180) - (pitch - Flx16(180)));
+            }
+
+            Flx16 c_pitch = pitch.cos();
+            Flx16 s_pitch = pitch.sin();
+
+#endif
+            //ÄÄÄ Compute shades for gradient polygon
+#if 1
+            long sh_top = 0;
+            long sh_bottom = 255;
+
+            if (pitch < 0)
+            {
+                sh_top = Flx16(255) * (-s_pitch);
+            }
+            else
+            {
+                sh_bottom = Flx16(255) * (Flx16(1) - s_pitch);
+            }
+/*
+            long sh_top = (pitch < 0)
+                          ? long(Flx16(255)*(Flx16(1)-c_pitch)) : 0;
+
+            long sh_bottom = (pitch > 0)
+                             ? long(Flx16(255)*c_pitch)
+                             : 255;
+*/
+#else
+            long sh_top = 0;
+            long sh_bottom = 255;
+
+
+#endif
+
+            if (sh_top > 250)
+                sh_top = 250;
+            if (sh_bottom > 250)
+                sh_bottom = 250;
+
+            VngoPoint vpt[4];
+            vpt[0].x = 0;
+            vpt[0].y = 0;
+            vpt[0].z = 0xfffeffff;
+            vpt[0].clr = bcolor;
+            if (top.i >= 0)
+            {
+                vpt[0].shade = (c_roll > 0)
+                               ? sh_top
+                               : (long(Flx16(sh_bottom-sh_top)*(-c_roll))
+                                  + sh_top);
+            }
+            else
+            {
+                vpt[0].shade = (c_roll < 0)
+                               ? sh_bottom
+                               : (long(Flx16(sh_bottom-sh_top)*(Flx16(1)-c_roll))
+                                  + sh_top);
+            }
+
+            vpt[1].x = vport->vbuff.width - 1;
+            vpt[1].y = 0;
+            vpt[1].z = 0xfffeffff;
+            vpt[1].clr = bcolor;
+            if (top.i >= 0)
+            {
+                vpt[1].shade = (c_roll > 0)
+                               ? (long(Flx16(sh_bottom-sh_top)*(Flx16(1)-c_roll))
+                                  + sh_top)
+                               : sh_bottom;
+            }
+            else
+            {
+                vpt[1].shade = (c_roll < 0)
+                               ? (long(Flx16(sh_bottom-sh_top)*(-c_roll))
+                                  + sh_top)
+                               : sh_top;
+            }
+
+            vpt[2].x = vport->vbuff.width - 1;
+            vpt[2].y = vport->vbuff.height - 1;
+            vpt[2].z = 0xfffeffff;
+            vpt[2].clr = bcolor;
+            if (top.i >= 0)
+            {
+                vpt[2].shade = (c_roll > 0)
+                               ? sh_bottom
+                               : (long(Flx16(sh_bottom-sh_top)*(Flx16(1)+c_roll))
+                                  + sh_top);
+            }
+            else
+            {
+                vpt[2].shade = (c_roll < 0)
+                               ? sh_top
+                               : (long(Flx16(sh_bottom-sh_top)*c_roll)
+                                  + sh_top);
+            }
+
+            vpt[3].x = 0;
+            vpt[3].y = vport->vbuff.height - 1;
+            vpt[3].z = 0xfffeffff;
+            vpt[3].clr = bcolor;
+            if (top.i >= 0)
+            {
+                vpt[3].shade = (c_roll > 0)
+                               ? (long(Flx16(sh_bottom-sh_top)*c_roll)
+                                  + sh_top)
+                               : sh_top;
+            }
+            else
+            {
+                vpt[3].shade = (c_roll < 0)
+                               ? (long(Flx16(sh_bottom-sh_top)*(Flx16(1)+c_roll))
+                                  + sh_top)
+                               : sh_bottom;
+            }
+
+            //ÄÄÄ Draw gradient polygon
+            assertMyth("EschCameraEx::pre_rend() needs palette in current context's vport",
+                       vport->vbuff.pal != 0);
+
+            VngoShadePal *orig = vport->vbuff.pal->shd_pal;
+            vport->vbuff.pal->shd_pal = grd_pal;
+#if 0
+            dword tval = vpt[0].shade;
+            vpt[0].clr = (tval << 16) | (tval << 8) | 250 | VNGO_COLOR_24BIT;
+            tval = vpt[1].shade;
+            vpt[1].clr = (tval << 16) | (tval << 8) | 250 | VNGO_COLOR_24BIT;
+            tval = vpt[2].shade;
+            vpt[2].clr = (tval << 16) | (tval << 8) | 250 | VNGO_COLOR_24BIT;
+            tval = vpt[3].shade;
+            vpt[3].clr = (tval << 16) | (tval << 8) | 250 | VNGO_COLOR_24BIT;
+
+            if (vport->get_zmap())
+            {
+                vport->grpoly(4, vpt);
+            }
+            else
+            {
+                vport->zbuffer_off();
+                vport->grpoly(4, vpt);
+                vport->zbuffer_on();
+            }
+#else
+            if (vport->get_zmap())
+            {
+                vport->gpoly(4, vpt);
+            }
+            else
+            {
+                vport->zbuffer_off();
+                vport->gpoly(4, vpt);
+                vport->zbuffer_on();
+            }
+#endif
+            vport->vbuff.pal->shd_pal = orig;
+        }
+        //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Solid Color Background
         else
         {
             vport->clear_screen_on();
@@ -252,19 +508,19 @@ void EschCameraEx::post_rend()
 
         for(long y=0; y < h; y++)
         {
-            byte *cptr = vport->get_vbuff()->scrn_ptr 
+            byte *cptr = vport->get_vbuff()->scrn_ptr
                          + vport->get_vbuff()->ytable[y];
 
             // 16-bit Zbuffer
-            ushort *zptr = (ushort*)((byte*)vport->get_vbuff()->zbuff_ptr 
+            ushort *zptr = (ushort*)((byte*)vport->get_vbuff()->zbuff_ptr
                                      + vport->get_vbuff()->ztable[y]);
 
             for(long x=0; x < w; x++, cptr++)
             {
                 // 16-bit Zbuffer
                 ushort r = *(zptr++);
-                
-                if (r < 0xfffe)
+
+                if (r >= hz_startz && r < 0xfffe)
                 {
                     *cptr = (*((VngoShadePal8*)hz_pal))[*cptr].shl[r >> lvl_bits];
                 }
@@ -323,9 +579,9 @@ int EschCameraEx::set_bg_bitmap(XFBitmap *bm, int owns)
 // EschCameraEx - set_haze                                                  ³
 //                                                                          ³
 // Sets up the haze palette, freeing the old one if owned by the camera,    ³
-// returning 0 on success, or 1 if setting the bitmap failed.               ³
+// returning 0 on success, or 1 if setting the palette failed.              ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-int EschCameraEx::set_haze(VngoShadePal *hzp, int owns)
+int EschCameraEx::set_haze(VngoShadePal *hzp, int owns, long startz)
 {
 //ÄÄÄ Free old haze palette, if owned by Camera
     if ((flags & ESCH_CAM_OWNSHAZE) && hz_pal)
@@ -347,12 +603,14 @@ int EschCameraEx::set_haze(VngoShadePal *hzp, int owns)
 
     flags |= ESCH_CAM_HAZE;
 
+    hz_startz = startz;
+
     return 0;
 }
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// EschCameraEx - set_haze                                                  ³
+// EschCameraEx - create_haze                                               ³
 //                                                                          ³
 // Generates a new hazing shade palette given shade levels, number of       ³
 // 'pristine' levels, break-point level, break-point percentage, and        ³
@@ -401,6 +659,8 @@ esch_error_codes EschCameraEx::create_haze(ushort levels, ushort slevel,
     hz_pal = new VngoShadePal8 (levels);
     if (!hz_pal)
         return ESCH_ERR_NOMEMORY;
+
+    hz_startz = (slevel << hz_pal->num_shd_lvl_bits);
 
     flags |= ESCH_CAM_OWNSHAZE | ESCH_CAM_HAZE;
 
@@ -458,6 +718,145 @@ esch_error_codes EschCameraEx::create_haze(ushort levels, ushort slevel,
                                                  ((byte)(long)colorr,
                                                   (byte)(long)colorg,
                                                   (byte)(long)colorb));
+
+                colorr += rstep;
+                colorg += gstep;
+                colorb += bstep;
+            }
+        }
+    }
+
+    return ESCH_ERR_NONE;
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// EschCameraEx - set_gradient                                              ³
+//                                                                          ³
+// Sets up the gradient background palette, freeing the old one if owned by ³
+// the camera, returning 0 on success, or 1 if setting the palette failed.  ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+int EschCameraEx::set_gradient(VngoShadePal *grdp, int owns)
+{
+//ÄÄÄ Free old gradient palette, if owned by Camera
+    if ((flags & ESCH_CAM_OWNSGRADIENT) && grd_pal)
+    {
+        delete grd_pal;
+    }
+    grd_pal=0;
+
+    flags &= ~(ESCH_CAM_OWNSGRADIENT|ESCH_CAM_GRADIENT);
+
+//ÄÄÄ Test for valid palette
+    if (!grdp)
+        return 1;
+
+//ÄÄÄ Setup palette, if valid
+    grd_pal = grdp;
+    if (owns)
+        flags |= ESCH_CAM_OWNSGRADIENT;
+
+    flags |= ESCH_CAM_GRADIENT;
+
+    return 0;
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// EschCameraEx - create_gradient                                           ³
+//                                                                          ³
+// Generates a new gradient background shade palette given shade levels,    ³
+// break-point level, break-point percentage, and start and end colors.     ³
+//                                                                          ³
+// Note: This ramps in RGB space which gives better results that ramping in ³
+//       HLS space, which results in 'strange' changes in hues.             ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+esch_error_codes EschCameraEx::create_gradient(ushort levels,
+                                               ushort blevel, Flx16 bpercent,
+                                               VngoColor24bit color1,
+                                               VngoColor24bit color2)
+{
+//ÄÄÄ Verify input
+    if (!vport || !vport->vbuff.pal)
+        return ESCH_ERR_NEEDVPORT;
+
+    switch (levels)
+    {
+        case 8:
+        case 16:
+        case 32:
+        case 64:
+        case 128:
+        case 256:
+            break;
+        return ESCH_ERR_INVALIDPARMS;
+    }
+
+//ÄÄÄ Free old gradient palette, if owned by Camera
+    if ((flags & ESCH_CAM_OWNSGRADIENT) && grd_pal)
+    {
+        delete grd_pal;
+    }
+    grd_pal=0;
+
+    flags &= ~(ESCH_CAM_OWNSGRADIENT|ESCH_CAM_GRADIENT);
+
+//ÄÄÄ Create new gradient table
+    grd_pal = new VngoShadePal8 (levels);
+    if (!grd_pal)
+        return ESCH_ERR_NOMEMORY;
+
+    flags |= ESCH_CAM_OWNSGRADIENT | ESCH_CAM_GRADIENT;
+
+    //ÄÄÄ Setup each color (for gradient, all colors map to same for now...)
+    VngoPal *pal = vport->vbuff.pal;
+
+    for (ulong qt=0; qt < VNGO_PAL_SIZE; qt++)
+    {
+        byte *shl = &(*((VngoShadePal8*)grd_pal))[qt].shl[0];
+
+        Flx16 colorr = Flx16(color1.r);
+        Flx16 colorg = Flx16(color1.g);
+        Flx16 colorb = Flx16(color1.b);
+
+        VngoColor24bit bcolor
+            ((byte)(long)(colorr + (Flx16(color2.r - color1.r) * bpercent)),
+             (byte)(long)(colorg + (Flx16(color2.g - color1.g) * bpercent)),
+             (byte)(long)(colorb + (Flx16(color2.b - color1.b) * bpercent)));
+
+        int lvl=0;
+
+        //ÄÄÄ Linear from color 1 to break point
+        {
+            Flx16 rstep = Flx16(bcolor.r - color1.r) / Flx16(blevel);
+            Flx16 gstep = Flx16(bcolor.g - color1.g) / Flx16(blevel);
+            Flx16 bstep = Flx16(bcolor.b - color1.b) / Flx16(blevel);
+
+            for(; lvl < blevel; lvl++)
+            {
+                shl[lvl] = (byte)pal->get_index(VngoColor24bit
+                                                ((byte)(long)colorr,
+                                                 (byte)(long)colorg,
+                                                 (byte)(long)colorb));
+
+                colorr += rstep;
+                colorg += gstep;
+                colorb += bstep;
+            }
+        }
+
+        //ÄÄÄ Linear from break point to color 2
+        {
+            Flx16 rstep = Flx16(color2.r - bcolor.r) / Flx16(levels - blevel);
+            Flx16 gstep = Flx16(color2.g - bcolor.g) / Flx16(levels - blevel);
+            Flx16 bstep = Flx16(color2.b - bcolor.b) / Flx16(levels - blevel);
+
+            for(; lvl < levels; lvl++)
+            {
+                shl[lvl] = (byte)pal->get_index(VngoColor24bit
+                                                ((byte)(long)colorr,
+                                                 (byte)(long)colorg,
+                                                 (byte)(long)colorb));
 
                 colorr += rstep;
                 colorg += gstep;

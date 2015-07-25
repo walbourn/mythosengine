@@ -3,7 +3,7 @@
 //                      Ivory -- A Memory Management Library
 //                          Microsoft Windows '95 Version
 //
-//            Copyright (c) 1994, 1995 by Charybdis Enterprises, Inc.
+//            Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved.
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -53,6 +53,8 @@ extern "C" {
 
 #include <stddef.h>
 #include <portable.h>
+#include <malloc.h>
+#include <string.h>
 
 #include "ivmem.h"
 
@@ -106,7 +108,11 @@ typedef void (*ivory_error_handler) (ivory_error_codes);
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 // The actual Handle type returned by the Handle based allocation routines.
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+#ifdef __IMPLEMENT_HANDLES__
 typedef ulong IvoryHandle;
+#else
+typedef void *IvoryHandle;
+#endif
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
@@ -217,11 +223,24 @@ void ivory_free    (void **);
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 // Handle space functions
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+#ifdef __IMPLEMENT_HANDLES__
+
 IvoryHandle ivory_halloc (size_t);
 IvoryHandle ivory_zhalloc(size_t);
 void ivory_hfree   (IvoryHandle *);
 void *ivory_hlock  (IvoryHandle);
 void ivory_hunlock (IvoryHandle);
+
+#else
+
+// Just wrap up malloc for efficieny's sake.
+#define ivory_halloc(siz) malloc (siz)
+#define ivory_zhalloc(siz) memset (malloc (siz), 0, siz)
+#define ivory_hfree(handp) (free (*handp), *handp=0)
+#define ivory_hlock(hand) (hand)
+#define ivory_hunlock(hand)
+
+#endif
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 // Arena space functions

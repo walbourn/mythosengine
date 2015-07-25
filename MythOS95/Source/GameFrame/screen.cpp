@@ -8,7 +8,7 @@
 //
 // A Framework for Microsoft Windows '95 Entertainment Software Using MythOS
 //
-//           Copyright (c) 1995, 1996 by Charybdis Enterprises, Inc.
+//          Copyright (c) 1995 - 1997 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -36,7 +36,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #define WIN32_LEAN_AND_MEAN
@@ -383,7 +383,7 @@ void GFScreenDD::flip()
     if (lpDDSPrimary->IsLost() == DDERR_SURFACELOST)
         lpDDSPrimary->Restore();
 
-    lpDDSPrimary->Blt(NULL,lpDDSBackBuffer, NULL, 
+    lpDDSPrimary->Blt(NULL,lpDDSBackBuffer, NULL,
                       DDBLT_ASYNC | DDBLT_WAIT, NULL);
 #endif
 
@@ -423,7 +423,7 @@ void GFScreenDD::reinit()
 VngoVport *GFScreenDD::create_subviewport(VngoRect &srect, dword flags)
 {
 
-    VngoVport *ret_val = new VngoVportDD8(SurfaceManager, NULL,srect, 
+    VngoVport *ret_val = new VngoVportDD8(SurfaceManager, NULL,srect,
                                           gvport->vbuff.pal, flags);
     return (ret_val);
 }
@@ -632,7 +632,7 @@ void GFScreenDIB::flip()
                            damage_rect.right - damage_rect.left,
                            damage_rect.bottom - damage_rect.top,
 
-                           damage_rect.left, damage_rect.bottom, 
+                           damage_rect.left, damage_rect.bottom,
                            0, height,
                            bits, bmi, DIB_PAL_COLORS);
 #else

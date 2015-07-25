@@ -6,7 +6,7 @@
 #    (_)       ^          * *     *      *   *    *            (_)
 #             (_)       **   **   *    ***** **** ****
 #
-#            Copyright (c) 1994-1996 by Charybdis Enterprises, Inc.
+#            Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.
 #                             All Rights Reserved.
 #
 #ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -57,6 +57,7 @@ OBJS = \
 xfbase.obj\
 xfbitmap.obj\
 xfbmp.obj\
+xfbparse.obj\
 xfcel.obj\
 xfdisk.obj\
 xfdskbuf.obj\
@@ -98,6 +99,47 @@ all: setstden $(LIB).lib
 #                                 Rules
 #
 #°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+#--- .c, .cpp, .asm setup in standard include ---
+
+#--- .asm
+{..\Bitmap\}.asm{}.obj:
+   $(ASM) $(ASMOPTS) $<
+
+{..\IFF\}.asm{}.obj:
+   $(ASM) $(ASMOPTS) $<
+
+{..\INI\}.asm{}.obj:
+   $(ASM) $(ASMOPTS) $<
+
+{..\IO\}.asm{}.obj:
+   $(ASM) $(ASMOPTS) $<
+
+#--- .c
+{..\Bitmap\}.c{}.obj:
+	$(CC) $(CCOPTIONS) $<
+
+{..\IFF\}.c{}.obj:
+	$(CC) $(CCOPTIONS) $<
+
+{..\INI\}.c{}.obj:
+	$(CC) $(CCOPTIONS) $<
+
+{..\IO\}.c{}.obj:
+	$(CC) $(CCOPTIONS) $<
+
+#--- .cpp
+{..\Bitmap\}.cpp{}.obj:
+	$(CPP) $(CCOPTIONS) $<
+
+{..\IFF\}.cpp{}.obj:
+	$(CPP) $(CCOPTIONS) $<
+
+{..\INI\}.cpp{}.obj:
+	$(CPP) $(CCOPTIONS) $<
+
+{..\IO\}.cpp{}.obj:
+	$(CPP) $(CCOPTIONS) $<
 
 #±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 #

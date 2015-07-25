@@ -8,7 +8,7 @@
 //ששששש²±²ששששששש²±²שששש²±²ש²±²שששש²±²ש²±²שששש²±²ש²±²שששששששש²±²שששש²±²שששששש
 //שששש²²²²²²²²²²ש²²²²²²²²ששש²²²²²²²²שש²²²שששש²²²ש²²²²²²²²²²ש²²²שששש²²²ששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//שששששששששששCopyrightש(c)ש1994-1996שbyשCharybdisשEnterprises,שInc.שששששששששש
+//שששששששששששCopyrightש(c)ש1994-1997שbyשCharybdisשEnterprises,שInc.שששששששששש
 //ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
 //ששששששששששששששששששששש Microsoft Windows '95 Version ששששששששששששששששששששששש
@@ -111,6 +111,8 @@ ToolVPort::ToolVPort()
              | ESCH_CAM_SHADE_FLAT
              | ESCH_CAM_SHADE_SMOOTH
              | ESCH_CAM_SHADE_SPECULAR;
+
+    extra_flags = 0;
 }
 
 
@@ -235,7 +237,35 @@ void ToolVPort::Render(void)
         return;
     }
 
-    cam->render(pDoc->meshes,pDoc->lights);
+    EschContext ec(EschCurrent);
+    ec.camera = cam;
+    ec.lights = pDoc->lights;
+    ec.eschs = pDoc->meshes;
+    ec.push();
+
+    cam->render();
+
+    if (extra_flags & (SPHERE_EXTS | BOX_EXTS))
+    {
+        for(EschMeshDraw *ptr=pDoc->meshes;
+            ptr != NULL;
+            ptr = (EschMeshDraw*)ptr->next())
+        {
+            if (!(ptr->flags & ESCH_DRW_SKIP))
+            {
+                if (extra_flags & BOX_EXTS)
+                {
+                    ptr->mesh->box.draw(&ptr->world,cam->bcolor ^ 255);
+                }
+                if (extra_flags & SPHERE_EXTS)
+                {
+                    ptr->draw_extents(cam->bcolor ^ 255);
+                }
+            }
+        }
+    }
+
+    ec.pop();
 }
 
 
@@ -1302,6 +1332,13 @@ void ToolVPort::OnRButtonDown(UINT nFlags, CPoint point)
     modeMenu.AppendMenu(MF_STRING, ID_VIEW_RND_TEXTURES, "Textures");
     modeMenu.AppendMenu(MF_STRING, ID_VIEW_RND_PERSPECTIVE, "Perspective");
 
+    //ִִִ Show Submenu
+    CMenu   showMenu;
+    showMenu.CreatePopupMenu();
+
+    showMenu.AppendMenu(MF_STRING, ID_VIEW_SHOW_SPHEXTS, "Spherical Extents");
+    showMenu.AppendMenu(MF_STRING, ID_VIEW_SHOW_BOXEXTS, "Box Extents");
+
     //ִִִ AutoRotate Submenu
     CMenu   autoMenu;
     autoMenu.CreatePopupMenu();
@@ -1320,6 +1357,7 @@ void ToolVPort::OnRButtonDown(UINT nFlags, CPoint point)
     rMenu.AppendMenu(MF_STRING, ID_VIEW_REFRESH, "Refresh");
     rMenu.AppendMenu(MF_SEPARATOR);
     rMenu.AppendMenu(MF_STRING | MF_POPUP, (unsigned int) modeMenu.m_hMenu, "Render");
+    rMenu.AppendMenu(MF_STRING | MF_POPUP, (unsigned int) showMenu.m_hMenu, "Show");
     rMenu.AppendMenu(MF_SEPARATOR);
     rMenu.AppendMenu(MF_STRING, ID_VIEW_ROTXY, "Rotate X/Y");
     rMenu.AppendMenu(MF_STRING, ID_VIEW_MOVEXY, "Move X/Y");
@@ -1341,8 +1379,9 @@ void ToolVPort::OnRButtonDown(UINT nFlags, CPoint point)
                           point.x, point.y,
                           AfxGetMainWnd());
     rMenu.DestroyMenu();
-    modeMenu.DestroyMenu();
     autoMenu.DestroyMenu();
+    showMenu.DestroyMenu();
+    modeMenu.DestroyMenu();
 }
 
 //°±² eof - eshtvp.cpp ²±°

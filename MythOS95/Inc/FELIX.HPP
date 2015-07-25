@@ -10,7 +10,7 @@
 //
 //                      Microsoft Windows '95 Version
 //   
-//           Copyright (c) 1994, 1995 by Charybdis Enterprises, Inc.
+//           Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved.
 //
 //컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
@@ -184,7 +184,7 @@ extern "C" Flx16 Flx16_sin_data;
 //같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같�
 #define SAFE_DIVIDE         1
 
-const int   FLX_DEGREES_SHIFT   = 4;
+const int   FLX_DEGREES_SHIFT   = 6;
 const Flx16 FLX16_ZERO          = 0;
 const Flx16 FLX16_ONE           = 1;
 const int   SIN_TABLE_SIZE      = (90 << FLX_DEGREES_SHIFT);

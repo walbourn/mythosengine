@@ -10,7 +10,7 @@
 ;
 ;                      Microsoft Windows '95 Version
 ;   
-;           Copyright (c) 1994, 1995 by Charybdis Enterprises, Inc.
+;           Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.
 ;                           All Rights Reserved.
 ;
 ;컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
@@ -55,13 +55,8 @@ SAFE_DIVIDE             equ     1
 FLX16_ONE               equ     010000h ; this is one in 16.16
 FLX_SQRT_BITRES         equ     0ch     ; number of bits resolution in SQRT
                                         ; table.
-if 0
-FLX_DEGREES_SHIFT       equ     1       ; number of bits resolution in SIN
-                                        ; table. (ie. .5 degrees)
-else
-FLX_DEGREES_SHIFT	equ	4	; number of bits resolution in SIN
-					; table, (ie. .0625 degrees).
-endif
+FLX_DEGREES_SHIFT	equ	6	; number of bits resolution in SIN
+					; table, (ie. 1/64th of a degrees).
 
 FLX16_SHIFTS            equ     16      ; this is the shift value for 16.16s
 

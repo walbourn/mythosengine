@@ -7,7 +7,7 @@
  ששששש///ששששששש///שששש///ש///שששש///ש///שששש///ש///שששששששש///שששש///שששששש
  שששש//////////ש////////ששש////////שש///.ששש///.//////////ש///שששש///.שששששש
  ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
- שששששששששששCopyrightש(c)ש1994-1996שbyשCharybdisשEnterprises,שInc.שששששששששש
+ שששששששששששCopyrightש(c)ש1994-1997שbyשCharybdisשEnterprises,שInc.שששששששששש
  ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
  ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
  ששששששששששששששששששששש Microsoft Windows '95 Version ששששששששששששששששששששששש
@@ -38,28 +38,27 @@
 
  Notes by: Chuck Walbourn
 
- Last Updated: July 9, 1996
+ Last Updated: September 17, 1996
 
  Escher Exporter - 3D Studio R4 IPAS PXP Routine
 
  Changes for this release --------------------------------------------------
 
-    o Added export of ESCH_FACE_SELFILUM levels based on the selfillumiated
-      setting in the 3DS material definition.
+ Version 1.50
 
-    o Updated for new light types: EschFastPointLight, EschFastAttenLight,
-      EschFastSpotLight, EschAttenLight, EschSpotLight.
+    o Exports FLI/FLC animated textures.
 
-    o Changed search for material bitmaps to search Maps directories
-      before the Images directory to match 3D Studio's behavior.
+    o Options for controlling the use of the ALLOWPERSP bit were added.
 
-    o Fixed a problem with the radial extents computation which was
-      not taking any pivot points into account.
+    o Expanded Texture Resize Query dialog to include number of frames
+      for FLI/FLCs and interactive texture size indicator.
 
+    o Added materials format options for 8-bit or Truecolor optionally
+      RLE compressed data.
 
+    o Fixed problem with lights control dialog preventing YES/NO from
+      being selected.
 
- Pending changes -----------------------------------------------------------
-
-    o Changes for exporting multi-frame/animated textures.
+    o Cleaned up code
 
  *** END OF FILE ***

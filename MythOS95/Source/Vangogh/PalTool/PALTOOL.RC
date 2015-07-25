@@ -215,7 +215,7 @@ BEGIN
                     WS_GROUP,55,30,119,8
     CONTROL         "Version X.X\tMon DD YYYY",IDC_ABOUT_VERSION,"Static",
                     SS_SIMPLE | WS_GROUP,55,45,111,8
-    CONTROL         "Copyright © 1995, 1996 by Charybdis Enterprises, Inc.",
+    CONTROL         "Copyright © 1995-1997 by Charybdis Enterprises, Inc.",
                     IDC_STATIC,"Static",SS_SIMPLE | WS_GROUP,55,60,181,8
     CTEXT           "Van Gogh is a component of the MythOS collection",
                     IDC_STATIC,45,100,185,11

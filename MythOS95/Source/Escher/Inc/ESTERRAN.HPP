@@ -8,7 +8,7 @@
 //ששששש²±²ששששששש²±²שששש²±²ש²±²שששש²±²ש²±²שששש²±²ש²±²שששששששש²±²שששש²±²שששששש
 //שששש²²²²²²²²²²ש²²²²²²²²ששש²²²²²²²²שש²²²שששש²²²ש²²²²²²²²²²ש²²²שששש²²²ששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//שששששששששששCopyrightש(c)ש1994-1996שbyשCharybdisשEnterprises,שInc.שששששששששש
+//שששששששששששCopyrightש(c)ש1994-1997שbyשCharybdisשEnterprises,שInc.שששששששששש
 //ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
 //ששששששששששששששששששששש Microsoft Windows '95 Version ששששששששששששששששששששששש
@@ -28,7 +28,7 @@
 //
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
 //
-// Created by Chuck Walbourn
+// Created by Tim Little & Chuck Walbourn
 //
 // esterran.hpp
 //
@@ -158,6 +158,8 @@ public:
     //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ¿
     // Operations                                                           ³
     //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִÙ
+    const EschTerrain &operator = (const EschTerrain &t);
+
     virtual void draw();
     virtual void animate();
 
@@ -166,9 +168,18 @@ public:
     virtual void release();
 
     virtual Flx16 get_height(Flx16 x, Flx16 z) const;
-    Flx16 get_height(const EschPoint *pt) const { return get_height(pt->x, pt->z);}
+    Flx16 get_height(const EschPoint *pt) const
+    {
+        return get_height(pt->x, pt->z);
+    }
 
-    virtual int check_LOS(EschPoint *pt1, EschPoint *pt2, int precision=-1) const;
+    virtual ushort get_surface_flags(Flx16 x, Flx16 z) const;
+    ushort get_surface_flags(const EschPoint *pt) const
+    {
+        return get_surface_flags(pt->x, pt->z);
+    }
+
+    virtual int check_LOS(EschPoint *pt1, EschPoint *pt2, int precision=-1,Flx16 *dist=NULL) const;
 
     //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ¿
     // Utility functions.                                                   ³

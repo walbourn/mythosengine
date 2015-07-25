@@ -2,11 +2,11 @@
 //
 //                                                           %__________%
 //                                                          %/ . .  .   \%
-//           Van Gogh 2D-Display Library                     |  . .  o. | 
+//           Van Gogh 2D-Display Library                     |  . .  o. |
 //                                                           |. _  .   .|
-//          Microsoft Windows '95 Version                    | / \   .  | 
+//          Microsoft Windows '95 Version                    | / \   .  |
 //                                                           |_|_|_._._.|
-// Copyright (c) 1994-1996 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
+// Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
 //              All rights reserved.                        %\__________/%
 //                                                           %          %
 //
@@ -25,9 +25,9 @@
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
-// Vngcolor.hpp  
+// Vngcolor.hpp
 //
-//     This file has all of the various color definitions.    
+//     This file has all of the various color definitions.
 //
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ Revision History ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
@@ -36,9 +36,9 @@
 #define __VNGCOLOR_HPP 1
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-//             
+//
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include "portable.h"
@@ -101,11 +101,11 @@ public:
     byte    na;
 
     VngoColor24bit() {};
-    VngoColor24bit(dword clr) 
+    VngoColor24bit(dword clr)
     {
-        r =(byte)(clr & 0xff); 
-        g =(byte)((clr >> 8) & 0xff); 
-        b =(byte)((clr >> 16) & 0xff); 
+        r =(byte)(clr & 0xff);
+        g =(byte)((clr >> 8) & 0xff);
+        b =(byte)((clr >> 16) & 0xff);
     }
 
     VngoColor24bit(byte pr,byte pg,byte pb) {r=pr; g=pg; b=pb;na=0;}
@@ -237,7 +237,7 @@ public:
 };
 
 
-class VngoColorShade15 : public VngoColorShade 
+class VngoColorShade15 : public VngoColorShade
 {
     VngoColorShade15() {}
     friend class VngoShadePal15;
@@ -247,7 +247,7 @@ public:
 };
 
 
-class VngoColorShade16 : public VngoColorShade 
+class VngoColorShade16 : public VngoColorShade
 {
     VngoColorShade16() {}
     friend class VngoShadePal16;
@@ -257,7 +257,7 @@ public:
 };
 
 
-class VngoColorShade24 : public VngoColorShade 
+class VngoColorShade24 : public VngoColorShade
 {
     VngoColorShade24() {}
     friend class VngoShadePal24;

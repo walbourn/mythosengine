@@ -9,8 +9,8 @@
   
                        Microsoft Windows '95 Version
      
-          Copyright (c) 1994, 1995, 1996 by Charybdis Enterprises, Inc.
-                             All Rights Reserved.
+          Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.
+                           All Rights Reserved.
   
   ---------------------------------------------------------------------------
   
@@ -34,9 +34,10 @@
   Updated:   June 24, 1996
 
   Changes for this release --------------------------------------------------
+
     o Changed the precision of the trig functions to .0625 degrees accuracy.
 
-    o Added teh atan() functions.
+    o Added the atan() functions.
 
   Proposed changes ----------------------------------------------------------
 
@@ -50,6 +51,7 @@
 
     o 2.30, 24.8, 20.12, 12.20 formats.
 
+    o Support for floating point table-based trig functions
 
 
   Problems ------------------------------------------------------------------

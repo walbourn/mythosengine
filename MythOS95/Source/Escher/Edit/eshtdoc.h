@@ -8,7 +8,7 @@
 //ששששש²±²ששששששש²±²שששש²±²ש²±²שששש²±²ש²±²שששש²±²ש²±²שששששששש²±²שששש²±²שששששש
 //שששש²²²²²²²²²²ש²²²²²²²²ששש²²²²²²²²שש²²²שששש²²²ש²²²²²²²²²²ש²²²שששש²²²ששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//שששששששששששCopyrightש(c)ש1994-1996שbyשCharybdisשEnterprises,שInc.שששששששששש
+//שששששששששששCopyrightש(c)ש1994-1997שbyשCharybdisשEnterprises,שInc.שששששששששש
 //ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
 //ששששששששששששששששששששש Microsoft Windows '95 Version ששששששששששששששששששששששש
@@ -51,11 +51,17 @@
 class TerrEditDoc : public CDocument
 {
 protected: // create from serialization only
-	TerrEditDoc();
-	DECLARE_DYNCREATE(TerrEditDoc)
+        TerrEditDoc();
+        DECLARE_DYNCREATE(TerrEditDoc)
 
 // Attributes
 public:
+    enum
+    {
+        ESCH_NORMALS_SMOOTH = 0x1,
+        ESCH_NORMALS_FLAT   = 0x2
+    };
+
     ushort          width;                  // Width of height field
     ushort          depth;                  // Depth of height field
     ushort          surfratio;              // Surface ratio (height : surface)
@@ -65,12 +71,13 @@ public:
 
     int             autocenter;             // Autocenter terrain in XZ plane
     Flx16           orgx, orgy, orgz;       // Terrain origin
-    
+
     byte            *hfield;                // Height field array
     Flx16           *htable;                // Height table
     esch_surf_type  *surfinfo;              // Surface array
     dword           *surfcolr;              // Surface RGB color array
     IvoryHandle     hsurfnorml;             // Lighting normal array
+    IvoryHandle     hsurfnormlflat;         // Flat shading normal array.
 
     BOOL            undo_valid;
     esch_surf_type  *undo_surfinfo;         // Undo buffers
@@ -140,7 +147,7 @@ public:
     void SaveColors(const char *fname);
     void LoadColors(const char *fname);
 
-    void ComputeNormals();
+    void ComputeNormals(dword flags = ESCH_NORMALS_SMOOTH);
     void LightTerrain();
 
     void GetMinMaxElevations(Flx16 &min, Flx16 &max);
@@ -159,20 +166,20 @@ public:
     void UILightProperties(CWnd *parent, UINT ipage=0);
 
 // Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(TerrEditDoc)
-	public:
-	virtual BOOL OnNewDocument();
-	virtual void DeleteContents();
-	//}}AFX_VIRTUAL
+        // ClassWizard generated virtual function overrides
+        //{{AFX_VIRTUAL(TerrEditDoc)
+        public:
+        virtual BOOL OnNewDocument();
+        virtual void DeleteContents();
+        //}}AFX_VIRTUAL
 
 // Implementation
 public:
-	virtual ~TerrEditDoc();
-	virtual void Serialize(CArchive& ar);   // overridden for document i/o
+        virtual ~TerrEditDoc();
+        virtual void Serialize(CArchive& ar);   // overridden for document i/o
 #ifdef _DEBUG
-	virtual void AssertValid() const;
-	virtual void Dump(CDumpContext& dc) const;
+        virtual void AssertValid() const;
+        virtual void Dump(CDumpContext& dc) const;
 #endif
 
 protected:
@@ -200,11 +207,11 @@ protected:
 
 // Generated message map functions
 protected:
-	//{{AFX_MSG(TerrEditDoc)
-		// NOTE - the ClassWizard will add and remove member functions here.
-		//    DO NOT EDIT what you see in these blocks of generated code !
-	//}}AFX_MSG
-	DECLARE_MESSAGE_MAP()
+        //{{AFX_MSG(TerrEditDoc)
+                // NOTE - the ClassWizard will add and remove member functions here.
+                //    DO NOT EDIT what you see in these blocks of generated code !
+        //}}AFX_MSG
+        DECLARE_MESSAGE_MAP()
 };
 
 //°±² eof - eshtdoc.h ²±°

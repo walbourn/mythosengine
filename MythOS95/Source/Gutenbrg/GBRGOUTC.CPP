@@ -11,7 +11,7 @@
 //                     Text Output and Font Management System
 //                          Microsoft Windows '95 Version
 //
-//            Copyright (c) 1995, 1996 by Charybdis Enterprises, Inc.
+//            Copyright (c) 1995-1997 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved.
 //
 //컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
@@ -94,8 +94,24 @@ long gberg_outc(VngoVport *vp, long x, long y, char c)
 
             //컴 Monochrome fixed
 
+            if (c >= 0)
+            {
+                txt.flags = VNGO_TEXTURE_MONO;
+                txt.tex = (byte *)((byte *)fnt->ptr + (c*fnt->bpc));
+
+                int waslocked = vp->lock();
+                vp->image_trans_mono(&r,&txt,GBergInstance->fcol,GBergInstance->bcol);
+                if (!waslocked)
+                    vp->unlock();
+            }
+            break;
+
+        case GBERG_FNT_MONOFIXEDEX:
+
+            //컴 Monochrome fixed extended
+
             txt.flags = VNGO_TEXTURE_MONO;
-            txt.tex = (byte *)((byte *)fnt->ptr + (c*fnt->bpc));
+            txt.tex = (byte *)((byte *)fnt->ptr + ((byte)c*fnt->bpc));
 
             int waslocked = vp->lock();
             vp->image_trans_mono(&r,&txt,GBergInstance->fcol,GBergInstance->bcol);

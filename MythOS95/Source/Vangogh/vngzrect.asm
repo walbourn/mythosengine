@@ -6,7 +6,7 @@
 ;                                                           |. _  .   .|
 ;          Microsoft Windows '95 Version                    | / \   .  | 
 ;                                                           |_|_|_._._.|
-;  Copyright (c) 1994-1996 by Charybdis Enterprises, Inc.   |.-.-.-.-..|
+;  Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.   |.-.-.-.-..|
 ;              All rights reserved.                        %\__________/%
 ;                                                           %          %
 ;
@@ -95,18 +95,25 @@ START_PROC     zbuff_reset_rect16, C CurScreen:DWORD, rectptr:DWORD, depth:DWORD
 
         mov     esi,CurScreen
         mov     edi,(VNGO_VBUFFER PTR [esi]).vb_scrn_ptr
+
         mov     ebx,(VNGO_VBUFFER PTR [esi]).vb_zpitch
         mov     ecx,rectptr
-        mov     eax,(VNGO_RECT PTR [ecx]).rect_x
-        mov     LX1,eax
+
+        mov     edx,(VNGO_RECT PTR [ecx]).rect_x
         mov     eax,(VNGO_RECT PTR [ecx]).rect_dx
+
+        mov     LX1,edx
         mov     LDX,eax
-        mov     eax,(VNGO_RECT PTR [ecx]).rect_dy
-        mov     LDY,eax
+
+        mov     edx,(VNGO_RECT PTR [ecx]).rect_dy
         mov     eax,(VNGO_RECT PTR [ecx]).rect_y
-        mov     LY1,eax
+
+        mov     LDY,edx
         mov     ecx,(VNGO_VBUFFER PTR [esi]).vb_ztable
+
+        mov     LY1,eax
         lea     eax,[ecx+eax*4]
+
         mov     eax,[eax]
 
 
@@ -118,20 +125,32 @@ START_PROC     zbuff_reset_rect16, C CurScreen:DWORD, rectptr:DWORD, depth:DWORD
 
         mov     eax,depth       ; it is already expanded to 32bits.
 
-        mov     edx,LDY         ; LDY doesn't get modified, since it is pixels.
+; Here it is assumed that edx still has the contents of LDY.
+;        mov     edx,LDY         ; LDY doesn't get modified, since it is pixels.
         mov     esi,ecx
-        sub     ebx,esi
+        sub     ebx,ecx
 
-y_loop:
-        mov     ecx,esi
-        shr     ecx,2
+;; The outside loop....
+Outside_loop:
+	mov	ecx,esi
+	test	edi,2
+	jns	@f
+	mov	word ptr [edi],ax
+	sub	ecx,2
+	lea	edi,[edi+2]
+@@:
+	push	ecx
+	shr	ecx,2
     rep stosd
-        mov     ecx,esi
-        and     ecx,03h
-    rep stosb
+    	pop	ecx
+	and	ecx,2
+	jz 	@f
+   	mov	word ptr [edi],ax
+	lea	edi,[edi+2]	
+@@:
         add     edi,ebx         ; go to the next scan line.
         dec     edx
-        jg      y_loop
+        jg      Outside_loop
 
         pop	ebx
         pop	esi

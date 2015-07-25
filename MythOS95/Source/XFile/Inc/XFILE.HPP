@@ -6,7 +6,7 @@
 //    (_)       ^          * *     *      *   *    *            (_)
 //             (_)       **   **   *    ***** **** ****
 //
-//            Copyright (c) 1994-1996 by Charybdis Enterprises, Inc.
+//            Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.
 //                             All Rights Reserved.
 //                        Microsoft Windows '95 Version
 //
@@ -29,7 +29,7 @@
 //
 // xfile.hpp
 //
-//      This includes the headers for all parts of the XFile library.
+// This includes the headers for all parts of the XFile library.
 //
 //อออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออ
 

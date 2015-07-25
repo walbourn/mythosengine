@@ -1,0 +1,839 @@
+//ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
+//ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
+//ùùùùùùùùùù°°°°°°°°°°ù°°°°°°°°ùùù°°°°°°°°ùù°°°ùùùù°°°ù°°°°°°°°°°ù°°°°°°°°°ùù
+//ùùùùùùùùù°±°ùùùùùùù°±°ùùùù°±°ù°±°ùùùù°±°ù°±°ùùùù°±°ù°±°ùùùùùùùù°±°ùùùù°±°ùù
+//ùùùùùùùù±°±ùùùùùùù±°±ùùùùùùùù±°±ùùùùùùùù±°±ùùùù±°±ù±°±ùùùùùùùù±°±ùùùù±°±ùùù
+//ùùùùùùù±²±±°±±²ùù±²±±°±±²±±ù±²±ùùùùùùùù±²±±°±±²±±ù±²±±°±±²ùùù±²±±°±±²°ùùùùù
+//ùùùùùù±²±ùùùùùùùùùùùùùù±²±ù±²±ùùùùùùùù±²±ùùùù±²±ù±²±ùùùùùùùù±²±ùùùù±²±ùùùùù
+//ùùùùù²±²ùùùùùùù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùùùùùù²±²ùùùù²±²ùùùùùù
+//ùùùù²²²²²²²²²²ù²²²²²²²²ùùù²²²²²²²²ùù²²²ùùùù²²²ù²²²²²²²²²²ù²²²ùùùù²²²ùùùùùùù
+//ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
+//ùùùùùùùùùùùCopyrightù(c)ù1994-1997ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
+//ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
+//ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
+//ùùùùùùùùùùùùùùùùùùùùù Microsoft Windows '95 Version ùùùùùùùùùùùùùùùùùùùùùùù
+//ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//
+//           *** Charybdis Enterprises, Inc. Company Confidential ***
+//
+//  This file and all associated files are the company proprietary property
+//        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+//
+// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
+// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
+// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
+// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
+// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+//
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//
+// Created by Tim Little & Chuck Walbourn
+//
+// esmeshdr.cpp
+//
+// Contains the code for the EschMeshDraw class.  This class is
+// associated with an EschMesh object in order to define a drawable
+// instance of the mesh data--this reduces the data requirements for
+// having multiple copies of the same mesh displayed simultaneously.
+//
+//ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
+
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//
+//                                Includes
+//                                
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+#include "escher.hpp"
+
+//±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+//
+//                                 Data
+//
+//±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+
+extern char EschNoName[];
+
+//±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+//
+//                                 Code
+//
+//±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°±  Constructors/Destructors  ±°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// EschMeshDraw - Constructor                                               ³
+//                                                                          ³
+// Initializes the class instance.                                          ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+EschMeshDraw::EschMeshDraw(EschMesh *mdata) :
+    EschGeometry(),
+    mesh(0),
+    tmax(0),
+    txt(0)
+{
+    dtyp = ESCH_DRWT_MESH;
+
+    if (mdata)
+        attach(mdata);
+}
+
+EschMeshDraw::EschMeshDraw(const char *fname, const char *oname,
+                           VngoPal *pal, EschMesh *msh, char *pn,
+                           dword ctrlfl) :
+    EschGeometry(),
+    mesh(0),
+    tmax(0),
+    txt(0)
+{
+    dtyp = ESCH_DRWT_MESH;
+
+    load(fname,oname,pal,msh,pn,ctrlfl);
+}
+
+EschMeshDraw::EschMeshDraw(const EschMeshDraw &mshd) :
+    EschGeometry(mshd),
+    mesh (mshd.mesh),
+    tmax (mshd.tmax),
+    txt (mshd.txt)
+{
+    flags &= ~(ESCH_MSHD_OWNSTEXTURE
+               | ESCH_MSHD_OWNSNOSTCTXT
+               | ESCH_MSHD_OWNSNOMFTXT
+               | ESCH_MSHD_OWNSNOPRCTXT);
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// EschMeshDraw - Destructor                                                ³
+//                                                                          ³
+// Detaches the object.                                                     ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+EschMeshDraw:: ~EschMeshDraw()
+{
+    detach();
+}
+
+
+
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°±  Operations  ±°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// EschMeshDraw - operator =                                                ³
+//                                                                          ³
+// Copies the data from another mesh draw.                                  ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+const EschMeshDraw &EschMeshDraw::operator = (const EschMeshDraw &mshd)
+{
+    if (this != &mshd)
+    {
+        detach();
+
+        EschGeometry::operator = (mshd);
+
+        flags &= ~(ESCH_MSHD_OWNSTEXTURE
+                   | ESCH_MSHD_OWNSNOSTCTXT
+                   | ESCH_MSHD_OWNSNOMFTXT
+                   | ESCH_MSHD_OWNSNOPRCTXT);
+
+        attach(mshd.mesh);
+
+        tmax = mshd.tmax;
+        txt = mshd.txt;
+    }
+    return *this;
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// EschMeshDraw - draw                                                      ³
+//                                                                          ³
+// Draws the mesh object from the associated mesh's data using local        ³
+// object storage.                                                          ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+void EschMeshDraw::draw()
+{
+    ulong           i;
+    dword           ctrlfl;
+    dword           level;
+    dword           fflags;
+    dword           *vflags;
+    VngoPoint       *vpt;
+    EschFace        *face;
+    EschVertex      *vn;
+    EschCamera      *cam;
+    EschLight       *lights;
+    EschPoint       eyep(0,0,0);
+    EschFrameRef    frame(0);
+
+    assertMyth("EschMeshDraw::draw needs an attached mesh",
+               mesh && mesh->ref_count);
+
+    //ÄÄÄ Setup local pointers to current camera and Van Gogh viewport.
+    assertMyth("EschMeshDraw::draw needs camera in current context",
+               EschCurrent != NULL && EschCurrent->camera != NULL);
+
+    cam=EschCurrent->camera;
+
+    assertMyth("EschMeshDraw::draw needs a viewport in current context's camera",
+               cam->vport != NULL);
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Perform object radial extents check
+    if (!(flags & ESCH_MSHD_NOEXTENTSCHK))
+    {
+        EschPoint   p;
+
+        // Transform center into view
+        exts.center.transform(&world,&p);
+        p.transform(&cam->eye.iorient);
+        
+        // Scale radius
+        Flx16 r = flx_16mul16( exts.radius, 
+                  flx_16mul16( world.scalef, 
+                               cam->radius_factor ) );
+        r = flx_16mul16(r,Flx16(1.05));
+        assertMyth("EschMeshDraw::draw radius scale resulted in negative radius",
+                   r.flx >= 0);
+        
+        // Setup for compare
+        Flx16 yon = cam->yon;
+        Flx16 hither = cam->hither;
+        
+        // Check for fully invisible against hither/yon
+        if ( ((p.z.flx + r.flx) < hither.flx)
+             || ((p.z.flx - r.flx) > yon.flx) )
+        {
+            // Since the extents are inclusive of children, don't
+            // need to do anything for children meshes.
+            return;
+        }
+        
+        // If center is positive, then we can check against other planes
+        // and for fully visible (will need changing later for more general
+        // case)
+        if (p.z > 0)
+        {
+            Flx16 tx = flx_16mul16(p.z , cam->xsize);
+            Flx16 ty = flx_16mul16(p.z , cam->ysize);
+            
+            // Check for fully invisible against left/right/top/bottom
+            if ( ((p.x.flx + r.flx) < -tx.flx)
+                 || ((p.x.flx - r.flx) > tx.flx)
+                 || ((p.y.flx + r.flx) < -ty.flx)
+                 || ((p.y.flx - r.flx) > ty.flx) )
+            {
+                // Since the extents are inclusive of children, don't
+                // need to do anything for children meshes.
+                return;
+            }
+            
+            // See if fully visible or needs clipping
+            ctrlfl = ( ((p.z.flx - r.flx) > hither.flx)
+                        && ((p.z.flx + r.flx) < yon.flx)
+                        && ((p.x.flx - r.flx) > -tx.flx)
+                        && ((p.x.flx + r.flx) < tx.flx)
+                        && ((p.y.flx - r.flx) > -ty.flx)
+                        && ((p.y.flx + r.flx) < ty.flx) ) ? 0 : ESCH_CDF_CLIP;
+
+        }
+        else ctrlfl = ESCH_CDF_CLIP;
+    }
+    else ctrlfl = ESCH_CDF_CLIP;
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Setup
+    dword cflags = cam->flags;
+
+    assertMyth("EschMeshDraw::draw needs a palette in current context's camera",
+               cam->vport->vbuff.pal != NULL);
+
+    int mp = cam->vport->vbuff.pal->shd_pal->mid_point;
+
+    //ÄÄÄ Clear arena
+    assertMyth("EschMeshDraw needs Escher initialized",EschSysInstance != 0);
+    ivory_arena_clear(EschSysInstance->wspace);
+        
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Setup Context
+    EschContext ec(EschCurrent);
+    ec.current = this;
+
+    ec.verts = (EschVertex*)ivory_hlock(mesh->v);
+    assertMyth("EschMeshDraw:draw lock on verticies failed",
+               ec.verts != 0);
+
+    ec.vflags = vflags = (dword*)ivory_arena_zalloc(EschSysInstance->wspace,sizeof(dword) * mesh->nverts);
+    ec.vpoints = vpt = new (EschSysInstance->wspace) VngoPoint[mesh->nverts];
+
+    ec.faces = (EschFace*)ivory_hlock(mesh->f);
+    assertMyth("EschMeshDraw:draw lock on faces failed",
+               ec.faces != 0);
+
+    ec.fflags = 0;
+    ec.txts = txt;
+    ec.push();
+
+    //ÄÄÄ Workspace for shadeing values, if not shading in modelspace.
+    if (!(cflags & ESCH_CAM_MODELSPACE)
+        && (cflags & (ESCH_CAM_SHADE_SMOOTH|ESCH_CAM_SHADE_SPECULAR)))
+    {
+        vn = (EschVertex*) new (EschSysInstance->wspace) EschVertex[mesh->nverts];
+    }
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Misc Setup
+    //ÄÄÄ Create local->world->eye transform
+    world.orient.concat(&cam->eye.iorient,&frame.orient);
+    cam->eye.orient.concat(&world.iorient,&frame.iorient);
+
+    //ÄÄÄ Get camera into object coords if needed for backculling.
+    if (cflags & ESCH_CAM_BACKCULL)
+    {
+        eyep.transform(&frame.iorient);
+    }
+
+    //ÄÄÄ Setup lights, if any
+    lights = EschCurrent->lights;
+    if (lights)
+    {
+        lights->setup(&world);
+    }
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Main Face Loop
+    for(i=0, face=ec.faces; i < mesh->nfaces; i++, face++)
+    {
+        fflags = face->flags;
+
+        //ÄÄÄ Figure out shade level (take minimum of shade levels for 
+        //ÄÄÄ camera, drawable shade limits, and face)
+        level = cflags & fflags & limits;
+
+        //ÄÄÄÄÄÄÄÄÄÄÄÄ Perform backface culling, if allowed, in object space.
+        if (level & ESCH_CAM_BACKCULL)
+        {
+            EschVector fview;
+            fview.i.flx = ec.verts[face->a].x.flx - eyep.x.flx;
+            fview.j.flx = ec.verts[face->a].y.flx - eyep.y.flx;
+            fview.k.flx = ec.verts[face->a].z.flx - eyep.z.flx;
+
+            if ((fview DOT face->normal).flx > 0)
+                continue;
+        }
+
+        //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Transform face's verts
+        if (!(vflags[face->a] & ESCH_VVERT_TRANSFORMED))
+        {
+            ec.verts[face->a].transform(&frame,(EschPoint*)&vpt[face->a]);
+            vflags[face->a] |= ESCH_VVERT_TRANSFORMED;
+
+            // Transform vertex to world, if needed, for shading
+            if (!(cflags & ESCH_CAM_MODELSPACE)
+                && (level & (ESCH_CAM_SHADE_SMOOTH|ESCH_CAM_SHADE_SPECULAR)))
+            {
+                ec.verts[face->a].transform(&world,&vn[face->a]);
+                ec.verts[face->a].normal.transform(&world,&vn[face->a].normal);
+                if (world.scalef.flx != (1<<16))
+                    vn[face->a].normal.normalize();
+            }
+        }
+
+        if (!(vflags[face->b] & ESCH_VVERT_TRANSFORMED))
+        {
+            ec.verts[face->b].transform(&frame,(EschPoint*)&vpt[face->b]);
+            vflags[face->b] |= ESCH_VVERT_TRANSFORMED;
+
+            // Transform vertex to world, if needed, for shading
+            if (!(cflags & ESCH_CAM_MODELSPACE)
+                && (level & (ESCH_CAM_SHADE_SMOOTH|ESCH_CAM_SHADE_SPECULAR)))
+            {
+                ec.verts[face->b].transform(&world,&vn[face->b]);
+                ec.verts[face->b].normal.transform(&world,&vn[face->b].normal);
+                if (world.scalef.flx != (1<<16))
+                    vn[face->b].normal.normalize();
+            }
+        }
+
+        if (!(vflags[face->c] & ESCH_VVERT_TRANSFORMED))
+        {
+            vflags[face->c] |= ESCH_VVERT_TRANSFORMED;
+            ec.verts[face->c].transform(&frame,(EschPoint*)&vpt[face->c]);
+
+            // Transform vertex to world, if needed, for shading
+            if (!(cflags & ESCH_CAM_MODELSPACE)
+                && (level & (ESCH_CAM_SHADE_SMOOTH|ESCH_CAM_SHADE_SPECULAR)))
+            {
+                ec.verts[face->c].transform(&world,&vn[face->c]);
+                ec.verts[face->c].normal.transform(&world,&vn[face->c].normal);
+                if (world.scalef.flx != (1<<16))
+                    vn[face->c].normal.normalize();
+            }
+        }
+
+        //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Compute shading 
+
+        //ÄÄÄ Sets color (assumes draw face copies into face->b and face->c)
+        vpt[face->a].clr=face->color;
+
+        //ÄÄÄ Sets shade value
+        if (lights)
+        {
+            assert(ESCH_FACE_SELFILUM_MASK == 0xf00000);
+
+            dword base_shade = (fflags & ESCH_FACE_SELFILUM_MASK)
+                               ? ( (mp*(((fflags & ESCH_FACE_SELFILUM_MASK) >> 20)+1) ) >> 4)
+                               : 0;
+
+            //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Smooth/Specular shading
+            if (level & (ESCH_CAM_SHADE_SPECULAR|ESCH_CAM_SHADE_SMOOTH))
+            {
+                if (!(vflags[face->a] & ESCH_VVERT_LIT))
+                {
+                    vpt[face->a].shade=base_shade;
+
+                    if (level & ESCH_CAM_SHADE_SPECULAR)
+                    {
+                        lights->hishine((cflags & ESCH_CAM_MODELSPACE) ?
+                                        &ec.verts[face->a]
+                                        : &vn[face->a],&vpt[face->a],
+                                        !(fflags & ESCH_FACE_ONESIDED));
+                    }
+                    else
+                    {
+                        lights->shine((cflags & ESCH_CAM_MODELSPACE) ?
+                                      &ec.verts[face->a]
+                                      : &vn[face->a],&vpt[face->a],
+                                      !(fflags & ESCH_FACE_ONESIDED));
+                    }
+                    vflags[face->a] |= ESCH_VVERT_LIT;
+                }
+
+                if (!(vflags[face->b] & ESCH_VVERT_LIT))
+                {
+                    vpt[face->b].shade=base_shade;
+
+                    if (level & ESCH_CAM_SHADE_SPECULAR)
+                    {
+                        lights->hishine((cflags & ESCH_CAM_MODELSPACE) ?
+                                        &ec.verts[face->b]
+                                        : &vn[face->b],&vpt[face->b],
+                                        !(fflags & ESCH_FACE_ONESIDED));
+                    }
+                    else
+                    {
+                        lights->shine((cflags & ESCH_CAM_MODELSPACE) ?
+                                      &ec.verts[face->b]
+                                      : &vn[face->b],&vpt[face->b],
+                                      !(fflags & ESCH_FACE_ONESIDED));
+                    }
+                    vflags[face->b] |= ESCH_VVERT_LIT;
+                }
+
+                if (!(vflags[face->c] & ESCH_VVERT_LIT))
+                {
+                    vpt[face->c].shade=base_shade;
+
+                    if (level & ESCH_CAM_SHADE_SPECULAR)
+                    {
+                        lights->hishine((cflags & ESCH_CAM_MODELSPACE) ?
+                                        &ec.verts[face->c]
+                                        : &vn[face->c],&vpt[face->c],
+                                        !(fflags & ESCH_FACE_ONESIDED));
+                    }
+                    else
+                    {
+                        lights->shine((cflags & ESCH_CAM_MODELSPACE) ?
+                                      &ec.verts[face->c]
+                                      : &vn[face->c],&vpt[face->c],
+                                      !(fflags & ESCH_FACE_ONESIDED));
+                    }
+                    vflags[face->c] |= ESCH_VVERT_LIT;
+                }
+            }
+            //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Flat shading
+            else if (level & ESCH_CAM_SHADE_FLAT)
+            {
+                EschVertex  fnormal;
+
+                if (cflags & ESCH_CAM_MODELSPACE)
+                {
+                    fnormal.x = ec.verts[face->a].x;
+                    fnormal.y = ec.verts[face->a].y;
+                    fnormal.z = ec.verts[face->a].z;
+                    fnormal.normal.i = face->normal.i;
+                    fnormal.normal.j = face->normal.j;
+                    fnormal.normal.k = face->normal.k;
+                }
+                else
+                {
+                    ec.verts[face->a].transform(&world,&fnormal);
+                    face->normal.transform(&world,&fnormal.normal);
+                }
+
+                vpt[face->a].shade=0;
+                lights->shine(&fnormal,&vpt[face->a],
+                              !(fflags & ESCH_FACE_ONESIDED));
+            }
+            //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ No shading
+            else
+            {
+                vpt[face->a].shade=mp;
+            }
+        }
+        //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ No lights, so no shading
+        else
+        {
+            vpt[face->a].shade=mp;
+            vpt[face->b].shade=mp;
+            vpt[face->c].shade=mp;
+        }
+
+        //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Call clip draw
+        esch_clipdraw_face(i,ctrlfl);
+    }
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Cleanup
+    ec.pop();
+    ivory_hunlock(mesh->v);
+    ivory_hunlock(mesh->f);
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Call onto base
+    EschGeometry::draw();
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// EschMeshDraw - ray                                                       ³
+//                                                                          ³
+// Performs a ray intersection test with the object (or its extents),       ³
+// returning the distance along the ray for the intersection.               ³
+// It returns a zero if it missed the object, a positive distance along the ³
+// ray if it hit, or -1 if the intersection is not supported.               ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+Flx16 EschMeshDraw::ray(const EschPoint *pt, const EschVector *v, int coarse) const
+{
+    Flx16   dist;
+
+    assertMyth("EschMeshDraw::ray needs an attached mesh",
+               mesh && mesh->ref_count);
+
+    assertMyth("EschMeshDraw::ray assumes original extents in 'sphere'",
+               sphere != 0 && sphere->radius >= 0);
+
+//ÄÄÄ Transform ray into local coordinates
+    EschPoint   point;
+    pt->transform(&world.iorient,&point);
+
+    EschVector  ray;
+    v->transform(&world.iorient,&ray);
+    ray.normalize();
+
+//ÄÄÄ Perform coarse check, returning if coarse fails to detect a hit
+//ÄÄÄ (Ray/Sphere intersection)
+    dist=sphere->ray(&point,&ray);
+
+    if (dist <= 0)
+        return 0;
+
+    //ÄÄÄ If doing coarse only, return result now
+    if (coarse)
+        return ((world.scalef == 1) ? dist : (dist * world.scalef));
+
+//ÄÄÄ Perform fine check (Ray/Box intersection)
+    dist=mesh->box.ray(&point,&ray);
+
+    if (dist <= 0)
+        return 0;
+
+    return ((world.scalef == 1) ? dist : (dist * world.scalef));
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// EschMeshDraw - hit                                                       ³
+//                                                                          ³
+// Performs a sphere intersection test with the object (or its extents),    ³
+// returning 1 if it hit, 0 if it missed, -1 if not supported.              ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+int EschMeshDraw::hit(const EschPoint *pt, const Flx16 r, int coarse) const
+{
+    assertMyth("EschMeshDraw::hit needs point and radius",
+               pt != 0 && r >= 0);
+
+    assertMyth("EschMeshDraw::hit needs an attached mesh",
+               mesh && mesh->ref_count);
+
+    assertMyth("EschMeshDraw::hit assumes original extents in 'sphere'",
+               sphere != 0 && sphere->radius >= 0);
+
+    EschPoint   center;
+    pt->transform(&world.iorient,&center);
+
+    Flx16 radius = (world.scalef == 1)
+                   ? r : flx_16div16(r,world.scalef);
+
+    // Box hit is actually cheaper than sphere/sphere test and more
+    // accurate when the target sphere is in world coords.
+    return mesh->box.hit(&center,radius);
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// EschMeshDraw - animate                                                   ³
+//                                                                          ³
+// This call is used to inform the drawable to animate itself for the next  ³
+// frame.  This is called directly by the application when needed.          ³
+// The base behavior for a mesh draw is to call animate for each texture    ³
+// in the texture list.                                                     ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+void EschMeshDraw::animate()
+{
+    if (!txt)
+        return;
+
+    for(ulong i=0; i < tmax; i++)
+    {
+        EschTexture *t = txt[i];
+        if (!(t->flags & ESCH_TXT_SKIPANIMATE))
+            t->animate();
+    }
+
+    EschGeometry::animate();
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// EschMeshDraw - attach                                                    ³
+//                                                                          ³
+// Attaches an EschMesh object.                                             ³
+//                                                                          ³
+// Returns 0 on success, non-zero otherwise.                                ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+esch_error_codes EschMeshDraw::attach(EschMesh *mdata, dword update)
+{
+    ulong   needed;
+
+    if (!mdata)
+        return ESCH_ERR_INVALIDPARMS;
+
+//ÄÄ Detach frame mesh, if any
+    if (mesh)
+    {
+        detach();
+    }
+
+//ÄÄ Attach new mesh
+    mesh = mdata;
+    mdata->ref_count++;
+
+    assertMyth("EschMeshDraw::attach mesh reference must have non-zero nverts/nfaces",
+               mesh->nverts && mesh->nfaces);
+
+    //ÄÄ Get initial information from mesh data.
+    name = mesh->name;
+    sphere = &mesh->sphere;
+
+    tmax = mesh->tmax;
+    txt = mesh->txt;
+
+    flags &= ~(ESCH_MSHD_OWNSTEXTURE
+               | ESCH_MSHD_OWNSNOSTCTXT
+               | ESCH_MSHD_OWNSNOMFTXT
+               | ESCH_MSHD_OWNSNOPRCTXT);
+
+    //ÄÄ Update diags
+    assertMyth("EschMeshDraw needs Escher initialized",EschSysInstance != 0);
+    EschSysInstance->diag_ifaces += mesh->nfaces;
+    EschSysInstance->diag_iverts += mesh->nverts;
+
+    //ÄÄ Update wspace_mbytes diags
+    needed = (sizeof(VngoPoint)+sizeof(dword)+sizeof(EschVertex))*mesh->nverts;
+
+    assertMyth("EschMeshDraw::attach needs more workspace than is available",
+               needed <= EschSysInstance->wspace_sbytes);
+
+    if (needed > EschSysInstance->wspace_mbytes)
+        EschSysInstance->wspace_mbytes = needed;
+
+//ÄÄ Our extents probably changed, so rebuild if requested
+    if (update & ESCH_UPD_EXTENTS)
+    {
+        compute_extents();
+    }
+
+//ÄÄ Return success
+    return ESCH_ERR_NONE;
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// EschMeshDraw - detach                                                    ³
+//                                                                          ³
+// Detaches an EschMesh object.                                             ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+void EschMeshDraw::detach()
+{
+    if (!mesh)
+        return;
+
+    name=EschNoName;
+
+//ÄÄ Detach reference.
+
+    assertMyth("EschMeshDraw::detach, mesh already has a zero reference count",
+               mesh->ref_count);
+
+    //ÄÄ Update diags
+    assertMyth("EschMeshDraw needs Escher initialized",EschSysInstance != 0);
+    EschSysInstance->diag_ifaces -= mesh->nfaces;
+    EschSysInstance->diag_iverts -= mesh->nverts;
+
+    //ÄÄ Decrement reference count
+    mesh->ref_count--;
+
+    //ÄÄ Free any data, if owned.
+    if (flags & ESCH_DRW_OWNSDATA)
+    {
+        delete mesh;
+    }
+    mesh=0;
+
+    if (flags & ESCH_MSHD_OWNSTEXTURE)
+    {
+        for(ulong i=0; i < tmax; i++)
+        {
+            if (txt[i])
+            {
+                switch (txt[i]->get_type() & ESCH_TXTT_BASEMASK)
+                {
+                    case ESCH_TXTT_STATIC:
+                        if (!(flags & ESCH_MSHD_OWNSNOSTCTXT))
+                            delete txt[i];
+                        break;
+                    case ESCH_TXTT_MFRAME:
+                        if (!(flags & ESCH_MSHD_OWNSNOMFTXT))
+                            delete txt[i];
+                        break;
+                    case ESCH_TXTT_PRC:
+                        if (!(flags & ESCH_MSHD_OWNSNOPRCTXT))
+                            delete txt[i];
+                        break;
+                    default:
+                        delete txt[i];
+                        break;
+                }
+            }
+        }
+        delete [] txt;
+    }
+    tmax=0;
+    txt=0;
+
+    flags &= ~(ESCH_DRW_OWNSDATA
+               | ESCH_MSHD_OWNSTEXTURE
+               | ESCH_MSHD_OWNSNOSTCTXT
+               | ESCH_MSHD_OWNSNOMFTXT
+               | ESCH_MSHD_OWNSNOPRCTXT);
+}
+
+
+
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°±  I/O Routines  ±°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// EschMeshDraw - load                                                      ³
+//                                                                          ³
+// Loads a mesh, creating the Mesh object if not provided, attaches it,     ³
+// and sets orientation information from the mesh record, if any.           ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+esch_error_codes EschMeshDraw::load(const char *fname, const char *oname,
+                                    VngoPal *pal, EschMesh *msh, char *pn,
+                                    dword ctrlfl)
+{
+   esch_error_codes err;
+
+//ÄÄ Detach frame mesh, if any
+    if (mesh)
+    {
+        detach();
+    }
+
+//ÄÄ Create mesh, if needed
+    if (!msh)
+    {
+        msh = new EschMesh;
+        if (!msh)
+            return ESCH_ERR_NOMEMORY;
+        flags |= ESCH_DRW_OWNSDATA;
+    }
+
+    local.orient.reset();
+
+//ÄÄ Load
+    if ((err=msh->load(fname,oname,pal,&local.orient,pn,ctrlfl)) != 0)
+        return err;
+
+//ÄÄ Attach
+    if ((err=attach(msh)) != 0)
+        return err;
+
+//ÄÄ Update drawble information
+    local.dir.i = local.orient.mtx[ESCH_MTX_G];
+    local.dir.j = local.orient.mtx[ESCH_MTX_H];
+    local.dir.k = local.orient.mtx[ESCH_MTX_I];
+
+    local.compute_inverse();
+
+    compute_world();
+    return ESCH_ERR_NONE;
+}
+
+esch_error_codes EschMeshDraw::load(XFParseIFF *iff, const char *oname,
+                                    VngoPal *pal, EschMesh *msh, char *pn,
+                                    dword ctrlfl)
+
+{
+   esch_error_codes err;
+
+//ÄÄ Detach frame mesh, if any
+    if (mesh)
+    {
+        detach();
+    }
+
+//ÄÄ Create mesh, if needed
+    if (!msh)
+    {
+        msh = new EschMesh;
+        if (!msh)
+            return ESCH_ERR_NOMEMORY;
+        flags |= ESCH_DRW_OWNSDATA;
+    }
+
+    local.orient.reset();
+
+//ÄÄ Load
+    if ((err=msh->load(iff,oname,pal,&local.orient,pn,ctrlfl))!=0)
+        return err;
+
+//ÄÄ Attach
+    if ((err=attach(msh)) != 0)
+        return err;
+
+//ÄÄ Update drawble information
+    local.dir.i = local.orient.mtx[ESCH_MTX_G];
+    local.dir.j = local.orient.mtx[ESCH_MTX_H];
+    local.dir.k = local.orient.mtx[ESCH_MTX_I];
+
+    local.compute_inverse();
+
+    compute_world();
+    return ESCH_ERR_NONE;
+}
+
+//°±² End of module - esmeshdr.cpp ²±°
+

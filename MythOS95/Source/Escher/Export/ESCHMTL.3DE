@@ -3,34 +3,53 @@
 
 Dialog EschMtl[]=
 {
-{ -1, 1, -1, -1, 0, 5, 5, 366, 244, NULL, NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
-{ 0, -1, -1, 2, 4, 86, 16, 194, 18, " Escher Data Exporter ", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
-{ 0, -1, 1, 3, 4, 86, 36, 194, 18, " Materials Control ", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
-{ 0, -1, 2, 4, 4, 87, 80, 66, 18, "Palette:", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
-{ 0, -1, 3, 5, 1, 163, 80, 116, 20, "ESPORT.PAL", NULL, 0, 0, 80, 0, FNULL, FNULL, 0 },
-{ 0, -1, 4, 6, 4, 44, 111, 106, 18, " Bitmap Size ", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
-{ 0, -1, 5, 7, 4, 228, 120, 82, 18, " Set Size ", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
-{ 0, -1, 6, 8, 4, 214, 140, 28, 20, "X: ", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
-{ 0, -1, 7, 9, 5, 246, 140, 75, 18, (void *)0, NULL, 0, 0, 0, 3, FNULL, FNULL, 0 },
-{ 0, -1, 8, 10, 1, 50, 135, 98, 18, " Power of 2 ", NULL, 0, 0, 50, 0, FNULL, FNULL, 0 },
-{ 0, -1, 9, 11, 1, 50, 155, 98, 18, " Set ", NULL, 0, 0, 83, 0, FNULL, FNULL, 0 },
-{ 0, -1, 10, 12, 1, 50, 175, 98, 18, " Query ", NULL, 0, 0, 81, 0, FNULL, FNULL, 0 },
-{ 0, -1, 11, 13, 4, 214, 164, 28, 20, "Y: ", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
-{ 0, -1, 12, 14, 5, 246, 164, 75, 18, (void *)1, NULL, 0, 0, 0, 3, FNULL, FNULL, 0 },
-{ 0, -1, 13, 15, 1, 150, 204, 66, 20, " OK ", NULL, 0, 0, 13, 0, FNULL, FNULL, 0 },
-{ 0, -1, 14, -1, 3, 314, 204, 26, 20, " ! ", NULL, 0, 0, 33, 0, FNULL, FNULL, 0 },
+{ -1, 1, -1, -1, 0, 5, 5, 404, 276, NULL, NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
+{ 0, -1, -1, 2, 4, 105, 4, 194, 18, " Escher Data Exporter ", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
+{ 0, -1, 1, 3, 4, 105, 20, 194, 18, " Materials Control ", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
+{ 0, -1, 2, 4, 4, 18, 52, 66, 18, "Palette:", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
+{ 0, -1, 3, 5, 1, 94, 52, 116, 20, "ESPORT.PAL", NULL, 0, 0, 80, 3, FNULL, FNULL, 0 },
+{ 0, -1, 4, 6, 4, 284, 68, 106, 18, " Perspective ", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
+{ 0, -1, 5, 7, 4, 14, 84, 106, 18, " Bitmap Size ", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
+{ 0, -1, 6, 8, 4, 174, 84, 66, 18, " Format ", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
+{ 0, -1, 7, 9, 4, 282, 84, 106, 18, " Correction ", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
+{ 0, -1, 8, 10, 1, 18, 104, 98, 18, " Power of 2 ", NULL, 0, 0, 50, 0, FNULL, FNULL, 0 },
+{ 0, -1, 9, 11, 1, 158, 104, 98, 18, " 8-bit ", NULL, 0, 0, 56, 0, FNULL, FNULL, 0 },
+{ 0, -1, 10, 12, 1, 290, 104, 90, 18, " Never ", NULL, 0, 0, 78, 0, FNULL, FNULL, 0 },
+{ 0, -1, 11, 13, 1, 158, 128, 98, 18, " Truecolor ", NULL, 0, 0, 84, 0, FNULL, FNULL, 0 },
+{ 0, -1, 12, 14, 1, 290, 128, 90, 18, " ^ in Name ", NULL, 0, 0, 94, 0, FNULL, FNULL, 0 },
+{ 0, -1, 13, 15, 1, 18, 132, 98, 18, " Set ", NULL, 0, 0, 83, 0, FNULL, FNULL, 0 },
+{ 0, -1, 14, 16, 1, 290, 152, 90, 18, " Always ", NULL, 0, 0, 65, 0, FNULL, FNULL, 0 },
+{ 0, -1, 15, 17, 4, 10, 156, 28, 20, "X:", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
+{ 0, -1, 16, 18, 5, 40, 156, 75, 18, (void *)0, NULL, 0, 0, 0, 3, FNULL, FNULL, 0 },
+{ 0, -1, 17, 19, 1, 158, 160, 98, 18, " Compressed ", NULL, 0, 0, 67, 0, FNULL, FNULL, 0 },
+{ 0, -1, 18, 20, 4, 10, 176, 28, 20, "Y:", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
+{ 0, -1, 19, 21, 5, 40, 176, 75, 18, (void *)1, NULL, 0, 0, 0, 3, FNULL, FNULL, 0 },
+{ 0, -1, 20, 22, 4, 200, 188, 154, 18, " Animated Textures ", NULL, 0, 0, 0, 0, FNULL, FNULL, 0 },
+{ 0, -1, 21, 23, 1, 20, 204, 98, 18, " Query ", NULL, 0, 0, 81, 0, FNULL, FNULL, 0 },
+{ 0, -1, 22, 24, 1, 146, 208, 130, 18, " 1st Frame Only ", NULL, 0, 0, 49, 0, FNULL, FNULL, 0 },
+{ 0, -1, 23, 25, 1, 284, 208, 98, 18, " Multiframe ", NULL, 0, 0, 77, 0, FNULL, FNULL, 0 },
+{ 0, -1, 24, 26, 1, 169, 248, 66, 20, " OK ", NULL, 0, 0, 13, 0, FNULL, FNULL, 0 },
+{ 0, -1, 25, -1, 3, 364, 248, 26, 20, " ! ", NULL, 0, 0, 33, 0, FNULL, FNULL, 0 },
 };
 
 /* Tree Identifiers: EschMtl */
 
 #define PALETTE                         4
-#define SIZEX                           8
 #define POWER2                          9
-#define SET                             10
-#define QUERY                           11
-#define SIZEY                           13
-#define OK                              14
-#define ABOUT                           15
+#define F8BIT                           10
+#define PNEVER                          11
+#define FTC                             12
+#define PCARET                          13
+#define SET                             14
+#define PALWAYS                         15
+#define SIZEX                           17
+#define COMPRESS                        18
+#define SIZEY                           20
+#define QUERY                           22
+#define AFIRST                          23
+#define AMFRAME                         24
+#define OK                              25
+#define ABOUT                           26
 
 /* Editables */
 

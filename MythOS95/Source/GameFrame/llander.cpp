@@ -1,10 +1,10 @@
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
 //
 //            LLander -- A Lunar Lander game based on GameFrame
-//      
+//
 //                        For Microsoft Windows '95
-//      
-//           Copyright (c) 1995, 1996 by Charybdis Enterprises, Inc.
+//
+//          Copyright (c) 1995 - 1997 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved.
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -32,7 +32,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #define WIN32_LEAN_AND_MEAN
@@ -104,7 +104,7 @@ struct LanderPositionData: public PacketData
         yacceleration (l.yacceleration)
     {
     }
-    
+
     void stuff_into (Lander *l) const
     {
         l->xpos = xpos;
@@ -270,7 +270,7 @@ void Lander::run ()
             update_model ();
 
             // If we're on the network, let everyone know our new position
-            if (Net && Net->active())
+            if (Net && Net->is_active())
             {
                 LanderPositionData pd (*this);
                 Net->broadcast (player_id, &pd, sizeof (pd));
@@ -300,19 +300,19 @@ void Lander::reset (Flx16 x, Flx16 y)
     damage.right    =
     damage.bottom   = 0;
 
-	if (evt)
-	{
-    	// Adjust for joystick position
+        if (evt)
+        {
+        // Adjust for joystick position
 
         if ((CmdFlags & CMDFLAGS_JOYSTICK)
             && Devs->theJoystick.joy_present)
         {
-        	JOYINFOEX   j;
-        	evt->get_joystick (&j);
-        	jcenterx = j.dwXpos;
-        	jcentery = j.dwYpos;
+                JOYINFOEX   j;
+                evt->get_joystick (&j);
+                jcenterx = j.dwXpos;
+                jcentery = j.dwYpos;
         }
-	}
+        }
 
     start_time = last_update = chronos_time_now ();
 }
@@ -339,7 +339,7 @@ void Lander::process_events ()
         if ((CmdFlags & CMDFLAGS_JOYSTICK)
             && Devs->theJoystick.joy_present)
             evt->get_joystick (&j);
-        
+
         if (evts.check (UP))
             yacceleration = -25;
         else if (evts.check (DOWN))
@@ -350,7 +350,7 @@ void Lander::process_events ()
             yacceleration = Flx16 (long (j.dwYpos - jcenterx) / 512);
         else
             yacceleration = 0;
-        
+
         if (evts.check (LEFT))
             xacceleration = -10;
         else if (evts.check (RIGHT))
@@ -487,7 +487,7 @@ void Lander::draw (VngoVport *vp)
 {
     assertMyth("Must call load_images for Lander before calling draw",
                lander_image != 0
-               && lander_image_lowburn != 0 && lander_image_highburn !=0 
+               && lander_image_lowburn != 0 && lander_image_highburn !=0
                && lander_image_leftburn != 0 && lander_image_rightburn != 0);
 
     // Set up the bounding rect
@@ -497,7 +497,7 @@ void Lander::draw (VngoVport *vp)
     r.dx = LANDER_ISIZE;
     r.dy = LANDER_ISIZE;
 
-    VngoTexture mtex;
+    VngoTexture mtex (VNGO_TEXTURE_MONO);
     mtex.width  = LANDER_ISIZE;
     mtex.height = LANDER_ISIZE;
 
@@ -660,7 +660,7 @@ LunarLander::LunarLander ():
     }
 
     // Initialize the viewport
-    gvpb = new VngoVportDB8 (Screen->width, Screen->height, backbits, NULL, 
+    gvpb = new VngoVportDB8 (Screen->width, Screen->height, backbits, NULL,
                              Screen->pal, 0);
     if (!gvpb)
     {
@@ -760,7 +760,7 @@ void LunarLander::activate ()
         }
 
         // Lander #0 is your lander!
-        aLanders[0]->player_id = Net->create_player (Net->is_creator () ? 
+        aLanders[0]->player_id = Net->create_player (Net->is_creator () ?
                                                      "Veteran": "Newbie",
                                                      "Lunar Lander Pilot");
     }
@@ -819,7 +819,7 @@ Lander *LunarLander::init_lander (DPID player)
     // This is a cheezy hack for lander colors.
     // These should really be loaded from an IFF file or
     // something.
-    static VngoColor24bit colors[NUM_LANDERS] = 
+    static VngoColor24bit colors[NUM_LANDERS] =
     {
         VngoColor24bit (128,128,128),
         VngoColor24bit (0,128,128),
@@ -903,7 +903,7 @@ void LunarLander::process_events()
     char    buf[4096];
 
     // Only network stuff needs to be processed
-    if (Net && Net->active ())
+    if (Net && Net->is_active ())
     {
         while (Net->receive (buf, sizeof (buf)) != DPERR_NOMESSAGES)
             ;
@@ -1019,7 +1019,7 @@ void LunarLander::restore (LPRECT lpr)
 // LanderTitle - Constructor
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 LanderTitle::LanderTitle ():
-    GameState (), 
+    GameState (),
     evt (0),
     scene(0),
     vport (0)
@@ -1108,7 +1108,7 @@ void LanderTitle::activate ()
     vport = new VngoVportDB8 (vp_rect.dx, vp_rect.dy,
                               Screen->gvport->vbuff.scrn_ptr + vp_rect.x + (vp_rect.y * Screen->gvport->vbuff.pitch),
                               NULL,
-                              Screen->pal, 
+                              Screen->pal,
                               VNGO_ZBUFFER_DEV,
                               Screen->gvport->vbuff.pitch);
     if (!vport || vport->get_init_state())
@@ -1224,7 +1224,7 @@ void LanderTitle::process_events()
 LanderLanded::LanderLanded ():
     GameState (), evt (0), crashed (0)
 {
-    
+
 }
 
 

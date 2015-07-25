@@ -8,7 +8,7 @@
 #ששששש²±²ששששששש²±²שששש²±²ש²±²שששש²±²ש²±²שששש²±²ש²±²שששששששש²±²שששש²±²שששששש
 #שששש²²²²²²²²²²ש²²²²²²²²ששש²²²²²²²²שש²²²שששש²²²ש²²²²²²²²²²ש²²²שששש²²²ששששששש
 #ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-#שששששששששששCopyrightש(c)ש1994-1996שbyשCharybdisשEnterprises,שInc.שששששששששש
+#שששששששששששCopyrightש(c)ש1994-1997שbyשCharybdisשEnterprises,שInc.שששששששששש
 #ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
 #ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
 #ששששששששששששששששששששש Microsoft Windows '95 Version ששששששששששששששששששששששש
@@ -64,7 +64,10 @@ INCPATH   = ;..\inc;$(MYTH95ROOT)\inc;
 
 LIB = escher
 
-OBJS = escamera.obj\
+OBJS = \
+esbldmsh.obj\
+esbldtxt.obj\
+escamera.obj\
 escamex.obj\
 esclip.obj\
 esdata.obj\
@@ -75,11 +78,14 @@ esextsph.obj\
 esfref.obj\
 esfrrot.obj\
 esgeom.obj\
+esgpartn.obj\
 eslatten.obj\
 eslfatn.obj\
 eslfpnt.obj\
 eslfspot.obj\
 eslight.obj\
+eslindrw.obj\
+eslod.obj\
 eslpoint.obj\
 eslspot.obj\
 eslvect.obj\
@@ -87,18 +93,22 @@ esmath.obj\
 esmatrix.obj\
 esmesh.obj\
 esmeshdr.obj\
+esmetabx.obj\
 esmisc.obj\
 espartik.obj\
 esplosn.obj\
 espntdrw.obj\
 esprtgeo.obj\
 esprtpyr.obj\
+esprtspr.obj\
 esprtsys.obj\
 esscene.obj\
 essfield.obj\
 essprite.obj\
 essystem.obj\
+estcache.obj\
 esterran.obj\
+esternex.obj\
 estxfire.obj\
 estxtmfr.obj\
 estxtprc.obj\
@@ -125,6 +135,54 @@ all: setstden $(LIB).lib
 #°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #--- .c, .cpp, .asm setup in standard include ---
+
+#--- .asm
+{..\Build\}.asm{}.obj:
+   $(ASM) $(ASMOPTS) $<
+
+{..\Draw\}.asm{}.obj:
+   $(ASM) $(ASMOPTS) $<
+
+{..\Light\}.asm{}.obj:
+   $(ASM) $(ASMOPTS) $<
+
+{..\Math\}.asm{}.obj:
+   $(ASM) $(ASMOPTS) $<
+
+{..\Texture\}.asm{}.obj:
+   $(ASM) $(ASMOPTS) $<
+
+#--- .c
+{..\Build\}.c{}.obj:
+	$(CC) $(CCOPTIONS) $<
+
+{..\Draw\}.c{}.obj:
+	$(CC) $(CCOPTIONS) $<
+
+{..\Light\}.c{}.obj:
+	$(CC) $(CCOPTIONS) $<
+
+{..\Math\}.c{}.obj:
+	$(CC) $(CCOPTIONS) $<
+
+{..\Texture\}.c{}.obj:
+	$(CC) $(CCOPTIONS) $<
+
+#--- .cpp
+{..\Build\}.cpp{}.obj:
+	$(CPP) $(CCOPTIONS) $<
+
+{..\Draw\}.cpp{}.obj:
+	$(CPP) $(CCOPTIONS) $<
+
+{..\Light\}.cpp{}.obj:
+	$(CPP) $(CCOPTIONS) $<
+
+{..\Math\}.cpp{}.obj:
+	$(CPP) $(CCOPTIONS) $<
+
+{..\Texture\}.cpp{}.obj:
+	$(CPP) $(CCOPTIONS) $<
 
 #±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 #

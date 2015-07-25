@@ -8,7 +8,7 @@
 //ùùùùù²±²ùùùùùùù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùùùùùù²±²ùùùù²±²ùùùùùù
 //ùùùù²²²²²²²²²²ù²²²²²²²²ùùù²²²²²²²²ùù²²²ùùùù²²²ù²²²²²²²²²²ù²²²ùùùù²²²ùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùCopyrightù(c)ù1994-1996ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
+//ùùùùùùùùùùùCopyrightù(c)ù1994-1997ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùù Microsoft Windows '95 Version ùùùùùùùùùùùùùùùùùùùùùùù
@@ -129,8 +129,20 @@ int EschSphereExtents::hit(const EschPoint *pt) const
                   pt->y - center.y,
                   pt->z - center.z);
 
-    return  ( (p.magnitude()).flx < radius.flx )
-              ? 1 : 0;
+//ÄÄÄ Check for trivial reject
+    Flx16 r = radius;
+    Flx16 nr = - r;
+
+    if (p.i.flx > r.flx
+        || p.i.flx < nr.flx
+        || p.k.flx > r.flx
+        || p.k.flx < nr.flx
+        || p.j.flx > r.flx
+        || p.j.flx < nr.flx)
+        return 0;
+
+//ÄÄÄ Check with true magnitude
+    return  (((p.magnitude()).flx < r.flx) ? 1 : 0);
 }
 
 int EschSphereExtents::hit(const EschPoint *pt, const Flx16 r) const
@@ -142,8 +154,21 @@ int EschSphereExtents::hit(const EschPoint *pt, const Flx16 r) const
                   pt->y - center.y,
                   pt->z - center.z);
 
-    return  ( (p.magnitude()).flx < (radius.flx + r.flx) )
-            ? 1 : 0;
+//ÄÄÄ Check for trivial reject
+    Flx16 rs = radius + r;
+    Flx16 nrs = - rs;
+
+    if (p.i.flx > rs.flx
+        || p.i.flx < nrs.flx
+        || p.k.flx > rs.flx
+        || p.k.flx < nrs.flx
+        || p.j.flx > rs.flx
+        || p.j.flx < nrs.flx)
+        return 0;
+
+//ÄÄÄ Check with true magnitude
+    return  (( (p.magnitude()).flx < rs.flx )
+             ? 1 : 0);
 }
 
 //°±² End of module - esextsph.cpp ²±°

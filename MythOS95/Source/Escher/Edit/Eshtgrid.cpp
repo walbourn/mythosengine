@@ -8,7 +8,7 @@
 //ששששש²±²ששששששש²±²שששש²±²ש²±²שששש²±²ש²±²שששש²±²ש²±²שששששששש²±²שששש²±²שששששש
 //שששש²²²²²²²²²²ש²²²²²²²²ששש²²²²²²²²שש²²²שששש²²²ש²²²²²²²²²²ש²²²שששש²²²ששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//שששששששששששCopyrightש(c)ש1994-1996שbyשCharybdisשEnterprises,שInc.שששששששששש
+//שששששששששששCopyrightש(c)ש1994-1997שbyשCharybdisשEnterprises,שInc.שששששששששש
 //ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
 //ששששששששששששששששששששש Microsoft Windows '95 Version ששששששששששששששששששששששש
@@ -621,7 +621,7 @@ void TerrEditGrid::assign_by_random_roll(TerrEditDoc* pDoc,
                                  + (dspos << surfshift)
                                    *(width << surfshift)
                                  + (xspos << surfshift))];
-        
+
         if (h < a_elvlow || h > a_elvhigh)
             return;
     }
@@ -694,7 +694,7 @@ void TerrEditGrid::assign_by_random_roll(TerrEditDoc* pDoc,
 void TerrEditGrid::assign_by_angle(TerrEditDoc* pDoc,
                                    int xspos, int dspos, BOOL &changed)
 {
-    ASSERT(pDoc && pDoc->hfield && pDoc->htable && pDoc->surfinfo && pDoc->hsurfnorml);
+    ASSERT(pDoc && pDoc->hfield && pDoc->htable && pDoc->surfinfo && pDoc->hsurfnormlflat);
 
 //ִִִ Compute surface info pointer
     esch_surf_type *surf = pDoc->surfinfo + ((dspos*width) + xspos);
@@ -710,13 +710,13 @@ void TerrEditGrid::assign_by_angle(TerrEditDoc* pDoc,
                                  + (dspos << surfshift)
                                    *(width << surfshift)
                                  + (xspos << surfshift))];
-        
+
         if (h < a_elvlow || h > a_elvhigh)
             return;
     }
 
 //ִִִ Lookup surface normal
-    EschVector *nml = (EschVector*)ivory_hlock(pDoc->hsurfnorml);
+    EschVector *nml = (EschVector*)ivory_hlock(pDoc->hsurfnormlflat);
     if (!nml)
         return;
 
@@ -779,7 +779,7 @@ void TerrEditGrid::assign_by_angle(TerrEditDoc* pDoc,
         }
     }
 
-    ivory_hunlock(pDoc->hsurfnorml);
+    ivory_hunlock(pDoc->hsurfnormlflat);
 }
 
 

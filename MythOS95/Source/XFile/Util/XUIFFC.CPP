@@ -6,7 +6,7 @@
 //    (_)       ^          * *     *      *   *    *            (_)
 //             (_)       **   **   *    ***** **** ****
 //
-//            Copyright (c) 1994-1996 by Charybdis Enterprises, Inc.
+//            Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.
 //                              All Rights Reserved.
 //                        Microsoft Windows '95 Version
 //
@@ -31,7 +31,7 @@
 //
 // xuiffc.cpp
 //
-//     This is the main module for the IFF compiler.
+// This is the main module for the IFF compiler.
 //
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
 
@@ -85,7 +85,7 @@ IvorySystem     Ivory;
 extern "C" FILE *yyin;
 
 STATIC char Util_name[]
-        = "°± IFF Compiler - (C) 1994-1996 Charybdis Enterprises, Inc. ±°\n"
+        = "°± IFF Compiler - (C) 1994-1997 Charybdis Enterprises, Inc. ±°\n"
           "                  All Rights Reserved.  " __DATE__ "\n";
 
 XFParseIFF      *IFF=NULL;
@@ -269,7 +269,7 @@ void main(int argc, char *argv[])
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// Cleanup function.                                                         ³
+// Cleanup function.                                                        ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 STATIC void cleanup(void)
 {
@@ -354,6 +354,7 @@ void print_error(XFParseIFF *xp, char *s)
    
     cout << "\n";
 }
+
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // expand_work                                                              ³

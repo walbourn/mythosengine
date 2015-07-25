@@ -6,7 +6,7 @@
 //                                                           |. _  .   .|
 //          Microsoft Windows '95 Version                    | / \   .  | 
 //                                                           |_|_|_._._.|
-// Copyright (c) 1994-1996 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
+// Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
 //              All rights reserved.                        %\__________/%
 //                                                           %          %
 //
@@ -45,6 +45,7 @@
 #include "ivory.h"
 
 #define __VNGVPDD8_HPP
+#define __VNGSCRN_HPP
 #include "vangogh.hpp"
 
 //같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같�

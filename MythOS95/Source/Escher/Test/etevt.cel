@@ -1,0 +1,367 @@
+;ֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽ
+;ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
+;שששששששששש°°°°°°°°°°ש°°°°°°°°ששש°°°°°°°°שש°°°שששש°°°ש°°°°°°°°°°ש°°°°°°°°°שש
+;ששששששששש°±°ששששששש°±°שששש°±°ש°±°שששש°±°ש°±°שששש°±°ש°±°שששששששש°±°שששש°±°שש
+;שששששששש±°±ששששששש±°±שששששששש±°±שששששששש±°±שששש±°±ש±°±שששששששש±°±שששש±°±ששש
+;ששששששש±²±±°±±²שש±²±±°±±²±±ש±²±שששששששש±²±±°±±²±±ש±²±±°±±²ששש±²±±°±±²°ששששש
+;שששששש±²±שששששששששששששש±²±ש±²±שששששששש±²±שששש±²±ש±²±שששששששש±²±שששש±²±ששששש
+;ששששש²±²ששששששש²±²שששש²±²ש²±²שששש²±²ש²±²שששש²±²ש²±²שששששששש²±²שששש²±²שששששש
+;שששש²²²²²²²²²²ש²²²²²²²²ששש²²²²²²²²שש²²²שששש²²²ש²²²²²²²²²²ש²²²שששש²²²ששששששש
+;ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
+;שששששששששששCopyrightש(c)ש1994-1997שbyשCharybdisשEnterprises,שInc.שששששששששש
+;ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
+;ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
+;ששששששששששששששששששששש Microsoft Windows '95 Version ששששששששששששששששששששששש
+;ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
+;ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
+;
+;           *** Charybdis Enterprises, Inc. Company Confidential ***
+;
+;  This file and all associated files are the company proprietary property
+;        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+;
+; CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
+; TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
+; IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
+; AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
+; INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+;
+;ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
+;
+; etevt.cel
+;
+;  Event tester event description file.
+;
+;ֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽ
+
+;ִִִ Camera display controls
+
+event ALL_LINES
+{
+   [ key #f1
+     not key #lshift 
+     not key #rshift ]
+}
+
+event MODEL_SPACE
+{
+   [ key #f2 ]
+}
+
+event BACKCULL
+{
+   [ key #f3 ]
+}
+
+;ִִִ These are "radio buttons"
+
+event SHADE_WIRE
+{
+   [ key #f4 ]
+}
+
+event SHADE_SOLID
+{
+   [ key #f5 ]
+}
+
+event SHADE_FLAT
+{
+   [ key #f6 ]
+}
+
+event SHADE_SMOOTH
+{
+   [ key #f7 ]
+}
+
+event SHADE_SPECULAR
+{
+   [ key #f8 ]
+}
+
+event TEXTURE_MAP
+{
+   [ key #f9 
+     not key #lshift
+     not key #rshift ]
+}
+
+event BITMAP_BACKGROUND
+{
+   [ key #f9 
+     key #lshift ]
+   [ key #f9 
+     key #rshift ]
+}
+
+event SHADE_PERSPECTIVE
+{
+   [ key #f10 ]
+}
+
+event ZBUFFER
+{
+   [ key #f12 ]
+}
+
+;ִִִ Input controls.
+
+event MOVEXY
+{
+    [ mouseb 1]
+}
+
+event MOVEZ
+{
+    [ mouseb 2]
+    [ mouseb 4]
+    [ key #lalt ]
+}
+
+;ִִִ Light controls
+
+event LIGHT_POSITION
+{
+    [ key 'E' ]
+}
+
+event LIGHT_IN_BRIGHTER
+{
+    [ key ']' ]
+}
+
+event LIGHT_IN_DIMMER
+{
+    [ key '[' ]
+}
+
+;ִִִ Camera motion controls (combine with MOVEXY and MOVEZ events.
+
+event CAMERA_ROTATE
+{
+    [ key 'Q' ]
+}
+
+event CAMERA_MOVE
+{
+    [ key 'A' ]
+}
+
+;ִִִ Object controls
+
+event ALLI
+{
+   [ key 'I'
+     key #lctrl ]
+}
+
+event ALLJ
+{
+   [ key 'J'
+     key #lctrl ]
+}
+
+event ALLK
+{
+   [ key 'K'
+     key #lctrl ]
+}
+
+event OBJECT_ROTATE
+{
+    [ key #lshift ]
+    [ key 'W'
+      not key #lshift ]
+}
+
+event OBJECT_MOVE
+{
+    [ key #lctrl ]
+    [ key 'S' ]
+}
+
+event OBJECT_NEXT
+{
+    [ key 'N'
+     not key #lshift
+     not key #rshift ]
+}
+
+event OBJECT_PREV
+{
+    [ key 'P' ]
+}
+
+event OBJECT_CHILD
+{
+    [ key 'N'
+      key #lshift ]
+    [ key 'N'
+      key #rshift ]
+}
+
+;ִִִ Misc controls
+
+event FASTER
+{
+    [ key '+' ]
+    [ key #grayplus ]
+}
+
+event SLOWER
+{
+    [ key '-' ]
+    [ key #grayminus ]
+}
+
+event TERRAIN_DOTS
+{
+    [ key 'D'
+      not key #lshift ]
+}
+
+event TERRAIN_LOD
+{
+    [ key 'F'
+      not key #lshift ]
+}
+
+event TERRAIN_DEBUG
+{
+    [ key #f11 
+      not key #lshift ]
+}
+
+event CAM_HOVER
+{
+    [ key #f11 
+      key #lshift ]
+}
+
+event ADJUST_ALPHA
+{
+    [ key 'T' ]
+}
+
+event ADJUST_FOV
+{
+    [ key 'V' ]
+}
+
+event ADJUST_FACTOR
+{
+    [ key 'Z' ]
+}
+
+event ADJUST_MBOX_SIZE
+{
+    [ key 'S' ]
+}
+
+event ADJUST_BM_OFFSET
+{
+    [ key 'B' ]
+}
+
+event SHOW_EXTENTS
+{
+    [ key 'X' ]
+}
+
+event HAZING
+{
+    [ key 'H' ]
+}
+
+event GRADIENT
+{
+    [ key 'G' ]
+}
+
+event FIRE_INCREASE
+{
+    [ key 'I'
+      key #lshift ]
+}
+
+event FIRE_DECREASE
+{
+    [ key 'D'
+      key #lshift ]
+}
+
+event FIRE_DOUSE
+{
+    [ key 'W'
+      key #lshift ]
+}
+
+event FIRE_FIREBALL
+{
+    [ key 'F'
+      key #lshift ]
+}
+
+event SHOW_FPS
+{
+    [ key '`' ]
+}
+
+event PARTN_TOGGLE
+{
+    [ key 'P'
+      key #shift ]
+}
+
+event EXPLOSION_RESET
+{
+    [ key 'R' ]
+}
+
+
+;ִִִ Quit Demonstation
+
+event DONE
+{
+    [ key 'Q'
+      key #ralt ]
+    [ key 'Q'
+      key #lalt ]
+    [ key #esc ]
+}
+
+;ִִִ Arrow controls
+
+event UP
+{
+    [ key #up ]
+    [ key #grayup ]
+}
+
+event DOWN
+{
+    [ key #down ]
+    [ key #graydown ]
+}
+
+event LEFT
+{
+    [ key #left ]
+    [ key #grayleft ]
+}
+
+event RIGHT
+{
+    [ key #right ]
+    [ key #grayright ]
+}
+
+;ִִִ Debug
+
+event PARTN_LIST
+{
+    [ key ';' ]
+}
+
+;*** END OF FILE ***

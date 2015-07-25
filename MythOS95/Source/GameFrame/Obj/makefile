@@ -8,7 +8,7 @@
 #
 # A Framework for Microsoft Windows '95 Entertainment Software Using MythOS
 #
-#           Copyright (c) 1995, 1996 by Charybdis Enterprises, Inc.
+#          Copyright (c) 1995 - 1997 by Charybdis Enterprises, Inc.
 #                           All Rights Reserved
 #
 #ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -33,7 +33,7 @@
 #°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 #
 #                               Variables
-#                                
+#
 #°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 !if "$(DEBUG)" == ""
@@ -79,7 +79,9 @@ LIBS=\
     winmm.lib\
     user32.lib\
     ddraw.lib\
-    dplay.lib\
+    dplayx.lib\
+    uuid.lib\
+    dxguid.lib\
     turner.lib
 
 #ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
@@ -115,7 +117,7 @@ all: setstden $(EXE).exe
 ..\landevt.iff : ..\landevt.hpp
 
 ..\landevt.hpp:  ..\landevt.cel
-   $(MYTH95ROOT)\bin\maxc ..\landevt.cel 
+   $(MYTH95ROOT)\bin\maxc ..\landevt.cel
 
 #ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 # C++ files

@@ -2,11 +2,11 @@
 //
 //                                                           %__________%
 //                                                          %/ . .  .   \%
-//           Van Gogh 2D-Display Library                     |  . .  o. | 
+//           Van Gogh 2D-Display Library                     |  . .  o. |
 //                                                           |. _  .   .|
-//          Microsoft Windows '95 Version                    | / \   .  | 
+//          Microsoft Windows '95 Version                    | / \   .  |
 //                                                           |_|_|_._._.|
-// Copyright (c) 1994-1996 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
+// Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
 //              All rights reserved.                        %\__________/%
 //                                                           %          %
 //
@@ -35,7 +35,7 @@
 //같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같�
 //
 //                                Includes
-//                                
+//
 //같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같�
 
 #include <string.h>
@@ -52,7 +52,7 @@
 //
 //같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같�
 
-#define MIN(a,b)  ((a) < (b)) ? (a) : (b)  
+#define MIN(a,b)  ((a) < (b)) ? (a) : (b)
 
 //같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같�
 //
@@ -96,6 +96,7 @@
 VngoVportDD8::VngoVportDD8 (VngoSurfaceManager *_pddsurf,
                             VngoSurfaceManager *zbptr,
                             VngoPal *my_pal,dword flags)
+
 {
     lock_status = _pddsurf->get_lock_status();
     ddsd.dwSize = sizeof(ddsd);
@@ -108,8 +109,6 @@ VNGError VngoVportDD8::init (VngoSurfaceManager *_pddsurf,
 {
     persp_pixcount = VNGO_PERSP_PRECISION;
     vp_offset = 0;
-    vbuff.left = 0;
-    vbuff.top = 0;
     vflags = flags;
     vflags |= VNGO_PAL_MAPPED_DEV;
     vbuff.zbuff_ptr = (word *)zbptr;
@@ -117,13 +116,20 @@ VNGError VngoVportDD8::init (VngoSurfaceManager *_pddsurf,
     surf_stat = _pddsurf;
     pddsurf = _pddsurf->ddsurf;
 
-    lock();
+    int was_locked = lock();
+    if (was_locked == -1)
+        return (VNGO_INTERNAL_ERROR);
+
     if (ddsd.ddpfPixelFormat.dwRGBBitCount != 8)
     {
-        unlock();
+        if (!was_locked)
+            unlock();
         // I need to make a new error for this!
         return (VNGO_WRONG_BITDEPTH);
     }
+
+    if (!was_locked)
+        unlock();
 
     vbuff.width = ddsd.dwWidth;
     vbuff.height = ddsd.dwHeight;
@@ -133,7 +139,7 @@ VNGError VngoVportDD8::init (VngoSurfaceManager *_pddsurf,
     vp_rect.x = 0;
     vp_rect.y = 0;
     vp_rect.dx = vbuff.width;
-    vp_rect.dy = vbuff.height; 
+    vp_rect.dy = vbuff.height;
 
     if (vflags & VNGO_ZBUFFER_DEV)
     {
@@ -177,8 +183,36 @@ VNGError VngoVportDD8::init (VngoSurfaceManager *_pddsurf,
             return (VNGO_MEMALLOC_ERROR);
         }
     }
+    long max_dem = vbuff.width;
+    if (vbuff.height > vbuff.width)
+        max_dem = vbuff.height;
 
-    vbuff.invert = vngo_get_invert();
+    vbuff.edge1 = (VngoPoint2 *)ivory_alloc(max_dem * sizeof(VngoPoint2));
+    if (vbuff.edge1 == NULL)
+    {
+        if(vflags & VNGO_ZBUFFER_DEV)
+        {
+            ivory_free((void **)&(vbuff.zbuff_ptr));
+            ivory_free((void **)&(vbuff.ztable));
+        }
+        ivory_free((void**)&(vbuff.ytable));
+        return (VNGO_MEMALLOC_ERROR);
+    }
+
+    vbuff.edge2 = (VngoPoint2 *)ivory_alloc(max_dem * sizeof(VngoPoint2));
+    if (vbuff.edge2 == NULL)
+    {
+        if(vflags & VNGO_ZBUFFER_DEV)
+        {
+            ivory_free((void **)&(vbuff.zbuff_ptr));
+            ivory_free((void **)&(vbuff.ztable));
+        }
+        ivory_free((void**)&(vbuff.ytable));
+        ivory_free((void**)&(vbuff.edge1));
+        return (VNGO_MEMALLOC_ERROR);
+    }
+
+
 
     if (my_pal)
     {
@@ -204,9 +238,15 @@ VNGError VngoVportDD8::init (VngoSurfaceManager *_pddsurf,
 
     if (!(vflags & VNGO_INIT_NO_RESET))
     {
-        reset();
+        was_locked = lock();
+        if (was_locked != -1)
+        {
+            reset();
+            if (!was_locked)
+                unlock();
+        }
     }
-    unlock();
+
     return (VNGO_NO_ERROR);
 }
 
@@ -214,7 +254,7 @@ VNGError VngoVportDD8::init (VngoSurfaceManager *_pddsurf,
 
 
 
-VngoVportDD8::VngoVportDD8 (VngoSurfaceManager *_pddsurf, VngoSurfaceManager *zbptr, 
+VngoVportDD8::VngoVportDD8 (VngoSurfaceManager *_pddsurf, VngoSurfaceManager *zbptr,
                             VngoRect &srect, VngoPal *my_pal,dword flags)
 {
     lock_status = _pddsurf->get_lock_status();
@@ -222,13 +262,11 @@ VngoVportDD8::VngoVportDD8 (VngoSurfaceManager *_pddsurf, VngoSurfaceManager *zb
     init_status = init ( _pddsurf, zbptr, srect, my_pal, flags);
 }
 
-VNGError VngoVportDD8::init (VngoSurfaceManager *_pddsurf, 
+VNGError VngoVportDD8::init (VngoSurfaceManager *_pddsurf,
                              VngoSurfaceManager *zbptr,
                              VngoRect &srect, VngoPal *my_pal,dword flags)
 {
     persp_pixcount = VNGO_PERSP_PRECISION;
-    vbuff.left = 0;
-    vbuff.top = 0;
     vflags = flags;
     vflags |= VNGO_PAL_MAPPED_DEV;
     vbuff.zbuff_ptr = (word *)zbptr;
@@ -236,13 +274,18 @@ VNGError VngoVportDD8::init (VngoSurfaceManager *_pddsurf,
     surf_stat = _pddsurf;
     pddsurf = _pddsurf->ddsurf;
 
-    lock();
+    int was_locked = lock();
+    if (was_locked == -1)
+        return (VNGO_INTERNAL_ERROR);
+
     if (ddsd.ddpfPixelFormat.dwRGBBitCount != 8)
     {
+        if (!was_locked)
             unlock();
-            // I need to make a new error for this!
-            return (VNGO_WRONG_BITDEPTH);
+        return (VNGO_WRONG_BITDEPTH);
     }
+    if (!was_locked)
+        unlock();
 
     vbuff.width = srect.dx;
     vbuff.height = srect.dy;
@@ -295,8 +338,35 @@ VNGError VngoVportDD8::init (VngoSurfaceManager *_pddsurf,
             return (VNGO_MEMALLOC_ERROR);
         }
     }
+    long max_dem = vbuff.width;
+    if (vbuff.height > vbuff.width)
+        max_dem = vbuff.height;
 
-    vbuff.invert = vngo_get_invert();
+    vbuff.edge1 = (VngoPoint2*)ivory_alloc(max_dem * sizeof(VngoPoint2));
+    if (vbuff.edge1 == NULL)
+    {
+        if(vflags & VNGO_ZBUFFER_DEV)
+        {
+            ivory_free((void **)&(vbuff.zbuff_ptr));
+            ivory_free((void **)&(vbuff.ztable));
+        }
+        ivory_free((void**)&(vbuff.ytable));
+        return (VNGO_MEMALLOC_ERROR);
+    }
+
+    vbuff.edge2 = (VngoPoint2*)ivory_alloc(max_dem * sizeof(VngoPoint2));
+    if (vbuff.edge2 == NULL)
+    {
+        if(vflags & VNGO_ZBUFFER_DEV)
+        {
+            ivory_free((void **)&(vbuff.zbuff_ptr));
+            ivory_free((void **)&(vbuff.ztable));
+        }
+        ivory_free((void**)&(vbuff.ytable));
+        ivory_free((void**)&(vbuff.edge1));
+        return (VNGO_MEMALLOC_ERROR);
+    }
+
 
     if (my_pal)
     {
@@ -310,7 +380,9 @@ VNGError VngoVportDD8::init (VngoSurfaceManager *_pddsurf,
 
     // Fill all tables.
     vbuff.ytable[0] = 0;
-    vbuff.ztable[0] = 0;
+    if (vflags & VNGO_ZBUFFER_DEV)
+        vbuff.ztable[0] = 0;
+
     for (int i=1; i < vbuff.height; i++)
     {
         vbuff.ytable[i] = vbuff.ytable[i-1] + vbuff.pitch;
@@ -320,23 +392,30 @@ VNGError VngoVportDD8::init (VngoSurfaceManager *_pddsurf,
 
     if (!(vflags & VNGO_INIT_NO_RESET))
     {
-        reset();
+        int was_locked = lock();
+        if (was_locked != -1)
+        {
+            reset();
+            if (!was_locked)
+                unlock();
+        }
     }
-    unlock();
     return (VNGO_NO_ERROR);
 }
 
 int VngoVportDD8::lock()
 {
+    int fail_safe=0;
     int ret_val = surf_stat->lock();
     if (ret_val != 1)
     {
         int locked=0;
         HRESULT hr;
-        while (!locked)    
+        while (!locked && (fail_safe < 10000))
         {
-            if ((hr = pddsurf->Lock (NULL, &ddsd, 
-                                     DDLOCK_SURFACEMEMORYPTR 
+            fail_safe++;    // just so we can't loop infinately.
+            if ((hr = pddsurf->Lock (NULL, &ddsd,
+                                     DDLOCK_SURFACEMEMORYPTR
                                      | DDLOCK_WAIT, NULL)) == DD_OK)
             {
                 vbuff.scrn_ptr = (byte *) ((dword)ddsd.lpSurface + vp_offset);
@@ -346,7 +425,7 @@ int VngoVportDD8::lock()
             {
                 hr = pddsurf->Restore();
                 if (hr != DD_OK)
-                    locked = 1;	// an error occured while 
+                    locked = 1; // an error occured while
                                 // restoring the surface, so it cannot be locked.
             }
         }
@@ -354,7 +433,7 @@ int VngoVportDD8::lock()
         if (hr != DD_OK)
         {
             surf_stat->unlock();
-            return (-1);	// failure to lock;
+            return (-1);        // failure to lock;
         }
     }
 
@@ -389,7 +468,7 @@ VNGError VngoVportDD8::clip_frect(VngoRect *rect,dword color, VngoRect *clip)
     assert (lock_status);
 
     VngoRect trect = *rect;
-    VngoRect vprect(vbuff.left,vbuff.top,vbuff.width,vbuff.height);
+    VngoRect vprect(0,0,vbuff.width,vbuff.height);
 
     if (clip)
     {
@@ -423,17 +502,17 @@ VNGError VngoVportDD8::clip_frect(VngoRect *rect,dword color, VngoRect *clip)
 VNGError VngoVportDD8::frect(VngoRect *rect,VngoColor24bit *rgb_val)
 {
     assert (lock_status);
-    return clip_frect(rect,vbuff.pal->get_index(*rgb_val));
+    return frect(rect,vbuff.pal->get_index(*rgb_val));
 }
 
 
 VNGError VngoVportDD8::frect(VngoRect *rect,dword color)
 {
     assert (lock_status);
-    assert (rect->x >= vbuff.left);
-    assert ((rect->x + rect->dx) < vbuff.width);
-    assert (rect->y >= vbuff.top);
-    assert ((rect->y + rect->dy) < vbuff.height);
+    assert (rect->x >= 0);
+    assert ((rect->x + rect->dx) <= vbuff.width);
+    assert (rect->y >= 0);
+    assert ((rect->y + rect->dy) <= vbuff.height);
 
     int t;
     t = unlock();
@@ -466,7 +545,7 @@ void VngoVportDD8::reset(dword c,dword farz)
 
     if (!(vflags & VNGO_NOCLEAR_VBUFFER))
     {
-        if (zmap)
+        if (zmap && 0)
         {
             assert(zmap->zmap.flags & VNGO_TEXTURE_ZMAP);
             assert(zmap->zmap.flags & VNGO_TEXTURE_MONO);
@@ -523,6 +602,15 @@ VngoVportDD8::~VngoVportDD8()
     {
         ivory_free((void **)&(vbuff.ztable));
     }
+    if (vbuff.edge1)
+    {
+        ivory_free((void **)&(vbuff.edge1));
+    }
+    if (vbuff.edge2)
+    {
+        ivory_free((void **)&(vbuff.edge2));
+    }
+
 }
 
 
