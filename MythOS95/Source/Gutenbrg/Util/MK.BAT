@@ -1,10 +1,10 @@
 @echo off
-echo 같같같굉 Gutenberg '95 Tools 껑같같같같같같같같같같같같같같같같같같같같�
+echo 같같같굉 Gutenberg Tools 껑같같같같같같같같같같같같같같같같같같같같같같�
 cd obj
 call nmake /nologo %1 %2 %3 %4 %5 %6 %7 %8 %9
 cd ..
 if ERRORLEVEL 1 goto error
-echo 같같같굉 Gutenberg '95 Tools - Done 껑같같같같같같같같같같같같같같같같같
+echo 같같같굉 Gutenberg Tools - Done 껑같같같같같같같같같같같같같같같같같같같
 goto exit
 :error
 echo  E r r o r 

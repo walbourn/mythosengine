@@ -9,9 +9,9 @@
 //                          /  /            \  \ 
 //                         /__/              \__\ 
 //
-//                      Microsoft Windows '95 Version
+//                    Microsoft Windows 95/NT Version
 //
-//            Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.
+//            Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved.
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -116,7 +116,7 @@ STATIC int load_pal(VngoPal *pal,char *infile);
 //
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 
-char Util_name[] = "°± MythOS Pic Image Utility - (C) 1994-1997 Charybdis Enterprises, Inc. ±°\n"
+char Util_name[] = "°± MythOS Pic Image Utility - (C) 1994-1998 Charybdis Enterprises, Inc. ±°\n"
                    "                              " __DATE__ "   All Rights Reserved.\n";
 
 

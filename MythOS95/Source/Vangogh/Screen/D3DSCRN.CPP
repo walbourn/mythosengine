@@ -462,8 +462,8 @@ VNGError VngoDirect3D::set_mode(int _width, int _height, int bpp, VngoPal *_pal,
     if (ddhaldesc.dwCaps2 & DDCAPS2_NO2DDURING3DSCENE)
     {
         sins |= VNGO_NO_3D_2D_INTERLEAVE;
-        term();
-        return VNGO_INTERNAL_ERROR;
+//        term();
+//        return VNGO_INTERNAL_ERROR;
     }
 
 
@@ -534,7 +534,9 @@ VNGError VngoDirect3D::set_mode(int _width, int _height, int bpp, VngoPal *_pal,
                 sins |= VNGO_NO_VERTEX_FOG;
             if (!(thaldesc.dpcTriCaps.dwRasterCaps & D3DPRASTERCAPS_FOGTABLE))
                 sins |= VNGO_NO_TABLE_FOG;
-            if (!(thaldesc.dpcTriCaps.dwRasterCaps & D3DPRASTERCAPS_STIPPLE))
+            if (!(thaldesc.dpcTriCaps.dwRasterCaps & D3DPRASTERCAPS_STIPPLE) &&
+                !(thaldesc.dpcTriCaps.dwShadeCaps & D3DPSHADECAPS_ALPHAFLATSTIPPLED) &&
+                !(thaldesc.dpcTriCaps.dwShadeCaps & D3DPSHADECAPS_ALPHAGOURAUDSTIPPLED))
                 sins |= VNGO_NO_STIPPLE_ALPHA;
             if (!((thaldesc.dpcTriCaps.dwSrcBlendCaps & D3DPBLENDCAPS_BOTHSRCALPHA)
                 && (thaldesc.dpcTriCaps.dwDestBlendCaps & D3DPBLENDCAPS_BOTHSRCALPHA)))
@@ -638,6 +640,7 @@ VNGError VngoDirect3D::set_mode(int _width, int _height, int bpp, VngoPal *_pal,
     d3dDevice->SetRenderState(D3DRENDERSTATE_DITHERENABLE,TRUE);
     d3dDevice->SetRenderState(D3DRENDERSTATE_CULLMODE, D3DCULL_NONE);
     d3dDevice->SetRenderState(D3DRENDERSTATE_TEXTUREHANDLE,NULL);
+    d3dDevice->SetRenderState(D3DRENDERSTATE_LASTPIXEL,FALSE);
 
     return VNGO_NO_ERROR;
 }
@@ -891,5 +894,107 @@ BOOL CALLBACK EnumModesCallback(LPDDSURFACEDESC lpsdesc ,LPVOID lParam)
 VNGError VngoDirect3D::dump_textures()
 {
     return VNGO_NO_ERROR;
+}
+
+void VngoDirect3D::set_draw_state(dword state, D3DTEXTUREHANDLE handle)
+{
+    static dword            last_state=-1;
+    static D3DTEXTUREHANDLE last_handle=0;
+
+    if (last_handle != handle)
+    {
+        d3dDevice->SetRenderState(D3DRENDERSTATE_TEXTUREHANDLE,handle);
+        last_handle = handle;
+    }
+    if (last_state != state)
+    {
+        bool always_set=FALSE;
+        if (last_state == -1)
+        {
+            last_state = 0;
+            always_set=TRUE;
+        }
+        if (((last_state & VNGO_D3DSFLAGS_ALPHA) != (state & VNGO_D3DSFLAGS_ALPHA)) || always_set)
+        {
+            if (state & VNGO_D3DSFLAGS_ALPHA)
+            {
+                d3dDevice->SetRenderState(D3DRENDERSTATE_ALPHABLENDENABLE, TRUE);
+                d3dDevice->SetRenderState(D3DRENDERSTATE_DESTBLEND, D3DBLEND_BOTHSRCALPHA);
+                d3dDevice->SetRenderState(D3DRENDERSTATE_SRCBLEND, D3DBLEND_BOTHSRCALPHA);
+                last_state |= VNGO_D3DSFLAGS_ALPHA;
+            }
+            else
+            {
+                d3dDevice->SetRenderState(D3DRENDERSTATE_ALPHABLENDENABLE, FALSE);
+                last_state &= ~VNGO_D3DSFLAGS_ALPHA;
+            }
+
+        }
+        if (((last_state & VNGO_D3DSFLAGS_GOURAUD) != (state & VNGO_D3DSFLAGS_GOURAUD)) || always_set)
+        {
+            if (state & VNGO_D3DSFLAGS_GOURAUD)
+            {
+                last_state |= VNGO_D3DSFLAGS_GOURAUD;
+                d3dDevice->SetRenderState(D3DRENDERSTATE_SHADEMODE, D3DSHADE_GOURAUD);
+            }
+            else
+            {
+                last_state &= ~VNGO_D3DSFLAGS_GOURAUD;
+                d3dDevice->SetRenderState(D3DRENDERSTATE_SHADEMODE, D3DSHADE_FLAT);
+            }
+        }
+        if (((last_state & VNGO_D3DSFLAGS_DITHER) != (state & VNGO_D3DSFLAGS_DITHER)) || always_set)
+        {
+            if (state & VNGO_D3DSFLAGS_DITHER)
+            {
+                last_state |= VNGO_D3DSFLAGS_DITHER;
+                d3dDevice->SetRenderState(D3DRENDERSTATE_DITHERENABLE,TRUE);
+            }
+            else
+            {
+                last_state &= ~VNGO_D3DSFLAGS_DITHER;
+                d3dDevice->SetRenderState(D3DRENDERSTATE_DITHERENABLE,TRUE);
+            }
+        }
+        if (((last_state & VNGO_D3DSFLAGS_PERSPECTIVE) != (state & VNGO_D3DSFLAGS_PERSPECTIVE)) || always_set)
+        {
+            if (state & VNGO_D3DSFLAGS_PERSPECTIVE)
+            {
+                last_state |= VNGO_D3DSFLAGS_PERSPECTIVE;
+                d3dDevice->SetRenderState(D3DRENDERSTATE_TEXTUREPERSPECTIVE, TRUE);
+            }
+            else
+            {
+                last_state &= ~VNGO_D3DSFLAGS_PERSPECTIVE;
+                d3dDevice->SetRenderState(D3DRENDERSTATE_TEXTUREPERSPECTIVE, FALSE);
+            }
+        }
+        if (((last_state & VNGO_D3DSFLAGS_TBLEND_MOD) != (state & VNGO_D3DSFLAGS_TBLEND_MOD)) || always_set)
+        {
+            if (state & VNGO_D3DSFLAGS_TBLEND_MOD)
+            {
+                last_state |= VNGO_D3DSFLAGS_TBLEND_MOD;
+                d3dDevice->SetRenderState(D3DRENDERSTATE_TEXTUREMAPBLEND,D3DTBLEND_MODULATE);
+            }
+            else
+            {
+                last_state &= ~VNGO_D3DSFLAGS_TBLEND_MOD;
+                d3dDevice->SetRenderState(D3DRENDERSTATE_TEXTUREMAPBLEND,D3DTBLEND_DECAL);
+            }
+        }
+        if (((last_state & VNGO_D3DSFLAGS_CKEY_ENABLE) != (state & VNGO_D3DSFLAGS_CKEY_ENABLE)) || always_set)
+        {
+            if (state & VNGO_D3DSFLAGS_CKEY_ENABLE)
+            {
+                last_state |= VNGO_D3DSFLAGS_CKEY_ENABLE;
+                d3dDevice->SetRenderState(D3DRENDERSTATE_COLORKEYENABLE,TRUE);
+            }
+            else
+            {
+                last_state &= ~VNGO_D3DSFLAGS_CKEY_ENABLE;
+                d3dDevice->SetRenderState(D3DRENDERSTATE_COLORKEYENABLE,FALSE);
+            }
+        }
+    }
 }
 

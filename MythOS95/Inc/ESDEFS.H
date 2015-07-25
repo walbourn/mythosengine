@@ -8,10 +8,10 @@
 //ששששש²±²ששששששש²±²שששש²±²ש²±²שששש²±²ש²±²שששש²±²ש²±²שששששששש²±²שששש²±²שששששש
 //שששש²²²²²²²²²²ש²²²²²²²²ששש²²²²²²²²שש²²²שששש²²²ש²²²²²²²²²²ש²²²שששש²²²ששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//שששששששששששCopyrightש(c)ש1994-1997שbyשCharybdisשEnterprises,שInc.שששששששששש
-//ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
+//ששששששששששששששששששש Microsoft Windows 95/NT Version ששששששששששששששששששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//ששששששששששששששששששששש Microsoft Windows '95 Version ששששששששששששששששששששששש
+//שששששששששששCopyrightש(c)ש1994-1998שbyשCharybdisשEnterprises,שInc.שששששששששש
+//ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
 //
@@ -223,6 +223,8 @@ typedef enum _esch_error_codes
 #define ESCH_CAM_NOFLUSH            0x20000     // Don't flush element list on render
 
 #define ESCH_CAM_TRUESORT           0x40000     // Use true sorting during flush
+
+#define ESCH_CAM_ORTHO              0x80000     // Camera is orthographic, not perspective
 
 #define ESCH_CAM_IGNORE_BMAP        0x100000    // Ignore's background bitmap if defined (Ex)
 #define ESCH_CAM_GRADIENT           0x200000    // Gradient background (Ex)

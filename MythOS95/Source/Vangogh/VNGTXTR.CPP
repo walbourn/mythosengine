@@ -187,7 +187,7 @@ VNGError VngoTexture::convert(XFBitmap *bm, VngoPal *pal)
 
                     if (flags & VNGO_TEXTURE_TRANSPARENT)
                     {
-                        mypal[255] = 255;      // 255 is always transparent if the 
+                        mypal[255] = 255;      // 255 is always transparent if the
                         loop_count--;          // texture has transparentcies.
                     }
                     for(int i=0; i < loop_count; i++)
@@ -911,10 +911,15 @@ VngoTextureManager::~VngoTextureManager()
 //컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
 // VngoTextureManager
 //컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
-VNGError VngoTextureManager::ready()
+VNGError VngoTextureManager::ready(VngoCacheHndl *hndl)
 {
     // This makes sure that a texture is properly loaded and ready for use
     // another way of thinking of it is "cached in".
+    if (!(hndl->flags & VNGO_TEXTURE_CACHED_IN))
+    {
+        remove(hndl);
+        add (hndl);
+    }
     return VNGO_NO_ERROR;
 }
 
@@ -939,7 +944,8 @@ VNGError VngoTextureManager::add(VngoCacheHndl *ntex,int ready)
         }
         ntex->next = NULL;
         ready_tail = ntex;
-        ntex->flags = VNGO_TEXTURE_CACHED_IN;
+        ntex->flags &= ~VNGO_TEXTURE_CACHED_OUT;
+        ntex->flags |= VNGO_TEXTURE_CACHED_IN;
     }
     else
     {
@@ -956,7 +962,8 @@ VNGError VngoTextureManager::add(VngoCacheHndl *ntex,int ready)
         }
         ntex->next = NULL;
         out_tail = ntex;
-        ntex->flags = VNGO_TEXTURE_CACHED_OUT;
+        ntex->flags &= ~VNGO_TEXTURE_CACHED_IN;
+        ntex->flags |= VNGO_TEXTURE_CACHED_OUT;
     }
     return VNGO_NO_ERROR;
 }
@@ -973,25 +980,37 @@ VNGError VngoTextureManager::remove(VngoCacheHndl *ntex)
         {
             // remove from the ready head position.
             ready_head = ntex->next;
+            if (ready_head)
+                ready_head->prev = NULL;
             ntex->next = NULL;
+            ntex->prev = NULL;
         }
         else if (ready_tail == ntex)
         {
             // remove from the ready tail position.
             ready_tail = ntex->prev;
-            ready_tail->next = NULL;
+            if (ready_tail)
+                ready_tail->next = NULL;
+            ntex->prev = NULL;
+            ntex->next = NULL;
         }
         else if (out_head == ntex)
         {
             // remove from the out head position.
             out_head = ntex->next;
+            if (out_head)
+                out_head->prev = NULL;
             ntex->next = NULL;
+            ntex->prev = NULL;
         }
         else if (out_tail == ntex)
         {
             // remove from the out tail position.
             out_tail = ntex->prev;
-            out_tail->next = NULL;
+            if (out_tail)
+                out_tail->next = NULL;
+            ntex->prev = NULL;
+            ntex->next = NULL;
         }
         else
         {
@@ -1006,8 +1025,10 @@ VNGError VngoTextureManager::remove(VngoCacheHndl *ntex)
                 }
                 if (t != NULL)
                 {
-                    t->prev->next = t->next;
-                    t->next->prev = t->prev;
+                    if (t->prev)
+                        t->prev->next = t->next;
+                    if (t->next)
+                        t->next->prev = t->prev;
                     t->next = NULL;
                     t->prev = NULL;
                 }
@@ -1022,8 +1043,10 @@ VNGError VngoTextureManager::remove(VngoCacheHndl *ntex)
                 }
                 if (t != NULL)
                 {
-                    t->prev->next = t->next;
-                    t->next->prev = t->prev;
+                    if (t->prev)
+                        t->prev->next = t->next;
+                    if (t->next)
+                        t->next->prev = t->prev;
                     t->next = NULL;
                     t->prev = NULL;
                 }

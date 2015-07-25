@@ -1,10 +1,17 @@
 //อออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออ
+//           __ ,                                                      
+//            ,-| ~           ,               ,,                      
+//           ('||/__,        ||               ||                  _   
+//          (( |||  | \\ \\ =||=   _-_  \\/\\ ||/|,  _-_  ,._-_  / \\ 
+//          (( |||==| || ||  ||   || \\ || || || || || \\  ||   || || 
+//           ( / |  , || ||  ||   ||/   || || || |' ||/    ||   || || 
+//            -____/  \\/\\  \\,  \\,/  \\ \\ \\/   \\,/   \\,  \\_-| 
+//                                                               /  \ 
+//                                                              '----`
+//                     Text Output and Font Management System
+//                        Microsoft Windows 95/NT Version
 //
-//               GameFrame -- A Simple Windows Game Framework
-//
-//                        For Microsoft Windows '95
-//
-//            Copyright (c) 1995-1997 by Charybdis Enterprises, Inc.
+//            Copyright (c) 1995-1998 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved.
 //
 //ฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤ

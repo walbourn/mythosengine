@@ -2,9 +2,9 @@
 #
 #                              Makefile Include
 #
-#                         Microsoft Windows '95 Version
+#                        Microsoft Windows 95/NT Version
 #
-#            Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.
+#            Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.
 #                            All Rights Reserved.
 #
 #ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -48,7 +48,7 @@
 #°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 !message ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-!message ³  MythOS(tm) Make.INC - (C) 1994-1997 by Charybdis Enterprises, Inc.  ³
+!message ³MythOS(tm) 95 Make.INC - (C) 1994-1998 by Charybdis Enterprises, Inc. ³
 !message ÀÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
 !if "$(DEBUG)" == "ASSERT"

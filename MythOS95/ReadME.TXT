@@ -8,10 +8,10 @@
                            /  /            \  \
                           /__/              \__\
  
-             Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.
+             Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.
                             All Rights Reserved.
 
-                            Windows '95 Version
+                           Windows 95/NT Version
 
  ---------------------------------------------------------------------------
  
@@ -35,17 +35,17 @@
                                 (512) 343-7224
                               FAX: (512) 343-6310
 
-                  Direct e-mail inquires to: tim@charybdis.com
+              Direct E-mail inquiries to: mythos_sales@charybdis.com
 
                           http://www.charybdis.com/
 
  ---------------------------------------------------------------------------
 
-                         *** Version 1.51 Release ***
+                         *** Version 1.6 Release ***
 
-                             November 13, 1997
+                             January 15, 1998
 
- This is the sixth full release of the MythOS collection.  Usage of this 
+ This is the seventh full release of the MythOS collection.  Usage of this 
  library is subject to your license agreement.  All materials herein 
  should be treated as confidential information.
 
@@ -60,6 +60,15 @@
 
  Select Start/Run... and select 'setup.exe'.  Follow the instructions
  given in the setup program.
+
+ To build some of the code, you will need some supporting Microsoft
+ SDKs which have been provided in their web-distributed form on the CD.
+
+    \Dx5            DirectX V5 SDK
+    \DXMedia51      DirectX Media V5.1 SDK
+    \Platform SDK   Microsoft November 1997 Platform SDK
+
+ To install these, read the ReadME.TXT file in the subdirectory.
 
 
 
@@ -221,6 +230,14 @@
     |     |
     |     +--Obj
     |
+    +--Spielberg                    Spielberg (Animation/movie player)
+    |  +--Inc (source only)
+    |  |
+    |  +--Obj (source only)
+    |  |
+    |  +--Test
+    |     +--Obj
+    |
     +--System                       MythOS System (Source)
     |  +--Inc
     |  |
@@ -294,9 +311,6 @@
     README.TXT's are in each of the library component directories with
     current status and work notes.
 
-    A new examples directory was added to the release.  The GameFrame
-    was removed.
-
     This version of MythOS was built with Microsoft Visual C++ v5.0.  The
     MFC-based tools will therefore not compile with v2.x MSVC.
 
@@ -324,7 +338,7 @@
  ---------------------------------------------------------------------------
  EXAMPLES
 
-    We have started to include some example code with this release.  The
+    This release includes some example code to get you started.  The
     ReadME files for the examples give details on thier function.
 
     The Viewer example is a simple object viewer with interactive controls

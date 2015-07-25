@@ -3,10 +3,10 @@
                                                             %/ . .  .   \%
              Van Gogh 2D-Display Library                     |  . .  o. |
                                                              |. _  .   .|
-   Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.    | / \   .  |
-                All rights reserved.                         |_|_|_._._.|
-                                                             |.-.-.-.-..|
-                                                            %\__________/%
+           Microsoft Windows 95/NT Version                   | / \   .  |
+                                                             |_|_|_._._.|
+   Copyright (C) 1994-1998 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
+                  All rights reserved.                      %\__________/%
                                                              %          %
 
   ----------------------------------------------------------------------------
@@ -27,16 +27,14 @@
                             _Library Status_
 
   Notes by:  Tim Little
-  Updated:   November 12, 1997
+  Updated:   January 15, 1998
 
   Changes for this release --------------------------------------------------
 
-    o Minor fix to palette loading code for 16-bit
+    o Continued development of Direct3D for texture caching, fogging
+      support, and optimizations.
 
-    o Changed pixel for D3D to always use line() since some boards do not
-      support a pixel operation and detecting this case is not obvious.
-
-    o Continued development of Direct3D.
+    o Fixed problems with pixel output in 16bpp virtual viewport.
 
 
 
@@ -46,12 +44,12 @@
 
     o The screen manager check_mode() functions need to be implemented.
 
-    o Implementation of 3D/fx Glide and Matrox Simple Interface 3D
-      viewports/screen managers.
+    o Implementation of 3D/fx Glide.
 
-    o Possibly add 24-bit/32-bit display support.
+    o Removal of now defunct Cirrus Laguna support and drop Matrox
+      Simple Interface.
 
-    o More features for PalTool.
+    o Total rewrite planned for MythOS 98
 
 *** END OF FILE ***
 

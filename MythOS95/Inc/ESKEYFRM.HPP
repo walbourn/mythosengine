@@ -8,10 +8,10 @@
 //ששששש²±²ששששששש²±²שששש²±²ש²±²שששש²±²ש²±²שששש²±²ש²±²שששששששש²±²שששש²±²שששששש
 //שששש²²²²²²²²²²ש²²²²²²²²ששש²²²²²²²²שש²²²שששש²²²ש²²²²²²²²²²ש²²²שששש²²²ששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//שששששששששששCopyrightש(c)ש1994-1997שbyשCharybdisשEnterprises,שInc.שששששששששש
-//ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
+//ששששששששששששששששששש Microsoft Windows 95/NT Version ששששששששששששששששששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//ששששששששששששששששששששש Microsoft Windows '95 Version ששששששששששששששששששששששש
+//שששששששששששCopyrightש(c)ש1994-1998שbyשCharybdisשEnterprises,שInc.שששששששששש
+//ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
 //
@@ -177,6 +177,7 @@ protected:
     // Protected data members                                               ³
     //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִÙ
     ulong           k_type;                     // keyframe type
+    ulong           k_type_store;               // backup k_type info
     float           rest_pitch;
     float           rest_roll;
     float           rest_yaw;
@@ -207,6 +208,7 @@ protected:
 
     // timing array.  floating precision needed for determining interval step to next frame
     float           fnext_frames[ESCH_MAX_SIMULTANEOUS];
+    float           current_next[ESCH_MAX_SIMULTANEOUS];
 
     // time stamps for tweening
     float           prev_stamp[ESCH_MAX_SIMULTANEOUS];
@@ -278,6 +280,7 @@ public:
     int swap_motion(char *str1, char *str2);
 
     void reset_keyframes(int num, float time, float interval=0.0f, float shift=1.0f);
+    void reset_ktypes();
 
     float calc_stride (int chain_num);
     int calc_foot (ulong kt, char *mt, EschVector *ret, EschFrameRef *stride_mtx, int frame_num);

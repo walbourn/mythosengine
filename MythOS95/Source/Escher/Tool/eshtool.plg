@@ -11,11 +11,22 @@ Project's tools are:
 			"Custom Build" with flags ""
 			"<Component 0xa>" with flags ""
 
-Creating temp file "C:\WIN95\TEMP\RSPA185.TMP" with contents </nologo /MDd /W3 /Gm /GX /Zi /Od /I "..\..\inc" /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /Fp".\WinDebug/eshtool.pch" /Yu"stdafx.h" /Fo".\WinDebug/" /Fd".\WinDebug/" /FD /c 
+Creating command line "rc.exe /l 0x409 /fo".\WinDebug/eshtool.res" /d "_DEBUG" /d "_AFXDLL" "E:\CHARYBDS\MythOS95\Escher\Tool\eshtool.rc"" 
+Creating temp file "C:\WIN95\TEMP\RSPF5.TMP" with contents </nologo /MDd /W3 /Gm /GX /Zi /Od /I "..\..\inc" /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /Fp".\WinDebug/eshtool.pch" /Yu"stdafx.h" /Fo".\WinDebug/" /Fd".\WinDebug/" /FD /c 
+"E:\CHARYBDS\MythOS95\Escher\Tool\eshtdlg.cpp"
+"E:\CHARYBDS\MythOS95\Escher\Tool\eshtdoc.cpp"
+"E:\CHARYBDS\MythOS95\Escher\Tool\eshtmfrm.cpp"
+"E:\CHARYBDS\MythOS95\Escher\Tool\eshtool.cpp"
+"E:\CHARYBDS\MythOS95\Escher\Tool\eshttree.cpp"
+"E:\CHARYBDS\MythOS95\Escher\Tool\eshtview.cpp"
 "E:\CHARYBDS\MythOS95\Escher\Tool\eshtvp.cpp"
 >
-Creating command line "cl.exe @C:\WIN95\TEMP\RSPA185.TMP" 
-Creating temp file "C:\WIN95\TEMP\RSPA186.TMP" with contents <winmm.lib ..\..\lib\mythos.lib ..\..\lib\ivorymfc.lib ..\..\lib\bozo.lib ..\..\lib\xfile.lib ..\..\lib\chronos.lib ..\..\lib\escher.lib ..\..\lib\gutenbrg.lib ..\..\lib\felix.lib ..\..\lib\vangogh.lib /nologo /version:4 /subsystem:windows /incremental:yes /pdb:".\WinDebug/eshtool.pdb" /debug /machine:I386 /nodefaultlib:"LIBC" /nodefaultlib:"LIBCMT" /out:".\WinDebug/eshtool.exe" 
+Creating command line "cl.exe @C:\WIN95\TEMP\RSPF5.TMP" 
+Creating temp file "C:\WIN95\TEMP\RSP00F6.TMP" with contents </nologo /MDd /W3 /Gm /GX /Zi /Od /I "..\..\inc" /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /Fp".\WinDebug/eshtool.pch" /Yc"stdafx.h" /Fo".\WinDebug/" /Fd".\WinDebug/" /FD /c 
+"E:\CHARYBDS\MythOS95\Escher\Tool\stdafx.cpp"
+>
+Creating command line "cl.exe @C:\WIN95\TEMP\RSP00F6.TMP" 
+Creating temp file "C:\WIN95\TEMP\RSP00F7.TMP" with contents <winmm.lib ..\..\lib\mythos.lib ..\..\lib\ivorymfc.lib ..\..\lib\bozo.lib ..\..\lib\xfile.lib ..\..\lib\chronos.lib ..\..\lib\escher.lib ..\..\lib\gutenbrg.lib ..\..\lib\felix.lib ..\..\lib\vangogh.lib /nologo /version:4 /subsystem:windows /incremental:yes /pdb:".\WinDebug/eshtool.pdb" /debug /machine:I386 /nodefaultlib:"LIBC" /nodefaultlib:"LIBCMT" /out:".\WinDebug/eshtool.exe" 
 .\WinDebug\eshtdlg.obj
 .\WinDebug\eshtdoc.obj
 .\WinDebug\eshtmfrm.obj
@@ -25,11 +36,7 @@ Creating temp file "C:\WIN95\TEMP\RSPA186.TMP" with contents <winmm.lib ..\..\li
 .\WinDebug\eshtvp.obj
 .\WinDebug\stdafx.obj
 .\WinDebug\eshtool.res>
-Creating command line "link.exe @C:\WIN95\TEMP\RSPA186.TMP" 
-Compiling...
-eshtvp.cpp
-Linking...
+Creating command line "link.exe @C:\WIN95\TEMP\RSP00F7.TMP" 
+Compiling resources...
+Error spawning rc.exe
 
-
-
-eshtool.exe - 0 error(s), 0 warning(s)

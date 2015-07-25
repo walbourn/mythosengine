@@ -8,10 +8,10 @@
 //ùùùùù²±²ùùùùùùù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùùùùùù²±²ùùùù²±²ùùùùùù
 //ùùùù²²²²²²²²²²ù²²²²²²²²ùùù²²²²²²²²ùù²²²ùùùù²²²ù²²²²²²²²²²ù²²²ùùùù²²²ùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùCopyrightù(c)ù1994-1997ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
-//ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
+//ùùùùùùùùùùùùùùùùùùù Microsoft Windows 95/NT Version ùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùùùùùùùùùùù Microsoft Windows '95 Version ùùùùùùùùùùùùùùùùùùùùùùù
+//ùùùùùùùùùùùCopyrightù(c)ù1994-1998ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
+//ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
@@ -197,6 +197,12 @@ public:
         return get_height(pt->x, pt->z);
     }
 
+    virtual bool get_face (float x, float z, EschPoint *p1, EschPoint *p2, EschPoint *p3) const;
+    bool get_face (const EschPoint *pt, EschPoint *p1, EschPoint *p2, EschPoint *p3) const
+    {
+        return get_face (pt->x, pt->z, p1, p2, p3);
+    }
+
     virtual ushort get_surface_flags(float x, float z) const;
     ushort get_surface_flags(const EschPoint *pt) const
     {
@@ -303,7 +309,25 @@ protected:
     void esch_find_draw_volume();
     VngoRect draw_terrain_rect(VngoRect *iclip, VngoRect *oclip,int dlevel,dword flags);
     void draw_terrain_rect(VngoRect *iclip, int dlevel, dword flags);
-    void display_pixel_row(VngoPoint *vpt, int count);
+    void draw_terrain_trans_rect(VngoRect *iclip, int dlevel, dword flags);
+    void draw_terrain_trans_ul (VngoRect *rect,EschPoint *orig, byte *dptr,
+                                esch_surf_type *sptr, int dlevel, dword lflags);
+    void draw_terrain_trans_ur (VngoRect *rect,EschPoint *orig, byte *dptr,
+                                esch_surf_type *sptr, int dlevel, dword lflags);
+    void draw_terrain_trans_bl (VngoRect *rect,EschPoint *orig, byte *dptr,
+                                esch_surf_type *sptr, int dlevel, dword lflags);
+    void draw_terrain_trans_br (VngoRect *rect,EschPoint *orig, byte *dptr,
+                                esch_surf_type *sptr, int dlevel, dword lflags);
+    void draw_terrain_trans_top (VngoRect *rect,EschPoint *orig, byte *dptr,
+                                 esch_surf_type *sptr, int dlevel, ulong count, dword lflags);
+    void draw_terrain_trans_bottom (VngoRect *rect,EschPoint *orig, byte *dptr,
+                                    esch_surf_type *sptr, int dlevel, ulong count, dword lflags);
+    void draw_terrain_trans_left (VngoRect *rect,EschPoint *orig, byte *dptr,
+                                  esch_surf_type *sptr, int dlevel, ulong count, dword lflags);
+    void draw_terrain_trans_right (VngoRect *rect,EschPoint *orig, byte *dptr,
+                                   esch_surf_type *sptr, int dlevel, ulong count, dword lflags);
+    void point_average (EschPoint *mid, EschPoint *top, EschPoint *bottom);
+    void display_pixel_row(VngoPoint *vpt, int count, dword cflags);
     void setup_edge_limits(VngoPoint *edge);
     void add_edge_to_limits(VngoPoint *p1,VngoPoint *p2);
 
@@ -321,6 +345,7 @@ public:
     virtual void draw();
     virtual void release();
     virtual float get_height(float x, float z) const;
+    virtual bool  get_face (float x, float z, EschPoint *p1, EschPoint *p2, EschPoint *p3) const;
 
     virtual void set_lod (int count,...);
     virtual void set_texture_lod(int lod);
@@ -388,6 +413,9 @@ protected:
 
     EschTerrainEx *terr;
 
+    float   hgt_dither_mat[4][4];
+    float   hgt_dither_scalar;
+
     int esch_find_draw_volume(EschVector *pts=0);
     VngoRect draw_tree_rect(VngoRect *iclip, VngoRect *oclip,int dlevel,dword flags);
     void draw_tree_rect(VngoRect *iclip, int dlevel, dword flags);
@@ -436,6 +464,9 @@ public:
     void get_exterior_rect_world (float *x, float *z, float *dx, float *dz);
     void get_interior_rect (VngoRect *rect);
     void get_interior_rect_world (float *x, float *z, float *dx, float *dz);
+
+    void set_hgt_dither_mat (float *mat) {if (mat) memcpy (hgt_dither_mat, mat, sizeof (hgt_dither_mat));};
+    void set_hgt_dither_scalar (float scale) {hgt_dither_scalar = scale;};
 };
 
 #ifdef __WATCOMC__

@@ -241,9 +241,6 @@ LINK32_OBJS= \
 !IF "$(CFG)" == "eshtool - Win32 Debug" || "$(CFG)" ==\
  "eshtool - Win32 Release"
 SOURCE=.\eshtdlg.cpp
-
-!IF  "$(CFG)" == "eshtool - Win32 Debug"
-
 DEP_CPP_ESHTD=\
 	"..\..\inc\bozo.h"\
 	"..\..\inc\bozo.hpp"\
@@ -274,6 +271,7 @@ DEP_CPP_ESHTD=\
 	"..\..\inc\esscene.hpp"\
 	"..\..\inc\essystem.hpp"\
 	"..\..\inc\esterran.hpp"\
+	"..\..\inc\estoken.hpp"\
 	"..\..\inc\estxture.hpp"\
 	"..\..\inc\felix.hpp"\
 	"..\..\inc\felix.ipp"\
@@ -321,35 +319,14 @@ DEP_CPP_ESHTD=\
 	".\eshtdoc.h"\
 	".\eshtool.h"\
 	".\stdafx.h"\
-	{$(INCLUDE)}"dinput.h"\
 	{$(INCLUDE)}"gl\gl.h"\
 	
 
 "$(INTDIR)\eshtdlg.obj" : $(SOURCE) $(DEP_CPP_ESHTD) "$(INTDIR)"\
  "$(INTDIR)\eshtool.pch"
 
-
-!ELSEIF  "$(CFG)" == "eshtool - Win32 Release"
-
-DEP_CPP_ESHTD=\
-	"..\..\inc\esdefs.h"\
-	"..\..\inc\felix.hpp"\
-	"..\..\inc\portable.h"\
-	".\eshtdlg.h"\
-	".\eshtdoc.h"\
-	".\eshtool.h"\
-	
-
-"$(INTDIR)\eshtdlg.obj" : $(SOURCE) $(DEP_CPP_ESHTD) "$(INTDIR)"\
- "$(INTDIR)\eshtool.pch"
-
-
-!ENDIF 
 
 SOURCE=.\eshtdoc.cpp
-
-!IF  "$(CFG)" == "eshtool - Win32 Debug"
-
 DEP_CPP_ESHTDO=\
 	"..\..\inc\bozo.h"\
 	"..\..\inc\bozo.hpp"\
@@ -381,6 +358,7 @@ DEP_CPP_ESHTDO=\
 	"..\..\inc\esscene.hpp"\
 	"..\..\inc\essystem.hpp"\
 	"..\..\inc\esterran.hpp"\
+	"..\..\inc\estoken.hpp"\
 	"..\..\inc\estxture.hpp"\
 	"..\..\inc\felix.hpp"\
 	"..\..\inc\felix.ipp"\
@@ -427,35 +405,14 @@ DEP_CPP_ESHTDO=\
 	".\eshtdoc.h"\
 	".\eshtool.h"\
 	".\stdafx.h"\
-	{$(INCLUDE)}"dinput.h"\
 	{$(INCLUDE)}"gl\gl.h"\
 	
 
 "$(INTDIR)\eshtdoc.obj" : $(SOURCE) $(DEP_CPP_ESHTDO) "$(INTDIR)"\
  "$(INTDIR)\eshtool.pch"
 
-
-!ELSEIF  "$(CFG)" == "eshtool - Win32 Release"
-
-DEP_CPP_ESHTDO=\
-	"..\..\inc\esdefs.h"\
-	"..\..\inc\esfile.hpp"\
-	"..\..\inc\felix.hpp"\
-	"..\..\inc\portable.h"\
-	".\eshtdoc.h"\
-	".\eshtool.h"\
-	
-
-"$(INTDIR)\eshtdoc.obj" : $(SOURCE) $(DEP_CPP_ESHTDO) "$(INTDIR)"\
- "$(INTDIR)\eshtool.pch"
-
-
-!ENDIF 
 
 SOURCE=.\eshtmfrm.cpp
-
-!IF  "$(CFG)" == "eshtool - Win32 Debug"
-
 DEP_CPP_ESHTM=\
 	"..\..\inc\bozo.h"\
 	"..\..\inc\bozo.hpp"\
@@ -486,6 +443,7 @@ DEP_CPP_ESHTM=\
 	"..\..\inc\esscene.hpp"\
 	"..\..\inc\essystem.hpp"\
 	"..\..\inc\esterran.hpp"\
+	"..\..\inc\estoken.hpp"\
 	"..\..\inc\estxture.hpp"\
 	"..\..\inc\felix.hpp"\
 	"..\..\inc\felix.ipp"\
@@ -536,38 +494,14 @@ DEP_CPP_ESHTM=\
 	".\eshtview.h"\
 	".\eshtvp.h"\
 	".\stdafx.h"\
-	{$(INCLUDE)}"dinput.h"\
 	{$(INCLUDE)}"gl\gl.h"\
 	
 
 "$(INTDIR)\eshtmfrm.obj" : $(SOURCE) $(DEP_CPP_ESHTM) "$(INTDIR)"\
  "$(INTDIR)\eshtool.pch"
 
-
-!ELSEIF  "$(CFG)" == "eshtool - Win32 Release"
-
-DEP_CPP_ESHTM=\
-	"..\..\inc\esdefs.h"\
-	"..\..\inc\felix.hpp"\
-	"..\..\inc\portable.h"\
-	".\eshtdoc.h"\
-	".\eshtmfrm.h"\
-	".\eshtool.h"\
-	".\eshttree.h"\
-	".\eshtview.h"\
-	".\eshtvp.h"\
-	
-
-"$(INTDIR)\eshtmfrm.obj" : $(SOURCE) $(DEP_CPP_ESHTM) "$(INTDIR)"\
- "$(INTDIR)\eshtool.pch"
-
-
-!ENDIF 
 
 SOURCE=.\eshtool.cpp
-
-!IF  "$(CFG)" == "eshtool - Win32 Debug"
-
 DEP_CPP_ESHTO=\
 	"..\..\inc\bozo.h"\
 	"..\..\inc\bozo.hpp"\
@@ -598,6 +532,7 @@ DEP_CPP_ESHTO=\
 	"..\..\inc\esscene.hpp"\
 	"..\..\inc\essystem.hpp"\
 	"..\..\inc\esterran.hpp"\
+	"..\..\inc\estoken.hpp"\
 	"..\..\inc\estxture.hpp"\
 	"..\..\inc\felix.hpp"\
 	"..\..\inc\felix.ipp"\
@@ -648,33 +583,12 @@ DEP_CPP_ESHTO=\
 	".\eshtview.h"\
 	".\eshtvp.h"\
 	".\stdafx.h"\
-	{$(INCLUDE)}"dinput.h"\
 	{$(INCLUDE)}"gl\gl.h"\
 	
 
 "$(INTDIR)\eshtool.obj" : $(SOURCE) $(DEP_CPP_ESHTO) "$(INTDIR)"\
  "$(INTDIR)\eshtool.pch"
 
-
-!ELSEIF  "$(CFG)" == "eshtool - Win32 Release"
-
-DEP_CPP_ESHTO=\
-	"..\..\inc\esdefs.h"\
-	"..\..\inc\felix.hpp"\
-	"..\..\inc\portable.h"\
-	".\eshtdoc.h"\
-	".\eshtmfrm.h"\
-	".\eshtool.h"\
-	".\eshttree.h"\
-	".\eshtview.h"\
-	".\eshtvp.h"\
-	
-
-"$(INTDIR)\eshtool.obj" : $(SOURCE) $(DEP_CPP_ESHTO) "$(INTDIR)"\
- "$(INTDIR)\eshtool.pch"
-
-
-!ENDIF 
 
 SOURCE=.\eshtool.rc
 DEP_RSC_ESHTOO=\
@@ -699,9 +613,6 @@ DEP_RSC_ESHTOO=\
 
 
 SOURCE=.\eshttree.cpp
-
-!IF  "$(CFG)" == "eshtool - Win32 Debug"
-
 DEP_CPP_ESHTT=\
 	"..\..\inc\bozo.h"\
 	"..\..\inc\bozo.hpp"\
@@ -732,6 +643,7 @@ DEP_CPP_ESHTT=\
 	"..\..\inc\esscene.hpp"\
 	"..\..\inc\essystem.hpp"\
 	"..\..\inc\esterran.hpp"\
+	"..\..\inc\estoken.hpp"\
 	"..\..\inc\estxture.hpp"\
 	"..\..\inc\felix.hpp"\
 	"..\..\inc\felix.ipp"\
@@ -781,37 +693,14 @@ DEP_CPP_ESHTT=\
 	".\eshtview.h"\
 	".\eshtvp.h"\
 	".\stdafx.h"\
-	{$(INCLUDE)}"dinput.h"\
 	{$(INCLUDE)}"gl\gl.h"\
 	
 
 "$(INTDIR)\eshttree.obj" : $(SOURCE) $(DEP_CPP_ESHTT) "$(INTDIR)"\
  "$(INTDIR)\eshtool.pch"
 
-
-!ELSEIF  "$(CFG)" == "eshtool - Win32 Release"
-
-DEP_CPP_ESHTT=\
-	"..\..\inc\esdefs.h"\
-	"..\..\inc\felix.hpp"\
-	"..\..\inc\portable.h"\
-	".\eshtdoc.h"\
-	".\eshtool.h"\
-	".\eshttree.h"\
-	".\eshtview.h"\
-	".\eshtvp.h"\
-	
-
-"$(INTDIR)\eshttree.obj" : $(SOURCE) $(DEP_CPP_ESHTT) "$(INTDIR)"\
- "$(INTDIR)\eshtool.pch"
-
-
-!ENDIF 
 
 SOURCE=.\eshtview.cpp
-
-!IF  "$(CFG)" == "eshtool - Win32 Debug"
-
 DEP_CPP_ESHTV=\
 	"..\..\inc\bozo.h"\
 	"..\..\inc\bozo.hpp"\
@@ -842,6 +731,7 @@ DEP_CPP_ESHTV=\
 	"..\..\inc\esscene.hpp"\
 	"..\..\inc\essystem.hpp"\
 	"..\..\inc\esterran.hpp"\
+	"..\..\inc\estoken.hpp"\
 	"..\..\inc\estxture.hpp"\
 	"..\..\inc\felix.hpp"\
 	"..\..\inc\felix.ipp"\
@@ -892,38 +782,14 @@ DEP_CPP_ESHTV=\
 	".\eshtview.h"\
 	".\eshtvp.h"\
 	".\stdafx.h"\
-	{$(INCLUDE)}"dinput.h"\
 	{$(INCLUDE)}"gl\gl.h"\
 	
 
 "$(INTDIR)\eshtview.obj" : $(SOURCE) $(DEP_CPP_ESHTV) "$(INTDIR)"\
  "$(INTDIR)\eshtool.pch"
 
-
-!ELSEIF  "$(CFG)" == "eshtool - Win32 Release"
-
-DEP_CPP_ESHTV=\
-	"..\..\inc\esdefs.h"\
-	"..\..\inc\felix.hpp"\
-	"..\..\inc\portable.h"\
-	".\eshtdlg.h"\
-	".\eshtdoc.h"\
-	".\eshtool.h"\
-	".\eshttree.h"\
-	".\eshtview.h"\
-	".\eshtvp.h"\
-	
-
-"$(INTDIR)\eshtview.obj" : $(SOURCE) $(DEP_CPP_ESHTV) "$(INTDIR)"\
- "$(INTDIR)\eshtool.pch"
-
-
-!ENDIF 
 
 SOURCE=.\eshtvp.cpp
-
-!IF  "$(CFG)" == "eshtool - Win32 Debug"
-
 DEP_CPP_ESHTVP=\
 	"..\..\inc\bozo.h"\
 	"..\..\inc\bozo.hpp"\
@@ -954,6 +820,7 @@ DEP_CPP_ESHTVP=\
 	"..\..\inc\esscene.hpp"\
 	"..\..\inc\essystem.hpp"\
 	"..\..\inc\esterran.hpp"\
+	"..\..\inc\estoken.hpp"\
 	"..\..\inc\estxture.hpp"\
 	"..\..\inc\felix.hpp"\
 	"..\..\inc\felix.ipp"\
@@ -1001,7 +868,6 @@ DEP_CPP_ESHTVP=\
 	".\eshtool.h"\
 	".\eshtvp.h"\
 	".\stdafx.h"\
-	{$(INCLUDE)}"dinput.h"\
 	{$(INCLUDE)}"gl\gl.h"\
 	
 
@@ -1009,27 +875,7 @@ DEP_CPP_ESHTVP=\
  "$(INTDIR)\eshtool.pch"
 
 
-!ELSEIF  "$(CFG)" == "eshtool - Win32 Release"
-
-DEP_CPP_ESHTVP=\
-	"..\..\inc\esdefs.h"\
-	"..\..\inc\felix.hpp"\
-	"..\..\inc\portable.h"\
-	".\eshtdoc.h"\
-	".\eshtool.h"\
-	".\eshtvp.h"\
-	
-
-"$(INTDIR)\eshtvp.obj" : $(SOURCE) $(DEP_CPP_ESHTVP) "$(INTDIR)"\
- "$(INTDIR)\eshtool.pch"
-
-
-!ENDIF 
-
 SOURCE=.\stdafx.cpp
-
-!IF  "$(CFG)" == "eshtool - Win32 Debug"
-
 DEP_CPP_STDAF=\
 	"..\..\inc\bozo.h"\
 	"..\..\inc\bozo.hpp"\
@@ -1060,6 +906,7 @@ DEP_CPP_STDAF=\
 	"..\..\inc\esscene.hpp"\
 	"..\..\inc\essystem.hpp"\
 	"..\..\inc\esterran.hpp"\
+	"..\..\inc\estoken.hpp"\
 	"..\..\inc\estxture.hpp"\
 	"..\..\inc\felix.hpp"\
 	"..\..\inc\felix.ipp"\
@@ -1104,9 +951,11 @@ DEP_CPP_STDAF=\
 	"..\..\inc\xfini.hpp"\
 	"..\..\inc\xfio.h"\
 	".\stdafx.h"\
-	{$(INCLUDE)}"dinput.h"\
 	{$(INCLUDE)}"gl\gl.h"\
 	
+
+!IF  "$(CFG)" == "eshtool - Win32 Debug"
+
 CPP_SWITCHES=/nologo /MDd /W3 /Gm /GX /Zi /Od /I "..\..\inc" /D "_DEBUG" /D\
  "WIN32" /D "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /Fp"$(INTDIR)\eshtool.pch"\
  /Yc"stdafx.h" /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 
@@ -1120,82 +969,6 @@ CPP_SWITCHES=/nologo /MDd /W3 /Gm /GX /Zi /Od /I "..\..\inc" /D "_DEBUG" /D\
 
 !ELSEIF  "$(CFG)" == "eshtool - Win32 Release"
 
-DEP_CPP_STDAF=\
-	"..\..\inc\bozo.h"\
-	"..\..\inc\bozo.hpp"\
-	"..\..\inc\bzartn.h"\
-	"..\..\inc\bzqueue.h"\
-	"..\..\inc\bzsemap.h"\
-	"..\..\inc\bztask.h"\
-	"..\..\inc\bzwrap.hpp"\
-	"..\..\inc\chronos.hpp"\
-	"..\..\inc\debug.h"\
-	"..\..\inc\esbasic.hpp"\
-	"..\..\inc\esbuild.hpp"\
-	"..\..\inc\escamera.hpp"\
-	"..\..\inc\escher.hpp"\
-	"..\..\inc\escontxt.hpp"\
-	"..\..\inc\esdefs.h"\
-	"..\..\inc\esdraw.hpp"\
-	"..\..\inc\eselemnt.hpp"\
-	"..\..\inc\esexts.hpp"\
-	"..\..\inc\esgeom.hpp"\
-	"..\..\inc\eskeyfrm.hpp"\
-	"..\..\inc\eslight.hpp"\
-	"..\..\inc\eslimb.hpp"\
-	"..\..\inc\esmath.hpp"\
-	"..\..\inc\esmisc.hpp"\
-	"..\..\inc\espartik.hpp"\
-	"..\..\inc\espartn.hpp"\
-	"..\..\inc\esscene.hpp"\
-	"..\..\inc\essystem.hpp"\
-	"..\..\inc\esterran.hpp"\
-	"..\..\inc\estxture.hpp"\
-	"..\..\inc\felix.hpp"\
-	"..\..\inc\felix.ipp"\
-	"..\..\inc\gutenbrg.h"\
-	"..\..\inc\gutenbrg.hpp"\
-	"..\..\inc\ivmem.h"\
-	"..\..\inc\ivory.h"\
-	"..\..\inc\ivory.hpp"\
-	"..\..\inc\ivory.ipp"\
-	"..\..\inc\max.hpp"\
-	"..\..\inc\maxdevs.hpp"\
-	"..\..\inc\maxesrc.hpp"\
-	"..\..\inc\maxevt.hpp"\
-	"..\..\inc\maxjoy.hpp"\
-	"..\..\inc\maxkb.hpp"\
-	"..\..\inc\maxmouse.hpp"\
-	"..\..\inc\maxvmap.hpp"\
-	"..\..\inc\mythos.h"\
-	"..\..\inc\mythos.hpp"\
-	"..\..\inc\portable.h"\
-	"..\..\inc\vangogh.hpp"\
-	"..\..\inc\vgvpdb16.hpp"\
-	"..\..\inc\vgvpdd16.hpp"\
-	"..\..\inc\vngcolor.hpp"\
-	"..\..\inc\vngd3d.hpp"\
-	"..\..\inc\vngdefs.h"\
-	"..\..\inc\vngoems.hpp"\
-	"..\..\inc\vngpal.hpp"\
-	"..\..\inc\vngscrn.hpp"\
-	"..\..\inc\vngstrct.hpp"\
-	"..\..\inc\vngtxtr.hpp"\
-	"..\..\inc\vngvp.hpp"\
-	"..\..\inc\vngvpdb8.hpp"\
-	"..\..\inc\vngvpdd8.hpp"\
-	"..\..\inc\vngvvp16.hpp"\
-	"..\..\inc\vngvvp8.hpp"\
-	"..\..\inc\xfbase.hpp"\
-	"..\..\inc\xfbitmap.hpp"\
-	"..\..\inc\xfdefs.h"\
-	"..\..\inc\xfiff.hpp"\
-	"..\..\inc\xfile.hpp"\
-	"..\..\inc\xfini.hpp"\
-	"..\..\inc\xfio.h"\
-	".\stdafx.h"\
-	{$(INCLUDE)}"dinput.h"\
-	
 CPP_SWITCHES=/nologo /MD /W3 /GX /O2 /I "..\..\inc" /D "NDEBUG" /D "WIN32" /D\
  "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /Fp"$(INTDIR)\eshtool.pch" /Yc"stdafx.h"\
  /Fo"$(INTDIR)\\" /Fd"$(INTDIR)\\" /FD /c 

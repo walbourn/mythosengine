@@ -8,10 +8,10 @@
 //ששששש²±²ששששששש²±²שששש²±²ש²±²שששש²±²ש²±²שששש²±²ש²±²שששששששש²±²שששש²±²שששששש
 //שששש²²²²²²²²²²ש²²²²²²²²ששש²²²²²²²²שש²²²שששש²²²ש²²²²²²²²²²ש²²²שששש²²²ששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//שששששששששששCopyrightש(c)ש1994-1997שbyשCharybdisשEnterprises,שInc.שששששששששש
-//ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
+//ששששששששששששששששששש Microsoft Windows 95/NT Version ששששששששששששששששששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//ששששששששששששששששששששש Microsoft Windows '95 Version ששששששששששששששששששששששש
+//שששששששששששCopyrightש(c)ש1994-1998שbyשCharybdisשEnterprises,שInc.שששששששששש
+//ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
 //
@@ -1383,6 +1383,7 @@ void ToolVPort::OnRButtonDown(UINT nFlags, CPoint point)
     modeMenu.AppendMenu(MF_STRING, ID_VIEW_RND_PERSPECTIVE, "Perspective");
     modeMenu.AppendMenu(MF_STRING, ID_VIEW_RND_ALPHA, "Alpha");
     modeMenu.AppendMenu(MF_STRING, ID_VIEW_RND_SORT, "Sort");
+    modeMenu.AppendMenu(MF_STRING, ID_VIEW_RND_ORTHO, "Orthogonal");
 
     //ִִִ Show Submenu
     CMenu   showMenu;

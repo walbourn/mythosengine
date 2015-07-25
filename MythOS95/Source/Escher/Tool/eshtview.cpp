@@ -8,10 +8,10 @@
 //ùùùùù²±²ùùùùùùù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùùùùùù²±²ùùùù²±²ùùùùùù
 //ùùùù²²²²²²²²²²ù²²²²²²²²ùùù²²²²²²²²ùù²²²ùùùù²²²ù²²²²²²²²²²ù²²²ùùùù²²²ùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùCopyrightù(c)ù1994-1997ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
-//ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
+//ùùùùùùùùùùùùùùùùùùù Microsoft Windows 95/NT Version ùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùùùùùùùùùùù Microsoft Windows '95 Version ùùùùùùùùùùùùùùùùùùùùùùù
+//ùùùùùùùùùùùCopyrightù(c)ù1994-1998ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
+//ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
@@ -134,6 +134,8 @@ BEGIN_MESSAGE_MAP(ToolView, CView)
 	ON_COMMAND(ID_VIEW_RND_SORT, OnViewRndSort)
 	ON_COMMAND(ID_VIEW_RND_ALPHA, OnViewRndAlpha)
 	ON_UPDATE_COMMAND_UI(ID_VIEW_RND_ALPHA, OnUpdateViewRndAlpha)
+	ON_COMMAND(ID_VIEW_RND_ORTHO, OnViewRndOrtho)
+	ON_UPDATE_COMMAND_UI(ID_VIEW_RND_ORTHO, OnUpdateViewRndOrtho)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -348,6 +350,8 @@ BOOL ToolView::ui_camera_properties(EschCameraEx *cam, int doupdate)
 	gdlg.m_ktop = cam->top.k;
 
 	gdlg.m_fov  = cam->fov;
+    gdlg.m_width = cam->width;
+    gdlg.m_height = cam->height;
 
 //ÄÄÄ Application Flags
     CameraPropAppFlagsPage  afdlg;
@@ -399,7 +403,18 @@ BOOL ToolView::ui_camera_properties(EschCameraEx *cam, int doupdate)
         cam->set_position(gdlg.m_xpos,gdlg.m_ypos,gdlg.m_zpos);
         cam->set_vects(gdlg.m_itop,gdlg.m_jtop,gdlg.m_ktop,
                        gdlg.m_idir,gdlg.m_jdir,gdlg.m_kdir);
-        cam->set_fov(gdlg.m_fov);
+
+        if (cam->flags & ESCH_CAM_ORTHO)
+        {
+            cam->fov = gdlg.m_fov;
+            cam->set_ortho(gdlg.m_width,gdlg.m_height);
+        }
+        else
+        {
+            cam->width = gdlg.m_width;
+            cam->height = gdlg.m_height;
+            cam->set_fov(gdlg.m_fov);
+        }
         
         //ÄÄÄ Application Flags
         dword flags = cam->flags;
@@ -1943,6 +1958,43 @@ void ToolView::OnUpdateViewRndSort(CCmdUI* pCmdUI)
         case VPMODE_STANDARD:
             pCmdUI->Enable(1);
             pCmdUI->SetCheck( (wVp[0].cflags & ESCH_CAM_SORT) ? 1 : 0);
+            break;
+        default:
+            pCmdUI->SetCheck(0);
+            pCmdUI->Enable(0);
+            break;
+    }
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// ToolView - OnView(Update)RndOrtho                                        ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+void ToolView::OnViewRndOrtho() 
+{
+    switch (vpmode)
+    {
+        case VPMODE_STANDARD:
+            wVp[0].cflags ^= ESCH_CAM_ORTHO;
+            if (wVp[0].cam)
+            {
+                wVp[0].cam->set_flags(wVp[0].cflags);
+                wVp[0].cam->compute_scalar();
+                wVp[0].cam->compute_frustrum();
+                wVp[0].Render();
+                wVp[0].RedrawWindow();
+            }
+            break;
+    }
+}
+
+void ToolView::OnUpdateViewRndOrtho(CCmdUI* pCmdUI) 
+{
+    switch (vpmode)
+    {
+        case VPMODE_STANDARD:
+            pCmdUI->Enable(1);
+            pCmdUI->SetCheck( (wVp[0].cflags & ESCH_CAM_ORTHO) ? 1 : 0);
             break;
         default:
             pCmdUI->SetCheck(0);

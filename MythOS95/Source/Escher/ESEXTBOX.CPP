@@ -8,10 +8,10 @@
 //ששששש²±²ששששששש²±²שששש²±²ש²±²שששש²±²ש²±²שששש²±²ש²±²שששששששש²±²שששש²±²שששששש
 //שששש²²²²²²²²²²ש²²²²²²²²ששש²²²²²²²²שש²²²שששש²²²ש²²²²²²²²²²ש²²²שששש²²²ששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//שששששששששששCopyrightש(c)ש1994-1997שbyשCharybdisשEnterprises,שInc.שששששששששש
-//ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
+//ששששששששששששששששששש Microsoft Windows 95/NT Version ששששששששששששששששששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//ששששששששששששששששששששש Microsoft Windows '95 Version ששששששששששששששששששששששש
+//שששששששששששCopyrightש(c)ש1994-1998שbyשCharybdisשEnterprises,שInc.שששששששששש
+//ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
 //
@@ -61,8 +61,11 @@
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִÙ
 void EschBoxExtents::draw(const EschFrameRef *fr, dword clr) const
 {
+    int                 i;
     EschCamera          *cam;
     VngoVport           *vp;
+    float               yon, hither;
+    int                 mp;
     EschPoint           p;
     EschFrameRef        frame(0);
     VngoPoint           vpt[8];
@@ -84,14 +87,14 @@ void EschBoxExtents::draw(const EschFrameRef *fr, dword clr) const
         frame.orient = cam->eye.iorient;
 
 //ִִִ Setup for compare
-    float yon = cam->yon;
-    float hither = cam->hither;
+    yon = cam->yon;
+    hither = cam->hither;
 
 //ִִִ Box
-    int mp = vp->vbuff.pal->shd_pal->mid_point;
+    mp = vp->vbuff.pal->shd_pal->mid_point;
 
 //ִִִ For each of the eight points of the extents
-    for(int i=0; i < 8; i++)
+    for(i=0; i < 8; i++)
     {
         switch (i)
         {
@@ -142,10 +145,20 @@ void EschBoxExtents::draw(const EschFrameRef *fr, dword clr) const
         if (p.z < hither || p.z > yon)
             return;
 
-        vpt[i].x = long((p.x * cam->xscalar) / p.z)
-                   + (cam->vport->vbuff.width >> 1);
-        vpt[i].y = (cam->vport->vbuff.height >> 1)
-                   - long((p.y * cam->yscalar) / p.z);
+        if (cam->flags & ESCH_CAM_ORTHO)
+        {
+            vpt[i].x = long(p.x * cam->xscalar)
+                       + (cam->vport->vbuff.width >> 1);
+            vpt[i].y = (cam->vport->vbuff.height >> 1)
+                       - long(p.y * cam->yscalar);
+        }
+        else
+        {
+            vpt[i].x = long((p.x * cam->xscalar) / p.z)
+                       + (cam->vport->vbuff.width >> 1);
+            vpt[i].y = (cam->vport->vbuff.height >> 1)
+                        - long((p.y * cam->yscalar) / p.z);
+        }
         vpt[i].z = dword(p.z * cam->z_factor * float(0xffffffff));
         vpt[i].clr = clr;
         vpt[i].shade = mp;

@@ -8,10 +8,10 @@
 //ששששש²±²ששששששש²±²שששש²±²ש²±²שששש²±²ש²±²שששש²±²ש²±²שששששששש²±²שששש²±²שששששש
 //שששש²²²²²²²²²²ש²²²²²²²²ששש²²²²²²²²שש²²²שששש²²²ש²²²²²²²²²²ש²²²שששש²²²ששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//שששששששששששCopyrightש(c)ש1994-1997שbyשCharybdisשEnterprises,שInc.שששששששששש
-//ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
+//ששששששששששששששששששש Microsoft Windows 95/NT Version ששששששששששששששששששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//ששששששששששששששששששששש Microsoft Windows '95 Version ששששששששששששששששששששששש
+//שששששששששששCopyrightש(c)ש1994-1998שbyשCharybdisשEnterprises,שInc.שששששששששש
+//ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
 //
@@ -147,9 +147,10 @@ void EschKeyframeDraw::init_rotations(float time)
         prev_stamp[i] = time;
         current_stamp[i] = time;
         activity[i] = FALSE;
-        prev_shift[i] = 0.0f;
-        prev_shift_storage[i] = 0.0f;
+        prev_shift[i] = 1.0f;
+        prev_shift_storage[i] = 1.0f;
         fnext_frames[i] = 0.0f;
+        current_next[i] = 0.0f;
     }
 }
 
@@ -176,8 +177,8 @@ void EschKeyframeDraw::init_keys(float time)
         activity[i] = FALSE;
         prev_stamp[i] = time;
         current_stamp[i] = time;
-        prev_shift[i] = 0.0f;
-        prev_shift_storage[i] = 0.0f;
+        prev_shift[i] = 1.0f;
+        prev_shift_storage[i] = 1.0f;
     }
     key_chain_count = 0;
 }
@@ -252,6 +253,7 @@ int EschKeyframeDraw::set_key(EschKeyframe *key, float scalar, float chain_time)
         keyheads[keynum] = key;
         keyframes[keynum] = key;
         fnext_frames[keynum] = float(key->frame_num);
+        current_next[keynum] = float(key->frame_num);
 
         // count the number of keyframes
         EschKeyframe *ptr = keyheads[keynum];
@@ -266,14 +268,7 @@ int EschKeyframeDraw::set_key(EschKeyframe *key, float scalar, float chain_time)
         }
         if (cnt > 0.0f)
         {
-            if (keyheads[keynum]->k_type & (ESCH_KEYFRAME_SWAPPING_1 | ESCH_KEYFRAME_SWAPPING_2))
-            {
-                step_times[keynum] = chain_time / ((cnt-1)*2);
-            }
-            else
-            {
-                step_times[keynum] = chain_time / (cnt-1);
-            }
+            step_times[keynum] = chain_time / (cnt-1.0f);
         }
         else
         {
@@ -423,6 +418,7 @@ int EschKeyframeDraw::swap_motion (char *str1, char *str2)
             }
             keyframes[i] = temp;
             fnext_frames[i] = float (keyframes[i]->frame_num);
+            current_next[i] = float (keyframes[i]->frame_num);
             next_keyframes[i] = keyframes[i]->child;
             calc_step (i);
             init_tween (i);
@@ -455,34 +451,10 @@ void EschKeyframeDraw::reset_keyframes(int num, float time, float interval, floa
         // reset k_type for swapping
         if (keyheads[num]->root->flags & ESCH_KEYFRAME_SWAPPING_1)
         {
-            if (k_type & ESCH_KEYFRAME_LEFT)
-            {
-                if (leads_with_left)
-                {
-                    k_type &= ~ESCH_KEYFRAME_TRAILING;
-                    k_type |= ESCH_KEYFRAME_LEADING;
-                }
-                else
-                {
-                    k_type &= ~ESCH_KEYFRAME_LEADING;
-                    k_type |= ESCH_KEYFRAME_TRAILING;
-                }
-            }
-            else if (k_type & ESCH_KEYFRAME_RIGHT)
-            {
-                if (leads_with_left)
-                {
-                    k_type &= ~ESCH_KEYFRAME_LEADING;
-                    k_type |= ESCH_KEYFRAME_TRAILING;
-                }
-                else
-                {
-                    k_type &= ~ESCH_KEYFRAME_TRAILING;
-                    k_type |= ESCH_KEYFRAME_LEADING;
-                }
-            }
+            k_type = k_type_store;
+
             // reset the keyframe
-            EschKeyframe *temp_key = EschKeyframeMan->get(k_type, keyheads[num]->root->m_type, 0,keyheads[num]->root);
+            EschKeyframe *temp_key = EschKeyframeMan->get(k_type,keyheads[num]->root->m_type,0,keyheads[num]->root);
             if (temp_key)
             {
                 keyheads[num] = temp_key;
@@ -505,6 +477,7 @@ void EschKeyframeDraw::reset_keyframes(int num, float time, float interval, floa
             next_keyframes[num] = keyframes[num];
         }
         fnext_frames[num] = float(keyframes[num]->frame_num);
+        current_next[num] = float(keyframes[num]->frame_num);
         prev_stamp[num] = time;  // = current_stamp[num];
         current_stamp[num] = time;
         calc_step (num,time,scale);
@@ -543,7 +516,7 @@ void EschKeyframeDraw::calc_step(int num, float time, float shift)
     float extend_time;
     float sliver;
 
-    extend_time = (time * shift) - prev_stamp[num];
+    extend_time = (time * shift) - (prev_stamp[num] * shift);
 
     if (prev_shift[num] != shift
         || shift > 4.0f)
@@ -588,9 +561,6 @@ void EschKeyframeDraw::init_tween(int num)
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
 void EschKeyframeDraw::build_keyframe(float scalar, float interval)
 {
-    // take primary_keyframe and secondary_keyframe
-    // build tweens for them with next_primary and next_secondary
-
     for (int i=0; i<key_chain_count; i++)
     {
         if (activity[i])
@@ -653,6 +623,7 @@ int EschKeyframeDraw::get_keyframe_spot(EschKeyframe *key)
     keyheads[key_chain_count] = key;
     keyframes[key_chain_count] = key;
     fnext_frames[key_chain_count] = float(keyframes[key_chain_count]->frame_num);
+    current_next[key_chain_count] = float(keyframes[key_chain_count]->frame_num);
     if (key->child)
     {
         next_keyframes[key_chain_count] = key->child;
@@ -744,39 +715,41 @@ int EschKeyframeDraw::get_next_key(int num, float interval, float time, float sh
     BOOL                anim_end = FALSE;
 
     // We shouldn't need to do anything if our time step is too small...
-//    current_stamp[num] = time;
-    if ((time * shift) < (prev_stamp[num] + step_times[num]))
-    {
-        return 0;
-    }
-
-    int swap_temp = int(fnext_frames[num]);
-
-    // we know what our time step is
-    // let's see if it creates underflow or overflow
     if ((_flags & ESCH_KEYFRAME_PING_PONG)
         && ping_pong[num])
     {
-        fnext_frames[num] -= ((((time * shift)-prev_stamp[num]) / step_times[num]));
-        next_framenum = int (fnext_frames[num]);
-    }
-    else
-    {
         if (step_times[num] > 0.0f)
         {
-            fnext_frames[num] += (((((time * shift) - (prev_stamp[num])) / step_times[num])));;
-            next_framenum = int (fnext_frames[num]);
+            fnext_frames[num] -= (((time * shift) - (prev_stamp[num] * shift)) / step_times[num]);
         }
         else
         {
             return 0;
         }
     }
+    else
+    {
+        if (step_times[num] > 0.0f)
+        {
+            fnext_frames[num] += (interval / step_times[num]);
+        }
+        else
+        {
+            return 0;
+        }
+    }
+    if (float(floor(fnext_frames[num])) <= current_next[num])
+//    if ((time * shift) < ((prev_stamp[num] * shift) + step_times[num]))
+    {
+        return 0;
+    }
+    next_framenum = int (fnext_frames[num]);
+    current_next[num] = float(floor(fnext_frames[num]));
 
 
 
     // update prev and current after next is chosen
-    current_stamp[num] = (time * shift);
+    current_stamp[num] = time;
     prev_stamp[num] = current_stamp[num];
 
     last_framenum = head->key_depth - 1;
@@ -816,19 +789,18 @@ int EschKeyframeDraw::get_next_key(int num, float interval, float time, float sh
         || anim_end == TRUE)
     {
         // determine how far past the ends we have gone
-
-        // keep a shift change from spiking the swap count
-        if (prev_shift_storage[num] != shift)
+        // interval is always in compressed time
+        swap_count = int(interval / (total_times[num]))+1;
+#if 0
+        if (head->key_depth > first_framenum)
         {
-            prev_shift_storage[num] = shift;
-            swap_count = 1;
+            swap_count = fnext_frames[num] / (head->key_depth - first_framenum);
         }
         else
         {
-            swap_count = int(interval / (total_times[num]))+1;
-//            swap_count = next_framenum / head->key_depth;
+            swap_count = 1;
         }
-
+#endif
         if (_flags & ESCH_KEYFRAME_CHAINING)
         {
             // determine which EschKeyframeHeader to look at
@@ -874,7 +846,7 @@ int EschKeyframeDraw::get_next_key(int num, float interval, float time, float sh
             {
                 temp_ktype &= ~ESCH_KEYFRAME_LEADING;
                 temp_ktype |= ESCH_KEYFRAME_TRAILING;
-                // swap the left/leading, right/trailing attributes for the search only
+                // swap the left/right, leading/trailing attributes for the search only
                 // the real thing only swaps leading/trailing.
                 if (leads_with_left)
                 {
@@ -893,7 +865,7 @@ int EschKeyframeDraw::get_next_key(int num, float interval, float time, float sh
             {
                 temp_ktype &= ~ESCH_KEYFRAME_TRAILING;
                 temp_ktype |= ESCH_KEYFRAME_LEADING;
-                // swap the left/leading, right/trailing attributes for the search only
+                // swap the left/right, leading/trailing attributes for the search only
                 // the real thing only swaps leading/trailing.
                 if (leads_with_left)
                 {
@@ -944,6 +916,7 @@ int EschKeyframeDraw::get_next_key(int num, float interval, float time, float sh
                 next_framenum = first_framenum;
             }
             fnext_frames[num] = float (next_framenum);
+            current_next[num] = float (next_framenum);
         }
         else
         {
@@ -1001,6 +974,7 @@ int EschKeyframeDraw::get_next_key(int num, float interval, float time, float sh
                         }
                     }
                     fnext_frames[num] = float (next_framenum);
+                    current_next[num] = float (next_framenum);
                 }
                 else
                 {
@@ -1585,6 +1559,7 @@ void EschKeyframeDraw::tokenize_name()
     if (TokenMan)
     {
         k_type = TokenMan->get_token_type (mesh->name);
+        k_type_store = k_type;
         return;
     }
     else
@@ -1596,14 +1571,16 @@ void EschKeyframeDraw::tokenize_name()
 
         for (int i=0; i<ESCH_KEYFRAME_TOKEN_COUNT; i++)
         {
-            if (strstr(esch_token_list[i].name, str))
+            if (strstr(str, esch_token_list[i].name))
             {
                 k_type = esch_token_list[i].type;
+                k_type_store = k_type;
                 return;
             }
         }
     }
     k_type = ESCH_KEYFRAME_NONE;
+    k_type_store = k_type;
 }
 
 
@@ -2131,6 +2108,20 @@ void EschKeyframeDraw::calc_frame (long chain_num, long frame_num)
     if (child())
     {
         ((EschKeyframeDraw *)child())->calc_frame (chain_num, frame_num);
+    }
+}
+
+void EschKeyframeDraw::reset_ktypes()
+{
+    k_type = k_type_store;
+    if (parent()
+        && next())
+    {
+        ((EschKeyframeDraw *)next())->reset_ktypes();
+    }
+    if (child())
+    {
+        ((EschKeyframeDraw *)child())->reset_ktypes();
     }
 }
 

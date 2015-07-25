@@ -1,10 +1,17 @@
 //อออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออ
+//           __ ,                                                      
+//            ,-| ~           ,               ,,                      
+//           ('||/__,        ||               ||                  _   
+//          (( |||  | \\ \\ =||=   _-_  \\/\\ ||/|,  _-_  ,._-_  / \\ 
+//          (( |||==| || ||  ||   || \\ || || || || || \\  ||   || || 
+//           ( / |  , || ||  ||   ||/   || || || |' ||/    ||   || || 
+//            -____/  \\/\\  \\,  \\,/  \\ \\ \\/   \\,/   \\,  \\_-| 
+//                                                               /  \ 
+//                                                              '----`
+//                     Text Output and Font Management System
+//                        Microsoft Windows 95/NT Version
 //
-//                    Generic -- "The Simplest Win32 App"
-//
-//                        Microsoft Windows '95 Version
-//
-//            Copyright (c) 1995-1997 by Charybdis Enterprises, Inc.
+//            Copyright (c) 1995-1998 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved.
 //
 //ฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤ

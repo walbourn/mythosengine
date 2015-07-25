@@ -188,8 +188,10 @@ extern "C" void draw_tazghlines16(VngoTriangle *tri, long alpha)
     word            *zbuff = (word*)tri->zptr;
     VngoPoint2      *edge1 = tri->left_edge;
     VngoPoint2      *edge2 = tri->right_edge;
-    long            talpha1 = alpha >> 6;
-    long            talpha2 = 3 - talpha1;
+    float           talpha1 = float(alpha) / 255.f;
+    float           talpha2 = 1.f - talpha1;
+//    long            talpha1 = alpha >> 6;
+//    long            talpha2 = 3 - talpha1;
 
     long start_y = tri->start_y;
     if (tri->vbuff->pal->flags & VNGO_15BIT)
@@ -198,10 +200,10 @@ extern "C" void draw_tazghlines16(VngoTriangle *tri, long alpha)
         {
             long tz = edge1->z;
             long ts = edge1->shade;
-            long tx = (edge1->x + 0x8000) >> 16;
+            long tx = (edge1->x + 0xffff) >> 16;
             word *ptr = scrn + tx;
             word *zptr = zbuff + tx;
-            int dx = ((edge2->x + 0x8000) >> 16);
+            int dx = ((edge2->x + 0) >> 16);
             long *dmatrix = &DitherMatrix[(start_y+y)&3][0];
             long *amatrix = &AlphaMatrix[(start_y+y)&3][0];
 
@@ -233,9 +235,12 @@ extern "C" void draw_tazghlines16(VngoTriangle *tri, long alpha)
                     tclr2.g = (t2 >> 2) & 0xf8;
                     tclr2.b = (t2 << 3) & 0xf8;
 
-                    tclr.r = byte(((long(tclr.r) << talpha1) + (long(tclr2.r) << talpha2)) >> 3);
-                    tclr.g = byte(((long(tclr.g) << talpha1) + (long(tclr2.g) << talpha2)) >> 3);
-                    tclr.b = byte(((long(tclr.b) << talpha1) + (long(tclr2.b) << talpha2)) >> 3);
+                    tclr.r = byte((float(tclr.r)*talpha1) + (float(tclr2.r)*talpha2));
+                    tclr.g = byte((float(tclr.g)*talpha1) + (float(tclr2.g)*talpha2));
+                    tclr.b = byte((float(tclr.b)*talpha1) + (float(tclr2.b)*talpha2));
+//                    tclr.r = byte(((long(tclr.r) << talpha1) + (long(tclr2.r) << talpha2)) >> 3);
+//                    tclr.g = byte(((long(tclr.g) << talpha1) + (long(tclr2.g) << talpha2)) >> 3);
+//                    tclr.b = byte(((long(tclr.b) << talpha1) + (long(tclr2.b) << talpha2)) >> 3);
 
                     *ptr = tclr.compress();
                 }
@@ -256,10 +261,10 @@ extern "C" void draw_tazghlines16(VngoTriangle *tri, long alpha)
         {
             long tz = edge1->z;
             long ts = edge1->shade;
-            long tx = (edge1->x + 0x8000) >> 16;
+            long tx = (edge1->x + 0xffff) >> 16;
             word *ptr = scrn + tx;
             word *zptr = zbuff + tx;
-            int dx = ((edge2->x + 0x8000) >> 16);
+            int dx = ((edge2->x + 0) >> 16);
             long *dmatrix = &DitherMatrix[(start_y+y)&3][0];
             long *amatrix = &AlphaMatrix[(start_y+y)&3][0];
 
@@ -290,9 +295,13 @@ extern "C" void draw_tazghlines16(VngoTriangle *tri, long alpha)
                     tclr2.g = (t2 >> 3) & 0xfc;
                     tclr2.b = (t2 << 3) & 0xf8;
 
-                    tclr.r = byte(((long(tclr.r) << talpha1) + (long(tclr2.r) << talpha2)) >> 3);
-                    tclr.g = byte(((long(tclr.g) << talpha1) + (long(tclr2.g) << talpha2)) >> 3);
-                    tclr.b = byte(((long(tclr.b) << talpha1) + (long(tclr2.b) << talpha2)) >> 3);
+                    tclr.r = byte((float(tclr.r)*talpha1) + (float(tclr2.r)*talpha2));
+                    tclr.g = byte((float(tclr.g)*talpha1) + (float(tclr2.g)*talpha2));
+                    tclr.b = byte((float(tclr.b)*talpha1) + (float(tclr2.b)*talpha2));
+
+//                    tclr.r = byte(((long(tclr.r) << talpha1) + (long(tclr2.r) << talpha2)) >> 3);
+//                    tclr.g = byte(((long(tclr.g) << talpha1) + (long(tclr2.g) << talpha2)) >> 3);
+//                    tclr.b = byte(((long(tclr.b) << talpha1) + (long(tclr2.b) << talpha2)) >> 3);
 
                     *ptr = tclr.compress16();
                 }

@@ -8,10 +8,10 @@
 //ùùùùù²±²ùùùùùùù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùùùùùù²±²ùùùù²±²ùùùùùù
 //ùùùù²²²²²²²²²²ù²²²²²²²²ùùù²²²²²²²²ùù²²²ùùùù²²²ù²²²²²²²²²²ù²²²ùùùù²²²ùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùCopyrightù(c)ù1994-1997ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
-//ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
+//ùùùùùùùùùùùùùùùùùùù Microsoft Windows 95/NT Version ùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùùùùùùùùùùù Microsoft Windows '95 Version ùùùùùùùùùùùùùùùùùùùùùùù
+//ùùùùùùùùùùùCopyrightù(c)ù1994-1998ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
+//ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
@@ -173,8 +173,11 @@ void EschMeshDraw::draw()
     EschLight       *lights;
     EschPoint       p;
     EschPoint       eyep(0,0,0);
-    EschVector      fview;
+    EschVector      fview(0,0,1);
     EschVertex      fnormal;
+    float           r;
+    float           yon, hither;
+    float           tx, ty;
     long            base_shade;
     long            shadea;
     long            shadeb;
@@ -190,6 +193,8 @@ void EschMeshDraw::draw()
 
     cam=EschCurrent->camera;
 
+    cflags = cam->flags;
+
     assertMyth("EschMeshDraw::draw needs a viewport in current context's camera",
                cam->vport != NULL);
 
@@ -201,14 +206,14 @@ void EschMeshDraw::draw()
         p.transform(&cam->eye.iorient);
 
         // Scale radius
-        float r = exts.radius * world.scalef * cam->radius_factor * 1.05f;
+        r = exts.radius * world.scalef * cam->radius_factor * 1.05f;
 
         assertMyth("EschMeshDraw::draw radius scale resulted in negative radius",
                    r >= 0);
 
         // Setup for compare
-        float yon = cam->yon;
-        float hither = cam->hither;
+        yon = cam->yon;
+        hither = cam->hither;
 
         // Check for fully invisible against hither/yon
         if ( ((p.z + r) < hither)
@@ -224,8 +229,16 @@ void EschMeshDraw::draw()
         // case)
         if (p.z > 0)
         {
-            float tx = p.z * cam->xsize;
-            float ty = p.z * cam->ysize;
+            if (cflags & ESCH_CAM_ORTHO)
+            {
+                tx = cam->xsize;
+                ty = cam->ysize;
+            }
+            else
+            {
+                tx = p.z * cam->xsize;
+                ty = p.z * cam->ysize;
+            }
 
             // Check for fully invisible against left/right/top/bottom
             if ( ((p.x + r) < -tx)
@@ -252,8 +265,6 @@ void EschMeshDraw::draw()
     else ctrlfl = ESCH_CDF_CLIP;
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Setup
-    cflags = cam->flags;
-
     assertMyth("EschMeshDraw::draw needs a palette in current context's camera",
                cam->vport->vbuff.pal != NULL);
 
@@ -312,7 +323,14 @@ void EschMeshDraw::draw()
     //ÄÄÄ Get camera into object coords if needed for backculling.
     if (cflags & ESCH_CAM_BACKCULL)
     {
-        eyep.transform(&frame.iorient);
+        if (cflags & ESCH_CAM_ORTHO)
+        {
+            fview.transform(&frame.iorient);
+        }
+        else
+        {
+            eyep.transform(&frame.iorient);
+        }
     }
 
     //ÄÄÄ Setup lights, if any
@@ -334,9 +352,12 @@ void EschMeshDraw::draw()
         //ÄÄÄÄÄÄÄÄÄÄÄÄ Perform backface culling, if allowed, in object space.
         if (level & ESCH_CAM_BACKCULL)
         {
-            fview.i = ec.verts[face->a].x - eyep.x;
-            fview.j = ec.verts[face->a].y - eyep.y;
-            fview.k = ec.verts[face->a].z - eyep.z;
+            if (!(cflags & ESCH_CAM_ORTHO))
+            {
+                fview.i = ec.verts[face->a].x - eyep.x;
+                fview.j = ec.verts[face->a].y - eyep.y;
+                fview.k = ec.verts[face->a].z - eyep.z;
+            }
 
             if ((fview DOT face->normal) > 0)
                 continue;

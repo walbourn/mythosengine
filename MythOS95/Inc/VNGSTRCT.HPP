@@ -325,6 +325,15 @@ public:
     void release();
 };
 
+class VngoHazeInfoD3D
+{
+public:
+    byte            fog_lut[256];
+    VngoColor24bit  target_color;
+
+    void setup(VngoHazeInfo *info);
+    int get_fog(float z){return (int(fog_lut[int(z*255.f)]));}
+};
 
 #ifdef __WATCOMC__
 #pragma pack();

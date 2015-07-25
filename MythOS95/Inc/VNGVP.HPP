@@ -105,6 +105,7 @@ public:
     inline VNGError get_init_state() { return (init_status); }
 
     inline VngoZMap * get_zmap() { return zmap; }
+    inline int skips_last_pix() { return ((vflags & VNGO_SKIPS_LAST_PIX) ? 1:0);}
 
     //컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
     // Utility functions.                                                   �

@@ -8,10 +8,10 @@
 //ùùùùù²±²ùùùùùùù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùùùùùù²±²ùùùù²±²ùùùùùù
 //ùùùù²²²²²²²²²²ù²²²²²²²²ùùù²²²²²²²²ùù²²²ùùùù²²²ù²²²²²²²²²²ù²²²ùùùù²²²ùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùCopyrightù(c)ù1994-1997ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
-//ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
+//ùùùùùùùùùùùùùùùùùùù Microsoft Windows 95/NT Version ùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùùùùùùùùùùù Microsoft Windows '95 Version ùùùùùùùùùùùùùùùùùùùùùùù
+//ùùùùùùùùùùùCopyrightù(c)ù1994-1998ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
+//ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
@@ -197,6 +197,8 @@ CameraPropGeneralPage::CameraPropGeneralPage() : CPropertyPage(CameraPropGeneral
 	m_jtop = 0.0f;
 	m_ktop = 0.0f;
 	m_fov = 0.0f;
+	m_height = 0.0f;
+	m_width = 0.0f;
 	//}}AFX_DATA_INIT
 }
 
@@ -230,6 +232,10 @@ void CameraPropGeneralPage::DoDataExchange(CDataExchange* pDX)
 	DDV_MinMaxFloat(pDX, m_ktop, -32768.f, 32768.f);
 	DDX_Text(pDX, IDC_CPROP_FOV, m_fov);
 	DDV_MinMaxFloat(pDX, m_fov, 1.f, 127.f);
+	DDX_Text(pDX, IDC_CPROP_HEIGHT, m_height);
+	DDV_MinMaxFloat(pDX, m_height, 0.f, 32768.f);
+	DDX_Text(pDX, IDC_CPROP_WIDTH, m_width);
+	DDV_MinMaxFloat(pDX, m_width, 0.1f, 32768.f);
 	//}}AFX_DATA_MAP
 
     if (pDX->m_bSaveAndValidate)

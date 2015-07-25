@@ -8,10 +8,10 @@
 //ùùùùù²±²ùùùùùùù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùùùùùù²±²ùùùù²±²ùùùùùù
 //ùùùù²²²²²²²²²²ù²²²²²²²²ùùù²²²²²²²²ùù²²²ùùùù²²²ù²²²²²²²²²²ù²²²ùùùù²²²ùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùCopyrightù(c)ù1994-1997ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
-//ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
+//ùùùùùùùùùùùùùùùùùùù Microsoft Windows 95/NT Version ùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùùùùùùùùùùù Microsoft Windows '95 Version ùùùùùùùùùùùùùùùùùùùùùùù
+//ùùùùùùùùùùùCopyrightù(c)ù1994-1998ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
+//ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
@@ -61,6 +61,9 @@
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 void EschSphereExtents::draw(const EschFrameRef *fr, dword clr) const
 {
+    long                x, y, rd;
+    float               r;
+    float               hither, yon;
     EschCamera          *cam;
     EschPoint           p;
     EschFrameRef        frame(0);
@@ -81,14 +84,14 @@ void EschSphereExtents::draw(const EschFrameRef *fr, dword clr) const
         frame.orient = cam->eye.iorient;
 
 //ÄÄÄ Setup for compare
-    float yon = cam->yon;
-    float hither = cam->hither;
+    yon = cam->yon;
+    hither = cam->hither;
     
 //ÄÄÄ Transform center into view
     center.transform(&frame,&p);
 
 //ÄÄÄ Scale radius
-    float r = radius * fr->scalef * cam->radius_factor;
+    r = radius * fr->scalef * cam->radius_factor;
 
     assertMyth("EschSphereExtents::draw scaled to a negative radius",
                r >= 0);
@@ -101,12 +104,25 @@ void EschSphereExtents::draw(const EschFrameRef *fr, dword clr) const
         return;
 
 //ÄÄÄ Draw radial extent
-    long x = long((p.x * cam->xscalar) / p.z)
-             + (cam->vport->vbuff.width>>1);
-    long y = (cam->vport->vbuff.height>>1)
-             - long((p.y * cam->yscalar) / p.z);
-    long rd = long(((p.x + r) * cam->xscalar) / p.z)
-              + (cam->vport->vbuff.width>>1) - x;
+    
+    if (cam->flags & ESCH_CAM_ORTHO)
+    {
+        x = long(p.x * cam->xscalar)
+            + (cam->vport->vbuff.width>>1);
+        y = (cam->vport->vbuff.height>>1)
+            - long(p.y * cam->yscalar);
+        rd = long((p.x + r) * cam->xscalar)
+             + (cam->vport->vbuff.width>>1) - x;
+    }
+    else
+    {
+        x = long((p.x * cam->xscalar) / p.z)
+            + (cam->vport->vbuff.width>>1);
+        y = (cam->vport->vbuff.height>>1)
+            - long((p.y * cam->yscalar) / p.z);
+        rd = long(((p.x + r) * cam->xscalar) / p.z)
+             + (cam->vport->vbuff.width>>1) - x;
+    }
 
     vngo_clip_circle(cam->vport,x,y,rd,clr);
 }

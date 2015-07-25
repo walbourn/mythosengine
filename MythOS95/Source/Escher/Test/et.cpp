@@ -8,10 +8,10 @@
 //ùùùùù²±²ùùùùùùù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùùùùùù²±²ùùùù²±²ùùùùùù
 //ùùùù²²²²²²²²²²ù²²²²²²²²ùùù²²²²²²²²ùù²²²ùùùù²²²ù²²²²²²²²²²ù²²²ùùùù²²²ùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùCopyrightù(c)ù1994-1997ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
-//ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
+//ùùùùùùùùùùùùùùùùùùù Microsoft Windows 95/NT Version ùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùùùùùùùùùùù Microsoft Windows '95 Version ùùùùùùùùùùùùùùùùùùùùùùù
+//ùùùùùùùùùùùCopyrightù(c)ù1994-1998ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
+//ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
@@ -58,6 +58,8 @@ extern ulong EschProposedTris;
 extern ulong EschDrawnTris;
 extern ulong EschElementDepth;
 extern ulong EschElementSize;
+
+int GlobalFireTest;
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
@@ -113,6 +115,7 @@ EscherTest::EscherTest (MaxDevices *d):
     anim_current_frame(0),
     anim_current_step(0),
     anim_chain_count(0),
+    anim_root(0),
     scale(1.0f)
 {
     int use_fullscreen = 0;
@@ -944,7 +947,7 @@ BOOL EscherTest::LoadTreeTops(const char *buff)
         if (!*c || *c == ',')
         {
             // if s is still the start of the list, its the filename
-            if (count >= 10)
+            if (count >= 11)
             {
                 MessageBox ("Too many parameters found for TreeTops",
                             MB_OK | MB_ICONEXCLAMATION);
@@ -1481,45 +1484,42 @@ BOOL EscherTest::SetupAnimation(const char *buff)
                 }
                 iff.close();
 
-                if (!hide_count)
+                if (hide_count)
                 {
-                    MessageBox ("Error: Hide file contains no hide data", MB_OK | MB_ICONEXCLAMATION);
-                    return FALSE;
-                }
-
-                struct to_hide
-                {
-                    dword type;
-                };
-
-                to_hide *temp_list = new to_hide[hide_count];
-
-                if (!temp_list)
-                {
-                    MessageBox ("Error: Failed to allocate memory for hide list", MB_OK | MB_ICONEXCLAMATION);
-                }
-                if (iff.open (hide_file, XF_OPEN_READ | XF_OPEN_DENYWRITE))
-                {
-                    MessageBox("Error: Failed to reopen hide list file", MB_OK|MB_ICONEXCLAMATION);
-                }
-
-                int i=0;
-                while (iff.next() == XF_ERR_NONE)
-                {
-                    if (iff.chunkid == iff.makeid('H','I','D','E'))
+                    struct to_hide
                     {
-                        if (iff.read(&temp_list[i].type))
-                        {
-                            MessageBox ("Error: Hide type read failed",MB_OK|MB_ICONEXCLAMATION);
-                        }
-                        i++;
+                        dword type;
+                    };
+
+                    to_hide *temp_list = new to_hide[hide_count];
+
+                    if (!temp_list)
+                    {
+                        MessageBox ("Error: Failed to allocate memory for hide list", MB_OK | MB_ICONEXCLAMATION);
                     }
+                    if (iff.open (hide_file, XF_OPEN_READ | XF_OPEN_DENYWRITE))
+                    {
+                        MessageBox("Error: Failed to reopen hide list file", MB_OK|MB_ICONEXCLAMATION);
+                    }
+
+                    int i=0;
+                    while (iff.next() == XF_ERR_NONE)
+                    {
+                        if (iff.chunkid == iff.makeid('H','I','D','E'))
+                        {
+                            if (iff.read(&temp_list[i].type))
+                            {
+                                MessageBox ("Error: Hide type read failed",MB_OK|MB_ICONEXCLAMATION);
+                            }
+                            i++;
+                        }
+                    }
+                    for (i=0; i<hide_count; i++)
+                    {
+                        ((EschKeyframeDraw *)curmesh)->hide_by_absolute_ktype (temp_list[i].type);
+                    }
+                    delete [] temp_list;
                 }
-                for (i=0; i<hide_count; i++)
-                {
-                    ((EschKeyframeDraw *)curmesh)->hide_by_absolute_ktype (temp_list[i].type);
-                }
-                delete [] temp_list;
             }
             else if (count >= 3)
             {
@@ -1551,12 +1551,16 @@ BOOL EscherTest::SetupAnimation(const char *buff)
         return FALSE;
     }
 
+    // look into the Keyframe Manager and copy the key_types into the temp array in order of appearance
     EschKeyframeMan->get_next_chain_type(0, kchain_temp[0].key_type);
     for (int i=1; i<anim_chain_count; i++)
     {
         EschKeyframeMan->get_next_chain_type(kchain_temp[i-1].key_type, kchain_temp[i].key_type);
     }
 
+    // step through the temp array and grab the coresponding keyframes from the Keyframe Manager
+    // stuff the pointers to the Keyframes into the mesh hierarchy with set_key
+    // set the key_chain as inactive so it won't animation right now
     for (i=0; i<anim_chain_count; i++)
     {
         EschKeyframe *temp_key;
@@ -1964,10 +1968,10 @@ void EscherTest::ProcessEvents()
 //ÄÄÄ Camera misc
     if (events.check (ADJUST_FOV))
     {
+        float fov = cam->fov;
+
         if (events.check (MOVEXY))
         {
-            float fov = cam->fov;
-
             fov += float(dy);
 
             if (fov < 1.0f)
@@ -1975,9 +1979,27 @@ void EscherTest::ProcessEvents()
 
             if (fov > 175.0f)
                 fov = 175.0f;
-
-            cam->set_fov(fov);
         }
+
+        cam->set_fov(fov);
+    }
+
+    if (events.check (ADJUST_ORTHO))
+    {
+        float w = cam->width;
+
+        if (events.check (MOVEXY))
+        {
+            w += float(dy);
+
+            if (w < 1.0f)
+                w = 1.0f;
+
+            if (w > 1000.0f)
+                w = 1000.0f;
+        }
+
+        cam->set_ortho(w);
     }
 
     if (events.check (ADJUST_FACTOR))
@@ -2051,7 +2073,7 @@ void EscherTest::ProcessEvents()
     if (single_events.check (SHADE_FLAT_SPECULAR))
     {
         cam_flags &= ~ESCH_CAM_SHADE_SMOOTH;
-        cam_flags |= ESCH_CAM_SHADE_SPECULAR 
+        cam_flags |= ESCH_CAM_SHADE_SPECULAR
                      | ESCH_CAM_SHADE_FLAT
                      | ESCH_CAM_SHADE_SOLID
                      | ESCH_CAM_SHADE_WIRE;
@@ -2195,6 +2217,20 @@ void EscherTest::ProcessEvents()
         drawexts++;
         if (drawexts > 3)
             drawexts=0;
+    }
+
+    if (single_events.check (CHECK_EXTENTS))
+    {
+        for(EschMeshDraw *ptr=scene->meshes;
+            ptr != NULL;
+            ptr = (EschMeshDraw*)ptr->next())
+        {
+            if (ptr->flags & ESCH_MSHD_NOEXTENTSCHK)
+                ptr->set_flags(ptr->flags & ~ESCH_MSHD_NOEXTENTSCHK);
+            else
+                ptr->set_flags(ptr->flags | ESCH_MSHD_NOEXTENTSCHK);
+        }
+
     }
 
     if (single_events.check (SHOW_PARTN))
@@ -2925,7 +2961,7 @@ void EscherTest::update_keys(float interval)
     {
         anim_current_step = 0.0f;
         scale *= 2.0f;
-        if (scale > 8.0f)
+        if (scale > anim_max_compress)
         {
             scale = 1.0f;
             ((EschKeyframeDraw *)curmesh)->set_inactivity(anim_current_frame);
@@ -2937,6 +2973,29 @@ void EscherTest::update_keys(float interval)
             ((EschKeyframeDraw *)curmesh)->set_activity(anim_current_frame);
         }
         ((EschKeyframeDraw *)curmesh)->reset_keyframes(anim_current_frame, temp_clock, interval, scale);
+        ((EschKeyframeDraw *)curmesh)->reset_ktypes();
+    }
+    if (terrain)
+    {
+        float offset= - scene->meshes->mesh->box.mins[1];
+        EschKeyframeDraw *step = (EschKeyframeDraw *)scene->meshes->child();
+        while (step)
+        {
+            if (step->get_ktype() & ESCH_KEYFRAME_LEG)
+            {
+                offset -= step->mesh->box.mins[1];
+                step = (EschKeyframeDraw *)step->child();
+            }
+            else
+            {
+                step = (EschKeyframeDraw *)step->next();
+            }
+        }
+
+        float h = terrain->get_height(0,0) + offset;
+
+        scene->meshes->set_position(0,h,0);
+
     }
 }
 
@@ -2954,9 +3013,16 @@ void EscherTest::Animate()
             long tc = (anim_clock.check());
             float temp_c = float(tc);
             float temp_clock = temp_c / 1024.0f;
+            interval *= scale;
             update_keys(interval);
-            ((EschKeyframeDraw *)scene->meshes)->step(interval,1.0,temp_clock,scale);
+            GlobalFireTest = int(((EschKeyframeDraw *)scene->meshes)->step(interval,1.0,temp_clock,scale));
         }
+    }
+    if (cam && keyframe_animation)
+    {
+        EschPoint pnt;
+        anim_root->get_position(&pnt);
+        cam->set_lookat(&pnt);
     }
 }
 

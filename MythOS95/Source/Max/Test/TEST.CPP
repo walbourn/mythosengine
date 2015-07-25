@@ -103,6 +103,13 @@ void main ()
 
     evt.install ();
 
+    if (devs.is_mouse_present())
+        cout << "Mouse present" << endl;
+    if (devs.is_keyboard_present())
+        cout << "Keyboard present" << endl;
+    if (devs.is_joystick_present())
+        cout << "Joystick present" << endl;
+
 //    devs.theJoystick->auto_poll (true, 20);
 
     cout << "Looking for:" << endl;
@@ -111,7 +118,6 @@ void main ()
     cout << "   o Arrow keys" << endl;
     cout << "   (see .CEL file for full list)" << endl;
     cout << endl << "===> Shift-ESC to exit " << endl;
-
 
     cout << "Process the events!" << endl;
 
@@ -134,19 +140,22 @@ void main ()
 
         if (active.check (fire))
         {
-            JOYINFOEX stat;
+            if (devs.is_joystick_present())
+            {
+                JOYINFOEX stat;
 
-            evt.get_joystick (&stat);
-            cout << "Joystick: (" ;
+                evt.get_joystick (&stat);
+                cout << "Joystick: (" ;
 
-            cout << int (stat.dwXpos - 32767) << ", ";
-            cout << int (stat.dwYpos - 32767) << ", ";
-            cout << int (stat.dwZpos - 32767) << ", ";
-            cout << int (stat.dwRpos - 32767) << ", ";
-            cout << int (stat.dwUpos - 32767) << ", ";
-            cout << int (stat.dwVpos - 32767) << ") ";
-            cout << "Hat = " << stat.dwPOV;
-            cout << endl;
+                cout << int (stat.dwXpos - 32767) << ", ";
+                cout << int (stat.dwYpos - 32767) << ", ";
+                cout << int (stat.dwZpos - 32767) << ", ";
+                cout << int (stat.dwRpos - 32767) << ", ";
+                cout << int (stat.dwUpos - 32767) << ", ";
+                cout << int (stat.dwVpos - 32767) << ") ";
+                cout << "Hat = " << stat.dwPOV;
+                cout << endl;
+            }
         }
 
         if (active.check (up))      cout << "up"    << endl;

@@ -6,9 +6,10 @@
 //    (_)       ^          * *     *      *   *    *            (_)
 //             (_)       **   **   *    ***** **** ****
 //
-//            Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.
-//                            All Rights Reserved.
-//                        Microsoft Windows '95 Version
+//                      Microsoft Windows 95/NT Version
+//
+//            Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.
+//                              All Rights Reserved.
 //
 //컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
 //
@@ -110,7 +111,7 @@ void main(int argc, char *argv[])
     IvorySystem ivory;
 
 //컴컴 Print welcome banner 컴컴
-    cout << "갚 XFile Tester - (C) 1994-1997 Charybdis Enterprises, Inc. 굅\n"
+    cout << "갚 XFile Tester - (C) 1994-1998 Charybdis Enterprises, Inc. 굅\n"
             "                  All Rights Reserved.  "  __DATE__ "\n";
 
     if (argc > 1

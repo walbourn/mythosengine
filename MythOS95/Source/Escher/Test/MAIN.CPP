@@ -8,7 +8,7 @@
 //ששששש²±²ששששששש²±²שששש²±²ש²±²שששש²±²ש²±²שששש²±²ש²±²שששששששש²±²שששש²±²שששששש
 //שששש²²²²²²²²²²ש²²²²²²²²ששש²²²²²²²²שש²²²שששש²²²ש²²²²²²²²²²ש²²²שששש²²²ששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//שששששששששששCopyrightש(c)ש1994-1997שbyשCharybdisשEnterprises,שInc.שששששששששש
+//שששששששששששCopyrightש(c)ש1994-1998שbyשCharybdisשEnterprises,שInc.שששששששששש
 //ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
 //ששששששששששששששששששששש Microsoft Windows '95 Version ששששששששששששששששששששששש
@@ -300,6 +300,7 @@ int APIENTRY WinMain (HINSTANCE hInstance,
         if (!mode->LoadScene(buff,(ESCH_SCENELD_ALL & ~ESCH_SCENELD_MESHES) |
                                   ESCH_SCENELD_SKELETON))
             return FALSE;
+        mode->anim_root = (EschKeyframeDraw *)mode->scene->meshes;
     }
 
     if (!ini.read("AnimationTime",buff))
@@ -310,6 +311,11 @@ int APIENTRY WinMain (HINSTANCE hInstance,
     if (!ini.read("AnimationStepTime",buff))
     {
         mode->anim_step_time = float(atof (buff));
+    }
+
+    if (!ini.read ("AnimationMaxCompress",buff))
+    {
+        mode->anim_max_compress = float(atof(buff));
     }
 
     if (!ini.read("AnimationTest",buff))

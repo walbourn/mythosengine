@@ -8,106 +8,36 @@
                            /  /            \  \
                           /__/              \__\
  
-             Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.
+             Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.
                             All Rights Reserved.
 
-                            Windows '95 Version
+                           Windows 95/NT Version
 
  ---------------------------------------------------------------------------
 
                             W H A T ' S   N E W
 
-                         *** Version 1.51 Release ***
+                         *** Version 1.6 Release ***
 
-                              November 13, 1997
+                             January 15, 1998
 
  ---------------------------------------------------------------------------
  3D HARDWARE
 
  Van Gogh's 3D hardware support has been updated and more functionality 
- added to the Direct3D and other classes.
+ added to the Direct3D and other classes, particularly for the texture
+ cache management.  Also added fogging support for the Direct3D
+ implementation.
 
- Note: A number of Van Gogh's routines which took 4 longs now take a 
-       VngoRect instance.  This will cause current code to fail and unifies
-       the order for the width, height, originx, and originy parameters.
-
-
- ---------------------------------------------------------------------------
- SORTING
-
- A basic sorting method has been added to Escher.  Its current implementation
- is sufficent to draw Alpha-blended primitives in the correct order for
- composition with the scene.  It will operate without a Z-buffer, but the
- sorting method is not currently complex enough to resolve many common
- sorting cases.
+ Note: We will probably be removing support for Cirrus Laguna since Cirrus
+       has cancelled this project and the Matrox Simple Interface will
+       probably be dropped.
 
 
  ---------------------------------------------------------------------------
- HAZING
+ 3D ENGINE ENHANCEMENTS
 
- Hazing/fogging support has been moved into Van Gogh and Escher has been
- updated to use this new interface.  The software hazing has been
- implemeneted for both 8-bit and 15/16-bit devices and the interface
- will allow the use of 3D hardware fogging.  The older hazing interface
- has been removed as it only supported 8-bit software devices.  Code
- that used the older interface will fail to compile and will need changed.
-
-
- ---------------------------------------------------------------------------
- 3D MODEL DATA
-
- We've changed the internal data structure representation for a face
- in Escher to include full-scale alpha and self-illumation values (0-255)
- instead of the 16-level flags encoding.
-
- The loading logic and support structure for central shared texture files
- was added to Escher.  This allowed us to create a tool (the Escher
- Texture Librarian -- ESHTLIB) to extract the texture data from exported
- IFFs and create a composite IFF with data for all unique textures and a
- residual IFF with the model data stripped of the texture data.  This
- reduces data file size and load time.  It has been implemented in a way
- as to be backwards compatable and intermixable with the current method.
- 
-
- ---------------------------------------------------------------------------
- 3D TOOLS
-
- The data exporter has been updated to export the material's transparency
- percentage as the alpha-level for faces using the new face format.  The
- exporter has been changed to support sequentially numbered bitmaps for
- its animated texture export rather than just FLI/FLC files.
-
- The viewer tool has been updated to support the new data format and
- alpha controls have been added.  It will also support 16-bit per
- pixel display (see the appropriate ReadME.TXT for more details).
-
-
- ---------------------------------------------------------------------------
- PARTICLE SYSTEMS
-
- The particle system support in Escher has been updated to provide more
- functionality.  The particles can now have either frame-based or time-based
- lifetime values (a major source of headache when trying to balance
- the use of particle systems with 3D hardware vs. software framerates).  A
- new general-purpose particle generator has been added which automatically
- creates new particles based on stochasitic distributions and an
- adjustable generation area.
-
-
- ---------------------------------------------------------------------------
- FLOATING POINT MATH
-
- A number of minor bugs with the floating-point conversion have been
- corrected.
-
-
- ---------------------------------------------------------------------------
- DIRECTX V5
-
- Fixed a number of bugs with the DirectInput implementation in Max.  We
- have added a method for determining if the DirectInput device has
- failed so that code can fallback onto the Win32 implementation in
- these cases.
+ Orthographic (parallel) cameras are now supported by Escher.
 
 
  ---------------------------------------------------------------------------
@@ -120,11 +50,12 @@
 
 
  ---------------------------------------------------------------------------
- EXAMPLES
+ ANIMATION/MOVIE LIBRARY
 
- We've added some examples to the release and removed the obsolete GameFrame
- directory.  The examples are fairly basic, but do provide some clean
- working code.
+ The Spielberg library has been added to this release which supports
+ playback of AVIs, MPEGs, and QuickTime movie files using Microsoft's
+ DX Media APIs.  Playback can be sent to a window or to a DirectDraw
+ surface.
 
 END OF DOCUMENT
 

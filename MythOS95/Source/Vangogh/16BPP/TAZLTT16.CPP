@@ -211,8 +211,10 @@ extern "C" void draw_tazlhlines16(VngoTriangle *tri,long alpha)
     byte            *tptr = (byte*)tri->tex->vtxt->tex;
     long            mask = ~((1 << tri->tex->widthshift) - 1);
     byte            clr;
-    long            talpha1 = alpha >> 6;
-    long            talpha2 = 3 - talpha1;
+    float           talpha1 = float(alpha) / 255.f;
+    float           talpha2 = 1.f - talpha1;
+//    long            talpha1 = alpha >> 6;
+//    long            talpha2 = 3 - talpha1;
 
 
     if (tpal->flags & VNGO_15BIT)
@@ -251,9 +253,13 @@ extern "C" void draw_tazlhlines16(VngoTriangle *tri,long alpha)
                         tclr2.g = (t2 >> 2) & 0xf8;
                         tclr2.b = (t2 << 3) & 0xf8;
 
-                        tclr.r = byte(((long(tclr.r) << talpha1) + (long(tclr2.r) << talpha2)) >> 3);
-                        tclr.g = byte(((long(tclr.g) << talpha1) + (long(tclr2.g) << talpha2)) >> 3);
-                        tclr.b = byte(((long(tclr.b) << talpha1) + (long(tclr2.b) << talpha2)) >> 3);
+                        tclr.r = byte((float(tclr.r)*talpha1) + (float(tclr2.r)*talpha2));
+                        tclr.g = byte((float(tclr.g)*talpha1) + (float(tclr2.g)*talpha2));
+                        tclr.b = byte((float(tclr.b)*talpha1) + (float(tclr2.b)*talpha2));
+
+//                        tclr.r = byte(((long(tclr.r) << talpha1) + (long(tclr2.r) << talpha2)) >> 3);
+//                        tclr.g = byte(((long(tclr.g) << talpha1) + (long(tclr2.g) << talpha2)) >> 3);
+//                        tclr.b = byte(((long(tclr.b) << talpha1) + (long(tclr2.b) << talpha2)) >> 3);
 
                         *ptr = tclr.compress();
                         *zptr = wz;
@@ -306,9 +312,12 @@ extern "C" void draw_tazlhlines16(VngoTriangle *tri,long alpha)
                         tclr2.g = (t2 >> 3) & 0xfc;
                         tclr2.b = (t2 << 3) & 0xf8;
 
-                        tclr.r = byte(((long(tclr.r) << talpha1) + (long(tclr2.r) << talpha2)) >> 3);
-                        tclr.g = byte(((long(tclr.g) << talpha1) + (long(tclr2.g) << talpha2)) >> 3);
-                        tclr.b = byte(((long(tclr.b) << talpha1) + (long(tclr2.b) << talpha2)) >> 3);
+                        tclr.r = byte((float(tclr.r)*talpha1) + (float(tclr2.r)*talpha2));
+                        tclr.g = byte((float(tclr.g)*talpha1) + (float(tclr2.g)*talpha2));
+                        tclr.b = byte((float(tclr.b)*talpha1) + (float(tclr2.b)*talpha2));
+//                        tclr.r = byte(((long(tclr.r) << talpha1) + (long(tclr2.r) << talpha2)) >> 3);
+//                        tclr.g = byte(((long(tclr.g) << talpha1) + (long(tclr2.g) << talpha2)) >> 3);
+//                        tclr.b = byte(((long(tclr.b) << talpha1) + (long(tclr2.b) << talpha2)) >> 3);
 
                         *ptr = tclr.compress16();
                         *zptr = wz;

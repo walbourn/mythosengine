@@ -5,9 +5,9 @@
      (_)       ^          * *     *      *   *    *            (_)
               (_)       **   **   *    ***** **** ****
 
-                          Microsoft Windows '95 Version
+                        Microsoft Windows 95/NT Version
  
-             Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.
+             Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.
                                All Rights Reserved.
  
  ---------------------------------------------------------------------------
@@ -35,16 +35,21 @@
                              _Library Status_
 
  Notes by: Chuck Walbourn
- Updated: September 29, 1997
+ Updated: January 2, 1998
 
  Changes for this release --------------------------------------------------
 
-   o Added compressed monochrome reader/writer to XFParseXEB class.
+   o Minor updates to comments.
 
 
  Proposed changes ----------------------------------------------------------
 
-    ° NOTE:  Due to the Unisys patent, XFileGIF will not be implemented. °
+   ° NOTE:  Due to the Unisys patent, XFileGIF will not be implemented. °
+
+   o XFileMemMapped to take advantage of the Win32 memory-mapped system
+     for reading files.
+
+   o XFileRAM needs a method for attaching/loading a binary resource entry.
 
    o XFileX file-system-in-a-file class plus associated compactor and
      directory tools
@@ -52,8 +57,10 @@
    o XFParse classes will need changes to take advantage of XFileX classes,
      but they will only require that all code be recompiled.
 
-   o XFile compression support
+   o General XFile compression and encryption support (probably as a
+     special XFileDiskEx or as a filter XFile which writes to another XFile
+     instance).
 
-   o Additional XFParse bitmaps objects for new formats.
+   o Additional XFParse bitmaps objects for new formats (PNM, IMG, JPG)
 
 *** END OF FILE ***

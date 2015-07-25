@@ -1,17 +1,17 @@
- ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
- שששששששששש//////////ש////////ששש////////שש///שששש///ש//////////ש////////.שש
- ששששששששש///ששששששש///שששש///ש///שששש///ש///שששש///ש///שששששששש///שששש///שש
- שששששששש///ששששששש///שששששששש///שששששששש///שששש///ש///שששששששש///שששש///ששש
- ששששששש////////שש//////////ש///שששששששש//////////ש////////ששש/////////ששששש
- שששששש///שששששששששששששש///ש///שששששששש///שששש///ש///שששששששש///ששש.///ששששש
- ששששש///ששששששש///שששש///ש///שששש///ש///שששש///ש///שששששששש///שששש///שששששש
- שששש//////////ש////////ששש////////שש///.ששש///.//////////ש///שששש///.שששששש
- ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
- שששששששששששCopyrightש(c)ש1994-1997שbyשCharybdisשEnterprises,שInc.שששששששששש
- ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
- ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
- ששששששששששששששששששששש Microsoft Windows '95 Version ששששששששששששששששששששששש
- ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
+
+           ////////// ////////   ////////  ///    /// ////////// ////////.
+          ///       ///    /// ///    /// ///    /// ///        ///    ///
+         ///       ///        ///        ///    /// ///        ///    ///
+        ////////  ////////// ///        ////////// ////////   /////////
+       ///              /// ///        ///    /// ///        ///   .///
+      ///       ///    /// ///    /// ///    /// ///        ///    ///
+     ////////// ////////   ////////  ///.   ///.////////// ///    ///.
+
+                     Microsoft Windows 95/NT Version
+
+            Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.
+                           All Rights Reserved.
+
  ---------------------------------------------------------------------------
  
             *** Charybdis Enterprises, Inc. Company Confidential ***
@@ -37,51 +37,26 @@
                              _Library Status_
 
  Notes by: Chuck Walbourn
- Updated: November 12, 1997
+ Updated: January 2, 1998
 
  Changes for this release --------------------------------------------------
 
-    o Element Sort
+    o Camera
 
-        - Fixed sorting bug which caused invalid max's to be choosen for
-          sorting of polygons.
+        - Added support for orthographic projection.
+        - Fixed minor problem with assignment of clipping planes in
+          perspective mode.
 
-    o Partitioning
+    o Element/Drawables/Extents
 
-        - Fixed problem with the grid partitioning pick() when a max
-          distance was not specified.
-        - Implemented grid partitioning traverse().
-        - Added draw_grid() to grid partitioning for debugging.
-        - Implemented quadtree partitioning EschQuadTreePartition class
-          and octtree partitioning EschOctTreePartition class.
-
-    o Drawable
-
-        - Added partn_data pointer for use by EschPartition classes.
-        - Added ESCH_DRW_SKIPTRAVERSE bit for use by partitioning
-          traverse() members.
-
-    o Terrain
-
-        - Special exagerate value added to compute_shades for controlling
-          the effect of the normal on the terrain shading for more dramatic
-          lighting effects.
+        - Updated for orthographic projection mode.
+        - EschLineDraw now uses true 3D clipping.
+        - Minor optimizations made in the draw routines.
 
     o Motion
 
         - Continued development and refinement for the keyframer
           classes.
-
-    o Misc
-
-        - Added more constructors for EschSphereExtents and EschBoxExtents.
-        - Changed DOT and CROSS operations to use inline math ops instead
-          of calling esch_dot and esch_cross functions.
-        - Added inline transform() usage with some minor changes to the
-          terrain to work around a compiler bug.
-        - Flat can now be combined with Specular for specularly highlighted
-          facet shading.
-        - Some optimizations to various draw functions.
 
 
  Pending changes -----------------------------------------------------------
@@ -103,28 +78,28 @@
     o Camera
 
         - Gradient background needs completion/debugging.
-        - An orthogonal camera implementation might be useful in some
-          situations -- would require changes to most of the drawables
-          to support this as well as to the element clipping code.
 
     o Math
 
         - Cubic spline interpolation.
+        - 4X4 matrix implementations
 
     o Drawables
 
         - Cubic spline drawable.
         - Tesselated object drawables.
-        - EschPlaneDraw for infinite planes.
+        - EschPlaneDraw for finite and infinite planes.
         - EschSprite may still have some rotation problems.
         - EschStarfield could use a load function.  Would be great
           if it could handle starchart input for realistic placement
           of the stars.
+        - The terrain drawables don't seem to work correctly in ORTHO mode.
 
     o Lights
 
         - Regionalized lighting mechanism would be useful.
-        - Shadow support using projected shadows.
+        - Shadow support using projected 'fake' ground-plane shadows.
+        - Colored lights (will require changes to Van Gogh).
 
     o Tools
 
@@ -134,5 +109,8 @@
     o Textures
 
         - EschFireTexture may need some cleanup and updated docs.
+        - Rework to use a more generic "materials" interface.
+
+    o Total rewrite planned for MythOS 98
 
 *** END OF FILE ***

@@ -8,12 +8,12 @@
            ³  ³ OÙ OÙ    ÜÛÛÛÜÜÜÛÛÛß   ÛÛÛÛİßÛÜ  ßÛÛÜÜÛÛ  ÜÛÛÛÜ ÜÛÛÛÜ 
           OÙ OÙ  
                              C++ Music, Sound, and Effects Library
-                                 Microsoft Windows '95 Version
+                                Microsoft Windows 95/NT Version
  
-            Copyright (c) 1995-1997 by Charybdis Enterprises, Inc.
+            Copyright (c) 1995-1998 by Charybdis Enterprises, Inc.
                             All Rights Reserved.
  
- ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ ---------------------------------------------------------------------------
  
             *** Charybdis Enterprises, Inc. Company Confidential ***
  
@@ -26,14 +26,14 @@
   AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
   INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
  
- ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ ---------------------------------------------------------------------------
 
                              _Library Status_
 
  Notes by: Chuck Walbourn
- Updated: November 10, 1997
+ Updated: January 2, 1998
 
- Changes for this release ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ Changes for this release --------------------------------------------------
 
  o Redesigned and cleaned up interface (BachSample is now an abstract
    base class with BachStaticSample implementation the standard

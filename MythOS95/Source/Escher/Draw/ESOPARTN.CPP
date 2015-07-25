@@ -8,10 +8,10 @@
 //ששששש²±²ששששששש²±²שששש²±²ש²±²שששש²±²ש²±²שששש²±²ש²±²שששששששש²±²שששש²±²שששששש
 //שששש²²²²²²²²²²ש²²²²²²²²ששש²²²²²²²²שש²²²שששש²²²ש²²²²²²²²²²ש²²²שששש²²²ששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//שששששששששששCopyrightש(c)ש1994-1997שbyשCharybdisשEnterprises,שInc.שששששששששש
-//ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
+//ששששששששששששששששששש Microsoft Windows 95/NT Version ששששששששששששששששששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//ששששששששששששששששששששש Microsoft Windows '95 Version ששששששששששששששששששששששש
+//שששששששששששCopyrightש(c)ש1994-1998שbyשCharybdisשEnterprises,שInc.שששששששששש
+//ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
 //
@@ -190,11 +190,18 @@ void EschOctTreePartition::draw()
         }
         else
         {
+            EschPoint   pos;
+            float       tx, ty;
+            EschCamera  *cam;
+            dword       cflags;
+
             //ִִִ Setup local pointers to current camera and Van Gogh viewport.
             assertMyth("EschOctTreePartition::draw needs camera in current context",
                        EschCurrent != NULL && EschCurrent->camera != NULL);
 
-            EschCamera *cam=EschCurrent->camera;
+            cam=EschCurrent->camera;
+
+            cflags = cam->flags;
 
             assertMyth("EschOctTreePartition::draw needs a viewport in current context's camera",
                        cam->vport != NULL);
@@ -202,14 +209,21 @@ void EschOctTreePartition::draw()
             //ִִִ Transform view volume into world coords and form min/maxs
 
             //ִִִ Camera Position
-            EschPoint   pos;
             cam->get_position(&pos);
 
             EschBoxExtents exts(&pos,&pos);
 
             //ִִִ Far points
-            float tx = cam->yon * cam->xsize;
-            float ty = cam->yon * cam->ysize;
+            if (cam->flags & ESCH_CAM_ORTHO)
+            {
+                tx = cam->xsize;
+                ty = cam->ysize;
+            }
+            else
+            {
+                tx = cam->yon * cam->xsize;
+                ty = cam->yon * cam->ysize;
+            }
 
             // -tx, ty
             pos.x = -tx;
@@ -2466,26 +2480,30 @@ void EschOctTreePartition::draw_octtree(dword clr) const
 
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ Helper recursive routine
 void EschOctTreePartition::walk_drawocttree(EschOctTreeNode *node,
-                                              EschCamera *cam,
-                                              dword clr) const
+                                            EschCamera *cam,
+                                            dword clr) const
 {
+    int         i;
+    int         mp;
+    float       hither, yon;
+    VngoVport   *vp;
     EschPoint   p;
     VngoPoint   vpt[8];
 
     if (!node)
         return;
 
-    VngoVport *vp=cam->vport;
+    vp=cam->vport;
 
 //ִִִ Setup for compare
-    float yon = cam->yon;
-    float hither = cam->hither;
+    yon = cam->yon;
+    hither = cam->hither;
 
-    int mp = vp->vbuff.pal->shd_pal->mid_point;
+    mp = vp->vbuff.pal->shd_pal->mid_point;
 
 //ִִִ Draw self
     //ִִִ For each of the eight points of the cell
-    for(int i=0; i < 8; i++)
+    for(i=0; i < 8; i++)
     {
         switch (i)
         {
@@ -2536,10 +2554,20 @@ void EschOctTreePartition::walk_drawocttree(EschOctTreeNode *node,
         if (p.z < hither || p.z > yon)
             break;
 
-        vpt[i].x = long((p.x * cam->xscalar) / p.z)
-                    + (cam->vport->vbuff.width >> 1);
-        vpt[i].y = (cam->vport->vbuff.height >> 1)
-                    - long((p.y * cam->yscalar) / p.z);
+        if (cam->flags & ESCH_CAM_ORTHO)
+        {
+            vpt[i].x = long(p.x * cam->xscalar)
+                       + (cam->vport->vbuff.width >> 1);
+            vpt[i].y = (cam->vport->vbuff.height >> 1)
+                       - long(p.y * cam->yscalar);
+        }
+        else
+        {
+            vpt[i].x = long((p.x * cam->xscalar) / p.z)
+                       + (cam->vport->vbuff.width >> 1);
+            vpt[i].y = (cam->vport->vbuff.height >> 1)
+                       - long((p.y * cam->yscalar) / p.z);
+        }
         vpt[i].z = dword(p.z * cam->z_factor * float(0xffffffff));
         vpt[i].clr = clr;
         vpt[i].shade = mp;

@@ -13,9 +13,9 @@
 //
 //                     A Simluator Framework for MythOS(tm)
 //
-//                        Microsoft Windows '95 Version
+//                      Microsoft Windows 95/NT Version
 //
-//               Copyright (c) 1997 by Charybdis Enterprises, Inc.
+//            Copyright (c) 1997-1998 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved.
 //
 //컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
@@ -103,7 +103,7 @@ IDI_SIM_APPICON ICON "..\\res\\charybds.ico"
 
 1 VERSIONINFO
  FILEVERSION 0,1,0,0
- PRODUCTVERSION 0,1,0,0
+ PRODUCTVERSION 1,6,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0xbL
@@ -120,17 +120,17 @@ BEGIN
         BEGIN
             VALUE "OriginalFilename", "St.EXE\0"
 
-            VALUE "ProductName", "SimGine Framework\0"
             VALUE "InternalName", "SimGine\0"
             VALUE "FileDescription", "SimGine Tester Executable\0"
-
-            VALUE "ProductVersion", "0.1\0"
             VALUE "FileVersion", "0.1\0"
+
+            VALUE "ProductName", "MythOS 95\0"
+            VALUE "ProductVersion", "1.6\0"
 
             VALUE "CompanyName", "Charybdis Enterprises, Inc.\0"
 
             VALUE "LegalCopyright",
-"Copyright \251 1997 by Charybdis Enterprises, Inc.\0"
+"Copyright \251 1997-1998 by Charybdis Enterprises, Inc.\0"
 
             VALUE "LegalTrademarks",
 "MythOS is a trademark of Charybdis Enterprises, Inc.\n\

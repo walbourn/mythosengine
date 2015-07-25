@@ -8,10 +8,10 @@
 //ששששש²±²ששששששש²±²שששש²±²ש²±²שששש²±²ש²±²שששש²±²ש²±²שששששששש²±²שששש²±²שששששש
 //שששש²²²²²²²²²²ש²²²²²²²²ששש²²²²²²²²שש²²²שששש²²²ש²²²²²²²²²²ש²²²שששש²²²ששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//שששששששששששCopyrightש(c)ש1994-1997שbyשCharybdisשEnterprises,שInc.שששששששששש
-//ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
+//ששששששששששששששששששש Microsoft Windows 95/NT Version ששששששששששששששששששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//ששששששששששששששששששששש Microsoft Windows '95 Version ששששששששששששששששששששששש
+//שששששששששששCopyrightש(c)ש1994-1998שbyשCharybdisשEnterprises,שInc.שששששששששש
+//ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
 //
@@ -104,6 +104,8 @@ EschCamera::EschCamera(const char *fname, const char *cname) :
     factor(1.0),
     hither(1.0),
     yon(4096.0),
+    width(100.0),
+    height(0),
     bcolor(0),
     app_data(0)
 {
@@ -129,12 +131,15 @@ EschCamera::EschCamera(const EschCamera &cam) :
     hither(cam.hither),
     yon(cam.yon),
     fov(cam.fov),
+    width(cam.width),
+    height(cam.height),
     bcolor(cam.bcolor),
     radius_factor(cam.radius_factor),
     z_factor(cam.z_factor),
     app_data(cam.app_data)
 {
     strncpy(name,cam.name,ESCH_MAX_NAME);
+    memcpy(&frustrum,&cam.frustrum,sizeof(frustrum));
 };
 
 
@@ -176,10 +181,13 @@ const EschCamera &EschCamera::operator = (const EschCamera &cam)
         hither = cam.hither;
         yon = cam.yon;
         fov = cam.fov;
+        width = cam.width;
+        height = cam.height;
         bcolor = cam.bcolor;
         radius_factor = cam.radius_factor;
         z_factor = cam.z_factor;
         strncpy(name,cam.name,ESCH_MAX_NAME);
+        memcpy(&frustrum,&cam.frustrum,sizeof(frustrum));
         app_data = cam.app_data;
     }
     return *this;
@@ -206,6 +214,7 @@ void EschCamera::attach(VngoVport *vp)
 
     compute_scalar();
     compute_frustrum();
+    compute_z_factor();
 }
 
 
@@ -372,12 +381,16 @@ void EschCamera::reset()
 
     fov=48.0;                               // Default used by 3DS, so why not?
 
+    width=100.0;
+    height=0;
+
     factor=1.0;                             // No user zoom factor by default.
 
 
 //ִִִ Call computation functions
     compute_scalar();
     compute_frustrum();
+    compute_z_factor();
     compute_eye();
 }
 
@@ -737,58 +750,91 @@ void EschCamera::orthogonalize_top(dword update)
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ¿
 // EschCamera - compute_scalar                                              ³
 //                                                                          ³
-// Recomputes the xsize, ysize, xscalar, and yscalar values from the fov    ³
-// and viewport dimensions.  If there is no viewport attached to the camera ³
-// nothing is changed.                                                      ³
+// Recomputes the xsize, ysize, xscalar, yscalar, and radius_factor from    ³
+// the aspect_ratio, viewport dimensions, and either the field-of-view      ³
+// for perspective cameras or the width and height for orthogonal cameras.  ³
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִÙ
 void EschCamera::compute_scalar()
 {
-    float   size;
-    float   angle;
-
     if (!vport)
         return;
 
-    assertMyth("EschCamera::compute_scalar only allows 1 <= fov <= 175",
-               ((fov >= 1) && (fov <= 175)));
-
-    // angle is fov / 2
-    angle = fov / 2.0f;
-
     assertMyth("EschCamera::compute_scalar requires factor > 0",
-               factor > 0);
+                factor > 0);
 
-    // Save off radius factor.
-    radius_factor = factor / esch_cos(angle);
+//ִִִ Orthographic projection
+    if (flags & ESCH_CAM_ORTHO)
+    {
+        float hw, hh;
 
-//ִִִ Compute 1/2 size of projection-plane from FOV angle
-//
-//                         /|
-//                        / |
-//                       /  |
-//                      /   | 1/2 size projection plane (unknown)
-//                     /    |
-//        1/2 of FOV  /     |
-//         is this   *______|
-//          angle      ^
-//                     | Projection-plane distance (always 1)
-//
+        assertMyth("EschCamera::compute_scalar needs valid width and height",
+                   width > 0 && height >= 0);
 
-    size = esch_sin(angle) / esch_cos(angle);
+        hw = float((width + vport->skips_last_pix()) / 2.0f);
+        hh = float((height + vport->skips_last_pix()) / 2.0f);
 
-    assertMyth("EschCamera::compute_scalar requires FOV to result in non-zero size",
-               size != 0);
+        radius_factor = factor;
 
-//ִִִ Save 1/2 size of projection-plane in X and compute Y.
-    xsize = size / factor;
-    ysize = ((xsize * vport->vbuff.height) / vport->vbuff.width)
-            * aspect_ratio;
+        //ִִִ Set projection size based on factor & width/height
+        //ִִִ (a 0 height means set based on aspect-ratio)
 
-//ִִִ Compute scalar values for X and Y to get pixel locations.
-    xscalar = ((vport->vbuff.width / 2) * factor) / size;
-    yscalar = xscalar / aspect_ratio;
+        xsize = hw / factor;
 
-    compute_z_factor();
+        if (height > 0.0)
+            ysize = hh / factor;
+        else
+            ysize = ((xsize * float(vport->vbuff.height + vport->skips_last_pix()))
+                    / float(vport->vbuff.width + vport->skips_last_pix()))
+                    * aspect_ratio;
+
+        //ִִִ Compute scalar values for X and Y to get pixel locations.
+        xscalar = (float((vport->vbuff.width + vport->skips_last_pix()) / 2.f) * factor) / hw;
+
+        if (height > 0.0)
+            yscalar = (float((vport->vbuff.height + vport->skips_last_pix()) / 2.f) * factor) / hh;
+        else
+            yscalar = xscalar / aspect_ratio;
+    }
+//ִִִ Perspective projection
+    else
+    {
+        assertMyth("EschCamera::compute_scalar only allows 1 <= fov <= 175",
+                   ((fov >= 1) && (fov <= 175)));
+
+        // angle is fov / 2
+        float angle = fov / 2.0f;
+
+        // Save off radius factor.
+        radius_factor = factor / esch_cos(angle);
+
+        //ִִִ Compute 1/2 size of projection-plane from FOV angle
+        //
+        //                         /|
+        //                        / |
+        //                       /  |
+        //                      /   | 1/2 size projection plane (unknown)
+        //                     /    |
+        //        1/2 of FOV  /     |
+        //         is this   *______|
+        //          angle      ^
+        //                     | Projection-plane distance (always 1)
+        //
+
+        float size = esch_sin(angle) / esch_cos(angle);
+
+        assertMyth("EschCamera::compute_scalar requires FOV to result in non-zero size",
+                   size != 0);
+
+        //ִִִ Save 1/2 size of projection-plane in X and compute Y.
+        xsize = size / factor;
+        ysize = ((xsize * float(vport->vbuff.height + vport->skips_last_pix()) )
+                / float(vport->vbuff.width + vport->skips_last_pix()))
+                * aspect_ratio;
+
+        //ִִִ Compute scalar values for X and Y to get pixel locations.
+        xscalar = ((float(vport->vbuff.width + vport->skips_last_pix()) / 2.f) * factor) / size;
+        yscalar = xscalar / aspect_ratio;
+    }
 }
 
 
@@ -796,22 +842,81 @@ void EschCamera::compute_scalar()
 // EschCamera - compute_frustrum                                            ³
 //                                                                          ³
 // Recomputes the planes for the view frustrum, which are used for 3D       ³
-// clipping.                                                                ³
+// clipping.  This routine depends on xsize/ysize computed by               ³
+// compute_scalar()                                                         ³
+//                                                                          ³
+// The distances are pre-negated for faster processing in the clipping code!³
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִÙ
 void EschCamera::compute_frustrum()
 {
-    float   xangle = esch_atan(xsize);
-    float   yangle = esch_atan(ysize);
+//ִִִ Orthographic projection
+    if (flags & ESCH_CAM_ORTHO)
+    {
+        // Left
+        frustrum[ESCH_CAM_FRUSTRUM_LEFT].normal.i = 1;
+        frustrum[ESCH_CAM_FRUSTRUM_LEFT].normal.j = 0;
+        frustrum[ESCH_CAM_FRUSTRUM_LEFT].normal.k = 0;
+        frustrum[ESCH_CAM_FRUSTRUM_LEFT].dist = -xsize;
 
-    xangle = (90.0f - xangle);  // Get the perpendicular to the frustrum.
-    yangle = (90.0f - yangle);  // Get the perpendicular to the frustrum.
+        // Right
+        frustrum[ESCH_CAM_FRUSTRUM_RIGHT].normal.i = -1;
+        frustrum[ESCH_CAM_FRUSTRUM_RIGHT].normal.j = 0;
+        frustrum[ESCH_CAM_FRUSTRUM_RIGHT].normal.k = 0;
+        frustrum[ESCH_CAM_FRUSTRUM_RIGHT].dist = -xsize;
 
-    float   top_cos = esch_cos(yangle);
-    float   top_sin = esch_sin(yangle);
-    float   left_cos = esch_cos(xangle);
-    float   left_sin = esch_sin(xangle);
-    float   epsilon(0.001f);
+        // Top
+        frustrum[ESCH_CAM_FRUSTRUM_TOP].normal.i = 0;
+        frustrum[ESCH_CAM_FRUSTRUM_TOP].normal.j = -1;
+        frustrum[ESCH_CAM_FRUSTRUM_TOP].normal.k = 0;
+        frustrum[ESCH_CAM_FRUSTRUM_TOP].dist = -ysize;
 
+        // Bottom
+        frustrum[ESCH_CAM_FRUSTRUM_BOTTOM].normal.i = 0;
+        frustrum[ESCH_CAM_FRUSTRUM_BOTTOM].normal.j = 1;
+        frustrum[ESCH_CAM_FRUSTRUM_BOTTOM].normal.k = 0;
+        frustrum[ESCH_CAM_FRUSTRUM_BOTTOM].dist = -ysize;
+    }
+//ִִִ Perspective projection
+    else
+    {
+        float   epsilon(0.001f);
+        float   xangle = esch_atan(xsize);
+        float   yangle = esch_atan(ysize);
+
+        xangle = (90.0f - xangle);  // Get the perpendicular to the frustrum.
+        yangle = (90.0f - yangle);  // Get the perpendicular to the frustrum.
+
+        float   top_cos = esch_cos(yangle);
+        float   top_sin = esch_sin(yangle);
+        float   left_cos = esch_cos(xangle);
+        float   left_sin = esch_sin(xangle);
+
+        // Left
+        frustrum[ESCH_CAM_FRUSTRUM_LEFT].normal.i = left_sin;
+        frustrum[ESCH_CAM_FRUSTRUM_LEFT].normal.j = 0;
+        frustrum[ESCH_CAM_FRUSTRUM_LEFT].normal.k = left_cos;
+        frustrum[ESCH_CAM_FRUSTRUM_LEFT].dist = -epsilon;
+
+        // Right
+        frustrum[ESCH_CAM_FRUSTRUM_RIGHT].normal.i = -left_sin;
+        frustrum[ESCH_CAM_FRUSTRUM_RIGHT].normal.j = 0;
+        frustrum[ESCH_CAM_FRUSTRUM_RIGHT].normal.k = left_cos;
+        frustrum[ESCH_CAM_FRUSTRUM_RIGHT].dist = -epsilon;
+
+        // Top
+        frustrum[ESCH_CAM_FRUSTRUM_TOP].normal.i = 0;
+        frustrum[ESCH_CAM_FRUSTRUM_TOP].normal.j = -top_sin;
+        frustrum[ESCH_CAM_FRUSTRUM_TOP].normal.k = top_cos;
+        frustrum[ESCH_CAM_FRUSTRUM_TOP].dist = -epsilon;
+
+        // Bottom
+        frustrum[ESCH_CAM_FRUSTRUM_BOTTOM].normal.i = 0;
+        frustrum[ESCH_CAM_FRUSTRUM_BOTTOM].normal.j = top_sin;
+        frustrum[ESCH_CAM_FRUSTRUM_BOTTOM].normal.k = top_cos;
+        frustrum[ESCH_CAM_FRUSTRUM_BOTTOM].dist = -epsilon;
+    }
+
+//ִִִ Near/Far planes not based on projection mode
     // Near
     frustrum[ESCH_CAM_FRUSTRUM_HITHER].normal.i = 0;
     frustrum[ESCH_CAM_FRUSTRUM_HITHER].normal.j = 0;
@@ -823,30 +928,6 @@ void EschCamera::compute_frustrum()
     frustrum[ESCH_CAM_FRUSTRUM_YON].normal.j = 0;
     frustrum[ESCH_CAM_FRUSTRUM_YON].normal.k = -1;
     frustrum[ESCH_CAM_FRUSTRUM_YON].dist = -(yon * 0.99f);
-
-    // Left
-    frustrum[ESCH_CAM_FRUSTRUM_LEFT].normal.i = left_sin;
-    frustrum[ESCH_CAM_FRUSTRUM_LEFT].normal.j = 0;
-    frustrum[ESCH_CAM_FRUSTRUM_LEFT].normal.k = left_cos;
-    frustrum[ESCH_CAM_FRUSTRUM_LEFT].dist = -epsilon;
-
-    // Right
-    frustrum[ESCH_CAM_FRUSTRUM_RIGHT].normal.i = -left_sin;
-    frustrum[ESCH_CAM_FRUSTRUM_RIGHT].normal.j = 0;
-    frustrum[ESCH_CAM_FRUSTRUM_RIGHT].normal.k = left_cos;
-    frustrum[ESCH_CAM_FRUSTRUM_RIGHT].dist = epsilon;
-
-    // Top
-    frustrum[ESCH_CAM_FRUSTRUM_TOP].normal.i = 0;
-    frustrum[ESCH_CAM_FRUSTRUM_TOP].normal.j = -top_sin;
-    frustrum[ESCH_CAM_FRUSTRUM_TOP].normal.k = top_cos;
-    frustrum[ESCH_CAM_FRUSTRUM_TOP].dist = -epsilon;
-
-    // Bottom
-    frustrum[ESCH_CAM_FRUSTRUM_BOTTOM].normal.i = 0;
-    frustrum[ESCH_CAM_FRUSTRUM_BOTTOM].normal.j = top_sin;
-    frustrum[ESCH_CAM_FRUSTRUM_BOTTOM].normal.k = top_cos;
-    frustrum[ESCH_CAM_FRUSTRUM_BOTTOM].dist = epsilon;
 }
 
 
@@ -1041,6 +1122,7 @@ esch_error_codes EschCamera::load(XFParseIFF *iff, const char *cname)
 //ִִִ Call computation functions
     compute_scalar();
     compute_frustrum();
+    compute_z_factor();
     compute_eye();
 
 //ִִ Return ok

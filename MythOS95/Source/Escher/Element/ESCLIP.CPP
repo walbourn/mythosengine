@@ -8,10 +8,10 @@
 //ששששש²±²ששששששש²±²שששש²±²ש²±²שששש²±²ש²±²שששש²±²ש²±²שששששששש²±²שששש²±²שששששש
 //שששש²²²²²²²²²²ש²²²²²²²²ששש²²²²²²²²שש²²²שששש²²²ש²²²²²²²²²²ש²²²שששש²²²ששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//שששששששששששCopyrightש(c)ש1994-1997שbyשCharybdisשEnterprises,שInc.שששששששששש
-//ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
+//ששששששששששששששששששש Microsoft Windows 95/NT Version ששששששששששששששששששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//ששששששששששששששששששששש Microsoft Windows '95 Version ששששששששששששששששששששששש
+//שששששששששששCopyrightש(c)ש1994-1998שbyשCharybdisשEnterprises,שInc.שששששששששש
+//ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
 //
@@ -43,16 +43,6 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include "escher.hpp"
-#include <limits.h>
-
-//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-//
-//                               Routines
-//
-//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-
-extern "C" int esch_clip_to_plane(int *count, VngoPoint *in, VngoPoint *out,
-                                  EschPlane *plane, dword flags);
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
@@ -65,20 +55,26 @@ extern "C" int esch_clip_to_plane(int *count, VngoPoint *in, VngoPoint *out,
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִÙ
 extern "C" int esch_clip_to_frustrum (ulong *rcount, VngoPoint *pts,
                                       VngoPoint *outpts,
-                                      EschCamera *cam, dword flags)
+                                      EschCamera *cam, dword level)
 {
+    assertMyth("esch_clip_to_frustrum needs valid input",
+               rcount != 0 && pts != 0 && outpts != 0 && cam != 0);
+
     int         i;
     int         modified=0;
     int         ycount=0;
     int         hcount=0;
     int         count = int(*rcount);
     int         cstate;
+    dword       lclip_flags=0;
     VngoPoint   *work1;
     VngoPoint   *work2;
     VngoPoint   *t;
+    float       x, y, tx, ty;
+    dword       cflags;
 
 //ִִִ Trivialy accept/reject of near/far first.
-    for (i=0;i < count;i++)
+    for (i=0; i < count; i++)
     {
         if (((const EschPoint*)(&pts[i]))->z > cam->yon)
             ycount++;
@@ -91,14 +87,22 @@ extern "C" int esch_clip_to_frustrum (ulong *rcount, VngoPoint *pts,
     }
 
 //ִִִ Determine clip flags
-    dword lclip_flags=0;
+    cflags = cam->flags;
 
     for(i=0; i < count; i++)
     {
-        float tx = ((const EschPoint*)(&pts[i]))->z * cam->xsize;
-        float ty = ((const EschPoint*)(&pts[i]))->z * cam->ysize;
+        if (cflags & ESCH_CAM_ORTHO)
+        {
+            tx = cam->xsize;
+            ty = cam->ysize;
+        }
+        else
+        {
+            tx = ((const EschPoint*)(&pts[i]))->z * cam->xsize;
+            ty = ((const EschPoint*)(&pts[i]))->z * cam->ysize;
+        }
 
-        float x = ((const EschPoint*)(&pts[i]))->x;
+        x = ((const EschPoint*)(&pts[i]))->x;
         if (x < -tx)
         {
             lclip_flags |= 0x1 << (4*i);
@@ -108,7 +112,7 @@ extern "C" int esch_clip_to_frustrum (ulong *rcount, VngoPoint *pts,
             lclip_flags |= 0x2 << (4*i);
         }
 
-        float y = ((const EschPoint*)(&pts[i]))->y;
+        y = ((const EschPoint*)(&pts[i]))->y;
         if (y < -ty)
         {
             lclip_flags |= 0x4 << (4*i);
@@ -137,6 +141,9 @@ extern "C" int esch_clip_to_frustrum (ulong *rcount, VngoPoint *pts,
         return -1;
     }
 
+    // HACK:  If you do only partial clip tests, things get way out of
+    //        whack for some reason...  this forces all four tests if
+    //        any are needed.
     lclip_flags = 0xf;
 
     work1 = pts;
@@ -147,7 +154,7 @@ extern "C" int esch_clip_to_frustrum (ulong *rcount, VngoPoint *pts,
     {
         cstate = esch_clip_to_plane(&count,work1,work2,
                                     &cam->frustrum[ESCH_CAM_FRUSTRUM_YON],
-                                    flags);
+                                    level);
 
         if (!cstate)
             return 0;
@@ -165,7 +172,7 @@ extern "C" int esch_clip_to_frustrum (ulong *rcount, VngoPoint *pts,
     {
         cstate = esch_clip_to_plane(&count,work1,work2,
                                     &cam->frustrum[ESCH_CAM_FRUSTRUM_HITHER],
-                                    flags);
+                                    level);
 
         if (!cstate)
             return 0;
@@ -183,7 +190,7 @@ extern "C" int esch_clip_to_frustrum (ulong *rcount, VngoPoint *pts,
     {
         cstate = esch_clip_to_plane(&count,work1,work2,
                                     &cam->frustrum[ESCH_CAM_FRUSTRUM_TOP],
-                                    flags);
+                                    level);
         if (!cstate)
             return 0;
         else if (cstate == 1)
@@ -200,7 +207,7 @@ extern "C" int esch_clip_to_frustrum (ulong *rcount, VngoPoint *pts,
     {
         cstate = esch_clip_to_plane(&count,work1,work2,
                                     &cam->frustrum[ESCH_CAM_FRUSTRUM_BOTTOM],
-                                    flags);
+                                    level);
         if (!cstate)
             return 0;
         else if (cstate == 1)
@@ -217,7 +224,7 @@ extern "C" int esch_clip_to_frustrum (ulong *rcount, VngoPoint *pts,
     {
         cstate = esch_clip_to_plane(&count,work1,work2,
                                     &cam->frustrum[ESCH_CAM_FRUSTRUM_RIGHT],
-                                    flags);
+                                    level);
         if (!cstate)
             return 0;
         else if (cstate == 1)
@@ -234,7 +241,7 @@ extern "C" int esch_clip_to_frustrum (ulong *rcount, VngoPoint *pts,
     {
         cstate = esch_clip_to_plane(&count,work1,work2,
                                     &cam->frustrum[ESCH_CAM_FRUSTRUM_LEFT],
-                                    flags);
+                                    level);
         if (!cstate)
             return 0;
         else if (cstate == 1)
@@ -263,13 +270,19 @@ extern "C" int esch_clip_to_frustrum (ulong *rcount, VngoPoint *pts,
 // DDJ Source Book March/April '95                                          ³
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִÙ
 extern "C" int esch_clip_to_plane(int *count, VngoPoint *in, VngoPoint *out,
-                                  EschPlane *plane, dword flags)
+                                  EschPlane *plane, dword level)
 {
     int         i,curin,nextin;
     int         modified = -1;
     float       curdot,nextdot,scale;
     VngoPoint   *cvert,*nvert;
     int         local_count=0;
+
+    assertMyth("esch_clip_to_plane needs valid input",
+               count != 0 && in != 0 && out != 0 && plane != 0);
+
+    assertMyth("esch_clip_to_plane() needs valid count",
+               *count >= 2);
 
     cvert = &in[*count-1];
 
@@ -305,13 +318,13 @@ extern "C" int esch_clip_to_plane(int *count, VngoPoint *in, VngoPoint *out,
                                    + ( ( ((const EschPoint*)nvert)->z
                                          - ((const EschPoint*)cvert)->z ) * scale );
 
-            if (flags & ESCH_CAM_TEXTURED)
+            if (level & ESCH_CAM_TEXTURED)
             {
                 //!!! u/v are still fixed point!
                 out->u = (Flx16(cvert->u,0) + (Flx16(nvert->u - cvert->u,0) * Flx16(scale))).flx;
                 out->v = (Flx16(cvert->v,0) + (Flx16(nvert->v - cvert->v,0) * Flx16(scale))).flx;
             }
-            if (flags & ESCH_CAM_SHADE_SMOOTH)
+            if (level & ESCH_CAM_SHADE_SMOOTH)
             {
                 out->shade = long(float(cvert->shade)
                                   + (float(nvert->shade - cvert->shade) * scale));
@@ -330,7 +343,7 @@ extern "C" int esch_clip_to_plane(int *count, VngoPoint *in, VngoPoint *out,
         curin = nextin;
         cvert = nvert;
     }
-    if (local_count < 3)
+    if ((local_count < 3) && (local_count < *count))
         return 0;
 
     *count = local_count;
@@ -439,7 +452,7 @@ int esch_rotate_check(ulong count, VngoPoint *pts, EschCamera *cam)
 
         EschVector f = b CROSS a;
 
-        if ((view DOT f) > 0.075f)
+        if ((view DOT f) > 0.025f)
             return 0;
         else
             return 1;

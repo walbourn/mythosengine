@@ -73,6 +73,7 @@ class VngoCacheHndl
 {
 public:
     dword           flags;
+    VngoTexture3D   *tex;
     VngoCacheHndl   *next;
     VngoCacheHndl   *prev;
 
@@ -98,7 +99,7 @@ public:
     }
 
     ~VngoTextureManager();
-    VNGError ready();
+    VNGError ready(VngoCacheHndl *hndl);
     VNGError add(VngoCacheHndl *ntex,int ready=1);
     VNGError remove(VngoCacheHndl *ntex);
 

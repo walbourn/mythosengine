@@ -8,10 +8,10 @@
 //ùùùùù²±²ùùùùùùù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùùùùùù²±²ùùùù²±²ùùùùùù
 //ùùùù²²²²²²²²²²ù²²²²²²²²ùùù²²²²²²²²ùù²²²ùùùù²²²ù²²²²²²²²²²ù²²²ùùùù²²²ùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùCopyrightù(c)ù1994-1997ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
-//ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
+//ùùùùùùùùùùùùùùùùùùù Microsoft Windows 95/NT Version ùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùùùùùùùùùùù Microsoft Windows '95 Version ùùùùùùùùùùùùùùùùùùùùùùù
+//ùùùùùùùùùùùCopyrightù(c)ù1994-1998ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
+//ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
@@ -188,11 +188,19 @@ void EschGridPartition::draw()
         return;
     }
 
+    EschPoint   pos;
+    float       minx;
+    float       minz;
+    float       maxx;
+    float       maxz;
+    float       tx, ty;
+    EschCamera  *cam;
+
 //ÄÄÄ Setup local pointers to current camera and Van Gogh viewport.
     assertMyth("EschGridPartition::draw needs camera in current context",
                EschCurrent != NULL && EschCurrent->camera != NULL);
 
-    EschCamera *cam=EschCurrent->camera;
+    cam = EschCurrent->camera;
 
     assertMyth("EschGridPartition::draw needs a viewport in current context's camera",
                cam->vport != NULL);
@@ -201,17 +209,24 @@ void EschGridPartition::draw()
 //ÄÄÄ forming min/max bound.
 
     //ÄÄÄ Camera Position
-    EschPoint   pos;
     cam->get_position(&pos);
 
-    float minx = pos.x;
-    float minz = pos.z;
-    float maxx = pos.x;
-    float maxz = pos.z;
+    minx = pos.x;
+    minz = pos.z;
+    maxx = pos.x;
+    maxz = pos.z;
 
     //ÄÄÄ Far points
-    float tx = cam->yon * cam->xsize;
-    float ty = cam->yon * cam->ysize;
+    if (cam->flags & ESCH_CAM_ORTHO)
+    {
+        tx = cam->xsize;
+        ty = cam->ysize;
+    }
+    else
+    {
+        tx = cam->yon * cam->xsize;
+        ty = cam->yon * cam->ysize;
+    }
 
     // -tx, ty
     pos.x = -tx;

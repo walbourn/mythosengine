@@ -57,7 +57,7 @@
 
 // #define TERRAIN_DEBUG_AID
 // #define TERRAIN_NO_FRUSTRUM_WALK
-//#define TERRAIN_NO_PATCHUP
+// #define TERRAIN_NO_PATCHUP
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
@@ -183,6 +183,7 @@ void EschTerrainEx::release()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 void EschTerrainEx::draw()
 {
+
     assertMyth("EschLowTerrain::draw needs height-field information",
                hfield);
 
@@ -518,6 +519,9 @@ VngoRect EschTerrainEx::draw_terrain_rect(VngoRect *iclip, VngoRect *oclip,
     if (work_rect.dy <= 0 || work_rect.dx <= 0)
         return (work_rect);     // No terrain to draw in this rect.
 
+        if (dlevel == (num_dlevels-1))
+            flags &= ~ESCH_TERNEX_SMOOTH_ALL;
+
     if (oclip == NULL)
     {
         draw_terrain_rect (&work_rect,dlevel,flags);
@@ -642,6 +646,9 @@ VngoRect EschTerrainEx::draw_terrain_rect(VngoRect *iclip, VngoRect *oclip,
             draw_terrain_rect(&trect,dlevel,wflags);
         }
     }
+
+    if (dlevel == (num_dlevels-1))
+        flags |= ESCH_TERNEX_SMOOTH_ALL;
     return (work_rect);
 }
 
@@ -649,1382 +656,280 @@ VngoRect EschTerrainEx::draw_terrain_rect(VngoRect *iclip, VngoRect *oclip,
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // EschTerrainEx - display_pixel_row                                        ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void EschTerrainEx::display_pixel_row(VngoPoint *vpt,int count)
+void EschTerrainEx::display_pixel_row(VngoPoint *vpt,int count,dword cflags)
 {
-    for (int k=0;k < count;k++)
+    int         k;
+    VngoPoint   *vpnt;
+    float       zx, zy;
+
+    for (k=0;k < count;k++)
     {
-        VngoPoint *vpnt = &vpt[k];
+        vpnt = &vpt[k];
         const EschPoint *pnt = (const EschPoint*)vpnt;
 
         if ( (pnt->z <= cam->yon)
              && (pnt->z >= cam->hither) )
         {
-            float zx = pnt->z * cam->xsize;
-            float zy = pnt->z * cam->ysize;
-
-            if ((pnt->x >= -zx)
-                && (pnt->x <= zx)
-                && (pnt->y >= -zy)
-                && (pnt->y <= zy))
+            if (cflags & ESCH_CAM_ORTHO)
             {
-                vpnt->x = long((pnt->x * cam->xscalar) / pnt->z)
-                          + (cam->vport->vbuff.width>>1);
+                zx = cam->xsize;
+                zy = cam->ysize;
 
-                vpnt->y = (cam->vport->vbuff.height>>1)
-                          - long((pnt->y * cam->yscalar) / pnt->z);
+                if ((pnt->x >= -zx)
+                    && (pnt->x <= zx)
+                    && (pnt->y >= -zy)
+                    && (pnt->y <= zy))
+                {
+                    vpnt->x = long(pnt->x * cam->xscalar)
+                              + (cam->vport->vbuff.width>>1);
 
-                vpnt->z = ulong(pnt->z * cam->z_factor * float(0xffffffff));
+                    vpnt->y = (cam->vport->vbuff.height>>1)
+                               - long(pnt->y * cam->yscalar);
 
-                //ÄÄÄ Draw pdxel
-                cam->vport->pixel(vpnt);
+                    vpnt->z = ulong(pnt->z * cam->z_factor * float(0xffffffff));
+
+                    //ÄÄÄ Draw pdxel
+                    cam->vport->pixel(vpnt);
+                }
+            }
+            else
+            {
+                zx = pnt->z * cam->xsize;
+                zy = pnt->z * cam->ysize;
+
+                if ((pnt->x >= -zx)
+                    && (pnt->x <= zx)
+                    && (pnt->y >= -zy)
+                    && (pnt->y <= zy))
+                {
+                    vpnt->x = long((pnt->x * cam->xscalar) / pnt->z)
+                              + (cam->vport->vbuff.width>>1);
+
+                    vpnt->y = (cam->vport->vbuff.height>>1)
+                              - long((pnt->y * cam->yscalar) / pnt->z);
+
+                    vpnt->z = ulong(pnt->z * cam->z_factor * float(0xffffffff));
+
+                    //ÄÄÄ Draw pdxel
+                    cam->vport->pixel(vpnt);
+                }
             }
         }
     }
 }
-
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // EschTerrainEx - draw_terrain_rect                                        ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 void EschTerrainEx::draw_terrain_rect (VngoRect *rect, int dlevel,dword lflags)
 {
-    ulong                   needed;
-    int                     texture_shift;
-    int                     texture_shift2;
-    int                     leftx,curx,curz;
-    int                     step,cstep;
-    VngoPoint               *vpt;
-    EschVector              _wvec;
-    EschVector              _dvec;
-
-    dword                   *vflags;
-    dword                   fflags1 = ESCH_FACE_ALLOWPERSP
-                                    | ESCH_FACE_TEXTURED
-                                    | ESCH_FACE_SPECULAR
-                                    | ESCH_FACE_SMOOTH
-                                    | ESCH_FACE_FLAT
-                                    | ESCH_FACE_SOLID
-                                    | ESCH_FACE_WIRE
-                                    | ESCH_FACE_ABLINE
-                                    | ESCH_FACE_BCLINE
-                                    | ESCH_FACE_CALINE;
-
-    dword                   fflags2 = ESCH_FACE_ALLOWPERSP
-                                    | ESCH_FACE_TEXTURED
-                                    | ESCH_FACE_SPECULAR
-                                    | ESCH_FACE_SMOOTH
-                                    | ESCH_FACE_FLAT
-                                    | ESCH_FACE_SOLID
-                                    | ESCH_FACE_WIRE
-                                    | ESCH_FACE_ABLINE
-                                    | ESCH_FACE_BCLINE
-                                    | ESCH_FACE_CALINE;
-
-    dword                   fflags3 = ESCH_FACE_SMOOTH
-                                    | ESCH_FACE_FLAT
-                                    | ESCH_FACE_SOLID
-                                    | ESCH_FACE_WIRE
-                                    | ESCH_FACE_ABLINE
-                                    | ESCH_FACE_BCLINE
-                                    | ESCH_FACE_CALINE;
-
-
-    dword ctrlfl = ESCH_CDF_CLIP
-                   | ((cam->flags & ESCH_CAM_BACKCULL) ? ESCH_CDF_BFCULL : 0);
-
-    static EschFace         face[3];
-
-    if (dlevel > int(surfshift))
-        texture_shift = dlevel - surfshift;
-    else
-        texture_shift = 0;
-
-    if ((dlevel+1) > int(surfshift))
-        texture_shift2 = dlevel - surfshift + 1;
-    else
-        texture_shift2 = 0;
-
-
-    if ((rect->x > (darea.x + darea.dx)) ||
-        ((rect->x + rect->dx) < darea.x) ||
-        (rect->y > (darea.y + darea.dy)) ||
-        ((rect->y + rect->dy) < darea.y))
-        return;
-
-    if (rect->x + rect->dx >= width)
-    {
-        rect->dx = width - 1 - rect->x;
-    }
-    if (rect->y + rect->dy >= depth)
-    {
-        rect->dy = depth - 1- rect->y;
-    }
-
-#if 0
-    if(work_rect.x < darea.x)
-    {
-        int t = darea.x - work_rect.x;
-        work_rect.x = darea.x
-        work_rect.dx -= t;
-    }
-    if ((work_rect.x + work_rect.dx) > (darea.x + darea.dx))
-    {
-        work_rect.dx = (darea.x + darea.dx) - work_rect.x;
-    }
-
-    if(work_rect.y < darea.y)
-    {
-        int t = darea.y - work_rect.y;
-        work_rect.y = darea.y
-        work_rect.dy -= t;
-    }
-    if ((work_rect.y + work_rect.dy) > (darea.y + darea.dy))
-    {
-        work_rect.dy = (darea.y + darea.dy) - work_rect.y;
-    }
-#endif
-
-    if (!(lflags & ESCH_TERNEX_TEXTURE))
-    {
-        fflags1 &=~ESCH_FACE_TEXTURED;
-        fflags2 &=~ESCH_FACE_TEXTURED;
-    }
-    else if (!(lflags & ESCH_TERNEX_PERSPECTIVE))
-    {
-        fflags1 &=~ESCH_FACE_ALLOWPERSP;
-        fflags2 &=~ESCH_FACE_ALLOWPERSP;
-    }
-    if (!(lflags & ESCH_TERNEX_SMOOTH))
-    {
-        fflags1 &=~ESCH_FACE_SMOOTH;
-        fflags2 &=~ESCH_FACE_SMOOTH;
-    }
-    if (!(lflags & ESCH_FACE_SPECULAR))
-    {
-        fflags1 &=~ESCH_FACE_SPECULAR;
-        fflags2 &=~ESCH_FACE_SPECULAR;
-    }
-
-
-
-    leftx = rect->x;
-    curz = rect->y;
-    curx = leftx;
-    cstep = 2 << dlevel;
-    step = 1 << dlevel;
-
-    assertMyth("EschLowTerrain::draw_terrain_rect needs an in-clip region",
-                rect != NULL);
-    assertMyth("EschLowTerrain::draw_terrain_rect needs camera.",
-                cam != NULL);
-
-//ÄÄÄ Clear arena
-    assertMyth("EschTerrain needs Escher initialized",EschSysInstance != 0);
-    ivory_arena_clear(EschSysInstance->wspace);
-
-    int dx = (rect->dx >> dlevel) + 1;
-
-    // Initialize all of the faces.
-    int     rowa = 0;
-    int     rowb = dx;
-    int     rowc = dx + dx;
-
-    // Setup the stepping vectors for the correct detail level.
-
-    float dterm = float(1 << dlevel);
-
-    _wvec.i = wvec.i * dterm;
-    _wvec.j = wvec.j * dterm;
-    _wvec.k = wvec.k * dterm;
-
-    _dvec.i = dvec.i * dterm;
-    _dvec.j = dvec.j * dterm;
-    _dvec.k = dvec.k * dterm;
-
-    // Update workspace metrics; no other place is reasonable to do this
-
-    needed = (((sizeof(dword)+sizeof(VngoPoint)) * dx) * 3);
-
-    assertMyth("EschLowTerrain::draw needs more workspace",
-               needed <= EschSysInstance->wspace_sbytes);
-
-    if (needed > EschSysInstance->wspace_mbytes)
-        EschSysInstance->wspace_mbytes = needed;
-
-//ÄÄÄ Push drawing context
-
-    EschContext ec(EschCurrent);
-    ec.current = this;
-    ec.verts = 0;
-    ec.fflags = 0;
-    ec.vflags = vflags = (dword*)ivory_arena_zalloc(EschSysInstance->wspace,sizeof(dword) * (dx * 3));
-    ec.vpoints = vpt = new (EschSysInstance->wspace) VngoPoint[dx * 3];
-    ec.faces = &face[0];
-    ec.txts = txt;
-    ec.push();
-
-
-    int endy = rect->dy >> dlevel;
-    int endx = rect->dx >> dlevel;
-    int tstep = (1 << dlevel);
-    int i,j;
-
-    VngoPoint   work_points[3];
-    EschPoint   *rpt = (EschPoint*) (&work_points[2]);
-    EschPoint   *cpt = (EschPoint*) (&work_points[0]);
-    EschPoint   *cpt2 = (EschPoint*) (&work_points[1]);
-    EschPoint   pd,pw;
-
-    cpt->x = origin.x + float(rect->x << scaleshift);
-    cpt->y = origin.y;
-    cpt->z = origin.z + float(rect->y << scaleshift);
-
-    ::esch_transform(cpt,&cam->eye.iorient,cpt);
-
-    rpt->x = cpt->x;
-    rpt->y = cpt->y;
-    rpt->z = cpt->z;
-
-    VngoPoint   *vA = &vpt[rowa];
-    VngoPoint   *vB = &vpt[rowb];
-    VngoPoint   *vC = &vpt[rowc];
-
-    long            t = (width * rect->y) + rect->x;
-    byte            *ptr = hfield + t;
-    byte            *rptr = ptr;
     long            st = ((width >> surfshift) * (rect->y >> surfshift)) + (rect->x >> surfshift);
     esch_surf_type  *sptr = surfinfo + st;
-    esch_surf_type  *rsptr = sptr;
-    long            pstep = 1 << dlevel;
+    byte            *lhfield = hfield + (width * rect->y) + rect->x;
 
-
-    VngoPoint       tpt;
-    VngoColor24bit  clr(0,255,255);
-    if (dlevel == 1)
+    VngoRect trect;
+    trect.x = rect->x;
+    trect.y = rect->y;
+    trect.dx = rect->dx;
+    trect.dy = rect->dy;
+    int mod = 2 << dlevel;
+    if (lflags & ESCH_TERNEX_SMOOTH_TOP)
     {
-        clr.r = 0;
-        clr.g = 255;
-        clr.b = 0;
+        trect.y += mod;
+        trect.dy -= mod;
     }
-    else if (dlevel == 2)
+    if (lflags & ESCH_TERNEX_SMOOTH_BOTTOM)
     {
-        clr.r = 0;
-        clr.g = 0;
-        clr.b = 255;
+        trect.dy -= mod;
     }
-    else if (dlevel == 3)
+    if (lflags & ESCH_TERNEX_SMOOTH_LEFT)
     {
-        clr.r = 255;
-        clr.g = 255;
-        clr.b = 255;
+        trect.x += mod;
+        trect.dx -= mod;
     }
-    else if (dlevel == 4)
+    if (lflags & ESCH_TERNEX_SMOOTH_RIGHT)
     {
-        clr.r = 255;
-        clr.g = 255;
-        clr.b = 0;
+        trect.dx -= mod;
     }
 
-    for (i=0; i <= endx; i++)
-    {   // Setup the first line A
-        float h = htable[*ptr];
-        ((EschPoint *)vA)->x = cpt->x + (h * hvec.i);
-        ((EschPoint *)vA)->y = cpt->y + (h * hvec.j);
-        ((EschPoint *)vA)->z = cpt->z + (h * hvec.k);
+    if (trect.dx > 0 && trect.dy > 0)
+        draw_terrain_trans_rect(&trect,dlevel,lflags);
 
-        if (sptr->flags & ESCH_SURF_CINDISTXT)
-        {
-            vA->clr = txtcolor[sptr->cind-1];
-        }
-        else
-        {
-            vA->clr = sptr->cind;
-        }
+    EschPoint root_point;
+    root_point.x = origin.x + float(rect->x << scaleshift);
+    root_point.y = origin.y;
+    root_point.z = origin.z + float(rect->y << scaleshift);
 
-        vA->shade = sptr->shd;
-        cpt->x = cpt->x + _wvec.i;
-        cpt->y = cpt->y + _wvec.j;
-        cpt->z = cpt->z + _wvec.k;
-        vA++;
-        ptr +=pstep;
-        sptr += pstep >> surfshift;
-    }
-    rpt->x = rpt->x + _dvec.i;
-    rpt->y = rpt->y + _dvec.j;
-    rpt->z = rpt->z + _dvec.k;
-
-    sptr = rsptr;
-
-    vA = &vpt[rowa];
+    ::esch_transform(&root_point,&cam->eye.iorient,&root_point);
 
     if (lflags & ESCH_TERNEX_SMOOTH_TOP)
     {
-
-        for (i=0;i < endx-1;i+=2)
+        VngoRect  wrect = *rect;
+        EschPoint troot2 = root_point;
+        int hfoff = 0;
+        int spoff = 0;
+        if (lflags & ESCH_TERNEX_SMOOTH_RIGHT)
         {
-            ((EschPoint*)&vA[i+1])->x = (((const EschPoint*)(&vA[i]))->x
-                              + ((const EschPoint*)(&vA[i+2]))->x) / 2.0f;
-            ((EschPoint*)&vA[i+1])->y = (((const EschPoint*)(&vA[i]))->y
-                              + ((const EschPoint*)(&vA[i+2]))->y) / 2.0f;
-            ((EschPoint*)&vA[i+1])->z = (((const EschPoint*)(&vA[i]))->z
-                              + ((const EschPoint*)(&vA[i+2]))->z) / 2.0f;
-            vA[i+1].shade = (vA[i].shade + vA[i+2].shade) >> 1;
-#ifndef TERRAIN_NO_PATCHUP
-#ifdef TERRAIN_DEBUG_AID
-            if (!(flags & ESCH_TRN_DOTS))
-#endif
-            {
-                float u_left,u_right,v_top,v_bottom;
-                dword tlflags = sptr->flags;
-                face[2].flags = fflags1;
-                face[2].txt = sptr->cind;
-                face[2].a = i;
-                face[2].b = i+1;
-                face[2].c = i+2;
-                if (((tlflags & ESCH_SURF_CINDISTXT) &&
-                   (!texture_shift2 || (!(tlflags & ESCH_SURF_NOTILE)))))
-                {
-                    compute_texture_uv(u_left,u_right,v_top,v_bottom,
-                                       tlflags,rect->x + (i << dlevel),
-                                       rect->y,texture_shift2);
+            wrect.dx -= mod;
 
-                    face[2].txt = sptr->cind;
+            VngoRect trect = *rect;
+            trect.x = trect.x + trect.dx - mod;
+            trect.dx = mod;
+            trect.dy = mod;
 
-                    face[2].u[0] = u_left;
-                    face[2].u[1] = (u_left+u_right) / 2.0f;
-                    face[2].u[2] = u_right;
-                    face[2].v[0] = 0;
-                    face[2].v[1] = 0;
-                    face[2].v[2] = 0;
-                }
-                else
-                {
-                    face[2].flags &= ~ESCH_FACE_TEXTURED;
-                }
-                esch_clipdraw_face(2,(ctrlfl & ~ESCH_CDF_BFCULL));
-                sptr += pstep >> surfshift;
-            }
-#endif
+            EschPoint troot = troot2;
+            troot.x = troot.x + (wvec.i * float(rect->dx-mod));
+            troot.y = troot.y + (wvec.j * float(rect->dx-mod));
+            troot.z = troot.z + (wvec.k * float(rect->dx-mod));
+
+            draw_terrain_trans_ur(&trect,&troot,lhfield+(rect->dx-mod),
+                                  sptr + ((rect->dx-mod) >> surfshift),
+                                  dlevel,lflags);
         }
+        if (lflags & ESCH_TERNEX_SMOOTH_LEFT)
+        {
+            wrect.x += mod;
+            wrect.dx -= mod;
 
+            VngoRect trect = *rect;
+            trect.dx = mod;
+            trect.dy = mod;
+
+            troot2.x = troot2.x + (wvec.i * float(mod));
+            troot2.y = troot2.y + (wvec.j * float(mod));
+            troot2.z = troot2.z + (wvec.k * float(mod));
+
+            draw_terrain_trans_ul(&trect,&root_point,lhfield,sptr,dlevel,lflags);
+
+            hfoff+=mod;
+            spoff+=(mod >> surfshift);
+        }
+        int count = (wrect.dx >> dlevel);
+
+        draw_terrain_trans_top(&wrect,&troot2,lhfield+hfoff,sptr+spoff,
+                               dlevel,count,lflags);
     }
-
-    rptr += (width << dlevel);
-    rsptr += (width << dlevel) >> surfshift;
-    ptr = rptr;
-    sptr = rsptr;
-
-    for (i=1; i <= endy;)
+#if 1
+    if (lflags & ESCH_TERNEX_SMOOTH_BOTTOM)
     {
-        cpt->x = rpt->x;
-        cpt->y = rpt->y;
-        cpt->z = rpt->z;
-        cpt2->x = rpt->x + _dvec.i;
-        cpt2->y = rpt->y + _dvec.j;
-        cpt2->z = rpt->z + _dvec.k;
+        int count_mod = 0;
+        VngoRect    wrect = *rect;
+        wrect.y += wrect.dy - mod;
+        wrect.dy = mod;
+        EschPoint troot2 = root_point;
+        troot2.x += dvec.i * float(rect->dy - mod);
+        troot2.y += dvec.j * float(rect->dy - mod);
+        troot2.z += dvec.k * float(rect->dy - mod);
+        // check to ensure troot2 within clip rect...  How could it not be in if it is within dy?
+        int hfoff = width * (rect->dy - mod);
+        int spoff = hfoff >> surfshift;
 
-        for (j=0; j <= endx; j++)
-        {   // Process lines ABC.
-            float h = htable[*ptr];
-            ((EschPoint*)vB)->x = cpt->x + (h * hvec.i);
-            ((EschPoint*)vB)->y = cpt->y + (h * hvec.j);
-            ((EschPoint*)vB)->z = cpt->z + (h * hvec.k);
-
-            if (sptr->flags & ESCH_SURF_CINDISTXT)
-            {
-                vB->clr = txtcolor[sptr->cind-1];
-            }
-            else
-            {
-                vB->clr = sptr->cind;
-            }
-
-            vB->shade = sptr->shd;
-
-            cpt->x = cpt->x + _wvec.i;
-            cpt->y = cpt->y + _wvec.j;
-            cpt->z = cpt->z + _wvec.k;
-            vB++;
-
-            if (i + 1 <= endy)
-            {
-                h = htable[ptr[width << dlevel]];
-                ((EschPoint*)vC)->x = cpt2->x + (h * hvec.i);
-                ((EschPoint*)vC)->y = cpt2->y + (h * hvec.j);
-                ((EschPoint*)vC)->z = cpt2->z + (h * hvec.k);
-
-                if (sptr->flags & ESCH_SURF_CINDISTXT)
-                {
-                    vC->clr = txtcolor[sptr[width << (dlevel - surfshift)].cind-1];
-                }
-                else
-                {
-                    vC->clr = sptr[width << (dlevel - surfshift)].cind;
-                }
-                vC->shade = sptr[width << (dlevel - surfshift)].shd;
-
-                cpt2->x = cpt2->x + _wvec.i;
-                cpt2->y = cpt2->y + _wvec.j;
-                cpt2->z = cpt2->z + _wvec.k;
-                vC++;
-            }
-            ptr+=pstep;
-            sptr += pstep >> surfshift;
-        }
-        vA = &vpt[rowa];
-        vB = &vpt[rowb];
-        vC = &vpt[rowc];
-
-        if (i+1 <= endy)
+        if (lflags & ESCH_TERNEX_SMOOTH_RIGHT)
         {
-            if (lflags & ESCH_TERNEX_SMOOTH_LEFT)
-            {
-                esch_surf_type      *tlsptr;
-                tlsptr = rsptr - ((width << dlevel) >> surfshift);
-                ((EschPoint*)vB)->x = (((EschPoint*)vA)->x
-                                       + ((EschPoint*)vC)->x) / 2.0f;
-                ((EschPoint*)vB)->y = (((EschPoint*)vA)->y
-                                       + ((EschPoint*)vC)->y) / 2.0f;
-                ((EschPoint*)vB)->z = (((EschPoint*)vA)->z
-                                       + ((EschPoint*)vC)->z) / 2.0f;
-                vB->shade = (vA->shade + vC->shade) >> 1;
-#ifndef TERRAIN_NO_PATCHUP
-#ifdef TERRAIN_DEBUG_AID
-                if (!(flags & ESCH_TRN_DOTS))
-#endif
-                {
-                    float u_left,u_right,v_top,v_bottom;
-                    dword tlflags = tlsptr->flags;
-                    face[2].flags = fflags1;
-                    face[2].a = rowa;
-                    face[2].b = rowb;
-                    face[2].c = rowc;
+            VngoRect trect = *rect;
+            trect.x = trect.x + trect.dx - mod;
+            trect.y = trect.y + trect.dy - mod;
+            trect.dx = mod;
+            trect.dy = mod;
 
-                    if (((tlflags & ESCH_SURF_CINDISTXT) &&
-                        (!texture_shift2 || (!(tlflags & ESCH_SURF_NOTILE)))))
-                    {
-                        compute_texture_uv(u_left,u_right,v_top,v_bottom,
-                                            tlflags,rect->x + (i << dlevel),
-                                            rect->y,texture_shift2);
+            wrect.dx -=mod;
 
-                        face[2].txt = tlsptr->cind;
+            EschPoint troot = troot2;
+            troot.x += (wvec.i * float(rect->dx-mod));
+            troot.y += (wvec.j * float(rect->dx-mod));
+            troot.z += (wvec.k * float(rect->dx-mod));
 
-                        face[2].u[0] = 0;
-                        face[2].u[1] = 0;
-                        face[2].u[2] = 0;
-                        face[2].v[0] = v_top;
-                        face[2].v[1] = (v_top + v_bottom) / 2.0f;
-                        face[2].v[2] = v_bottom;
-                    }
-                    else
-                    {
-                        face[2].flags &= ~ESCH_FACE_TEXTURED;
-                    }
+            int thfoff = (rect->dx-mod) + hfoff;
+            int tspoff = ((rect->dx-mod) >> surfshift) + spoff;
 
-                    esch_clipdraw_face(2,(ctrlfl & ~ESCH_CDF_BFCULL));
-                }
-#endif
-            }
-            if (lflags & ESCH_TERNEX_SMOOTH_RIGHT)
-            {
-                esch_surf_type      *tlsptr;
-                tlsptr = rsptr - ((width << dlevel) >> surfshift) + (rect->dx >> surfshift);
+            draw_terrain_trans_br(&trect,&troot,lhfield+thfoff, sptr+tspoff,
+                                  dlevel,lflags);
 
-                ((EschPoint*)(&vB[endx]))->x = (((EschPoint*)(&vA[endx]))->x
-                                        + ((EschPoint*)(&vC[endx]))->x) / 2.0f;
-                ((EschPoint*)(&vB[endx]))->y = (((EschPoint*)(&vA[endx]))->y
-                                        + ((EschPoint*)(&vC[endx]))->y) / 2.0f ;
-                ((EschPoint*)(&vB[endx]))->z = (((EschPoint*)(&vA[endx]))->z
-                                        + ((EschPoint*)(&vC[endx]))->z) / 2.0f ;
-                vB[endx].shade = (vA[endx].shade + vC[endx].shade) >> 1;
-#ifndef TERRAIN_NO_PATCHUP
-#ifdef TERRAIN_DEBUG_AID
-                if (!(flags & ESCH_TRN_DOTS))
-#endif
-                {
-                    float u_left,u_right,v_top,v_bottom;
-                    dword tlflags = tlsptr->flags;
-                    face[2].flags = fflags1;
-                    face[2].a = rowa + dx - 1;
-                    face[2].b = rowb + dx - 1;
-                    face[2].c = rowc + dx - 1;
-
-                    if (((tlflags & ESCH_SURF_CINDISTXT) &&
-                       (!texture_shift2 || (!(tlflags & ESCH_SURF_NOTILE)))))
-                    {
-                        compute_texture_uv(u_left,u_right,v_top,v_bottom,
-                                           tlflags,rect->x + (i << dlevel),
-                                           rect->y,texture_shift2);
-
-                        face[2].txt = tlsptr->cind;
-
-                        face[2].u[0] = 0;
-                        face[2].u[1] = 0;
-                        face[2].u[2] = 0;
-                        face[2].v[0] = v_top;
-                        face[2].v[1] = (v_top + v_bottom) / 2.0f;
-                        face[2].v[2] = v_bottom;
-                    }
-                    else
-                    {
-                        face[2].flags &= ~ESCH_FACE_TEXTURED;
-                    }
-
-
-                    esch_clipdraw_face(2,(ctrlfl & ~ESCH_CDF_BFCULL));
-                }
-#endif
-            }
         }
-
-        if ((i+1 == endy) && (lflags & ESCH_TERNEX_SMOOTH_BOTTOM))
+        if (lflags & ESCH_TERNEX_SMOOTH_LEFT)
         {
-            esch_surf_type      *tlsptr;
-            tlsptr = rsptr + ((width << dlevel) >> surfshift);
-            for (int k=0;k < endx-1;k+=2)
-            {
-                ((EschPoint*)(&vC[k+1]))->x = (((const EschPoint*)(&vC[k]))->x
-                                            + ((const EschPoint*)(&vC[k+2]))->x) / 2.0f;
-                ((EschPoint*)(&vC[k+1]))->y = (((const EschPoint*)(&vC[k]))->y
-                                            + ((const EschPoint*)(&vC[k+2]))->y) / 2.0f;
-                ((EschPoint*)(&vC[k+1]))->z = (((const EschPoint*)(&vC[k]))->z
-                                            + ((const EschPoint*)(&vC[k+2]))->z) / 2.0f;
-                vC[k+1].shade = (vC[k].shade + vC[k+2].shade) >> 1;
-#ifndef TERRAIN_NO_PATCHUP
-#ifdef TERRAIN_DEBUG_AID
-                if (!(flags & ESCH_TRN_DOTS))
-#endif
-                {
-                    float u_left,u_right,v_top,v_bottom;
-                    dword tlflags = tlsptr->flags;
-                    face[2].flags = fflags1;
-                    face[2].txt = tlsptr->cind;
-                    face[2].a = rowc + k;
-                    face[2].b = rowc + k + 1;
-                    face[2].c = rowc + k + 2;
+            wrect.x += mod;
+            wrect.dx -= mod;
+            VngoRect trect = *rect;
+            trect.y = trect.y + trect.dy - mod;
+            trect.dx = mod;
+            trect.dy = mod;
 
-                    if (((tlflags & ESCH_SURF_CINDISTXT) &&
-                       (!texture_shift2 || (!(tlflags & ESCH_SURF_NOTILE)))))
-                    {
-                        compute_texture_uv(u_left,u_right,v_top,v_bottom,
-                                           tlflags,rect->x + (i << dlevel),
-                                           rect->y,texture_shift2);
+            draw_terrain_trans_bl(&trect,&troot2,lhfield+hfoff,sptr+spoff,dlevel,lflags);
 
-                        face[2].txt = tlsptr->cind;
+            troot2.x = troot2.x + (wvec.i * float(mod));
+            troot2.y = troot2.y + (wvec.j * float(mod));
+            troot2.z = troot2.z + (wvec.k * float(mod));
 
-                        face[2].u[0] = u_left;
-                        face[2].u[1] = (u_left+u_right) / 2.0f;
-                        face[2].u[2] = u_right;
-                        face[2].v[0] = 0;
-                        face[2].v[1] = 0;
-                        face[2].v[2] = 0;
-                    }
-                    else
-                    {
-                        face[2].flags &= ~ESCH_FACE_TEXTURED;
-                    }
-
-                    esch_clipdraw_face(2,(ctrlfl & ~ESCH_CDF_BFCULL));
-                }
-#endif
-                tlsptr += pstep >> surfshift;
-            }
+            hfoff+=mod;
+            spoff+=(mod >> surfshift);
         }
-        else if (i == endy && (lflags & ESCH_TERNEX_SMOOTH_BOTTOM))
-        {
-            esch_surf_type      *tlsptr;
-            tlsptr = rsptr;
-            for (int k=0;k < endx-1;k+=2)
-            {
-                ((EschPoint*)(&vB[k+1]))->x = (((const EschPoint*)(&vB[k]))->x
-                                    + ((const EschPoint*)(&vB[k+2]))->x) / 2.0f;
-                ((EschPoint*)(&vB[k+1]))->y = (((const EschPoint*)(&vB[k]))->y
-                                    + ((const EschPoint*)(&vB[k+2]))->y) / 2.0f;
-                ((EschPoint*)(&vB[k+1]))->z = (((const EschPoint*)(&vB[k]))->z
-                                    + ((const EschPoint*)(&vB[k+2]))->z) / 2.0f;
-                vB[k+1].shade = (vB[k].shade + vB[k+2].shade) >> 1;
-#ifndef TERRAIN_NO_PATCHUP
-#ifdef TERRAIN_DEBUG_AID
-                if (!(flags & ESCH_TRN_DOTS))
-#endif
-                {
-                    float u_left,u_right,v_top,v_bottom;
-                    dword tlflags = tlsptr->flags;
-                    face[2].flags = fflags1;
-                    face[2].txt = tlsptr->cind;
-                    face[2].a = rowb + k;
-                    face[2].b = rowb + k + 1;
-                    face[2].c = rowb + k + 2;
-                    if (((tlflags & ESCH_SURF_CINDISTXT) &&
-                       (!texture_shift2 || (!(tlflags & ESCH_SURF_NOTILE)))))
-                    {
-                        compute_texture_uv(u_left,u_right,v_top,v_bottom,
-                                           tlflags,rect->x + (i << dlevel),
-                                           rect->y,texture_shift2);
+        int count = wrect.dx >> dlevel;
 
-                        face[2].txt = tlsptr->cind;
-
-                        face[2].u[0] = u_left;
-                        face[2].u[1] = (u_left+u_right) / 2.0f;
-                        face[2].u[2] = u_right;
-                        face[2].v[0] = 0;
-                        face[2].v[1] = 0;
-                        face[2].v[2] = 0;
-                    }
-                    else
-                    {
-                        face[2].flags &= ~ESCH_FACE_TEXTURED;
-                    }
-                    esch_clipdraw_face(2,(ctrlfl & ~ESCH_CDF_BFCULL));
-                }
-#endif
-                tlsptr += pstep >> surfshift;
-            }
-        }
-
-
-        //
-        // Now spew out the faces....tl
-        //
-#ifdef TERRAIN_DEBUG_AID
-        if (flags & ESCH_TRN_DOTS)
-        {
-            //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Dots
-            //ÄÄÄ Clip against view volume
-            // Near/far clip plane
-            display_pixel_row(vA,endx);
-            display_pixel_row(vB,endx);
-            if (i+1 <= endy)
-                display_pixel_row(vC,endx);
-        }
-        else
-#endif
-        {
-            float u_left,u_right,v_top,v_bottom;
-            esch_surf_type      *lsptr;
-            lsptr = &rsptr[-((width >> surfshift) << dlevel)];
-            dword tlflags;
-            curx = leftx;
-
-            for (int k=0; k < endx;k++)
-            {
-#ifndef TERRAIN_NO_FRUSTRUM_WALK
-                if ((curx >= (left_edge[curz] - cstep)
-                    || curx >= (left_edge[curz+step] - cstep))
-                    && (curx <= (right_edge[curz] + cstep)
-                    || curx <= (right_edge[curz+step] + cstep)))
-#endif
-                {
-                    tlflags = lsptr->flags;
-                    if (!(tlflags & ESCH_SURF_HIDDEN))
-                    {
-                        // draw the tri strip formed by rows a & b;
-                        face[0].flags = fflags1;
-                        face[1].flags = fflags2;
-
-                        face[0].a = k;
-                        face[0].b = k + rowb;
-                        face[0].c = k + rowb + 1;
-
-                        face[1].a = k;
-                        face[1].b = k + rowb + 1;
-                        face[1].c = k + 1;
-
-                        if ((tlflags & ESCH_SURF_CINDISTXT) &&
-                            (!texture_shift || !(tlflags & ESCH_SURF_NOTILE)))
-                        {
-                            face[0].txt = lsptr->cind;
-                            face[1].txt = face[0].txt;
-
-                            if (face[0].flags & ESCH_FACE_TEXTURED)
-                            {
-                                compute_texture_uv(u_left,u_right,v_top,v_bottom,
-                                                    tlflags,rect->x + (k << dlevel),
-                                                    rect->y + (i << dlevel),
-                                                    texture_shift);
-                            }
-                            else
-                            {
-                                u_left=u_right=v_bottom=v_top=0;
-                            }
-                            face[0].u[0] = u_left;
-                            face[0].v[0] = v_bottom;
-                            face[0].u[1] = u_left;
-                            face[0].v[1] = v_top;
-                            face[0].u[2] = u_right;
-                            face[0].v[2] = v_top;
-
-    //                        face[1].flags = face[0].flags;
-                            face[1].u[0] = u_left;
-                            face[1].v[0] = v_bottom;
-                            face[1].u[1] = u_right;
-                            face[1].v[1] = v_top;
-                            face[1].u[2] = u_right;
-                            face[1].v[2] = v_bottom;
-                        }
-                        else
-                        {
-                            face[0].flags &= ~ESCH_FACE_TEXTURED;
-                            face[1].flags &= ~ESCH_FACE_TEXTURED;
-                        }
-                        esch_clipdraw_face(0,ctrlfl);
-                        esch_clipdraw_face(1,ctrlfl);
-                    }
-                    else
-                    {
-                        int debug_trap = TRUE;
-                    }
-#ifdef TERRAIN_DEBUG_AID
-                    if (flags & ESCH_TRN_DEBUG)
-                    {
-                        tpt.x = curx;
-                        tpt.y = curz;
-                        tpt.z = 0x10000;
-                        cam->vport->clip_pixel(&tpt,&clr);
-                    }
-#endif
-                }
-                if( i+1 <= endy)
-                {
-#ifndef TERRAIN_NO_FRUSTRUM_WALK
-                    if ((curx >= (left_edge[curz+step] - cstep)
-                        || curx >= (left_edge[curz+step+step] - cstep))
-                        && (curx <= (right_edge[curz+step] + cstep)
-                        || curx <= (right_edge[curz+step+step] + cstep)))
-#endif
-                    {
-                        int t = (width >> surfshift) << dlevel;
-                        tlflags = lsptr[t].flags;
-                        if (!(tlflags & ESCH_SURF_HIDDEN))
-                        {
-
-                            // draw the tri strip formed by rows b & c;
-                            face[0].flags = fflags1;
-                            face[0].a = k + rowb;
-                            face[0].b = k + rowc;
-                            face[0].c = k + rowc + 1;
-
-                            face[1].flags = fflags2;
-                            face[1].a = k + rowb;
-                            face[1].b = k + rowc + 1;
-                            face[1].c = k + rowb + 1;
-
-
-                            if ((tlflags & ESCH_SURF_CINDISTXT) &&
-                                (!texture_shift || !(tlflags & ESCH_SURF_NOTILE)))
-                            {
-                                face[0].txt = lsptr[t].cind;
-                                face[1].txt = face[0].txt;
-
-                                if (face[0].flags & ESCH_FACE_TEXTURED)
-                                {
-                                    compute_texture_uv(u_left,u_right,v_top,v_bottom,
-                                                        tlflags,rect->x  + (k << dlevel),
-                                                        rect->y + ((i+1) << dlevel),
-                                                        texture_shift);
-                                }
-                                else
-                                {
-                                    u_left=u_right=v_top=v_bottom=0;
-                                }
-
-                                face[0].u[0] = u_left;
-                                face[0].v[0] = v_bottom;
-                                face[0].u[1] = u_left;
-                                face[0].v[1] = v_top;
-                                face[0].u[2] = u_right;
-                                face[0].v[2] = v_top;
-
-    //                            face[1].flags = face[0].flags;
-                                face[1].u[0] = u_left;
-                                face[1].v[0] = v_bottom;
-                                face[1].u[1] = u_right;
-                                face[1].v[1] = v_top;
-                                face[1].u[2] = u_right;
-                                face[1].v[2] = v_bottom;
-                            }
-                            else
-                            {
-                                face[0].flags &= ~ESCH_FACE_TEXTURED;
-                                face[1].flags &= ~ESCH_FACE_TEXTURED;
-                            }
-                            esch_clipdraw_face(0,ctrlfl);
-                            esch_clipdraw_face(1,ctrlfl);
-                        }
-                        else
-                        {
-                            int debug_trap = TRUE;
-                        }
-#ifdef TERRAIN_DEBUG_AID
-                        if (flags & ESCH_TRN_DEBUG)
-                        {
-                            tpt.x = curx;
-                            tpt.y = curz + step;
-                            tpt.z = 0x10000;
-                            cam->vport->clip_pixel(&tpt,&clr);
-                        }
-#endif
-                    }
-                }
-                curx += step;
-                lsptr += pstep >> surfshift;
-            }
-            curz += step << 1;
-            for (int l = 0;l <= endx;l++)
-            {
-                vflags[l] = vflags[l+rowb] = 0;
-            }
-        }
-
-
-        //
-        // Update all of the stuff to do the next two rows of points.
-        //
-        i += 2;
-
-        rptr = rptr + (width << (dlevel + 1));
-        ptr = rptr;
-
-        rsptr = rsptr + ((width << (dlevel + 1)) >> surfshift);
-        sptr = rsptr;
-
-        rpt->x = rpt->x + _dvec.i + _dvec.i;
-        rpt->y = rpt->y + _dvec.j + _dvec.j;
-        rpt->z = rpt->z + _dvec.k + _dvec.k;
-        cpt->x = rpt->x;
-        cpt->y = rpt->y;
-        cpt->z = rpt->z;
-        cpt2->x = rpt->x + _dvec.i;
-        cpt2->y = rpt->y + _dvec.j;
-        cpt2->z = rpt->z + _dvec.k;
-
-        if (i  <= endy)
-        {
-            for (j=0; j <= endx; j++)
-            {   // Process lines CBA.
-                float h = htable[*ptr];
-                ((EschPoint*)vB)->x = cpt->x + (h * hvec.i);
-                ((EschPoint*)vB)->y = cpt->y + (h * hvec.j);
-                ((EschPoint*)vB)->z = cpt->z + (h * hvec.k);
-
-                if (sptr->flags & ESCH_SURF_CINDISTXT)
-                {
-                    vB->clr = txtcolor[sptr->cind-1];
-                }
-                else
-                {
-                    vB->clr = sptr->cind;
-                }
-                vB->shade = sptr->shd;
-                cpt->x = cpt->x + _wvec.i;
-                cpt->y = cpt->y + _wvec.j;
-                cpt->z = cpt->z + _wvec.k;
-                vB++;
-                if (i+1 <= endy)
-                {
-                    h = htable[ptr[width << dlevel]];
-                    ((EschPoint*)vA)->x = cpt2->x + (h * hvec.i);
-                    ((EschPoint*)vA)->y = cpt2->y + (h * hvec.j);
-                    ((EschPoint*)vA)->z = cpt2->z + (h * hvec.k);
-
-                    if (sptr->flags & ESCH_SURF_CINDISTXT)
-                    {
-                        vA->clr = txtcolor[sptr[width << (dlevel - surfshift)].cind-1];
-                    }
-                    else
-                    {
-                        vA->clr = sptr[width << (dlevel - surfshift)].cind;
-                    }
-
-                    vA->shade = sptr[width << (dlevel - surfshift)].shd;
-                    cpt2->x = cpt2->x + _wvec.i;
-                    cpt2->y = cpt2->y + _wvec.j;
-                    cpt2->z = cpt2->z + _wvec.k;
-                    vA++;
-                }
-                ptr += pstep;
-                sptr += pstep >> surfshift;
-
-            }
-            vA = &vpt[rowa];
-            vB = &vpt[rowb];
-            vC = &vpt[rowc];
-
-            if (i+1 <= endy)
-            {
-                if (lflags & ESCH_TERNEX_SMOOTH_LEFT)
-                {
-                    esch_surf_type      *tlsptr;
-                    tlsptr = rsptr - ((width << dlevel) >> surfshift);
-                    ((EschPoint*)vB)->x = (((EschPoint*)vA)->x
-                                           + ((EschPoint*)vC)->x) / 2.0f;
-                    ((EschPoint*)vB)->y = (((EschPoint*)vA)->y
-                                           + ((EschPoint*)vC)->y) / 2.0f;
-                    ((EschPoint*)vB)->z = (((EschPoint*)vA)->z
-                                           + ((EschPoint*)vC)->z) / 2.0f;
-                    vB->shade = (vA->shade + vC->shade) >> 1;
-#ifndef TERRAIN_NO_PATCHUP
-#ifdef TERRAIN_DEBUG_AID
-                    if (!(flags & ESCH_TRN_DOTS))
-#endif
-                    {
-                        float u_left,u_right,v_top,v_bottom;
-                        dword tlflags = tlsptr->flags;
-                        face[2].flags = fflags1;
-                        face[2].a = rowa;
-                        face[2].b = rowb;
-                        face[2].c = rowc;
-
-                        if (((tlflags & ESCH_SURF_CINDISTXT) &&
-                           (!texture_shift2 || (!(tlflags & ESCH_SURF_NOTILE)))))
-                        {
-                            compute_texture_uv(u_left,u_right,v_top,v_bottom,
-                                               tlflags,rect->x + (i << dlevel),
-                                               rect->y,texture_shift2);
-
-                            face[2].txt = tlsptr->cind;
-
-                            face[2].u[0] = 0;
-                            face[2].u[1] = 0;
-                            face[2].u[2] = 0;
-                            face[2].v[0] = v_top;
-                            face[2].v[1] = (v_top + v_bottom) / 2.0f;
-                            face[2].v[2] = v_bottom;
-                        }
-                        else
-                        {
-                            face[2].flags &= ~ESCH_FACE_TEXTURED;
-                        }
-
-                        esch_clipdraw_face(2,(ctrlfl & ~ESCH_CDF_BFCULL));
-                    }
-#endif
-                }
-                if (lflags & ESCH_TERNEX_SMOOTH_RIGHT)
-                {
-                    esch_surf_type      *tlsptr;
-                    tlsptr = rsptr - ((width << dlevel) >> surfshift) + (rect->dx >> surfshift);
-                    ((EschPoint*)(&vB[endx]))->x = (((const EschPoint*)(&vA[endx]))->x
-                                    + ((const EschPoint*)(&vC[endx]))->x) / 2.0f;
-                    ((EschPoint*)(&vB[endx]))->y = (((const EschPoint*)(&vA[endx]))->y
-                                    + ((const EschPoint*)(&vC[endx]))->y) / 2.0f;
-                    ((EschPoint*)(&vB[endx]))->z = (((const EschPoint*)(&vA[endx]))->z
-                                    + ((const EschPoint*)(&vC[endx]))->z) / 2.0f;
-                    vB[endx].shade = (vA[endx].shade + vC[endx].shade) >> 1;
-#ifndef TERRAIN_NO_PATCHUP
-#ifdef TERRAIN_DEBUG_AID
-                    if (!(flags & ESCH_TRN_DOTS))
-#endif
-                    {
-                        float u_left,u_right,v_top,v_bottom;
-                        dword tlflags = tlsptr->flags;
-                        face[2].flags = fflags1;
-                        face[2].a = rowa + dx - 1;
-                        face[2].b = rowb + dx - 1;
-                        face[2].c = rowc + dx - 1;
-
-                        if (((tlflags & ESCH_SURF_CINDISTXT) &&
-                           (!texture_shift2 || (!(tlflags & ESCH_SURF_NOTILE)))))
-                        {
-                            compute_texture_uv(u_left,u_right,v_top,v_bottom,
-                                               tlflags,rect->x + (i << dlevel),
-                                               rect->y,texture_shift2);
-
-                            face[2].txt = tlsptr->cind;
-
-                            face[2].u[0] = 0;
-                            face[2].u[1] = 0;
-                            face[2].u[2] = 0;
-                            face[2].v[0] = v_top;
-                            face[2].v[1] = (v_top + v_bottom) / 2.0f;
-                            face[2].v[2] = v_bottom;
-                        }
-                        else
-                        {
-                            face[2].flags &= ~ESCH_FACE_TEXTURED;
-                        }
-
-                        esch_clipdraw_face(2,(ctrlfl & ~ESCH_CDF_BFCULL));
-                    }
-#endif
-                }
-            }
-
-            if (((i+1) == endy) && (lflags & ESCH_TERNEX_SMOOTH_BOTTOM))
-            {
-                esch_surf_type      *tlsptr;
-                tlsptr = rsptr + ((width << dlevel) >> surfshift);
-                for (int k=0;k < endx-1;k+=2)
-                {
-                    ((EschPoint*)(&vA[k+1]))->x = (((const EschPoint*)(&vA[k]))->x
-                                    + ((const EschPoint*)(&vA[k+2]))->x) / 2.0f;
-                    ((EschPoint*)(&vA[k+1]))->y = (((const EschPoint*)(&vA[k]))->y
-                                    + ((const EschPoint*)(&vA[k+2]))->y) / 2.0f;
-                    ((EschPoint*)(&vA[k+1]))->z = (((const EschPoint*)(&vA[k]))->z
-                                    + ((const EschPoint*)(&vA[k+2]))->z) / 2.0f;
-                    vA[k+1].shade = (vA[k].shade + vA[k+2].shade) >> 1;
-#ifndef TERRAIN_NO_PATCHUP
-#ifdef TERRAIN_DEBUG_AID
-                    if (!(flags & ESCH_TRN_DOTS))
-#endif
-                    {
-                        float u_left,u_right,v_top,v_bottom;
-                        dword tlflags = tlsptr->flags;
-                        face[2].flags = fflags1;
-                        face[2].txt = tlsptr->cind;
-                        face[2].a = rowa + k;
-                        face[2].b = rowa + k + 1;
-                        face[2].c = rowa + k + 2;
-
-                        if (((tlflags & ESCH_SURF_CINDISTXT) &&
-                           (!texture_shift2 || (!(tlflags & ESCH_SURF_NOTILE)))))
-                        {
-                            compute_texture_uv(u_left,u_right,v_top,v_bottom,
-                                               tlflags,rect->x + (i << dlevel),
-                                               rect->y,texture_shift2);
-
-                            face[2].txt = tlsptr->cind;
-
-                            face[2].u[0] = u_left;
-                            face[2].u[1] = (u_left+u_right) / 2.0f;
-                            face[2].u[2] = u_right;
-                            face[2].v[0] = 0;
-                            face[2].v[1] = 0;
-                            face[2].v[2] = 0;
-                        }
-                        else
-                        {
-                            face[2].flags &= ~ESCH_FACE_TEXTURED;
-                        }
-
-                        esch_clipdraw_face(2,(ctrlfl & ~ESCH_CDF_BFCULL));
-                    }
-#endif
-                    tlsptr += pstep >> surfshift;
-                }
-            }
-            else if (i == endy && (lflags & ESCH_TERNEX_SMOOTH_BOTTOM))
-            {
-                esch_surf_type      *tlsptr;
-                tlsptr = rsptr;
-                for (int k=0;k < endx-1;k+=2)
-                {
-                    ((EschPoint*)(&vB[k+1]))->x = (((const EschPoint*)(&vB[k]))->x
-                                    + ((const EschPoint*)(&vB[k+2]))->x) / 2.0f;
-                    ((EschPoint*)(&vB[k+1]))->y = (((const EschPoint*)(&vB[k]))->y
-                                    + ((const EschPoint*)(&vB[k+2]))->y) / 2.0f;
-                    ((EschPoint*)(&vB[k+1]))->z = (((const EschPoint*)(&vB[k]))->z
-                                    + ((const EschPoint*)(&vB[k+2]))->z) / 2.0f;
-                    vB[k+1].shade = (vB[k].shade + vB[k+2].shade) >> 1;
-
-#ifndef TERRAIN_NO_PATCHUP
-#ifdef TERRAIN_DEBUG_AID
-                    if (!(flags & ESCH_TRN_DOTS))
-#endif
-                    {
-                        float u_left,u_right,v_top,v_bottom;
-                        dword tlflags = tlsptr->flags;
-                        face[2].flags = fflags1;
-                        face[2].txt = tlsptr->cind;
-                        face[2].a = rowb + k;
-                        face[2].b = rowb + k + 1;
-                        face[2].c = rowb + k + 2;
-
-                        if (((tlflags & ESCH_SURF_CINDISTXT) &&
-                           (!texture_shift2 || (!(tlflags & ESCH_SURF_NOTILE)))))
-                        {
-                            compute_texture_uv(u_left,u_right,v_top,v_bottom,
-                                               tlflags,rect->x + (i << dlevel),
-                                               rect->y,texture_shift2);
-
-                            face[2].txt = tlsptr->cind;
-
-                            face[2].u[0] = u_left;
-                            face[2].u[1] = (u_left+u_right) / 2.0f;
-                            face[2].u[2] = u_right;
-                            face[2].v[0] = 0;
-                            face[2].v[1] = 0;
-                            face[2].v[2] = 0;
-                        }
-                        else
-                        {
-                            face[2].flags &= ~ESCH_FACE_TEXTURED;
-                        }
-
-                        esch_clipdraw_face(2,(ctrlfl & ~ESCH_CDF_BFCULL));
-                    }
-#endif
-                    tlsptr += pstep >> surfshift;
-                }
-            }
-        }
-#ifdef TERRAIN_DEBUG_AID
-        if (flags & ESCH_TRN_DOTS)
-        {
-            //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Dots
-            //ÄÄÄ Clip against view volume
-            // Near/far clip plane
-            if (i <= endy)
-                display_pixel_row(vB,endx);
-        }
-        else
-#endif
-        {
-            float u_left,u_right,v_top,v_bottom;
-            esch_surf_type      *lsptr;
-            lsptr = &rsptr[-((width >> surfshift) << dlevel)];
-            dword tlflags;
-
-
-            curx = leftx;
-            for (int k=0; k < endx;k++)
-            {
-#ifndef TERRAIN_NO_FRUSTRUM_WALK
-                if ((curx >= (left_edge[curz] - cstep)
-                    || curx >= (left_edge[curz+step] - cstep))
-                    && (curx <= (right_edge[curz] + cstep)
-                    || curx <= (right_edge[curz+step] + cstep)))
-#endif
-                {
-                    if (i <= endy)
-                    {
-                        tlflags = lsptr->flags;
-
-                        if (!(tlflags & ESCH_SURF_HIDDEN))
-                        {
-
-                            // draw the tri strip formed by rows c & b;
-                            face[0].flags = fflags1;
-                            face[1].flags = fflags2;
-
-                            face[0].a = k + rowc;
-                            face[0].b = k + rowb;
-                            face[0].c = k + rowb + 1;
-
-                            face[1].a = k + rowc;
-                            face[1].b = k + rowb + 1;
-                            face[1].c = k + rowc + 1;
-
-                            if ((tlflags & ESCH_SURF_CINDISTXT) &&
-                                (!texture_shift || !(tlflags & ESCH_SURF_NOTILE)))
-                            {
-                                face[0].txt = lsptr->cind;
-                                face[1].txt = face[0].txt;
-
-                                if (face[0].flags & ESCH_FACE_TEXTURED)
-                                {
-                                    compute_texture_uv(u_left,u_right,v_top,v_bottom,
-                                                        tlflags,rect->x  + (k << dlevel),
-                                                        rect->y + (i << dlevel),
-                                                        texture_shift);
-                                }
-                                else
-                                {
-                                    u_left=u_right=v_top=v_bottom=0;
-                                }
-
-                                face[0].u[0] = u_left;
-                                face[0].v[0] = v_bottom;
-                                face[0].u[1] = u_left;
-                                face[0].v[1] = v_top;
-                                face[0].u[2] = u_right;
-                                face[0].v[2] = v_top;
-
-    //                            face[1].flags = face[0].flags;
-                                face[1].u[0] = u_left;
-                                face[1].v[0] = v_bottom;
-                                face[1].u[1] = u_right;
-                                face[1].v[1] = v_top;
-                                face[1].u[2] = u_right;
-                                face[1].v[2] = v_bottom;
-                            }
-                            else
-                            {
-                                face[0].flags &= ~ESCH_FACE_TEXTURED;
-                                face[1].flags &= ~ESCH_FACE_TEXTURED;
-                            }
-                            esch_clipdraw_face(0,ctrlfl);
-                            esch_clipdraw_face(1,ctrlfl);
-                        }
-                        else
-                        {
-                            int debug_trap = TRUE;
-                        }
-#ifdef TERRAIN_DEBUG_AID
-                        if (flags & ESCH_TRN_DEBUG)
-                        {
-                            tpt.x = curx;
-                            tpt.y = curz;
-                            tpt.z = 0x10000;
-
-                            cam->vport->clip_pixel(&tpt,&clr);
-                        }
-#endif
-                    }
-                }
-                if( i+1 <= endy)
-                {
-#ifndef TERRAIN_NO_FRUSTRUM_WALK
-                    if ((curx >= (left_edge[curz+step] - cstep)
-                        || curx >= (left_edge[curz+step+step] - cstep))
-                        && (curx <= (right_edge[curz+step] + cstep)
-                        || curx <= (right_edge[curz+step+step] + cstep)))
-#endif
-                    {
-                        int t = (width >> surfshift) << dlevel;
-                        tlflags = lsptr[t].flags;
-
-                        if (!(tlflags & ESCH_SURF_HIDDEN))
-                        {
-
-                            // draw the tri strip formed by rows b & a;
-                            face[0].flags = fflags1;
-                            face[1].flags = fflags2;
-
-                            face[0].a = k + rowb;
-                            face[0].b = k + rowa;
-                            face[0].c = k + rowa + 1;
-
-                            face[1].a = k + rowb;
-                            face[1].b = k + rowa + 1;
-                            face[1].c = k + rowb + 1;
-
-                            if ((tlflags & ESCH_SURF_CINDISTXT) &&
-                                (!texture_shift || !(tlflags & ESCH_SURF_NOTILE)))
-                            {
-                                face[0].txt = lsptr[t].cind;
-                                face[1].txt = face[0].txt;
-
-                                if (face[0].flags & ESCH_FACE_TEXTURED)
-                                {
-                                    compute_texture_uv(u_left,u_right,v_top,v_bottom,
-                                                        tlflags,rect->x + (k << dlevel),
-                                                        rect->y + ((i+1) << dlevel),
-                                                        texture_shift);
-                                }
-                                else
-                                {
-                                    u_left=u_right=v_top=v_bottom=0;
-                                }
-
-                                face[0].u[0] = u_left;
-                                face[0].v[0] = v_bottom;
-                                face[0].u[1] = u_left;
-                                face[0].v[1] = v_top;
-                                face[0].u[2] = u_right;
-                                face[0].v[2] = v_top;
-
-    //                            face[1].flags = face[0].flags;
-                                face[1].u[0] = u_left;
-                                face[1].v[0] = v_bottom;
-                                face[1].u[1] = u_right;
-                                face[1].v[1] = v_top;
-                                face[1].u[2] = u_right;
-                                face[1].v[2] = v_bottom;
-                            }
-                            else
-                            {
-                                face[0].flags &= ~ESCH_FACE_TEXTURED;
-                                face[1].flags &= ~ESCH_FACE_TEXTURED;
-                            }
-
-                            esch_clipdraw_face(0,ctrlfl);
-                            esch_clipdraw_face(1,ctrlfl);
-                        }
-                        else
-                        {
-                            int debug_trap = TRUE;
-                        }
-
-#ifdef TERRAIN_DEBUG_AID
-                        if (flags & ESCH_TRN_DEBUG)
-                        {
-                            tpt.x = curx;
-                            tpt.y = curz + step;
-                            tpt.z = 0x10000;
-                            cam->vport->clip_pixel(&tpt,&clr);
-                        }
-#endif
-                    }
-                }
-                curx += step;
-                lsptr += pstep >> surfshift;
-            }
-            curz += step << 1;
-            for (int l = 0;l <= endx;l++)
-            {
-                vflags[rowc+l] = vflags[l+rowb] = 0;
-            }
-        }
-
-        rptr += (width << (dlevel + 1));
-        ptr = rptr;
-
-        rsptr = rsptr + ((width << (dlevel + 1)) >> surfshift);
-        sptr = rsptr;
-
-        rpt->x = rpt->x + _dvec.i + _dvec.i;
-        rpt->y = rpt->y + _dvec.j + _dvec.j;
-        rpt->z = rpt->z + _dvec.k + _dvec.k;
-        i += 2;
-
+        draw_terrain_trans_bottom(&wrect,&troot2,lhfield+hfoff,sptr+spoff,
+                                  dlevel,count,lflags);
     }
-#ifdef TERRAIN_DEBUG_AID
-    if(flags & ESCH_TRN_DEBUG)
+    if (lflags & ESCH_TERNEX_SMOOTH_LEFT)
     {
+        VngoRect    wrect = *rect;
+        EschPoint troot2 = root_point;
+        int hfoff = 0;
+        int spoff = 0;
+        int count_mod=0;
 
-        VngoColor24bit color(255,0,0);
-        // go ahead and draw the rect.
-        if (dlevel == 1)
+        if (lflags & ESCH_TERNEX_SMOOTH_TOP)
         {
-            color.r = 0;
-            color.g = 255;
-            color.b = 0;
+            troot2.x += (dvec.i * float (mod));
+            troot2.y += (dvec.j * float (mod));
+            troot2.z += (dvec.k * float (mod));
+            wrect.y += mod;
+            wrect.dy -= mod;
+            hfoff += ((width << 1) << dlevel);
+            spoff += (((width << 1) << dlevel) >> surfshift);
         }
-        else if (dlevel == 2)
+        if (lflags & ESCH_TERNEX_SMOOTH_BOTTOM)
         {
-            color.r = 0;
-            color.g = 0;
-            color.b = 255;
+            wrect.dy -= mod;
         }
-        else if (dlevel == 3)
+        int count = wrect.dy >> dlevel;
+
+        draw_terrain_trans_left(&wrect,&troot2,lhfield+hfoff,
+                                sptr+spoff,dlevel,count,lflags);
+    }
+    if (lflags & ESCH_TERNEX_SMOOTH_RIGHT)
+    {
+        VngoRect    wrect = *rect;
+        wrect.x = wrect.x + wrect.dx - mod;
+        wrect.dx = mod;
+        EschPoint troot2 = root_point;
+        int hfoff = rect->dx - mod;
+        int spoff = hfoff >> surfshift;
+        troot2.x += wvec.i * float(rect->dx - mod);
+        troot2.y += wvec.j * float(rect->dx - mod);
+        troot2.z += wvec.k * float(rect->dx - mod);
+        int count_mod=0;
+
+        if (lflags & ESCH_TERNEX_SMOOTH_TOP)
         {
-            color.r = 255;
-            color.g = 255;
-            color.b = 255;
+            troot2.x += (dvec.i * float (mod));
+            troot2.y += (dvec.j * float (mod));
+            troot2.z += (dvec.k * float (mod));
+            wrect.y += mod;
+            wrect.dy -= mod;
+            hfoff += ((width << 1) << dlevel);
+            spoff += (((width << 1) << dlevel) >> surfshift);
         }
-        else if (dlevel == 4)
+        if (lflags & ESCH_TERNEX_SMOOTH_BOTTOM)
         {
-            color.r = 255;
-            color.g = 255;
-            color.b = 0;
+            wrect.dy -= mod;
         }
 
-        VngoPoint   pts[4];
-        pts[0].x = rect->x;
-        pts[1].x = rect->x + rect->dx;
-        pts[2].x = rect->x + rect->dx;
-        pts[3].x = rect->x;
+        int count = wrect.dy >> dlevel;
 
-        pts[0].y = rect->y;
-        pts[1].y = rect->y;
-        pts[2].y = rect->y + rect->dy;
-        pts[3].y = rect->y + rect->dy;
-
-        pts[0].z = 0x10000 + (dlevel << 16);
-        pts[1].z = 0x10000 + (dlevel << 16);
-        pts[2].z = 0x10000 + (dlevel << 16);
-        pts[3].z = 0x10000 + (dlevel << 16);
-
-        cam->vport->clip_line(&pts[0],&pts[1],&color);
-        cam->vport->clip_line(&pts[1],&pts[2],&color);
-        cam->vport->clip_line(&pts[2],&pts[3],&color);
-        cam->vport->clip_line(&pts[3],&pts[0],&color);
+        draw_terrain_trans_right(&wrect,&troot2,lhfield+hfoff,
+                                 sptr+spoff,dlevel,count,lflags);
     }
 #endif
-
-//ÄÄÄ Pop drawing context
-    ec.pop();
 }
 
 
@@ -2033,21 +938,23 @@ void EschTerrainEx::draw_terrain_rect (VngoRect *rect, int dlevel,dword lflags)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 void EschTerrainEx::esch_find_draw_volume()
 {
-    EschCamera             *cam;
-    VngoPoint              pt1,pt2;
+    VngoPoint   pt1,pt2;
+    EschPoint   pos;
+    EschPoint   tpt;
+    EschCamera  *cam;
+    float       tx, ty, tz;
+    VngoPoint   vpt[6];
 
     cam=EschCurrent->camera;
 
     //
     // Get and draw the camera position in blue.
     //
-    EschPoint   pos;
     cam->get_position(&pos);
 
     //
     // Get and draw the viewing frustrum.
     //
-    VngoPoint   vpt[6];
 
     float modifier = float(1<< (scaleshift + 2)); // this help enlarge area slightly.
     EschVector  cvect= -cam->eye.dir;
@@ -2058,11 +965,18 @@ void EschTerrainEx::esch_find_draw_volume()
     vpt[0].y = (long(pos.z + cvect.k) >> scaleshift) + (width>>1);
 
     // Calc the 4 corners.
-    float tz = cam->yon + modifier;
-    float tx = tz * cam->xsize;
-    float ty = tz * cam->ysize;
+    tz = cam->yon + modifier;
 
-    EschPoint   tpt;
+    if (cam->flags & ESCH_CAM_ORTHO)
+    {
+        tx = cam->xsize;
+        ty = cam->ysize;
+    }
+    else
+    {
+        tx = tz * cam->xsize;
+        ty = tz * cam->ysize;
+    }
 
     tpt.x = tx;
     tpt.y = ty;
@@ -2249,12 +1163,12 @@ float EschTerrainEx::get_height(float x, float z) const
 
 //ÄÄÄÄ Check that point is on map
     if ((lx < 0)
-        || (lz < 0)
         || (lx >= width)
+        || (lz < 0)
         || (lz >= depth))
         return 0;
 
-    byte *ptr = &hfield[( lz * width ) + lx];
+    const byte *ptr = &hfield[( lz * width ) + lx];
 
 //ÄÄÄÄ Compute parameters t1 and t2, and assign b1/b2
 
@@ -2295,6 +1209,76 @@ float EschTerrainEx::get_height(float x, float z) const
 //ÄÄÄÄ Compute y
     y = y0 + (b1 * t1) + (b2 * t2);
     return (y + origin.y);
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// EschTerrainEx - get_face                                                 ³
+//                                                                          ³
+// Return the three points of the triangle under the point <x,z>.           ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+bool EschTerrainEx::get_face (float x, float z, EschPoint *p1, EschPoint *p2, EschPoint *p3) const
+{
+    float _x = x - origin.x;
+    float _z = z - origin.z;
+
+    assertMyth("EschTerrainEx::get_face needs height-field information",
+               hfield && htable);
+
+    assertMyth("EschTerrainEx::get_face needs positive scales",
+               scale > 0);
+
+    int     lx = (int)_x >> scaleshift;
+    int     lz = (int)_z >> scaleshift;
+
+    float   wx = float(lx << scaleshift);
+    float   wz = float(lz << scaleshift);
+
+    x = _x - wx;
+    z = _z - wz;
+
+//ÄÄÄÄ Check that point is on map
+    if ((lx < 0)
+        || (lx >= width)
+        || (lz < 0)
+        || (lz >= depth))
+        return 0;
+
+    const byte *ptr = &hfield[lz * width + lx];
+
+//ÄÄÄÄ Compute the points
+
+    const float one = float (1 << scaleshift);
+    if (x < z)
+    {
+        p1->x = wx;
+        p1->y = htable[*ptr];
+        p1->z = wz;
+
+        p2->x = wx;
+        p2->y = htable[*(ptr+width)];
+        p2->z = wz + one;
+
+        p3->x = wx + one;
+        p3->y = htable[*(ptr+width+1)];
+        p3->z = wz + one;
+    }
+    else
+    {
+        p1->x = wx;
+        p1->y = htable[*ptr];
+        p1->z = wz;
+
+        p2->x = wx + one;
+        p2->y = htable[*(ptr+width+1)];
+        p2->z = wz + one;
+
+        p3->x = wx + one;
+        p3->y = htable[*(ptr+1)];
+        p3->z = wz;
+    }
+//ÄÄÄÄ Compute y
+    return true;
 }
 
 
@@ -2419,6 +1403,14 @@ void EschTerrainEx::hide_rect(VngoRect &hrect)
         }
         sptr += wstep;
     }
+}
+
+
+void EschTerrainEx::point_average (EschPoint *mid, EschPoint *top, EschPoint *bottom)
+{
+    mid->x = (mid->x + ((top->x + bottom->x) / 2.0f)) / 2.0f;
+    mid->y = (mid->y + ((top->y + bottom->y) / 2.0f)) / 2.0f;
+    mid->z = (mid->z + ((top->z + bottom->z) / 2.0f)) / 2.0f;
 }
 
 //°±² End of module - esternex.cpp ²±°

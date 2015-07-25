@@ -8,10 +8,10 @@
 //ùùùùù²±²ùùùùùùù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùùùùùù²±²ùùùù²±²ùùùùùù
 //ùùùù²²²²²²²²²²ù²²²²²²²²ùùù²²²²²²²²ùù²²²ùùùù²²²ù²²²²²²²²²²ù²²²ùùùù²²²ùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùCopyrightù(c)ù1994-1997ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
-//ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
+//ùùùùùùùùùùùùùùùùùùù Microsoft Windows 95/NT Version ùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùùùùùùùùùùù Microsoft Windows '95 Version ùùùùùùùùùùùùùùùùùùùùùùù
+//ùùùùùùùùùùùCopyrightù(c)ù1994-1998ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
+//ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
@@ -825,6 +825,10 @@ void EschTerrain::draw()
     float                   minx, minz, maxx, maxz; // Bounding area (far/yon)
     float                   mlox, mloz, mhix, mhiz; // Medium detail area
     float                   llox, lloz, lhix, lhiz; // Low detail area
+    EschPoint               pos;
+    EschCamera              *cam;
+    EschVector              tvect;
+    dword                   cflags;
     static EschPoint        po, pd, pw;             // Workspace
 
     assertMyth("EschTerrain::draw needs height-field information",
@@ -844,7 +848,9 @@ void EschTerrain::draw()
     assertMyth("EschTerrain::draw needs camera in current context",
                EschCurrent != NULL && EschCurrent->camera != NULL);
 
-    EschCamera *cam=EschCurrent->camera;
+    cam=EschCurrent->camera;
+
+    cflags = cam->flags;
 
     assertMyth("EschTerrain::draw needs a viewport in current context's camera",
                cam->vport != NULL);
@@ -857,19 +863,15 @@ void EschTerrain::draw()
 //ÄÄÄ needed.
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Camera Position
-    EschPoint   pos;
-
     cam->get_position(&pos);
 
-    {
-        EschVector  tvect;
-        tvect = cam->eye.dir;
-        tvect = tvect * scale * float(2);
+    // Hack for problems with falling away of ground...
+    tvect = cam->eye.dir;
+    tvect = tvect * scale * float(2);
 
-        pos.x = (pos.x - tvect.i);
-        pos.y = (pos.y - tvect.j);
-        pos.z = (pos.z - tvect.k);
-    }
+    pos.x = (pos.x - tvect.i);
+    pos.y = (pos.y - tvect.j);
+    pos.z = (pos.z - tvect.k);
 
     mlox = llox = minx = pos.x;
     mloz = lloz = minz = pos.z;
@@ -882,8 +884,16 @@ void EschTerrain::draw()
         if (lodmedium > cam->hither)
         {
             //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Medium
-            tx = lodmedium * cam->xsize;
-            ty = lodmedium * cam->ysize;
+            if (cflags & ESCH_CAM_ORTHO)
+            {
+                tx = cam->xsize;
+                ty = cam->ysize;
+            }
+            else
+            {
+                tx = lodmedium * cam->xsize;
+                ty = lodmedium * cam->ysize;
+            }
 
             // -tx, ty
             po.x = -tx;
@@ -929,8 +939,16 @@ void EschTerrain::draw()
         if (lodlow > cam->hither)
         {
             //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Low
-            tx = lodlow * cam->xsize;
-            ty = lodlow * cam->ysize;
+            if (cflags & ESCH_CAM_ORTHO)
+            {
+                tx = cam->xsize;
+                ty = cam->ysize;
+            }
+            else
+            {
+                tx = lodlow * cam->xsize;
+                ty = lodlow * cam->ysize;
+            }
 
             // -tx, ty
             po.x = -tx;
@@ -975,8 +993,16 @@ void EschTerrain::draw()
     }
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Far points
-    tx = cam->yon * cam->xsize;
-    ty = cam->yon * cam->ysize;
+    if (cflags & ESCH_CAM_ORTHO)
+    {
+        tx = cam->xsize;
+        ty = cam->ysize;
+    }
+    else
+    {
+        tx = cam->yon * cam->xsize;
+        ty = cam->yon * cam->ysize;
+    }
 
     // -tx, ty
     po.x = -tx;
@@ -1250,25 +1276,55 @@ void EschTerrain::draw()
                 if (((EschPoint*)v)->z <= cam->yon
                     && ((EschPoint*)v)->z >= cam->hither)
                 {
-                    // Left/right/top/bottom plane clippdng
-                    float zx = ((EschPoint*)v)->z * cam->xsize;
-                    float zy = ((EschPoint*)v)->z * cam->ysize;
-
-                    if (((EschPoint*)v)->x >= -zx
-                        && ((EschPoint*)v)->x <= zx
-                        && ((EschPoint*)v)->y >= -zy
-                        && ((EschPoint*)v)->y <= zy)
+                    if (cflags & ESCH_CAM_ORTHO)
                     {
-                        //ÄÄÄ Project pixel
-                        v->x = long((((EschPoint*)v)->x * cam->xscalar) / ((EschPoint*)v)->z)
-                               + (cam->vport->vbuff.width >> 1);
-                        v->y = (cam->vport->vbuff.height >> 1)
-                               - long((((EschPoint*)v)->y * cam->yscalar) / ((EschPoint*)v)->z);
-                        v->z = ulong(((EschPoint*)v)->z * cam->z_factor * float(0xffffffff));
-                        vflags[i] |= ESCH_VVERT_PROJECTED;
+                        // Left/right/top/bottom plane clipping
+                        float zx = cam->xsize;
+                        float zy = cam->ysize;
 
-                        //ÄÄÄ Draw pixel
-                        cam->vport->pixel(v);
+                        if (((EschPoint*)v)->x >= -zx
+                            && ((EschPoint*)v)->x <= zx
+                            && ((EschPoint*)v)->y >= -zy
+                            && ((EschPoint*)v)->y <= zy)
+                        {
+                            //ÄÄÄ Project pixel
+                            v->x = long(((EschPoint*)v)->x * cam->xscalar)
+                                       + (cam->vport->vbuff.width >> 1);
+                            v->y = (cam->vport->vbuff.height >> 1)
+                                   - long(((EschPoint*)v)->y * cam->yscalar);
+                            v->z = ulong(((EschPoint*)v)->z
+                                         * cam->z_factor
+                                         * float(0xffffffff));
+                            vflags[i] |= ESCH_VVERT_PROJECTED;
+
+                            //ÄÄÄ Draw pixel
+                            cam->vport->pixel(v);
+                        }
+                    }
+                    else
+                    {
+                        // Left/right/top/bottom plane clipping
+                        float zx = ((EschPoint*)v)->z * cam->xsize;
+                        float zy = ((EschPoint*)v)->z * cam->ysize;
+
+                        if (((EschPoint*)v)->x >= -zx
+                            && ((EschPoint*)v)->x <= zx
+                            && ((EschPoint*)v)->y >= -zy
+                            && ((EschPoint*)v)->y <= zy)
+                        {
+                            //ÄÄÄ Project pixel
+                            v->x = long((((EschPoint*)v)->x * cam->xscalar)
+                                                       / ((EschPoint*)v)->z)
+                                       + (cam->vport->vbuff.width >> 1);
+                            v->y = (cam->vport->vbuff.height >> 1)
+                                       - long((((EschPoint*)v)->y * cam->yscalar)
+                                                             / ((EschPoint*)v)->z);
+                            v->z = ulong(((EschPoint*)v)->z * cam->z_factor * float(0xffffffff));
+                            vflags[i] |= ESCH_VVERT_PROJECTED;
+
+                            //ÄÄÄ Draw pixel
+                            cam->vport->pixel(v);
+                        }
                     }
                 }
             }
@@ -1722,12 +1778,12 @@ float EschTerrain::get_height(float x, float z) const
 
 //ÄÄÄÄ Check that point is on map
     if ((lx < 0)
-        || (lz < 0)
         || (lx >= width)
+        || (lz < 0)
         || (lz >= depth))
         return 0;
 
-    byte *ptr = &hfield[( lz * width ) + lx];
+    const byte *ptr = &hfield[( lz * width ) + lx];
 
 //ÄÄÄÄ Compute parameters t1 and t2, and assign b1/b2
 
@@ -1811,6 +1867,112 @@ float EschTerrain::get_height(float x, float z) const
     y = y0 + (b1 * t1) + (b2 * t2);
 
     return (y + origin.y);
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// EschTerrain - get_face                                                   ³
+//                                                                          ³
+// Return the three points of the triangle under the point <x,z>.           ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+bool EschTerrain::get_face (float x, float z, EschPoint *p1, EschPoint *p2, EschPoint *p3) const
+{
+    float _x = x - origin.x;
+    float _z = z - origin.z;
+
+    assertMyth("EschTerrain::get_face needs height-field information",
+               hfield && htable);
+
+    assertMyth("EschTerrain:get_face needs positive scales",
+               scale > 0);
+
+    int     lx = int (_x) >> scaleshift;
+    int     lz = int (_z) >> scaleshift;
+
+    float   wx = float (lx << scaleshift);
+    float   wz = float (lz << scaleshift);
+
+    x = _x - wx;
+    z = _z - wz;
+
+//ÄÄÄÄ Check that point is on map
+    if ((lx < 0)
+        || (lx >= width)
+        || (lz < 0)
+        || (lz >= depth))
+        return false;
+
+    const byte *ptr = &hfield[lz * width + lx];
+
+//ÄÄÄÄ Compute parameters t1 and t2, and assign b1/b2
+
+    const float one = float (1 << scaleshift);
+    if (!((lx ^ lz) & 0x1)) // determine which triangle pattern to follow
+    {                       // __
+                            // |/  or /|
+        if (x < z)
+        {
+            p1->x = wx;
+            p1->y = htable[*ptr];
+            p1->z = wz;
+
+            p2->x = wx;
+            p2->y = htable[*(ptr+width)];
+            p2->z = wz + one;
+
+            p3->x = wx + one;
+            p3->y = htable[*(ptr+width+1)];
+            p3->z = wz + one;
+        }
+        else
+        {
+            p1->x = wx;
+            p1->y = htable[*ptr];
+            p1->z = wz;
+
+            p2->x = wx + one;
+            p2->y = htable[*(ptr+width+1)];
+            p2->z = wz + one;
+
+            p3->x = wx + one;
+            p3->y = htable[*(ptr+1)];
+            p3->z = wz;
+        }
+    }
+    else
+    {                       // |\
+                            // ---
+        if ((x+z) > scale)
+        {
+            p1->x = wx + one;
+            p1->y = htable[*(ptr+width+1)];
+            p1->z = wz + one;
+
+            p2->x = wx + one;
+            p2->y = htable[*(ptr+1)];
+            p2->z = wz;
+
+            p3->x = wx;
+            p3->y = htable[*(ptr+width)];
+            p3->z = wz + one;
+        }
+        else
+        {
+            p1->x = wx;
+            p1->y = htable[*ptr];
+            p1->z = wz;
+
+            p2->x = wx;
+            p2->y = htable[*(ptr+width)];
+            p2->z = wz + one;
+
+            p3->x = wx + one;
+            p3->y = htable[*(ptr+1)];
+            p3->z = wz;
+        }
+    }
+
+    return true;
 }
 
 

@@ -8,9 +8,9 @@
                            /  /            \  \
                           /__/              \__\
  
-                       Microsoft Windows '95 Version
+                     Microsoft Windows 95/NT Version
 
-             Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.
+             Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.
                             All Rights Reserved.
 
  ---------------------------------------------------------------------------
@@ -38,7 +38,7 @@
                               LUNAR LANDER EXAMPLE
 
  Notes by: Chuck Walbourn
- Updated: October 31, 1997
+ Updated: January 2, 1998
 
 
  ---------------------------------------------------------------------------

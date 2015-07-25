@@ -13,9 +13,9 @@
 //
 //                     A Simluator Framework for MythOS(tm)
 //
-//                        Microsoft Windows '95 Version
+//                      Microsoft Windows 95/NT Version
 //
-//               Copyright (c) 1997 by Charybdis Enterprises, Inc.
+//            Copyright (c) 1997-1998 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved.
 //
 //컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
@@ -152,12 +152,12 @@ BOOL SimGine::init_instance()
     wc.lpszMenuName  = 0;
 
     // This will load the small icon image from the icon resource
-    wc.hIconSm = (HICON__*)LoadImage (hInstance,
-                                      MAKEINTRESOURCE(IDI_SIM_APPICON),
-                                      IMAGE_ICON,
-                                      GetSystemMetrics(SM_CXSMICON),
-                                      GetSystemMetrics(SM_CYSMICON),
-                                      LR_DEFAULTCOLOR);
+    wc.hIconSm = (HICON__ *)LoadImage (hInstance,
+                                       MAKEINTRESOURCE(IDI_SIM_APPICON),
+                                       IMAGE_ICON,
+                                       GetSystemMetrics(SM_CXSMICON),
+                                       GetSystemMetrics(SM_CYSMICON),
+                                       LR_DEFAULTCOLOR);
 
     if (!RegisterClassEx (&wc))
         return FALSE;

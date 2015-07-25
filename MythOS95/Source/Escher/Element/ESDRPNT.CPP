@@ -8,10 +8,10 @@
 //ùùùùù²±²ùùùùùùù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùùùùùù²±²ùùùù²±²ùùùùùù
 //ùùùù²²²²²²²²²²ù²²²²²²²²ùùù²²²²²²²²ùù²²²ùùùù²²²ù²²²²²²²²²²ù²²²ùùùù²²²ùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùCopyrightù(c)ù1994-1997ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
-//ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
+//ùùùùùùùùùùùùùùùùùùù Microsoft Windows 95/NT Version ùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùùùùùùùùùùù Microsoft Windows '95 Version ùùùùùùùùùùùùùùùùùùùùùùù
+//ùùùùùùùùùùùCopyrightù(c)ù1994-1998ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
+//ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
@@ -74,11 +74,18 @@ extern VngoPointF EschTempVPointF;
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 extern "C" void esch_clipdraw_point(dword ctrlfl)
 {
+    long        width, height;
+    float       zx, zy;
+    EschCamera  *cam;
+    dword       cflags;
+
 //ÄÄÄ Setup local pointer to current camera
     assertMyth("esch_clipdraw_point needs camera in current context",
                EschCurrent != 0 && EschCurrent->camera != 0);
     
-    EschCamera *cam = EschCurrent->camera;
+    cam = EschCurrent->camera;
+
+    cflags = cam->flags;
 
 //ÄÄÄ Perform Clip
     if (ctrlfl & ESCH_CDF_CLIP)
@@ -89,8 +96,16 @@ extern "C" void esch_clipdraw_point(dword ctrlfl)
             return;
 
         //ÄÄÄ Left/right/top/bottom plane clipping
-        float zx = EschTempVPointF.z * cam->xsize;
-        float zy = EschTempVPointF.z * cam->ysize;
+        if (cflags & ESCH_CAM_ORTHO)
+        {
+            zx = cam->xsize;
+            zy = cam->ysize;
+        }
+        else
+        {
+            zx = EschTempVPointF.z * cam->xsize;
+            zy = EschTempVPointF.z * cam->ysize;
+        }
 
         if (EschTempVPointF.x < -zx 
             || EschTempVPointF.x > zx
@@ -99,25 +114,43 @@ extern "C" void esch_clipdraw_point(dword ctrlfl)
             return;
     }
 
-    long width = cam->vport->vbuff.width;
-    long height = cam->vport->vbuff.height;
+    width = cam->vport->vbuff.width;
+    height = cam->vport->vbuff.height;
 
 //ÄÄÄ Project pixel
+    if (cflags & ESCH_CAM_ORTHO)
+    {
 #ifdef ES_SNAP_VERTS
-    EschTempVPointF.x = float(long((EschTempVPointF.x * cam->xscalar)
-                                   / EschTempVPointF.z)
-                              + (width >> 1));
-    EschTempVPointF.y = float((height >> 1)
-                              - long((EschTempVPointF.y * cam->yscalar)
-                                     / EschTempVPointF.z));
+        EschTempVPointF.x = float(long(EschTempVPointF.x * cam->xscalar)
+                                  + (width >> 1));
+        EschTempVPointF.y = float((height >> 1)
+                                  - long(EschTempVPointF.y * cam->yscalar));
 #else
-    EschTempVPointF.x = ((EschTempVPointF.x * cam->xscalar)
-                         / EschTempVPointF.z)
-                        + float(width >> 1);
-    EschTempVPointF.y = float(height >> 1)
-                        - ((EschTempVPointF.y * cam->yscalar)
-                           / EschTempVPointF.z);
+        EschTempVPointF.x = (EschTempVPointF.x * cam->xscalar)
+                            + float(width >> 1);
+        EschTempVPointF.y = float(height >> 1)
+                            - (EschTempVPointF.y * cam->yscalar);
 #endif
+    }
+    else
+    {
+#ifdef ES_SNAP_VERTS
+        EschTempVPointF.x = float(long((EschTempVPointF.x * cam->xscalar)
+                                                      / EschTempVPointF.z)
+                                  + (width >> 1));
+        EschTempVPointF.y = float((height >> 1)
+                                  - long((EschTempVPointF.y * cam->yscalar)
+                                                        / EschTempVPointF.z));
+#else
+        EschTempVPointF.x = ((EschTempVPointF.x * cam->xscalar)
+                                            / EschTempVPointF.z)
+                            + float(width >> 1);
+        EschTempVPointF.y = float(height >> 1)
+                            - ((EschTempVPointF.y * cam->yscalar)
+                                              / EschTempVPointF.z);
+#endif
+    }
+
     EschTempVPointF.z = (ctrlfl & ESCH_CDF_INFINITEZ)
                         ? 0.99998f : (EschTempVPointF.z * cam->z_factor);
 
@@ -141,18 +174,7 @@ extern "C" void esch_clipdraw_point(dword ctrlfl)
 //ÄÄÄ Draw pixel
     if ((ctrlfl & ESCH_CDF_DONTSORT) || !(cam->flags & ESCH_CAM_SORT))
     {
-#if 1
-        // HACK: Van Gogh bug workaround until fixed...
-        VngoPoint   tpt;
-        tpt.x = long(EschTempVPointF.x + .5f);
-        tpt.y = long(EschTempVPointF.y + .5f);
-        tpt.z = dword(EschTempVPointF.z * float(0xffffffff));
-        tpt.clr = EschTempVPointF.clr;
-        tpt.shade = long(EschTempVPointF.shade);
-        cam->vport->pixel(&tpt);
-#else
         cam->vport->pixel(&EschTempVPointF);
-#endif
     }
     else
     {

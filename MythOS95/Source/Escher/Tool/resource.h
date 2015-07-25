@@ -108,8 +108,10 @@
 #define IDC_MPROP_MTXG                  1035
 #define IDC_MPROP_FLAGS_APP5            1036
 #define IDC_MPROP_MTXH                  1036
+#define IDC_CPROP_WIDTH                 1036
 #define IDC_MPROP_FLAGS_APP6            1037
 #define IDC_MPROP_MTXI                  1037
+#define IDC_CPROP_HEIGHT                1037
 #define IDC_MPROP_FLAGS_APP7            1038
 #define IDC_MPROP_XCEN                  1039
 #define IDC_MPROP_YCEN                  1040
@@ -219,6 +221,7 @@
 #define ID_FILE_FLOATING                32801
 #define ID_VIEW_RND_SORT                32802
 #define ID_VIEW_RND_ALPHA               32803
+#define ID_VIEW_RND_ORTHO               32804
 #define ID_VIEW_REFRESH                 32809
 #define ID_VIEW_RND_SPECULAR            32816
 #define ID_VIEW_RND_WIREFRAME           32820
@@ -241,7 +244,7 @@
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
 #define _APS_NEXT_RESOURCE_VALUE        143
-#define _APS_NEXT_COMMAND_VALUE         32804
+#define _APS_NEXT_COMMAND_VALUE         32805
 #define _APS_NEXT_CONTROL_VALUE         1086
 #define _APS_NEXT_SYMED_VALUE           101
 #endif

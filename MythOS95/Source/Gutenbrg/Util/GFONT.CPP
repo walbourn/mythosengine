@@ -9,9 +9,9 @@
 //                                                               /  \ 
 //                                                              '----`
 //                     Text Output and Font Management System
-//                          Microsoft Windows '95 Version
+//                        Microsoft Windows 95/NT Version
 //
-//            Copyright (c) 1995-1997 by Charybdis Enterprises, Inc.
+//            Copyright (c) 1995-1998 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved.
 //
 //컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
@@ -87,7 +87,7 @@ extern void capture_tt(char *name, char *ttname,
 extern "C" FILE *yyin;
 
 STATIC char Util_name[]
-       = "갚 Gutenberg Font Utility - (C) 1995-1997 Charybdis Enterprises, Inc. 굅\n";
+       = "갚 Gutenberg Font Utility - (C) 1995-1998 Charybdis Enterprises, Inc. 굅\n";
 
 XFParseIFF     IFF;
 

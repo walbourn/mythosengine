@@ -8,10 +8,10 @@
 //ùùùùù²±²ùùùùùùù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùùùùùù²±²ùùùù²±²ùùùùùù
 //ùùùù²²²²²²²²²²ù²²²²²²²²ùùù²²²²²²²²ùù²²²ùùùù²²²ù²²²²²²²²²²ù²²²ùùùù²²²ùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùCopyrightù(c)ù1994-1997ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
-//ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
+//ùùùùùùùùùùùùùùùùùùù Microsoft Windows 95/NT Version ùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùùùùùùùùùùù Microsoft Windows '95 Version ùùùùùùùùùùùùùùùùùùùùùùù
+//ùùùùùùùùùùùCopyrightù(c)ù1994-1998ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
+//ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
@@ -115,15 +115,27 @@ const EschSprite &EschSprite::operator = (const EschSprite &s)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 void EschSprite::draw()
 {
+    int             i;
+    float           _width, _height;
+    dword           level;
     dword           ctrlfl;
-    dword           *vflags;
-    VngoPoint       *vpt;
+    int             mp;
+    EschCamera      *cam;
+    EschLight       *lights;
+    dword           cflags;
+    float           yon, hither;
+    float           tx, ty;
+    float           ti, tj;
+    float           c, s;
+    float           wh, hh, xc, yc, xs, ys;
+    float           r;
+    EschFrameRef    world(0);
 
     if (!txt)
         return;
 
-    float _width = width * scale;
-    float _height = height * scale;
+    _width = width * scale;
+    _height = height * scale;
 
     assertMyth("EschSprite::draw needs valid size",
                _width > 0 && _height > 0);
@@ -132,15 +144,15 @@ void EschSprite::draw()
     assertMyth("EschSprite::draw needs camera in current context",
                EschCurrent != NULL && EschCurrent->camera != NULL);
 
-    EschCamera *cam=EschCurrent->camera;
+    cam = EschCurrent->camera;
+
+    cflags = cam->flags;
 
     assertMyth("EschSprite::draw needs a viewport in current context's camera",
                cam->vport != NULL);
 
-    float yon = cam->yon;
-    float hither = cam->hither;
-
-    float tx, ty;
+    yon = cam->yon;
+    hither = cam->hither;
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Transform
     //ÄÄÄ Transform into copy of point
@@ -151,12 +163,21 @@ void EschSprite::draw()
         ((EschVector*)&pos)->transform(&cam->eye.iorient,
                                        (EschVector*)&EschTempPoint);
 
-        tx = EschTempPoint.z * cam->xsize;
-        ty = EschTempPoint.z * cam->ysize;
+        // Left/right/top/bottom clipping
+        if (cflags & ESCH_CAM_ORTHO)
+        {
+            tx = cam->xsize;
+            ty = cam->ysize;
+        }
+        else
+        {
+            tx = EschTempPoint.z * cam->xsize;
+            ty = EschTempPoint.z * cam->ysize;
+        }
 
         if (EschTempPoint.z > 0)
         {
-            float r = max(_width,_height) * cam->radius_factor;
+            r = max(_width,_height) * cam->radius_factor;
 
             // Check for fully invisible against left/right/top/bottom
             if ( ((EschTempPoint.x + r) < -tx)
@@ -181,12 +202,21 @@ void EschSprite::draw()
             || EschTempPoint.z < hither)
             return;
 
-        tx = EschTempPoint.z * cam->xsize;
-        ty = EschTempPoint.z * cam->ysize;
+        // Left/right/top/bottom clipping
+        if (cflags & ESCH_CAM_ORTHO)
+        {
+            tx = cam->xsize;
+            ty = cam->ysize;
+        }
+        else
+        {
+            tx = EschTempPoint.z * cam->xsize;
+            ty = EschTempPoint.z * cam->ysize;
+        }
 
         if (EschTempPoint.z > 0)
         {
-            float r = max(_width,_height) * cam->radius_factor;
+            r = max(_width,_height) * cam->radius_factor;
 
             // Check for fully invisible against left/right/top/bottom
             if ( ((EschTempPoint.x + r) < -tx)
@@ -201,13 +231,12 @@ void EschSprite::draw()
     }
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Setup
-    dword cflags = cam->flags;
-    dword level = cflags & limits;
+    level = cflags & limits;
 
     assertMyth("EschSprite::draw needs a palette in current context's camera",
                cam->vport->vbuff.pal != NULL);
 
-    int mp = cam->vport->vbuff.pal->shd_pal->mid_point;
+    mp = cam->vport->vbuff.pal->shd_pal->mid_point;
 
     //ÄÄÄ Clear arena
     ivory_arena_clear(EschSysInstance->wspace);
@@ -216,9 +245,22 @@ void EschSprite::draw()
     EschContext ec(EschCurrent);
     ec.current = this;
     ec.verts = 0;
-    ec.vflags = vflags = (dword*)ivory_arena_zalloc(EschSysInstance->wspace,sizeof(dword) * 4);
-    ec.vpoints = vpt = new (EschSysInstance->wspace) VngoPoint[4];
-    ec.faces = new (EschSysInstance->wspace) EschFace[2];
+
+    ec.vflags = (dword*)ivory_arena_zalloc(EschSysInstance->wspace,
+                                           sizeof(dword) * 4);
+    assertMyth("EschSprite::draw failed to allocate needed workspace",
+               ec.vflags != 0);
+
+    ec.vpoints = (VngoPoint*)ivory_arena_alloc(EschSysInstance->wspace,
+                                               sizeof(VngoPoint) * 4);
+    assertMyth("EschSprite::draw failed to allocate needed workspace",
+               ec.vpoints != 0);
+
+    ec.faces = (EschFace*)ivory_arena_alloc(EschSysInstance->wspace,
+                                            sizeof(EschFace) * 2);
+    assertMyth("EschSprite::draw failed to allocate needed workspace",
+               ec.faces != 0);
+
     ec.fflags = 0;
     ec.txts = (EschTexture**) &txt;
     ec.push();
@@ -232,22 +274,22 @@ void EschSprite::draw()
 // |   B |
 // 0-----1
 
-    float ti = cam->top.i;
-    float tj = cam->top.j;
+    ti = cam->top.i;
+    tj = cam->top.j;
 
-    float c = tj / esch_sqrt(ti*ti + tj*tj);
-    float s = esch_sqrt(1.0f - (c*c));
+    c = tj / esch_sqrt(ti*ti + tj*tj);
+    s = esch_sqrt(1.0f - (c*c));
     if (ti < 0)
         s = -s;
 
-    float wh = _width / 2;
-    float hh = _height / 2;
+    wh = _width / 2;
+    hh = _height / 2;
 
-    float xc = wh*c;
-    float yc = hh*c;
+    xc = wh*c;
+    yc = hh*c;
 
-    float xs = wh*s;
-    float ys = hh*s;
+    xs = wh*s;
+    ys = hh*s;
 
     EschPoint temp(-xc+ys, -xs-yc, 0);
     if (rotation != 0)
@@ -260,9 +302,9 @@ void EschSprite::draw()
              || ((EschTempPoint.y + temp.y) > ty) )
             ctrlfl |= ESCH_CDF_CLIP;
     }
-    ((EschPoint*)(&vpt[0]))->x = EschTempPoint.x + temp.x;
-    ((EschPoint*)(&vpt[0]))->y = EschTempPoint.y + temp.y;
-    ((EschPoint*)(&vpt[0]))->z = EschTempPoint.z;
+    ((EschPoint*)(&ec.vpoints[0]))->x = EschTempPoint.x + temp.x;
+    ((EschPoint*)(&ec.vpoints[0]))->y = EschTempPoint.y + temp.y;
+    ((EschPoint*)(&ec.vpoints[0]))->z = EschTempPoint.z;
 
     temp.x = xc+ys;
     temp.y = xs-yc;
@@ -276,9 +318,9 @@ void EschSprite::draw()
              || ((EschTempPoint.y + temp.y) > ty) )
             ctrlfl |= ESCH_CDF_CLIP;
     }
-    ((EschPoint*)(&vpt[1]))->x = EschTempPoint.x + temp.x;
-    ((EschPoint*)(&vpt[1]))->y = EschTempPoint.y + temp.y;
-    ((EschPoint*)(&vpt[1]))->z = EschTempPoint.z;
+    ((EschPoint*)(&ec.vpoints[1]))->x = EschTempPoint.x + temp.x;
+    ((EschPoint*)(&ec.vpoints[1]))->y = EschTempPoint.y + temp.y;
+    ((EschPoint*)(&ec.vpoints[1]))->z = EschTempPoint.z;
 
     temp.x = xc - ys;
     temp.y = xs + yc;
@@ -292,9 +334,9 @@ void EschSprite::draw()
              || ((EschTempPoint.y + temp.y) > ty) )
             ctrlfl |= ESCH_CDF_CLIP;
     }
-    ((EschPoint*)(&vpt[2]))->x = EschTempPoint.x + temp.x;
-    ((EschPoint*)(&vpt[2]))->y = EschTempPoint.y + temp.y;
-    ((EschPoint*)(&vpt[2]))->z = EschTempPoint.z;
+    ((EschPoint*)(&ec.vpoints[2]))->x = EschTempPoint.x + temp.x;
+    ((EschPoint*)(&ec.vpoints[2]))->y = EschTempPoint.y + temp.y;
+    ((EschPoint*)(&ec.vpoints[2]))->z = EschTempPoint.z;
 
     temp.x = -xc - ys;
     temp.y = -xs + yc;
@@ -308,9 +350,9 @@ void EschSprite::draw()
              || ((EschTempPoint.y + temp.y) > ty) )
             ctrlfl |= ESCH_CDF_CLIP;
     }
-    ((EschPoint*)(&vpt[3]))->x = EschTempPoint.x + temp.x;
-    ((EschPoint*)(&vpt[3]))->y = EschTempPoint.y + temp.y;
-    ((EschPoint*)(&vpt[3]))->z = EschTempPoint.z;
+    ((EschPoint*)(&ec.vpoints[3]))->x = EschTempPoint.x + temp.x;
+    ((EschPoint*)(&ec.vpoints[3]))->y = EschTempPoint.y + temp.y;
+    ((EschPoint*)(&ec.vpoints[3]))->z = EschTempPoint.z;
 
 //ÄÄÄ Create 2 faces
     ec.faces[0].flags = (limits & (ESCH_FACE_WIRE
@@ -351,17 +393,16 @@ void EschSprite::draw()
     ec.faces[1].v[2]  = float(0.01);
     ec.faces[1].txt   = 1;
 
-
 //ÄÄÄ Handle shading
-    vpt[0].clr = 0;
-    vpt[0].shade = mp;
+    ec.vpoints[0].clr = 0;
+    ec.vpoints[0].shade = mp;
 
-    EschLight *lights = EschCurrent->lights;
+    lights = EschCurrent->lights;
     if ((level & ESCH_CAM_SHADE_FLAT)
         && !(flags & ESCH_SPRITE_INFINITE)
         && lights)
     {
-        EschFrameRef    world;
+        world.reset();
         world.set_position(&pos);
         lights->setup(&world);
 
@@ -382,14 +423,14 @@ void EschSprite::draw()
             vtx.normal = -cam->eye.dir;
         }
 
-        vpt[0].shade = 0;
-        lights->shine(&vtx,&vpt[0],1);
+        ec.vpoints[0].shade = 0;
+        lights->shine(&vtx,&ec.vpoints[0],1);
     }
 
-    for(int i=0; i < 4; i++)
+    for(i=0; i < 4; i++)
     {
-        vpt[i].clr = vpt[0].clr;
-        vpt[i].shade = vpt[0].shade;
+        ec.vpoints[i].clr = ec.vpoints[0].clr;
+        ec.vpoints[i].shade = ec.vpoints[0].shade;
     }
 
 //ÄÄÄ Draw Faces

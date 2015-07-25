@@ -1,5 +1,5 @@
 :Base MythOS.HLP
-:Title MythOS for Windows 95
+:Title MythOS for Windows 95/NT
 :Index =MythOS.HLP
 1 Notice=NOTICE@mythos.hlp
 1 MythOS Programmer's Guide
@@ -258,6 +258,11 @@
 3 Static Sample Class=PG_BACH_STATICSAMPLE
 3 File Sample Class=PG_BACH_FILESAMPLE
 3 Sample Sequencer Class=PG_BACH_SAMPLESEQ
+2 Spielberg
+3 Overview=PG_SBERG_OVERVIEW
+3 SpielbergPlayer Class=PG_SBERG_PLAYER
+3 SpielbergAMPlayer Class=PG_SBERG_AMPLAYER
+3 SpielbergAMStreamPlayer Class=PG_SBERG_AMSTREAMPLAYER
 1 MythOS User's Guide
 2 About this guide=UG_ABOUT
 2 Overview=UG_OVERVIEW

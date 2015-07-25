@@ -415,7 +415,7 @@ VNGError VngoVVport16::clip_pixel (VngoPointF *pt, VngoColor24bit *rgb_val, Vngo
 
     VngoPoint   tpt;
     tpt.x = long(pt->x + .5f);
-    tpt.x = long(pt->y + .5f);
+    tpt.y = long(pt->y + .5f);
     tpt.z = dword(pt->z * float(0xffffffff));
     tpt.clr = pt->clr;
     tpt.shade = long(pt->shade);
@@ -434,7 +434,7 @@ VNGError VngoVVport16::pixel(VngoPointF *pt, VngoColor24bit *rgb_val)
 {
     VngoPoint   tpt;
     tpt.x = long(pt->x + .5f);
-    tpt.x = long(pt->y + .5f);
+    tpt.y = long(pt->y + .5f);
     tpt.z = dword(pt->z * float(0xffffffff));
     tpt.clr = pt->clr;
     tpt.shade = long(pt->shade);

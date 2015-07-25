@@ -60,15 +60,11 @@
 //
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
-extern "C" int esch_clip_to_frustrum (ulong *count, VngoPoint *pts,
-                                      VngoPoint *outpts,
-                                      EschCamera *cam, dword flags);
-
-STATIC int iesch_immediate(VngoVport *vp, 
+STATIC int iesch_immediate(VngoVport *vp,
                            dword level, EschFace *face,
                            long edge_count, VngoPointF *vpoly, dword ctrlfl);
 
-STATIC int iesch_elmlist(VngoVport *vp, 
+STATIC int iesch_elmlist(VngoVport *vp,
                          dword level, EschFace *face,
                          long edge_count, VngoPointF *vpoly, dword ctrlfl);
 
@@ -110,6 +106,7 @@ extern "C" void esch_clipdraw_face(ulong ind, dword ctrlfl)
     VngoVport           *vp;
     EschDrawable        *current;
     EschFace            *face;
+    int                 edge_adj = 0;
 
     // Static work-space
     static VngoPoint    *vpt[ES_MAX_VERTS];
@@ -168,6 +165,10 @@ extern "C" void esch_clipdraw_face(ulong ind, dword ctrlfl)
               | ((ctrlfl & ESCH_CDF_MUSTTXT) ? ESCH_CAM_TEXTURED : 0) )
             & face->flags;
 
+    //ÄÄÄ Perspective mode invalid for ortho cameras
+    if (cflags & ESCH_CAM_ORTHO)
+        level &= ~ESCH_CAM_PERSPECTIVE;
+
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Perform Backface and/or Clip
     if (ctrlfl & (ESCH_CDF_BFCULL | ESCH_CDF_CLIP))
     {
@@ -220,6 +221,8 @@ extern "C" void esch_clipdraw_face(ulong ind, dword ctrlfl)
                cam->vport != 0);
     vp=cam->vport;
 
+    edge_adj = vp->skips_last_pix();
+
     height = vp->vbuff.height >> 1;
     width = vp->vbuff.width >> 1;
 
@@ -235,29 +238,48 @@ extern "C" void esch_clipdraw_face(ulong ind, dword ctrlfl)
 
             z = ((const EschPoint*)(vpt[i]))->z;
 
-            tv = (((const EschPoint*)(vpt[i]))->x * tx) / z;
+            if (cflags & ESCH_CAM_ORTHO)
+            {
+                tv = (((const EschPoint*)(vpt[i]))->x * tx);
 
 #ifdef ES_SNAP_VERTS
-            vpt[i]->x = long(tv) + width;
+                vpt[i]->x = long(tv) + width;
 #else
-            vpt[i]->x = long(tv * 65536.0f) + (width<<16);
+                vpt[i]->x = long(tv * 65536.0f) + (width<<16);
 #endif
-
-            tv = (((const EschPoint*)(vpt[i]))->y * ty) / z;
+                tv = (((const EschPoint*)(vpt[i]))->y * ty);
 
 #ifdef ES_SNAP_VERTS
-            vpt[i]->y = height - long(tv);
+                vpt[i]->y = height - long(tv);
 #else
-            vpt[i]->y = (height<<16) - long(tv * 65536.0f);
+                vpt[i]->y = (height<<16) - long(tv * 65536.0f);
 #endif
+            }
+            else
+            {
+                tv = (((const EschPoint*)(vpt[i]))->x * tx) / z;
+
+#ifdef ES_SNAP_VERTS
+                vpt[i]->x = long(tv) + width;
+#else
+                vpt[i]->x = long(tv * 65536.0f) + (width<<16);
+#endif
+                tv = (((const EschPoint*)(vpt[i]))->y * ty) / z;
+
+#ifdef ES_SNAP_VERTS
+                vpt[i]->y = height - long(tv);
+#else
+                vpt[i]->y = (height<<16) - long(tv * 65536.0f);
+#endif
+            }
 
             //!!! w is 2.30 fixed instead of float
             vpt[i]->w = flx_recip230(Flx16(z));
         }
     }
 
-    int swidth = vp->vbuff.width;
-    int sheight = vp->vbuff.height;
+    int swidth = vp->vbuff.width + edge_adj;
+    int sheight = vp->vbuff.height + edge_adj;
 
     color = (ctrlfl & ESCH_CDF_COLOR)
             ? EschCurrent->color
@@ -273,7 +295,7 @@ extern "C" void esch_clipdraw_face(ulong ind, dword ctrlfl)
         vpoly2[i].shade  = float(vpt[i]->shade);
         vpoly2[i].u      = float(vpt[i]->u) / float(0x10000);
         vpoly2[i].v      = float(vpt[i]->v) / float(0x10000);
-        
+
         vpoly2[i].w      = float(vpt[i]->w / float(0x3fffffff));
 
         vpoly2[i].clr = color;
@@ -428,7 +450,7 @@ extern "C" void esch_clipdraw_face(ulong ind, dword ctrlfl)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // iesch_immediate                                                          ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-STATIC int iesch_immediate(VngoVport *vp, 
+STATIC int iesch_immediate(VngoVport *vp,
                            dword level, EschFace *face,
                            long edge_count, VngoPointF *vpoly, dword ctrlfl)
 {
@@ -611,7 +633,7 @@ STATIC int iesch_immediate(VngoVport *vp,
 
         return 0;
     }
-    
+
     return 1;
 }
 
@@ -619,7 +641,7 @@ STATIC int iesch_immediate(VngoVport *vp,
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // iesch_elmlist                                                            ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-STATIC int iesch_elmlist(VngoVport *vp, 
+STATIC int iesch_elmlist(VngoVport *vp,
                          dword level, EschFace *face,
                          long edge_count, VngoPointF *vpoly, dword ctrlfl)
 {

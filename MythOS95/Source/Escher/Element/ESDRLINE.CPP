@@ -8,10 +8,10 @@
 //ùùùùù²±²ùùùùùùù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùùùùùù²±²ùùùù²±²ùùùùùù
 //ùùùù²²²²²²²²²²ù²²²²²²²²ùùù²²²²²²²²ùù²²²ùùùù²²²ù²²²²²²²²²²ù²²²ùùùù²²²ùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùCopyrightù(c)ù1994-1997ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
-//ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
+//ùùùùùùùùùùùùùùùùùùù Microsoft Windows 95/NT Version ùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùùùùùùùùùùù Microsoft Windows '95 Version ùùùùùùùùùùùùùùùùùùùùùùù
+//ùùùùùùùùùùùCopyrightù(c)ù1994-1998ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
+//ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
@@ -74,84 +74,129 @@ extern VngoPointF EschTempVPointF;
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 extern "C" void esch_clipdraw_line(VngoPointF *vpt2, dword ctrlfl)
 {
+    EschCamera  *cam;
+    dword       cflags;
+
 //ÄÄÄ Setup local pointer to current camera
     assertMyth("esch_clipdraw_point needs camera in current context",
                EschCurrent != 0 && EschCurrent->camera != 0);
     
-    EschCamera *cam = EschCurrent->camera;
+    cam = EschCurrent->camera;
+
+    cflags = cam->flags;
 
 //ÄÄÄ Perform Clip
     if (ctrlfl & ESCH_CDF_CLIP)
     {
+        // This is messy because the clip routines don't take
+        // VngoPointF yet!
 
-//
-// Simple rejection clip for now... needs to do a true 3D line clip.
-//
+        ulong count = 2;
+        static VngoPoint    vpoly[2];
+        static VngoPoint    tvpoly[2];
 
-        //ÄÄÄ Near/far clipping
-        if (EschTempVPointF.z > cam->yon
-            || vpt2->z > cam->yon)
+        tvpoly[0].wx = EschTempVPointF.x;
+        tvpoly[0].wy = EschTempVPointF.y;
+        tvpoly[0].wz = EschTempVPointF.z;
+        tvpoly[0].x = long(EschTempVPointF.x);
+        tvpoly[0].y = long(EschTempVPointF.y);
+        tvpoly[0].z = long(EschTempVPointF.z);
+        tvpoly[0].shade  = long(EschTempVPointF.shade);
+
+        tvpoly[1].wx = vpt2->x;
+        tvpoly[1].wy = vpt2->y;
+        tvpoly[1].wz = vpt2->z;
+        tvpoly[1].x = long(vpt2->x);
+        tvpoly[1].y = long(vpt2->y);
+        tvpoly[1].z = long(vpt2->z);
+        tvpoly[1].shade  = long(vpt2->shade);
+
+        int cstate = esch_clip_to_frustrum(&count, tvpoly, vpoly,
+                                           cam,
+                                           cam->flags
+                                           & EschCurrent->current->limits);
+        if (cstate == 1)        // Was clipped
+        {
+            EschTempVPointF.x = float(vpoly[0].x);
+            EschTempVPointF.y = float(vpoly[0].y);
+            EschTempVPointF.z = float(vpoly[0].z);
+            EschTempVPointF.shade = float(vpoly[0].shade);
+
+            vpt2->x = float(vpoly[1].x);
+            vpt2->y = float(vpoly[1].y);
+            vpt2->z = float(vpoly[1].z);
+            vpt2->shade = float(vpoly[1].shade);
+        }
+        else if (cstate == 0)   // It is fully clipped.
+        {
             return;
-
-        if (EschTempVPointF.z < cam->hither
-            || vpt2->z < cam->hither)
-            return;
-
-        //ÄÄÄ Left/right/top/bottom plane clipping
-        float zx1 = EschTempVPointF.z * cam->xsize;
-        float zx2 = vpt2->z * cam->xsize;
-
-        float zy1 = EschTempVPointF.z * cam->ysize;
-        float zy2 = vpt2->z * cam->ysize;
-
-        if (EschTempVPointF.x < -zx1
-            && vpt2->x < -zx2)
-            return;
-
-        if (EschTempVPointF.x > zx1
-            && vpt2->x > zx2)
-            return;
-
-        if (EschTempVPointF.y < -zy1
-            && vpt2->y < -zy2)
-            return;
-
-        if (EschTempVPointF.y > zy1
-            && vpt2->y > zy2)
-            return;
+        }
+        // the return of -1 means that the poly was fully visible.
     }
 
 //ÄÄÄ Project end-points
+    if (cflags & ESCH_CAM_ORTHO)
+    {
 #ifdef ES_SNAP_VERTS
-    long hwidth = cam->vport->vbuff.width >> 1;
-    long hheight = cam->vport->vbuff.height >> 1;
+        long hwidth = cam->vport->vbuff.width >> 1;
+        long hheight = cam->vport->vbuff.height >> 1;
 
-    EschTempVPointF.x = float(long((EschTempVPointF.x * cam->xscalar)
-                                   / EschTempVPointF.z)
-                              + hwidth);
-    vpt2->x = float(long((vpt2->x * cam->xscalar) / vpt2->z) + hwidth);
+        EschTempVPointF.x = float(long(EschTempVPointF.x * cam->xscalar)
+                                  + hwidth);
+        vpt2->x = float(long((vpt2->x * cam->xscalar) / vpt2->z) + hwidth);
 
-    EschTempVPointF.y = float(hheight
-                              - long((EschTempVPointF.y * cam->yscalar)
-                                     / EschTempVPointF.z));
-    vpt2->y = float(hheight - long((vpt2->y * cam->yscalar) / vpt2->z));
+        EschTempVPointF.y = float(hheight
+                                  - long(EschTempVPointF.y * cam->yscalar));
+        vpt2->y = float(hheight - long(vpt2->y * cam->yscalar));
 #else
-    float hwidth = float(cam->vport->vbuff.width >> 1);
-    float hheight = float(cam->vport->vbuff.height >> 1);
+        float hwidth = float(cam->vport->vbuff.width >> 1);
+        float hheight = float(cam->vport->vbuff.height >> 1);
 
-    EschTempVPointF.x = ((EschTempVPointF.x * cam->xscalar)
-                         / EschTempVPointF.z) + hwidth;
-    vpt2->x = ((vpt2->x * cam->xscalar) / vpt2->z) + hwidth;
+        EschTempVPointF.x = (EschTempVPointF.x * cam->xscalar) + hwidth;
+        vpt2->x = (vpt2->x * cam->xscalar) + hwidth;
 
-    EschTempVPointF.y = hheight - ((EschTempVPointF.y * cam->yscalar)
-                                   / EschTempVPointF.z);
-    vpt2->y = hheight - ((vpt2->y * cam->yscalar) / vpt2->z);
+        EschTempVPointF.y = hheight - (EschTempVPointF.y * cam->yscalar);
+        vpt2->y = hheight - (vpt2->y * cam->yscalar);
 #endif
 
-    EschTempVPointF.z = (ctrlfl & ESCH_CDF_INFINITEZ)
-                        ? 0.99998f : (EschTempVPointF.z * cam->z_factor);
-    vpt2->z = (ctrlfl & ESCH_CDF_INFINITEZ)
-              ? 0.99998f : (vpt2->z * cam->z_factor);
+        EschTempVPointF.z = (ctrlfl & ESCH_CDF_INFINITEZ)
+                            ? 0.99998f : (EschTempVPointF.z * cam->z_factor);
+        vpt2->z = (ctrlfl & ESCH_CDF_INFINITEZ)
+                ? 0.99998f : (vpt2->z * cam->z_factor);
+    }
+    else
+    {
+#ifdef ES_SNAP_VERTS
+        long hwidth = cam->vport->vbuff.width >> 1;
+        long hheight = cam->vport->vbuff.height >> 1;
+
+        EschTempVPointF.x = float(long((EschTempVPointF.x * cam->xscalar)
+                                    / EschTempVPointF.z)
+                                + hwidth);
+        vpt2->x = float(long((vpt2->x * cam->xscalar) / vpt2->z) + hwidth);
+
+        EschTempVPointF.y = float(hheight
+                                - long((EschTempVPointF.y * cam->yscalar)
+                                        / EschTempVPointF.z));
+        vpt2->y = float(hheight - long((vpt2->y * cam->yscalar) / vpt2->z));
+#else
+        float hwidth = float(cam->vport->vbuff.width >> 1);
+        float hheight = float(cam->vport->vbuff.height >> 1);
+
+        EschTempVPointF.x = ((EschTempVPointF.x * cam->xscalar)
+                            / EschTempVPointF.z) + hwidth;
+        vpt2->x = ((vpt2->x * cam->xscalar) / vpt2->z) + hwidth;
+
+        EschTempVPointF.y = hheight - ((EschTempVPointF.y * cam->yscalar)
+                                    / EschTempVPointF.z);
+        vpt2->y = hheight - ((vpt2->y * cam->yscalar) / vpt2->z);
+#endif
+
+        EschTempVPointF.z = (ctrlfl & ESCH_CDF_INFINITEZ)
+                            ? 0.99998f : (EschTempVPointF.z * cam->z_factor);
+        vpt2->z = (ctrlfl & ESCH_CDF_INFINITEZ)
+                ? 0.99998f : (vpt2->z * cam->z_factor);
+    }
 
 //ÄÄÄ Mark as visible
     assertMyth("esch_clipdraw_point needs valid draw data in context",

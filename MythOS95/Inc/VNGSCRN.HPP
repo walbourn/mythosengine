@@ -116,7 +116,7 @@ public:
     virtual ~VngoScreenManager() {};
 
     void set_startxy(int sx,int sy) { startx = sx; starty = sy;}
-
+    dword get_flags() {return lflags;}
     dword get_type () {return (type_info);}
     VNGError get_initstate() { return (init_state);}
 
@@ -301,8 +301,16 @@ public:
     virtual void close_frame();
     virtual VNGError dump_textures();
 
+    void set_draw_state(dword state, D3DTEXTUREHANDLE handle=0);
 };
 
+
+#define VNGO_D3DSFLAGS_GOURAUD          0x1
+#define VNGO_D3DSFLAGS_DITHER           0x2
+#define VNGO_D3DSFLAGS_PERSPECTIVE      0x4
+#define VNGO_D3DSFLAGS_TBLEND_MOD       0x8
+#define VNGO_D3DSFLAGS_CKEY_ENABLE      0x10
+#define VNGO_D3DSFLAGS_ALPHA            0x20
 
 //컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
 // Cirrus Clear3D screen manager

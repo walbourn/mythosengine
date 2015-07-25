@@ -8,10 +8,10 @@
 //ששששש²±²ששששששש²±²שששש²±²ש²±²שששש²±²ש²±²שששש²±²ש²±²שששששששש²±²שששש²±²שששששש
 //שששש²²²²²²²²²²ש²²²²²²²²ששש²²²²²²²²שש²²²שששש²²²ש²²²²²²²²²²ש²²²שששש²²²ששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//שששששששששששCopyrightש(c)ש1994-1997שbyשCharybdisשEnterprises,שInc.שששששששששש
-//ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
+//ששששששששששששששששששש Microsoft Windows 95/NT Version ששששששששששששששששששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//ששששששששששששששששששששש Microsoft Windows '95 Version ששששששששששששששששששששששש
+//שששששששששששCopyrightש(c)ש1994-1998שbyשCharybdisשEnterprises,שInc.שששששששששש
+//ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
 //
@@ -112,6 +112,8 @@ public:
     float           hither;                 // Distance to near clip plane
     float           yon;                    // Distance to far clip plane
     float           fov;                    // Field of view (degrees)
+    float           width;                  // Width for Orthographic mode
+    float           height;                 // Height for Orthographic mode
     dword           bcolor;                 // Background color for clear
     float           radius_factor;          // Extent radius factor
     float           z_factor;               // scale to appropriate z range
@@ -290,7 +292,20 @@ public:
 
     void set_fov(const float f, dword update=ESCH_UPD_ALL)
     {
+        flags &= ~ESCH_CAM_ORTHO;
         fov=f;
+        if (update & ESCH_UPD_SCALAR)
+        {
+            compute_scalar();
+            compute_frustrum();
+        }
+    }
+
+    void set_ortho(const float w, const float h=0, dword update=ESCH_UPD_ALL)
+    {
+        flags |= ESCH_CAM_ORTHO;
+        width = w;
+        height = h;
         if (update & ESCH_UPD_SCALAR)
         {
             compute_scalar();

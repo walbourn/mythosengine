@@ -9,9 +9,9 @@
 //                          /  /            \  \ 
 //                         /__/              \__\ 
 //
-//                      Microsoft Windows '95 Version
+//                    Microsoft Windows 95/NT Version
 //
-//            Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.
+//            Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved.
 //
 //컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
@@ -33,7 +33,7 @@
 //
 // mythos.hpp
 //
-// The Mythos Collection provides many diverse tools for development of
+// The MythOS Collection provides many diverse tools for development of
 // entertainment software.  This header contains the MythosSystem class for
 // coordinated use of the various Mythos components.
 //

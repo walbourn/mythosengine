@@ -9,9 +9,9 @@
 //                          /  /            \  \
 //                         /__/              \__\
 //
-//                      Microsoft Windows '95 Version
+//                    Microsoft Windows 95/NT Version
 //
-//            Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.
+//            Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved.
 //
 //컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
@@ -131,7 +131,7 @@ END
 
 1 VERSIONINFO
  FILEVERSION 1,0,0,0
- PRODUCTVERSION 1,5,0,0
+ PRODUCTVERSION 1,6,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0xbL
@@ -148,19 +148,19 @@ BEGIN
         BEGIN
             VALUE "OriginalFilename", "llander.exe\0"
 
-            VALUE "ProductName", "MythOS(tm) 95\0"
             VALUE "InternalName", "Lunar Lander\0"
-            VALUE "FileDescription", "MythOS(tm) '95 Lunar Lander Example\0"
-
-            VALUE "ProductVersion", "1.5\0"
+            VALUE "FileDescription", "MythOS 95 Lunar Lander Example\0"
             VALUE "FileVersion", "1.0\0"
+
+            VALUE "ProductName", "MythOS 95\0"
+            VALUE "ProductVersion", "1.6\0"
 
             VALUE "Comments", "CHARYBDIS ENTERPRISES, INC. COMPANY CONFIDENTIAL\0"
 
             VALUE "CompanyName", "Charybdis Enterprises, Inc.\0"
 
             VALUE "LegalCopyright",
-"Copyright \251 1997\0"
+"Copyright \251 1997-1998\0"
 
             VALUE "LegalTrademarks",
 "MythOS is a trademark of Charybdis Enterprises, Inc.\n\

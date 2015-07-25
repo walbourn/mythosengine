@@ -67,6 +67,7 @@ class VngoVportD3D : public VngoVport
     long            left,top;
     DDSURFACEDESC   ddsd;
     VngoDirect3D    *screen;
+    VngoHazeInfoD3D fog_table;
 
     int plock();
     int punlock();
@@ -112,6 +113,20 @@ public:
         VgSystem.cur_vport = NULL;
         make_current();
     }
+
+    virtual void haze_on()
+    {
+        VngoVport::haze_on();
+        VgSystem.cur_vport = NULL;
+        make_current();
+    }
+    virtual void haze_off()
+    {
+        VngoVport::haze_off();
+        VgSystem.cur_vport = NULL;
+        make_current();
+    }
+
 
     virtual void make_current();
 
@@ -237,7 +252,10 @@ public:
 
     //ÄÄÄ Fogging/hazing functions
     virtual VNGError set_haze(VngoHazeInfo *haze_info)
-        { return VNGO_NOT_SUPPORTED; }
+    {
+        fog_table.setup(haze_info);
+        return VNGO_NO_ERROR;
+    }
     virtual VNGError haze()
         { return VNGO_NOT_SUPPORTED; }
 };

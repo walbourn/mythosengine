@@ -73,6 +73,7 @@ extern "C" {
 #define VNGO_PAL_CALC           0x100
 #define VNGO_ZMAP_DEV           0x200
 #define VNGO_ZMAP_ACTIVE        0x400
+#define VNGO_SKIPS_LAST_PIX     0x800
 #define VNGO_ACTIVE_HAZE_DEV    0x1000
 #define VNGO_PASSIVE_HAZE_DEV   0x2000
 #define VNGO_HAZE_ON            0x4000
@@ -155,7 +156,7 @@ enum _vngo_error_codes
    VNGO_NEEDS_PAL8              = 12,
    VNGO_NEEDS_PAL15             = 13,
    VNGO_NEEDS_PAL16             = 14,
-}; 
+};
 
 typedef enum _vngo_error_codes VNGError;
 

@@ -9,9 +9,9 @@
                                                                '----`
                       Text Output and Font Management System
  
-                           Microsoft Windows '95 Version
+                         Microsoft Windows 95/NT Version
 
-             Copyright (c) 1995-1997 by Charybdis Enterprises, Inc.
+             Copyright (c) 1995-1998 by Charybdis Enterprises, Inc.
                             All Rights Reserved.
 
  ----------------------------------------------------------------------------
@@ -32,7 +32,7 @@
                              _Library Status_
 
  Notes by: Chuck Walbourn
- Updated: September 29, 1997
+ Updated: January 2, 1998
 
  Proposed changes -----------------------------------------------------------
 
@@ -40,6 +40,8 @@
       binary search tree and having loadstring use it.
 
     o Color font support.
+
+    o Possibly add a 3D font drawable for Escher.
 
 *** END OF FILE ***
 
