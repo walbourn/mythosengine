@@ -61,10 +61,9 @@
 //дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
 // Bach Library Includes                                                    Ё
 //дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
-#include "bachdefs.hpp"
-#include "bachsys.hpp"
+#include "bachdefs.h"
 #include "bachdigi.hpp"
-#include "bachwseq.hpp"
+#include "bachmisc.hpp"
 
 #endif
 

@@ -38,7 +38,7 @@
                                3D SCRIPT EXAMPLE
 
  Notes by: Chuck Walbourn
- Updated: October 6, 1997
+ Updated: October 29, 1997
 
 
  ---------------------------------------------------------------------------

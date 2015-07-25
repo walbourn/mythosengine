@@ -96,6 +96,7 @@ EscherTest::EscherTest (MaxDevices *d):
     partn(0),
     mtxt(0),
     drawexts(0),
+    drawpartn(0),
     RotateDegrees(1),
     ScriptRotateDegrees(3),
     backgrnd (0),
@@ -105,7 +106,14 @@ EscherTest::EscherTest (MaxDevices *d):
     map_xsize (MAP_XSIZE),
     map_ysize (MAP_YSIZE),
     total_time (0),
-    alpha (255)
+    alpha (255),
+    anim_time(1.0),
+    anim_step_time(1.0),
+    keyframe_animation(0),
+    anim_current_frame(0),
+    anim_current_step(0),
+    anim_chain_count(0),
+    scale(1.0f)
 {
     int use_fullscreen = 0;
     int use_zbuffer=TRUE;
@@ -505,6 +513,11 @@ EscherTest::~EscherTest ()
         delete scene;
         scene = 0;
     }
+    if (EschKeyframeMan)
+    {
+        delete EschKeyframeMan;
+        EschKeyframeMan = 0;
+    }
 
     if (mypal)
     {
@@ -610,12 +623,45 @@ BOOL EscherTest::SetupFireTest()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 // EscherTest - SetupPartitionTest
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-BOOL EscherTest::SetupPartitionTest()
+BOOL EscherTest::SetupPartitionTest(const char *buff)
 {
+    if (strstr(buff,"grid"))
+    {
+        partn = new EschGridPartition;
+        if (!partn
+            || ((EschGridPartition*)partn)->init(4,4,128,&EschPoint(-256,0,-256)))
+        {
+            MessageBox("Couldn't create grid", MB_OK | MB_ICONEXCLAMATION);
+            return FALSE;
+        }
+    }
+    else if (strstr(buff,"quad"))
+    {
+        partn = new EschQuadTreePartition;
+        if (!partn
+            || ((EschQuadTreePartition*)partn)->init(&EschPoint(-256,0,-256),128*4,128*4))
+        {
+            MessageBox("Couldn't create quadtree", MB_OK | MB_ICONEXCLAMATION);
+            return FALSE;
+        }
 
-    partn = new EschGridPartition;
-    if (!partn
-        || ((EschGridPartition*)partn)->init(4,4,128,&EschPoint(-256,0,-256)))
+        ((EschQuadTreePartition*)partn)->set_maxdepth(8);
+        ((EschQuadTreePartition*)partn)->set_maxcount(1);
+    }
+    else if (strstr(buff,"oct"))
+    {
+        partn = new EschOctTreePartition;
+        if (!partn
+            || ((EschOctTreePartition*)partn)->init(&EschPoint(-256,-128,-256),128*4,128*4,128*4))
+        {
+            MessageBox("Couldn't create octtree", MB_OK | MB_ICONEXCLAMATION);
+            return FALSE;
+        }
+
+        ((EschQuadTreePartition*)partn)->set_maxdepth(8);
+        ((EschQuadTreePartition*)partn)->set_maxcount(1);
+    }
+    else
     {
         MessageBox("Couldn't create partitioning", MB_OK | MB_ICONEXCLAMATION);
         return FALSE;
@@ -769,7 +815,7 @@ BOOL EscherTest::SetupSprite(const char *name)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 // EscherTest - LoadScene
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-BOOL EscherTest::LoadScene(char *fn)
+BOOL EscherTest::LoadScene(char *fn, dword in_type)
 {
     int err;
 
@@ -780,7 +826,7 @@ BOOL EscherTest::LoadScene(char *fn)
     if (!scene)
         return FALSE;
 
-    if ((err=scene->load(fn,0,mypal))!=0)
+    if ((err=scene->load(fn,0,mypal,in_type))!=0)
     {
         char buff[256];
         sprintf(buff,"Could not load a scene from file '%s', error %d",fn,err);
@@ -1341,6 +1387,196 @@ BOOL EscherTest::SetupMetabox(const char *buff)
     return TRUE;
 }
 
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// EscherTest - SetupAnimation
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+BOOL EscherTest::SetupAnimation(const char *buff)
+{
+    char key_file[80];
+    char tok_file[80];
+    char hide_file[80];
+    int count = 0;
+
+    // parse the command line for filenames
+    for (const char *s=buff, *c=buff; ; c++)
+    {
+        if (!*c || *c == ',')
+        {
+            if (count == 0)
+            {
+                // keyframe filename
+                memset(key_file,0,sizeof(key_file));
+                strncpy (key_file, s, c-s);
+                XFParseIFF iff;
+                int err;
+
+                if (iff.open(key_file, XF_OPEN_READ | XF_OPEN_DENYWRITE))
+                {
+                    MessageBox("ERROR: File Open failed in SetupAnimation",MB_OK | MB_ICONEXCLAMATION);
+                }
+                int keyforms_found = 0;
+
+                while (iff.next() == XF_ERR_NONE)
+                {
+                    if (iff.chunkid == iff.makeid ('F','O','R','M')
+                        && iff.formid == iff.makeid ('K','E','Y','F'))
+                            keyforms_found ++;
+                }
+                iff.close();
+                if (!keyforms_found)
+                {
+                    MessageBox ("Error: Keyframe file contains no keyframes", MB_OK | MB_ICONEXCLAMATION);
+                }
+
+                if (EschKeyframeMan)
+                    delete EschKeyframeMan;
+                EschKeyframeMan = new EschKeyframer;
+
+                if (!EschKeyframeMan)
+                {
+                    MessageBox("Error: EschKeyframeMan create failed", MB_OK | MB_ICONEXCLAMATION);
+                }
+                if (iff.open (key_file, XF_OPEN_READ | XF_OPEN_DENYWRITE))
+                {
+                    MessageBox("ERROR: File Reopen failed in SetupAnimation",MB_OK | MB_ICONEXCLAMATION);
+                }
+
+                while (iff.next() == XF_ERR_NONE)
+                {
+                    if (iff.chunkid == iff.makeid('F','O','R','M')
+                        && iff.formid == iff.makeid('K','E','Y','F'))
+                    {
+                        err = EschKeyframeMan->load (&iff);
+                        if (err)
+                            break;
+                    }
+                }
+                iff.close();
+            }
+            else if (count == 1)
+            {
+                // token filename
+                memset(tok_file,0,sizeof(tok_file));
+                strncpy (tok_file, s, c-s);
+                ((EschKeyframeDraw *)curmesh)->initialize_tokens(tok_file);
+                ((EschKeyframeDraw *)curmesh)->tokenize_names();
+            }
+            else if (count == 2)
+            {
+                // hide-list filename
+                memset(hide_file, 0, sizeof(hide_file));
+                strncpy (hide_file, s, c-s);
+                XFParseIFF iff;
+                int hide_count=0;
+
+                if (iff.open (hide_file, XF_OPEN_READ | XF_OPEN_DENYWRITE))
+                {
+                    MessageBox("ERROR: SetupAnimation object hide file open failed",MB_OK|MB_ICONEXCLAMATION);
+                }
+
+                while (iff.next() == XF_ERR_NONE)
+                {
+                    if (iff.chunkid == iff.makeid ('H','I','D','E'))
+                        hide_count ++;
+                }
+                iff.close();
+
+                if (!hide_count)
+                {
+                    MessageBox ("Error: Hide file contains no hide data", MB_OK | MB_ICONEXCLAMATION);
+                    return FALSE;
+                }
+
+                struct to_hide
+                {
+                    dword type;
+                };
+
+                to_hide *temp_list = new to_hide[hide_count];
+
+                if (!temp_list)
+                {
+                    MessageBox ("Error: Failed to allocate memory for hide list", MB_OK | MB_ICONEXCLAMATION);
+                }
+                if (iff.open (hide_file, XF_OPEN_READ | XF_OPEN_DENYWRITE))
+                {
+                    MessageBox("Error: Failed to reopen hide list file", MB_OK|MB_ICONEXCLAMATION);
+                }
+
+                int i=0;
+                while (iff.next() == XF_ERR_NONE)
+                {
+                    if (iff.chunkid == iff.makeid('H','I','D','E'))
+                    {
+                        if (iff.read(&temp_list[i].type))
+                        {
+                            MessageBox ("Error: Hide type read failed",MB_OK|MB_ICONEXCLAMATION);
+                        }
+                        i++;
+                    }
+                }
+                for (i=0; i<hide_count; i++)
+                {
+                    ((EschKeyframeDraw *)curmesh)->hide_by_absolute_ktype (temp_list[i].type);
+                }
+                delete [] temp_list;
+            }
+            else if (count >= 3)
+            {
+                MessageBox ("Too many parameters found for Animation",
+                           MB_OK | MB_ICONEXCLAMATION);
+                return FALSE;
+            }
+            count ++;
+            if (!*c)
+                break;
+            s=c+1;
+        }
+    }
+
+    // now get and set all keyframes
+
+    // step through animations and build a list of key_chains
+    anim_chain_count = EschKeyframeMan->get_chain_count();
+
+    struct tempkey
+    {
+        char key_type[M_TYPE_LEN];
+    };
+    tempkey *kchain_temp = new tempkey[anim_chain_count];
+
+    if (!kchain_temp)
+    {
+        MessageBox("ERROR:  SetupAnimation() failed to allocate memory for key chains",MB_OK|MB_ICONEXCLAMATION);
+        return FALSE;
+    }
+
+    EschKeyframeMan->get_next_chain_type(0, kchain_temp[0].key_type);
+    for (int i=1; i<anim_chain_count; i++)
+    {
+        EschKeyframeMan->get_next_chain_type(kchain_temp[i-1].key_type, kchain_temp[i].key_type);
+    }
+
+    for (i=0; i<anim_chain_count; i++)
+    {
+        EschKeyframe *temp_key;
+        temp_key = EschKeyframeMan->get (((EschKeyframeDraw *)curmesh)->get_ktype(),
+                                         kchain_temp[i].key_type, 0);
+        if (temp_key)
+        {
+            ((EschKeyframeDraw *)curmesh)->set_key(temp_key, 0, anim_time);
+            ((EschKeyframeDraw *)curmesh)->set_inactivity(i);
+        }
+    }
+    delete [] kchain_temp;
+
+    ((EschKeyframeDraw *)curmesh)->set_activity(0);
+    float time = float(anim_clock.check())/1024.0f;
+    ((EschKeyframeDraw *)curmesh)->reset_keyframes(0,time);
+
+    return TRUE;
+}
+
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 // EscherTest - GetEvents
@@ -1367,6 +1603,7 @@ void EscherTest::Begin ()
 {
     clock.clear();
     fps_clock.clear();
+    anim_clock.clear();
     frames=0;
     total_frames=0;
     total_time=0;
@@ -1811,6 +2048,16 @@ void EscherTest::ProcessEvents()
         doreshade=1;
     }
 
+    if (single_events.check (SHADE_FLAT_SPECULAR))
+    {
+        cam_flags &= ~ESCH_CAM_SHADE_SMOOTH;
+        cam_flags |= ESCH_CAM_SHADE_SPECULAR 
+                     | ESCH_CAM_SHADE_FLAT
+                     | ESCH_CAM_SHADE_SOLID
+                     | ESCH_CAM_SHADE_WIRE;
+        doreshade=1;
+    }
+
     if (single_events.check (SHADE_SMOOTH))
     {
         cam_flags &= ~ESCH_CAM_SHADE_SPECULAR;
@@ -1950,6 +2197,11 @@ void EscherTest::ProcessEvents()
             drawexts=0;
     }
 
+    if (single_events.check (SHOW_PARTN))
+    {
+        drawpartn = !drawpartn;
+    }
+
     if (single_events.check (ZBUFFER))
     {
         if (cam->vport->vflags & VNGO_ZBUFFER_DEV)
@@ -1975,25 +2227,102 @@ void EscherTest::ProcessEvents()
 
     if (single_events.check (PARTN_LIST) && partn)
     {
-        EschGridPartition *gpartn = (EschGridPartition*)partn;
-
-        for(ulong i=0; i < gpartn->nregions; i++)
+        switch (partn->get_type())
         {
-            for(EschPartitionList *ptr = gpartn->regions[i]; ptr != 0; ptr = ptr->next)
-            {
-                char buff[128];
-                if (!ptr->item)
+            case ESCH_DRWT_PRTN_GRID:
                 {
-                    wsprintf(buff,"Region #%i\n\n Invalid Entry!", i);
+                    EschGridPartition *gpartn = (EschGridPartition*)partn;
+
+                    for(ulong i=0; i < gpartn->nregions; i++)
+                    {
+                        for(EschPartitionList *ptr = gpartn->regions[i]; ptr != 0; ptr = ptr->next)
+                        {
+                            char buff[128];
+                            if (!ptr->item)
+                            {
+                                wsprintf(buff,"Region #%i\n\n Invalid Entry!", i);
+                            }
+                            else
+                            {
+                                wsprintf(buff,"Region #%i\n\nDrawables '%s'",
+                                            i,
+                                            ptr->item->name);
+                            }
+                            MessageBox(buff, MB_OK);
+                        }
+                    }
                 }
-                else
+                break;
+            case ESCH_DRWT_PRTN_QUAD:
                 {
-                    wsprintf(buff,"Region #%i\n\nDrawables '%s'",
-                                i,
-                                ptr->item->name);
+                    EschQuadTreePartition *qpartn = (EschQuadTreePartition*)partn;
+
+                    EschQuadTreeStats stats;
+                    qpartn->compute_stats(&stats);
+
+                    char    buff[64];
+                    char    str[4096];
+                    *str = 0;
+
+                    sprintf(buff,"hidepth=%d\n",stats.hidepth);
+                    strcat(str,buff);
+
+                    sprintf(buff,"hicount=%d\n",stats.hicount);
+                    strcat(str,buff);
+
+                    sprintf(buff,"nodes=%d\n",stats.nodes);
+                    strcat(str,buff);
+
+                    sprintf(buff,"leaves=%d\n",stats.leaves);
+                    strcat(str,buff);
+
+                    sprintf(buff,"items=%d\n",stats.items);
+                    strcat(str,buff);
+
+                    sprintf(buff,"items_nonleaf=%d\n",stats.items_nonleaf);
+                    strcat(str,buff);
+
+                    sprintf(buff,"items_global=%d\n",stats.items_global);
+                    strcat(str,buff);
+
+                    MessageBox(str, MB_OK);
                 }
-                MessageBox(buff, MB_OK);
-            }
+                break;
+            case ESCH_DRWT_PRTN_OCT:
+                {
+                    EschOctTreePartition *opartn = (EschOctTreePartition*)partn;
+
+                    EschOctTreeStats stats;
+                    opartn->compute_stats(&stats);
+
+                    char    buff[64];
+                    char    str[4096];
+                    *str = 0;
+
+                    sprintf(buff,"hidepth=%d\n",stats.hidepth);
+                    strcat(str,buff);
+
+                    sprintf(buff,"hicount=%d\n",stats.hicount);
+                    strcat(str,buff);
+
+                    sprintf(buff,"nodes=%d\n",stats.nodes);
+                    strcat(str,buff);
+
+                    sprintf(buff,"leaves=%d\n",stats.leaves);
+                    strcat(str,buff);
+
+                    sprintf(buff,"items=%d\n",stats.items);
+                    strcat(str,buff);
+
+                    sprintf(buff,"items_nonleaf=%d\n",stats.items_nonleaf);
+                    strcat(str,buff);
+
+                    sprintf(buff,"items_global=%d\n",stats.items_global);
+                    strcat(str,buff);
+
+                    MessageBox(str, MB_OK);
+                }
+                break;
         }
     }
 
@@ -2207,6 +2536,7 @@ void EscherTest::ProcessEvents()
         mtxt->animate();
     }
 
+
     // Perform animation of all drawables!
     for(EschDrawable *dptr = draws; dptr != NULL; dptr = dptr->next())
         dptr->animate();
@@ -2255,6 +2585,22 @@ void EscherTest::Render()
         }
     }
 
+    if (drawpartn && partn)
+    {
+        switch (partn->get_type())
+        {
+            case ESCH_DRWT_PRTN_GRID:
+                ((EschGridPartition*)partn)->draw_grid(exts_color);
+                break;
+            case ESCH_DRWT_PRTN_QUAD:
+                ((EschQuadTreePartition*)partn)->draw_quadtree(exts_color);
+                break;
+            case ESCH_DRWT_PRTN_OCT:
+                ((EschOctTreePartition*)partn)->draw_octtree(exts_color);
+                break;
+        }
+    }
+
     frames++;
 
     if (show_fps)
@@ -2274,7 +2620,6 @@ void EscherTest::Render()
 
         sprintf (buff, "FOV: %5.3f\n",float(cam->fov));
         gt.out (buff);
-
 
 
         gt.outc('\n');
@@ -2372,6 +2717,43 @@ void EscherTest::Render()
 #endif
     }
 
+    if (keyframe_animation)
+    {
+        sprintf (buff, "Animation:\n");
+        gt.out (buff);
+        sprintf (buff, "   time scale:  %5.0fX\n", scale);
+        gt.out (buff);
+        if (anim_current_frame == 0)
+            sprintf (buff, "   current chain:  WALK\n");
+        else if (anim_current_frame == 1)
+            sprintf (buff, "   current chain:  RUN\n");
+        else if (anim_current_frame == 2)
+            sprintf (buff, "   current chain:  CROUCH\n");
+        else if (anim_current_frame == 3)
+            sprintf (buff, "   current chain:  EXPLOSION DEATH\n");
+        else if (anim_current_frame == 4)
+            sprintf (buff, "   current chain:  BULLET DEATH\n");
+        else if (anim_current_frame == 5)
+            sprintf (buff, "   current chain:  KNEEL\n");
+        gt.out (buff);
+
+        sprintf (buff, "   frame_num:  %d\n", ((EschKeyframeDraw *)scene->meshes)->get_current_key(anim_current_frame));
+        gt.out(buff);
+
+#if 0
+        if (GlobalFireTest == ESCH_KEYFRAME_LOOPEND)
+        {
+            sprintf (buff, "  FIRE!\n");
+            gt.out(buff);
+        }
+        else if (GlobalFireTest > 0)
+        {
+            sprintf (buff, "   swap_count:  %d", GlobalFireTest);
+            gt.out (buff);
+        }
+#endif
+    }
+
     if (frames > 100)
     {
         total_frames += frames;
@@ -2414,10 +2796,44 @@ void EscherTest::Render()
                 {
                     if (!r->item)
                         wsprintf(buff,"(%d) = No item pointer!\n",c);
+                    else if (r->item->partn_data)
+                    {
+                        assert(partn != 0);
+                        switch (partn->get_type())
+                        {
+                            case ESCH_DRWT_PRTN_QUAD:
+                                {
+                                    EschQuadTreeNode *node =
+                                       (EschQuadTreeNode*)r->item->partn_data;
+
+                                    sprintf(buff,"(%d) = '%s' @ %6.2f (partn depth %d, partn count %d)\n",c,
+                                            (r->item->name) ? r->item->name : "NoName",
+                                            (float)r->dist, node->depth, node->count);
+                                }
+                                break;
+                            case ESCH_DRWT_PRTN_OCT:
+                                {
+                                    EschOctTreeNode *node =
+                                       (EschOctTreeNode*)r->item->partn_data;
+
+                                    sprintf(buff,"(%d) = '%s' @ %6.2f (partn depth %d, partn count %d)\n",c,
+                                            (r->item->name) ? r->item->name : "NoName",
+                                            (float)r->dist, node->depth, node->count);
+                                }
+                                break;
+                            default:
+                                sprintf(buff,"(%d) = '%s' @ %6.2f\n",c,
+                                        (r->item->name) ? r->item->name : "NoName",
+                                        (float)r->dist);
+                                break;
+                        }
+                    }
                     else
+                    {
                         sprintf(buff,"(%d) = '%s' @ %6.2f\n",c,
                                 (r->item->name) ? r->item->name : "NoName",
                                 (float)r->dist);
+                    }
                     gt.out(buff);
                 }
             }
@@ -2501,5 +2917,48 @@ int EscherTest::MessageBox(LPCSTR lpText, UINT nType)
     return ::MessageBox(hWndClient,lpText,szAppName,nType);
 }
 
-//°±² eof - GState.cpp ²±°
+void EscherTest::update_keys(float interval)
+{
+    float temp_clock = float (anim_clock.check()) / 1024.0f;
+    anim_current_step += interval;
+    if (anim_current_step > anim_step_time)
+    {
+        anim_current_step = 0.0f;
+        scale *= 2.0f;
+        if (scale > 8.0f)
+        {
+            scale = 1.0f;
+            ((EschKeyframeDraw *)curmesh)->set_inactivity(anim_current_frame);
+            anim_current_frame ++;
+            if (anim_current_frame >= anim_chain_count)
+            {
+                anim_current_frame = 0;
+            }
+            ((EschKeyframeDraw *)curmesh)->set_activity(anim_current_frame);
+        }
+        ((EschKeyframeDraw *)curmesh)->reset_keyframes(anim_current_frame, temp_clock, interval, scale);
+    }
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// EscherTest - Animate
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+void EscherTest::Animate()
+{
+    if (scene && scene->meshes)
+    {
+        if (keyframe_animation)
+        {
+            Flx16 interval(clock.check()<<6,0);
+            long tc = (anim_clock.check());
+            float temp_c = float(tc);
+            float temp_clock = temp_c / 1024.0f;
+            update_keys(interval);
+            ((EschKeyframeDraw *)scene->meshes)->step(interval,1.0,temp_clock,scale);
+        }
+    }
+}
+
+//°±² eof - et.cpp ²±°
 

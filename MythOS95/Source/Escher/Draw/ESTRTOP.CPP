@@ -1383,7 +1383,7 @@ void EschTerrainTreeTop::draw_tree_rect (VngoRect *rect, int dlevel,dword lflags
     cpt->y = origin.y;
     cpt->z = origin.z + (float)(rect->y << scaleshift);
 
-    cpt->transform(&cam->eye.iorient,cpt);
+    ::esch_transform(cpt,&cam->eye.iorient,cpt);
 
     rpt->x = cpt->x;
     rpt->y = cpt->y;
@@ -2727,8 +2727,7 @@ void EschTerrainTreeTop::draw_tree_skirt (VngoRect *rect, int dlevel, dword lfla
         }
         cpt->y = origin.y;
 
-        cpt->transform(&cam->eye.iorient,cpt);
-
+        ::esch_transform(cpt,&cam->eye.iorient,cpt);
 
         VngoPoint   *vA = &vpt[rowa];
         VngoPoint   *vB = &vpt[rowb];
@@ -2868,7 +2867,7 @@ void EschTerrainTreeTop::draw_tree_skirt (VngoRect *rect, int dlevel, dword lfla
         }
         cpt->y = origin.y;
 
-        cpt->transform(&cam->eye.iorient,cpt);
+        ::esch_transform(cpt,&cam->eye.iorient,cpt);
 
         VngoPoint   *vA = &vpt[rowa];
         VngoPoint   *vB = &vpt[rowb];
@@ -3007,8 +3006,7 @@ void EschTerrainTreeTop::draw_tree_skirt (VngoRect *rect, int dlevel, dword lfla
         }
         cpt->y = origin.y;
 
-        cpt->transform(&cam->eye.iorient,cpt);
-
+        ::esch_transform(cpt,&cam->eye.iorient,cpt);
 
         VngoPoint   *vA = &vpt[cola];
         VngoPoint   *vB = &vpt[colb];
@@ -3140,7 +3138,7 @@ void EschTerrainTreeTop::draw_tree_skirt (VngoRect *rect, int dlevel, dword lfla
         }
         cpt->y = origin.y;
 
-        cpt->transform(&cam->eye.iorient,cpt);
+        ::esch_transform(cpt,&cam->eye.iorient,cpt);
 
         VngoPoint   *vA = &vpt[cola];
         VngoPoint   *vB = &vpt[colb];
@@ -3291,7 +3289,7 @@ int EschTerrainTreeTop::esch_find_draw_volume(EschVector *pts)
     tpt.y = ty;
     tpt.z = tz;
 
-    tpt.transform(&cam->eye.orient);
+    ::esch_transform(&tpt,&cam->eye.orient,&tpt);
 
     vpt[1].x = (long(tpt.x) >> scaleshift) + (width>>1);
     vpt[1].y = (long(tpt.z) >> scaleshift) + (width>>1);
@@ -3300,7 +3298,7 @@ int EschTerrainTreeTop::esch_find_draw_volume(EschVector *pts)
     tpt.y = ty;
     tpt.z = tz;
 
-    tpt.transform(&cam->eye.orient);
+    ::esch_transform(&tpt,&cam->eye.orient,&tpt);
 
     vpt[2].x = (long(tpt.x) >> scaleshift) + (width>>1);
     vpt[2].y = (long(tpt.z) >> scaleshift) + (width>>1);
@@ -3309,7 +3307,7 @@ int EschTerrainTreeTop::esch_find_draw_volume(EschVector *pts)
     tpt.y = -ty;
     tpt.z = tz;
 
-    tpt.transform(&cam->eye.orient);
+    ::esch_transform(&tpt,&cam->eye.orient,&tpt);
 
     vpt[3].x = (long(tpt.x) >> scaleshift) + (width>>1);
     vpt[3].y = (long(tpt.z) >> scaleshift) + (width>>1);
@@ -3318,7 +3316,7 @@ int EschTerrainTreeTop::esch_find_draw_volume(EschVector *pts)
     tpt.y = -ty;
     tpt.z = tz;
 
-    tpt.transform(&cam->eye.orient);
+    ::esch_transform(&tpt,&cam->eye.orient,&tpt);
 
     vpt[4].x = (long(tpt.x) >> scaleshift) + (width>>1);
     vpt[4].y = (long(tpt.z) >> scaleshift) + (width>>1);
@@ -3551,7 +3549,7 @@ void EschTerrainTreeTop::draw_slip_endcap (VngoRect *rect, dword type, int dleve
     cpt.x = origin.x + float (corner.x << scaleshift);
     cpt.y = origin.y;
     cpt.z = origin.z + float (corner.y << scaleshift);
-    cpt.transform (&cam->eye.iorient, &cpt);
+    ::esch_transform(&cpt,&cam->eye.iorient,&cpt);
 
     ((EschPoint *)&points[0])->x = cpt.x + ((h-(hgt+0.5f)) * hvec.i);
     ((EschPoint *)&points[0])->y = cpt.y + ((h-(hgt+0.5f)) * hvec.j);
@@ -3601,7 +3599,7 @@ void EschTerrainTreeTop::draw_slip_endcap (VngoRect *rect, dword type, int dleve
     cpt.x = origin.x + float ((corner.x+corner.dx) << scaleshift);
     cpt.y = origin.y;
     cpt.z = origin.z + float (corner.y << scaleshift);
-    cpt.transform (&cam->eye.iorient, &cpt);
+    ::esch_transform(&cpt,&cam->eye.iorient,&cpt);
     ((EschPoint *)&points[1])->x = cpt.x + ((h-(hgt+0.5f)) * hvec.i);
     ((EschPoint *)&points[1])->y = cpt.y + ((h-(hgt+0.5f)) * hvec.j);
     ((EschPoint *)&points[1])->z = cpt.z + ((h-(hgt+0.5f)) * hvec.k);
@@ -3647,7 +3645,7 @@ void EschTerrainTreeTop::draw_slip_endcap (VngoRect *rect, dword type, int dleve
     cpt.x = origin.x + float ((corner.x+corner.dx) << scaleshift);
     cpt.y = origin.y;
     cpt.z = origin.z + float ((corner.y+corner.dy) << scaleshift);
-    cpt.transform (&cam->eye.iorient, &cpt);
+    ::esch_transform(&cpt,&cam->eye.iorient,&cpt);
     ((EschPoint *)&points[2])->x = cpt.x + ((h-(hgt+0.5f)) * hvec.i);
     ((EschPoint *)&points[2])->y = cpt.y + ((h-(hgt+0.5f)) * hvec.j);
     ((EschPoint *)&points[2])->z = cpt.z + ((h-(hgt+0.5f)) * hvec.k);
@@ -3693,7 +3691,7 @@ void EschTerrainTreeTop::draw_slip_endcap (VngoRect *rect, dword type, int dleve
     cpt.x = origin.x + float (corner.x << scaleshift);
     cpt.y = origin.y;
     cpt.z = origin.z + float ((corner.y+corner.dy) << scaleshift);
-    cpt.transform (&cam->eye.iorient, &cpt);
+    ::esch_transform(&cpt,&cam->eye.iorient,&cpt);
     ((EschPoint *)&points[3])->x = cpt.x + ((h-(hgt+0.5f)) * hvec.i);
     ((EschPoint *)&points[3])->y = cpt.y + ((h-(hgt+0.5f)) * hvec.j);
     ((EschPoint *)&points[3])->z = cpt.z + ((h-(hgt+0.5f)) * hvec.k);
@@ -3849,139 +3847,64 @@ void EschTerrainTreeTop::draw_slip_endcap (VngoRect *rect, dword type, int dleve
 int EschTerrainTreeTop::check_LOS (EschPoint *pt1, EschPoint *pt2,
                            int precision,float *ndist) const
 {
-    // Check rect edges for collisions and use any points found in the check
-    // We can only collide with 2 lines.
-    // First step, figure out which 2.
-    // Second step, figure out the x or y where the lines are crossed
-    // Third, decide if new x,y point is on the rect edge or off
-    // If third passes,
-    //  Fourth build magnitude from starting point to ending point
-    // If new mag is < ndist,
-    //  ndist = new mag
+    // build a world rect from left/right, top/bottom
+    VngoRect tree_world;
+    tree_world.x = (left<<scaleshift) + long(origin.x);
+    tree_world.y = (top<<scaleshift) + long(origin.z);
+    tree_world.dx = (right<<scaleshift) - (left<<scaleshift);
+    tree_world.dy = (bottom<<scaleshift) - (top<<scaleshift);
 
-    // check 2 points against 4 edges to figure quadrants
-    // we can use this to do a trivial clip
+    VngoPoint tpt1, tpt2;
+    tpt1.x = (long)pt1->x;
+    tpt1.y = (long)pt1->z;
+    tpt1.z = (long)pt1->y;
+    tpt2.x = (long)pt2->x;
+    tpt2.y = (long)pt2->z;
+    tpt2.z = (long)pt2->y;
 
-    int q1, q2;
-    if (pt1->x < left)
+    VNGError clip_state = tree_world.clip_to (&tpt1, &tpt2, VNGO_CLIP_VERBOSE|VNGO_CLIP_Z);
+
+    long temp_swap;
+    temp_swap = tpt1.z;
+    tpt1.z = tpt1.y;
+    tpt1.y = temp_swap;
+
+    temp_swap = tpt2.z;
+    tpt2.z = tpt2.y;
+    tpt2.y = temp_swap;
+
+    // clip_to() will swap points to ensure movement from left to right...  need to swap back...
+    if (pt1->x > pt2->x)
     {
-        if (pt1->y < top)
-        {
-            q1 = 1;
-        }
-        else if (pt1->y > bottom)
-        {
-            q1 = 7;
-        }
-        else
-        {
-            q1 = 4;
-        }
-    }
-    else if (pt1->x > right)
-    {
-        if (pt1->y < top)
-        {
-            q1 = 3;
-        }
-        else if (pt1->y > bottom)
-        {
-            q1 = 9;
-        }
-        else
-        {
-            q1 = 6;
-        }
-    }
-    else
-    {
-        if (pt1->y < top)
-        {
-            q1 = 2;
-        }
-        else if (pt1->y > bottom)
-        {
-            q1 = 8;
-        }
-        else
-        {
-            q1 = 5;
-        }
+        VngoPoint temp_pt;
+        temp_pt = tpt1;
+        tpt1 = tpt2;
+        tpt2 = temp_pt;
     }
 
-    if (pt2->x < left)
+    if (clip_state == VNGO_FULLY_INSIDE)
     {
-        if (pt2->y < top)
-        {
-            q2 = 1;
-        }
-        else if (pt2->y > bottom)
-        {
-            q2 = 7;
-        }
-        else
-        {
-            q2 = 4;
-        }
+        // line is completely inside trees
+        if (ndist)
+            *ndist = 0;
+        return 0;
     }
-    else if (pt2->x > right)
+    else if (clip_state == VNGO_FULLY_CLIPPED)
     {
-        if (pt2->y < top)
-        {
-            q2 = 3;
-        }
-        else if (pt2->y > bottom)
-        {
-            q2 = 9;
-        }
-        else
-        {
-            q2 = 6;
-        }
-    }
-    else
-    {
-        if (pt2->y < top)
-        {
-            q2 = 2;
-        }
-        else if (pt2->y > bottom)
-        {
-            q2 = 8;
-        }
-        else
-        {
-            q2 = 5;
-        }
-    }
-
-    // If both points are above, below, left, or right, its clipped
-    if ((q1 < 4 && q2 < 4)
-        || (q1 > 6 && q2 > 6)
-        || ((q1 == 1 || q1 == 4 || q1 == 7)
-            && (q2 == 1 || q2 == 4 || q2 == 7))
-        || ((q1 == 3 || q1 == 6 || q1 == 9)
-            && (q2 == 3 || q2 == 6 || q2 == 9)))
-    {
+        // we don't hamper LOS, so return TRUE
         return 1;
     }
 
-    // Now for a little less trivial clip
+    // tpt1 and/or tpt2 is on the edge of the tree blocks
+    // pt1 is the starting point
+    // pt2 is the ending point
+    // if tpt1 has changed, line is pt1 to tpt1
+    // else, line is pt1 to tpt2
 
-
-
-
-//ÄÄÄ Form vector
-    VngoRect    temp_rect (left<<scaleshift,
-                           top<<scaleshift,
-                           (right - left)<<scaleshift,
-                           (bottom - top)<<scaleshift);
-    EschVector  temp (pt1->x - pt2->x, pt1->y - pt2->y, pt1->z - pt2->z);
-
-    float       dist = temp.magnitude();
-
-//ÄÄÄ Determine step count and size
+    float dist;
     long count;
+    EschVector temp (float(tpt1.x - tpt2.x), float(tpt1.y-tpt2.y), float(tpt1.z-tpt2.z));
+    dist = temp.magnitude();
     if (precision > 0)
     {
         count = (long)(dist / float(precision)) + 1;
@@ -3991,35 +3914,28 @@ int EschTerrainTreeTop::check_LOS (EschPoint *pt1, EschPoint *pt2,
         count = (long)(dist / scale) + 1;
     }
 
-    float xstep = (pt2->x - pt1->x) / float(count);
-    float ystep = (pt2->y - pt1->y) / float(count);
-    float zstep = (pt2->z - pt1->z) / float(count);
+    float xstep = (float)(tpt2.x - tpt1.x) / float(count);
+    float ystep = (float)(tpt2.y - tpt1.y) / float(count);
+    float zstep = (float)(tpt2.z - tpt1.z) / float(count);
 
-//ÄÄÄ Perform checks
-    float curx = pt1->x;
-    float cury = pt1->y;
-    float curz = pt1->z;
+    float curx = (float)tpt1.x;
+    float cury = (float)tpt1.y;
+    float curz = (float)tpt1.z;
 
-    for (long i=0; i < count; i++)
+    for (long i=0; i<count; i++)
     {
-        if (temp_rect.point_in(int (curx), int (curz)))
+        float test_hgt = get_height(curx,curz);
+        if (test_hgt >= cury)
         {
-            float nheight = get_height(curx,curz);
-            if (nheight > cury)
+            if (ndist)
             {
-                if (ndist != NULL)
-                {
-                    EschVector tvect(curx-pt1->x,nheight-pt1->y,curz-pt1->z);
+                EschVector tvect(curx-pt1->x,test_hgt-pt1->y,curz-pt1->z);
+                if (ndist)
                     *ndist = tvect.magnitude();
-                }
-                return 0;
             }
+            return 0;
         }
-        curx += xstep;
-        cury += ystep;
-        curz += zstep;
     }
-
 
     return 1;
 }

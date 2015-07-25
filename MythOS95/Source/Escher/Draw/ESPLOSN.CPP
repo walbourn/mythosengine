@@ -495,7 +495,6 @@ void EschPlosion::draw()
 //ÄÄÄ Transform and light (if possible) the verticies
     for(i=0; i < verts; i++)
     {
-        vflags[i] = ESCH_VVERT_TRANSFORMED;
         ec.verts[i].transform(&frame,(EschPoint*)(&vpt[i]));
         vpt[i].shade=mp;
     }

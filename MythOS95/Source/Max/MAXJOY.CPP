@@ -203,7 +203,6 @@ short MaxJoystickWin32::init ()
 void MaxJoystickWin32::uninit()
 {
     initialized = false;
-    joy_present = 0;
     if (timer_id)
     {
         timeKillEvent (timer_id);
@@ -380,7 +379,6 @@ MaxJoystickDirectX::~MaxJoystickDirectX()
         pdid->Release();
         pdid = 0;
     }
-    joy_present = false;
 }
 
 
@@ -434,7 +432,6 @@ short MaxJoystickDirectX::init ()
 void MaxJoystickDirectX::uninit()
 {
     initialized = false;
-    joy_present = 0;
     if (pdid)
         pdid->Unacquire();
 

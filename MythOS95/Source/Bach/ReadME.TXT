@@ -30,20 +30,20 @@
 
                              _Library Status_
 
- Notes by: Dan Higdon
- Updated: July 22, 1997
+ Notes by: Chuck Walbourn
+ Updated: November 10, 1997
 
  Changes for this release 컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
 
- o Changed for DX5
+ o Redesigned and cleaned up interface (BachSample is now an abstract
+   base class with BachStaticSample implementation the standard
+   static sample functionality; dropped BachSystem and BachDigitalInterface
+   classes)
 
- Proposed changes 컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴
+ o Completed sample sequencer (previously named WaveSequencer)
 
- o Rework BachDigital and BachSample to provide custom mixing control and
-   move DirectSound dependancies entirely into BachDigital.
+ o Implemented file streaming class.
 
- o Possibly provide a BachSquencer and BachSequence MIDI playback support.
-
- o Direct-from-disk streaming of WAVs and possibly MIDs.
+ o Completed documentation and included a simple test application.
 
 *** END OF FILE ***

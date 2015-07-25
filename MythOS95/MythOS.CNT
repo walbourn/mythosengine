@@ -180,6 +180,8 @@
 4 Partitioning Drawables
 5 EschPartition Class=PG_ESCH_PARTITION
 5 EschGridPartition Class=PG_ESCH_GRIDPARTITION
+5 EschQuadTreePartition Class=PG_ESCH_QUADTREEPARTITION
+5 EschOctTreePartition Class=PG_ESCH_OCTTREEPARTITION
 4 Misc Drawables
 5 EschStarfield Class=PG_ESCH_STARFIELD
 5 EschPlosion Class=PG_ESCH_PLOSION
@@ -251,10 +253,11 @@
 3 Vector Class=PG_NEWT_VECTOR
 2 Bach
 3 Overview=PG_BACH_OVERVIEW
-3 System Class=PG_BACH_SYSTEM
-3 Digital Interface Class=PG_BACH_DIGI_INTERFACE
-3 Digital Class=PG_BACH_DIGI
-3 Sample Class=PG_BACH_SAMPLE
+3 Digital Sound Source Class=PG_BACH_DIGI
+3 Base Sample Class=PG_BACH_SAMPLE
+3 Static Sample Class=PG_BACH_STATICSAMPLE
+3 File Sample Class=PG_BACH_FILESAMPLE
+3 Sample Sequencer Class=PG_BACH_SAMPLESEQ
 1 MythOS User's Guide
 2 About this guide=UG_ABOUT
 2 Overview=UG_OVERVIEW

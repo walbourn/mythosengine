@@ -421,20 +421,35 @@ int APIENTRY WinMain (HINSTANCE hInstance,
     fclose(yyin);
 
     //컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴� Termination
-    delete Vport;
-    Vport=0;
+    if (Vport)
+    {
+        delete Vport;
+        Vport=0;
+    }
 
-    delete Screen;
-    Screen=0;
+    if (Palette)
+    {
+        delete Palette;
+        Palette=0;
+    }
 
-    delete Palette;
-    Palette=0;
+    if (Screen)
+    {
+        delete Screen;
+        Screen=0;
+    }
 
-    delete Devs;
-    Devs=0;
+    if (Devs)
+    {
+        delete Devs;
+        Devs=0;
+    }
 
-    delete MythOS;
-    MythOS=0;
+    if (MythOS)
+    {
+        delete MythOS;
+        MythOS=0;
+    }
 
     return 0;
 }
@@ -507,12 +522,12 @@ BOOL InitApplication (HINSTANCE hInstance, int nCmdShow, int w, int h)
     wc.lpszMenuName  = 0;
 
     // This will load the small icon image from the icon resource
-    wc.hIconSm = LoadImage (hInstance,
-                            szAppName,
-                            IMAGE_ICON,
-                            GetSystemMetrics(SM_CXSMICON),
-                            GetSystemMetrics(SM_CYSMICON),
-                            LR_DEFAULTCOLOR);
+    wc.hIconSm = (HICON__*)LoadImage (hInstance,
+                                      szAppName,
+                                      IMAGE_ICON,
+                                      GetSystemMetrics(SM_CXSMICON),
+                                      GetSystemMetrics(SM_CYSMICON),
+                                      LR_DEFAULTCOLOR);
 
     if (!RegisterClassEx (&wc))
         return FALSE;

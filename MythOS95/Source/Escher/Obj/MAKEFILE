@@ -106,6 +106,7 @@ esmatrix.obj\
 esmesh.obj\
 esmeshdr.obj\
 esmetabx.obj\
+esopartn.obj\
 espartik.obj\
 esplosn.obj\
 espntdrw.obj\
@@ -114,6 +115,7 @@ esprtgeo.obj\
 esprtpyr.obj\
 esprtspr.obj\
 esprtsys.obj\
+esqpartn.obj\
 esscene.obj\
 essfield.obj\
 essprite.obj\

@@ -67,7 +67,7 @@ rem cd profiler
 rem call mk %1
 rem if ERRORLEVEL 1 goto error
 rem cd ..
-rem ÄÄÄÄ Speilberg '95 ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+rem ÄÄÄÄ Spielberg '95 ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 rem cd spielbrg
 rem call mk %1
 rem if ERRORLEVEL 1 goto error
@@ -180,8 +180,13 @@ cd ..\..
 rem ÄÄÄÄ Turner '95 ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 rem ÄÄÄÄ Newton '95 ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 rem ÄÄÄÄ Bach '95 ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-rem ÄÄÄÄ Speilberg '95 ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-rem cd speilbrg\test
+cd bach\test
+call mk clean
+call mk
+if ERRORLEVEL 1 goto error
+cd ..\..
+rem ÄÄÄÄ Spielburg '95 ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+rem cd spielbrg\test
 rem call mk clean
 rem call mk
 rem if ERRORLEVEL 1 goto error

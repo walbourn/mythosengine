@@ -47,6 +47,39 @@
 
 #include "escher.hpp"
 
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//
+//                                Equates
+//
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+#define UNKNOWN     0
+#define DISCOVERED  1
+#define EXPLORED    2
+
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//
+//                               Structures
+//
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+struct queue_entry
+{
+    queue_entry *next;
+    long        w;
+    long        d;
+    float       dist;
+
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    // Constructor/Destructors                                              ³
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+    queue_entry(long _w, long _d, float _dist) :
+        next(0),
+        w(_w),
+        d(_d),
+        dist(_dist) {}
+};
+
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
 //                                 Code
@@ -65,6 +98,17 @@ EschGridPartition::EschGridPartition() :
     regions(0)
 {
     dtyp=ESCH_DRWT_PRTN_GRID;
+}
+
+EschGridPartition::EschGridPartition(ushort w, ushort d, float s,
+                                     const EschPoint *o) :
+    EschPartition(),
+    regions(0)
+{
+    dtyp=ESCH_DRWT_PRTN_GRID;
+
+    esch_error_codes err = init(w,d,s,o);
+    assertMyth("EschGridPartition init failed", err == ESCH_ERR_NONE);
 }
 
 
@@ -312,10 +356,17 @@ esch_error_codes EschGridPartition::pick(EschPicking *data) const
         long w = long(x) >> sizeshift;
         long d = long(z) >> sizeshift;
 
-        float dist = data->maxdist
-                     + EschVector (x - float(w)*size,
+        if (w >= width || d >= depth)
+            return ESCH_ERR_NOTSUPPORTED;
+
+        float dist = (data->flags & ESCH_PICK_MAXDIST)
+                     ? (data->maxdist
+                        + EschVector (x - float(w)*size,
+                                      0,
+                                      z - float(d)*size).magnitude())
+                     : (EschVector(float(width)*size,
                                    0,
-                                   z - float(d)*size).magnitude();
+                                   float(depth)*size).magnitude());
 
         float ex = x + (dist * data->direction.i);
         float ez = z + (dist * data->direction.k);
@@ -338,7 +389,6 @@ esch_error_codes EschGridPartition::pick(EschPicking *data) const
             Flx16 step = Flx16(dd) / Flx16(dw);
 
             Flx16 daccum = 0;
-//            Flx16 daccum = (x - Flx16(w)) / Flx16(size);
 
             for(long i=0; i <= dw; i++)
             {
@@ -405,7 +455,7 @@ esch_error_codes EschGridPartition::pick(EschPicking *data) const
 
                 w += wstep;
                 daccum += step;
-                if (daccum > Flx16(1))
+                while (daccum >= Flx16(1))
                 {
                     d += dstep;
                     daccum -= Flx16(1);
@@ -418,7 +468,6 @@ esch_error_codes EschGridPartition::pick(EschPicking *data) const
             Flx16 step = Flx16(dw) / Flx16(dd);
 
             Flx16 waccum = 0;
-//            Flx16 waccum = (z - Flx16(d)) / Flx16(size);
 
             for(long i=0; i <= dd; i++)
             {
@@ -485,7 +534,7 @@ esch_error_codes EschGridPartition::pick(EschPicking *data) const
 
                 d += dstep;
                 waccum += step;
-                if (waccum > Flx16(1))
+                while (waccum >= Flx16(1))
                 {
                     w += wstep;
                     waccum -= Flx16(1);
@@ -587,6 +636,7 @@ esch_error_codes EschGridPartition::collide(EschCollision *data) const
             for(d=sd; d <= ed; d++)
             {
                 long n = (d*width) + sw + 1;
+                assert(n < nregions);
                 for(w=sw; w <= ew; w++, n++)
                 {
                     for(EschPartitionList *ptr=regions[n]; ptr != 0; ptr = ptr->next)
@@ -692,59 +742,6 @@ void EschGridPartition::release()
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// EschGridPartition - init                                                 ³
-//                                                                          ³
-// Initializes the partitioning.                                            ³
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-esch_error_codes EschGridPartition::init(ushort w, ushort d, float s,
-                                         const EschPoint *o)
-{
-    release();
-
-//ÄÄÄ Verify inputs
-    if (!w || !d || !o || s <= 0)
-        return ESCH_ERR_INVALIDPARMS;
-
-//ÄÄÄ Determine scale shift for region size
-    {
-        long msk = 0x1;
-
-        for(ulong i=0; i < 16; i++, msk <<= 1)
-        {
-            if (msk == long(s))
-            {
-                size = s;
-                sizeshift = i;
-                break;
-            }
-        }
-
-        if (i >= 16)
-            return ESCH_ERR_INVALIDPARMS;
-    }
-
-//ÄÄÄ Save values
-    width = w;
-    depth = d;
-
-    origin = *o;
-
-//ÄÄÄ Initialize region lists (plus one for 'global' region)
-    nregions = width*depth + 1;
-
-    regions = new EschPartitionList *[nregions];
-    if (!regions)
-        return ESCH_ERR_NOMEMORY;
-
-    flags |= ESCH_DRW_OWNSDATA;
-
-    memset(regions, 0, sizeof(EschPartitionList*) * nregions);
-
-    return ESCH_ERR_NONE;
-}
-
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // EschGridPartition - insert                                               ³
 //                                                                          ³
 // Inserts a drawable into the partitioning.                                ³
@@ -789,10 +786,7 @@ esch_error_codes EschGridPartition::insert(EschDrawable *drw)
     }
 
 //ÄÄÄ Insert into region list
-    EschPartitionList *ptr = new EschPartitionList;
-    ptr->item = drw;
-    ptr->next = 0;
-    ptr->prev = 0;
+    EschPartitionList *ptr = new EschPartitionList(drw);
 
     assert(n < nregions);
     if (regions[n])
@@ -857,10 +851,493 @@ void EschGridPartition::remove(EschDrawable *drw)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 esch_error_codes EschGridPartition::traverse(EschTraverse *data) const
 {
-//
-// This still needs to be implemented...
-//
-    return ESCH_ERR_NOTSUPPORTED;
+    if (!data || !data->func)
+        return ESCH_ERR_INVALIDPARMS;
+
+//ÄÄÄ Handle 'dumb' traverse
+    if (flags & ESCH_PARTN_OFF)
+    {
+        for(ulong i=0; i < nregions; i++)
+        {
+            for(EschPartitionList *ptr=regions[i]; ptr != 0; ptr = ptr->next)
+            {
+                EschDrawable *item = ptr->item;
+
+                assertMyth("EschGridPartition::traverse found entry without item",
+                           item != 0);
+
+                if (!(item->flags & ESCH_DRW_SKIPTRAVERSE))
+                {
+                    if (data->func(data->data,item))
+                        return ESCH_ERR_STOPPED;
+                }
+            }
+        }
+        return ESCH_ERR_NONE;
+    }
+
+//ÄÄÄ Determine starting grid location
+    float x = data->pos.x - origin.x;
+    float z = data->pos.z - origin.z;
+
+    if (x < 0 || z < 0)
+        return ESCH_ERR_NOTSUPPORTED;
+
+    long w = long(x) >> sizeshift;
+    long d = long(z) >> sizeshift;
+
+    if (w >= width || d >= depth)
+        return ESCH_ERR_NOTSUPPORTED;
+
+//ÄÄÄ Directed walk
+    if (data->flags & ESCH_TRAV_DIRECTION)
+    {
+        float dist = (data->flags & ESCH_TRAV_DIST)
+                     ? (data->dist
+                        + EschVector (x - float(w)*size,
+                                      0,
+                                      z - float(d)*size).magnitude())
+                     : (EschVector(float(width)*size,
+                                   0,
+                                   float(depth)*size).magnitude());
+
+        float ex = x + (dist * data->dir.i);
+        float ez = z + (dist * data->dir.k);
+
+        long ew = long(ex) >> sizeshift;
+        long ed = long(ez) >> sizeshift;
+
+        long dw = ew - w;
+        long dd = ed - d;
+
+        long wstep = (dw >= 0) ? 1 : -1;
+        long dstep = (dd >= 0) ? 1 : -1;
+
+        dw = abs(dw);
+        dd = abs(dd);
+
+        //ÄÄÄ Width major
+        if (dw > dd)
+        {
+            Flx16 step = Flx16(dd) / Flx16(dw);
+
+            Flx16 daccum = 0;
+
+            for(long i=0; i <= dw; i++)
+            {
+                if (w >= 0 && w < width
+                    && d >= 0 && d < depth)
+                {
+                    ulong n = (d*width) + w + 1;
+                    assert(n < nregions);
+                    for(EschPartitionList *ptr=regions[n]; ptr != 0; ptr = ptr->next)
+                    {
+                        EschDrawable *item = ptr->item;
+
+                        assertMyth("EschGridPartition::traverse found entry without item",
+                                   item != 0);
+
+                        if (!(item->flags & ESCH_DRW_SKIPTRAVERSE))
+                        {
+                            if (data->func(data->data,item))
+                                return ESCH_ERR_STOPPED;
+                        }
+                    }
+                }
+                if (w >= 0 && w < width
+                    && (d+1) >= 0 && (d+1) < depth)
+                {
+                    ulong n = ((d+1)*width) + w + 1;
+                    assert(n < nregions);
+                    for(EschPartitionList *ptr=regions[n]; ptr != 0; ptr = ptr->next)
+                    {
+                        EschDrawable *item = ptr->item;
+
+                        assertMyth("EschGridPartition::traverse found entry without item",
+                                   item != 0);
+
+                        if (!(item->flags & ESCH_DRW_SKIPTRAVERSE))
+                        {
+                            if (data->func(data->data,item))
+                                return ESCH_ERR_STOPPED;
+                        }
+                    }
+                }
+                if (w >= 0 && w < width
+                    && (d-1) >= 0 && (d-1) < depth)
+                {
+                    ulong n = ((d-1)*width) + w + 1;
+                    assert(n < nregions);
+                    for(EschPartitionList *ptr=regions[n]; ptr != 0; ptr = ptr->next)
+                    {
+                        EschDrawable *item = ptr->item;
+
+                        assertMyth("EschGridPartition::traverse found entry without item",
+                                   item != 0);
+
+                        if (!(item->flags & ESCH_DRW_SKIPTRAVERSE))
+                        {
+                            if (data->func(data->data,item))
+                                return ESCH_ERR_STOPPED;
+                        }
+                    }
+                }
+
+                w += wstep;
+                daccum += step;
+                while (daccum >= Flx16(1))
+                {
+                    d += dstep;
+                    daccum -= Flx16(1);
+                }
+            }
+        }
+        //ÄÄÄ Depth major
+        else
+        {
+            Flx16 step = Flx16(dw) / Flx16(dd);
+
+            Flx16 waccum = 0;
+
+            for(long i=0; i <= dd; i++)
+            {
+                if (w >= 0 && w < width
+                    && d >= 0 && d < depth)
+                {
+                    ulong n = (d*width) + w + 1;
+                    assert(n < nregions);
+                    for(EschPartitionList *ptr=regions[n]; ptr != 0; ptr = ptr->next)
+                    {
+                        EschDrawable *item = ptr->item;
+
+                        assertMyth("EschGridPartition::traverse found entry without item",
+                                   item != 0);
+
+                        if (!(item->flags & ESCH_DRW_SKIPTRAVERSE))
+                        {
+                            if (data->func(data->data,item))
+                                return ESCH_ERR_STOPPED;
+                        }
+                    }
+                }
+                if ((w+1) >= 0 && (w+1) < width
+                    && d >= 0 && d < depth)
+                {
+                    ulong n = (d*width) + (w+1) + 1;
+                    assert(n < nregions);
+                    for(EschPartitionList *ptr=regions[n]; ptr != 0; ptr = ptr->next)
+                    {
+                        EschDrawable *item = ptr->item;
+
+                        assertMyth("EschGridPartition::traverse found entry without item",
+                                   item != 0);
+
+                        if (!(item->flags & ESCH_DRW_SKIPTRAVERSE))
+                        {
+                            if (data->func(data->data,item))
+                                return ESCH_ERR_STOPPED;
+                        }
+                    }
+                }
+                if ((w-1) >= 0 && (w-1) < width
+                    && d >= 0 && d < depth)
+                {
+                    ulong n = (d*width) + (w-1) + 1;
+                    assert(n < nregions);
+                    for(EschPartitionList *ptr=regions[n]; ptr != 0; ptr = ptr->next)
+                    {
+                        EschDrawable *item = ptr->item;
+
+                        assertMyth("EschGridPartition::traverse found entry without item",
+                                   item != 0);
+
+                        if (!(item->flags & ESCH_DRW_SKIPTRAVERSE))
+                        {
+                            if (data->func(data->data,item))
+                                return ESCH_ERR_STOPPED;
+                        }
+                    }
+                }
+
+                d += dstep;
+                waccum += step;
+                while (waccum >= Flx16(1))
+                {
+                    w += wstep;
+                    waccum -= Flx16(1);
+                }
+            }
+        }
+    }
+//ÄÄÄ Area walk
+    else
+    {
+        //ÄÄÄ Use arena for workspace
+        if (!(data->flags & ESCH_TRAV_ARENA))
+        {
+            data->arena = (EschSysInstance) ? EschSysInstance->wspace : 0;
+            if (data->arena)
+                ivory_arena_clear(data->arena);
+        }
+        if (!data->arena)
+            return ESCH_ERR_NEEDARENA;
+
+        //ÄÄÄ Need status for all regions
+        byte *status = new (data->arena) byte[nregions];
+        if (!status)
+            return ESCH_ERR_NOMEMORY;
+        memset(status,UNKNOWN,nregions);
+
+        //ÄÄÄ Setup queue with starting node
+        queue_entry *head = new (data->arena) queue_entry(w,d,0);
+        if (!head)
+            return ESCH_ERR_NOMEMORY;
+
+        queue_entry *tail = head;
+
+        //ÄÄÄ Breadth-first search loop
+        while (head != 0)
+        {
+            d = head->d;
+            w = head->w;
+
+            ulong n = (d*width) + w + 1;
+            assert(n < nregions);
+
+            if (status[n] != EXPLORED)
+            {
+                status[n] = EXPLORED;
+
+                //ÄÄÄ Check objects in this region
+                for(EschPartitionList *ptr=regions[n]; ptr != 0; ptr = ptr->next)
+                {
+                    EschDrawable *item = ptr->item;
+
+                    assertMyth("EschGridPartition::traverse found entry without item",
+                                item != 0);
+
+                    if (!(item->flags & ESCH_DRW_SKIPTRAVERSE))
+                    {
+                        if (data->func(data->data,item))
+                            return ESCH_ERR_STOPPED;
+                    }
+                }
+
+                //ÄÄÄ Add undiscovered adjacent regions
+                //   +---+---+---+
+                //   | 2 | 3 | 4 |
+                //   +---+---+---+
+                //   | 1 | X | 5 |
+                //   +---+---+---+
+                //   | 8 | 7 | 6 |
+                //   +---+---+---+
+
+                //ÄÄÄ 1
+                if ((w-1) >= 0)
+                {
+                    if (!(data->flags & ESCH_TRAV_DIST)
+                        || (head->dist < data->dist))
+                    {
+                        n = (d*width) + (w-1) + 1;
+                        assert(n < nregions);
+                        if (status[n] == UNKNOWN)
+                        {
+                            status[n] = DISCOVERED;
+
+                            queue_entry *q = new (data->arena)
+                                          queue_entry(w-1,d,head->dist+size);
+                            if (!q)
+                                return ESCH_ERR_NOMEMORY;
+
+                            tail->next = q;
+                            tail = q;
+                        }
+                    }
+                }
+
+                //ÄÄÄ 2
+                if ((w-1) >= 0 && (d-1) >= 0)
+                {
+                    if (!(data->flags & ESCH_TRAV_DIST)
+                        || (head->dist < data->dist))
+                    {
+                        n = ((d-1)*width) + (w-1) + 1;
+                        assert(n < nregions);
+                        if (status[n] == UNKNOWN)
+                        {
+                            status[n] = DISCOVERED;
+
+                            queue_entry *q = new (data->arena)
+                                        queue_entry(w-1,d-1,head->dist+size);
+                            if (!q)
+                                return ESCH_ERR_NOMEMORY;
+
+                            tail->next = q;
+                            tail = q;
+                        }
+                    }
+                }
+
+                //ÄÄÄ 3
+                if ((d-1) >= 0)
+                {
+                    if (!(data->flags & ESCH_TRAV_DIST)
+                        || (head->dist < data->dist))
+                    {
+                        n = ((d-1)*width) + w + 1;
+                        assert(n < nregions);
+                        if (status[n] == UNKNOWN)
+                        {
+                            status[n] = DISCOVERED;
+
+                            queue_entry *q = new (data->arena)
+                                        queue_entry(w,d-1,head->dist+size);
+                            if (!q)
+                                return ESCH_ERR_NOMEMORY;
+
+                            tail->next = q;
+                            tail = q;
+                        }
+                    }
+                }
+
+                //ÄÄÄ 4
+                if ((w+1) < width && (d-1) >= 0)
+                {
+                    if (!(data->flags & ESCH_TRAV_DIST)
+                        || (head->dist < data->dist))
+                    {
+                        n = ((d-1)*width) + (w+1) + 1;
+                        assert(n < nregions);
+                        if (status[n] == UNKNOWN)
+                        {
+                            status[n] = DISCOVERED;
+
+                            queue_entry *q = new (data->arena)
+                                        queue_entry(w+1,d-1,head->dist+size);
+                            if (!q)
+                                return ESCH_ERR_NOMEMORY;
+
+                            tail->next = q;
+                            tail = q;
+                        }
+                    }
+                }
+
+                //ÄÄÄ 5
+                if ((w+1) < width)
+                {
+                    if (!(data->flags & ESCH_TRAV_DIST)
+                        || (head->dist < data->dist))
+                    {
+                        n = (d*width) + (w+1) + 1;
+                        assert(n < nregions);
+                        if (status[n] == UNKNOWN)
+                        {
+                            status[n] = DISCOVERED;
+
+                            queue_entry *q = new (data->arena)
+                                        queue_entry(w+1,d,head->dist+size);
+                            if (!q)
+                                return ESCH_ERR_NOMEMORY;
+
+                            tail->next = q;
+                            tail = q;
+                        }
+                    }
+                }
+
+                //ÄÄÄ 6
+                if ((w+1) < width && (d+1) < depth)
+                {
+                    if (!(data->flags & ESCH_TRAV_DIST)
+                        || (head->dist < data->dist))
+                    {
+                        n = ((d+1)*width) + (w+1) + 1;
+                        assert(n < nregions);
+                        if (status[n] == UNKNOWN)
+                        {
+                            status[n] = DISCOVERED;
+
+                            queue_entry *q = new (data->arena)
+                                        queue_entry(w+1,d+1,head->dist+size);
+                            if (!q)
+                                return ESCH_ERR_NOMEMORY;
+
+                            tail->next = q;
+                            tail = q;
+                        }
+                    }
+                }
+
+                //ÄÄÄ 7
+                if ((d+1) < depth)
+                {
+                    if (!(data->flags & ESCH_TRAV_DIST)
+                        || (head->dist < data->dist))
+                    {
+                        n = ((d+1)*width) + w + 1;
+                        assert(n < nregions);
+                        if (status[n] == UNKNOWN)
+                        {
+                            status[n] = DISCOVERED;
+
+                            queue_entry *q = new (data->arena)
+                                        queue_entry(w,d+1,head->dist+size);
+                            if (!q)
+                                return ESCH_ERR_NOMEMORY;
+
+                            tail->next = q;
+                            tail = q;
+                        }
+                    }
+                }
+
+                //ÄÄÄ 8
+                if ((w-1) >= 0 && (d+1) < depth)
+                {
+                    if (!(data->flags & ESCH_TRAV_DIST)
+                        || (head->dist < data->dist))
+                    {
+                        n = ((d+1)*width) + (w-1) + 1;
+                        assert(n < nregions);
+                        if (status[n] == UNKNOWN)
+                        {
+                            status[n] = DISCOVERED;
+
+                            queue_entry *q = new (data->arena)
+                                        queue_entry(w-1,d+1,head->dist+size);
+                            if (!q)
+                                return ESCH_ERR_NOMEMORY;
+
+                            tail->next = q;
+                            tail = q;
+                        }
+                    }
+                }
+            }
+
+            //ÄÄÄ Dequeue our head item and continue
+            head = head->next;
+        }
+    }
+
+//ÄÄÄ Walk global
+    for(EschPartitionList *ptr=regions[0]; ptr != 0; ptr = ptr->next)
+    {
+        EschDrawable *item = ptr->item;
+
+        assertMyth("EschGridPartition::traverse found entry without item",
+                    item != 0);
+
+        if (!(item->flags & ESCH_DRW_SKIPTRAVERSE))
+        {
+            if (data->func(data->data,item))
+                return ESCH_ERR_STOPPED;
+        }
+    }
+
+    return ESCH_ERR_NONE;
 }
 
 
@@ -878,6 +1355,9 @@ esch_error_codes EschGridPartition::update(EschDrawable *drw)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Update a single drawable
     if (drw)
     {
+        if (drw->flags & ESCH_DRW_PARTNSTATIC)
+            return ESCH_ERR_NONE;
+
         //ÄÄÄ Determine 'new' sphere
         EschSphereExtents sphere;
         if (drw->get_extents(&sphere) == -1)
@@ -1041,6 +1521,180 @@ esch_error_codes EschGridPartition::update(EschDrawable *drw)
     }
 
     return ESCH_ERR_NONE;
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// EschGridPartition - init                                                 ³
+//                                                                          ³
+// Initializes the partitioning.                                            ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+esch_error_codes EschGridPartition::init(ushort w, ushort d, float s,
+                                         const EschPoint *o)
+{
+    release();
+
+//ÄÄÄ Verify inputs
+    if (!w || !d || !o || s <= 0)
+        return ESCH_ERR_INVALIDPARMS;
+
+//ÄÄÄ Determine scale shift for region size
+    {
+        long msk = 0x1;
+
+        for(ulong i=0; i < 16; i++, msk <<= 1)
+        {
+            if (msk == long(s))
+            {
+                size = s;
+                sizeshift = i;
+                break;
+            }
+        }
+
+        if (i >= 16)
+            return ESCH_ERR_INVALIDPARMS;
+    }
+
+//ÄÄÄ Save values
+    width = w;
+    depth = d;
+
+    origin = *o;
+
+//ÄÄÄ Initialize region lists (plus one for 'global' region)
+    nregions = width*depth + 1;
+
+    regions = new EschPartitionList *[nregions];
+    if (!regions)
+        return ESCH_ERR_NOMEMORY;
+
+    flags |= ESCH_DRW_OWNSDATA;
+
+    memset(regions, 0, sizeof(EschPartitionList*) * nregions);
+
+    return ESCH_ERR_NONE;
+}
+
+
+
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°°°±  Utility Routines  ±°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// EschGridPartition - draw_grid                                            ³
+//                                                                          ³
+// Draws the outline of the grid itself.  Needs the current context to be   ³
+// valid.                                                                   ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+void EschGridPartition::draw_grid(dword clr) const
+{
+    EschPoint           p;
+    VngoPoint           vpt[8];
+
+//ÄÄÄ Setup local pointers to current camera and Van Gogh viewport.
+    assertMyth("EschGridPartition::draw_grid needs camera in current context",
+               EschCurrent != NULL && EschCurrent->camera != NULL);
+
+    EschCamera *cam=EschCurrent->camera;
+
+    assertMyth("EschGridPartition::draw_grid needs a viewport in current context's camera",
+               cam->vport != NULL);
+    VngoVport *vp=cam->vport;
+
+//ÄÄÄ Setup for compare
+    float yon = cam->yon;
+    float hither = cam->hither;
+
+    int mp = vp->vbuff.pal->shd_pal->mid_point;
+
+//ÄÄÄ Process in loop
+    float z = origin.z;
+    for(long d = 0; d < depth; d++, z += size)
+    {
+        float x = origin.x;
+        for(long w = 0; w < width; w++, x += size)
+        {
+            //ÄÄÄ For each of the eight points of the cell
+            for(int i=0; i < 8; i++)
+            {
+                switch (i)
+                {
+                    case 0:
+                        p.x = x;
+                        p.y = -size;
+                        p.z = z;
+                        break;
+                    case 1:
+                        p.x = x+size;
+                        p.y = -size;
+                        p.z = z;
+                        break;
+                    case 2:
+                        p.x = x;
+                        p.y = size;
+                        p.z = z;
+                        break;
+                    case 3:
+                        p.x = x+size;
+                        p.y = size;
+                        p.z = z;
+                        break;
+                    case 4:
+                        p.x = x;
+                        p.y = -size;
+                        p.z = z+size;
+                        break;
+                    case 5:
+                        p.x = x+size;
+                        p.y = -size;
+                        p.z = z+size;
+                        break;
+                    case 6:
+                        p.x = x;
+                        p.y = size;
+                        p.z = z+size;
+                        break;
+                    default: /* 7 */
+                        p.x = x+size;
+                        p.y = size;
+                        p.z = z+size;
+                        break;
+                }
+                p.transform(&cam->eye.iorient);
+
+                // If we cross near or far plane, abort draw of extents
+                if (p.z < hither || p.z > yon)
+                    break;
+
+                vpt[i].x = long((p.x * cam->xscalar) / p.z)
+                           + (cam->vport->vbuff.width >> 1);
+                vpt[i].y = (cam->vport->vbuff.height >> 1)
+                           - long((p.y * cam->yscalar) / p.z);
+                vpt[i].z = dword(p.z * cam->z_factor * float(0xffffffff));
+                vpt[i].clr = clr;
+                vpt[i].shade = mp;
+            }
+
+            //ÄÄÄ Draw cell
+            if (i >= 8)
+            {
+                vp->clip_line(&vpt[0],&vpt[1]);
+                vp->clip_line(&vpt[1],&vpt[5]);
+                vp->clip_line(&vpt[5],&vpt[4]);
+                vp->clip_line(&vpt[4],&vpt[0]);
+                vp->clip_line(&vpt[2],&vpt[3]);
+                vp->clip_line(&vpt[3],&vpt[7]);
+                vp->clip_line(&vpt[7],&vpt[6]);
+                vp->clip_line(&vpt[6],&vpt[2]);
+                vp->clip_line(&vpt[0],&vpt[2]);
+                vp->clip_line(&vpt[1],&vpt[3]);
+                vp->clip_line(&vpt[5],&vpt[7]);
+                vp->clip_line(&vpt[4],&vpt[6]);
+            }
+        }
+    }
 }
 
 //°±² End of module - esgpartn.cpp ²±°

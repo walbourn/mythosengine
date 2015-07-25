@@ -115,6 +115,9 @@ public:
     dword           *fflags;
     
     EschTexture     **txts;
+
+    dword           color;
+    dword           alpha;
     
     //컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
     // Constructor/Destructors                                              �

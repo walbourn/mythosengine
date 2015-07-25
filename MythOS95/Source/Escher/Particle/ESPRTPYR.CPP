@@ -367,7 +367,6 @@ void EschParticlePyramid::draw()
 //컴� Transform and light (if possible) the verticies
     for(i=0; i < 4; i++)
     {
-        vflags[i] = ESCH_VVERT_TRANSFORMED;
         ec.verts[i].transform(&frame,(EschPoint*)(&vpt[i]));
         vpt[i].clr=color;
         vpt[i].shade=mp;
@@ -387,27 +386,21 @@ void EschParticlePyramid::draw()
             //컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴� Smooth/Specular shading
             if (level & (ESCH_CAM_SHADE_SPECULAR|ESCH_CAM_SHADE_SMOOTH))
             {
-                if (!(vflags[i] & ESCH_VVERT_LIT))
-                {
-                    vpt[i].shade=0;
+                vpt[i].shade=0;
 
-                    if (level & ESCH_CAM_SHADE_SPECULAR)
-                    {
-                        lights->hishine((cflags & ESCH_CAM_MODELSPACE) ?
-                                        &ec.verts[i]
-                                        : &vn[i],&vpt[i]);
-                    }
-                    else
-                    {
-                        lights->shine((cflags & ESCH_CAM_MODELSPACE) ?
-                                      &ec.verts[i]
-                                      : &vn[i],&vpt[i]);
-                    }
-                    vflags[i] |= ESCH_VVERT_LIT;
+                if (level & ESCH_CAM_SHADE_SPECULAR)
+                {
+                    lights->hishine((cflags & ESCH_CAM_MODELSPACE) ?
+                                    &ec.verts[i]
+                                    : &vn[i],&vpt[i]);
+                }
+                else
+                {
+                    lights->shine((cflags & ESCH_CAM_MODELSPACE) ?
+                                    &ec.verts[i]
+                                    : &vn[i],&vpt[i]);
                 }
             }
-            else if (!(level & ESCH_CAM_SHADE_FLAT))
-                vflags[i] |= ESCH_VVERT_LIT;
         }
     }
 

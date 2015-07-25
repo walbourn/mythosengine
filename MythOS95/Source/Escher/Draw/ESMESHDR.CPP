@@ -164,14 +164,21 @@ void EschMeshDraw::draw()
     ulong           i;
     dword           ctrlfl;
     dword           level;
-    dword           fflags;
-    dword           *vflags;
-    VngoPoint       *vpt;
+    dword           facefl;
+    dword           cflags;
+    int             mp;
     EschFace        *face;
     EschVertex      *vn;
     EschCamera      *cam;
     EschLight       *lights;
+    EschPoint       p;
     EschPoint       eyep(0,0,0);
+    EschVector      fview;
+    EschVertex      fnormal;
+    long            base_shade;
+    long            shadea;
+    long            shadeb;
+    long            shadec;
     EschFrameRef    frame(0);
 
     assertMyth("EschMeshDraw::draw needs an attached mesh",
@@ -189,8 +196,6 @@ void EschMeshDraw::draw()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Perform object radial extents check
     if (!(flags & ESCH_MSHD_NOEXTENTSCHK))
     {
-        EschPoint   p;
-
         // Transform center into view
         exts.center.transform(&world,&p);
         p.transform(&cam->eye.iorient);
@@ -247,41 +252,56 @@ void EschMeshDraw::draw()
     else ctrlfl = ESCH_CDF_CLIP;
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Setup
-    dword cflags = cam->flags;
+    cflags = cam->flags;
 
     assertMyth("EschMeshDraw::draw needs a palette in current context's camera",
                cam->vport->vbuff.pal != NULL);
 
-    int mp = cam->vport->vbuff.pal->shd_pal->mid_point;
+    mp = cam->vport->vbuff.pal->shd_pal->mid_point;
 
     //ÄÄÄ Clear arena
     assertMyth("EschMeshDraw needs Escher initialized",EschSysInstance != 0);
     ivory_arena_clear(EschSysInstance->wspace);
 
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Setup Context
+    //ÄÄÄ Setup Context
     EschContext ec(EschCurrent);
     ec.current = this;
 
+    //ÄÄÄ Allocate workspace
     ec.verts = (EschVertex*)ivory_hlock(mesh->v);
-    assertMyth("EschMeshDraw:draw lock on verticies failed",
+    assertMyth("EschMeshDraw::draw lock on verticies failed",
                ec.verts != 0);
 
-    ec.vflags = vflags = (dword*)ivory_arena_zalloc(EschSysInstance->wspace,sizeof(dword) * mesh->nverts);
-    ec.vpoints = vpt = new (EschSysInstance->wspace) VngoPoint[mesh->nverts];
-
     ec.faces = (EschFace*)ivory_hlock(mesh->f);
-    assertMyth("EschMeshDraw:draw lock on faces failed",
+    assertMyth("EschMeshDraw::draw lock on faces failed",
                ec.faces != 0);
+
+    ec.vflags = (dword*)ivory_arena_zalloc(EschSysInstance->wspace,
+                                           sizeof(dword) * mesh->nverts);
+    assertMyth("EschMeshDraw::draw failed to allocate needed workspace",
+               ec.vflags != 0);
+
+    ec.vpoints = (VngoPoint*)ivory_arena_alloc(EschSysInstance->wspace,
+                                           sizeof(VngoPoint) * mesh->nverts);
+    assertMyth("EschMeshDraw::draw failed to allocate needed workspace",
+               ec.vpoints != 0);
 
     ec.fflags = 0;
     ec.txts = txt;
     ec.push();
 
-    //ÄÄÄ Workspace for shadeing values, if not shading in modelspace.
+    //ÄÄÄ If not doing modelspace lighting, may need vertex workspace
     if (!(cflags & ESCH_CAM_MODELSPACE)
-        && (cflags & (ESCH_CAM_SHADE_SMOOTH|ESCH_CAM_SHADE_SPECULAR)))
+        && (cflags & limits & ESCH_CAM_SHADE_SMOOTH))
     {
-        vn = (EschVertex*) new (EschSysInstance->wspace) EschVertex[mesh->nverts];
+        vn = (EschVertex*)ivory_arena_alloc(EschSysInstance->wspace,
+                                          sizeof(EschVertex) * mesh->nverts);
+        assertMyth("EschMeshDraw::draw failed to allocate needed workspace",
+                   vn != 0);
+    }
+    else
+    {
+        vn = 0;
     }
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Misc Setup
@@ -305,16 +325,15 @@ void EschMeshDraw::draw()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Main Face Loop
     for(i=0, face=ec.faces; i < mesh->nfaces; i++, face++)
     {
-        fflags = face->flags;
+        facefl = face->flags;
 
         //ÄÄÄ Figure out shade level (take minimum of shade levels for
         //ÄÄÄ camera, drawable shade limits, and face)
-        level = cflags & fflags & limits;
+        level = cflags & facefl & limits;
 
         //ÄÄÄÄÄÄÄÄÄÄÄÄ Perform backface culling, if allowed, in object space.
         if (level & ESCH_CAM_BACKCULL)
         {
-            EschVector fview;
             fview.i = ec.verts[face->a].x - eyep.x;
             fview.j = ec.verts[face->a].y - eyep.y;
             fview.k = ec.verts[face->a].z - eyep.z;
@@ -324,49 +343,55 @@ void EschMeshDraw::draw()
         }
 
         //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Transform face's verts
-        if (!(vflags[face->a] & ESCH_VVERT_TRANSFORMED))
+        //ÄÄÄ Vertex A
+        if (!(ec.vflags[face->a] & ESCH_VVERT_TRANSFORMED))
         {
-            ec.verts[face->a].transform(&frame,(EschPoint*)(&vpt[face->a]));
-            vflags[face->a] |= ESCH_VVERT_TRANSFORMED;
+            ec.vflags[face->a] |= ESCH_VVERT_TRANSFORMED;
 
-            // Transform vertex to world, if needed, for shading
-            if (!(cflags & ESCH_CAM_MODELSPACE)
-                && (level & (ESCH_CAM_SHADE_SMOOTH|ESCH_CAM_SHADE_SPECULAR)))
+            ec.verts[face->a].transform(&frame,
+                                        (EschPoint*)(&ec.vpoints[face->a]));
+
+            if (vn && (level & ESCH_CAM_SHADE_SMOOTH))
             {
                 ec.verts[face->a].transform(&world,&vn[face->a]);
-                ec.verts[face->a].normal.transform(&world,&vn[face->a].normal);
+                ec.verts[face->a].normal.transform(&world,
+                                                   &vn[face->a].normal);
                 if (world.scalef != 1.0)
                     vn[face->a].normal.normalize();
             }
         }
 
-        if (!(vflags[face->b] & ESCH_VVERT_TRANSFORMED))
+        //ÄÄÄ Vertex B
+        if (!(ec.vflags[face->b] & ESCH_VVERT_TRANSFORMED))
         {
-            ec.verts[face->b].transform(&frame,(EschPoint*)(&vpt[face->b]));
-            vflags[face->b] |= ESCH_VVERT_TRANSFORMED;
+            ec.vflags[face->b] |= ESCH_VVERT_TRANSFORMED;
 
-            // Transform vertex to world, if needed, for shading
-            if (!(cflags & ESCH_CAM_MODELSPACE)
-                && (level & (ESCH_CAM_SHADE_SMOOTH|ESCH_CAM_SHADE_SPECULAR)))
+            ec.verts[face->b].transform(&frame,
+                                        (EschPoint*)(&ec.vpoints[face->b]));
+
+            if (vn && (level & ESCH_CAM_SHADE_SMOOTH))
             {
                 ec.verts[face->b].transform(&world,&vn[face->b]);
-                ec.verts[face->b].normal.transform(&world,&vn[face->b].normal);
+                ec.verts[face->b].normal.transform(&world,
+                                                   &vn[face->b].normal);
                 if (world.scalef != 1.0)
                     vn[face->b].normal.normalize();
             }
         }
 
-        if (!(vflags[face->c] & ESCH_VVERT_TRANSFORMED))
+        //ÄÄÄ Vertex C
+        if (!(ec.vflags[face->c] & ESCH_VVERT_TRANSFORMED))
         {
-            vflags[face->c] |= ESCH_VVERT_TRANSFORMED;
-            ec.verts[face->c].transform(&frame,(EschPoint*)(&vpt[face->c]));
+            ec.vflags[face->c] |= ESCH_VVERT_TRANSFORMED;
 
-            // Transform vertex to world, if needed, for shading
-            if (!(cflags & ESCH_CAM_MODELSPACE)
-                && (level & (ESCH_CAM_SHADE_SMOOTH|ESCH_CAM_SHADE_SPECULAR)))
+            ec.verts[face->c].transform(&frame,
+                                        (EschPoint*)(&ec.vpoints[face->c]));
+
+            if (vn && (level & ESCH_CAM_SHADE_SMOOTH))
             {
                 ec.verts[face->c].transform(&world,&vn[face->c]);
-                ec.verts[face->c].normal.transform(&world,&vn[face->c].normal);
+                ec.verts[face->c].normal.transform(&world,
+                                                   &vn[face->c].normal);
                 if (world.scalef != 1.0)
                     vn[face->c].normal.normalize();
             }
@@ -375,84 +400,152 @@ void EschMeshDraw::draw()
         //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Compute shading
 
         //ÄÄÄ Sets color (assumes draw face copies into face->b and face->c)
-        vpt[face->a].clr=face->color;
+        ec.vpoints[face->a].clr=face->color;
 
         //ÄÄÄ Sets shade value
         if (lights)
         {
-            dword base_shade = (mp*long(face->self_illum)) / 255;
-
-            //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Smooth/Specular shading
-            if (level & (ESCH_CAM_SHADE_SPECULAR|ESCH_CAM_SHADE_SMOOTH))
+            //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Smooth shading
+            if (level & ESCH_CAM_SHADE_SMOOTH)
             {
-                if (!(vflags[face->a] & ESCH_VVERT_LIT))
-                {
-                    vpt[face->a].shade=base_shade;
+                int revnormal = !(facefl & ESCH_FACE_ONESIDED);
 
-                    if (level & ESCH_CAM_SHADE_SPECULAR)
+                //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ World Shading
+                if (vn)
+                {
+                    //ÄÄÄ Vertex A
+                    if (!(ec.vflags[face->a] & ESCH_VVERT_LIT))
                     {
-                        lights->hishine((cflags & ESCH_CAM_MODELSPACE) ?
-                                        &ec.verts[face->a]
-                                        : &vn[face->a],&vpt[face->a],
-                                        !(fflags & ESCH_FACE_ONESIDED));
+                        ec.vflags[face->a] |= ESCH_VVERT_LIT;
+
+                        ec.vpoints[face->a].shade=0;
+
+                        if (level & ESCH_CAM_SHADE_SPECULAR)
+                        {
+                            lights->hishine(&vn[face->a],
+                                            &ec.vpoints[face->a],
+                                            revnormal);
+                        }
+                        else
+                        {
+                            lights->shine(&vn[face->a],
+                                          &ec.vpoints[face->a],
+                                          revnormal);
+                        }
                     }
-                    else
+
+                    //ÄÄÄ Vertex B
+                    if (!(ec.vflags[face->b] & ESCH_VVERT_LIT))
                     {
-                        lights->shine((cflags & ESCH_CAM_MODELSPACE) ?
-                                      &ec.verts[face->a]
-                                      : &vn[face->a],&vpt[face->a],
-                                      !(fflags & ESCH_FACE_ONESIDED));
+                        ec.vflags[face->b] |= ESCH_VVERT_LIT;
+
+                        ec.vpoints[face->b].shade=0;
+
+                        if (level & ESCH_CAM_SHADE_SPECULAR)
+                        {
+                            lights->hishine(&vn[face->b],
+                                            &ec.vpoints[face->b],
+                                            revnormal);
+                        }
+                        else
+                        {
+                            lights->shine(&vn[face->b],
+                                          &ec.vpoints[face->b],
+                                          revnormal);
+                        }
                     }
-                    vflags[face->a] |= ESCH_VVERT_LIT;
+
+                    //ÄÄÄ Vertex C
+                    if (!(ec.vflags[face->c] & ESCH_VVERT_LIT))
+                    {
+                        ec.vflags[face->c] |= ESCH_VVERT_LIT;
+
+                        ec.vpoints[face->c].shade=0;
+
+                        if (level & ESCH_CAM_SHADE_SPECULAR)
+                        {
+                            lights->hishine(&vn[face->c],
+                                            &ec.vpoints[face->c],
+                                            revnormal);
+                        }
+                        else
+                        {
+                            lights->shine(&vn[face->c],
+                                          &ec.vpoints[face->c],
+                                          !(facefl & ESCH_FACE_ONESIDED));
+                        }
+                    }
                 }
-
-                if (!(vflags[face->b] & ESCH_VVERT_LIT))
+                //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Modelspace Shading
+                else
                 {
-                    vpt[face->b].shade=base_shade;
+                    //ÄÄÄ Vertex A
+                    if (!(ec.vflags[face->a] & ESCH_VVERT_LIT))
+                    {
+                        ec.vflags[face->a] |= ESCH_VVERT_LIT;
 
-                    if (level & ESCH_CAM_SHADE_SPECULAR)
-                    {
-                        lights->hishine((cflags & ESCH_CAM_MODELSPACE) ?
-                                        &ec.verts[face->b]
-                                        : &vn[face->b],&vpt[face->b],
-                                        !(fflags & ESCH_FACE_ONESIDED));
-                    }
-                    else
-                    {
-                        lights->shine((cflags & ESCH_CAM_MODELSPACE) ?
-                                      &ec.verts[face->b]
-                                      : &vn[face->b],&vpt[face->b],
-                                      !(fflags & ESCH_FACE_ONESIDED));
-                    }
-                    vflags[face->b] |= ESCH_VVERT_LIT;
-                }
+                        ec.vpoints[face->a].shade=0;
 
-                if (!(vflags[face->c] & ESCH_VVERT_LIT))
-                {
-                    vpt[face->c].shade=base_shade;
+                        if (level & ESCH_CAM_SHADE_SPECULAR)
+                        {
+                            lights->hishine(&ec.verts[face->a],
+                                            &ec.vpoints[face->a],
+                                            revnormal);
+                        }
+                        else
+                        {
+                            lights->shine(&ec.verts[face->a],
+                                          &ec.vpoints[face->a],
+                                          revnormal);
+                        }
+                    }
 
-                    if (level & ESCH_CAM_SHADE_SPECULAR)
+                    //ÄÄÄ Vertex B
+                    if (!(ec.vflags[face->b] & ESCH_VVERT_LIT))
                     {
-                        lights->hishine((cflags & ESCH_CAM_MODELSPACE) ?
-                                        &ec.verts[face->c]
-                                        : &vn[face->c],&vpt[face->c],
-                                        !(fflags & ESCH_FACE_ONESIDED));
+                        ec.vflags[face->b] |= ESCH_VVERT_LIT;
+
+                        ec.vpoints[face->b].shade=0;
+
+                        if (level & ESCH_CAM_SHADE_SPECULAR)
+                        {
+                            lights->hishine(&ec.verts[face->b],
+                                            &ec.vpoints[face->b],
+                                            revnormal);
+                        }
+                        else
+                        {
+                            lights->shine(&ec.verts[face->b],
+                                          &ec.vpoints[face->b],
+                                          revnormal);
+                        }
                     }
-                    else
+
+                    //ÄÄÄ Vertex C
+                    if (!(ec.vflags[face->c] & ESCH_VVERT_LIT))
                     {
-                        lights->shine((cflags & ESCH_CAM_MODELSPACE) ?
-                                      &ec.verts[face->c]
-                                      : &vn[face->c],&vpt[face->c],
-                                      !(fflags & ESCH_FACE_ONESIDED));
+                        ec.vflags[face->c] |= ESCH_VVERT_LIT;
+
+                        ec.vpoints[face->c].shade=0;
+
+                        if (level & ESCH_CAM_SHADE_SPECULAR)
+                        {
+                            lights->hishine(&ec.verts[face->c],
+                                            &ec.vpoints[face->c],
+                                            revnormal);
+                        }
+                        else
+                        {
+                            lights->shine(&ec.verts[face->c],
+                                          &ec.vpoints[face->c],
+                                          revnormal);
+                        }
                     }
-                    vflags[face->c] |= ESCH_VVERT_LIT;
                 }
             }
             //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Flat shading
             else if (level & ESCH_CAM_SHADE_FLAT)
             {
-                EschVertex  fnormal;
-
                 if (cflags & ESCH_CAM_MODELSPACE)
                 {
                     fnormal.x = ec.verts[face->a].x;
@@ -468,26 +561,62 @@ void EschMeshDraw::draw()
                     face->normal.transform(&world,&fnormal.normal);
                 }
 
-                vpt[face->a].shade=0;
-                lights->shine(&fnormal,&vpt[face->a],
-                              !(fflags & ESCH_FACE_ONESIDED));
+                ec.vpoints[face->a].shade=0;
+
+                if (level & ESCH_CAM_SHADE_SPECULAR)
+                {
+                    lights->hishine(&fnormal,
+                                    &ec.vpoints[face->a],
+                                    !(facefl & ESCH_FACE_ONESIDED));
+                }
+                else
+                {
+                    lights->shine(&fnormal,
+                                  &ec.vpoints[face->a],
+                                  !(facefl & ESCH_FACE_ONESIDED));
+                }
             }
             //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ No shading
             else
             {
-                vpt[face->a].shade=mp;
+                ec.vpoints[face->a].shade=mp;
             }
         }
         //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ No lights, so no shading
         else
         {
-            vpt[face->a].shade=mp;
-            vpt[face->b].shade=mp;
-            vpt[face->c].shade=mp;
+            ec.vpoints[face->a].shade=mp;
+            ec.vpoints[face->b].shade=mp;
+            ec.vpoints[face->c].shade=mp;
         }
 
         //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Call clip draw
-        esch_clipdraw_face(i,ctrlfl);
+        if (!face->self_illum)
+        {
+            esch_clipdraw_face(i,ctrlfl);
+        }
+        else
+        {
+            base_shade = (mp*long(face->self_illum)) / 255;
+
+            shadea = ec.vpoints[face->a].shade;
+            if (shadea < base_shade)
+                ec.vpoints[face->a].shade = base_shade;
+
+            shadeb = ec.vpoints[face->b].shade;
+            if (shadeb < base_shade)
+                ec.vpoints[face->b].shade = base_shade;
+
+            shadec = ec.vpoints[face->c].shade;
+            if (shadec < base_shade)
+                ec.vpoints[face->c].shade = base_shade;
+
+            esch_clipdraw_face(i,ctrlfl);
+
+            ec.vpoints[face->a].shade = shadea;
+            ec.vpoints[face->b].shade = shadeb;
+            ec.vpoints[face->c].shade = shadec;
+        }
     }
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Cleanup

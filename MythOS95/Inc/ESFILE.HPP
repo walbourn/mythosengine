@@ -450,6 +450,26 @@ struct EschFileKeyframeV1
     long    rotation[3];
 };
 
+//дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+// FORM 'ETOK' - Escher Keyframe Token data IFF form.                       Ё
+//дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+
+//дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд Header
+//ддд 'HDR '
+struct EschFileTokenHeader
+{
+    ulong   ver;
+    ulong   count;
+};
+
+//дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд Tokens
+//ддд 'KTOK'
+struct EschFileToken
+{
+    char    name[ESCH_MAX_NAME];
+    ulong   type;
+};
+
 
 //дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
 // FORM 'ESEN' - Scene data IFF form.                                       Ё

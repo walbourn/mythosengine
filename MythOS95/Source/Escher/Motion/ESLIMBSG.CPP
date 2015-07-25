@@ -393,7 +393,6 @@ int EschLimbSegment::swap_motion (char *str1, char *str2)
                 keyheads[i] = temp;
                 keyframes[i] = temp;
                 next_keyframes[i] = keyframes[i]->child;
-                first_step = 1;
                 calc_step (i);
                 init_tween (i);
 
@@ -424,15 +423,7 @@ int EschLimbSegment::swap_motion (char *str1, char *str2)
 //컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
 void EschLimbSegment::build_interim(int num)
 {
-    if (first_step)
-    {
-        pre_interim[num] = *keyframes[num];
-        first_step = 0;
-    }
-    else
-    {
-        pre_interim[num] = interim[num];
-    }
+    pre_interim[num] = interim[num];
     interim[num] = *next_keyframes[num];
 
     interim[num].rotations.i += fore_pitch;
@@ -591,8 +582,6 @@ int EschLimbSegment::get_next_key(int num,float side_vel)
     {
         if (k_type & (ESCH_KEYFRAME_LEADING | ESCH_KEYFRAME_TRAILING))
         {
-            swap_lead_trail (num);
-
             // bypass the base frame
             if (keyheads[num]->child)
             {
@@ -1184,7 +1173,6 @@ esch_error_codes EschLimbSegment::load(const char *fname, const char *oname,
     local.compute_inverse();
     float dummy,y;
     local.get_position(&dummy, &y, &dummy);
-    length =  y - msh->box.mins[1];
 
     compute_world();
 

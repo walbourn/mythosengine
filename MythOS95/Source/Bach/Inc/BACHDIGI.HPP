@@ -33,7 +33,13 @@
 //
 // bachdigi.hpp
 //
-// Contains the Digital object hierarchy.
+// BachSample - Base sample container class
+//
+// BachStaticSample - Static sample container class
+//
+// BachFileSample - Sample that plays from a file
+//
+// BachDigital - Digital sound source class
 //
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
 
@@ -50,13 +56,6 @@
 //
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// Sound System Library Includes                                            ³
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-
-//ÄÄÄ Standard headers
-#include <windows.h>
-#include <mmsystem.h>
 #include <dsound.h>
 
 //ÄÄÄ Charybdis headers
@@ -68,7 +67,7 @@
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // Bach Library Includes                                                    ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-#include "bachdefs.hpp"
+#include "bachdefs.h"
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
@@ -76,186 +75,267 @@
 //
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
+class BachDigital;
+
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°° Sample Classes °°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// BachSample - Container object for digital sample                         ³
+// BachSample - Base class for digital samples                              ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 class BachSample
 {
-    IDirectSound        *dSound;            // The DirectSound instance we will play on
-    IDirectSoundBuffer  *pdsb;              // The DirectSound buffer
-    IvoryHandle         dsbHandle;          // "Off-Card" storage for restoring buffers
+protected:
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    // Protected data members                                               ³
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+    IDirectSound        *dsound;            // DSound instanace
+    IDirectSoundBuffer  *sbuffer;           // DSound buffer
 
-    //ÄÄÄ Internal buffer maintainance
-    HRESULT restore ();                     // Restore a lost DSound buffer
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    // Internal routines                                                    ³
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+    enum { db_table_size=128 };
+
+    static short db_table[db_table_size];
+    static short db_table_find(int i);
 
 public:
-    dword               flags;              // Sample status flags
-    ulong               length;             // Sample length
-    bach_digi_fmt       fmt;                // Sample format
-    ulong               rate;               // Sample rate
-    void                *ptr;               // non-zero if locked
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    // Public data members.                                                 ³
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+    dword           flags;                  // Sample flags
+    bach_digi_fmt   fmt;                    // Sample format
+    ulong           rate;                   // Sample rate
+    void            *app_data;              // Application data
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Constructor/Destructor                                               ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-    BachSample (const class BachDigital &);
+    BachSample (BachDigital *digi);
+    BachSample (BachSample const &b);
+
     virtual ~BachSample();
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-    // Copy Constructor/Assignment                                          ³
+    // Operations                                                           ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-    BachSample (BachSample const &b);
-    BachSample &operator = (BachSample const &);
+    BachSample &operator = (BachSample const &that);
+
+    //ÄÄÄ Free all associated data
+    virtual void release ();
+
+    //ÄÄÄ Play controls
+    virtual bach_err_codes play (int loop = 0)=0;
+    virtual bach_err_codes stop ()=0;
+    virtual bach_err_codes pause()=0;
+    virtual bach_err_codes resume()=0;
+    virtual dword status() const=0;
+
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    // Utility functions.                                                   ³
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+    void set_app_data(void *p) { app_data = p; }
+};
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// BachStaticSample - Static sample class                                   ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+class BachStaticSample : public BachSample
+{
+protected:
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    // Internal routines                                                    ³
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+    bach_err_codes restore();
+
+public:
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    // Public data members.                                                 ³
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+    ulong           length;                 // Sample length
+    IvoryHandle     handle;                 // Sample data
+
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    // Constructor/Destructor                                               ³
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+    BachStaticSample (BachDigital *digi);
+    virtual ~BachStaticSample();
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Operations                                                           ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
-    //ÄÄÄ Lock/unlock ptr for use.
-    virtual bach_err_codes lock ();
-    virtual void unlock ();
-
-    //ÄÄÄ Free all sample memory
+    //ÄÄÄ Base class interface
     virtual void release ();
-
-    //ÄÄÄ Loads the sample from disk.
-    virtual bach_err_codes load (const char *fname);
-    virtual bach_err_codes load (XFParseIFF *iff);
-
-    //ÄÄÄ Play controls
-    virtual bach_err_codes play (BOOL loop = 0);
-    virtual bach_err_codes stop (BOOL rewind = TRUE);
-    virtual bach_err_codes set_volume   (long);
-    virtual long           get_volume   ();
-    virtual bach_err_codes set_pan      (long);
-    virtual long           get_pan      ();
-    virtual bach_err_codes set_playrate (ulong);
-    virtual dword          get_flags    ();
-
-    dword   get_playtime () const;
-};
-
-
-#if 0
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// BachSample - Container object for digital sample                         ³
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-class BachStreamSample: public BachSample
-{
-    XFile   *xf;
-    ulong   buf_len;
-
-public:
-    BachStreamSample (const class BachDigital &, int buf_len = 4096);
-
-    //ÄÄÄ Free all sample memory
-    virtual void release ();
-
-    //ÄÄÄ Loads the sample from disk.
-    virtual bach_err_codes load (XFParseIFF *iff);
-
-    //ÄÄÄ Play controls
-    virtual bach_err_codes play (BOOL loop = 0);
+    virtual bach_err_codes play (int loop = 0);
     virtual bach_err_codes stop ();
+    virtual bach_err_codes pause();
+    virtual bach_err_codes resume();
+    virtual dword status() const;
+
+    //ÄÄÄ Additional controls for static samples
+    bach_err_codes set_volume (long vol);
+    long get_volume () const;
+
+    bach_err_codes set_pan (long heading);
+    long get_pan () const;
+
+    bach_err_codes set_playrate (ulong r);
+    ulong get_playrate() const;
+
+    bach_err_codes set_position (ulong p);
+    ulong get_position() const;
+
+    //ÄÄÄ Create sample from data buffer
+    bach_err_codes create(void *p, ulong l,
+                          bach_digi_fmt f=BACH_DIGI_MONO_8,
+                          ulong r=BACH_DIGI_DRIVERRATE);
+
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    // Utility functions.                                                   ³
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+    ulong get_playtime () const;
+
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    // I/O routines.                                                        ³
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+    //ÄÄÄ Load sample from disk
+    bach_err_codes load_raw(const char *fname,
+                            bach_digi_fmt f=BACH_DIGI_MONO_8,
+                            ulong r=BACH_SMP_DEFAULTRATE);
+    bach_err_codes load_raw(XFile &xf,
+                            bach_digi_fmt f=BACH_DIGI_MONO_8,
+                            ulong r=BACH_SMP_DEFAULTRATE);
+
+    bach_err_codes load_wav(const char *fname);
+    bach_err_codes load_wav(XFParseIFF &iff);
 };
-#endif
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// BachDigitalInterface - Abstract base class for digital I/O               ³
+// BachFileSample - File streamed sample class                              ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-class BachDigitalInterface
+class BachFileSample : BachSample
 {
 protected:
-    bach_err_codes      errorn;
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    // Protected data members                                               ³
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+    IDirectSoundBuffer  *sbuffer_next;      // DSound buffer
+
+    HANDLE              thread_handle;
+    CRITICAL_SECTION    critical_section;
+
+    enum
+    {
+        START   = 0,
+        STOP    = 1,
+        MAX
+    };
+    HANDLE              thread_event[MAX];
+
+    ulong               buffer_size;
+
+    XFile               *xfile;
+    ulong               playrate;
+    ulong               start;
+    ulong               offset;
+    ulong               length;
+
+    XFile               *xfile_next;
+    bach_digi_fmt       fmt_next;
+    ulong               rate_next;
+    ulong               playrate_next;
+    ulong               start_next;
+    ulong               length_next;
+
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    // Internal routines                                                    ³
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+    static DWORD WINAPI thread_proc (LPVOID);
+
+    // We cannot allow copying because of the critical section
+    BachFileSample (BachFileSample const &);
+    BachFileSample &operator= (BachFileSample const &);
 
 public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Constructor/Destructor                                               ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-    BachDigitalInterface() { errorn=BACH_ERR_NONE; };
-    virtual ~BachDigitalInterface() {};
+    BachFileSample (class BachDigital *digi, ulong bsize = 16384);
+    virtual ~BachFileSample ();
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-    // Operations for digital i/o                                           ³
+    // Operations                                                           ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-    bach_err_codes  error() { return errorn; }
 
-    //ÄÄ Hardware init
-    virtual bach_err_codes init (HWND, DWORD)=0;
-    virtual void close ()=0;
+    //ÄÄÄ Base class interface
+    virtual void release();
+    virtual bach_err_codes play (int loop = 0);
+    virtual bach_err_codes stop ();
+    virtual bach_err_codes pause();
+    virtual bach_err_codes resume();
+    virtual dword status() const;
 
-    //ÄÄ Sample playback
-    virtual byte setup(BachSample *s, byte chan=(byte)-1)=0;
-    virtual void release(byte chan)=0;
+    //ÄÄÄ Initializes class
+    bach_err_codes init();
 
-    virtual void play(byte chan, ulong loop=1)=0;
-    virtual void stop(byte chan)=0;
-    virtual void pause(byte chan)=0;
-    virtual void resume(byte chan)=0;
+    //ÄÄÄ Prepares files for streaming
+    bach_err_codes ready_raw (const char *fname,
+                              bach_digi_fmt f=BACH_DIGI_MONO_8,
+                              ulong r=BACH_SMP_DEFAULTRATE);
+    bach_err_codes ready_raw (XFile *xf,
+                              bach_digi_fmt f=BACH_DIGI_MONO_8,
+                              ulong r=BACH_SMP_DEFAULTRATE, ulong l=0,
+                              int owns=1);
 
-    virtual dword status(byte chan=(byte)-1)=0;
+    bach_err_codes ready_wav (const char *fname);
+    bach_err_codes ready_wav (XFile *xf, XFParseIFF *iff, int owns=0);
 
-    //ÄÄ Sample volume/panning control
-    virtual byte set_volume(byte chan, byte vol)=0;
-    virtual byte get_volume(byte chan)=0;
-
-    virtual byte set_pan(byte chan, byte pan)=0;
-    virtual byte get_pan(byte chan)=0;
+    //ÄÄÄ Skip to next, if any
+    bach_err_codes next();
 };
 
+
+
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°° Digitial Class °°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // BachDigital - Digital output object.                                     ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-class BachDigital : public BachDigitalInterface
+class BachDigital
 {
-    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-    // Copy Constructor/Assignment                                          ³
-    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-    // Private so they can't be used.
-    BachDigital (BachDigital const &);
-    BachDigital &operator= (BachDigital const &);
-
-protected:
-    dword                   driverRate;
-    IDirectSound            *dSound;
-    IDirectSoundBuffer      *dsPrimary;
-    BachSample              *smpPtr[BACH_DIGI_CHANNELS];
-
-    friend class BachSample;
-
 public:
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    // Public data members.                                                 ³
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+    IDirectSound        *dsound;            // DirectSound instance
+    IDirectSoundBuffer  *primary;           // DirectSound playback buffer
+    ulong               driverRate;         // Driver playback rate      
+    bach_digi_fmt       driverFmt;          // Driver playback format
+
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Constructor/Destructor                                               ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-    BachDigital(dword drate=BACH_DIGI_DRIVERRATE);
+    BachDigital(ulong drate=BACH_DIGI_DRIVERRATE,
+                bach_digi_fmt fmt=BACH_DIGI_STEREO_16);
     virtual ~BachDigital();
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-    // Operations for digital i/o                                           ³
+    // Operations                                                           ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-    //ÄÄ Hardware init
-    virtual bach_err_codes init (HWND, DWORD = DSSCL_PRIORITY);
+    virtual bach_err_codes init (HWND hWnd, DWORD coop_level = DSSCL_PRIORITY, int cont_play=1);
     virtual void close ();
 
-    //ÄÄ Sample playback
-    virtual byte setup(BachSample *s, byte chan=(byte)-1);
-    virtual void release(byte chan);
-
-    virtual void play(byte chan, ulong loop=1);
-    virtual void stop(byte chan);
-    virtual void pause(byte chan);
-    virtual void resume(byte chan);
-
-    virtual dword status(byte chan=(byte)-1);
-
-    //ÄÄ Sample volume/panning control
-    virtual byte set_volume(byte chan, byte vol);
-    virtual byte get_volume(byte chan);
-
-    virtual byte set_pan(byte chan, byte pan);
-    virtual byte get_pan(byte chan);
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    // Utility functions.                                                   ³
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 };
 
 #ifdef _MSC_VER

@@ -209,7 +209,7 @@ void EschParticleSprite::animate()
         if (scale_rate != 0)
         {
             float scale = sprite->scale;
-            scale -= (interval * scale_rate);
+            scale += (interval * scale_rate);
             if (scale < 0.0f)
                 scale = 0.0f;
             sprite->set_scale(scale);

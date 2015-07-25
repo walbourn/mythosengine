@@ -152,12 +152,12 @@ BOOL SimGine::init_instance()
     wc.lpszMenuName  = 0;
 
     // This will load the small icon image from the icon resource
-    wc.hIconSm = LoadImage (hInstance,
-                            MAKEINTRESOURCE(IDI_SIM_APPICON),
-                            IMAGE_ICON,
-                            GetSystemMetrics(SM_CXSMICON),
-                            GetSystemMetrics(SM_CYSMICON),
-                            LR_DEFAULTCOLOR);
+    wc.hIconSm = (HICON__*)LoadImage (hInstance,
+                                      MAKEINTRESOURCE(IDI_SIM_APPICON),
+                                      IMAGE_ICON,
+                                      GetSystemMetrics(SM_CXSMICON),
+                                      GetSystemMetrics(SM_CYSMICON),
+                                      LR_DEFAULTCOLOR);
 
     if (!RegisterClassEx (&wc))
         return FALSE;
@@ -263,7 +263,7 @@ BOOL SimGine::init_instance()
         if (!Audio)
             return FALSE;
 
-        if (!Audio->init())
+        if (Audio->init() != SimAudio::ERROR_NONE)
         {
             delete Audio;
             Audio = 0;

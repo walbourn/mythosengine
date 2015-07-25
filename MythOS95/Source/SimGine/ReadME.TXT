@@ -43,9 +43,11 @@
                              _Library Status_
 
  Notes by: Chuck Walbourn
- Updated: October 8, 1997
+ Updated: November 12, 1997
 
  Changes for this release --------------------------------------------------
+
+ o Enabled SimAudio class by deriving it from BachDigital.
 
  o Updated SimScreen classes to clean up interface and to update for new
    15/16-bit bit-depth error handling in Van Gogh for automatic determination

@@ -81,6 +81,13 @@ public:
     // Constructor/Destructors                                              Ё
     //дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
     EschSphereExtents() {}
+    EschSphereExtents(float x, float y, float z, float r) :
+        center(x,y,z),
+        radius(r) {}
+    EschSphereExtents(const EschPoint *p, float r) :
+        center(*p),
+        radius(r) {}
+
     ~EschSphereExtents() {}
 
     //дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
@@ -111,6 +118,14 @@ public:
     // Constructor/Destructors                                              Ё
     //дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
     EschBoxExtents() {}
+    EschBoxExtents(float minx, float miny, float minz,
+                   float maxx, float maxy, float maxz)
+        { mins[0] = minx; mins[1] = miny; mins[2] = minz;
+          maxs[0] = maxx; maxs[1] = maxy; maxs[2] = maxz; }
+    EschBoxExtents(const EschPoint *min, const EschPoint *max)
+        { mins[0] = min->x; mins[1] = min->y; mins[2] = min->z;
+          maxs[0] = max->x; maxs[1] = max->y; maxs[2] = max->z; }
+
     ~EschBoxExtents() {}
 
     //дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©

@@ -85,78 +85,6 @@ void EschElement::insert()
 //ÄÄÄ Walk down until we can insert as left or right leaf
     for(ulong depth=1;; depth++)
     {
-#if 0
-        //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Check Z extents for clear front/back
-        if (maxz < elm->minz)
-        {
-            if (!elm->left)                     //ÄÄÄ Closer
-            {
-                elm->left = this;
-                break;
-            }
-            elm = elm->left;
-        }
-        else if (minz > elm->maxz)
-        {
-            if (!elm->right)                    //ÄÄÄ Further
-            {
-                elm->right = this;
-                break;
-            }
-            elm = elm->right;
-        }
-        //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Check X/Y extents for no obscure
-        else if ((maxx < elm->minx)
-                 || (minx > elm->maxx)
-                 || (maxy < elm->miny)
-                 || (miny > elm->maxy))
-        {
-            if (maxz < elm->maxz)
-            {
-                if (!elm->left)                 //ÄÄÄ Closer
-                {
-                    elm->left = this;
-                    break;
-                }
-                elm = elm->left;
-            }
-            else
-            {
-                if (!elm->right)                //ÄÄÄ Further
-                {
-                    elm->right = this;
-                    break;
-                }
-                elm = elm->right;
-            }
-        }
-        //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Extents overlap, perform point/plane test
-        else
-        {
-            EschPoint   pt;
-
-            elm->prepare_test(&pt);
-
-            if (perform_test(&pt))
-            {
-                if (!elm->left)                 //ÄÄÄ Closer
-                {
-                    elm->left = this;
-                    break;
-                }
-                elm = elm->left;
-            }
-            else
-            {
-                if (!elm->right)                //ÄÄÄ Further
-                {
-                    elm->right = this;
-                    break;
-                }
-                elm = elm->right;
-            }
-        }
-#else
         //ÄÄÄ Insert by maximum z
         if (maxz <= elm->maxz)
         {
@@ -176,7 +104,6 @@ void EschElement::insert()
             }
             elm = elm->right;
         }
-#endif
     }
 
 //ÄÄÄ Update stats
@@ -235,6 +162,95 @@ void EschElement::flush()
 }
 
 
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//                            °°° Protected °°°                             ³
+// EschElement - link_tree                                                  ³
+//                                                                          ³
+// Creates a linked-list from the tree (destroying the tree).               ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+EschElement *EschElement::link_tree(EschElement *elm)
+{
+    assertMyth("EschElement::draw_tree() needs valid input", elm != 0);
+
+    EschElement *right = (elm->right) ? link_tree(elm->right) : 0;
+    EschElement *left = (elm->left) ? link_tree(elm->left) : 0;
+
+    if (right)
+    {
+        for(EschElement *e = right; e->right != 0; e = e->right);
+
+        e->right = elm;
+        elm->left = e;
+
+        elm->right = left;
+        if (left)
+            left->left = elm;
+
+        return right;
+    }
+    else if (left)
+    {
+        elm->left = 0;
+        elm->right = left;
+        if (left)
+            left->left = elm;
+
+        return elm;
+    }
+    else
+    {
+        elm->left = elm->right = 0;
+        return elm;
+    }
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// EschElement - flush_truesort                                             ³
+//                                                                          ³
+// Draws any pending element entries using a more complex sort and clears   ³
+// the arena.                                                               ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+void EschElement::flush_truesort()
+{
+    assertMyth("EschElement::flush_truesort() needs sort area",
+               EschSysInstance != 0 && EschSysInstance->sspace != 0);
+
+//ÄÄÄ Perform draw of any pending elements
+    if (EschSysInstance->sroot)
+    {
+        //ÄÄÄ Create linked-list of elements sorted by Z-max
+        //ÄÄÄ with right as next, left as prev.
+        EschElement *head = link_tree(EschSysInstance->sroot);
+        assert(head != 0);
+
+        //ÄÄÄ Start from end of list
+        for(EschElement *elm=head; elm->right != 0; elm = elm->right);
+
+        //ÄÄÄ Process each polygon from back to front
+        while(elm != 0)
+        {
+            // for now just draw...
+            elm->draw();
+        }
+    }
+
+//ÄÄÄ Clear sort area
+    ivory_arena_clear(EschSysInstance->sspace);
+    EschSysInstance->sroot=0;
+
+//ÄÄÄ Update stats
+    if (EschElementDepth > EschSysInstance->sspace_mdepth)
+        EschSysInstance->sspace_mdepth = EschElementDepth;
+
+    if (EschElementSize > EschSysInstance->sspace_mbytes)
+        EschSysInstance->sspace_mbytes = EschElementSize;
+
+    EschElementDepth=0;
+    EschElementSize=0;
+}
+
+
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //°°°°°°°°°°°°°°°°°°°°°°°°°°° EschPixelElement °°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
@@ -251,18 +267,7 @@ void EschPixelElement::draw()
     assertMyth("EschPixelElement::draw() camera needs viewport",
                EschCurrent->camera->vport != 0);
 
-#if 1
-    // HACK: Van Gogh bug workaround until fixed...
-    VngoPoint   tpt;
-    tpt.x = long(pnt.x + .5f);
-    tpt.y = long(pnt.y + .5f);
-    tpt.z = dword(pnt.z * float(0xffffffff));
-    tpt.clr = pnt.clr;
-    tpt.shade = long(pnt.shade);
-    EschCurrent->camera->vport->pixel(&tpt);
-#else
     EschCurrent->camera->vport->pixel(&pnt);
-#endif
 }
 
 

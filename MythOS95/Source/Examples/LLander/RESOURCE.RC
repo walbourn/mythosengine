@@ -1,13 +1,13 @@
 //อออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออ
 //
-//                                /\    /\ 
-//                               /  \  /  \ 
-//                              /    \/    \ 
-//                             /  /\    /\  \ 
+//                                /\    /\
+//                               /  \  /  \
+//                              /    \/    \
+//                             /  /\    /\  \
 //                            /  /  \  /  Y T H O S
-//                           /  /    \/    \  \ 
-//                          /  /            \  \ 
-//                         /__/              \__\ 
+//                           /  /    \/    \  \
+//                          /  /            \  \
+//                         /__/              \__\
 //
 //                      Microsoft Windows '95 Version
 //
@@ -47,6 +47,17 @@
 #include "windows.h"
 #include "simdefs.h"
 
+// These are taken from Turner.hpp
+#define IDC_MAXNETWORK_LIST1           100
+#define IDC_MAXNETWORK_CREATE          100
+#define IDC_MAXNETWORK_CONNECT         101
+
+#define IDD_MAXNETWORK_REMCONNABORTDLG 1
+#define IDD_MAXNETWORK_CHOOSEPROVIDER  2
+#define IDD_MAXNETWORK_SELSESSION      3
+#define IDD_MAXNETWORK_Q_CREATE        4
+
+
 //ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
 //
 //                               Resources
@@ -81,6 +92,37 @@ GENERIC ICON "charybds.ico"
 //ฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ
 // Dialogs                                                                  ณ
 //ฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
+
+IDD_MAXNETWORK_CHOOSEPROVIDER DIALOG DISCARDABLE  0, 0, 199, 158
+STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION
+CAPTION "Choose Connection Mechanism"
+FONT 8, "MS Sans Serif"
+BEGIN
+    LISTBOX         IDC_MAXNETWORK_LIST1,6,7,182,109,LBS_SORT |
+                    LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "OK",IDOK,31,130,47,13
+    PUSHBUTTON      "Cancel",IDCANCEL,120,130,47,13
+END
+
+IDD_MAXNETWORK_SELSESSION DIALOG DISCARDABLE  0, 0, 185, 170
+STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION "Select Session"
+FONT 8, "MS Sans Serif"
+BEGIN
+    LISTBOX         IDC_MAXNETWORK_LIST1,10,12,157,129,LBS_SORT |
+                    LBS_NOINTEGRALHEIGHT | WS_VSCROLL | WS_TABSTOP
+    PUSHBUTTON      "OK",IDOK,10,150,60,15
+    PUSHBUTTON      "Cancel",IDCANCEL,100,150,65,15
+END
+
+IDD_MAXNETWORK_Q_CREATE DIALOG DISCARDABLE  0, 0, 142, 36
+STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
+CAPTION "Create Game or Connect to Game?"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "Create",IDC_MAXNETWORK_CREATE,3,10,50,14
+    PUSHBUTTON      "Connect",IDC_MAXNETWORK_CONNECT,78,10,50,14
+END
 
 
 //ฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฟ

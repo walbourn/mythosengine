@@ -72,11 +72,12 @@ typedef enum _esch_error_codes
     ESCH_ERR_INVALIDSRFDATA         =20,    // Invalid surface data
     ESCH_ERR_INVALIDBEND            =21,    // Invalid bend constraint data
 
-    //ÄÄÄ Drawable picking/collide error codes
+    //ÄÄÄ Drawable picking/collide/traverse error codes
     ESCH_ERR_NEEDILIST              =30,    // No input list
     ESCH_ERR_NEEDARENA              =31,    // Arena missing
     ESCH_ERR_NEEDCAMERA             =32,    // Need camera data
     ESCH_ERR_NEEDTERRAIN            =33,    // Need terrain data
+    ESCH_ERR_STOPPED                =34,    // Traverse callback returned non-zero
 
     //ÄÄÄ Shade-table generation error codes
     ESCH_ERR_NEEDVPORT              =40,    // Camera needs viewport
@@ -99,6 +100,8 @@ typedef enum _esch_error_codes
 #define ESCH_CDF_INFINITEZ      0x4
 #define ESCH_CDF_MUSTTXT        0x8
 #define ESCH_CDF_DONTSORT       0x10
+#define ESCH_CDF_COLOR          0x20
+#define ESCH_CDF_ALPHA          0x40
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // Update flags                                                             ³
@@ -149,6 +152,7 @@ typedef enum _esch_error_codes
 #define ESCH_ELMNT_TXTPOLY_PERSP_A  0x0331
 #define ESCH_ELMNT_GTXTPOLY_A       0x0332
 #define ESCH_ELMNT_GTXTPOLY_PERSP_A 0x0333
+
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // EschTexture                                                              ³
@@ -218,6 +222,8 @@ typedef enum _esch_error_codes
 
 #define ESCH_CAM_NOFLUSH            0x20000     // Don't flush element list on render
 
+#define ESCH_CAM_TRUESORT           0x40000     // Use true sorting during flush
+
 #define ESCH_CAM_IGNORE_BMAP        0x100000    // Ignore's background bitmap if defined (Ex)
 #define ESCH_CAM_GRADIENT           0x200000    // Gradient background (Ex)
 
@@ -278,7 +284,7 @@ typedef enum _esch_error_codes
 #define ESCH_CLSN_NOWALK            0x2     // Only use first item in input list
 #define ESCH_CLSN_TESTSELF          0x4     // Test first item in input list
 #define ESCH_CLSN_ILIST             0x8     // Use input list instead of context
-#define ESCH_CLSN_ARENA             0x10    // Use arean instead of systems
+#define ESCH_CLSN_ARENA             0x10    // Use arena instead of systems
 #define ESCH_CLSN_MAXCOUNT          0x20    // Use max count instead of 1
 #define ESCH_CLSN_COARSE            0x40    // Use coarse tests only
 #define ESCH_CLSN_SPHERE            0x80    // Sphere member set manually
@@ -332,6 +338,8 @@ typedef enum _esch_error_codes
                                             // collide/pick tests only
 #define ESCH_DRW_SKIPANIMATE        0x8     // Skip this drawable during
                                             // animate calls.
+#define ESCH_DRW_SKIPTRAVERSE       0x10    // Skip this drawable during
+                                            // partition traverse calls.
 
 #define ESCH_DRW_VISIBLE            0x100   // Set if a drawable is not rejected
                                             // by clipping.
@@ -363,6 +371,8 @@ typedef enum _esch_error_codes
 #define ESCH_DRWT_SPRITE            0x0600
 #define ESCH_DRWT_PARTITION         0x0700
 #define ESCH_DRWT_PRTN_GRID         0x0710
+#define ESCH_DRWT_PRTN_QUAD         0x0720
+#define ESCH_DRWT_PRTN_OCT          0x0730
 #define ESCH_DRWT_LINEDRAW          0x0800
 #define ESCH_DRWT_STARFIELD         0x1000
 #define ESCH_DRWT_EXPLOSION         0x1100
@@ -412,8 +422,8 @@ typedef enum _esch_error_codes
 #define ESCH_PARTN_OWNSDRAWS        0x10000 // Own's drawables within
                                             // partition, so delete on release.
 #define ESCH_PARTN_OFF              0x20000 // Causes draw(), pick(), and
-                                            // and collide() to call all
-                                            // drawables in partition
+                                            // collide(), and traverse()
+                                            // to test draws in 'dumb' order
 
 //ÄÄÄ EschStarfield
 
@@ -594,6 +604,7 @@ typedef enum _esch_error_codes
 
 #define ESCH_TRAV_DIRECTION         0x1         // Use direction vector
 #define ESCH_TRAV_DIST              0x2         // Use distance value
+#define ESCH_TRAV_ARENA             0x4         // Use arena instead of systems
 
 #define ESCH_TRAV_APP0              0x1000000   // Application defined bits
 #define ESCH_TRAV_APP1              0x2000000
@@ -703,9 +714,10 @@ typedef enum _esch_error_codes
 #define ESCH_HIP_MAX_YAW            0
 #define ESCH_HIP_MIN_YAW            0
 
-
 typedef long esch_limb_type;
 #define M_TYPE_LEN      80
+
+#define ESCH_TOKEN_VERSION                  0x001
 
 // Flags
 #define ESCH_KEYFRAME_LOOPING               0x01
@@ -736,7 +748,7 @@ typedef long esch_limb_type;
 #define ESCH_KEYFRAME_SHLDR                 0x00000800
 
 // Duplicates one of the above -- base object for a hierarchy
-#define ESCH_KEYFRAME_ROOT                  0x00000040
+#define ESCH_KEYFRAME_ROOT                  0x00000100
 
 // Modifiers
 #define ESCH_KEYFRAME_LEADING               0x00001000
@@ -748,6 +760,13 @@ typedef long esch_limb_type;
 #define ESCH_KEYFRAME_MISC                  0x00040000
 #define ESCH_KEYFRAME_LEADING_2             0x00080000
 #define ESCH_KEYFRAME_TRAILING_2            0x00100000
+
+#define ESCH_KEYFRAME_WEAP1                 0x00200000
+#define ESCH_KEYFRAME_WEAP1F                0x00400000
+#define ESCH_KEYFRAME_WEAP2                 0x00800000
+#define ESCH_KEYFRAME_WEAP2F                0x01000000
+#define ESCH_KEYFRAME_WEAP3                 0x02000000
+#define ESCH_KEYFRAME_WEAP3F                0x04000000
 
 // Combined Leading Leg
 #define ESCH_KEYFRAME_FOOTLL                0x00021001

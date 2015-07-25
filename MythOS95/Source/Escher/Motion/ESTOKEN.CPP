@@ -38,6 +38,7 @@
 
 #include "escher.hpp"
 #include "estoken.hpp"
+#include "esfile.hpp"
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
@@ -60,6 +61,22 @@ esch_token esch_token_list[ESCH_KEYFRAME_TOKEN_COUNT] =
     "SHINR",(ESCH_KEYFRAME_SHIN|ESCH_KEYFRAME_TRAILING|ESCH_KEYFRAME_LEG|ESCH_KEYFRAME_RIGHT),
     "THIGHL",(ESCH_KEYFRAME_THIGH|ESCH_KEYFRAME_LEADING|ESCH_KEYFRAME_LEG|ESCH_KEYFRAME_LEFT) ,
     "THIGHR",(ESCH_KEYFRAME_THIGH|ESCH_KEYFRAME_TRAILING|ESCH_KEYFRAME_LEG|ESCH_KEYFRAME_RIGHT),
+    "UPLEG-L",(ESCH_KEYFRAME_THIGH|ESCH_KEYFRAME_TRAILING|ESCH_KEYFRAME_LEG|ESCH_KEYFRAME_RIGHT),
+    "UPLEG-R",(ESCH_KEYFRAME_THIGH|ESCH_KEYFRAME_LEADING|ESCH_KEYFRAME_LEG|ESCH_KEYFRAME_LEFT) ,
+    "LOLEG-L",(ESCH_KEYFRAME_SHIN|ESCH_KEYFRAME_LEADING|ESCH_KEYFRAME_LEG|ESCH_KEYFRAME_LEFT) ,
+    "LOLEG-R",(ESCH_KEYFRAME_SHIN|ESCH_KEYFRAME_TRAILING|ESCH_KEYFRAME_LEG|ESCH_KEYFRAME_RIGHT),
+    "FOOT-L",(ESCH_KEYFRAME_FOOT|ESCH_KEYFRAME_LEADING|ESCH_KEYFRAME_LEG|ESCH_KEYFRAME_LEFT)  ,
+    "FOOT-R",(ESCH_KEYFRAME_FOOT|ESCH_KEYFRAME_TRAILING|ESCH_KEYFRAME_LEG|ESCH_KEYFRAME_RIGHT),
+    "ARM-L",(ESCH_KEYFRAME_UPARM|ESCH_KEYFRAME_LEADING|ESCH_KEYFRAME_ARM|ESCH_KEYFRAME_LEFT) ,
+    "ARM-R",(ESCH_KEYFRAME_UPARM|ESCH_KEYFRAME_TRAILING|ESCH_KEYFRAME_ARM|ESCH_KEYFRAME_RIGHT),
+    "ARM-L1",(ESCH_KEYFRAME_UPARM|ESCH_KEYFRAME_LEADING|ESCH_KEYFRAME_ARM|ESCH_KEYFRAME_LEFT) ,
+    "ARM-R1",(ESCH_KEYFRAME_UPARM|ESCH_KEYFRAME_TRAILING|ESCH_KEYFRAME_ARM|ESCH_KEYFRAME_RIGHT),
+    "ARMWEAP1",(ESCH_KEYFRAME_UPARM|ESCH_KEYFRAME_ARM|ESCH_KEYFRAME_WEAP1),
+    "ARMWEAP1F",(ESCH_KEYFRAME_UPARM|ESCH_KEYFRAME_ARM|ESCH_KEYFRAME_WEAP1F),
+    "ARMWEAP2",(ESCH_KEYFRAME_UPARM|ESCH_KEYFRAME_ARM|ESCH_KEYFRAME_WEAP2),
+    "ARMWEAP2F",(ESCH_KEYFRAME_UPARM|ESCH_KEYFRAME_ARM|ESCH_KEYFRAME_WEAP2F),
+    "ARMWEAP3",(ESCH_KEYFRAME_UPARM|ESCH_KEYFRAME_ARM|ESCH_KEYFRAME_WEAP3),
+    "ARMWEAP3F",(ESCH_KEYFRAME_UPARM|ESCH_KEYFRAME_ARM|ESCH_KEYFRAME_WEAP3F),
     "U_ARML",(ESCH_KEYFRAME_UPARM|ESCH_KEYFRAME_LEADING|ESCH_KEYFRAME_ARM|ESCH_KEYFRAME_LEFT) ,
     "U_ARMR",(ESCH_KEYFRAME_UPARM|ESCH_KEYFRAME_TRAILING|ESCH_KEYFRAME_ARM|ESCH_KEYFRAME_RIGHT),
     "F_ARML",(ESCH_KEYFRAME_FOREARM|ESCH_KEYFRAME_LEADING|ESCH_KEYFRAME_ARM|ESCH_KEYFRAME_LEFT) ,
@@ -84,6 +101,181 @@ esch_token esch_token_list[ESCH_KEYFRAME_TOKEN_COUNT] =
     "MISC",ESCH_KEYFRAME_MISC,
     "ALL",ESCH_KEYFRAME_ALL
 };
+
+EschTokenManager::~EschTokenManager()
+{
+    if (token_list)
+    {
+        delete [] token_list;
+        token_list = 0;
+    }
+}
+
+esch_error_codes EschTokenManager::load(char *filename)
+{
+    esch_error_codes    err;
+    XFParseIFF          iff;
+
+    if (iff.open (filename, XF_OPEN_READ | XF_OPEN_DENYWRITE))
+        return ESCH_ERR_FILEERROR;
+
+
+    err = ESCH_ERR_NONE;
+
+    for (;;)
+    {
+        if (iff.next() != XF_ERR_NONE)
+        {
+            if (!iff.depth)
+                return ESCH_ERR_NOTFOUND;
+            iff.leaveform();
+            continue;
+        }
+
+        if (iff.chunkid == iff.makeid('F','O','R','M')
+            && iff.formid == iff.makeid ('E','T','O','K'))
+        {
+            err = load (&iff);
+
+            if (!err
+                || err != ESCH_ERR_NOTFOUND)
+                break;
+        }
+    }
+    iff.close();
+    return err;
+}
+
+esch_error_codes EschTokenManager::load(XFParseIFF *iff)
+{
+    assertMyth ("EschTokenManager::load needs a valid iff pointer", iff);
+
+    if (iff->chunkid != iff->makeid('F','O','R','M')
+        && iff->formid == iff->makeid ('E','T','O','K'))
+        return ESCH_ERR_NOTFOUND;
+
+    EschFileTokenHeader header;
+
+    iff->enterform();
+
+    if (iff->seekchunk(iff->makeid('H','D','R',' '))
+        || iff->chunkSize != sizeof (header))
+    {
+        iff->leaveform();
+        return ESCH_ERR_INVALIDDATA;
+    }
+
+    if (iff->read(&header))
+    {
+        iff->leaveform();
+        return ESCH_ERR_FILEERROR;
+    }
+
+    if (header.ver == ESCH_TOKEN_VERSION)
+    {
+        // allocate token_list
+
+        if (token_list)
+        {
+            delete token_list;
+        }
+
+        token_list = new esch_token[header.count];
+        if (!token_list)
+        {
+            iff->leaveform();
+            return ESCH_ERR_NOMEMORY;
+        }
+
+        token_count = header.count;
+
+        int i=0;
+        while (!iff->next())
+        {
+            EschFileToken   tok;
+
+            if (iff->chunkid == iff->makeid ('K','T','O','K'))
+            {
+                if (iff->chunkSize != sizeof(tok))
+                {
+                    iff->leaveform();
+                    return ESCH_ERR_INVALIDDATA;
+                }
+
+                if (iff->read(&tok))
+                {
+                    iff->leaveform();
+                    return ESCH_ERR_FILEERROR;
+                }
+            }
+
+            token_list[i].type = tok.type;
+            strcpy(token_list[i].name, tok.name);
+            i ++;
+        }
+        iff->leaveform();
+    }
+    else
+    {
+        iff->leaveform();
+        return ESCH_ERR_INVALIDDATA;
+    }
+
+
+    return ESCH_ERR_NONE;
+}
+
+void EschTokenManager::get_token_name (char *_name, esch_limb_type _type)
+{
+    if (token_list)
+    {
+        for (int i=0; i< token_count; i++)
+        {
+            if (_type == token_list[i].type)
+            {
+                strcpy (_name, token_list[i].name);
+                return;
+            }
+        }
+    }
+}
+
+esch_limb_type EschTokenManager::get_token_type (char *_name)
+{
+    if (token_list)
+    {
+        char str[80];
+        strcpy (str, _name);
+        str_to_upper(str);
+
+        for (int i=0; i< token_count; i++)
+        {
+            if (strstr (token_list[i].name, str))
+            {
+                return token_list[i].type;
+            }
+        }
+    }
+    return ESCH_KEYFRAME_NONE;
+}
+
+void EschTokenManager::str_to_upper (char *str)
+{
+    char *ptr = str;
+    int i=0;
+    while (*ptr != '\0')
+    {
+        *ptr = toupper(*ptr);
+        ptr ++;
+
+        // don't keep going forever...
+        i ++;
+        if (i > 80)
+        {
+            return;
+        }
+    }
+}
 
 //°±² End of File - estoken.cpp ²±°
 

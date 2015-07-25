@@ -1103,6 +1103,11 @@ VNGError VngoVportD3D::frect(VngoRect *rect,dword color)
 
 VNGError VngoVportD3D::pixel (VngoPoint *pt, VngoColor24bit *rgb_val)
 {
+#if 1
+    VngoPoint  p2 = *pt;
+//    p2.x += 1;
+    return line(pt,&p2,rgb_val);
+#else
     make_current();
 
     VngoColor24bit tclr;
@@ -1143,9 +1148,15 @@ VNGError VngoVportD3D::pixel (VngoPoint *pt, VngoColor24bit *rgb_val)
 
     screen->d3dDevice->DrawPrimitive(D3DPT_POINTLIST,D3DVT_TLVERTEX,&vert,1,D3DDP_DONOTCLIP);
     return VNGO_NO_ERROR;
+#endif
 }
 VNGError VngoVportD3D::pixel (VngoPointF *pt, VngoColor24bit *rgb_val)
 {
+#if 1
+    VngoPointF  p2 = *pt;
+//    p2.x += 1.;
+    return line(pt,&p2,rgb_val);
+#else
     make_current();
 
     VngoColor24bit tclr;
@@ -1187,6 +1198,7 @@ VNGError VngoVportD3D::pixel (VngoPointF *pt, VngoColor24bit *rgb_val)
 
     screen->d3dDevice->DrawPrimitive(D3DPT_POINTLIST,D3DVT_TLVERTEX,&vert,1,D3DDP_DONOTCLIP);
     return VNGO_NO_ERROR;
+#endif
 
 }
 
@@ -2667,6 +2679,124 @@ VNGError VngoVportD3D::gtpoly_persp (int count,VngoPointF pts[],VngoTexture *tex
     return VNGO_NO_ERROR;
 }
 
+VNGError VngoVportD3D::grpoly (int count, VngoPoint pts[])
+{
+    make_current();
+
+    assert (count < VNGO_MAX_VERTCOUNT);
+
+    screen->open_frame();
+    D3DTLVERTEX verts[VNGO_MAX_VERTCOUNT];
+
+    int tclr;
+    VngoColor24bit rgb;
+    for (int i=0;i < count;i++)
+    {
+
+        verts[i].sx = (D3DVALUE)pts[i].x+left;
+        verts[i].sy = (D3DVALUE)pts[i].y+top;
+        if (pts[i].z > 0)
+            verts[i].sz = (D3DVALUE)float(ulong(pts[i].z)) / float(0xffffffff);
+//            verts[i].sz = (D3DVALUE)float(ulong(pts[i].z) >> 16)*ZCONST;
+        else
+            verts[i].sz = 0.f;
+
+        if (!(pts[i].clr & VNGO_COLOR_24BIT))
+        {
+            word *shades = (word*)vbuff.pal->shd_pal->ptr;
+            shades += (pts[i].clr << 5);
+            tclr = shades[pts[i].shade >> 3];
+
+            if (vbuff.pal->flags & VNGO_15BIT)
+            {
+                rgb.r = (tclr >> 7) & 0xf8;
+                rgb.g = (tclr >> 2) & 0xf8;
+                rgb.b = (tclr & 0x1f) << 3;
+            }
+            else
+            {
+                rgb.r = (tclr >> 8) & 0xf8;
+                rgb.g = (tclr >> 3) & 0xfc;
+                rgb.b = (tclr & 0x1f) << 3;
+            }
+        }
+        else
+        {
+            rgb.r = byte((pts[i].clr & 0xff0000) >> 16);
+            rgb.g = byte((pts[i].clr & 0xff00) >> 8);
+            rgb.b = byte(pts[i].clr & 0xff);
+        }
+
+        verts[i].color = RGB_MAKE(rgb.r,rgb.g,rgb.b);
+        verts[i].specular = RGB_MAKE(0,0,0);
+    }
+    screen->d3dDevice->SetRenderState(D3DRENDERSTATE_TEXTUREHANDLE,NULL);
+    screen->d3dDevice->SetRenderState(D3DRENDERSTATE_SHADEMODE, D3DSHADE_GOURAUD);
+    screen->d3dDevice->SetRenderState(D3DRENDERSTATE_DITHERENABLE,TRUE);
+
+    screen->d3dDevice->DrawPrimitive(D3DPT_TRIANGLEFAN,D3DVT_TLVERTEX,verts,count,D3DDP_DONOTCLIP);
+    return VNGO_NO_ERROR;
+}
+
+VNGError VngoVportD3D::grpoly (int count, VngoPointF pts[])
+{
+    make_current();
+
+    assert (count < VNGO_MAX_VERTCOUNT);
+
+    screen->open_frame();
+    D3DTLVERTEX verts[VNGO_MAX_VERTCOUNT];
+
+    int tclr;
+    VngoColor24bit rgb;
+    for (int i=0;i < count;i++)
+    {
+
+        verts[i].sx = (D3DVALUE)pts[i].x+left;
+        verts[i].sy = (D3DVALUE)pts[i].y+top;
+        verts[i].sz = (D3DVALUE)pts[i].z;
+
+        if (!(pts[i].clr & VNGO_COLOR_24BIT))
+        {
+            word *shades = (word*)vbuff.pal->shd_pal->ptr;
+            shades += (pts[i].clr << 5);
+            tclr = shades[int(pts[i].shade) >> 3];
+
+            if (vbuff.pal->flags & VNGO_15BIT)
+            {
+                rgb.r = (tclr >> 7) & 0xf8;
+                rgb.g = (tclr >> 2) & 0xf8;
+                rgb.b = (tclr & 0x1f) << 3;
+            }
+            else
+            {
+                rgb.r = (tclr >> 8) & 0xf8;
+                rgb.g = (tclr >> 3) & 0xfc;
+                rgb.b = (tclr & 0x1f) << 3;
+            }
+        }
+        else
+        {
+            rgb.r = byte((pts[i].clr & 0xff0000) >> 16);
+            rgb.g = byte((pts[i].clr & 0xff00) >> 8);
+            rgb.b = byte(pts[i].clr & 0xff);
+        }
+
+        verts[i].color = RGB_MAKE(rgb.r,rgb.g,rgb.b);
+        verts[i].specular = RGB_MAKE(0,0,0);
+    }
+    screen->d3dDevice->SetRenderState(D3DRENDERSTATE_TEXTUREHANDLE,NULL);
+    screen->d3dDevice->SetRenderState(D3DRENDERSTATE_SHADEMODE, D3DSHADE_GOURAUD);
+    screen->d3dDevice->SetRenderState(D3DRENDERSTATE_DITHERENABLE,TRUE);
+
+    screen->d3dDevice->DrawPrimitive(D3DPT_TRIANGLEFAN,D3DVT_TLVERTEX,verts,count,D3DDP_DONOTCLIP);
+    return VNGO_NO_ERROR;
+}
+
+
+//
+// Alpha blended versions.
+//
 
 VNGError VngoVportD3D::poly_a (int count,VngoPoint pts[],long alpha)
 {

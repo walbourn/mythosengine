@@ -1,13 +1,13 @@
 #ЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭ
 #
-#                        мммммммммм                       мммм
-#     кФФП                ллл     ллм                     оллл
-#     Г  Г       кФФП     ллл     ллл   мммм      ммммм    ллл ммм
-#     Г  Г кФФП  Г  Г     лллммммлллп  п  олн    ллп   пл  лллллплл
-#     Г  Г Г  Г  Г  Г     ллл     ллм  млллллн  ллл        ллл   ллл
-#    Oй Oй Г  Г  Г  Г     ллл     ллл олн  ллл  ллл    мл  ллл   ллл
-#          Г  Г Oй Oй    млллмммлллп   ллллнплм  пллммлл  млллм млллм
-#         Oй Oй
+#                        мммммммммм                       мммм        
+#     кФФП                ллл     ллм                     оллл        
+#     Г  Г       кФФП     ллл     ллл   мммм      ммммм    ллл ммм    
+#     Г  Г кФФП  Г  Г     лллммммлллп  п  олн    ллп   пл  лллллплл   
+#     Г  Г Г  Г  Г  Г     ллл     ллм  млллллн  ллл        ллл   ллл  
+#    Oй Oй Г  Г  Г  Г     ллл     ллл олн  ллл  ллл    мл  ллл   ллл  
+#          Г  Г Oй Oй    млллмммлллп   ллллнплм  пллммлл  млллм млллм 
+#         Oй Oй  
 #                            C++ Music, Sound, and Effects Library
 #                                Microsoft Windows '95 Version
 #
@@ -38,7 +38,7 @@
 #ААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААА
 #
 #                               Variables
-#
+#                                
 #ААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААА
 
 !if "$(DEBUG)" == ""
@@ -46,7 +46,7 @@ DEBUG = NO
 !endif
 
 !if "$(THREAD)" == ""
-THREAD=YES
+THREAD = YES
 !endif
 
 !if "$(MYTH95ROOT)" == ""
@@ -62,10 +62,14 @@ INCPATH = ;..\inc;$(MYTH95ROOT)\inc;
 LIB = bach
 
 OBJS = \
+bachpch.obj\
 bachdigi.obj\
 bachsamp.obj\
-bachsys.obj\
-bachwseq.obj
+bachsfil.obj\
+bachsraw.obj\
+bachsseq.obj\
+bachssmp.obj\
+bachswav.obj
 
 #ФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФП
 # First target                                                             Г
@@ -87,40 +91,22 @@ all: setstden $(LIB).lib
 
 #--- .c, .cpp, .asm setup in standard include ---
 
+#--- .cpp
+{..\}.cpp{}.obj:
+        $(CPP) $(CCOPTIONS) /Yubach.hpp /Fp$(LIB).pch $<
+
+
 #БББББББББББББББББББББББББББББББББББББББББББББББББББББББББББББББББББББББББББ
 #
 #                              Dependencies
 #
 #БББББББББББББББББББББББББББББББББББББББББББББББББББББББББББББББББББББББББББ
 
-bachdigi.obj:\
-    ..\bachdigi.cpp\
-    ..\inc\bach.hpp\
-    ..\inc\bachdigi.hpp\
-    ..\inc\bachdefs.hpp\
-    ..\inc\bachsys.hpp
+$(LIB).pch :
+    del bachpch.obj
 
-bachsamp.obj:\
-    ..\bachsamp.cpp\
-    ..\inc\bach.hpp\
-    ..\inc\bachdigi.hpp\
-    ..\inc\bachdefs.hpp\
-    ..\inc\bachsys.hpp
-
-bachsys.obj:\
-    ..\bachsys.cpp\
-    ..\inc\bach.hpp\
-    ..\inc\bachdigi.hpp\
-    ..\inc\bachdefs.hpp\
-    ..\inc\bachsys.hpp
-
-bachwseq.obj:\
-    ..\bachwseq.cpp\
-    ..\inc\bach.hpp\
-    ..\inc\bachdigi.hpp\
-    ..\inc\bachwseq.hpp\
-    ..\inc\bachdefs.hpp\
-    ..\inc\bachsys.hpp
+bachpch.obj : ..\bachpch.cpp
+    $(CPP) /Ycbach.hpp /Fp$(LIB).pch $(CCOPTIONS) ..\$*.cpp
 
 #ФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФП
 # Library                                                                  Г
@@ -140,6 +126,8 @@ clean:
    del *.obj
    del *.err
    del *.lst
+   del *.pdb
+   del *.pch
 
 #АБВ End of makefile ВБА
 

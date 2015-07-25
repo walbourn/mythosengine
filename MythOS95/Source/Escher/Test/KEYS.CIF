@@ -1,0 +1,38 @@
+merge "N:\panzer\art\keyframe\uswalkk.iff"
+merge "N:\panzer\art\keyframe\usrunk.iff"
+merge "N:\panzer\art\keyframe\uscrchk.iff"
+merge "N:\panzer\art\keyframe\usexpk.iff"
+merge "N:\panzer\art\keyframe\usshotk.iff"
+merge "N:\panzer\art\keyframe\uskneelk.iff"
+
+chunk "HIDE"
+{
+    dword   0x00015008
+}
+
+chunk "HIDE"
+{
+    dword   0x0001A008
+}
+
+chunk "HIDE"
+{
+    dword   0x00210008
+}
+chunk "HIDE"
+{
+    dword   0x00410008
+}
+chunk "HIDE"
+{
+    dword   0x01010008
+}
+chunk "HIDE"
+{
+    dword   0x02010008
+}
+chunk "HIDE"
+{
+    dword   0x04010008
+}
+

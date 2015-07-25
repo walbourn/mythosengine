@@ -206,6 +206,15 @@ public:
         width(w), height(h),
         rotation(r),
         scale(s) {};
+    EschSprite(const EschPoint *p, float w, float h,
+               float r=0, float s=1) :
+        EschDrawable(ESCH_DRWT_SPRITE),
+        txt(0),
+        alpha_level(255),
+        pos(*p),
+        width(w), height(h),
+        rotation(r),
+        scale(s) {};
 
     virtual ~EschSprite();
 

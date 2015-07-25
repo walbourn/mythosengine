@@ -54,6 +54,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include "esdefs.h"
+#include "estoken.hpp"
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
@@ -159,6 +160,10 @@ public:
     virtual esch_error_codes load (XFParseIFF *iff);
 
     virtual esch_error_codes update_chaining();
+
+    int get_chain_count();
+
+    void get_next_chain_type (char *find, char *set);
 };
 
 
@@ -178,32 +183,47 @@ protected:
 
     int             key_chain_count;
     float           tween_step[ESCH_MAX_SIMULTANEOUS];
-    float           length;
-    int             first_step;                 // boolean marking beginning of animation
+    int             leads_with_left;            // bool for swapping
 
     // Array of  time to completion  values - time between each keyframe
     float           step_times[ESCH_MAX_SIMULTANEOUS];
     float           total_times[ESCH_MAX_SIMULTANEOUS];
-    // for some reason, this next array doesn't show up as a BOOL.  Trying ulong
+
+    // array for active/inactive keychain flagging
     ulong           activity[ESCH_MAX_SIMULTANEOUS];
 
+    // pointers into Keyframe Manager data for keychain head
     EschKeyframe    *keyheads[ESCH_MAX_SIMULTANEOUS];
+    // pointers into Keyframe Manager data for current keyframes
     EschKeyframe    *keyframes[ESCH_MAX_SIMULTANEOUS];
+    // pointers into Keyframe Manager data for next keyframes
     EschKeyframe    *next_keyframes[ESCH_MAX_SIMULTANEOUS];
+    // array of data work vectors for building tweens
     EschVector      tweens[ESCH_MAX_SIMULTANEOUS];
+    // array of incremental step data for tweening
     EschVector      steps[ESCH_MAX_SIMULTANEOUS];
+    // array of bools for reverse during ping pong animation
     BOOL            ping_pong[ESCH_MAX_SIMULTANEOUS];
+
+    // timing array.  floating precision needed for determining interval step to next frame
     float           fnext_frames[ESCH_MAX_SIMULTANEOUS];
 
     // time stamps for tweening
     float           prev_stamp[ESCH_MAX_SIMULTANEOUS];
     float           current_stamp[ESCH_MAX_SIMULTANEOUS];
+
+    // time compression shift change data
     float           prev_shift[ESCH_MAX_SIMULTANEOUS];
+    float           prev_shift_storage[ESCH_MAX_SIMULTANEOUS];
+
+    // object tokens for object/keyframe pairing
+    static EschTokenManager *TokenMan;
+    static long             tok_users;
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Protected functions                                                  ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-    void calc_step(int num, float interval = 0, float shift = 0);
+    void calc_step(int num, float time = 0, float shift = 1.0f);
     void init_tween(int num);
 
     void build_keyframe(float scalar, float interval);
@@ -213,12 +233,11 @@ protected:
     void remove_key_chains(char *mt);
     void remove_key (int num);
 
-    virtual void swap_lead_trail (int num, float side_vel = 0.0f);
-
     void scale_step (int num, float scalar);
 
     int get_next_key(int num, float interval, float time = 0, float shift = 0);
 
+    void load_tokens(XFParseIFF *iff);
     void tokenize_name();
 
 public:
@@ -258,11 +277,17 @@ public:
 
     int swap_motion(char *str1, char *str2);
 
-    void reset_keyframes(int num, float time, float interval=0.0f);
-    void reset_children (int num, float time, float interval=0.0f);
+    void reset_keyframes(int num, float time, float interval=0.0f, float shift=1.0f);
 
     float calc_stride (int chain_num);
     int calc_foot (ulong kt, char *mt, EschVector *ret, EschFrameRef *stride_mtx, int frame_num);
+
+
+    // search through all objects in hierarchy and hide/unhide
+    void hide_by_ktype (ulong kt);
+    void hide_by_absolute_ktype (ulong kt);
+    void unhide_by_ktype (ulong kt);
+    void unhide_by_absolute_ktype (ulong kt);
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Accessor functions                                                   ³
@@ -274,6 +299,30 @@ public:
 
     void set_activity(int num);
     void set_inactivity(int num);
+
+    int get_key_depth(int num)
+    {
+        if ((num < ESCH_MAX_SIMULTANEOUS)
+            && keyheads
+            && keyheads[num]
+            && keyheads[num]->root)
+        {
+            return (keyheads[num]->root->key_depth);
+        }
+        else
+        {
+            return 0;
+        }
+    }
+
+    int get_current_key (int num)
+    {
+        if (keyframes && keyframes[num])
+        {
+            return (keyframes[num]->frame_num);
+        }
+        return (0);
+    }
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Utility functions                                                    ³
@@ -308,6 +357,8 @@ public:
 
     EschKeyframeDraw *get_child_by_ktype (ulong kt);
     void get_child_by_kt (ulong kt, EschKeyframeDraw **temp);
+    void get_pos_by_frame (long chain_num, long frame_num, EschPoint *pos);
+    void calc_frame (long chain_num, long frame_num);
 
     void set_pitch_rest (const float degrees) { rest_pitch = degrees; };
     void set_pitch_rest (const dword degrees) { rest_pitch = float((long)degrees); };
@@ -320,6 +371,9 @@ public:
 
     void align_swapping_keys();
     void align_child(int num, EschKeyframeDraw *root);
+    void tokenize_names();
+    esch_error_codes initialize_tokens(char *filename=0);
+
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // I/O Routines.                                                        ³

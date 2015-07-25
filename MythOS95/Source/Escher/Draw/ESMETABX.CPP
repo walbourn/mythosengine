@@ -206,7 +206,6 @@ void EschMetabox::draw()
         ec.verts[i].y = corner[i].y;
         ec.verts[i].z = corner[i].z;
 
-        vflags[i] = ESCH_VVERT_TRANSFORMED;
         ec.verts[i].transform(&frame,(EschPoint*)(&vpt[i]));
         vpt[i].shade=mp;
     }

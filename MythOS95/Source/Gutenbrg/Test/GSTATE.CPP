@@ -343,7 +343,7 @@ void GameState::Display()
     SetDIBitsToDevice (hdc, 0, 0, MAP_XSIZE, MAP_YSIZE, 0, 0, 0, MAP_YSIZE,
                        gmap, bmi, DIB_RGB_COLORS);
 
-    ReleaseDC (hdc, hWndClient);
+    ReleaseDC (hWndClient, hdc);
 }
 
 

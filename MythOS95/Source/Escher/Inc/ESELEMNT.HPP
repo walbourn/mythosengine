@@ -77,7 +77,8 @@ protected:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Protected draw function for tree recursion                           ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-    static void draw_tree(EschElement *);
+    static void draw_tree(EschElement *elm);
+    static EschElement *link_tree(EschElement *elm);
 
 public:
     float       maxz;                   // Maximum Z
@@ -110,6 +111,7 @@ public:
     virtual BOOL perform_test(const EschPoint *pt) const =0 ;
 
     static void flush();
+    static void flush_truesort();
 };
 
 
@@ -186,6 +188,9 @@ public:
                    || (_typ == ESCH_ELMNT_GPOLY)
                    || (_typ == ESCH_ELMNT_GPOLY_PERSP));
 
+        assertMyth("EschPolyElement needs valid input",
+                   _count >= 3 && _vpoly != 0);
+
         count = (ushort)_count;
         memcpy(vpoly, _vpoly, _count * sizeof(VngoPointF));
         EschElementSize += sizeof(*this) + ((_count-1) * sizeof(VngoPointF));
@@ -194,7 +199,7 @@ public:
         maxz = minz = _vpoly[0].z;
         maxx = minx = _vpoly[0].x;
         maxy = miny = _vpoly[0].y;
-        for(; _count >= 1; _count--)
+        for(_count--; _count >= 1; _count--)
         {
             if (_vpoly[_count].z > maxz)  maxz = _vpoly[_count].z;
             if (_vpoly[_count].z < minz)  minz = _vpoly[_count].z;
@@ -230,6 +235,9 @@ public:
                    || (_typ == ESCH_ELMNT_GPOLY_A)
                    || (_typ == ESCH_ELMNT_GPOLY_PERSP_A));
 
+        assertMyth("EschPolyAElement needs valid input",
+                   _count >= 3 && _vpoly != 0);
+
         count = (ushort)_count;
         memcpy(vpoly, _vpoly, _count * sizeof(VngoPointF));
         EschElementSize += sizeof(*this) + ((_count-1) * sizeof(VngoPointF));
@@ -238,7 +246,7 @@ public:
         maxz = minz = _vpoly[0].z;
         maxx = minx = _vpoly[0].x;
         maxy = miny = _vpoly[0].y;
-        for(; _count >= 1; _count--)
+        for(_count--; _count >= 1; _count--)
         {
             if (_vpoly[_count].z > maxz)  maxz = _vpoly[_count].z;
             if (_vpoly[_count].z < minz)  minz = _vpoly[_count].z;
@@ -275,6 +283,9 @@ public:
                    || (_typ == ESCH_ELMNT_GTXTPOLY)
                    || (_typ == ESCH_ELMNT_GTXTPOLY_PERSP));
 
+        assertMyth("EschPolyTxtElement needs valid input",
+                   _count >= 3 && _vpoly != 0);
+
         count = (ushort)_count;
         memcpy(vpoly, _vpoly, _count * sizeof(VngoPointF));
         EschElementSize += sizeof(*this) + ((_count-1) * sizeof(VngoPointF));
@@ -283,7 +294,7 @@ public:
         maxz = minz = _vpoly[0].z;
         maxx = minx = _vpoly[0].x;
         maxy = miny = _vpoly[0].y;
-        for(; _count >= 1; _count--)
+        for(_count--; _count >= 1; _count--)
         {
             if (_vpoly[_count].z > maxz)  maxz = _vpoly[_count].z;
             if (_vpoly[_count].z < minz)  minz = _vpoly[_count].z;
@@ -323,6 +334,9 @@ public:
                    || (_typ == ESCH_ELMNT_GTXTPOLY_A)
                    || (_typ == ESCH_ELMNT_GTXTPOLY_PERSP_A));
 
+        assertMyth("EschPolyTxtAElement needs valid input",
+                   _count >= 3 && _vpoly != 0);
+
         count = (ushort)_count;
         memcpy(vpoly, _vpoly, _count * sizeof(VngoPointF));
         EschElementSize += sizeof(*this) + ((_count-1) * sizeof(VngoPointF));
@@ -331,7 +345,7 @@ public:
         maxz = minz = _vpoly[0].z;
         maxx = minx = _vpoly[0].x;
         maxy = miny = _vpoly[0].y;
-        for(; _count >= 1; _count--)
+        for(_count--; _count >= 1; _count--)
         {
             if (_vpoly[_count].z > maxz)  maxz = _vpoly[_count].z;
             if (_vpoly[_count].z < minz)  minz = _vpoly[_count].z;

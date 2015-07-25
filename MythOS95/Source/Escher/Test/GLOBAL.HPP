@@ -127,6 +127,14 @@ public:     // Construction/Destruction
     float   mbox_size;
     long    alpha;
 
+    BOOL    keyframe_animation;
+    float   anim_time;
+    float   anim_step_time;
+    float   anim_current_step;
+    int     anim_current_frame;
+    int     anim_chain_count;
+    float   scale;
+
     EschCameraEx            *cam;
     EschLight               *light;
     EschDrawable            *draws;
@@ -143,6 +151,7 @@ public:     // Construction/Destruction
     EschMultiFrameTexture   *mtxt;
     EschTerrainTreeTop      *trees;
     int                     drawexts;
+    int                     drawpartn;
     dword                   exts_color;
     float                   RotateDegrees;
     float                   ScriptRotateDegrees;
@@ -155,19 +164,24 @@ public:     // Construction/Destruction
     long                    total_time;
 
     Chronometer             clock;
+    Chronometer             anim_clock;
 
     BOOL SetupFireTest();
-    BOOL SetupPartitionTest();
+    BOOL SetupPartitionTest(const char *buff);
     BOOL SetupMultiTest(const char *name);
     BOOL SetupSprite(const char *name);
 
-    BOOL LoadScene(char *fn);
+    BOOL LoadScene(char *fn, dword in_type=ESCH_SCENELD_ALL);
     BOOL LoadTreeTops(const char *buff);
     BOOL LoadTerrain(char *fn);
     BOOL SetupParticleSystem(const char *name);
     BOOL SetupStarfield(BOOL fixed, BOOL brights);
     BOOL SetupExplosion(const char *buff);
     BOOL SetupMetabox(const char *buff);
+    BOOL SetupAnimation(const char *buff);
+    void update_keys(float interval);
+
+    void Animate();
 
     void Begin();
     void End(char *buff);

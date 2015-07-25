@@ -197,11 +197,8 @@ int APIENTRY WinMain (HINSTANCE hInstance,
     if (!ini.read("PartitionTest",buff))
     {
         strlwr(buff);
-        if (strstr(buff,"yes") || strstr(buff,"on"))
-        {
-            if (!mode->SetupPartitionTest())
-                return FALSE;
-        }
+        if (!mode->SetupPartitionTest(buff))
+            return FALSE;
     }
 
     if (!ini.read("FireTest",buff))
@@ -297,6 +294,31 @@ int APIENTRY WinMain (HINSTANCE hInstance,
         if (strstr(buff,"yes") || strstr(buff,"on"))
             mode->collide_test = TRUE;
     }
+
+    if (!ini.read("SkeletonFile",buff))
+    {
+        if (!mode->LoadScene(buff,(ESCH_SCENELD_ALL & ~ESCH_SCENELD_MESHES) |
+                                  ESCH_SCENELD_SKELETON))
+            return FALSE;
+    }
+
+    if (!ini.read("AnimationTime",buff))
+    {
+        mode->anim_time = float(atof (buff));
+    }
+
+    if (!ini.read("AnimationStepTime",buff))
+    {
+        mode->anim_step_time = float(atof (buff));
+    }
+
+    if (!ini.read("AnimationTest",buff))
+    {
+        strlwr(buff);
+        if (!mode->SetupAnimation(buff))
+            return FALSE;
+        mode->keyframe_animation = TRUE;
+    }
     ini.close();
 
     if (!mode->cam)
@@ -316,6 +338,7 @@ int APIENTRY WinMain (HINSTANCE hInstance,
     {
         // Do per-frame processing here
         Devs->update ();
+        mode->Animate();
         mode->GetEvents();
         mode->ProcessEvents();
         EschProposedTris = 0;

@@ -203,7 +203,7 @@ void capture_tt(char *name, char *ttname,
             exit(1);
         }
 
-        hOldFont = SelectObject(hDC,hFont);
+        hOldFont = (HFONT__*)SelectObject(hDC,hFont);
 
         memset(&tm,0,sizeof(tm));
         GetOutlineTextMetrics(hDC,sizeof(tm),&tm);

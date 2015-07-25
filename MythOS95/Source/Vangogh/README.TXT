@@ -27,29 +27,15 @@
                             _Library Status_
 
   Notes by:  Tim Little
-  Updated:   October 7, 1997
+  Updated:   November 12, 1997
 
   Changes for this release --------------------------------------------------
 
-    o Updated to support set_haze/haze calls to the VngoVport class to
-      support both software post-process and hardware support hazing.
+    o Minor fix to palette loading code for 16-bit
 
-    o Added capture() routine to VngoVport to handle device-dependant
-      code for screenshot capture.
+    o Changed pixel for D3D to always use line() since some boards do not
+      support a pixel operation and detecting this case is not obvious.
 
-    o Added a make_current call to the VngoVport class that sets the cur_vport
-      member of the VngoSystem class, and forces the viewports local infomation
-      to be updated.  If you ever draw to a VngoVport that is not the current,
-      it will make itself the current automatically if it needs to be the current
-      in order to function properly.
-
-    o Added new calls to enable true alpha blending and texture filtering when
-      they are supported by the view port.  Note that calling either of these
-      functions or the zbuffer_on/off functions force a call to the VngoVport's
-      make_current function as well.
-
-    o Added line-clipping routines to VngoRect class.
-      
     o Continued development of Direct3D.
 
 

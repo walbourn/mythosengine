@@ -54,6 +54,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <math.h>
+#include <ctype.h>
 
 #include "xfbitmap.hpp"
 #include "xfiff.hpp"
@@ -169,6 +170,7 @@ STATIC void init_key_data();
 STATIC void capture_hierarchy_rotations();
 STATIC void process_child (int parent, int this_node, int this_keyframe);
 STATIC esch_limb_type get_token (char name[22]);
+STATIC void str_to_upper (char name[22]);
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
@@ -1332,17 +1334,76 @@ STATIC int export_mesh(XFParseIFF &iff, ItemData *idata,
         // Fill out vertex mapping parameters
         if (idata->item.m.tverts)
         {
-            efaces[i].u[0] = verts[faces[i].a].u;
-            efaces[i].u[1] = verts[faces[i].b].u;
-            efaces[i].u[2] = verts[faces[i].c].u;
+            float u[3] = { verts[faces[i].a].u,
+                           verts[faces[i].b].u,
+                           verts[faces[i].c].u };
+            float v[3] = { verts[faces[i].a].v,
+                           verts[faces[i].b].v,
+                           verts[faces[i].c].v };
+
+#if 1
+            if (faces[i].flags & XF_UWRAP)
+            {
+                int max = 0;
+
+                for(int j=1; j < 3; j++)
+                {
+                    if (u[j] > u[max])
+                        max = j;
+                }
+
+                float nextu = ceil(u[max]);
+
+                for(j=0; j < 3; j++)
+                {
+                    if (max == j)
+                        continue;
+
+                    if (fabs(u[max] - (u[j]+nextu)) < fabs(u[max] - u[j]))
+                    {
+                        u[j] += nextu;
+                    }
+                }
+            }
+#endif
+
+            efaces[i].u[0] = u[0];
+            efaces[i].u[1] = u[1];
+            efaces[i].u[2] = u[2];
 
             // 3DS Uses the opposite definition of v, so we
             // have to negate it to result in right-side up
             // images.
 
-            efaces[i].v[0] = -verts[faces[i].a].v;
-            efaces[i].v[1] = -verts[faces[i].b].v;
-            efaces[i].v[2] = -verts[faces[i].c].v;
+#if 1
+            if (faces[i].flags & XF_VWRAP)
+            {
+                int max = 0;
+
+                for(int j=1; j < 3; j++)
+                {
+                    if (v[j] > v[max])
+                        max = j;
+                }
+
+                float nextv = ceil(v[max]);
+
+                for(j=0; j < 3; j++)
+                {
+                    if (max == j)
+                        continue;
+
+                    if (fabs(v[max] - (v[j]+nextv)) < fabs(v[max] - v[j]))
+                    {
+                        v[j] += nextv;
+                    }
+                }
+            }
+#endif
+
+            efaces[i].v[0] = -v[0];
+            efaces[i].v[1] = -v[1];
+            efaces[i].v[2] = -v[2];
         }
 
         efaces[i].flags |= ESCH_FACE_WIRE
@@ -1351,8 +1412,8 @@ STATIC int export_mesh(XFParseIFF &iff, ItemData *idata,
         if (mtl_perspmode == 3)
             efaces[i].flags |= ESCH_FACE_ALLOWPERSP;
 
-        efaces[i].alpha_a = 
-        efaces[i].alpha_b = 
+        efaces[i].alpha_a =
+        efaces[i].alpha_b =
         efaces[i].alpha_c = 255;
 
         // Fill out material information
@@ -3053,14 +3114,16 @@ STATIC int export_keyframes()
             // rotations are in float
             EschFileKeyframe    out_key;
 
+            str_to_upper(key[i].name);
             out_key.k_type = get_token(key[i].name);
             out_key.frame_num = key[i].frame_num;
 
-            sprintf (buff, "k_type %d pit %f roll %f yaw %f", out_key.k_type,
-                                                              out_key.rotation[0],
-                                                              out_key.rotation[1],
-                                                              out_key.rotation[2]);
-            gfx_continu_line(buff);
+// Following is for debug output.  Uncomment to view data at export time.
+//            sprintf (buff, "k_type %d pit %f roll %f yaw %f", out_key.k_type,
+//                                                              out_key.rotation[0],
+//                                                              out_key.rotation[1],
+//                                                              out_key.rotation[2]);
+//            gfx_continu_line(buff);
 
             for (int j=0; j<3; j++)
             {
@@ -3086,6 +3149,7 @@ STATIC int export_keyframes()
         {
             EschFileKeyframeV1  out_key;
 
+            str_to_upper(key[i].name);
             out_key.k_type = get_token(key[i].name);
             out_key.frame_num = key[i].frame_num;
             for (int j=0; j<3; j++)
@@ -3111,33 +3175,51 @@ STATIC int export_keyframes()
 esch_token esch_token_list[ESCH_KEYFRAME_TOKEN_COUNT] =
 {
     "NONE",ESCH_KEYFRAME_NONE,
-    "FOOTL",(ESCH_KEYFRAME_FOOT|ESCH_KEYFRAME_LEADING|ESCH_KEYFRAME_LEG)  ,
-    "FOOTR",(ESCH_KEYFRAME_FOOT|ESCH_KEYFRAME_TRAILING|ESCH_KEYFRAME_LEG),
-    "CALFL",(ESCH_KEYFRAME_SHIN|ESCH_KEYFRAME_LEADING|ESCH_KEYFRAME_LEG ) ,
-    "CALFR",(ESCH_KEYFRAME_SHIN|ESCH_KEYFRAME_TRAILING|ESCH_KEYFRAME_LEG),
-    "THIGHL",(ESCH_KEYFRAME_THIGH|ESCH_KEYFRAME_LEADING|ESCH_KEYFRAME_LEG ) ,
-    "THIGHR",(ESCH_KEYFRAME_THIGH|ESCH_KEYFRAME_TRAILING|ESCH_KEYFRAME_LEG),
-    "U_ARML",(ESCH_KEYFRAME_UPARM|ESCH_KEYFRAME_LEADING|ESCH_KEYFRAME_ARM) ,
-    "U_ARMR",(ESCH_KEYFRAME_UPARM|ESCH_KEYFRAME_TRAILING|ESCH_KEYFRAME_ARM),
-    "F_ARML",(ESCH_KEYFRAME_FOREARM|ESCH_KEYFRAME_LEADING|ESCH_KEYFRAME_ARM) ,
-    "F_ARMR",(ESCH_KEYFRAME_FOREARM|ESCH_KEYFRAME_TRAILING|ESCH_KEYFRAME_ARM),
-    "UARML",(ESCH_KEYFRAME_UPARM|ESCH_KEYFRAME_LEADING|ESCH_KEYFRAME_ARM) ,
-    "UARMR",(ESCH_KEYFRAME_UPARM|ESCH_KEYFRAME_TRAILING|ESCH_KEYFRAME_ARM),
-    "FARML",(ESCH_KEYFRAME_FOREARM|ESCH_KEYFRAME_LEADING|ESCH_KEYFRAME_ARM) ,
-    "FARMR",(ESCH_KEYFRAME_FOREARM|ESCH_KEYFRAME_TRAILING|ESCH_KEYFRAME_ARM),
-    "UPARML",(ESCH_KEYFRAME_UPARM|ESCH_KEYFRAME_LEADING|ESCH_KEYFRAME_ARM) ,
-    "UPARMR",(ESCH_KEYFRAME_UPARM|ESCH_KEYFRAME_TRAILING|ESCH_KEYFRAME_ARM),
-    "HANDL",(ESCH_KEYFRAME_HAND|ESCH_KEYFRAME_LEADING|ESCH_KEYFRAME_ARM) ,
-    "HANDR",(ESCH_KEYFRAME_HAND|ESCH_KEYFRAME_TRAILING|ESCH_KEYFRAME_ARM),
-    "BODY",(ESCH_KEYFRAME_TORSO|ESCH_KEYFRAME_MISC),
-    "TORSO",(ESCH_KEYFRAME_TORSO|ESCH_KEYFRAME_MISC),
-    "HEAD",(ESCH_KEYFRAME_HEAD|ESCH_KEYFRAME_MISC),
-    "DOME",(ESCH_KEYFRAME_DOME|ESCH_KEYFRAME_MISC),
-    "WAIST",(ESCH_KEYFRAME_WAIST|ESCH_KEYFRAME_MISC),
-    "HIPL",(ESCH_KEYFRAME_HIP|ESCH_KEYFRAME_LEADING|ESCH_KEYFRAME_LEG)  ,
-    "HIPR",(ESCH_KEYFRAME_HIP|ESCH_KEYFRAME_TRAILING|ESCH_KEYFRAME_LEG),
-    "SHLDRL",(ESCH_KEYFRAME_SHLDR|ESCH_KEYFRAME_LEADING|ESCH_KEYFRAME_ARM) ,
-    "SHLDRR",(ESCH_KEYFRAME_SHLDR|ESCH_KEYFRAME_TRAILING|ESCH_KEYFRAME_ARM),
+    "FOOTL",(ESCH_KEYFRAME_FOOT|ESCH_KEYFRAME_LEADING|ESCH_KEYFRAME_LEG|ESCH_KEYFRAME_LEFT)  ,
+    "FOOTR",(ESCH_KEYFRAME_FOOT|ESCH_KEYFRAME_TRAILING|ESCH_KEYFRAME_LEG|ESCH_KEYFRAME_RIGHT),
+    "CALFL",(ESCH_KEYFRAME_SHIN|ESCH_KEYFRAME_LEADING|ESCH_KEYFRAME_LEG|ESCH_KEYFRAME_LEFT) ,
+    "CALFR",(ESCH_KEYFRAME_SHIN|ESCH_KEYFRAME_TRAILING|ESCH_KEYFRAME_LEG|ESCH_KEYFRAME_RIGHT),
+    "SHINL",(ESCH_KEYFRAME_SHIN|ESCH_KEYFRAME_LEADING|ESCH_KEYFRAME_LEG|ESCH_KEYFRAME_LEFT) ,
+    "SHINR",(ESCH_KEYFRAME_SHIN|ESCH_KEYFRAME_TRAILING|ESCH_KEYFRAME_LEG|ESCH_KEYFRAME_RIGHT),
+    "THIGHL",(ESCH_KEYFRAME_THIGH|ESCH_KEYFRAME_LEADING|ESCH_KEYFRAME_LEG|ESCH_KEYFRAME_LEFT) ,
+    "THIGHR",(ESCH_KEYFRAME_THIGH|ESCH_KEYFRAME_TRAILING|ESCH_KEYFRAME_LEG|ESCH_KEYFRAME_RIGHT),
+    "UPLEG-L",(ESCH_KEYFRAME_THIGH|ESCH_KEYFRAME_TRAILING|ESCH_KEYFRAME_LEG|ESCH_KEYFRAME_RIGHT),
+    "UPLEG-R",(ESCH_KEYFRAME_THIGH|ESCH_KEYFRAME_LEADING|ESCH_KEYFRAME_LEG|ESCH_KEYFRAME_LEFT) ,
+    "LOLEG-L",(ESCH_KEYFRAME_SHIN|ESCH_KEYFRAME_LEADING|ESCH_KEYFRAME_LEG|ESCH_KEYFRAME_LEFT) ,
+    "LOLEG-R",(ESCH_KEYFRAME_SHIN|ESCH_KEYFRAME_TRAILING|ESCH_KEYFRAME_LEG|ESCH_KEYFRAME_RIGHT),
+    "FOOT-L",(ESCH_KEYFRAME_FOOT|ESCH_KEYFRAME_LEADING|ESCH_KEYFRAME_LEG|ESCH_KEYFRAME_LEFT)  ,
+    "FOOT-R",(ESCH_KEYFRAME_FOOT|ESCH_KEYFRAME_TRAILING|ESCH_KEYFRAME_LEG|ESCH_KEYFRAME_RIGHT),
+    "ARM-L",(ESCH_KEYFRAME_UPARM|ESCH_KEYFRAME_LEADING|ESCH_KEYFRAME_ARM|ESCH_KEYFRAME_LEFT) ,
+    "ARM-R",(ESCH_KEYFRAME_UPARM|ESCH_KEYFRAME_TRAILING|ESCH_KEYFRAME_ARM|ESCH_KEYFRAME_RIGHT),
+    "ARM-L1",(ESCH_KEYFRAME_UPARM|ESCH_KEYFRAME_LEADING|ESCH_KEYFRAME_ARM|ESCH_KEYFRAME_LEFT) ,
+    "ARM-R1",(ESCH_KEYFRAME_UPARM|ESCH_KEYFRAME_TRAILING|ESCH_KEYFRAME_ARM|ESCH_KEYFRAME_RIGHT),
+    "ARMWEAP1",(ESCH_KEYFRAME_UPARM|ESCH_KEYFRAME_ARM|ESCH_KEYFRAME_WEAP1),
+    "ARMWEAP1F",(ESCH_KEYFRAME_UPARM|ESCH_KEYFRAME_ARM|ESCH_KEYFRAME_WEAP1F),
+    "ARMWEAP2",(ESCH_KEYFRAME_UPARM|ESCH_KEYFRAME_ARM|ESCH_KEYFRAME_WEAP2),
+    "ARMWEAP2F",(ESCH_KEYFRAME_UPARM|ESCH_KEYFRAME_ARM|ESCH_KEYFRAME_WEAP2F),
+    "ARMWEAP3",(ESCH_KEYFRAME_UPARM|ESCH_KEYFRAME_ARM|ESCH_KEYFRAME_WEAP3),
+    "ARMWEAP3F",(ESCH_KEYFRAME_UPARM|ESCH_KEYFRAME_ARM|ESCH_KEYFRAME_WEAP3F),
+    "U_ARML",(ESCH_KEYFRAME_UPARM|ESCH_KEYFRAME_LEADING|ESCH_KEYFRAME_ARM|ESCH_KEYFRAME_LEFT) ,
+    "U_ARMR",(ESCH_KEYFRAME_UPARM|ESCH_KEYFRAME_TRAILING|ESCH_KEYFRAME_ARM|ESCH_KEYFRAME_RIGHT),
+    "F_ARML",(ESCH_KEYFRAME_FOREARM|ESCH_KEYFRAME_LEADING|ESCH_KEYFRAME_ARM|ESCH_KEYFRAME_LEFT) ,
+    "F_ARMR",(ESCH_KEYFRAME_FOREARM|ESCH_KEYFRAME_TRAILING|ESCH_KEYFRAME_ARM|ESCH_KEYFRAME_RIGHT),
+    "UARML",(ESCH_KEYFRAME_UPARM|ESCH_KEYFRAME_LEADING|ESCH_KEYFRAME_ARM|ESCH_KEYFRAME_LEFT) ,
+    "UARMR",(ESCH_KEYFRAME_UPARM|ESCH_KEYFRAME_TRAILING|ESCH_KEYFRAME_ARM|ESCH_KEYFRAME_RIGHT),
+    "FARML",(ESCH_KEYFRAME_FOREARM|ESCH_KEYFRAME_LEADING|ESCH_KEYFRAME_ARM|ESCH_KEYFRAME_LEFT) ,
+    "FARMR",(ESCH_KEYFRAME_FOREARM|ESCH_KEYFRAME_TRAILING|ESCH_KEYFRAME_ARM|ESCH_KEYFRAME_RIGHT),
+    "UPARML",(ESCH_KEYFRAME_UPARM|ESCH_KEYFRAME_LEADING|ESCH_KEYFRAME_ARM|ESCH_KEYFRAME_LEFT) ,
+    "UPARMR",(ESCH_KEYFRAME_UPARM|ESCH_KEYFRAME_TRAILING|ESCH_KEYFRAME_ARM|ESCH_KEYFRAME_RIGHT),
+    "HANDL",(ESCH_KEYFRAME_HAND|ESCH_KEYFRAME_LEADING|ESCH_KEYFRAME_ARM|ESCH_KEYFRAME_LEFT) ,
+    "HANDR",(ESCH_KEYFRAME_HAND|ESCH_KEYFRAME_TRAILING|ESCH_KEYFRAME_ARM|ESCH_KEYFRAME_RIGHT),
+    "BODY",ESCH_KEYFRAME_TORSOM,
+    "TORSO",ESCH_KEYFRAME_TORSOM,
+    "HEAD",ESCH_KEYFRAME_HEADM,
+    "DOME",ESCH_KEYFRAME_DOMEM,
+    "WAIST",ESCH_KEYFRAME_WAISTM,
+    "HIPL",(ESCH_KEYFRAME_HIP|ESCH_KEYFRAME_LEADING|ESCH_KEYFRAME_LEG|ESCH_KEYFRAME_LEFT)  ,
+    "HIPR",(ESCH_KEYFRAME_HIP|ESCH_KEYFRAME_TRAILING|ESCH_KEYFRAME_LEG|ESCH_KEYFRAME_RIGHT),
+    "SHLDRL",(ESCH_KEYFRAME_SHLDR|ESCH_KEYFRAME_LEADING|ESCH_KEYFRAME_ARM|ESCH_KEYFRAME_LEFT) ,
+    "SHLDRR",(ESCH_KEYFRAME_SHLDR|ESCH_KEYFRAME_TRAILING|ESCH_KEYFRAME_ARM|ESCH_KEYFRAME_RIGHT),
     "MISC",ESCH_KEYFRAME_MISC,
     "ALL",ESCH_KEYFRAME_ALL
 };
@@ -3147,13 +3229,32 @@ esch_limb_type get_token (char name[22])
     char buff[256];
     for (int i=0; i<ESCH_KEYFRAME_TOKEN_COUNT; i++)
     {
-        if (strstr(&name[0], esch_token_list[i].name))
+        if (strstr(esch_token_list[i].name, &name[0]))
         {
             return esch_token_list[i].type;
         }
     }
     return ESCH_KEYFRAME_NONE;
 }
+
+void str_to_upper (char str[22])
+{
+    char *ptr = str;
+    for (int i=0; i<22; i++)
+    {
+        if (ptr == '\0')
+        {
+            return;
+        }
+        else
+        {
+            *ptr = toupper(*ptr);
+        }
+        ptr ++;
+    }
+}
+
+
 
 
 

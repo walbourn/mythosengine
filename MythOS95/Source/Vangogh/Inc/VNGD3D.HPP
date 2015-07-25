@@ -208,10 +208,8 @@ public:
     virtual VNGError gtpoly_persp (int count, VngoPoint pts[],VngoTexture *tex);
     virtual VNGError gtpoly_persp (int count, VngoPointF pts[],VngoTexture *tex);
 
-    virtual VNGError grpoly (int count,VngoPoint pts[])
-        { return VNGO_NOT_SUPPORTED; }
-    virtual VNGError grpoly (int count,VngoPointF pts[])
-        { return VNGO_NOT_SUPPORTED; }
+    virtual VNGError grpoly (int count,VngoPoint pts[]);
+    virtual VNGError grpoly (int count,VngoPointF pts[]);
 
     //ÄÄÄ Alpha-blended polygon drawing functions
     virtual VNGError poly_a (int count, VngoPoint pts[],long alpha=127);

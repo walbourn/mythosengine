@@ -146,7 +146,7 @@ void EschBoxExtents::draw(const EschFrameRef *fr, dword clr) const
                    + (cam->vport->vbuff.width >> 1);
         vpt[i].y = (cam->vport->vbuff.height >> 1)
                    - long((p.y * cam->yscalar) / p.z);
-        vpt[i].z = 0;
+        vpt[i].z = dword(p.z * cam->z_factor * float(0xffffffff));
         vpt[i].clr = clr;
         vpt[i].shade = mp;
     }

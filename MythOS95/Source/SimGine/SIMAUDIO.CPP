@@ -46,7 +46,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include "simgine.hpp"
@@ -87,8 +87,10 @@ SimAudio::~SimAudio()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 SimAudio::error_codes SimAudio::init ()
 {
-    return ERROR_NONE;
+    if (BachDigital::init (SimApp->hWndClient) == BACH_ERR_NONE)
+        return ERROR_NONE;
+    else
+        return ERROR_INIT;
 }
 
 //°±² End of module - simaudio.cpp ²±°
-

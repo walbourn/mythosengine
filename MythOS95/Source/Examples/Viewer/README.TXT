@@ -38,7 +38,7 @@
                                3D VIEWER EXAMPLE
 
  Notes by: Chuck Walbourn
- Updated: September 24, 1997
+ Updated: October 29, 1997
 
 
  ---------------------------------------------------------------------------

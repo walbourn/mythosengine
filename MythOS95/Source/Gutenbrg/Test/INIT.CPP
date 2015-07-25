@@ -121,12 +121,12 @@ BOOL InitApplication (HINSTANCE hInstance, int nCmdShow)
     wc.lpszMenuName  = 0;
 
     // This will load the small icon image from the icon resource
-    wc.hIconSm = LoadImage (hInstance,
-                            szAppName,
-                            IMAGE_ICON,
-                            GetSystemMetrics(SM_CXSMICON), 
-                            GetSystemMetrics(SM_CYSMICON), 
-                            LR_DEFAULTCOLOR);              
+    wc.hIconSm = (HICON__*)LoadImage (hInstance,
+                                      szAppName,
+                                      IMAGE_ICON,
+                                      GetSystemMetrics(SM_CXSMICON), 
+                                      GetSystemMetrics(SM_CYSMICON), 
+                                      LR_DEFAULTCOLOR);              
 
     if (!RegisterClassEx (&wc))
         return FALSE;

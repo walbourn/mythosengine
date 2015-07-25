@@ -388,7 +388,6 @@ void EschSprite::draw()
 
     for(int i=0; i < 4; i++)
     {
-        vflags[i] = ESCH_VVERT_TRANSFORMED | ESCH_VVERT_LIT;
         vpt[i].clr = vpt[0].clr;
         vpt[i].shade = vpt[0].shade;
     }

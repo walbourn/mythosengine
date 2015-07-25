@@ -67,7 +67,14 @@ event SHADE_SOLID
 
 event SHADE_FLAT
 {
-   [ key #f6 ]
+   [ key #f6
+     not key #shift ]
+}
+
+event SHADE_FLAT_SPECULAR
+{
+   [ key #f6
+     key #shift]
 }
 
 event SHADE_SMOOTH
@@ -280,7 +287,14 @@ event ADJUST_BM_OFFSET
 
 event SHOW_EXTENTS
 {
-    [ key 'X' ]
+    [ key 'X' 
+      not key #shift ]
+}
+
+event SHOW_PARTN
+{
+    [ key 'X'
+      key #shift ]
 }
 
 event HAZING

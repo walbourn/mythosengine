@@ -1239,7 +1239,7 @@ void EschTerrain::draw()
 
             v->shade = sptr->shd;
 
-            vflags[i] = ESCH_VVERT_TRANSFORMED;
+            vflags[i] = 0;
 
             // Draw
             if (flags & ESCH_TRN_DOTS)
@@ -1533,7 +1533,7 @@ void EschTerrain::animate()
 // values every frame is extremely expensive, so this routine must be       ³
 // called explicitly to set the terrain shading values.                     ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void EschTerrain::compute_shades(EschCamera *cam, EschLight *lgts)
+void EschTerrain::compute_shades(EschCamera *cam, EschLight *lgts,float exagerate)
 {
     byte            *ptr;
     int             w,d;
@@ -1619,9 +1619,10 @@ void EschTerrain::compute_shades(EschCamera *cam, EschLight *lgts)
             vert.y = pw.y + htable[*ptr];
             vert.z = pw.z;
 
-            vert.normal.i = nptr->i;
+            vert.normal.i = nptr->i * exagerate;
             vert.normal.j = nptr->j;
-            vert.normal.k = nptr->k;
+            vert.normal.k = nptr->k * exagerate;
+            vert.normal.normalize();
             nptr++;
 
             v.shade = 0;

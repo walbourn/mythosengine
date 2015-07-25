@@ -49,12 +49,13 @@
 #endif
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-//             
+//
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include "esdefs.h"
+#include "xfile.hpp"
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
@@ -62,7 +63,7 @@
 //
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
-#define ESCH_KEYFRAME_TOKEN_COUNT 32
+#define ESCH_KEYFRAME_TOKEN_COUNT 48
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
@@ -74,6 +75,27 @@ struct esch_token
 {
     char name[ESCH_MAX_NAME];
     esch_limb_type type;
+};
+
+class EschTokenManager
+{
+protected:
+    int token_count;
+    esch_token *token_list;
+
+public:
+    EschTokenManager(){token_count = 0;token_list=0;};
+    ~EschTokenManager();
+    esch_error_codes load (char *filename);
+    esch_error_codes load (XFParseIFF *iff);
+
+    // find type and put matching name in _name
+    void get_token_name (char *_name, esch_limb_type _type);
+
+    // find _name and return matching type
+    esch_limb_type get_token_type(char *_name);
+
+    void str_to_upper (char *str);
 };
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°

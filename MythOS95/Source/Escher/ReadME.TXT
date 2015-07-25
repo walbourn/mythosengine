@@ -37,99 +37,51 @@
                              _Library Status_
 
  Notes by: Chuck Walbourn
- Updated: October 8, 1997
+ Updated: November 12, 1997
 
  Changes for this release --------------------------------------------------
 
-    o Changed EschCameraEx extensively to take advantage of new functionality
-      within Van Gogh for both hazing/fogging and 15/16-bit devices.
-      Previous use of the bitmap background and hazing interface will fail
-      to compile and will need updating for the new interface.
+    o Element Sort
 
-    o Added app_data pointers to EschCamera, EschTexture, EschLight,
-      and EschFace to match that found in EschDrawable.
+        - Fixed sorting bug which caused invalid max's to be choosen for
+          sorting of polygons.
 
-    o Updated EschFace structure to provide space for alpha values and
-      some other parameters.  Updated all load code to handle older
-      data format and to use new format.
+    o Partitioning
 
-    o Added rotation and scale factors to EschSprite and rate
-      support to EschParticleSprite for these values.
+        - Fixed problem with the grid partitioning pick() when a max
+          distance was not specified.
+        - Implemented grid partitioning traverse().
+        - Added draw_grid() to grid partitioning for debugging.
+        - Implemented quadtree partitioning EschQuadTreePartition class
+          and octtree partitioning EschOctTreePartition class.
+
+    o Drawable
+
+        - Added partn_data pointer for use by EschPartition classes.
+        - Added ESCH_DRW_SKIPTRAVERSE bit for use by partitioning
+          traverse() members.
 
     o Terrain
 
-        - Terrain load function now takes a palette pointer for use by
-          texture load changes.
-        - Minor change to terrain data format to make implementation of
-          shared texture-files feasible.
-        - Updated load code with control flags for texture handling and
-          setup to match logic in EschMesh (MTL chunk triggers use of
-          shared cache and registered texture files, load any missing
-          textures from local form).
-        - Added EschTerrain::get_surface_color() routine.
-        - Documented EschTerrainEx and EschTerrainTreeTop classes.
-        - Continued development/debugging for EschTerrainTreeTops.
+        - Special exagerate value added to compute_shades for controlling
+          the effect of the normal on the terrain shading for more dramatic
+          lighting effects.
 
-    o Mesh
+    o Motion
 
-        - Updated load to match logic in EschTerrain when there is no
-          MTL chunk (just load each material in the local form in
-          order they are encountered).
-        - Added a clone() routine.
+        - Continued development and refinement for the keyframer
+          classes.
 
-    o Math
+    o Misc
 
-        - Moved set_top and set_direction routines into EschFrameRef
-          since a number of drawables had duplicated code for these.
-        - Unified usage of EschFrameRef to include the standard
-          transformation routines as helpers for all drawables that
-          utilize it.
-        - Changed the maximum orthongonalize count to 4096 since floating
-          point has far less drift than the fixed-point version.
-        - Added some minor routines to EschPoint and a new constructor
-          for EschVector.
-        - Added math routines for EschPlane.
-
-    o Particles
-
-        - Added EschParticleGenerator class to handle dynamic creation
-          issues for particles using spherical, circular, or rectangular
-          generation areas and stochasitic parameters.
-        - EschParticle lifetime now has time-based lifetime mode and
-          lifetime is now in a 'float' rather than a ulong.  This also
-          affected the EschParticle-derived classes.
-        - Added alpha support to EschParticlePyramid.
-        - Moved particle-related drawable classes from DRAW to PARTICLE
-          subdirectory.
-
-    o Textures
-
-        - Updated for new Van Gogh changes in VngoTexture.
-        - Added registered texture file interface to allow texture data
-          in individual data files to be extracted or overridden by
-          one or more 'central' shared texture data files.
-        - Fixed problem with texture-cache handling of names which had
-          resulted in invalid 'name' pointers in shared texture references
-          when the texture cache was expanded.
-
-    o Updated all usage of XFile when reading files to deny only write-mode
-      sharing, thereby allowing read-mode sharing.
-
-    o Fixed load routines which take a filename to correct bug with
-      form scanning.
-
-    o Changes made to Exporter, Tool, and Editor.  See the ReadME.TXT
-      files for more details.  Updated Directory utility for latest data
-      file changes.
-
-    o Created ESHTLIB utility for creating shared texture files and
-      optionally texture stripped remainder files, plus dumping IFF
-      texture data to bitmaps.
-
-    o Added load() routines to EschBuildTexture.
-
-    o Minor changes for working with Van Gogh.
-
+        - Added more constructors for EschSphereExtents and EschBoxExtents.
+        - Changed DOT and CROSS operations to use inline math ops instead
+          of calling esch_dot and esch_cross functions.
+        - Added inline transform() usage with some minor changes to the
+          terrain to work around a compiler bug.
+        - Flat can now be combined with Specular for specularly highlighted
+          facet shading.
+        - Some optimizations to various draw functions.
 
 
  Pending changes -----------------------------------------------------------
@@ -138,34 +90,49 @@
 
         - Implement more sophisticated scheme to resolve some common
           missorting cases with Zmax-only approach that is currently
-          in use.
+          in use (TRUESORT).
 
     o Partitioning
 
-        - Implement traverse
-        - Implement EschQuadTreePartition
-        - Extend QuadTree to EschOctTreePartition
+        - Quad/Octtree optimizations for draw(), pick(), and direction
+          traverse() walks.
+        - BSP-based partitioning methods -- this requires a method for
+          creating the partitioning off-line since the BSP-build process
+          cannot be done effectively in real-time.
 
     o Camera
 
         - Gradient background needs completion/debugging.
-
-    o Exporter plug-in for 3D Studio MAX and EschBuildCamera/EschBuildLight
-      classes for use by this new tool.
+        - An orthogonal camera implementation might be useful in some
+          situations -- would require changes to most of the drawables
+          to support this as well as to the element clipping code.
 
     o Math
 
-        - Cubic Spline Interpolation
+        - Cubic spline interpolation.
 
     o Drawables
 
-        - Cubic Spline drawable
-        - Tesselated object drawables
-
-    o Other
-       
-        - EschFireTexture may need some cleanup and updated docs.
-        - EschStarfield could use a load function.
+        - Cubic spline drawable.
+        - Tesselated object drawables.
+        - EschPlaneDraw for infinite planes.
         - EschSprite may still have some rotation problems.
+        - EschStarfield could use a load function.  Would be great
+          if it could handle starchart input for realistic placement
+          of the stars.
+
+    o Lights
+
+        - Regionalized lighting mechanism would be useful.
+        - Shadow support using projected shadows.
+
+    o Tools
+
+        - Exporter plug-in for 3D Studio MAX and EschBuildCamera
+          and EschBuildLight classes for use by this new tool.
+
+    o Textures
+
+        - EschFireTexture may need some cleanup and updated docs.
 
 *** END OF FILE ***

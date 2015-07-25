@@ -879,7 +879,7 @@ void EschTerrainEx::draw_terrain_rect (VngoRect *rect, int dlevel,dword lflags)
     cpt->y = origin.y;
     cpt->z = origin.z + float(rect->y << scaleshift);
 
-    cpt->transform(&cam->eye.iorient,cpt);
+    ::esch_transform(cpt,&cam->eye.iorient,cpt);
 
     rpt->x = cpt->x;
     rpt->y = cpt->y;
@@ -2068,7 +2068,7 @@ void EschTerrainEx::esch_find_draw_volume()
     tpt.y = ty;
     tpt.z = tz;
 
-    tpt.transform(&cam->eye.orient);
+    ::esch_transform(&tpt,&cam->eye.orient,&tpt);
 
     vpt[1].x = (long(tpt.x) >> scaleshift) + (width>>1);
     vpt[1].y = (long(tpt.z) >> scaleshift) + (width>>1);
@@ -2077,7 +2077,7 @@ void EschTerrainEx::esch_find_draw_volume()
     tpt.y = ty;
     tpt.z = tz;
 
-    tpt.transform(&cam->eye.orient);
+    ::esch_transform(&tpt,&cam->eye.orient,&tpt);
 
     vpt[2].x = (long(tpt.x) >> scaleshift) + (width>>1);
     vpt[2].y = (long(tpt.z) >> scaleshift) + (width>>1);
@@ -2086,7 +2086,7 @@ void EschTerrainEx::esch_find_draw_volume()
     tpt.y = -ty;
     tpt.z = tz;
 
-    tpt.transform(&cam->eye.orient);
+    ::esch_transform(&tpt,&cam->eye.orient,&tpt);
 
     vpt[3].x = (long(tpt.x) >> scaleshift) + (width>>1);
     vpt[3].y = (long(tpt.z) >> scaleshift) + (width>>1);
@@ -2095,7 +2095,7 @@ void EschTerrainEx::esch_find_draw_volume()
     tpt.y = -ty;
     tpt.z = tz;
 
-    tpt.transform(&cam->eye.orient);
+    ::esch_transform(&tpt,&cam->eye.orient,&tpt);
 
     vpt[4].x = (long(tpt.x) >> scaleshift) + (width>>1);
     vpt[4].y = (long(tpt.z) >> scaleshift) + (width>>1);

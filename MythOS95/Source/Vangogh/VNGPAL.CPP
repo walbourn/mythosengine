@@ -1250,7 +1250,7 @@ STATIC void calc_linear_colors16 (word *colors, int steps,
     float   gstep = tg / float(break_point);
     float   bstep = tb / float(break_point);
 
-    for (int i = break_point -1; i >= 0; i--)
+    for (int i = break_point; i >= 0; i--)
     {
         tclr.r = int(tr + 0.5f);
         tclr.g = int(tg + 0.5f);
@@ -1270,7 +1270,7 @@ STATIC void calc_linear_colors16 (word *colors, int steps,
     gstep = (255.f - tg) / float(steps - break_point);
     bstep = (255.f - tb) / float(steps - break_point);
 
-    for (i = break_point; i < steps; i++)
+    for (i = break_point+1; i < steps; i++)
     {
         tr += rstep;
         tg += gstep;

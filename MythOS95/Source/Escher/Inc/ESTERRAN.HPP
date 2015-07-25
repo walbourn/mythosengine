@@ -186,7 +186,8 @@ public:
     virtual void draw();
     virtual void animate();
 
-    virtual void compute_shades(EschCamera *cam, EschLight *lgts);
+    virtual void compute_shades(EschCamera *cam, EschLight *lgts,
+                                float exagerate=1.0f);
 
     virtual void release();
 

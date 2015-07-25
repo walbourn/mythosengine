@@ -88,6 +88,7 @@ EschDrawable::EschDrawable(word t) :
            | ESCH_CAM_SHOW_ALL_LINES),
     flags(0),
     name(EschNoName),
+    partn_data(0),
     app_data(0)
 {
 }
@@ -99,6 +100,7 @@ EschDrawable::EschDrawable(const EschDrawable &drw) :
     limits(drw.limits),
     flags(drw.flags & ~ESCH_DRW_OWNSDATA),
     name(drw.name),
+    partn_data(0),
     app_data(drw.app_data)
 {
 }
@@ -334,9 +336,6 @@ esch_error_codes EschDrawable::pick(EschPicking *data) const
         }
         else if (!(data->flags & ESCH_PICK_WORLD))
             return ESCH_ERR_INVALIDPARMS;
-
-        if (!(data->flags & ESCH_PICK_MAXDIST))
-            data->maxdist = FLT_MAX;
     }
 
 //컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴� Walk list

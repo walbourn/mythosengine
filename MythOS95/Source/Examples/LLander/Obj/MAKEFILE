@@ -40,7 +40,7 @@
 #°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 #
 #                               Variables
-#                                
+#
 #°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 !if "$(DEBUG)" == ""
@@ -74,6 +74,7 @@ resource.res
 
 LIBS = \
 simgine.lib\
+bach.lib\
 ivory.lib\
 xfile.lib\
 felix.lib\
@@ -90,6 +91,7 @@ uuid.lib\
 dinput.lib\
 ddraw.lib\
 dplayx.lib\
+dsound.lib\
 gdi32.lib\
 winmm.lib\
 user32.lib
@@ -115,7 +117,7 @@ all: setstden $(EXE).pch $(EXE).exe ..\llander.iff
 #--- .c, .cpp, .asm setup in standard include ---
 
 {..\}.cpp{}.obj:
-	$(CPP) $(CCOPTIONS) /Yullander.hpp /Fp$(EXE).pch  $<
+        $(CPP) $(CCOPTIONS) /Yullander.hpp /Fp$(EXE).pch  $<
 
 #±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 #

@@ -334,7 +334,12 @@ void EschCamera::post_rend()
 {
 //ÄÄÄ Flush element buffer (if not forcing skip of this step)
     if (!(flags & ESCH_CAM_NOFLUSH))
-        EschElement::flush();
+    {
+        if (flags & ESCH_CAM_TRUESORT)
+            EschElement::flush_truesort();
+        else
+            EschElement::flush();
+    }
 
 //ÄÄÄ Unlock (if old state was unlocked)
     if (!(flags & ESCH_CAM_VPWASLOCKED))

@@ -54,6 +54,13 @@
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
+//                                Defines
+//
+//±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+
+
+//±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+//
 //                                 Data
 //
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
@@ -312,6 +319,15 @@ esch_error_codes EschKeyframer::load (XFParseIFF *iff)
                 iff->leaveform();
                 return ESCH_ERR_FILEERROR;
             }
+#if 0
+            if (key.k_type & ESCH_KEYFRAME_ROOT)
+//                && key.frame_num == 0)
+            {
+                key.rotation[0] = 0;
+                key.rotation[1] = 0;
+                key.rotation[2] = 0;
+            }
+#endif
         }
         else if (iff->chunkid == iff->makeid('K','E','Y',' '))
         {
@@ -334,6 +350,15 @@ esch_error_codes EschKeyframer::load (XFParseIFF *iff)
             key.rotation[0] = v1key.rotation[0] / 65536.0f;
             key.rotation[1] = v1key.rotation[1] / 65536.0f;
             key.rotation[2] = v1key.rotation[2] / 65536.0f;
+#if 1
+            if (key.k_type & ESCH_KEYFRAME_ROOT
+                && key.frame_num == 0)
+            {
+                key.rotation[0] = 0;
+                key.rotation[1] = 0;
+                key.rotation[2] = 0;
+            }
+#endif
         }
         else
         {
@@ -558,6 +583,51 @@ esch_error_codes EschKeyframer::load (XFParseIFF *iff)
 esch_error_codes EschKeyframer::update_chaining()
 {
     return ESCH_ERR_NONE;
+}
+
+int EschKeyframer::get_chain_count()
+{
+    int chain_count = 0;
+    EschKeyframeHeader *step = list;
+
+    while (step)
+    {
+        step = step->next;
+        chain_count ++;
+    }
+
+    return chain_count;
+}
+
+void EschKeyframer::get_next_chain_type(char *find, char *set)
+{
+    if (!set || !list)
+        return;
+
+    if (!find)
+    {
+        strcpy (set, list->m_type);
+        return;
+    }
+
+    EschKeyframeHeader *step = list;
+
+    while (step && strcmp (step->m_type, find))
+    {
+        step = step->next;
+    }
+    if (step)
+    {
+        step = step->next;
+    }
+    if (step)
+    {
+        strcpy (set, step->m_type);
+    }
+    else
+    {
+        set[0] = 0;
+    }
 }
 
 //°±² End of module - eskeyfrm.cpp ²±°

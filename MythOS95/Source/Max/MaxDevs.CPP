@@ -121,13 +121,22 @@ MaxDevices::MaxDevices():
 MaxDevices::~MaxDevices()
 {
     if (theKeyboard)
+    {
         delete theKeyboard;
+        theKeyboard = 0;
+    }
 
     if (theMouse)
+    {
         delete theMouse;
+        theMouse = 0;
+    }
 
     if (theJoystick)
+    {
         delete theJoystick;
+        theJoystick = 0;
+    }
 }
 
 
@@ -521,6 +530,31 @@ MaxDevicesDirectX::MaxDevicesDirectX (HWND _hwnd):
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 MaxDevicesDirectX::~MaxDevicesDirectX()
 {
+    // Must perform these deletes before the base class gets the chance
+    if (theKeyboard)
+    {
+        delete theKeyboard;
+        theKeyboard = 0;
+    }
+
+    if (theMouse)
+    {
+        delete theMouse;
+        theMouse = 0;
+    }
+
+    if (theJoystick)
+    {
+        delete theJoystick;
+        theJoystick = 0;
+    }
+
+    // Now, clean up the master DInput interface
+    if (pdi)
+    {
+        pdi->Release();
+        pdi = 0;
+    }
 }
 
 //°±² End of module - maxdevs.cpp ²±°

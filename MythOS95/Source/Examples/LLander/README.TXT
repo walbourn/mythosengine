@@ -38,7 +38,7 @@
                               LUNAR LANDER EXAMPLE
 
  Notes by: Chuck Walbourn
- Updated: October 3, 1997
+ Updated: October 31, 1997
 
 
  ---------------------------------------------------------------------------
@@ -83,13 +83,5 @@
  libraries.  Van Gogh and Escher are used to create the views, Max
  is used for input processing, Chronos for time tracking, and Turner
  is used for network communcation.
-
-
- ---------------------------------------------------------------------------
- BUGS
-
- With the port from the old GameFrame, the Turner connection code doesn't
- seem to work.  Therefore the example only runs in single-player mode.  We
- will fix this in a future release.
 
 *** END OF FILE ***

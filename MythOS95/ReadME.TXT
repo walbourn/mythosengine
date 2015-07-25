@@ -41,9 +41,9 @@
 
  ---------------------------------------------------------------------------
 
-                         *** Version 1.5 Release ***
+                         *** Version 1.51 Release ***
 
-                             October 8, 1997
+                             November 13, 1997
 
  This is the sixth full release of the MythOS collection.  Usage of this 
  library is subject to your license agreement.  All materials herein 
@@ -90,6 +90,9 @@
     |  +--Inc (source only)
     |  |
     |  +--Obj (source only)
+    |  |
+    |  +--Test
+    |     +--Obj
     |   
     +--Bozo                         Bozo (Task switcher)
     |  +--Inc (source only)
@@ -311,10 +314,6 @@
     MFC Version 5.x support DLLs are installed as part of the MythOS
     installation procedure since they are required by the MFC-based tools.
 
-    The Bach library has been included with this release, although this
-    is still under development.  The documentation is only a basic
-    template.
-    
     Several of the utilities require a PD utility, Flex, which must be 
     located in C:\FLEX in order to build the executable.  Unzip the FLEX.ZIP
     contained in the root directory of the installed tree structure into

@@ -33,7 +33,7 @@
 //
 // bachdigi.cpp
 //
-// Digital interface object core implementation.
+// Digitial sound source implementation
 //
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
 
@@ -48,293 +48,200 @@
 
 #include "bach.hpp"
 
-#include <xfile.hpp>
-
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
 //                                 Code
 //
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// BachDigital - Constructor                                                ³
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-BachDigital::BachDigital (dword drate):
-    BachDigitalInterface(),
-    driverRate  (drate),
-    dsPrimary   (0),
-    dSound      (0)
-{
-    assert (drate != 0);
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°±  Constructors/Destructors  ±°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
-//ÄÄ Setup default values
-    memset (smpPtr, 0, sizeof (smpPtr));
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// BachDigital - Constructor
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+BachDigital::BachDigital (ulong drate, bach_digi_fmt fmt):
+    dsound (0),
+    primary (0),
+    driverRate (drate),
+    driverFmt (fmt)
+{
+    assertMyth ("BachDigital needs valid driver rate", drate != 0);
 }
 
 
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// BachDigital - Destructor                                                 ³
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// BachDigital - Destructor
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 BachDigital::~BachDigital()
 {
     close ();
 }
 
 
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// BachDigital - init                                                       ³
-//                                                                          ³
-// Initializes the digital driver.                                          ³
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-bach_err_codes BachDigital::init (HWND hWnd, DWORD coop_level)
-{
-//ÄÄ Create Direct Sound Object
-    if (DirectSoundCreate (NULL, &dSound, NULL) != DS_OK)
-        return errorn = BACH_ERR_DSCONNECTFAIL;
 
-    assert (dSound != 0);
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°±  Operations  ±°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// BachDigital - init 
+//
+// Initializes the digital driver.
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+bach_err_codes BachDigital::init (HWND hWnd, DWORD coop_level, int cont_play)
+{
+    if (dsound)
+        return BACH_ERR_NONE;
+
+    if (!hWnd)
+        return BACH_ERR_INVALIDPARAMS;
+
+    switch (coop_level)
+    {
+        case DSSCL_WRITEPRIMARY:
+        case DSSCL_EXCLUSIVE:
+        case DSSCL_PRIORITY:
+        case DSSCL_NORMAL:
+            break;
+        default:
+            return BACH_ERR_INVALIDPARAMS;
+    }
+
+//ÄÄ Create Direct Sound Object
+    if (DirectSoundCreate (NULL, &dsound, NULL) != DS_OK)
+        return BACH_ERR_DSCONNECTFAIL;
+
+    assertMyth("BachDigital::init has invalid DSound create result",
+               dsound != 0);
 
 //ÄÄ Let Direct Sound know how much control we need
-    if (dSound->SetCooperativeLevel (hWnd, coop_level) != DS_OK)
+    if (dsound->SetCooperativeLevel (hWnd, coop_level) != DS_OK)
     {
-        dSound->Release();
-        dSound = 0;
-        return errorn = BACH_ERR_SETCOOPFAIL;
+        close();
+        return BACH_ERR_DSSETCOOPFAIL;
     }
 
 //ÄÄ Create Primary Direct Sound Buffer
-    if (coop_level != DSSCL_NORMAL)
-    {
-        DSBUFFERDESC    bd;
-        memset (&bd, 0, sizeof (bd));
-        bd.dwSize = sizeof (bd);
-        bd.dwFlags = DSBCAPS_PRIMARYBUFFER;
+    DSBUFFERDESC    bd;
+    memset (&bd, 0, sizeof (bd));
 
-        if (dSound->CreateSoundBuffer (&bd, &dsPrimary, NULL) != DS_OK)
+    bd.dwSize = sizeof (bd);
+    bd.dwFlags = DSBCAPS_PRIMARYBUFFER;
+
+    if (dsound->CreateSoundBuffer (&bd, &primary, NULL) != DS_OK)
+    {
+        close();
+        return BACH_ERR_DSPRICREATFAIL;
+    }
+
+    assertMyth("BachDigital::init failed DSound buffer create",
+                primary != 0);
+
+//ÄÄ Get caps of primary buffer
+    DSBCAPS     caps;
+    caps.dwSize = sizeof(caps);
+
+    primary->GetCaps(&caps);
+
+    assertMyth("BachDigital::init has invalid caps for primary buffer",
+               (caps.dwFlags & DSBCAPS_PRIMARYBUFFER)
+               && (caps.dwBufferBytes > 0));
+
+//ÄÄ Setup format
+    WAVEFORMATEX    wfmt;
+    memset(&wfmt,0,sizeof(wfmt));
+    
+    switch (driverFmt)
+    {
+        //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Mono 8-bit
+        case BACH_DIGI_MONO_8:
+            wfmt.nChannels		= 1;
+            wfmt.wBitsPerSample = 8;
+		    wfmt.nBlockAlign    = 1;
+            break;
+        //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Mono 16-bit
+        case BACH_DIGI_MONO_16:
+            wfmt.nChannels		= 1;
+            wfmt.wBitsPerSample = 16;
+		    wfmt.nBlockAlign    = 2;
+            break;
+        //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Stereo 8-bit
+        case BACH_DIGI_STEREO_8:
+            wfmt.nChannels		= 2;
+            wfmt.wBitsPerSample = 8;
+		    wfmt.nBlockAlign    = 2;
+            break;
+        //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Stereo 16-bit
+        case BACH_DIGI_STEREO_16:
+            wfmt.nChannels		= 2;
+            wfmt.wBitsPerSample = 16;
+		    wfmt.nBlockAlign    = 4;
+            break;
+        //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Unknown
+        default:
+            close();
+            return BACH_ERR_NOTSUPPORTED;
+    }
+
+    wfmt.wFormatTag      = WAVE_FORMAT_PCM;
+    wfmt.nSamplesPerSec  = driverRate;
+    wfmt.cbSize			 = 0;
+	wfmt.nAvgBytesPerSec = driverRate * wfmt.nBlockAlign;
+
+//ÄÄ Set format for primaray buffer
+    if (coop_level == DSSCL_WRITEPRIMARY)
+    {
+        if (primary->SetFormat (&wfmt) != DS_OK)
         {
-            dSound->Release();
-            dSound = 0;
-            return errorn = BACH_ERR_DSPRICREATFAIL;
-        }
-
-        assert (dsPrimary != 0);
-
-    //ÄÄ Set the primary buffer format and other parameters
-        WAVEFORMATEX        fmt;
-        fmt.wFormatTag      = WAVE_FORMAT_PCM;
-        fmt.nChannels       = 2;
-        fmt.nSamplesPerSec  = driverRate;
-        fmt.nBlockAlign     = 4;
-        fmt.nAvgBytesPerSec = driverRate * fmt.nBlockAlign;
-        fmt.wBitsPerSample  = 16;
-        fmt.cbSize          = 0;
-
-        dsPrimary->SetFormat (&fmt);
-        dsPrimary->SetFrequency (driverRate);
-        dsPrimary->SetVolume (BACH_DIGI_DEFAULT_VOLUME);
-        dsPrimary->SetPan (BACH_DIGI_DEFAULT_PAN);
-
-    //ÄÄ Begin primary buffer play
-        dsPrimary->Play (0, 0, DSBPLAY_LOOPING);
-    }
-
-    return errorn = BACH_ERR_NONE;
-}
-
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// BachDigital - close                                                      ³
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void BachDigital::close()
-{
-//ÄÄ Release all channels
-    for (byte i = 0; i < BACH_DIGI_CHANNELS; i++)
-    {
-        if (smpPtr[i] != 0)
-            release (i);
-    }
-
-//ÄÄ Release Direct Sound Primary Buffer and Object
-    if (dsPrimary)
-    {
-        dsPrimary->Stop();
-        dsPrimary->Release();
-        dsPrimary = 0;
-    }
-
-    if (dSound)
-    {
-        dSound->Release();
-        dSound = 0;
-    }
-}
-
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// BachDigital - setup                                                      ³
-//                                                                          ³
-// Setups up a digital sample for playback.  Either takes a filename or     ³
-// a BachSample object.  The input 'chan' is -1 by default, which indicates ³
-// to use the first available channel.  The channel used is returned or -1  ³
-// if an error occurs.                                                      ³
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-byte BachDigital::setup (BachSample *s, byte chan)
-{
-//ÄÄ Safeguard
-    assert (dSound);
-    assert (s && s->length && s->rate);
-
-//ÄÄÄ Find empty channel
-    if (chan == byte (-1))
-    {
-        assert (BACH_DIGI_CHANNELS > 0);
-        for (chan = 0; smpPtr[chan] != 0; chan++)
-        {
-            if (chan + 1 == BACH_DIGI_CHANNELS)
-            {
-                errorn = BACH_ERR_ALLCHANNELSBUSY;
-                return byte (-1);
-            }
+            close();
+            return BACH_ERR_DSFORMATFAILED;
         }
     }
     else
-        chan = byte (int (chan) % BACH_DIGI_CHANNELS);
+    {
+        if (primary->SetFormat (&wfmt) != DS_OK
+            && coop_level != DSSCL_NORMAL)
+        {
+            close();
+            return BACH_ERR_DSFORMATFAILED;
+        }
+    }
 
-//ÄÄÄ Release any previous sample
-    release (chan);
+//ÄÄ Begin primary buffer play
+    if (cont_play)
+    {
+        if (primary->Play (0, 0, DSBPLAY_LOOPING) != DS_OK)
+        {
+            close();
+            return BACH_ERR_DSFAILED;
+        }
+    }
 
-//ÄÄÄ Setup sample
-    smpPtr[chan] = s;
-
-    return chan;
+    return BACH_ERR_NONE;
 }
 
 
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// BachDigital - release                                                    ³
-//                                                                          ³
-// Releases a sample on the given channel.                                  ³
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void BachDigital::release (byte chan)
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// BachDigital - close
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+void BachDigital::close()
 {
-    BachSample **ptr = &smpPtr[chan % BACH_DIGI_CHANNELS];
-
-    if (*ptr != 0)
+//ÄÄ Release Direct Sound Buffer and Object
+    if (primary)
     {
-        (*ptr)->stop ();
-        *ptr = 0;
+        primary->Stop();
+        primary->Release();
+        primary = 0;
+    }
+
+    if (dsound)
+    {
+        dsound->Release();
+        dsound = 0;
     }
 }
-
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// BachDigital - play                                                       ³
-//                                                                          ³
-// Begins play of a sample on the given channel.                            ³
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void BachDigital::play (byte chan, ulong loop)
-{
-    assert (dSound);
-
-    smpPtr[chan % BACH_DIGI_CHANNELS]->play (loop);
-}
-
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// BachDigital - stop                                                       ³
-//                                                                          ³
-// Ends the play of a sample on the given channel.                          ³
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void BachDigital::stop (byte chan)
-{
-    assert (dSound);
-
-    smpPtr[chan % BACH_DIGI_CHANNELS]->stop();
-}
-
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// BachDigital - pause                                                      ³
-//                                                                          ³
-// Pauses the play of a sample on the given channel.                        ³
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void BachDigital::pause(byte chan)
-{
-    assert (dSound);
-}
-
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// BachDigital - resume                                                     ³
-//                                                                          ³
-// Resumes a paused sample on the given channel.                            ³
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void BachDigital::resume(byte chan)
-{
-    assert (dSound);
-}
-
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// BachDigital - status                                                     ³
-//                                                                          ³
-// Returns status word for digital object.                                  ³
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-dword BachDigital::status(byte chan)
-{
-    dword flags=0;
-
-
-    return flags;
-}
-
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// BachDigital - set_volume                                                 ³
-//                                                                          ³
-// Sets the current play volume for the specified channel.                  ³
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-byte BachDigital::set_volume(byte chan, byte vol)
-{
-    smpPtr[chan % BACH_DIGI_CHANNELS]->set_volume (vol);
-
-    return 0;
-}
-
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// BachDigital - get_volume                                                 ³
-//                                                                          ³
-// Returns the chanel's volume.                                             ³
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-byte BachDigital::get_volume(byte chan)
-{
-    return byte (smpPtr[chan % BACH_DIGI_CHANNELS]->get_volume ());
-}
-
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// BachDigital - set_pan                                                    ³
-//                                                                          ³
-// Sets the pan location for the given channel.                             ³
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-byte BachDigital::set_pan(byte chan, byte pan)
-{
-    smpPtr[chan % BACH_DIGI_CHANNELS]->set_pan (pan);
-    return 0;
-}
-
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// BachDigital - get_pan                                                    ³
-//                                                                          ³
-// Returns the given channel's pan location.                                ³
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-byte BachDigital::get_pan(byte chan)
-{
-    return byte (smpPtr[chan % BACH_DIGI_CHANNELS]->get_pan ());
-}
-
 
 //°±² End of module - bachdigi.cpp ²±°
 

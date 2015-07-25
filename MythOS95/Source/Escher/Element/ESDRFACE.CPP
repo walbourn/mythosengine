@@ -66,11 +66,11 @@ extern "C" int esch_clip_to_frustrum (ulong *count, VngoPoint *pts,
 
 STATIC int iesch_immediate(VngoVport *vp, 
                            dword level, EschFace *face,
-                           long edge_count, VngoPointF *vpoly);
+                           long edge_count, VngoPointF *vpoly, dword ctrlfl);
 
 STATIC int iesch_elmlist(VngoVport *vp, 
                          dword level, EschFace *face,
-                         long edge_count, VngoPointF *vpoly);
+                         long edge_count, VngoPointF *vpoly, dword ctrlfl);
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
@@ -96,6 +96,20 @@ extern "C" void esch_clipdraw_face(ulong ind, dword ctrlfl)
 {
     ulong               i;
     dword               lclip_flags=0;
+    ulong               edge_count;
+    dword               level;
+    dword               cflags;
+    dword               color;
+    long                height;
+    long                width;
+    float               tx;
+    float               ty;
+    float               z;
+    float               tv;
+    EschCamera          *cam;
+    VngoVport           *vp;
+    EschDrawable        *current;
+    EschFace            *face;
 
     // Static work-space
     static VngoPoint    *vpt[ES_MAX_VERTS];
@@ -113,7 +127,7 @@ extern "C" void esch_clipdraw_face(ulong ind, dword ctrlfl)
 
     EschProposedTris++;
 
-    EschCamera *cam=EschCurrent->camera;
+    cam=EschCurrent->camera;
 
 //ÄÄÄ Setup values/quick references
     assertMyth("esch_clipdraw_face needs valid draw data in context",
@@ -121,11 +135,11 @@ extern "C" void esch_clipdraw_face(ulong ind, dword ctrlfl)
                && EschCurrent->vpoints != 0 && EschCurrent->vflags != 0
                && EschCurrent->current != 0);
 
-    EschDrawable *current=EschCurrent->current;
+    current=EschCurrent->current;
 
-    EschFace *face=&EschCurrent->faces[ind];
+    face=&EschCurrent->faces[ind];
 
-    dword cflags = cam->flags;
+    cflags = cam->flags;
 
     vpt[0] = &EschCurrent->vpoints[face->a];
     vpt[1] = &EschCurrent->vpoints[face->b];
@@ -145,22 +159,25 @@ extern "C" void esch_clipdraw_face(ulong ind, dword ctrlfl)
     vflags[1]=&EschCurrent->vflags[face->b];
     vflags[2]=&EschCurrent->vflags[face->c];
 
-    ulong edge_count = 3;
+    edge_count = 3;
 
 //ÄÄÄ Figure out shade level (take minimum of shade levels for
 //ÄÄÄ camera, drawable limits, and face limits)
 
-    dword level = ( (cflags & current->limits)
-                    | ((ctrlfl & ESCH_CDF_MUSTTXT) ? ESCH_CAM_TEXTURED : 0) )
-                  & face->flags;
+    level = ( (cflags & current->limits)
+              | ((ctrlfl & ESCH_CDF_MUSTTXT) ? ESCH_CAM_TEXTURED : 0) )
+            & face->flags;
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Perform Backface and/or Clip
     if (ctrlfl & (ESCH_CDF_BFCULL | ESCH_CDF_CLIP))
     {
+        color = (ctrlfl & ESCH_CDF_COLOR)
+                ? EschCurrent->color : vpt[0]->clr;
+
         for (i=0;i < edge_count;i++)
         {
             tvpoly[i] = *vpt[i]; // copy content to work space.
-            tvpoly[i].clr = vpt[0]->clr;
+            tvpoly[i].clr = color;
             if (!(level & ESCH_CAM_SHADE_SMOOTH))
                 tvpoly[i].shade = vpt[0]->shade;
         }
@@ -178,7 +195,8 @@ extern "C" void esch_clipdraw_face(ulong ind, dword ctrlfl)
         if (ctrlfl & ESCH_CDF_CLIP)
         {
             // call the new 3d-clip here.
-            int cstate = esch_clip_to_frustrum(&edge_count,tvpoly,vpoly,cam,level);
+            int cstate = esch_clip_to_frustrum(&edge_count, tvpoly, vpoly,
+                                               cam, level);
             if (cstate == 1) // The poly was modified.
             {
                 lclip_flags = 1;
@@ -200,22 +218,24 @@ extern "C" void esch_clipdraw_face(ulong ind, dword ctrlfl)
 //ÄÄÄ Setup local copies of frequently used data
     assertMyth("esch_clipdraw_face expects current context's camera to have a viewport",
                cam->vport != 0);
-    VngoVport *vp=cam->vport;
+    vp=cam->vport;
 
-    long height(vp->vbuff.height >> 1);
-    long width(vp->vbuff.width >> 1);
+    height = vp->vbuff.height >> 1;
+    width = vp->vbuff.width >> 1;
 
-    float tx = cam->xscalar;
-    float ty = cam->yscalar;
+    tx = cam->xscalar;
+    ty = cam->yscalar;
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Project vertecies
     for(i=0; i < edge_count; i++)
     {
         if (!(*vflags[i] & ESCH_VVERT_PROJECTED))
         {
-            float z = ((const EschPoint*)(vpt[i]))->z;
+            *vflags[i] |= ESCH_VVERT_PROJECTED;
 
-            float tv = (((const EschPoint*)(vpt[i]))->x * tx) / z;
+            z = ((const EschPoint*)(vpt[i]))->z;
+
+            tv = (((const EschPoint*)(vpt[i]))->x * tx) / z;
 
 #ifdef ES_SNAP_VERTS
             vpt[i]->x = long(tv) + width;
@@ -233,13 +253,17 @@ extern "C" void esch_clipdraw_face(ulong ind, dword ctrlfl)
 
             //!!! w is 2.30 fixed instead of float
             vpt[i]->w = flx_recip230(Flx16(z));
-
-            *vflags[i] |= ESCH_VVERT_PROJECTED;
         }
     }
 
     int swidth = vp->vbuff.width;
     int sheight = vp->vbuff.height;
+
+    color = (ctrlfl & ESCH_CDF_COLOR)
+            ? EschCurrent->color
+            : EschCurrent->vpoints[face->a].clr;
+
+    float shade = float(EschCurrent->vpoints[face->a].shade);
 
     for(i=0; i < edge_count; i++)
     {
@@ -252,10 +276,10 @@ extern "C" void esch_clipdraw_face(ulong ind, dword ctrlfl)
         
         vpoly2[i].w      = float(vpt[i]->w / float(0x3fffffff));
 
-        vpoly2[i].clr = EschCurrent->vpoints[face->a].clr;
+        vpoly2[i].clr = color;
 
         if (!(level & ESCH_CAM_SHADE_SMOOTH))
-            vpoly2[i].shade = float(EschCurrent->vpoints[face->a].shade);
+            vpoly2[i].shade = shade;
 
         if (vpoly2[i].x < 0.f)
             vpoly2[i].x = 0.f;
@@ -297,7 +321,7 @@ extern "C" void esch_clipdraw_face(ulong ind, dword ctrlfl)
     if ((ctrlfl & ESCH_CDF_DONTSORT)
         || (!(cam->flags & ESCH_CAM_SORT) && !(level & ESCH_CAM_ALPHA)))
     {
-        if (iesch_immediate(vp,level,face,edge_count,vpoly2))
+        if (iesch_immediate(vp, level, face, edge_count, vpoly2, ctrlfl))
         {
             //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Draw wireframe
             if (level & ESCH_CAM_SHADE_WIRE)
@@ -329,7 +353,7 @@ extern "C" void esch_clipdraw_face(ulong ind, dword ctrlfl)
     }
     else
     {
-        if (iesch_elmlist(vp,level,face,edge_count,vpoly2))
+        if (iesch_elmlist(vp, level, face, edge_count, vpoly2, ctrlfl))
         {
             //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Wireframe
             if (level & ESCH_CAM_SHADE_WIRE)
@@ -406,10 +430,34 @@ extern "C" void esch_clipdraw_face(ulong ind, dword ctrlfl)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 STATIC int iesch_immediate(VngoVport *vp, 
                            dword level, EschFace *face,
-                           long edge_count, VngoPointF *vpoly)
+                           long edge_count, VngoPointF *vpoly, dword ctrlfl)
 {
     assertMyth("iesch_immediate() needs vport, face, and vpoly",
                vp != 0 && face != 0 && vpoly != 0);
+
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Color override mode
+    if (ctrlfl & ESCH_CDF_COLOR)
+    {
+        if (level & (ESCH_CAM_SHADE_FLAT | ESCH_CAM_SHADE_SOLID))
+        {
+            if (ctrlfl & ESCH_CDF_ALPHA)
+            {
+                vp->poly_a(edge_count, vpoly, EschCurrent->alpha);
+            }
+            else if (level & ESCH_CAM_ALPHA)
+            {
+                vp->poly_a(edge_count, vpoly, face->get_alpha());
+            }
+            else
+            {
+                vp->poly(edge_count, vpoly);
+            }
+
+            return 0;
+        }
+
+        return 1;
+    }
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Need to draw with Gouraud-shading
     if (level & ESCH_CAM_SHADE_SMOOTH)
@@ -425,39 +473,72 @@ STATIC int iesch_immediate(VngoVport *vp,
 
             if (level & ESCH_CAM_PERSPECTIVE)
             {
-                if (level & ESCH_CAM_ALPHA)
+                if (ctrlfl & ESCH_CDF_ALPHA)
                 {
-                    vp->gtpoly_persp_a(edge_count,vpoly,texture->ptr,face->get_alpha());
+                    vp->gtpoly_persp_a(edge_count, vpoly, texture->ptr,
+                                       EschCurrent->alpha);
+                }
+                else if (level & ESCH_CAM_ALPHA)
+                {
+                    vp->gtpoly_persp_a(edge_count, vpoly, texture->ptr,
+                                       face->get_alpha());
                 }
                 else
                 {
-                    vp->gtpoly_persp(edge_count,vpoly,texture->ptr);
+                    vp->gtpoly_persp(edge_count, vpoly, texture->ptr);
                 }
             }
             else
             {
-                if (level & ESCH_CAM_ALPHA)
-                    vp->gtpoly_a(edge_count,vpoly,texture->ptr,face->get_alpha());
+                if (ctrlfl & ESCH_CDF_ALPHA)
+                {
+                    vp->gtpoly_a(edge_count, vpoly, texture->ptr,
+                                 EschCurrent->alpha);
+                }
+                else if (level & ESCH_CAM_ALPHA)
+                {
+                    vp->gtpoly_a(edge_count, vpoly, texture->ptr,
+                                 face->get_alpha());
+                }
                 else
-                    vp->gtpoly(edge_count,vpoly,texture->ptr);
+                {
+                    vp->gtpoly(edge_count, vpoly, texture->ptr);
+                }
             }
+
             texture->unlock();
         }
         else
         {
             if (level & ESCH_CAM_PERSPECTIVE)
             {
-                if (level & ESCH_CAM_ALPHA)
-                    vp->gpoly_persp_a(edge_count,vpoly,face->get_alpha());
+                if (ctrlfl & ESCH_CDF_ALPHA)
+                {
+                    vp->gpoly_persp_a(edge_count, vpoly, EschCurrent->alpha);
+                }
+                else if (level & ESCH_CAM_ALPHA)
+                {
+                    vp->gpoly_persp_a(edge_count, vpoly, face->get_alpha());
+                }
                 else
-                    vp->gpoly_persp(edge_count,vpoly);
+                {
+                    vp->gpoly_persp(edge_count, vpoly);
+                }
             }
             else
             {
-                if (level & ESCH_CAM_ALPHA)
-                    vp->gpoly_a(edge_count,vpoly,face->get_alpha());
+                if (ctrlfl & ESCH_CDF_ALPHA)
+                {
+                    vp->gpoly_a(edge_count, vpoly, EschCurrent->alpha);
+                }
+                else if (level & ESCH_CAM_ALPHA)
+                {
+                    vp->gpoly_a(edge_count, vpoly, face->get_alpha());
+                }
                 else
+                {
                     vp->gpoly(edge_count,vpoly);
+                }
             }
         }
 
@@ -470,7 +551,7 @@ STATIC int iesch_immediate(VngoVport *vp,
         if (level & ESCH_CAM_TEXTURED)
         {
             assertMyth("iesch_immediate needs textures in current context",
-                    EschCurrent->txts);
+                       EschCurrent->txts);
 
             EschTexture *texture=EschCurrent->txts[face->txt-1];
 
@@ -478,26 +559,54 @@ STATIC int iesch_immediate(VngoVport *vp,
 
             if (level & ESCH_CAM_PERSPECTIVE)
             {
-                if (level & ESCH_CAM_ALPHA)
-                    vp->tpoly_persp_a(edge_count,vpoly,texture->ptr,face->get_alpha());
+                if (ctrlfl & ESCH_CDF_ALPHA)
+                {
+                    vp->tpoly_persp_a(edge_count, vpoly, texture->ptr,
+                                      EschCurrent->alpha);
+                }
+                else if (level & ESCH_CAM_ALPHA)
+                {
+                    vp->tpoly_persp_a(edge_count, vpoly, texture->ptr,
+                                      face->get_alpha());
+                }
                 else
-                    vp->tpoly_persp(edge_count,vpoly,texture->ptr);
+                {
+                    vp->tpoly_persp(edge_count, vpoly, texture->ptr);
+                }
             }
             else
             {
-                if (level & ESCH_CAM_ALPHA)
-                    vp->tpoly_a(edge_count,vpoly,texture->ptr,face->get_alpha());
+                if (ctrlfl & ESCH_CDF_ALPHA)
+                {
+                    vp->tpoly_a(edge_count, vpoly, texture->ptr,
+                                EschCurrent->alpha);
+                }
+                else if (level & ESCH_CAM_ALPHA)
+                {
+                    vp->tpoly_a(edge_count, vpoly, texture->ptr,
+                                face->get_alpha());
+                }
                 else
-                    vp->tpoly(edge_count,vpoly,texture->ptr);
+                {
+                    vp->tpoly(edge_count, vpoly, texture->ptr);
+                }
             }
             texture->unlock();
         }
         else
         {
-            if (level & ESCH_CAM_ALPHA)
-                vp->poly_a(edge_count,vpoly,face->get_alpha());
+            if (ctrlfl & ESCH_CDF_ALPHA)
+            {
+                vp->poly_a(edge_count, vpoly, EschCurrent->alpha);
+            }
+            else if (level & ESCH_CAM_ALPHA)
+            {
+                vp->poly_a(edge_count, vpoly, face->get_alpha());
+            }
             else
-                vp->poly(edge_count,vpoly);
+            {
+                vp->poly(edge_count, vpoly);
+            }
         }
 
         return 0;
@@ -512,7 +621,7 @@ STATIC int iesch_immediate(VngoVport *vp,
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 STATIC int iesch_elmlist(VngoVport *vp, 
                          dword level, EschFace *face,
-                         long edge_count, VngoPointF *vpoly)
+                         long edge_count, VngoPointF *vpoly, dword ctrlfl)
 {
     assertMyth("iesch_elmlist() needs vport, face, and vpoly",
                vp != 0 && face != 0 && vpoly != 0);
@@ -520,19 +629,104 @@ STATIC int iesch_elmlist(VngoVport *vp,
     assertMyth("iesch_elmlist() needs EschSysInstance and sort area",
                 EschSysInstance && EschSysInstance->sspace);
 
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Color override mode
+    if (ctrlfl & ESCH_CDF_COLOR)
+    {
+        if (level & (ESCH_CAM_SHADE_FLAT | ESCH_CAM_SHADE_SOLID))
+        {
+            if (ctrlfl & ESCH_CDF_ALPHA)
+            {
+                //ÄÄÄ poly_a
+                EschPolyAElement *elm = (EschPolyAElement*)
+                                   ivory_arena_alloc(EschSysInstance->sspace,
+                                                     sizeof(EschPolyAElement)
+                                       + ((edge_count-1)*sizeof(VngoPointF)));
+
+                assertMyth("iesch_elmlist() can't allocate sort area memory",
+                            elm != 0);
+                if (elm)
+                {
+                    elm->EschPolyAElement::EschPolyAElement(edge_count,
+                                                                 vpoly,
+                                                    EschCurrent->alpha);
+                    elm->insert();
+                }
+            }
+            else if (level & ESCH_CAM_ALPHA)
+            {
+                //ÄÄÄ poly_a
+                EschPolyAElement *elm = (EschPolyAElement*)
+                                   ivory_arena_alloc(EschSysInstance->sspace,
+                                                     sizeof(EschPolyAElement)
+                                       + ((edge_count-1)*sizeof(VngoPointF)));
+
+                assertMyth("iesch_elmlist() can't allocate sort area memory",
+                            elm != 0);
+                if (elm)
+                {
+                    elm->EschPolyAElement::EschPolyAElement(edge_count,
+                                                                 vpoly,
+                                                     face->get_alpha());
+                    elm->insert();
+                }
+            }
+            else
+            {
+                //ÄÄÄ poly
+                EschPolyElement *elm = (EschPolyElement*)
+                                ivory_arena_alloc(EschSysInstance->sspace,
+                                                    sizeof(EschPolyElement)
+                                    + ((edge_count-1)*sizeof(VngoPointF)));
+
+                assertMyth("iesch_elmlist() can't allocate sort area memory",
+                            elm != 0);
+                if (elm)
+                {
+                    elm->EschPolyElement::EschPolyElement(edge_count, vpoly);
+                    elm->insert();
+                }
+            }
+
+            return 0;
+        }
+
+        return 1;
+    }
+
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Need to draw with Gouraud-shading
     if (level & ESCH_CAM_SHADE_SMOOTH)
     {
         if (level & ESCH_CAM_TEXTURED)
         {
             assertMyth("iesch_elmlist needs textures in current context",
-                        EschCurrent->txts);
+                       EschCurrent->txts);
 
             EschTexture *texture=EschCurrent->txts[face->txt-1];
 
             if (level & ESCH_CAM_PERSPECTIVE)
             {
-                if (level & ESCH_CAM_ALPHA)
+                if (ctrlfl & ESCH_CDF_ALPHA)
+                {
+                    //ÄÄÄ gtpoly_persp_a
+                    EschPolyTxtAElement *elm = (EschPolyTxtAElement*)
+                                   ivory_arena_alloc(EschSysInstance->sspace,
+                                                  sizeof(EschPolyTxtAElement)
+                                       + ((edge_count-1)*sizeof(VngoPointF)));
+
+                    assertMyth("iesch_elmlist() can't allocate sort area memory",
+                                elm != 0);
+                    if (elm)
+                    {
+                        elm->EschPolyTxtAElement::EschPolyTxtAElement(
+                                                                  edge_count,
+                                                                       vpoly,
+                                                                     texture,
+                                                          EschCurrent->alpha,
+                                                 ESCH_ELMNT_GTXTPOLY_PERSP_A);
+                        elm->insert();
+                    }
+                }
+                else if (level & ESCH_CAM_ALPHA)
                 {
                     //ÄÄÄ gtpoly_persp_a
                     EschPolyTxtAElement *elm = (EschPolyTxtAElement*)
@@ -576,7 +770,28 @@ STATIC int iesch_elmlist(VngoVport *vp,
             }
             else
             {
-                if (level & ESCH_CAM_ALPHA)
+                if (ctrlfl & ESCH_CDF_ALPHA)
+                {
+                    //ÄÄÄ gtpoly_a
+                    EschPolyTxtAElement *elm = (EschPolyTxtAElement*)
+                                   ivory_arena_alloc(EschSysInstance->sspace,
+                                                  sizeof(EschPolyTxtAElement)
+                                       + ((edge_count-1)*sizeof(VngoPointF)));
+
+                    assertMyth("iesch_elmlist() can't allocate sort area memory",
+                                elm != 0);
+                    if (elm)
+                    {
+                        elm->EschPolyTxtAElement::EschPolyTxtAElement(
+                                                                  edge_count,
+                                                                       vpoly,
+                                                                     texture,
+                                                          EschCurrent->alpha,
+                                                       ESCH_ELMNT_GTXTPOLY_A);
+                        elm->insert();
+                    }
+                }
+                else if (level & ESCH_CAM_ALPHA)
                 {
                     //ÄÄÄ gtpoly_a
                     EschPolyTxtAElement *elm = (EschPolyTxtAElement*)
@@ -623,7 +838,26 @@ STATIC int iesch_elmlist(VngoVport *vp,
         {
             if (level & ESCH_CAM_PERSPECTIVE)
             {
-                if (level & ESCH_CAM_ALPHA)
+                if (ctrlfl & ESCH_CDF_ALPHA)
+                {
+                    //ÄÄÄ gpoly_persp_a
+                    EschPolyAElement *elm = (EschPolyAElement*)
+                                   ivory_arena_alloc(EschSysInstance->sspace,
+                                                     sizeof(EschPolyAElement)
+                                       + ((edge_count-1)*sizeof(VngoPointF)));
+
+                    assertMyth("iesch_elmlist() can't allocate sort area memory",
+                                elm != 0);
+                    if (elm)
+                    {
+                        elm->EschPolyAElement::EschPolyAElement(edge_count,
+                                                                     vpoly,
+                                                        EschCurrent->alpha,
+                                                  ESCH_ELMNT_GPOLY_PERSP_A);
+                        elm->insert();
+                    }
+                }
+                else if (level & ESCH_CAM_ALPHA)
                 {
                     //ÄÄÄ gpoly_persp_a
                     EschPolyAElement *elm = (EschPolyAElement*)
@@ -663,7 +897,26 @@ STATIC int iesch_elmlist(VngoVport *vp,
             }
             else
             {
-                if (level & ESCH_CAM_ALPHA)
+                if (ctrlfl & ESCH_CDF_ALPHA)
+                {
+                    //ÄÄÄ gpoly_a
+                    EschPolyAElement *elm = (EschPolyAElement*)
+                                   ivory_arena_alloc(EschSysInstance->sspace,
+                                                     sizeof(EschPolyAElement)
+                                       + ((edge_count-1)*sizeof(VngoPointF)));
+
+                    assertMyth("iesch_elmlist() can't allocate sort area memory",
+                                elm != 0);
+                    if (elm)
+                    {
+                        elm->EschPolyAElement::EschPolyAElement(edge_count,
+                                                                     vpoly,
+                                                        EschCurrent->alpha,
+                                                        ESCH_ELMNT_GPOLY_A);
+                        elm->insert();
+                    }
+                }
+                else if (level & ESCH_CAM_ALPHA)
                 {
                     //ÄÄÄ gpoly_a
                     EschPolyAElement *elm = (EschPolyAElement*)
@@ -718,7 +971,28 @@ STATIC int iesch_elmlist(VngoVport *vp,
 
             if (level & ESCH_CAM_PERSPECTIVE)
             {
-                if (level & ESCH_CAM_ALPHA)
+                if (ctrlfl & ESCH_CDF_ALPHA)
+                {
+                    //ÄÄÄ tpoly_persp_a
+                    EschPolyTxtAElement *elm = (EschPolyTxtAElement*)
+                                   ivory_arena_alloc(EschSysInstance->sspace,
+                                                  sizeof(EschPolyTxtAElement)
+                                       + ((edge_count-1)*sizeof(VngoPointF)));
+
+                    assertMyth("iesch_elmlist() can't allocate sort area memory",
+                                elm != 0);
+                    if (elm)
+                    {
+                        elm->EschPolyTxtAElement::EschPolyTxtAElement(
+                                                                  edge_count,
+                                                                       vpoly,
+                                                                     texture,
+                                                          EschCurrent->alpha,
+                                                  ESCH_ELMNT_TXTPOLY_PERSP_A);
+                        elm->insert();
+                    }
+                }
+                else if (level & ESCH_CAM_ALPHA)
                 {
                     //ÄÄÄ tpoly_persp_a
                     EschPolyTxtAElement *elm = (EschPolyTxtAElement*)
@@ -762,7 +1036,27 @@ STATIC int iesch_elmlist(VngoVport *vp,
             }
             else
             {
-                if (level & ESCH_CAM_ALPHA)
+                if (ctrlfl & ESCH_CDF_ALPHA)
+                {
+                    //ÄÄÄ tpoly_a
+                    EschPolyTxtAElement *elm = (EschPolyTxtAElement*)
+                                   ivory_arena_alloc(EschSysInstance->sspace,
+                                                  sizeof(EschPolyTxtAElement)
+                                       + ((edge_count-1)*sizeof(VngoPointF)));
+
+                    assertMyth("iesch_elmlist() can't allocate sort area memory",
+                                elm != 0);
+                    if (elm)
+                    {
+                        elm->EschPolyTxtAElement::EschPolyTxtAElement(
+                                                                  edge_count,
+                                                                       vpoly,
+                                                                     texture,
+                                                          EschCurrent->alpha);
+                        elm->insert();
+                    }
+                }
+                else if (level & ESCH_CAM_ALPHA)
                 {
                     //ÄÄÄ tpoly_a
                     EschPolyTxtAElement *elm = (EschPolyTxtAElement*)
@@ -805,7 +1099,25 @@ STATIC int iesch_elmlist(VngoVport *vp,
         }
         else
         {
-            if (level & ESCH_CAM_ALPHA)
+            if (ctrlfl & ESCH_CDF_ALPHA)
+            {
+                //ÄÄÄ poly_a
+                EschPolyAElement *elm = (EschPolyAElement*)
+                                   ivory_arena_alloc(EschSysInstance->sspace,
+                                                     sizeof(EschPolyAElement)
+                                       + ((edge_count-1)*sizeof(VngoPointF)));
+
+                assertMyth("iesch_elmlist() can't allocate sort area memory",
+                            elm != 0);
+                if (elm)
+                {
+                    elm->EschPolyAElement::EschPolyAElement(edge_count,
+                                                                 vpoly,
+                                                    EschCurrent->alpha);
+                    elm->insert();
+                }
+            }
+            else if (level & ESCH_CAM_ALPHA)
             {
                 //ÄÄÄ poly_a
                 EschPolyAElement *elm = (EschPolyAElement*)

@@ -107,7 +107,7 @@
 
 #define ESCH_MTX_NUM    12
 
-//#define ESCH_INLINE_TRANSFORM
+//#define ESCH_DONT_INLINE_MATH 1
 
 //같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같�
 //
@@ -390,13 +390,23 @@ public:
 
     EschVector operator CROSS (const EschVector &v) const
     {
+#ifdef ESCH_DONT_INLINE_MATH
         EschVector result;
         return (*::esch_cross(this,&v,&result));
+#else
+        return EschVector((j*v.k) - (k*v.j),
+                          (k*v.i) - (i*v.k),
+                          (i*v.j) - (j*v.i));
+#endif
     }
 
     float operator DOT (const EschVector &v) const
     {
+#ifdef ESCH_DONT_INLINE_MATH
         return (::esch_dot(this,&v));
+#else
+        return ((i*v.i) + (j*v.j) + (k*v.k));
+#endif
     }
 
     float magnitude() const { return (esch_magnitude(this));}
@@ -847,7 +857,9 @@ inline void EschPoint::transform(const EschMatrix *m)
     assertMyth("EschPoint::transform needs valid input", m != 0);
 #endif
 
-#ifdef ESCH_INLINE_TRANSFORM
+#ifdef ESCH_DONT_INLINE_MATH
+    ::esch_transform(this,m,this);
+#else
     float _x = x;
     float _y = y;
     float _z = z;
@@ -866,8 +878,6 @@ inline void EschPoint::transform(const EschMatrix *m)
         + m->mtx[ESCH_MTX_F]*_y
         + m->mtx[ESCH_MTX_I]*_z
         + m->mtx[ESCH_MTX_L];
-#else
-    ::esch_transform(this,m,this);
 #endif
 }
 
@@ -877,7 +887,9 @@ inline void EschPoint::transform(const EschMatrix *m, EschPoint *result) const
     assertMyth("EschPoint::transform needs valid input", m!=0 && result!=0);
 #endif
 
-#ifdef ESCH_INLINE_TRANSFORM
+#ifdef ESCH_DONT_INLINE_MATH
+    ::esch_transform(this,m,result);
+#else
     result->x = m->mtx[ESCH_MTX_A]*x
                 + m->mtx[ESCH_MTX_D]*y
                 + m->mtx[ESCH_MTX_G]*z
@@ -892,8 +904,6 @@ inline void EschPoint::transform(const EschMatrix *m, EschPoint *result) const
                 + m->mtx[ESCH_MTX_F]*y
                 + m->mtx[ESCH_MTX_I]*z
                 + m->mtx[ESCH_MTX_L];
-#else
-    ::esch_transform(this,m,result);
 #endif
 }
 
@@ -907,7 +917,9 @@ inline void EschVector::transform(const EschMatrix *m)
     assertMyth("EschVector::transform needs valid input", m != 0);
 #endif
 
-#ifdef ESCH_INLINE_TRANSFORM
+#ifdef ESCH_DONT_INLINE_MATH
+    ::esch_transform_notran(this,m,this);
+#else
     float _i = i;
     float _j = j;
     float _k = k;
@@ -923,8 +935,6 @@ inline void EschVector::transform(const EschMatrix *m)
     k = m->mtx[ESCH_MTX_C]*_i
         + m->mtx[ESCH_MTX_F]*_j
         + m->mtx[ESCH_MTX_I]*_k;
-#else
-    ::esch_transform_notran(this,m,this);
 #endif
 }
 
@@ -934,7 +944,9 @@ inline void EschVector::transform(const EschMatrix *m, EschVector *result) const
     assertMyth("EschVector::transform needs valid input", m!=0 && result!=0);
 #endif
 
-#ifdef ESCH_INLINE_TRANSFORM
+#ifdef ESCH_DONT_INLINE_MATH
+    ::esch_transform_notran(this,m,result);
+#else
     result->i = m->mtx[ESCH_MTX_A]*i
                 + m->mtx[ESCH_MTX_D]*j
                 + m->mtx[ESCH_MTX_G]*k;
@@ -946,8 +958,6 @@ inline void EschVector::transform(const EschMatrix *m, EschVector *result) const
     result->k = m->mtx[ESCH_MTX_C]*i
                 + m->mtx[ESCH_MTX_F]*j
                 + m->mtx[ESCH_MTX_I]*k;
-#else
-    ::esch_transform_notran(this,m,result);
 #endif
 }
 

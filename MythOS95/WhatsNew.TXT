@@ -17,9 +17,9 @@
 
                             W H A T ' S   N E W
 
-                         *** Version 1.5 Release ***
+                         *** Version 1.51 Release ***
 
-                              October 8, 1997
+                              November 13, 1997
 
  ---------------------------------------------------------------------------
  3D HARDWARE
@@ -108,6 +108,15 @@
  have added a method for determining if the DirectInput device has
  failed so that code can fallback onto the Win32 implementation in
  these cases.
+
+
+ ---------------------------------------------------------------------------
+ SOUND LIBRARY
+
+ The Bach sound library has been redesigned and documented.  It includes
+ support for DirectSound sample playback and file streaming.  Conversion
+ for applications using the older version of Bach is a simple process of
+ changing a few identifiers and parameter lists.
 
 
  ---------------------------------------------------------------------------

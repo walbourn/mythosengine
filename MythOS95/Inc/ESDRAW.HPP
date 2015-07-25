@@ -203,6 +203,7 @@ public:
     word    limits;             // Shading-limit mask
     dword   flags;              // Status flags
     char    *name;              // Pointer to obj name, if any
+    void    *partn_data;        // Partitioning pointer
     void    *app_data;          // Application data pointer
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
@@ -252,6 +253,7 @@ public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
     void set_flags(dword f) { flags = f; }
     void set_limits(word l) { limits = l; }
+    void set_partn_data(void *p) { partn_data = p; }
     void set_app_data(void *p) { app_data = p; }
 };
 
