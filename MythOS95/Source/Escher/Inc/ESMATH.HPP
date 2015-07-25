@@ -8,23 +8,27 @@
 //ששששש²±²ששששששש²±²שששש²±²ש²±²שששש²±²ש²±²שששש²±²ש²±²שששששששש²±²שששש²±²שששששש
 //שששש²²²²²²²²²²ש²²²²²²²²ששש²²²²²²²²שש²²²שששש²²²ש²²²²²²²²²²ש²²²שששש²²²ששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//ששששששששששששששששששש Microsoft Windows 95/NT Version ששששששששששששששששששששששש
+//ששששששששששששששששש Microsoft Windows 95/98/NT Version שששששששששששששששששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//שששששששששששCopyrightש(c)ש1994-1998שbyשCharybdisשEnterprises,שInc.שששששששששש
-//ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
+//שששCopyright (c) 1994-1999 by Dan Higdon, Tim Little, and Chuck Walbournששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
 //
-//           *** Charybdis Enterprises, Inc. Company Confidential ***
+// This file and all associated files are subject to the terms of the
+// GNU Lesser General Public License version 2 as published by the
+// Free Software Foundation (http://www.gnu.org).   They remain the
+// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+// See LICENSE.TXT in the distribution for a copy of this license.
 //
-//  This file and all associated files are the company proprietary property
-//        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+// THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+// OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+// PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+// LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+// OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 //
-// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+//ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
+//
+//                        http://www.mythos-engine.org/
 //
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
 //
@@ -151,6 +155,14 @@ inline float esch_tan(float degrees) { return float(tan(degrees * 0.017453292f))
 inline float esch_asin(float n) { return (float(asin(n)) * 57.29577951f); }
 inline float esch_acos(float n) { return (float(acos(n)) * 57.29577951f); }
 inline float esch_atan(float n) { return (float(atan(n)) * 57.29577951f); }
+
+//ִִ AMD-3D batch functions
+extern "C" void esch_amd3d_fpureset();
+extern "C" void esch_amd3d_nofpu_transform(const void *s,
+                                           const EschMatrix *m, void *d);
+extern "C" void esch_amd3d_nofpu_transform_notran(const void *s,
+                                           const EschMatrix *m, void *d);
+extern "C" void esch_amd3d_nofpu_normalize(EschVector *vect);
 
 //ִִ Misc functions
 inline float esch_sqrt(float n) { return float(sqrt(n)); }
@@ -520,9 +532,11 @@ public:
     // Constructor/Destructors                                              ³
     //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִÙ
     EschPlane() {}
+    EschPlane(float ia, float ib, float ic, float ix, float iy, float iz) :
+        normal(ia,ib,ic), dist(-(ia*ix + ib*iy + ic*iz)) {}
     EschPlane(float ia, float ib, float ic, float id) :
         normal(ia,ib,ic), dist(id) {}
-    EschPlane(EschVector &in, float id) :
+    EschPlane(const EschVector &in, float id) :
         normal(in), dist(id) {}
 
     ~EschPlane() {}
@@ -532,7 +546,6 @@ public:
     //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִÙ
     void normalize()
     {
-#ifdef ESCH_INLINE_MATH
         float mag = normal.magnitude();
 
 #ifdef assertMyth
@@ -547,9 +560,6 @@ public:
             normal.k /= mag;
             dist /= mag;
         }
-#else
-        normal.normalize();
-#endif
     }
 
     void nearest(const EschPoint *p, EschPoint *result) const
@@ -588,13 +598,13 @@ public:
         assertMyth("EschPlane::ray needs valid input", pt != 0 && v != 0);
 #endif
         float dot = ::esch_dot(&normal,v);
-        if (dot <= 0)
-            return 0;
+        if (dot == 0)
+            return -1;
 
         float t = - ((dist + ::esch_dot(&normal,(EschVector*)pt)) / dot);
 
-        if (t <= 0)
-            return 0;
+        if (t < 0)
+            return -1;
 
         return t;
     }
@@ -604,10 +614,10 @@ public:
     //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִÙ
 
     //ִִִ Transform by a matrix
-    void transform(const EschMatrix *im);
+    void transform(const EschMatrix *m, const EschMatrix *im);
     void transform(const EschFrameRef *m);
 
-    void transform(const EschMatrix *im, EschPlane *result) const;
+    void transform(const EschMatrix *m, const EschMatrix *im, EschPlane *result) const;
     void transform(const EschFrameRef *m, EschPlane *result) const;
 };
 
@@ -889,7 +899,7 @@ inline void EschPoint::transform(const EschMatrix *m)
     float _x = x;
     float _y = y;
     float _z = z;
-    
+
     x = m->mtx[ESCH_MTX_A]*_x
         + m->mtx[ESCH_MTX_D]*_y
         + m->mtx[ESCH_MTX_G]*_z
@@ -949,7 +959,7 @@ inline void EschVector::transform(const EschMatrix *m)
     float _i = i;
     float _j = j;
     float _k = k;
-    
+
     i = m->mtx[ESCH_MTX_A]*_i
         + m->mtx[ESCH_MTX_D]*_j
         + m->mtx[ESCH_MTX_G]*_k;
@@ -993,18 +1003,29 @@ inline void EschVector::transform(const EschMatrix *m, EschVector *result) const
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
 // EschPlane
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
-inline void EschPlane::transform(const EschMatrix *im)
+inline void EschPlane::transform(const EschMatrix *m, const EschMatrix *im)
 {
 #ifdef assertMyth
-    assertMyth("EschPlane::transform needs valid input", im != 0);
+    assertMyth("EschPlane::transform needs valid input", m != 0 && im != 0);
 #endif
-
-// This is a multiply by the transpose of the matrix 'im'
 
     float _i = normal.i;
     float _j = normal.j;
     float _k = normal.k;
 
+// Must compute point and plane form for transform...
+    EschPoint pos(0,0,0);
+    if (_i != 0)
+        pos.x = -dist / _i;
+    else if (_j != 0)
+        pos.y = -dist / _j;
+    else if (_k != 0)
+        pos.z = -dist / _k;
+
+// Transform point
+    pos.transform(m);
+
+// This is a multiply by the transpose of the matrix 'im'
     normal.i = im->mtx[ESCH_MTX_A]*_i
                + im->mtx[ESCH_MTX_B]*_j
                + im->mtx[ESCH_MTX_C]*_k;
@@ -1016,6 +1037,9 @@ inline void EschPlane::transform(const EschMatrix *im)
     normal.k = im->mtx[ESCH_MTX_G]*_i
                + im->mtx[ESCH_MTX_H]*_j
                + im->mtx[ESCH_MTX_I]*_k;
+
+// Compute dist from new normal and point
+    dist = -(normal.i*pos.x + normal.j*pos.y + normal.k*pos.z);
 }
 
 inline void EschPlane::transform(const EschFrameRef *m)
@@ -1023,17 +1047,30 @@ inline void EschPlane::transform(const EschFrameRef *m)
 #ifdef assertMyth
     assertMyth("EschPlane::transform needs valid input", m != 0);
 #endif
-    transform(&m->iorient);
+    transform(&m->orient, &m->iorient);
 }
 
-inline void EschPlane::transform(const EschMatrix *im, EschPlane *result) const
+inline void EschPlane::transform(const EschMatrix *m,
+                                 const EschMatrix *im,
+                                 EschPlane *result) const
 {
 #ifdef assertMyth
-    assertMyth("EschPlane::transform needs valid input", im!=0 && result!=0);
+    assertMyth("EschPlane::transform needs valid input", m != 0 && im !=0 && result!=0);
 #endif
 
-// This is a multiply by the transpose of the matrix 'im'
+// Must compute point and plane form for transform...
+    EschPoint pos(0,0,0);
+    if (normal.i != 0)
+        pos.x = -dist / normal.i;
+    else if (normal.j != 0)
+        pos.y = -dist / normal.j;
+    else if (normal.k != 0)
+        pos.z = -dist / normal.k;
 
+// Transform point
+    pos.transform(m);
+
+// This is a multiply by the transpose of the matrix 'im'
     result->normal.i = im->mtx[ESCH_MTX_A]*normal.i
                        + im->mtx[ESCH_MTX_B]*normal.j
                        + im->mtx[ESCH_MTX_C]*normal.k;
@@ -1045,6 +1082,9 @@ inline void EschPlane::transform(const EschMatrix *im, EschPlane *result) const
     result->normal.k = im->mtx[ESCH_MTX_G]*normal.i
                        + im->mtx[ESCH_MTX_H]*normal.j
                        + im->mtx[ESCH_MTX_I]*normal.k;
+
+// Compute dist from new normal and point
+    result->dist = -(result->normal.i*pos.x + result->normal.j*pos.y + result->normal.k*pos.z);
 }
 
 inline void EschPlane::transform(const EschFrameRef *m, EschPlane *result) const
@@ -1052,7 +1092,7 @@ inline void EschPlane::transform(const EschFrameRef *m, EschPlane *result) const
 #ifdef assertMyth
     assertMyth("EschPlane::transform needs valid input", m!=0 && result!=0);
 #endif
-    transform(&m->iorient,result);
+    transform(&m->orient, &m->iorient, result);
 }
 
 #ifdef __WATCOMC__

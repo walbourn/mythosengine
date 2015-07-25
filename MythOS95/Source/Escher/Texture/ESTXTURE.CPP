@@ -8,23 +8,27 @@
 //ùùùùù²±²ùùùùùùù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùùùùùù²±²ùùùù²±²ùùùùùù
 //ùùùù²²²²²²²²²²ù²²²²²²²²ùùù²²²²²²²²ùù²²²ùùùù²²²ù²²²²²²²²²²ù²²²ùùùù²²²ùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùùùùùùùùù Microsoft Windows 95/NT Version ùùùùùùùùùùùùùùùùùùùùùùù
+//ùùùùùùùùùùùùùùùùù Microsoft Windows 95/98/NT Version ùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùCopyrightù(c)ù1994-1998ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
-//ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
+//ùùùCopyright (c) 1994-1999 by Dan Higdon, Tim Little, and Chuck Walbournùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
-//           *** Charybdis Enterprises, Inc. Company Confidential ***
+// This file and all associated files are subject to the terms of the
+// GNU Lesser General Public License version 2 as published by the
+// Free Software Foundation (http://www.gnu.org).   They remain the
+// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+// See LICENSE.TXT in the distribution for a copy of this license.
 //
-//  This file and all associated files are the company proprietary property
-//        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+// THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+// OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+// PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+// LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+// OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 //
-// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//
+//                        http://www.mythos-engine.org/
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
@@ -228,28 +232,25 @@ void EschTexture::animate()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 esch_error_codes EschTexture::load_body(XFParseIFF *iff,
                                         EschFileMtlMHDR &header,
-                                        VngoPal *pal)
+                                        VngoPal *pal, XFBitmap *bm)
 {
     byte *work;
 
     assert(iff && ptr);
     assert(iff->chunkid == iff->makeid('B','O','D','Y') && iff->chunkSize);
 
-    assert(header.type == ESCH_MTL_TYPE_8BIT
-           || header.type == ESCH_MTL_TYPE_8BIT_TRANSP
-           || header.type == ESCH_MTL_TYPE_24BIT
-           || header.type == ESCH_MTL_TYPE_32BIT);
-
 //ÄÄÄ Determine bytes per pixel
-    int bpp=1;
+    int bpp, transp;
     switch (header.type)
     {
-        case ESCH_MTL_TYPE_24BIT:
-            bpp=3;
-            break;
-        case ESCH_MTL_TYPE_32BIT:
-            bpp=4;
-            break;
+        case ESCH_MTL_TYPE_8BIT:            bpp=1;  transp=0;   break;
+        case ESCH_MTL_TYPE_8BIT_TRANSP:     bpp=1;  transp=1;   break;
+        case ESCH_MTL_TYPE_15BIT:           bpp=2;  transp=0;   break;
+        case ESCH_MTL_TYPE_15BIT_TRANSP:    bpp=2;  transp=1;   break;
+        case ESCH_MTL_TYPE_24BIT:           bpp=3;  transp=0;   break;
+        case ESCH_MTL_TYPE_32BIT:           bpp=4;  transp=1;   break;
+        default:
+            return ESCH_ERR_NOTSUPPORTED;
     }
 
 //ÄÄÄ Process
@@ -269,7 +270,8 @@ esch_error_codes EschTexture::load_body(XFParseIFF *iff,
 
         switch (bpp)
         {
-            case 3:
+            case 2:
+                //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Convert to palette
                 {
                     byte *dptr=(byte*)ptr->tex;
                     byte *eptr=(byte*)ptr->tex + (header.xsize*header.ysize);
@@ -287,18 +289,44 @@ esch_error_codes EschTexture::load_body(XFParseIFF *iff,
                                     return ESCH_ERR_INVALIDDATA;
                                 }
 
-                                *(dptr++) = (byte)pal->get_index(
-                                                            VngoColor24bit(
-                                                                 *wptr,
-                                                                 *(wptr+1),
-                                                                 *(wptr+2)));
-                                wptr += 3;
+                                word pcolor = *wptr | (*(wptr+1) << 8);
+
+                                if (transp && (pcolor & 0x8000))
+                                {
+                                    *(dptr++) = (byte)VNGO_TRANSPARENT_COLOR;
+                                }
+                                else
+                                {
+                                    pcolor &= ~0x8000;
+                                    VngoColor24bit clr((pcolor >> 7) & 0xf8,
+                                                       (pcolor >> 2) & 0xf8,
+                                                       (pcolor << 3) & 0xf8);
+                                    *(dptr++) = (byte)pal->get_index(clr);
+                                }
+                                wptr += 2;
                             }
                         }
                         else
                         {
                             //ÄÄÄ Run
                             j = -j+1;
+
+                            word pcolor = *wptr | (*(wptr+1) << 8);
+
+                            byte index;
+                            if (transp && (pcolor & 0x8000))
+                            {
+                                index = (byte)VNGO_TRANSPARENT_COLOR;
+                            }
+                            else
+                            {
+                                pcolor &= ~0x8000;
+                                VngoColor24bit clr((pcolor >> 7) & 0xf8,
+                                                   (pcolor >> 2) & 0xf8,
+                                                   (pcolor << 3) & 0xf8);
+                                index = (byte)pal->get_index(clr);
+                            }
+
                             for(int i=0; i < j; i++)
                             {
                                 if (dptr >= eptr)
@@ -307,18 +335,35 @@ esch_error_codes EschTexture::load_body(XFParseIFF *iff,
                                     return ESCH_ERR_INVALIDDATA;
                                 }
 
-                                *(dptr++) = (byte)pal->get_index(
-                                                            VngoColor24bit(
-                                                                 *wptr,
-                                                                 *(wptr+1),
-                                                                 *(wptr+2)));
+                                *(dptr++) = index;
                             }
-                            wptr += 3;
+
+                            wptr += 2;
                         }
                     }
                 }
+                //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Decompress to bitmap, if requested
+                if (bm)
+                {
+                    if (bm->create(header.xsize,header.ysize,XFBM_BPP_15BIT))
+                    {
+                        delete [] work;
+                        return ESCH_ERR_NOMEMORY;
+                    }
+
+                    if (XFParseXEB::uncompress_rle_16bpp(header.xsize,
+                                                         header.ysize,
+                                                         iff->chunkSize,
+                                                         work,
+                                                         bm->data))
+                    {
+                        delete [] work;
+                        return ESCH_ERR_INVALIDDATA;
+                    }
+                }
                 break;
-            case 4:
+            case 3:
+                //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Convert to palette
                 {
                     byte *dptr=(byte*)ptr->tex;
                     byte *eptr=(byte*)ptr->tex + (header.xsize*header.ysize);
@@ -336,17 +381,87 @@ esch_error_codes EschTexture::load_body(XFParseIFF *iff,
                                     return ESCH_ERR_INVALIDDATA;
                                 }
 
-                                if (*(wptr+3) <= 10)
+                                VngoColor24bit clr(*wptr,
+                                                   *(wptr+1),
+                                                   *(wptr+2));
+                                *(dptr++) = (byte)pal->get_index(clr);
+                                wptr += 3;
+                            }
+                        }
+                        else
+                        {
+                            //ÄÄÄ Run
+                            j = -j+1;
+
+                            VngoColor24bit clr(*wptr,
+                                               *(wptr+1),
+                                               *(wptr+2));
+                            byte index = (byte)pal->get_index(clr);
+
+                            for(int i=0; i < j; i++)
+                            {
+                                if (dptr >= eptr)
+                                {
+                                    delete [] work;
+                                    return ESCH_ERR_INVALIDDATA;
+                                }
+
+                                *(dptr++) = index;
+                            }
+
+                            wptr += 3;
+                        }
+                    }
+                }
+                //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Decompress to bitmap, if requested
+                if (bm)
+                {
+                    if (bm->create(header.xsize,header.ysize,XFBM_BPP_24BIT))
+                    {
+                        delete [] work;
+                        return ESCH_ERR_NOMEMORY;
+                    }
+
+                    if (XFParseXEB::uncompress_rle_24bpp(header.xsize,
+                                                         header.ysize,
+                                                         iff->chunkSize,
+                                                         work,
+                                                         bm->data))
+                    {
+                        delete [] work;
+                        return ESCH_ERR_INVALIDDATA;
+                    }
+                }
+                break;
+            case 4:
+                //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Convert to palette
+                {
+                    byte *dptr=(byte*)ptr->tex;
+                    byte *eptr=(byte*)ptr->tex + (header.xsize*header.ysize);
+                    for(byte *wptr=work; wptr < work+iff->chunkSize; )
+                    {
+                        int j = (char) *(wptr++);
+                        if (j >= 0)
+                        {
+                            //ÄÄÄ Literial
+                            for(int i=0; i < j+1; i++)
+                            {
+                                if (dptr >= eptr)
+                                {
+                                    delete [] work;
+                                    return ESCH_ERR_INVALIDDATA;
+                                }
+
+                                if (*(wptr+3) < ESCH_ALPHA_TRANSP)
                                 {
                                     *(dptr++) = (byte)VNGO_TRANSPARENT_COLOR;
                                 }
                                 else
                                 {
-                                    *(dptr++) = (byte)pal->get_index(
-                                                            VngoColor24bit(
-                                                                    *wptr,
-                                                                    *(wptr+1),
-                                                                    *(wptr+2)));
+                                    VngoColor24bit clr(*wptr,
+                                                       *(wptr+1),
+                                                       *(wptr+2));
+                                    *(dptr++) = (byte)pal->get_index(clr);
                                 }
                                 wptr += 4;
                             }
@@ -355,6 +470,20 @@ esch_error_codes EschTexture::load_body(XFParseIFF *iff,
                         {
                             //ÄÄÄ Run
                             j = -j+1;
+
+                            byte index;
+                            if (*(wptr+3) < ESCH_ALPHA_TRANSP)
+                            {
+                                index = (byte)VNGO_TRANSPARENT_COLOR;
+                            }
+                            else
+                            {
+                                VngoColor24bit clr(*wptr,
+                                                   *(wptr+1),
+                                                   *(wptr+2));
+                                index = (byte)pal->get_index(clr);
+                            }
+
                             for(int i=0; i < j; i++)
                             {
                                 if (dptr >= eptr)
@@ -363,25 +492,35 @@ esch_error_codes EschTexture::load_body(XFParseIFF *iff,
                                     return ESCH_ERR_INVALIDDATA;
                                 }
 
-                                if (*(wptr+3) <= 10)
-                                {
-                                    *(dptr++) = (byte)VNGO_TRANSPARENT_COLOR;
-                                }
-                                else
-                                {
-                                    *(dptr++) = (byte)pal->get_index(
-                                                            VngoColor24bit(
-                                                                    *wptr,
-                                                                    *(wptr+1),
-                                                                    *(wptr+2)));
-                                }
+                                *(dptr++) = index;
                             }
+
                             wptr += 4;
                         }
                     }
                 }
+                //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Decompress to bitmap, if requested
+                if (bm)
+                {
+                    if (bm->create(header.xsize,header.ysize,XFBM_BPP_32BIT))
+                    {
+                        delete [] work;
+                        return ESCH_ERR_NOMEMORY;
+                    }
+
+                    if (XFParseXEB::uncompress_rle_32bpp(header.xsize,
+                                                         header.ysize,
+                                                         iff->chunkSize,
+                                                         work,
+                                                         bm->data))
+                    {
+                        delete [] work;
+                        return ESCH_ERR_INVALIDDATA;
+                    }
+                }
                 break;
             default:
+                //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Decompress
                 if (XFParseXEB::uncompress_rle_8bpp(header.xsize, header.ysize,
                                                     iff->chunkSize, work,
                                                     (byte*)ptr->tex))
@@ -409,7 +548,7 @@ esch_error_codes EschTexture::load_body(XFParseIFF *iff,
             return ESCH_ERR_NONE;
         }
 
-        //ÄÄÄ Handle 24/32-bits
+        //ÄÄÄ Handle 15/24/32-bits
         work = new byte[iff->chunkSize];
         if (!work)
             return ESCH_ERR_NOMEMORY;
@@ -423,39 +562,104 @@ esch_error_codes EschTexture::load_body(XFParseIFF *iff,
         //ÄÄÄ Recolor
         assert(pal);
 
-        if (bpp == 4)
+        switch (bpp)
         {
-            byte *dptr = (byte*)ptr->tex;
-            byte *sptr = work;
-            for(ulong i=0; i < (ulong)(header.xsize * header.ysize); i++)
-            {
-                if ((*(sptr+3)) <= 10)
+            //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ 15-bit format (5/5/5)
+            case 2:
                 {
-                    *(dptr++) = (byte)VNGO_TRANSPARENT_COLOR;
+                    byte *dptr = (byte*)ptr->tex;
+                    byte *sptr = work;
+                    for(ulong i=0; i < (ulong)(header.xsize * header.ysize); i++)
+                    {
+                        word pcolor = *sptr | (*(sptr+1) << 8);
+
+                        if (transp && (pcolor & 0x8000))
+                        {
+                            *(dptr++) = (byte)VNGO_TRANSPARENT_COLOR;
+                        }
+                        else
+                        {
+                            pcolor &= ~0x8000;
+                            *(dptr++) = (byte)pal->get_index(VngoColor24bit(
+                                                              (pcolor >> 7) & 0xf8,
+                                                              (pcolor >> 2) & 0xf8,
+                                                              (pcolor << 3) & 0xf8));
+                        }
+
+                        sptr += 2;
+                    }
                 }
-                else
+                //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Save to bitmap, if requested
+                if (bm)
                 {
-                    *(dptr++) = (byte)pal->get_index(VngoColor24bit(
-                                                        *sptr,
-                                                        *(sptr+1),
-                                                        *(sptr+2)));
+                    if (bm->create(header.xsize,header.ysize,XFBM_BPP_15BIT))
+                    {
+                        delete [] work;
+                        return ESCH_ERR_NOMEMORY;
+                    }
+
+                    memcpy(bm->data,work,header.xsize*header.ysize*2);
                 }
-                sptr += 4;
-            }
-        }
-        else
-        {
-            assert(bpp == 3);
-            byte *dptr = (byte*)ptr->tex;
-            byte *sptr = work;
-            for(ulong i=0; i < (ulong)(header.xsize * header.ysize); i++)
-            {
-                *(dptr++) = (byte)pal->get_index(VngoColor24bit(
-                                                 *sptr,
-                                                 *(sptr+1),
-                                                 *(sptr+2)));
-                sptr += 3;
-            }
+                break;
+            //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ 24-bit format (RGB)
+            case 3:
+                {
+                    byte *dptr = (byte*)ptr->tex;
+                    byte *sptr = work;
+                    for(ulong i=0; i < (ulong)(header.xsize * header.ysize); i++)
+                    {
+                        *(dptr++) = (byte)pal->get_index(VngoColor24bit(
+                                                         *sptr,
+                                                         *(sptr+1),
+                                                         *(sptr+2)));
+                        sptr += 3;
+                    }
+                }
+                //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Save to bitmap, if requested
+                if (bm)
+                {
+                    if (bm->create(header.xsize,header.ysize,XFBM_BPP_24BIT))
+                    {
+                        delete [] work;
+                        return ESCH_ERR_NOMEMORY;
+                    }
+
+                    memcpy(bm->data,work,header.xsize*header.ysize*3);
+                }
+                break;
+            //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ 32-bit format (RGBA)
+            case 4:
+                {
+                    byte *dptr = (byte*)ptr->tex;
+                    byte *sptr = work;
+                    for(ulong i=0; i < (ulong)(header.xsize * header.ysize); i++)
+                    {
+                        if ((*(sptr+3)) < ESCH_ALPHA_TRANSP)
+                        {
+                            *(dptr++) = (byte)VNGO_TRANSPARENT_COLOR;
+                        }
+                        else
+                        {
+                            *(dptr++) = (byte)pal->get_index(VngoColor24bit(
+                                                                *sptr,
+                                                                *(sptr+1),
+                                                                *(sptr+2)));
+                        }
+                        sptr += 4;
+                    }
+                }
+                //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Save to bitmap, if requested
+                if (bm)
+                {
+                    if (bm->create(header.xsize,header.ysize,XFBM_BPP_32BIT))
+                    {
+                        delete [] work;
+                        return ESCH_ERR_NOMEMORY;
+                    }
+
+                    memcpy(bm->data,work,header.xsize*header.ysize*4);
+                }
+                break;
         }
 
         delete [] work;
@@ -540,4 +744,3 @@ esch_error_codes EschTexture::load(XFParseIFF *iff, const char *tname,
 }
 
 //°±² End of module - estxture.cpp ²±°
-

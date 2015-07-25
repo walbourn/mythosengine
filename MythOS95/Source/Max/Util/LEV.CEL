@@ -1,6 +1,43 @@
+;ммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммм
+;                  ooo        ooooo
+;                  `88.       .888'
+;                   888b     d'888   .oooo.   oooo    ooo
+;                   8 Y88. .P  888  `P  )88b   `88b..8P'
+;                   8  `888'   888   .oP"888     Y888'
+;                   8    Y     888  d8(  888   .o8"'88b
+;                  o8o        o888o `Y888""8o o88'   888o
 ;
-;                             M A X I M I L L I A N
+;                          Across the event horizon...
 ;
+;                       Microsoft Windows 95/98/NT Version
+;
+;  Copyright (c) 1994-1999 by Dan Higdon, Tim Little, and Chuck Walbourn
+;
+;ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд
+;
+; This file and all associated files are subject to the terms of the
+; GNU Lesser General Public License version 2 as published by the
+; Free Software Foundation (http://www.gnu.org).   They remain the
+; property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+; See LICENSE.TXT in the distribution for a copy of this license.
+;
+; THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+; OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+; PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+; LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+; OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+;
+;ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд
+;
+;                        http://www.mythos-engine.org/
+;
+;ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд
+;
+; Created by Dan Higdon
+;
+; lev.cel
+;
+;ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд
 
 ;-----------------------------
 ; Example event declaration
@@ -9,9 +46,9 @@
 event Lev_up
 {
     [ key 0x48  ]
-    [ not key 0x148 
+    [ not key 0x148
       mouseb 1 ]
-    [ not key 0x148 
+    [ not key 0x148
       joyb 1 ]
 }
 

@@ -8,23 +8,27 @@
 //ששששש²±²ששששששש²±²שששש²±²ש²±²שששש²±²ש²±²שששש²±²ש²±²שששששששש²±²שששש²±²שששששש
 //שששש²²²²²²²²²²ש²²²²²²²²ששש²²²²²²²²שש²²²שששש²²²ש²²²²²²²²²²ש²²²שששש²²²ששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//ששששששששששששששששששש Microsoft Windows 95/NT Version ששששששששששששששששששששששש
+//ששששששששששששששששש Microsoft Windows 95/98/NT Version שששששששששששששששששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//שששששששששששCopyrightש(c)ש1994-1998שbyשCharybdisשEnterprises,שInc.שששששששששש
-//ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
+//שששCopyright (c) 1994-1999 by Dan Higdon, Tim Little, and Chuck Walbournששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
 //
-//           *** Charybdis Enterprises, Inc. Company Confidential ***
+// This file and all associated files are subject to the terms of the
+// GNU Lesser General Public License version 2 as published by the
+// Free Software Foundation (http://www.gnu.org).   They remain the
+// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+// See LICENSE.TXT in the distribution for a copy of this license.
 //
-//  This file and all associated files are the company proprietary property
-//        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+// THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+// OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+// PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+// LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+// OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 //
-// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+//ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
+//
+//                        http://www.mythos-engine.org/
 //
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
 //
@@ -33,7 +37,7 @@
 // eslight.hpp
 //
 // EschLight and the other associated light classes are container classes
-// for the various light sources in the environment.  Lists of 
+// for the various light sources in the environment.  Lists of
 // light objects are maintained and used by the other objects to
 // perform shading calculations.
 //
@@ -41,7 +45,7 @@
 // ambient lighting.
 //
 // EschVectorLights are vector light sources with a direction, but no
-// originating point.  They are the fastest non-ambient light sources 
+// originating point.  They are the fastest non-ambient light sources
 // available.
 //
 // EschFastPointLights are approximations of point light sources which
@@ -52,7 +56,7 @@
 // intensity attenuation.  They are inherited from EschFastPointLights.
 //
 // EschFastSpotLight are approixmated point light sources with
-// a directed output.  They inherit the properties of the EschFastAttenLight. 
+// a directed output.  They inherit the properties of the EschFastAttenLight.
 //
 // EschPointLights are point light sources with a position in world
 // space.  They are much slower to use than vector lights since they
@@ -80,9 +84,9 @@
 #endif
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-//             
+//
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include <portable.h>
@@ -102,7 +106,7 @@
 // EschLight - Base object for light (Used for ambient light).              ³
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִÙ
 class EschLight {
-   
+
 protected:
     //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ¿
     // Protected data members                                               ³
@@ -125,7 +129,7 @@ public:
     dword       flags;                      // Light flags
     char        name[ESCH_MAX_NAME];        // Light name
     void        *app_data;                  // Application data pointer
-    
+
     //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ¿
     // Constructor/Destructors                                              ³
     //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִÙ
@@ -162,7 +166,14 @@ public:
     byte get_intensity() const { return (byte)intensity; }
     void set_intensity(const byte i) { intensity = i; }
 
-    void set_flags(dword f) { flags = f; }
+    void set_flags(const dword f) { flags = f; }
+    void set_flags(const dword m, const int on)
+    {
+        if (on)
+            flags |= m;
+        else
+            flags &= ~m;
+    }
 
     void set_app_data(void *p) { app_data = p; }
 

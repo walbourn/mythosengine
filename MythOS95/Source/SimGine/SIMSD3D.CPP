@@ -13,29 +13,31 @@
 //
 //                     A Simluator Framework for MythOS(tm)
 //
-//                      Microsoft Windows 95/NT Version
+//                     Microsoft Windows 95/98/NT Version
 //
-//            Copyright (c) 1997-1998 by Charybdis Enterprises, Inc.
-//                           All Rights Reserved.
-//
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-//
-//           *** Charybdis Enterprises, Inc. Company Confidential ***
-//
-//  This file and all associated files are the company proprietary property
-//        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
-//
-// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+//  Copyright (c) 1997-1999 by Dan Higdon, Tim Little, and Chuck Walbourn
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
-// MythOS is a trademark of Charybdis Enterprises, Inc.
+// This file and all associated files are subject to the terms of the
+// GNU Lesser General Public License version 2 as published by the
+// Free Software Foundation (http://www.gnu.org).   They remain the
+// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+// See LICENSE.TXT in the distribution for a copy of this license.
+//
+// THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+// OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+// PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+// LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+// OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//
+//                        http://www.mythos-engine.org/
+//
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//
+// Created by Dan Higdon and Chuck Walbourn
 //
 // simsd3d.cpp
 //
@@ -121,7 +123,8 @@ SimScreen::error_codes SimScreenD3D::init (ushort w, ushort h,
         release();
 
         //ÄÄÄ Create screen manager
-        vgs = new VngoDirect3D (SimApp->hWndClient);
+        vgs = new VngoDirect3D (SimApp->hWndClient,
+                                (*SimApp->startup_target) ? SimApp->startup_target : 0);
         if (!vgs)
             return ERROR_NOMEMORY;
 
@@ -173,8 +176,16 @@ SimScreen::error_codes SimScreenD3D::init (ushort w, ushort h,
             bd = 15;
         else if (err)
         {
-            release();
-            return ERROR_MODEFAIL;
+            //ÄÄÄ May require Trueflip
+            if (init_flags & VNGO_TRUE_FLIP)
+            {
+                release();
+                return ERROR_MODEFAIL;
+            }
+            else
+            {
+                init_flags |= VNGO_TRUE_FLIP;
+            }
         }
         else
             break;
@@ -215,16 +226,9 @@ VngoVport *SimScreenD3D::create_subviewport(VngoRect &srect, dword flags)
     assertMyth("SimScreenD3D::create_subviewport needs screen manager and palette",
                vgs != 0 && pal != 0);
 
-    // Why always allocate at zbuffer?
-    // Shouldn't the app be able to control this?
-
-    VngoVport *vport = new VngoVportD3D (srect, pal,
-                                         flags | VNGO_ZBUFFER_DEV, vgs);
+    VngoVport *vport = new VngoVportD3D (srect, pal, flags, vgs);
     if (!vport)
         return 0;
-
-    if (!(flags & VNGO_ZBUFFER_DEV))
-        vport->zbuffer_off();
 
     return vport;
 }

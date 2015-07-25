@@ -8,23 +8,27 @@
 //ששששש²±²ששששששש²±²שששש²±²ש²±²שששש²±²ש²±²שששש²±²ש²±²שששששששש²±²שששש²±²שששששש
 //שששש²²²²²²²²²²ש²²²²²²²²ששש²²²²²²²²שש²²²שששש²²²ש²²²²²²²²²²ש²²²שששש²²²ששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//ששששששששששששששששששש Microsoft Windows 95/NT Version ששששששששששששששששששששששש
+//ששששששששששששששששש Microsoft Windows 95/98/NT Version שששששששששששששששששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//שששששששששששCopyrightש(c)ש1994-1998שbyשCharybdisשEnterprises,שInc.שששששששששש
-//ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
+//שששCopyright (c) 1994-1999 by Dan Higdon, Tim Little, and Chuck Walbournששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
 //
-//           *** Charybdis Enterprises, Inc. Company Confidential ***
+// This file and all associated files are subject to the terms of the
+// GNU Lesser General Public License version 2 as published by the
+// Free Software Foundation (http://www.gnu.org).   They remain the
+// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+// See LICENSE.TXT in the distribution for a copy of this license.
 //
-//  This file and all associated files are the company proprietary property
-//        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+// THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+// OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+// PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+// LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+// OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 //
-// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+//ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
+//
+//                        http://www.mythos-engine.org/
 //
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
 //
@@ -60,9 +64,9 @@
 #endif
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-//             
+//
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include "esdraw.hpp"
@@ -141,7 +145,7 @@ struct EschTraverse
         data(df),
         pos(p),
         dir(v) {}
-    EschTraverse(EschPoint &p,  
+    EschTraverse(EschPoint &p,
                  EschVector &v, float d,
                  EschTraverseCallback f, void *df=0) :
         flags(ESCH_TRAV_DIRECTION | ESCH_TRAV_DIST),
@@ -172,7 +176,7 @@ struct EschQuadTreeNode
     // Constructor/Destructors                                              ³
     //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִÙ
     EschQuadTreeNode() {}
-    EschQuadTreeNode(float _x1, float _z1, float _x2, float _z2, 
+    EschQuadTreeNode(float _x1, float _z1, float _x2, float _z2,
                      EschQuadTreeNode *_parent=0,
                      ushort _depth=0) :
         x1(_x1), z1(_z1),
@@ -262,7 +266,7 @@ public:
     EschPartition() : EschDrawable(ESCH_DRWT_PARTITION) {}
 
     virtual ~EschPartition() {}
-    
+
     //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ¿
     // Operations                                                           ³
     //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִÙ
@@ -312,12 +316,12 @@ public:
     EschGridPartition(ushort w, ushort d, float s, const EschPoint *o);
 
     virtual ~EschGridPartition();
-    
+
     //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ¿
     // Operations                                                           ³
     //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִÙ
     virtual EschDrawable *find(const char *dname) const;
-   
+
     virtual void draw();
 
     virtual esch_error_codes pick(EschPicking *data) const;
@@ -400,12 +404,12 @@ public:
     EschQuadTreePartition(const EschPoint *o, float w, float d=0);
 
     virtual ~EschQuadTreePartition();
-    
+
     //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ¿
     // Operations                                                           ³
     //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִÙ
     virtual EschDrawable *find(const char *dname) const;
-   
+
     virtual void draw();
 
     virtual esch_error_codes pick(EschPicking *data) const;
@@ -493,12 +497,12 @@ public:
                          float w, float h=0, float d=0);
 
     virtual ~EschOctTreePartition();
-    
+
     //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ¿
     // Operations                                                           ³
     //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִÙ
     virtual EschDrawable *find(const char *dname) const;
-   
+
     virtual void draw();
 
     virtual esch_error_codes pick(EschPicking *data) const;

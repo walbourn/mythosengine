@@ -8,40 +8,44 @@
 //ùùùùù²±²ùùùùùùù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùùùùùù²±²ùùùù²±²ùùùùùù
 //ùùùù²²²²²²²²²²ù²²²²²²²²ùùù²²²²²²²²ùù²²²ùùùù²²²ù²²²²²²²²²²ù²²²ùùùù²²²ùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùùùùùùùùù Microsoft Windows 95/NT Version ùùùùùùùùùùùùùùùùùùùùùùù
+//ùùùùùùùùùùùùùùùùù Microsoft Windows 95/98/NT Version ùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùCopyrightù(c)ù1994-1998ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
-//ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
+//ùùùCopyright (c) 1994-1999 by Dan Higdon, Tim Little, and Chuck Walbournùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
-//           *** Charybdis Enterprises, Inc. Company Confidential ***
+// This file and all associated files are subject to the terms of the
+// GNU Lesser General Public License version 2 as published by the
+// Free Software Foundation (http://www.gnu.org).   They remain the
+// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+// See LICENSE.TXT in the distribution for a copy of this license.
 //
-//  This file and all associated files are the company proprietary property
-//        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+// THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+// OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+// PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+// LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+// OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 //
-// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//
+//                        http://www.mythos-engine.org/
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
 //                        *** Escher Terrain Editor ***
 //
-// Chuck Walbourn
+// Created by Chuck Walbourn
 //
-// eshtdoci.cpp 
+// eshtdoci.cpp
 //
 // Terrain Editor Document class import routines.
 //
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-//             
+//
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include "stdafx.h"
@@ -262,7 +266,7 @@ void TerrEditDoc::compress_heights_uniform(long xs, long ys, long w, long h,
 //                             °°° Protected °°°                            ³
 // TerrEditDoc - compress_heights_averaged                                  ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrEditDoc::compress_heights_averaged(float threshold, 
+void TerrEditDoc::compress_heights_averaged(float threshold,
                                             long xs, long ys, long w, long h,
                                             ushort *data, BOOL normalize)
 {
@@ -350,7 +354,7 @@ void TerrEditDoc::compress_heights_averaged(float threshold,
     // until we reduce the table to 256 or fewer entries
 
     if (hcount > 256)
-        dlg.m_pbar.SetRange(0, hcount-256);
+        dlg.m_pbar.SetRange(0, short(hcount-256));
 
     for(long loops=0; hcount > 256; loops++)
     {
@@ -444,7 +448,7 @@ void TerrEditDoc::compress_heights_averaged(float threshold,
         // Create averaged entry with sum of usage counts
         heights[ind1] = (heights[ind1] + heights[ind2]) / 2.0f;
         counts[ind1] = counts[ind1] + counts[ind2];
-        
+
         // Remove now freed index
         for(long i=ind2; i < (long)hcount-1; i++)
         {
@@ -527,7 +531,7 @@ BOOL TerrEditDoc::import_heights_from_vpdem(const char *fname, BOOL *isvpdem)
         char    str[512];
 
         sprintf(str,"Error #%x opening input terrain file:\n\n%s",(int)i,fname);
-                                              
+
         MessageBox(NULL,
                    str,"Import Terrain Error",MB_OK | MB_ICONEXCLAMATION);
         return FALSE;
@@ -540,7 +544,7 @@ BOOL TerrEditDoc::import_heights_from_vpdem(const char *fname, BOOL *isvpdem)
 
         sprintf(str,"Error #%x reading header from input terrain file:\n\n%s",
                     (int)i,fname);
-                                              
+
         MessageBox(NULL,
                    str,"Import Terrain Error",MB_OK | MB_ICONEXCLAMATION);
         return FALSE;
@@ -601,7 +605,7 @@ BOOL TerrEditDoc::import_heights_from_vpdem(const char *fname, BOOL *isvpdem)
             char    str[512];
 
             sprintf(str,"Error #%x opening temporary terrain file:\n\n%s",(int)i,tname);
-                                              
+
             MessageBox(NULL,
                        str,"Import Terrain Error",MB_OK | MB_ICONEXCLAMATION);
             return FALSE;
@@ -614,7 +618,7 @@ BOOL TerrEditDoc::import_heights_from_vpdem(const char *fname, BOOL *isvpdem)
 
             sprintf(str,"Error #%x reading header from temporary terrain file:\n\n%s",
                         (int)i,tname);
-                                              
+
             MessageBox(NULL,
                        str,"Import Terrain Error",MB_OK | MB_ICONEXCLAMATION);
             return FALSE;
@@ -757,7 +761,7 @@ BOOL TerrEditDoc::import_heights_from_vpdem(const char *fname, BOOL *isvpdem)
 // TerrEditDoc - import_heights_from_usgsdem                                ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 BOOL TerrEditDoc::import_heights_from_usgsdem(const char *fname)
-{                   
+{
     int                 i;
     USGSFileParseDEM    usgs;
 
@@ -990,7 +994,7 @@ void TerrEditDoc::ImportSurface(const char *fname, int losswarn)
 
     ASSERT(width && depth && surfcolr);
 
-    dword surfsize = (width * depth) >> (surfshift*2);  
+    dword surfsize = (width * depth) >> (surfshift*2);
 
     if (losswarn)
     {
@@ -1021,7 +1025,7 @@ void TerrEditDoc::ImportSurface(const char *fname, int losswarn)
 
         sprintf(str,"Error #%x opening input surface file:\n\n%s",
                     (int)pcx.error(),fname);
-                                                
+
         MessageBox(NULL,
                   str,"Import Surface Error",MB_OK | MB_ICONEXCLAMATION);
         return;

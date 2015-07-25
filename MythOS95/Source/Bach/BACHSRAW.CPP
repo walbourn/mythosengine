@@ -9,23 +9,27 @@
 //          ³  ³ OÙ OÙ    ÜÛÛÛÜÜÜÛÛÛß   ÛÛÛÛÝßÛÜ  ßÛÛÜÜÛÛ  ÜÛÛÛÜ ÜÛÛÛÜ
 //         OÙ OÙ
 //                            C++ Music, Sound, and Effects Library
-//                               Microsoft Windows 95/NT Version
+//                               Microsoft Windows 95/98/NT Version
 //
-//           Copyright (c) 1995-1998 by Charybdis Enterprises, Inc.
-//                           All Rights Reserved.
+//  Copyright (c) 1995-1999 by Dan Higdon, Tim Little, and Chuck Walbourn
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
-//           *** Charybdis Enterprises, Inc. Company Confidential ***
+// This file and all associated files are subject to the terms of the
+// GNU Lesser General Public License version 2 as published by the
+// Free Software Foundation (http://www.gnu.org).   They remain the
+// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+// See LICENSE.TXT in the distribution for a copy of this license.
 //
-//  This file and all associated files are the company proprietary property
-//        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+// THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+// OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+// PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+// LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+// OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 //
-// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//
+//                        http://www.mythos-engine.org/
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
@@ -109,32 +113,32 @@ bach_err_codes BachStaticSample::load_raw(XFile &xf,
 //ÄÄ Setup format
     WAVEFORMATEX    wfmt;
     memset(&wfmt,0,sizeof(wfmt));
-    
+
     switch (f)
     {
         //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Mono 8-bit
         case BACH_DIGI_MONO_8:
-            wfmt.nChannels		= 1;
+            wfmt.nChannels              = 1;
             wfmt.wBitsPerSample = 8;
-		    wfmt.nBlockAlign    = 1;
+                    wfmt.nBlockAlign    = 1;
             break;
         //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Mono 16-bit
         case BACH_DIGI_MONO_16:
-            wfmt.nChannels		= 1;
+            wfmt.nChannels              = 1;
             wfmt.wBitsPerSample = 16;
-		    wfmt.nBlockAlign    = 2;
+                    wfmt.nBlockAlign    = 2;
             break;
         //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Stereo 8-bit
         case BACH_DIGI_STEREO_8:
-            wfmt.nChannels		= 2;
+            wfmt.nChannels              = 2;
             wfmt.wBitsPerSample = 8;
-		    wfmt.nBlockAlign    = 2;
+                    wfmt.nBlockAlign    = 2;
             break;
         //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Stereo 16-bit
         case BACH_DIGI_STEREO_16:
-            wfmt.nChannels		= 2;
+            wfmt.nChannels              = 2;
             wfmt.wBitsPerSample = 16;
-		    wfmt.nBlockAlign    = 4;
+                    wfmt.nBlockAlign    = 4;
             break;
         //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Unknown
         default:
@@ -144,22 +148,15 @@ bach_err_codes BachStaticSample::load_raw(XFile &xf,
 
     wfmt.wFormatTag      = WAVE_FORMAT_PCM;
     wfmt.nSamplesPerSec  = r;
-    wfmt.cbSize			 = 0;
-	wfmt.nAvgBytesPerSec = r * wfmt.nBlockAlign;
+    wfmt.cbSize          = 0;
+    wfmt.nAvgBytesPerSec = r * wfmt.nBlockAlign;
 
 //ÄÄÄ Setup sound buffer
-    DSBUFFERDESC    bd;
-    memset (&bd,0,sizeof (bd));
-
-    bd.dwSize           = sizeof (DSBUFFERDESC);
-    bd.dwFlags          = DSBCAPS_CTRLALL | DSBCAPS_STATIC;
-    bd.dwBufferBytes    = length;
-    bd.lpwfxFormat      = &wfmt;
-
-    if (dsound->CreateSoundBuffer (&bd, &sbuffer, NULL) != DS_OK)
+    bach_err_codes err = createbuffer(&wfmt);
+    if (err)
     {
         release();
-        return BACH_ERR_DSSECCREATFAIL;
+        return err;
     }
 
     assertMyth("BachStaticSample::load_raw expected valid sound buffer",

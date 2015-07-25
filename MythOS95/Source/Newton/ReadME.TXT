@@ -23,23 +23,27 @@
 
                      Newtonian Physics Simulation Library
 
-            Copyright (c) 1995-1998 by Charybdis Enterprises, Inc.
-                           All Rights Reserved.
+                      Microsoft Windows 95/98/NT Version
 
-                     Microsoft Windows 95/NT Version
+    Copyright (c) 1995-1999 by Dan Higdon, Tim Little, and Chuck Walbourn
 
  ---------------------------------------------------------------------------
- 
-            *** Charybdis Enterprises, Inc. Company Confidential ***
- 
-   This file and all associated files are the company proprietary property
-         of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
- 
-  CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-  TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-  IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-  AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-  INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+
+  This file and all associated files are subject to the terms of the
+  GNU Lesser General Public License version 2 as published by the
+  Free Software Foundation (http://www.gnu.org).   They remain the
+  property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+  See LICENSE.TXT in the distribution for a copy of this license.
+
+  THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+  OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+  PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+  LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+  OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+
+ ---------------------------------------------------------------------------
+
+                         http://www.mythos-engine.org/
 
  ---------------------------------------------------------------------------
 
@@ -61,5 +65,16 @@
    the last_position member variable.
 
  o Converted to use float instead of Flx16.
+
+
+
+ Future notes --------------------------------------------------------------
+
+ o Will need updating for new math library (Euler)
+
+ o Support for 2nd and 4th order integration techniques.
+
+ o More advanced physics models should be added (spring-dampner,
+   rigid-body collision computations, etc.).
 
 *** END OF FILE ***

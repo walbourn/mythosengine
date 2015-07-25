@@ -1,31 +1,35 @@
 //ммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммм
 //
-//                                /\    /\ 
-//                               /  \  /  \ 
-//                              /    \/    \ 
-//                             /  /\    /\  \ 
+//                                /\    /\
+//                               /  \  /  \
+//                              /    \/    \
+//                             /  /\    /\  \
 //                            /  /  \  /  Y T H O S
-//                           /  /    \/    \  \ 
-//                          /  /            \  \ 
-//                         /__/              \__\ 
+//                           /  /    \/    \  \
+//                          /  /            \  \
+//                         /__/              \__\
 //
-//                    Microsoft Windows 95/NT Version
+//                  Microsoft Windows 95/98/NT Version
 //
-//            Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.
-//                           All Rights Reserved.
+//  Copyright (c) 1994-1999 by Dan Higdon, Tim Little, and Chuck Walbourn
 //
 //ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд
 //
-//           *** Charybdis Enterprises, Inc. Company Confidential ***
+// This file and all associated files are subject to the terms of the
+// GNU Lesser General Public License version 2 as published by the
+// Free Software Foundation (http://www.gnu.org).   They remain the
+// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+// See LICENSE.TXT in the distribution for a copy of this license.
 //
-//  This file and all associated files are the company proprietary property
-//        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+// THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+// OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+// PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+// LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+// OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 //
-// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+//ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд
+//
+//                        http://www.mythos-engine.org/
 //
 //ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд
 //
@@ -98,7 +102,7 @@ extern int                  CurrentToken;
 
 //ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд
 // create_drawable
-//            
+//
 //         create_drawable :- drawable '=' <name>
 //                         [ type={mesh | particle} ]
 //                         [ maxcount=<integer> ]
@@ -252,7 +256,7 @@ void create_drawable()
 
 //ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд
 // modify_drawable
-//            
+//
 //         modify_drawable :- drawable '=' <name> '{' <body> '}'
 //
 //ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд
@@ -313,7 +317,7 @@ void modify_drawable()
 //                                  [,<integer>,<integer>,<integer> ];
 //                          | alpha=<integer> [,<integer>];
 //                          | acceleration=<float>,<float>,<float>;
-//                      
+//
 //                          | <empty>
 //
 //ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд
@@ -1033,7 +1037,7 @@ STATIC void drawable_anim(EschDrawable *drw)
                 match(YY_EQUAL);
 
                 float s = (float)rexpr();
-                
+
                 match(YY_SEMICOLON);
 
                 anim->usenewton = TRUE;
@@ -1124,7 +1128,7 @@ STATIC void drawable_anim(EschDrawable *drw)
                 match(YY_EQUAL);
 
                 float d = (float)rexpr();
-                
+
                 match(YY_SEMICOLON);
 
                 anim->lockdir = FALSE;
@@ -1139,7 +1143,7 @@ STATIC void drawable_anim(EschDrawable *drw)
                 match(YY_EQUAL);
 
                 float d = (float)rexpr();
-                
+
                 match(YY_SEMICOLON);
 
                 anim->lockdir = FALSE;
@@ -1154,7 +1158,7 @@ STATIC void drawable_anim(EschDrawable *drw)
                 match(YY_EQUAL);
 
                 float d = (float)rexpr();
-                
+
                 match(YY_SEMICOLON);
 
                 anim->lockdir = FALSE;
@@ -1169,7 +1173,7 @@ STATIC void drawable_anim(EschDrawable *drw)
                 match(YY_EQUAL);
 
                 float d = (float)rexpr();
-                
+
                 match(YY_SEMICOLON);
 
                 anim->lockdir = FALSE;
@@ -1184,7 +1188,7 @@ STATIC void drawable_anim(EschDrawable *drw)
                 match(YY_EQUAL);
 
                 float d = (float)rexpr();
-                
+
                 match(YY_SEMICOLON);
 
                 anim->lockdir = FALSE;
@@ -1199,7 +1203,7 @@ STATIC void drawable_anim(EschDrawable *drw)
                 match(YY_EQUAL);
 
                 float d = (float)rexpr();
-                
+
                 match(YY_SEMICOLON);
 
                 anim->lockdir = FALSE;

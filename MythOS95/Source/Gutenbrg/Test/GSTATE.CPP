@@ -1,33 +1,39 @@
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
-//           __ ,                                                      
-//            ,-| ~           ,               ,,                      
-//           ('||/__,        ||               ||                  _   
-//          (( |||  | \\ \\ =||=   _-_  \\/\\ ||/|,  _-_  ,._-_  / \\ 
-//          (( |||==| || ||  ||   || \\ || || || || || \\  ||   || || 
-//           ( / |  , || ||  ||   ||/   || || || |' ||/    ||   || || 
-//            -____/  \\/\\  \\,  \\,/  \\ \\ \\/   \\,/   \\,  \\_-| 
-//                                                               /  \ 
+//           __ ,
+//            ,-| ~           ,               ,,
+//           ('||/__,        ||               ||                  _
+//          (( |||  | \\ \\ =||=   _-_  \\/\\ ||/|,  _-_  ,._-_  / \\
+//          (( |||==| || ||  ||   || \\ || || || || || \\  ||   || ||
+//           ( / |  , || ||  ||   ||/   || || || |' ||/    ||   || ||
+//            -____/  \\/\\  \\,  \\,/  \\ \\ \\/   \\,/   \\,  \\_-|
+//                                                               /  \
 //                                                              '----`
 //                     Text Output and Font Management System
-//                        Microsoft Windows 95/NT Version
+//                       Microsoft Windows 95/98/NT Version
 //
-//            Copyright (c) 1995-1998 by Charybdis Enterprises, Inc.
-//                           All Rights Reserved.
+//  Copyright (c) 1995-1999 by Dan Higdon, Tim Little, and Chuck Walbourn
+//
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//
+// This file and all associated files are subject to the terms of the
+// GNU Lesser General Public License version 2 as published by the
+// Free Software Foundation (http://www.gnu.org).   They remain the
+// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+// See LICENSE.TXT in the distribution for a copy of this license.
+//
+// THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+// OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+// PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+// LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+// OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
-//           *** Charybdis Enterprises, Inc. Company Confidential ***
-//
-//  This file and all associated files are the company proprietary property
-//        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
-//
-// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+//                        http://www.mythos-engine.org/
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//
+// Created by Chuck Walbourn
 //
 // GState.cpp
 //
@@ -40,7 +46,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #define WIN32_LEAN_AND_MEAN
@@ -105,7 +111,7 @@ GameState::GameState (MaxDevices *d):
                 bmi->bmiColors[i].rgbBlue   = t->hw_pal.p[i].b;
                 bmi->bmiColors[i].rgbGreen  = t->hw_pal.p[i].g;
                 bmi->bmiColors[i].rgbRed    = t->hw_pal.p[i].r;
-                bmi->bmiColors[i].rgbReserved = 0;                
+                bmi->bmiColors[i].rgbReserved = 0;
             }
             gvp = new VngoVportDB8(MAP_XSIZE,MAP_YSIZE,gmap,NULL,mypal,0);
         }
@@ -189,7 +195,7 @@ BOOL GameState::PumpWindows ()
     Devs->wm_clear();
     while (PeekMessage (&msg, NULL, 0, 0, PM_NOREMOVE))
     {
-    	if (GetMessage (&msg, 0, 0, 0) == 0)
+        if (GetMessage (&msg, 0, 0, 0) == 0)
             return FALSE;
 
         TranslateMessage (&msg);
@@ -210,16 +216,16 @@ void GameState::ProcessEvents()
 
     if (single_events.check(SELECT_3X6))
         gberg_select_font("3x6");
-    
+
     if (single_events.check(SELECT_5X8))
         gberg_select_font("5x8");
-    
+
     if (single_events.check(SELECT_7X12))
         gberg_select_font("7x12");
-    
+
     if (single_events.check(SELECT_8X13))
         gberg_select_font("8x13");
-    
+
     if (single_events.check(SELECT_9X15))
         gberg_select_font("9x15");
 
@@ -267,7 +273,7 @@ void GameState::Render()
 
             gberg_color(gvp->vbuff.pal->get_index(c1),
                         gvp->vbuff.pal->get_index(c2));
-            
+
             //ÄÄÄÄ Do all font test.
             c=0;
             for(x=0; x < MAP_XSIZE-info.width-1; x+=info.width+1)

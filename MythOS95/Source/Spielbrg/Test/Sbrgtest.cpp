@@ -2,7 +2,7 @@
 //                                                      _o######ooooooo-_
 //     Spielberg -- Animation player library          o#####o_o#####~~~~~~
 //                                                   ################o__o
-//       Microsoft Windows 95/NT Version           _o###########~~~~~###~
+//      Microsoft Windows 95/98/NT Version        _o###########~~~~~###~
 //                                               o##############
 //                                            _o###############~
 //                                          _o#########~ooo~##~
@@ -21,21 +21,25 @@
 //          o##########~~~~    ~~~##########       ~~~~#############o
 //         #####~~~~~~                ~~~
 //
-//           Copyright (c) 1996-1998 by Charybdis Enterprises, Inc.
-//                           All Rights Reserved.
+//  Copyright (c) 1996-1999 by Dan Higdon, Tim Little, and Chuck Walbourn
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
-//           *** Charybdis Enterprises, Inc. Company Confidential ***
+// This file and all associated files are subject to the terms of the
+// GNU Lesser General Public License version 2 as published by the
+// Free Software Foundation (http://www.gnu.org).   They remain the
+// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+// See LICENSE.TXT in the distribution for a copy of this license.
 //
-//  This file and all associated files are the company proprietary property
-//        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+// THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+// OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+// PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+// LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+// OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 //
-// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//
+//                        http://www.mythos-engine.org/
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
@@ -50,7 +54,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include <conio.h>
@@ -83,6 +87,7 @@ HWND            hWndClient;
 const char      szAppName[]     = "Spielberg Tester";
 
 //ÄÄÄ Tester data
+BOOL                Batch=FALSE;
 SpielbergPlayer     *Player=0;
 LPDIRECTDRAW        DD=0;
 LPDIRECTDRAWSURFACE DDSurf=0;
@@ -121,16 +126,27 @@ int APIENTRY WinMain (HINSTANCE hInstance,
         }
         else
         {
-        	DD->SetCooperativeLevel(hWndClient, (strstr(lpCmdLine,"-nomode")
+                DD->SetCooperativeLevel(hWndClient, (strstr(lpCmdLine,"-nomode")
                                                  ? DDSCL_NORMAL
                                                  : (DDSCL_EXCLUSIVE
                                                     | DDSCL_FULLSCREEN
                                                     | DDSCL_ALLOWMODEX)));
 
             if (strstr(lpCmdLine,"-nomode"))
+            {
                 hr = DD_OK;
+            }
             else
-                hr = DD->SetDisplayMode(640,480,16);
+            {
+                if (strstr(lpCmdLine,"-800x600"))
+                    hr = DD->SetDisplayMode(800,600,16);
+                else if (strstr(lpCmdLine,"-320x240"))
+                    hr = DD->SetDisplayMode(320,240,16);
+                else if (strstr(lpCmdLine,"-320x200"))
+                    hr = DD->SetDisplayMode(320,200,16);
+                else
+                    hr = DD->SetDisplayMode(640,480,16);
+            }
 
             if (hr != DD_OK)
             {
@@ -141,15 +157,15 @@ int APIENTRY WinMain (HINSTANCE hInstance,
             }
             else
             {
-        	    DDSURFACEDESC ddsd;
+                    DDSURFACEDESC ddsd;
 
                 memset(&ddsd,0,sizeof(ddsd));
 
-        	    ddsd.dwSize = sizeof(ddsd);
-        	    ddsd.dwFlags = DDSD_CAPS;
-        	    ddsd.ddsCaps.dwCaps = DDSCAPS_PRIMARYSURFACE;
+                    ddsd.dwSize = sizeof(ddsd);
+                    ddsd.dwFlags = DDSD_CAPS;
+                    ddsd.ddsCaps.dwCaps = DDSCAPS_PRIMARYSURFACE;
 
-        	    hr = DD->CreateSurface(&ddsd, &DDSurf, NULL);
+                    hr = DD->CreateSurface(&ddsd, &DDSurf, NULL);
                 if (hr != DD_OK)
                 {
                     DD->RestoreDisplayMode();
@@ -159,6 +175,56 @@ int APIENTRY WinMain (HINSTANCE hInstance,
                                szAppName,MB_OK | MB_ICONEXCLAMATION);
                 }
             }
+        }
+    }
+
+    if (strstr(lpCmdLine,"-file"))
+    {
+        Batch=TRUE;
+
+        char *s = strstr(lpCmdLine,"-file");
+        for (;*s != ' ' && *s != '\0'; s++);
+        if (*s == '\0' || *(++s) == '\0')
+        {
+            MessageBox(hWndClient,"Expected a filename after -file",
+                                  szAppName,MB_OK | MB_ICONEXCLAMATION);
+            ExitProcess(1);
+        }
+
+        if (DD)
+            Player = new SpielbergAMStreamPlayer(DD,DDSurf);
+        else
+            Player = new SpielbergAMPlayer(hWndClient);
+
+        if (!Player)
+        {
+            MessageBox(hWndClient,"Out of memory!",
+                        szAppName,MB_OK | MB_ICONEXCLAMATION);
+            ExitProcess(1);
+        }
+
+        char buff[256];
+        memset(buff,0,sizeof(buff));
+        for(char *d=buff; *s != ' ' && *s != '\0'; *(d++) = *(s++));
+
+        sberg_err_codes err = Player->open(buff, SBERG_CTRL_FULLSCREEN);
+        if (err)
+        {
+            char buff[128];
+            strcat(str_error(buff,err)," - '-file' open");
+            MessageBox(hWndClient,buff,
+                        szAppName,MB_OK | MB_ICONEXCLAMATION);
+            ExitProcess(1);
+        }
+
+        err = Player->play();
+        if (err)
+        {
+            char buff[128];
+            strcat(str_error(buff,err)," - '-file' play");
+            MessageBox(hWndClient,buff,
+                        szAppName,MB_OK | MB_ICONEXCLAMATION);
+            ExitProcess(1);
         }
     }
 
@@ -205,6 +271,9 @@ BOOL PumpWindows()
     if (Player)
     {
         Player->display();
+
+        if (Batch && !(Player->get_flags() & SBERG_PLAYER_PLAYING))
+            return FALSE;
     }
 
     if (DDSurf)

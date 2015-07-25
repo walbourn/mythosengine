@@ -9,25 +9,31 @@
 #
 #                          Across the event horizon...
 #
-#                         Microsoft Windows '95 Version
+#                       Microsoft Windows 95/98/NT Version
 #
-#           Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.
-#                            All Rights Reserved.
+#  Copyright (c) 1994-1999 by Dan Higdon, Tim Little, and Chuck Walbourn
+#
+#ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+#
+# This file and all associated files are subject to the terms of the
+# GNU Lesser General Public License version 2 as published by the
+# Free Software Foundation (http://www.gnu.org).   They remain the
+# property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+# See LICENSE.TXT in the distribution for a copy of this license.
+#
+# THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+# OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+# PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+# LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+# OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 #
 #ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 #
-#           *** Charybdis Enterprises, Inc. Company Confidential ***
-#
-#  This file and all associated files are the company proprietary property
-#        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
-#
-# Charybdis Enterprises, Inc. makes no warranties, express or implied, as
-# to the correctness of this code or any derivative works which incorporate
-# it.  Charybdis Enterprises, Inc. provides the code on an "as-is" basis
-# and explicitly disclaims any liability, including consequential and
-# incidental damages for errors, omissions, and other problems in the code.
+#                        http://www.mythos-engine.org/
 #
 #ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+#
+# Created by Dan Higdon
 #
 # makefile
 #

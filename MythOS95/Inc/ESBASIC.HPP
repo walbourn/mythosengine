@@ -8,23 +8,27 @@
 //ששששש²±²ששששששש²±²שששש²±²ש²±²שששש²±²ש²±²שששש²±²ש²±²שששששששש²±²שששש²±²שששששש
 //שששש²²²²²²²²²²ש²²²²²²²²ששש²²²²²²²²שש²²²שששש²²²ש²²²²²²²²²²ש²²²שששש²²²ששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//ששששששששששששששששששש Microsoft Windows 95/NT Version ששששששששששששששששששששששש
+//ששששששששששששששששש Microsoft Windows 95/98/NT Version שששששששששששששששששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//שששששששששששCopyrightש(c)ש1994-1998שbyשCharybdisשEnterprises,שInc.שששששששששש
-//ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
+//שששCopyright (c) 1994-1999 by Dan Higdon, Tim Little, and Chuck Walbournששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
 //
-//           *** Charybdis Enterprises, Inc. Company Confidential ***
+// This file and all associated files are subject to the terms of the
+// GNU Lesser General Public License version 2 as published by the
+// Free Software Foundation (http://www.gnu.org).   They remain the
+// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+// See LICENSE.TXT in the distribution for a copy of this license.
 //
-//  This file and all associated files are the company proprietary property
-//        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+// THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+// OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+// PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+// LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+// OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 //
-// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+//ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
+//
+//                        http://www.mythos-engine.org/
 //
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
 //
@@ -37,6 +41,8 @@
 // EschPointDraw is a single unlit colored point in 3-space.
 //
 // EschLineDraw is a single unlit colored line in 3-space.
+//
+// EschPlaneDraw is a colored and optionally textured plane in 3-space.
 //
 // EschSprite is a 2D bitmap always facing the viewer.
 //
@@ -88,7 +94,7 @@ public:
         EschDrawable(ESCH_DRWT_POINTDRAW),
         pos(ix,iy,iz), color(c) {}
 
-    EschPointDraw(const EschPoint *p, dword c, ulong l=0) :
+    EschPointDraw(const EschPoint *p, dword c) :
         EschDrawable(ESCH_DRWT_POINTDRAW),
         pos(*p), color(c) {}
 
@@ -139,7 +145,7 @@ public:
         EschDrawable(ESCH_DRWT_LINEDRAW),
         pos1(ix1,iy1,iz1), pos2(ix2,iy2,iz2), color(c) {}
 
-    EschLineDraw(const EschPoint *p1, const EschPoint *p2, dword c, ulong l=0) :
+    EschLineDraw(const EschPoint *p1, const EschPoint *p2, dword c) :
         EschDrawable(ESCH_DRWT_LINEDRAW),
         pos1(*p1), pos2(*p2), color(c) {}
 
@@ -166,6 +172,106 @@ public:
     }
 
     void set_color(dword c) { color = c; }
+};
+
+
+//ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ¿
+// EschPlaneDraw - Colored plane in 3-space.                                ³
+//ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִÙ
+class EschPlaneDraw : public EschDrawable
+{
+protected:
+    long        alpha_level;                // Alpha-level
+
+public:
+    //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ¿
+    // Public data members                                                  ³
+    //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִÙ
+    EschPlane   plane;                      // Plane definition
+    dword       color;                      // Color
+    EschTexture *txt;                       // Texture
+    EschVector  uvec;                       // Mapping parameters
+    EschVector  vvec;
+    EschPoint   uvpos;
+    float       ustep;
+    float       vstep;
+
+    //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ¿
+    // Constructor/Destructors                                              ³
+    //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִÙ
+    EschPlaneDraw();
+    EschPlaneDraw(float ia, float ib, float ic, float id, dword c);
+    EschPlaneDraw(float ia, float ib, float ic,
+                  float ix, float iy, float iz, dword c);
+    EschPlaneDraw(const EschVector &in, float id, dword c);
+    EschPlaneDraw(const EschPlane *pl, dword c);
+    EschPlaneDraw(const EschVector &v1, const EschVector &v2,
+                  const EschPoint &pos, dword c, float us=100, float vs=100);
+
+    virtual ~EschPlaneDraw();
+
+    //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ¿
+    // Operations                                                           ³
+    //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִÙ
+    const EschPlaneDraw &operator = (const EschPlaneDraw &s);
+
+    virtual void draw();
+
+    virtual float ray(const EschPoint *pt, const EschVector *v, int coarse=0) const;
+    virtual int hit(const EschPoint *pt, const float r, int coarse=0) const;
+
+    virtual void animate();
+    virtual void release();
+
+    //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ¿
+    // Utility routines.                                                    ³
+    //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִÙ
+    void set_plane(const EschPlane &pln);
+    void set_plane(float ia, float ib, float ic, float id);
+    void set_plane(float ia, float ib, float ic,
+                   float ix, float iy, float iz);
+    void set_plane(const EschVector &v1, const EschVector &v2, const EschPoint &pos);
+
+    void set_mapping(const EschVector &_uvec,
+                     const EschVector &_vvec,
+                     const EschPoint &_uvpos,
+                     float us, float vs);
+
+    void set_uvstep(float us, float vs) { ustep = us; vstep = vs; }
+
+    void rotatex(const float d)
+    {
+        plane.normal.rotatex(d);
+        uvec.rotatex(d);
+        vvec.rotatex(d);
+    }
+    void rotatey(const float d)
+    {
+        plane.normal.rotatey(d);
+        uvec.rotatey(d);
+        vvec.rotatey(d);
+    }
+    void rotatez(const float d)
+    {
+        plane.normal.rotatez(d);
+        uvec.rotatez(d);
+        vvec.rotatez(d);
+    }
+
+    void normalize()
+    {
+
+        plane.normalize();
+        uvec.normalize();
+        vvec.normalize();
+    }
+
+    void set_color(dword c) { color = c; }
+
+    void set_alpha(long alpha) { alpha_level = alpha; }
+    long get_alpha() const { return alpha_level; }
+
+    void set_texture(EschTexture *t);
 };
 
 

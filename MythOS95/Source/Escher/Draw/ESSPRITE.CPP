@@ -8,23 +8,27 @@
 //ùùùùù²±²ùùùùùùù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùùùùùù²±²ùùùù²±²ùùùùùù
 //ùùùù²²²²²²²²²²ù²²²²²²²²ùùù²²²²²²²²ùù²²²ùùùù²²²ù²²²²²²²²²²ù²²²ùùùù²²²ùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùùùùùùùùù Microsoft Windows 95/NT Version ùùùùùùùùùùùùùùùùùùùùùùù
+//ùùùùùùùùùùùùùùùùù Microsoft Windows 95/98/NT Version ùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùCopyrightù(c)ù1994-1998ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
-//ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
+//ùùùCopyright (c) 1994-1999 by Dan Higdon, Tim Little, and Chuck Walbournùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
-//           *** Charybdis Enterprises, Inc. Company Confidential ***
+// This file and all associated files are subject to the terms of the
+// GNU Lesser General Public License version 2 as published by the
+// Free Software Foundation (http://www.gnu.org).   They remain the
+// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+// See LICENSE.TXT in the distribution for a copy of this license.
 //
-//  This file and all associated files are the company proprietary property
-//        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+// THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+// OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+// PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+// LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+// OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 //
-// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//
+//                        http://www.mythos-engine.org/
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
@@ -125,14 +129,31 @@ void EschSprite::draw()
     dword           cflags;
     float           yon, hither;
     float           tx, ty;
-    float           ti, tj;
+    float           t1, t2;
     float           c, s;
     float           wh, hh, xc, yc, xs, ys;
     float           r;
     EschFrameRef    world(0);
 
+    static EschFace faces[2] = { EschFace( 0,
+                                           0, 1, 2,
+                                           1,
+                                           float(0.01), float(0.99), float(0.99),
+                                           float(0.99), float(0.99), float(0.01),
+                                           0, 0, 0, 0 ),
+                                 EschFace( 0,
+                                           0, 2, 3,
+                                           1,
+                                           float(0.01), float(0.99), float(0.01),
+                                           float(0.99), float(0.01), float(0.01),
+                                           0, 0, 0, 0 ) };
+
     if (!txt)
         return;
+
+    assertMyth("EschSprite::draw needs valid scale",
+               scale > 0);
+
 
     _width = width * scale;
     _height = height * scale;
@@ -158,7 +179,7 @@ void EschSprite::draw()
     //ÄÄÄ Transform into copy of point
     if (flags & ESCH_SPRITE_INFINITE)
     {
-        // If no depth, only account for rotation
+        //ÄÄÄ If no depth, only account for rotation
 
         ((EschVector*)&pos)->transform(&cam->eye.iorient,
                                        (EschVector*)&EschTempPoint);
@@ -192,8 +213,8 @@ void EschSprite::draw()
     }
     else
     {
-        // Otherwise, perform standard transform and clip of sprite
-        // position
+        //ÄÄÄ Otherwise, perform standard transform and clip of sprite
+        //ÄÄÄ position
 
         pos.transform(&cam->eye.iorient,&EschTempPoint);
 
@@ -256,17 +277,16 @@ void EschSprite::draw()
     assertMyth("EschSprite::draw failed to allocate needed workspace",
                ec.vpoints != 0);
 
-    ec.faces = (EschFace*)ivory_arena_alloc(EschSysInstance->wspace,
-                                            sizeof(EschFace) * 2);
-    assertMyth("EschSprite::draw failed to allocate needed workspace",
-               ec.faces != 0);
+    ec.faces = faces;
 
     ec.fflags = 0;
     ec.txts = (EschTexture**) &txt;
     ec.push();
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Setup Rectangle
-//ÄÄÄ Create 4 (transformed) verticies (must rotate about Z for FoR)
+//ÄÄÄ Create 4 (transformed) verticies in view space based on transformed
+//ÄÄÄ center point, scaled width/height, camera transform, and rotation
+//ÄÄÄ value.
 //
 // 3-----2
 // | A   |
@@ -274,6 +294,84 @@ void EschSprite::draw()
 // |   B |
 // 0-----1
 
+#if 1
+    //ÄÄÄ Determine rotation
+    EschVector top(0,1,0);
+    top.transform(&cam->eye.iorient);
+    if (rotation != 0.0f)
+        top.rotatez(rotation);
+
+    if (top.i > -0.0001f && top.i < 0.0001f
+        && top.j > -0.0001f && top.j < 0.0001f)
+    {
+        top.i = 0;
+        top.j = (top.k < 0) ? -1.0f : 1.0f;
+        top.k = 0;
+    }
+    else
+    {
+        top.k=0;
+        top.normalize();
+    }
+
+    // Get cos with DOT vs. 0, 1, 0
+    c = top.j;
+    s = esch_sin((top.i > 0) ? -esch_acos(c) : esch_acos(c));
+
+    //ÄÄÄ Apply rotation
+    wh = _width / 2;
+    hh = _height / 2;
+
+    xc = wh*c;
+    yc = hh*c;
+
+    xs = wh*s;
+    ys = hh*s;
+
+    t1 = EschTempPoint.x - xc + ys;
+    t2 = EschTempPoint.y - xs - yc;
+    if (!(ctrlfl & ESCH_CDF_CLIP))
+    {
+        if ( (t1 < -tx) || (t1 > tx) || (t2 < -ty) || (t2 > ty))
+            ctrlfl |= ESCH_CDF_CLIP;
+    }
+    ((EschPoint*)(&ec.vpoints[0]))->x = t1;
+    ((EschPoint*)(&ec.vpoints[0]))->y = t2;
+    ((EschPoint*)(&ec.vpoints[0]))->z = EschTempPoint.z;
+
+    t1 = EschTempPoint.x + xc + ys;
+    t2 = EschTempPoint.y + xs - yc;
+    if (!(ctrlfl & ESCH_CDF_CLIP))
+    {
+        if ( (t1 < -tx) || (t1 > tx) || (t2 < -ty) || (t2 > ty))
+            ctrlfl |= ESCH_CDF_CLIP;
+    }
+    ((EschPoint*)(&ec.vpoints[1]))->x = t1;
+    ((EschPoint*)(&ec.vpoints[1]))->y = t2;
+    ((EschPoint*)(&ec.vpoints[1]))->z = EschTempPoint.z;
+
+    t1 = EschTempPoint.x + xc - ys;
+    t2 = EschTempPoint.y + xs + yc;
+    if (!(ctrlfl & ESCH_CDF_CLIP))
+    {
+        if ( (t1 < -tx) || (t1 > tx) || (t2 < -ty) || (t2 > ty))
+            ctrlfl |= ESCH_CDF_CLIP;
+    }
+    ((EschPoint*)(&ec.vpoints[2]))->x = t1;
+    ((EschPoint*)(&ec.vpoints[2]))->y = t2;
+    ((EschPoint*)(&ec.vpoints[2]))->z = EschTempPoint.z;
+
+    t1 = EschTempPoint.x - xc - ys;
+    t2 = EschTempPoint.y - xs + yc;
+    if (!(ctrlfl & ESCH_CDF_CLIP))
+    {
+        if ( (t1 < -tx) || (t1 > tx) || (t2 < -ty) || (t2 > ty))
+            ctrlfl |= ESCH_CDF_CLIP;
+    }
+    ((EschPoint*)(&ec.vpoints[3]))->x = t1;
+    ((EschPoint*)(&ec.vpoints[3]))->y = t2;
+    ((EschPoint*)(&ec.vpoints[3]))->z = EschTempPoint.z;
+#else
     ti = cam->top.i;
     tj = cam->top.j;
 
@@ -353,45 +451,24 @@ void EschSprite::draw()
     ((EschPoint*)(&ec.vpoints[3]))->x = EschTempPoint.x + temp.x;
     ((EschPoint*)(&ec.vpoints[3]))->y = EschTempPoint.y + temp.y;
     ((EschPoint*)(&ec.vpoints[3]))->z = EschTempPoint.z;
+#endif
 
 //ÄÄÄ Create 2 faces
-    ec.faces[0].flags = (limits & (ESCH_FACE_WIRE
-                                   | ESCH_FACE_SOLID
-                                   | ESCH_FACE_FLAT
-                                   | ESCH_FACE_TEXTURED))
-                                   | ESCH_FACE_ABLINE
-                                   | ESCH_FACE_BCLINE
-                                   | ESCH_FACE_CALINE;
+    faces[0].flags = (limits & (ESCH_FACE_WIRE
+                                | ESCH_FACE_SOLID
+                                | ESCH_FACE_FLAT
+                                | ESCH_FACE_TEXTURED))
+                                | ESCH_FACE_ABLINE
+                                | ESCH_FACE_BCLINE
+                                | ESCH_FACE_CALINE;
 
     if ((limits & ESCH_FACE_ALPHA) && alpha_level < 255)
     {
-        ec.faces[0].flags |= ESCH_FACE_ALPHA;
-        ec.faces[0].set_alpha(alpha_level);
-        ec.faces[1].set_alpha(alpha_level);
+        faces[0].flags |= ESCH_FACE_ALPHA;
+        faces[0].set_alpha(alpha_level);
+        faces[1].set_alpha(alpha_level);
     }
-    ec.faces[1].flags = ec.faces[0].flags;
-
-    ec.faces[0].a     = 0;
-    ec.faces[0].u[0]  = float(0.01);
-    ec.faces[0].v[0]  = float(0.99);
-    ec.faces[0].b     = 1;
-    ec.faces[0].u[1]  = float(0.99);
-    ec.faces[0].v[1]  = float(0.99);
-    ec.faces[0].c     = 2;
-    ec.faces[0].u[2]  = float(0.99);
-    ec.faces[0].v[2]  = float(0.01);
-    ec.faces[0].txt   = 1;
-
-    ec.faces[1].a     = 0;
-    ec.faces[1].u[0]  = float(0.01);
-    ec.faces[1].v[0]  = float(0.99);
-    ec.faces[1].b     = 2;
-    ec.faces[1].u[1]  = float(0.99);
-    ec.faces[1].v[1]  = float(0.01);
-    ec.faces[1].c     = 3;
-    ec.faces[1].u[2]  = float(0.01);
-    ec.faces[1].v[2]  = float(0.01);
-    ec.faces[1].txt   = 1;
+    faces[1].flags = faces[0].flags;
 
 //ÄÄÄ Handle shading
     ec.vpoints[0].clr = 0;

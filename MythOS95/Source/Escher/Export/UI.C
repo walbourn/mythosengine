@@ -8,21 +8,27 @@
 //ששששש²±²ששששששש²±²שששש²±²ש²±²שששש²±²ש²±²שששש²±²ש²±²שששששששש²±²שששש²±²שששששש
 //שששש²²²²²²²²²²ש²²²²²²²²ששש²²²²²²²²שש²²²שששש²²²ש²²²²²²²²²²ש²²²שששש²²²ששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//שששששששששששCopyrightש(c)ש1994-1998שbyשCharybdisשEnterprises,שInc.שששששששששש
-//ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
+//ששששששששששששששששש Microsoft Windows 95/98/NT Version שששששששששששששששששששששש
+//ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
+//שששCopyright (c) 1994-1999 by Dan Higdon, Tim Little, and Chuck Walbournששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
 //
-//           *** Charybdis Enterprises, Inc. Company Confidential ***
+// This file and all associated files are subject to the terms of the
+// GNU Lesser General Public License version 2 as published by the
+// Free Software Foundation (http://www.gnu.org).   They remain the
+// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+// See LICENSE.TXT in the distribution for a copy of this license.
 //
-//  This file and all associated files are the company proprietary property
-//        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+// THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+// OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+// PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+// LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+// OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 //
-// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+//ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
+//
+//                        http://www.mythos-engine.org/
 //
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
 //
@@ -61,7 +67,7 @@
 //
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
-#define VERSION "2.03"
+#define VERSION "2.04"
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
@@ -129,6 +135,7 @@ int material_mode=1;
 int hierarchy_mode=1;
 int orientation_mode=1;
 int format_mode=1;
+int vertex_mode=1;
 int log_mode=0;
 
 dword  object_flags=0;
@@ -166,6 +173,9 @@ static RadSub Escher_rad[] =
     FMT_FLT, feel_radio, &format_mode, 1,
     FMT_FIX, feel_radio, &format_mode, 2,
 
+    VTX_NRML, feel_radio, &vertex_mode, 1,
+    VTX_MRGE, feel_radio, &vertex_mode, 2,
+
     -1, FNULL, NULL, -1
 };
 
@@ -192,7 +202,7 @@ void about(void)
        "[           Escher Data Exporter|"
        "             for 3D Studio R4|"
        "|"
-       " (C) 1994-8 by Charybdis Enterprises, Inc.|"
+       "     (C) 1994-1999 by DH, TL, and CLW     |"
        "        Version " VERSION "   " __DATE__ "]"
        "[ OK ]", x);
 }

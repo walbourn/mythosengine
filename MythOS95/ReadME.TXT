@@ -8,50 +8,38 @@
                            /  /            \  \
                           /__/              \__\
  
-             Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.
-                            All Rights Reserved.
+    Copyright (c) 1994-1999 by Dan Higdon, Tim Little, and Chuck Walbourn
 
-                           Windows 95/NT Version
-
- ---------------------------------------------------------------------------
- 
-            *** Charybdis Enterprises, Inc. Company Confidential ***
- 
-   This file and all associated files are the company proprietary property
-         of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
- 
-  CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-  TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-  IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-  AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-  INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+                           Windows 95/98/NT Version
 
  ---------------------------------------------------------------------------
 
-                           Charybdis Enterprises, Inc.
-                              9430 Research Blvd.
-                             Echelon IV, Suite 302
-                               Austin, TX  78759
-                                (512) 343-7224
-                              FAX: (512) 343-6310
+  This file and all associated files are subject to the terms of the
+  GNU Lesser General Public License version 2 as published by the
+  Free Software Foundation (http://www.gnu.org).   They remain the
+  property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+  See LICENSE.TXT in the distribution for a copy of this license.
 
-              Direct E-mail inquiries to: mythos_sales@charybdis.com
-
-                          http://www.charybdis.com/
+  THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+  OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+  PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+  LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+  OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 
  ---------------------------------------------------------------------------
 
-                         *** Version 1.72 Release ***
+                         http://www.mythos-engine.org/
 
-                               March 20, 1998
+ ---------------------------------------------------------------------------
 
- This is the eight full release of the MythOS collection.  Usage of this 
- library is subject to your license agreement.  All materials herein 
- should be treated as confidential information.
+                         *** Version 1.8 Release ***
+
+			       July 8, 1999
 
  All documentation for MythOS is provided in Windows Help files.  If you 
  have need of hardcopy documentation, you can use the print option in the 
- Windows 95 help viewer.
+ Windows help viewer.  An HTML version of the help file should be available
+ from the MythOS Home Page (http://www.mythos-engine.org/).
 
  
  
@@ -61,14 +49,29 @@
  Select Start/Run... and select 'setup.exe'.  Follow the instructions
  given in the setup program.
 
- To build some of the code, you will need some supporting Microsoft
- SDKs which have been provided in their web-distributed form on the CD.
+ To build the code, you will need some supporting Microsoft SDKs in
+ addition to the Visual C++ v6 compiler and MASM 6.14 (a patch from
+ MASM 6.11 is provided in ML614.EXE from Microsoft's FTP site
+ ftp://ftp.microsoft.com/Softlib/MSLFILES/ML614.EXE):
 
-    \Dx5            DirectX V5 SDK
-    \DXMedia51      DirectX Media V5.1 SDK
-    \Platform SDK   Microsoft January 1998 Platform SDK
+    DirectX V6.1 SDK
 
- To install these, read the ReadME.TXT file in the subdirectory.
+    DirectX Media V6 SDK
+
+    Microsoft September 1998 Platform SDK
+
+ -or-
+
+    Microsoft June 1999 Platform SDK (includes DX V6.1, DXM V6)
+
+ Be sure that your INCLUDE and LIB environment variables put the DX and DXM
+ SDK first (if present), the Platform SDK next, and the Visual C++
+ directories last.  If you are using the libraries from within the MSDEV
+ environment, you will need to edit the variables under the Tools/Options...
+ menu.
+
+ Note: The Platform SDK can be downloaded from Microsoft's site at
+       http://msdn.microsoft.com/
 
 
 
@@ -96,63 +99,67 @@
  |
  +--Source
     +--Bach                         Bach (Sound library)
-    |  +--Inc (source only)
+    |  +--Inc
     |  |
-    |  +--Obj (source only)
+    |  +--Obj
     |  |
     |  +--Test
     |     +--Obj
     |   
     +--Bozo                         Bozo (Task switcher)
-    |  +--Inc (source only)
+    |  +--Inc
     |  |
-    |  +--Obj (source only)
+    |  +--Obj
     |  |
     |  +--Test
     |     +--Obj
     |   
     +--Chronos                      Chronos (Timer services)
-    |  +--Inc (source only)
+    |  +--Inc
     |  |
-    |  +--Obj (source only)
+    |  +--Obj
     |  |
     |  +--Test
     |     +--Obj
     |
     +--Escher                       Escher (3D Graphics System)
-    |  +--Inc (source only)
+    |  +--Inc
     |  |
-    |  +--Build (source only)
+    |  +--Build
     |  |
-    |  +--Draw (source only)
+    |  +--Draw
     |  |
-    |  +--Element (source only)
+    |  +--Element
     |  |
-    |  +--Light (source only)
+    |  +--Light
     |  |
-    |  +--Math (source only)
+    |  +--Math
     |  |
-    |  +--Motion (source only)
+    |  +--Motion
     |  |
-    |  +--Particle (source only)
+    |  +--Particle
     |  |
-    |  +--Texture (source only)
+    |  +--Partn
     |  |
-    |  +--Obj (source only)
+    |  +--Terrain
     |  |
-    |  +--Edit
+    |  +--Texture
     |  |
-    |  +--Tool
+    |  +--Obj
+    |  |
+    |  +--Edit                             Terrain Editor
+    |  |
+    |  +--Tool                             Object Viewer Tool
     |  |
     |  +--Test
     |  |  +--Data
     |  |  |
     |  |  +--Obj
     |  | 
-    |  +--Util
+    |  +--Util                             Directory, Converters, and Texture Librarian
     |  |  +--Obj
     |  | 
-    |  +--Export
+    |  +--Export                           3D Studio for DOS R4 Exporter
     |     +--Inc
     |     |
     |     +--Lib
@@ -175,17 +182,17 @@
     |     +--Obj
     |
     +--Felix                        Felix (Fixed-point support)
-    |  +--Inc (source only)
+    |  +--Inc
     |  |
-    |  +--Obj (source only)
+    |  +--Obj
     |  |
     |  +--Test
     |     +--Obj
     |
     +--Gutenbrg                     Gutenberg (Font and string support)
-    |  +--Inc (source only)
+    |  +--Inc 
     |  |
-    |  +--Obj (source only)
+    |  +--Obj
     |  |
     |  +--Test
     |  |  +--Obj
@@ -193,18 +200,21 @@
     |  +--Util
     |     +--Obj
     |
+    +--Help                         Help Master and Project Files
+    |
+    |
     +--Ivory                        Ivory (Memory-manager)
-    |  +--Inc (source only)
+    |  +--Inc
     |  |
-    |  +--Obj (source only)
+    |  +--Obj
     |  |
     |  +--Test
     |     +--Obj
     |
     +--Max                          Max (Event-system)
-    |  +--Inc (source only)
+    |  +--Inc
     |  |
-    |  +--Obj (source only)
+    |  +--Obj
     |  |
     |  +--Test
     |  |  +--Obj
@@ -213,14 +223,19 @@
     |     +--Obj
     |
     +--Newton                       Newton (Physics system)
-    |  +--Inc (source only)
+    |  +--Inc
     |  |
-    |  +--Obj (source only)
+    |  +--Obj
     |  |
     |  +--Test
     |     +--Obj
     |
-    +--SimGine                      SimGine Framework (Source)
+    +--Pane                         Pane (GUI Helper Library)
+    |  +--Inc
+    |  |
+    |  +--Obj
+    |
+    +--SimGine                      SimGine Framework
     |  +--Inc
     |  |
     |  +--Obj
@@ -231,14 +246,14 @@
     |     +--Obj
     |
     +--Spielberg                    Spielberg (Animation/movie player)
-    |  +--Inc (source only)
+    |  +--Inc
     |  |
-    |  +--Obj (source only)
+    |  +--Obj
     |  |
     |  +--Test
     |     +--Obj
     |
-    +--System                       MythOS System (Source)
+    +--System                       MythOS System
     |  +--Inc
     |  |
     |  +--Obj
@@ -247,25 +262,25 @@
     |     +--Obj
     |
     +--Turner                       Turner (Network system)
-    |  +--Inc (source only)
+    |  +--Inc
     |  |
-    |  +--Obj (source only)
+    |  +--Obj
     |
-    +--Util                         MythOS General Utilities (Source)
+    +--Util                         MythOS General Utilities
     |  +--Obj
     |
     +--VanGogh                      Van Gogh (2D Graphics System)
-    |  +--Inc (source only)
+    |  +--Inc
     |  |
-    |  +--8BPP (source only)
+    |  +--8BPP 
     |  |
-    |  +--16BPP (source only)
+    |  +--16BPP
     |  |
-    |  +--Boards (source only)
+    |  +--Boards
     |  |
-    |  +--Screen (source only)
+    |  +--Screen
     |  |
-    |  +--Obj (source only)
+    |  +--Obj
     |  |
     |  +--PalTool
     |  |
@@ -273,17 +288,17 @@
     |     +--Obj
     |
     +--XFile                        XFile (File system)
-       +--Inc (source only)
+       +--Inc
        |
-       +--IFF (source only)
+       +--IFF
        |
-       +--INI (source only)
+       +--INI 
        |
-       +--IO (source only)
+       +--IO
        |
-       +--Bitmap (source only)
+       +--Bitmap
        |
-       +--Obj (source only)
+       +--Obj
        |
        +--Test
        |  +--Obj
@@ -291,10 +306,8 @@
        +--Util
           +--Obj
 
-    If this is a source release, then each of the library subdirectories
-    will include the source code, an Inc, and an Obj directory.  A master
-    build.bat is also included in Source to build all libraries and release
-    them to the Lib and Inc directories.
+    A master build.bat is included build all libraries and release them
+    to the Lib and Inc directories.
 
     If you select a destination other than \MythOS95, you will need to
     set the environment variable MYTH95ROOT equal to the path of the
@@ -311,8 +324,7 @@
     README.TXT's are in each of the library component directories with
     current status and work notes.
 
-    This version of MythOS was built with Microsoft Visual C++ v5.0.  The
-    MFC-based tools will therefore not compile with v2.x MSVC.
+    This version of MythOS was built with Microsoft Visual C++ v6.0.
 
     The .libs have been built with the three run-time library choices for
     Visual C++.  The multi-threaded libraries were built with /MT, the
@@ -325,13 +337,17 @@
           Autodesk IPAS4 Toolkit, since it is a 3D Studio Plug-In module.
           It also uses the Autodesk Animation Support Libraries R2.0.
 
-    MFC Version 5.x support DLLs are installed as part of the MythOS
+    MFC Version 6.x support DLLs are installed as part of the MythOS
     installation procedure since they are required by the MFC-based tools.
 
     Several of the utilities require a PD utility, Flex, which must be 
     located in C:\FLEX in order to build the executable.  Unzip the FLEX.ZIP
     contained in the root directory of the installed tree structure into
     C:\FLEX (must be this directory!) and put C:\FLEX in your path.
+
+    A 3D Studio MAX exporter was planned, but has not been completed.
+    If time permits, Chuck will try to complete at least a basic
+    exporter for 3DS MAX.
 
       
     
@@ -359,6 +375,15 @@
 
 
  ---------------------------------------------------------------------------
+ VIEWING CODE
+
+    The commenting style uses extended IBM characters.  To properly view
+    them, set your editor to use the 'Terminal' font--most editors default
+    to Courier.
+
+
+
+ ---------------------------------------------------------------------------
  BUILDING CODE
 
     The majority of the code has been setup to build and run from the
@@ -367,28 +392,90 @@
     examples and testers include run batches which keep the current
     directory with the supporting data files.
 
+    The build environment makes use of a number of environment variables:
+    
+       DEBUG        YES for debug version, NO or not set for release version,
+                    or ASSERT for asserts only build.
+
+       THREAD       YES for multi-threaded run-time, DLL for multi-threaded DLL,
+                    or anything else for non multi-threaded run-time.
+
+       MSVC         If INCLUDE or LIB is not set, this is used to set the default
+                    directories where MSVC points to the Visual C library
+                    (set MSVC=D:\msdev\vc98 for example).
+
+       LINKMAP      If set to YES, then a link map file is generated.
+
+       MYTH95ROOT   Set to the root of the MythOS95 directory.
+
+    The build environment assumes that the PATH has already been updated for the
+    compiler tools.  The VCVARS32.BAT should work for this, although you might want
+    more direct control by writing your own batch or editing your AUTOEXEC.BAT.
+
     The MFC-based tools are setup to build release versions with the
     'mk.bat' but full control files have been included for use with
     Microsoft's Developer Studio.
+
+    To perform a build in all directories, change to the Source directory
+    and run the 'build' batch after setting the preferred environment
+    variables:
+
+    	'build release' will build and release all the libraries to the
+	Inc and Lib directories.
+
+	'build clean' will erase all library temporary files for a rebuild.
+
+	'build tools' will build and release all the utilities to the
+	Bin directory.  Libraries must exist before building tools.
+
+              Note: If you don't have the tools for building the
+	            Escher exporter, edit the Escher's mk.bat tools
+		    section.
+
+	'build tests' will build the testers.  Libraries and tools must
+	exist.
+
+	'build examples' will build the examples.  Libraries and tools
+	must exist.
+
+
+
+ ---------------------------------------------------------------------------
+ BUILDING HELP
+
+    The HLP file is constructed from RTF files in the Source\Help directory
+    along with RTF files in each libraries' source directory.  To rebuild
+    the help, run the 'make.bat' batch in the Source\Help directory after
+    editing it to point to the Help Compiler on your system.
 
 
 
  ---------------------------------------------------------------------------
  PROBLEMS/BUGS
 
-    If you have problems or find bugs working with MythOS, we would 
-    like to hear about them.  E-mail or FAX is the preferred method 
-    for reporting problems.  We are committed to doing quality work, 
-    so please let us know what you find.
+    This library is provided on an "as-is" basis and no supported is
+    provided.  Any future releases or bug-fixes will be posted to the
+    MythOS Home Page (http://www.mythos-engine.org/).
 
-    Bug reports should be sent to mythos_bugs@charybdis.com.  General
-    comments are welcome at mythos@charybdis.com.  There is a public
-    message board on our website which is open for comments and
-    discussions with other MythOS developers.  The URL is
-    http://www.charybdis.com/wwwboard/wwwboard-mythos.html.
+    Send comments and suggestions to mythos@mythos-engine.org.  Bug
+    reports should be sent to mythos_bugs@mythos-engine.org.
 
-    We will make future releases as the need arises and updates become 
-    available.
+
+
+ ---------------------------------------------------------------------------
+ FUTURE RELEASES
+
+    The MythOS 95 library set represents a technology base started in 1994
+    for use in Charybdis' first title.  We had plans for the development
+    of a new 2.0 version of the library to provide a major rewrite of the
+    graphics libraries (Van Gogh and Escher) to update for the shift
+    to 3D graphics consumer hardware from software-based rendering
+    on 486 class computers.  This version was to be called "MythOS 98".
+
+    We are not making any commitments for a future version, but there are
+    a number of plans which may or may not materialize.  Any such work
+    will take place on a part-time basis and would hopefully be released
+    using the same Open Source license.  The new version would be a major
+    rewrite and would not be compatable with MythOS 95.
 
 END OF DOCUMENT
-

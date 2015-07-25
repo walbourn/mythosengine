@@ -1,31 +1,35 @@
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
 //
-//                                /\    /\ 
-//                               /  \  /  \ 
-//                              /    \/    \ 
-//                             /  /\    /\  \ 
+//                                /\    /\
+//                               /  \  /  \
+//                              /    \/    \
+//                             /  /\    /\  \
 //                            /  /  \  /  Y T H O S
-//                           /  /    \/    \  \ 
-//                          /  /            \  \ 
-//                         /__/              \__\ 
+//                           /  /    \/    \  \
+//                          /  /            \  \
+//                         /__/              \__\
 //
-//                    Microsoft Windows 95/NT Version
+//                  Microsoft Windows 95/98/NT Version
 //
-//            Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.
-//                           All Rights Reserved.
+//  Copyright (c) 1994-1999 by Dan Higdon, Tim Little, and Chuck Walbourn
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
-//           *** Charybdis Enterprises, Inc. Company Confidential ***
+// This file and all associated files are subject to the terms of the
+// GNU Lesser General Public License version 2 as published by the
+// Free Software Foundation (http://www.gnu.org).   They remain the
+// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+// See LICENSE.TXT in the distribution for a copy of this license.
 //
-//  This file and all associated files are the company proprietary property
-//        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+// THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+// OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+// PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+// LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+// OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 //
-// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//
+//                        http://www.mythos-engine.org/
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
@@ -83,7 +87,7 @@ extern "C" int              yyleng;
 
 //ÄÄ Global data
 extern VngoPal              *Palette;
-extern EschLight            *Lights; 
+extern EschLight            *Lights;
 
 extern int                  CurrentToken;
 
@@ -95,7 +99,7 @@ extern int                  CurrentToken;
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 // create_light
-//            
+//
 //         create_light :- light '=' <name>
 //                         [ type={ambient | vector | point | atten | spot
 //                                 | fastpoint | fastatten | fastspot} ]
@@ -140,7 +144,7 @@ void create_light()
                 YY_esc_allowed=0;
                 match(YY_EQUAL);
                 YY_esc_allowed=1;
-                
+
                 if (CurrentToken != YY_STRING
                     || !xf_exist(yytext))
                     error("file needs valid filename");
@@ -263,7 +267,7 @@ void create_light()
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 // modify_light
-//            
+//
 //         modify_light :- light '=' <name> '{' <body> '}'
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -301,26 +305,26 @@ void modify_light()
 //         light_body :- intensity=<integer>;
 //                       | active={on | off | yes | no};
 //                       | darklight={on | off | yes | no};
-//                       
+//
 //                       (not valid for vector or ambient)
 //                       | position=<float>,<float>,<float>;
 //                       | translate=<float>,<float>,<float>;
-//                       
+//
 //                       (only valid for vector, spot, and fastspot)
 //                       | direction=<float>,<float>,<float>;
 //                       | rotatex=<float>;
 //                       | rotatey=<float>;
 //                       | rotatez=<float>;
-//                       
+//
 //                       (only valid for atten, spot, fastatten, or fastspot)
 //                       | attenuated={on | off | yes | no};
 //                       | inner=<float>;
 //                       | outer=<float>;
-//                       
+//
 //                       (only valid for spot or fastspot)
 //                       | hotspot=<float>;
 //                       | falloff=<float>;
-//                       
+//
 //                       | <empty>
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -437,7 +441,7 @@ STATIC void light_body(EschLight *lgt)
 
                         float z = (float)rexpr();
                         match(YY_SEMICOLON);
-                
+
                         switch (lgt->get_type())
                         {
                             case ESCH_LGTT_FPOINT:
@@ -482,7 +486,7 @@ STATIC void light_body(EschLight *lgt)
 
                         float z = (float)rexpr();
                         match(YY_SEMICOLON);
-            
+
                         switch (lgt->get_type())
                         {
                             case ESCH_LGTT_FPOINT:
@@ -524,7 +528,7 @@ STATIC void light_body(EschLight *lgt)
 
                         float k = (float)rexpr();
                         match(YY_SEMICOLON);
-                
+
                         switch (lgt->get_type())
                         {
                             case ESCH_LGTT_VECTOR:
@@ -561,7 +565,7 @@ STATIC void light_body(EschLight *lgt)
 
                         float d = (float)rexpr();
                         match(YY_SEMICOLON);
-                
+
                         switch (lgt->get_type())
                         {
                             case ESCH_LGTT_VECTOR:
@@ -598,7 +602,7 @@ STATIC void light_body(EschLight *lgt)
 
                         float d = (float)rexpr();
                         match(YY_SEMICOLON);
-                
+
                         switch (lgt->get_type())
                         {
                             case ESCH_LGTT_VECTOR:
@@ -635,7 +639,7 @@ STATIC void light_body(EschLight *lgt)
 
                         float d = (float)rexpr();
                         match(YY_SEMICOLON);
-                
+
                         switch (lgt->get_type())
                         {
                             case ESCH_LGTT_VECTOR:

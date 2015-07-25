@@ -27,18 +27,18 @@ LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 // TEXTINCLUDE
 //
 
-1 TEXTINCLUDE DISCARDABLE 
+1 TEXTINCLUDE DISCARDABLE
 BEGIN
     "resource.h\0"
 END
 
-2 TEXTINCLUDE DISCARDABLE 
+2 TEXTINCLUDE DISCARDABLE
 BEGIN
     "#include ""afxres.h""\r\n"
     "\0"
 END
 
-3 TEXTINCLUDE DISCARDABLE 
+3 TEXTINCLUDE DISCARDABLE
 BEGIN
     "#include ""res\\eshtedit.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
     "\r\n"
@@ -77,7 +77,7 @@ IDB_LOGO                BITMAP  DISCARDABLE     "RES\\logo.bmp"
 // Menu
 //
 
-IDR_MAINFRAME MENU PRELOAD DISCARDABLE 
+IDR_MAINFRAME MENU PRELOAD DISCARDABLE
 BEGIN
     POPUP "&File"
     BEGIN
@@ -203,7 +203,7 @@ END
 // Accelerator
 //
 
-IDR_MAINFRAME ACCELERATORS PRELOAD MOVEABLE PURE 
+IDR_MAINFRAME ACCELERATORS PRELOAD MOVEABLE PURE
 BEGIN
     "1",            ID_VIEW_ZOOM_NORM,      VIRTKEY, NOINVERT
     "1",            ID_VIEW_SHOW_COLORS,    VIRTKEY, SHIFT, NOINVERT
@@ -287,7 +287,7 @@ BEGIN
     RTEXT           "Depth",IDC_STATIC,99,37,29,8
     EDITTEXT        IDC_TPROP_DEPTH,133,35,32,12,ES_AUTOHSCROLL
     RTEXT           "Surface Ratio",IDC_STATIC,175,37,44,8
-    COMBOBOX        IDC_TPROP_SURFRATIO,225,35,32,35,CBS_DROPDOWNLIST | 
+    COMBOBOX        IDC_TPROP_SURFRATIO,225,35,32,35,CBS_DROPDOWNLIST |
                     WS_VSCROLL | WS_TABSTOP
     RTEXT           "Width/Depth Scale",IDC_STATIC,35,67,62,8
     EDITTEXT        IDC_TPROP_SCALE,103,65,32,12,ES_AUTOHSCROLL
@@ -349,33 +349,33 @@ CAPTION "General"
 FONT 8, "MS Sans Serif"
 BEGIN
     RTEXT           "Surface Grid Location:",IDC_STATIC,5,6,75,10
-    EDITTEXT        IDC_SPROP_XLOC,85,5,25,12,ES_AUTOHSCROLL | ES_READONLY | 
+    EDITTEXT        IDC_SPROP_XLOC,85,5,25,12,ES_AUTOHSCROLL | ES_READONLY |
                     NOT WS_TABSTOP
     LTEXT           "by",IDC_STATIC,115,6,10,10
-    EDITTEXT        IDC_SPROP_DLOC,131,5,25,12,ES_AUTOHSCROLL | ES_READONLY | 
+    EDITTEXT        IDC_SPROP_DLOC,131,5,25,12,ES_AUTOHSCROLL | ES_READONLY |
                     NOT WS_TABSTOP
     PUSHBUTTON      "&Color...",IDC_SPROP_COLR,210,5,50,15
     CONTROL         "Index is texture",IDC_SPROP_INDISTXT,"Button",
                     BS_AUTOCHECKBOX | WS_DISABLED | WS_TABSTOP,25,35,60,10
-    CONTROL         "Hidden",IDC_SPROP_HIDDEN,"Button",BS_AUTOCHECKBOX | 
+    CONTROL         "Hidden",IDC_SPROP_HIDDEN,"Button",BS_AUTOCHECKBOX |
                     WS_TABSTOP,25,50,60,10
-    CONTROL         "Control bit 4",IDC_SPROP_CBIT4,"Button",BS_AUTOCHECKBOX | 
+    CONTROL         "Control bit 4",IDC_SPROP_CBIT4,"Button",BS_AUTOCHECKBOX |
                     WS_DISABLED | WS_TABSTOP,25,65,60,10
     CONTROL         "Control bit 11",IDC_SPROP_CBIT11,"Button",
                     BS_AUTOCHECKBOX | WS_DISABLED | WS_TABSTOP,25,80,60,10
     CONTROL         "Control bit 12",IDC_SPROP_CBIT12,"Button",
                     BS_AUTOCHECKBOX | WS_DISABLED | WS_TABSTOP,25,95,60,10
     GROUPBOX        "Texture",IDC_STATIC,105,25,160,100
-    CONTROL         "Flip U",IDC_SPROP_FLIPU,"Button",BS_AUTOCHECKBOX | 
+    CONTROL         "Flip U",IDC_SPROP_FLIPU,"Button",BS_AUTOCHECKBOX |
                     WS_TABSTOP,115,35,55,10
-    CONTROL         "Flip V",IDC_SPROP_FLIPV,"Button",BS_AUTOCHECKBOX | 
+    CONTROL         "Flip V",IDC_SPROP_FLIPV,"Button",BS_AUTOCHECKBOX |
                     WS_TABSTOP,115,49,55,10
     RTEXT           "Tile Factor:",IDC_STATIC,175,36,40,10
-    COMBOBOX        IDC_SPROP_TILE,221,35,35,35,CBS_DROPDOWN | WS_VSCROLL | 
+    COMBOBOX        IDC_SPROP_TILE,221,35,35,35,CBS_DROPDOWN | WS_VSCROLL |
                     WS_TABSTOP
-    COMBOBOX        IDC_SPROP_TXT,180,50,80,40,CBS_DROPDOWNLIST | WS_VSCROLL | 
+    COMBOBOX        IDC_SPROP_TXT,180,50,80,40,CBS_DROPDOWNLIST | WS_VSCROLL |
                     WS_TABSTOP
-    CONTROL         "Not tileable",IDC_SPROP_NOTILE,"Button",BS_AUTOCHECKBOX | 
+    CONTROL         "Not tileable",IDC_SPROP_NOTILE,"Button",BS_AUTOCHECKBOX |
                     WS_TABSTOP,115,75,55,10
     CONTROL         "High detail only",IDC_SPROP_HIGHONLY,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,115,90,65,10
@@ -453,13 +453,13 @@ STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Texture View"
 FONT 8, "MS Sans Serif"
 BEGIN
-    CONTROL         "",IDC_BITMAP,"Static",SS_BITMAP | SS_CENTERIMAGE | 
+    CONTROL         "",IDC_BITMAP,"Static",SS_BITMAP | SS_CENTERIMAGE |
                     WS_BORDER,25,5,220,225
     RTEXT           "Width:",IDC_STATIC,25,242,30,8
-    EDITTEXT        IDC_TVIEW_WIDTH,61,240,25,12,ES_AUTOHSCROLL | 
+    EDITTEXT        IDC_TVIEW_WIDTH,61,240,25,12,ES_AUTOHSCROLL |
                     ES_READONLY | NOT WS_TABSTOP
     RTEXT           "Height:",IDC_STATIC,95,242,25,8
-    EDITTEXT        IDC_TVIEW_HEIGHT,125,240,25,12,ES_AUTOHSCROLL | 
+    EDITTEXT        IDC_TVIEW_HEIGHT,125,240,25,12,ES_AUTOHSCROLL |
                     ES_READONLY | NOT WS_TABSTOP
     DEFPUSHBUTTON   "OK",IDOK,195,240,50,14
 END
@@ -469,7 +469,7 @@ STYLE WS_CHILD | WS_VISIBLE | WS_DISABLED | WS_CAPTION
 CAPTION "Level of Detail"
 FONT 8, "MS Sans Serif"
 BEGIN
-    CONTROL         "Use level-of-detail",IDC_LOD,"Button",BS_AUTOCHECKBOX | 
+    CONTROL         "Use level-of-detail",IDC_LOD,"Button",BS_AUTOCHECKBOX |
                     WS_TABSTOP,35,20,100,10
     RTEXT           "Medium:",IDC_STATIC,25,56,35,10
     EDITTEXT        IDC_CPROP_MED,65,55,50,12,ES_AUTOHSCROLL
@@ -485,12 +485,12 @@ CAPTION "General"
 FONT 8, "MS Sans Serif"
 BEGIN
     RTEXT           "Type:",ID_STATIC,25,15,20,10
-    COMBOBOX        IDC_LPROP_TYPE,51,15,55,50,CBS_DROPDOWNLIST | WS_VSCROLL | 
+    COMBOBOX        IDC_LPROP_TYPE,51,15,55,50,CBS_DROPDOWNLIST | WS_VSCROLL |
                     WS_TABSTOP
     RTEXT           "Intensity:",ID_STATIC,15,52,30,10
     CONTROL         "Generic2",IDC_LPROP_INTENSITY,"msctls_trackbar32",
                     TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,45,50,110,15
-    CONTROL         "Attenuate",IDC_LPROP_ATTEN,"Button",BS_AUTOCHECKBOX | 
+    CONTROL         "Attenuate",IDC_LPROP_ATTEN,"Button",BS_AUTOCHECKBOX |
                     WS_TABSTOP,190,55,47,10
     RTEXT           "Position/",ID_STATIC,5,90,30,10
     RTEXT           "Vector:",ID_STATIC,5,100,30,10
@@ -602,13 +602,13 @@ STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Texture Create"
 FONT 8, "MS Sans Serif"
 BEGIN
-    CONTROL         "",IDC_BITMAP2,"Static",SS_BITMAP | SS_CENTERIMAGE | 
+    CONTROL         "",IDC_BITMAP2,"Static",SS_BITMAP | SS_CENTERIMAGE |
                     WS_BORDER,25,5,220,225
     RTEXT           "Width:",IDC_STATIC,10,242,30,8
-    EDITTEXT        IDC_TVIEW_WIDTH,46,240,25,12,ES_AUTOHSCROLL | 
+    EDITTEXT        IDC_TVIEW_WIDTH,46,240,25,12,ES_AUTOHSCROLL |
                     ES_READONLY | NOT WS_TABSTOP
     RTEXT           "Height:",IDC_STATIC,80,242,25,8
-    EDITTEXT        IDC_TVIEW_HEIGHT,110,240,25,12,ES_AUTOHSCROLL | 
+    EDITTEXT        IDC_TVIEW_HEIGHT,110,240,25,12,ES_AUTOHSCROLL |
                     ES_READONLY | NOT WS_TABSTOP
     DEFPUSHBUTTON   "Save &As...",IDC_TVIEW_SAVEAS,205,240,50,14
     PUSHBUTTON      "Cancel",IDCANCEL,205,260,50,14
@@ -621,17 +621,17 @@ STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "Create New Texture from a Color"
 FONT 8, "MS Sans Serif"
 BEGIN
-    CONTROL         "",IDC_BITMAP2,"Static",SS_BITMAP | SS_CENTERIMAGE | 
+    CONTROL         "",IDC_BITMAP2,"Static",SS_BITMAP | SS_CENTERIMAGE |
                     WS_BORDER,25,5,220,225
     RTEXT           "Width:",IDC_STATIC,10,242,30,8
-    EDITTEXT        IDC_TVIEW_WIDTH,46,240,25,12,ES_AUTOHSCROLL | 
+    EDITTEXT        IDC_TVIEW_WIDTH,46,240,25,12,ES_AUTOHSCROLL |
                     ES_READONLY | NOT WS_TABSTOP
     RTEXT           "Height:",IDC_STATIC,15,262,25,8
-    EDITTEXT        IDC_TVIEW_HEIGHT,45,260,25,12,ES_AUTOHSCROLL | 
+    EDITTEXT        IDC_TVIEW_HEIGHT,45,260,25,12,ES_AUTOHSCROLL |
                     ES_READONLY | NOT WS_TABSTOP
     DEFPUSHBUTTON   "Save &As...",IDC_SAVECLR,205,240,50,14
     DEFPUSHBUTTON   "Close",IDCANCEL,205,260,50,14
-    COMBOBOX        IDC_SAVECLR_SIZELIST,110,240,45,35,CBS_DROPDOWN | 
+    COMBOBOX        IDC_SAVECLR_SIZELIST,110,240,45,35,CBS_DROPDOWN |
                     WS_VSCROLL | WS_TABSTOP
     RTEXT           "Size",IDC_STATIC,90,242,14,8
     DEFPUSHBUTTON   "&Solid Color",ID_MATCH_ALL_CLRS,90,260,65,14
@@ -681,14 +681,14 @@ BEGIN
     EDITTEXT        IDC_DEM_LNG_DEGREES,73,105,35,15,ES_AUTOHSCROLL
     EDITTEXT        IDC_DEM_LNG_MINUTES,113,105,35,15,ES_AUTOHSCROLL
     EDITTEXT        IDC_DEM_LNG_SECONDS,153,105,35,15,ES_AUTOHSCROLL
-    CONTROL         "West",IDC_LNG_WEST,"Button",BS_AUTORADIOBUTTON | 
+    CONTROL         "West",IDC_LNG_WEST,"Button",BS_AUTORADIOBUTTON |
                     WS_GROUP,198,105,35,15
     CONTROL         "East",IDC_LNG_EAST,"Button",BS_AUTORADIOBUTTON,238,105,
                     35,15
     EDITTEXT        IDC_DEM_LAT_DEGREES,73,126,35,15,ES_AUTOHSCROLL
     EDITTEXT        IDC_DEM_LAT_MINUTES,113,126,35,15,ES_AUTOHSCROLL
     EDITTEXT        IDC_DEM_LAT_SECONDS,153,126,35,15,ES_AUTOHSCROLL
-    CONTROL         "North",IDC_LAT_NORTH,"Button",BS_AUTORADIOBUTTON | 
+    CONTROL         "North",IDC_LAT_NORTH,"Button",BS_AUTORADIOBUTTON |
                     WS_GROUP,198,125,35,15
     CONTROL         "South",IDC_LAT_SOUTH,"Button",BS_AUTORADIOBUTTON,235,
                     125,35,15
@@ -702,39 +702,39 @@ CAPTION "USGS DEM Import"
 FONT 8, "MS Sans Serif"
 BEGIN
     RTEXT           "Filename:",IDC_STATIC,5,7,30,10
-    EDITTEXT        IDC_DPRG_FNAME,40,5,160,15,ES_AUTOHSCROLL | ES_READONLY | 
+    EDITTEXT        IDC_DPRG_FNAME,40,5,160,15,ES_AUTOHSCROLL | ES_READONLY |
                     NOT WS_TABSTOP
     DEFPUSHBUTTON   "OK",IDOK,205,5,32,14,WS_DISABLED | WS_GROUP
     CTEXT           "Status",IDC_STATUS,10,30,220,10
     CONTROL         "Progress1",IDC_DPRG_BAR,"msctls_progress32",WS_BORDER,5,
                     45,230,14
     RTEXT           "DEM Quality Level:",IDC_STATIC,5,67,65,10
-    EDITTEXT        IDC_DPRG_QUALITY,75,65,30,15,ES_AUTOHSCROLL | 
+    EDITTEXT        IDC_DPRG_QUALITY,75,65,30,15,ES_AUTOHSCROLL |
                     ES_READONLY | NOT WS_TABSTOP
     RTEXT           "Ground Units:",IDC_STATIC,10,87,60,10
-    EDITTEXT        IDC_DPRG_GUNITS,75,85,45,15,ES_AUTOHSCROLL | ES_READONLY | 
+    EDITTEXT        IDC_DPRG_GUNITS,75,85,45,15,ES_AUTOHSCROLL | ES_READONLY |
                     NOT WS_TABSTOP
     RTEXT           "Elevation Units:",IDC_STATIC,10,107,60,10
-    EDITTEXT        IDC_DPRG_EUNITS,75,105,45,15,ES_AUTOHSCROLL | 
+    EDITTEXT        IDC_DPRG_EUNITS,75,105,45,15,ES_AUTOHSCROLL |
                     ES_READONLY | NOT WS_TABSTOP
     RTEXT           "Axis:",IDC_STATIC,110,67,20,10
-    EDITTEXT        IDC_DPRG_AXISX,135,65,35,15,ES_AUTOHSCROLL | ES_READONLY | 
+    EDITTEXT        IDC_DPRG_AXISX,135,65,35,15,ES_AUTOHSCROLL | ES_READONLY |
                     NOT WS_TABSTOP
-    EDITTEXT        IDC_DPRG_AXISY,170,65,35,15,ES_AUTOHSCROLL | ES_READONLY | 
+    EDITTEXT        IDC_DPRG_AXISY,170,65,35,15,ES_AUTOHSCROLL | ES_READONLY |
                     NOT WS_TABSTOP
-    EDITTEXT        IDC_DPRG_AXISZ,205,65,35,15,ES_AUTOHSCROLL | ES_READONLY | 
+    EDITTEXT        IDC_DPRG_AXISZ,205,65,35,15,ES_AUTOHSCROLL | ES_READONLY |
                     NOT WS_TABSTOP
     RTEXT           "Profile Rows:",IDC_STATIC,135,87,60,10
-    EDITTEXT        IDC_DPRG_PROWS,201,85,30,15,ES_AUTOHSCROLL | ES_READONLY | 
+    EDITTEXT        IDC_DPRG_PROWS,201,85,30,15,ES_AUTOHSCROLL | ES_READONLY |
                     NOT WS_TABSTOP
     RTEXT           "Profile Columns:",IDC_STATIC,135,108,60,10
-    EDITTEXT        IDC_DPRG_PCOLS,201,106,30,15,ES_AUTOHSCROLL | 
+    EDITTEXT        IDC_DPRG_PCOLS,201,106,30,15,ES_AUTOHSCROLL |
                     ES_READONLY | NOT WS_TABSTOP
     RTEXT           "Name:",IDC_STATIC,10,133,22,8
-    EDITTEXT        IDC_DPRG_NAME,35,130,205,15,ES_AUTOHSCROLL | ES_READONLY | 
+    EDITTEXT        IDC_DPRG_NAME,35,130,205,15,ES_AUTOHSCROLL | ES_READONLY |
                     NOT WS_TABSTOP
     RTEXT           "Comment:",IDC_STATIC,10,158,32,8
-    EDITTEXT        IDC_DPRG_COMMENT,45,154,195,15,ES_AUTOHSCROLL | 
+    EDITTEXT        IDC_DPRG_COMMENT,45,154,195,15,ES_AUTOHSCROLL |
                     ES_READONLY | NOT WS_TABSTOP
 END
 
@@ -743,9 +743,10 @@ STYLE WS_CHILD | WS_VISIBLE | WS_DISABLED | WS_CAPTION
 CAPTION "Height-table"
 FONT 8, "MS Sans Serif"
 BEGIN
-    LISTBOX         IDC_TROP_HGTS,5,2,130,125,NOT LBS_NOTIFY | LBS_NOSEL | 
+    LISTBOX         IDC_TROP_HGTS,5,2,130,125,NOT LBS_NOTIFY | LBS_NOSEL |
                     WS_VSCROLL | WS_TABSTOP
-    CTEXT           "Height data is not editable",IDC_STATIC,140,110,130,10
+    PUSHBUTTON      "&Scale",IDC_TPROP_HSCALE,175,23,57,14
+    PUSHBUTTON      "Clip to &Max",IDC_TPROP_HCLIP,175,58,57,14
 END
 
 IDD_TOOL_HEIGHT DIALOG DISCARDABLE  0, 0, 277, 201
@@ -761,28 +762,28 @@ BEGIN
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,15,20,130,10
     GROUPBOX        "Elevation to Texture/Color Mappings",IDC_STATIC,5,35,
                     205,145
-    COMBOBOX        IDC_TOOL_TC0,25,45,80,45,CBS_DROPDOWNLIST | WS_VSCROLL | 
+    COMBOBOX        IDC_TOOL_TC0,25,45,80,45,CBS_DROPDOWNLIST | WS_VSCROLL |
                     WS_TABSTOP
     EDITTEXT        IDC_TOOL_HEIGHT0,130,44,55,15,ES_AUTOHSCROLL
-    COMBOBOX        IDC_TOOL_TC1,25,62,80,48,CBS_DROPDOWNLIST | WS_VSCROLL | 
+    COMBOBOX        IDC_TOOL_TC1,25,62,80,48,CBS_DROPDOWNLIST | WS_VSCROLL |
                     WS_TABSTOP
     EDITTEXT        IDC_TOOL_HEIGHT1,130,61,55,15,ES_AUTOHSCROLL
-    COMBOBOX        IDC_TOOL_TC2,25,80,80,50,CBS_DROPDOWNLIST | WS_VSCROLL | 
+    COMBOBOX        IDC_TOOL_TC2,25,80,80,50,CBS_DROPDOWNLIST | WS_VSCROLL |
                     WS_TABSTOP
     EDITTEXT        IDC_TOOL_HEIGHT2,130,79,55,15,ES_AUTOHSCROLL
-    COMBOBOX        IDC_TOOL_TC3,25,96,80,44,CBS_DROPDOWNLIST | WS_VSCROLL | 
+    COMBOBOX        IDC_TOOL_TC3,25,96,80,44,CBS_DROPDOWNLIST | WS_VSCROLL |
                     WS_TABSTOP
     EDITTEXT        IDC_TOOL_HEIGHT3,130,95,55,15,ES_AUTOHSCROLL
-    COMBOBOX        IDC_TOOL_TC4,25,113,80,47,CBS_DROPDOWNLIST | WS_VSCROLL | 
+    COMBOBOX        IDC_TOOL_TC4,25,113,80,47,CBS_DROPDOWNLIST | WS_VSCROLL |
                     WS_TABSTOP
     EDITTEXT        IDC_TOOL_HEIGHT4,130,112,55,15,ES_AUTOHSCROLL
-    COMBOBOX        IDC_TOOL_TC5,25,130,80,45,CBS_DROPDOWNLIST | WS_VSCROLL | 
+    COMBOBOX        IDC_TOOL_TC5,25,130,80,45,CBS_DROPDOWNLIST | WS_VSCROLL |
                     WS_TABSTOP
     EDITTEXT        IDC_TOOL_HEIGHT5,130,129,55,15,ES_AUTOHSCROLL
-    COMBOBOX        IDC_TOOL_TC6,25,147,80,48,CBS_DROPDOWNLIST | WS_VSCROLL | 
+    COMBOBOX        IDC_TOOL_TC6,25,147,80,48,CBS_DROPDOWNLIST | WS_VSCROLL |
                     WS_TABSTOP
     EDITTEXT        IDC_TOOL_HEIGHT6,130,146,55,15,ES_AUTOHSCROLL
-    COMBOBOX        IDC_TOOL_TC7,25,164,80,41,CBS_DROPDOWNLIST | WS_VSCROLL | 
+    COMBOBOX        IDC_TOOL_TC7,25,164,80,41,CBS_DROPDOWNLIST | WS_VSCROLL |
                     WS_TABSTOP
     EDITTEXT        IDC_TOOL_HEIGHT7,130,163,55,15,ES_AUTOHSCROLL
     RTEXT           "Stop elevation:",IDC_STATIC,75,187,50,10
@@ -804,34 +805,34 @@ BEGIN
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,15,20,130,10
     GROUPBOX        "Percentange to Texture/Color Mappings",IDC_STATIC,5,35,
                     205,145
-    COMBOBOX        IDC_TOOL_TC0,25,45,80,50,CBS_DROPDOWNLIST | WS_VSCROLL | 
+    COMBOBOX        IDC_TOOL_TC0,25,45,80,50,CBS_DROPDOWNLIST | WS_VSCROLL |
                     WS_TABSTOP
     EDITTEXT        IDC_TOOL_RANGE0,130,45,55,15,ES_AUTOHSCROLL
-    COMBOBOX        IDC_TOOL_TC1,25,61,80,48,CBS_DROPDOWNLIST | WS_VSCROLL | 
+    COMBOBOX        IDC_TOOL_TC1,25,61,80,48,CBS_DROPDOWNLIST | WS_VSCROLL |
                     WS_TABSTOP
     EDITTEXT        IDC_TOOL_RANGE1,130,62,55,15,ES_AUTOHSCROLL
-    COMBOBOX        IDC_TOOL_TC2,25,80,80,45,CBS_DROPDOWNLIST | WS_VSCROLL | 
+    COMBOBOX        IDC_TOOL_TC2,25,80,80,45,CBS_DROPDOWNLIST | WS_VSCROLL |
                     WS_TABSTOP
     EDITTEXT        IDC_TOOL_RANGE2,130,79,55,15,ES_AUTOHSCROLL
-    COMBOBOX        IDC_TOOL_TC3,25,96,80,49,CBS_DROPDOWNLIST | WS_VSCROLL | 
+    COMBOBOX        IDC_TOOL_TC3,25,96,80,49,CBS_DROPDOWNLIST | WS_VSCROLL |
                     WS_TABSTOP
     EDITTEXT        IDC_TOOL_RANGE3,130,97,55,15,ES_AUTOHSCROLL
-    COMBOBOX        IDC_TOOL_TC4,25,114,80,46,CBS_DROPDOWNLIST | WS_VSCROLL | 
+    COMBOBOX        IDC_TOOL_TC4,25,114,80,46,CBS_DROPDOWNLIST | WS_VSCROLL |
                     WS_TABSTOP
     EDITTEXT        IDC_TOOL_RANGE4,130,113,55,15,ES_AUTOHSCROLL
-    COMBOBOX        IDC_TOOL_TC5,25,130,80,45,CBS_DROPDOWNLIST | WS_VSCROLL | 
+    COMBOBOX        IDC_TOOL_TC5,25,130,80,45,CBS_DROPDOWNLIST | WS_VSCROLL |
                     WS_TABSTOP
     EDITTEXT        IDC_TOOL_RANGE5,130,130,55,15,ES_AUTOHSCROLL
-    COMBOBOX        IDC_TOOL_TC6,25,147,80,53,CBS_DROPDOWNLIST | WS_VSCROLL | 
+    COMBOBOX        IDC_TOOL_TC6,25,147,80,53,CBS_DROPDOWNLIST | WS_VSCROLL |
                     WS_TABSTOP
     EDITTEXT        IDC_TOOL_RANGE6,130,146,55,15,ES_AUTOHSCROLL
-    COMBOBOX        IDC_TOOL_TC7,25,164,80,51,CBS_DROPDOWNLIST | WS_VSCROLL | 
+    COMBOBOX        IDC_TOOL_TC7,25,164,80,51,CBS_DROPDOWNLIST | WS_VSCROLL |
                     WS_TABSTOP
     EDITTEXT        IDC_TOOL_RANGE7,130,163,55,15,ES_AUTOHSCROLL
     DEFPUSHBUTTON   "OK",IDOK,240,7,50,14
     PUSHBUTTON      "Cancel",IDCANCEL,240,24,50,14
     GROUPBOX        "Elevation-based Cutoff",IDC_STATIC,215,65,80,90
-    CONTROL         "Active",IDC_TOOL_ELVCUTOFF,"Button",BS_AUTOCHECKBOX | 
+    CONTROL         "Active",IDC_TOOL_ELVCUTOFF,"Button",BS_AUTOCHECKBOX |
                     WS_TABSTOP,225,75,35,10
     CTEXT           "Lowest elevation:",IDC_STATIC,225,90,55,10
     EDITTEXT        IDC_TOOL_ELVLOW,225,100,55,15,ES_AUTOHSCROLL
@@ -845,11 +846,11 @@ CAPTION "Extended"
 FONT 8, "MS Sans Serif"
 BEGIN
     GROUPBOX        "Background",-1,10,15,235,30
-    CONTROL         "Active",IDC_CPROP_BMBACK,"Button",BS_AUTOCHECKBOX | 
+    CONTROL         "Active",IDC_CPROP_BMBACK,"Button",BS_AUTOCHECKBOX |
                     WS_TABSTOP,25,25,45,15
     PUSHBUTTON      "Select &Bitmap",IDC_CPROP_BITMAP,160,25,60,15
     GROUPBOX        "Hazing/Fogging",-1,10,60,235,65
-    CONTROL         "Active",IDC_CPROP_HAZE,"Button",BS_AUTOCHECKBOX | 
+    CONTROL         "Active",IDC_CPROP_HAZE,"Button",BS_AUTOCHECKBOX |
                     WS_TABSTOP,25,70,45,15
     PUSHBUTTON      "&Hazing Target Color",IDC_CPROP_HCOLR,150,70,80,15
     RTEXT           "Start Z:",-1,15,92,60,10
@@ -863,12 +864,12 @@ STYLE WS_CHILD | WS_VISIBLE | WS_CAPTION
 CAPTION "Surface Flags"
 FONT 8, "MS Sans Serif"
 BEGIN
-    CONTROL         "Flip U",IDC_TXPRP_FLIPU,"Button",BS_AUTOCHECKBOX | 
+    CONTROL         "Flip U",IDC_TXPRP_FLIPU,"Button",BS_AUTOCHECKBOX |
                     WS_TABSTOP,40,15,34,10
-    CONTROL         "Flip V",IDC_TXPRP_FLIPV,"Button",BS_AUTOCHECKBOX | 
+    CONTROL         "Flip V",IDC_TXPRP_FLIPV,"Button",BS_AUTOCHECKBOX |
                     WS_TABSTOP,40,30,34,10
     RTEXT           "Tile Factor:",IDC_STATIC,125,16,35,10
-    COMBOBOX        IDC_TXPRP_TILE,167,15,35,35,CBS_DROPDOWNLIST | 
+    COMBOBOX        IDC_TXPRP_TILE,167,15,35,35,CBS_DROPDOWNLIST |
                     WS_VSCROLL | WS_TABSTOP
     CONTROL         "Not tileable",IDC_TXPROP_NOTILE,"Button",
                     BS_AUTOCHECKBOX | WS_TABSTOP,40,65,55,10
@@ -899,34 +900,34 @@ BEGIN
                     "Button",BS_AUTOCHECKBOX | WS_TABSTOP,15,20,130,10
     GROUPBOX        "Angle to Texture/Color Mappings",IDC_STATIC,5,35,205,
                     145
-    COMBOBOX        IDC_TOOL_TC0,25,45,80,45,CBS_DROPDOWNLIST | WS_VSCROLL | 
+    COMBOBOX        IDC_TOOL_TC0,25,45,80,45,CBS_DROPDOWNLIST | WS_VSCROLL |
                     WS_TABSTOP
     EDITTEXT        IDC_TOOL_ANGLE0,130,44,55,15,ES_AUTOHSCROLL
-    COMBOBOX        IDC_TOOL_TC1,25,62,80,48,CBS_DROPDOWNLIST | WS_VSCROLL | 
+    COMBOBOX        IDC_TOOL_TC1,25,62,80,48,CBS_DROPDOWNLIST | WS_VSCROLL |
                     WS_TABSTOP
     EDITTEXT        IDC_TOOL_ANGLE1,130,61,55,15,ES_AUTOHSCROLL
-    COMBOBOX        IDC_TOOL_TC2,25,80,80,50,CBS_DROPDOWNLIST | WS_VSCROLL | 
+    COMBOBOX        IDC_TOOL_TC2,25,80,80,50,CBS_DROPDOWNLIST | WS_VSCROLL |
                     WS_TABSTOP
     EDITTEXT        IDC_TOOL_ANGLE2,130,79,55,15,ES_AUTOHSCROLL
-    COMBOBOX        IDC_TOOL_TC3,25,96,80,44,CBS_DROPDOWNLIST | WS_VSCROLL | 
+    COMBOBOX        IDC_TOOL_TC3,25,96,80,44,CBS_DROPDOWNLIST | WS_VSCROLL |
                     WS_TABSTOP
     EDITTEXT        IDC_TOOL_ANGLE3,130,95,55,15,ES_AUTOHSCROLL
-    COMBOBOX        IDC_TOOL_TC4,25,113,80,47,CBS_DROPDOWNLIST | WS_VSCROLL | 
+    COMBOBOX        IDC_TOOL_TC4,25,113,80,47,CBS_DROPDOWNLIST | WS_VSCROLL |
                     WS_TABSTOP
     EDITTEXT        IDC_TOOL_ANGLE4,130,112,55,15,ES_AUTOHSCROLL
-    COMBOBOX        IDC_TOOL_TC5,25,130,80,45,CBS_DROPDOWNLIST | WS_VSCROLL | 
+    COMBOBOX        IDC_TOOL_TC5,25,130,80,45,CBS_DROPDOWNLIST | WS_VSCROLL |
                     WS_TABSTOP
     EDITTEXT        IDC_TOOL_ANGLE5,130,129,55,15,ES_AUTOHSCROLL
-    COMBOBOX        IDC_TOOL_TC6,25,147,80,48,CBS_DROPDOWNLIST | WS_VSCROLL | 
+    COMBOBOX        IDC_TOOL_TC6,25,147,80,48,CBS_DROPDOWNLIST | WS_VSCROLL |
                     WS_TABSTOP
     EDITTEXT        IDC_TOOL_ANGLE6,130,146,55,15,ES_AUTOHSCROLL
-    COMBOBOX        IDC_TOOL_TC7,25,164,80,41,CBS_DROPDOWNLIST | WS_VSCROLL | 
+    COMBOBOX        IDC_TOOL_TC7,25,164,80,41,CBS_DROPDOWNLIST | WS_VSCROLL |
                     WS_TABSTOP
     EDITTEXT        IDC_TOOL_ANGLE7,130,163,55,15,ES_AUTOHSCROLL
     RTEXT           "Stop angle:",IDC_STATIC,75,187,50,10
     EDITTEXT        IDC_TOOL_ANGLE_STOP,130,185,55,15,ES_AUTOHSCROLL
     GROUPBOX        "Elevation-based Cutoff",IDC_STATIC,215,65,80,90
-    CONTROL         "Active",IDC_TOOL_ELVCUTOFF,"Button",BS_AUTOCHECKBOX | 
+    CONTROL         "Active",IDC_TOOL_ELVCUTOFF,"Button",BS_AUTOCHECKBOX |
                     WS_TABSTOP,225,75,35,10
     CTEXT           "Lowest elevation:",IDC_STATIC,225,90,55,10
     EDITTEXT        IDC_TOOL_ELVLOW,225,100,55,15,ES_AUTOHSCROLL
@@ -972,7 +973,7 @@ BEGIN
     CONTROL         169,IDC_STATIC,"Static",SS_BITMAP,10,65,256,46
     CONTROL         "Version X.X\tMon DD YYYY",IDC_ABOUT_VERSION,"Static",
                     SS_SIMPLE | WS_GROUP,120,65,111,8
-    CONTROL         "Copyright © 1995-1998",IDC_STATIC,"Static",SS_SIMPLE | 
+    CONTROL         "Copyright © 1995-1999",IDC_STATIC,"Static",SS_SIMPLE |
                     WS_GROUP,120,75,80,8
     DEFPUSHBUTTON   "OK",IDOK,219,11,32,14,WS_GROUP
     GROUPBOX        "",IDC_STATIC,5,110,255,5
@@ -980,6 +981,16 @@ BEGIN
                     IDC_STATIC,42,120,185,11
     CTEXT           "MythOS is a trademark of Charybdis Enterprises, Inc.",
                     IDC_STATIC,47,135,175,14
+END
+
+IDD_TERRHTBLE_EDIT DIALOG DISCARDABLE  0, 0, 186, 69
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Enter value"
+FONT 8, "MS Sans Serif"
+BEGIN
+    EDITTEXT        IDC_VALUE,46,17,93,14,ES_AUTOHSCROLL
+    DEFPUSHBUTTON   "OK",IDOK,35,48,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,101,48,50,14
 END
 
 
@@ -990,8 +1001,8 @@ END
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 2,1,1,0
- PRODUCTVERSION 1,6,0,0
+ FILEVERSION 2,1,2,0
+ PRODUCTVERSION 1,8,0,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -1006,16 +1017,19 @@ BEGIN
     BEGIN
         BLOCK "040904b0"
         BEGIN
-            VALUE "Author", "by Chuck Walbourn\0"
-            VALUE "CompanyName", "Charybdis Enterprises, Inc.\0"
+            VALUE "Authors", "Dan Higdon, Tim Little, and Chuck Walbourn\0"
+            VALUE "Comments", "This file is subject to the GNU LGPL\0"
             VALUE "FileDescription", "Escher Terrain Editor MFC Application\0"
-            VALUE "FileVersion", "2.11\0"
+            VALUE "FileVersion", "2.12\0"
             VALUE "InternalName", "Terrain Edit\0"
-            VALUE "LegalCopyright", "Copyright © 1995-1998\0"
-            VALUE "LegalTrademarks", "MythOS is a trademark of Charybdis Enterprises, Inc.\0"
+            VALUE "LegalCopyright", "Copyright (c) 1995-1999\0"
+            VALUE "LegalTrademarks",
+"MythOS is a trademark of Charybdis Enterprises, Inc.\n\
+Microsoft and Windows are tradmarks of Microsoft Corp.\0"
+            VALUE "URL", "http://www.mythos-engine.org/\0"
             VALUE "OriginalFilename", "ESHTEDIT.EXE\0"
             VALUE "ProductName", "MythOS 95\0"
-            VALUE "ProductVersion", "1.6\0"
+            VALUE "ProductVersion", "1.8\0"
         END
     END
     BLOCK "VarFileInfo"
@@ -1035,148 +1049,148 @@ END
 IDD_TERRPROP_GEN DLGINIT
 BEGIN
     IDC_TPROP_SURFRATIO, 0x403, 4, 0
-0x3a31, 0x0031, 
+0x3a31, 0x0031,
     IDC_TPROP_SURFRATIO, 0x403, 4, 0
-0x3a32, 0x0031, 
+0x3a32, 0x0031,
     IDC_TPROP_SURFRATIO, 0x403, 4, 0
-0x3a34, 0x0031, 
+0x3a34, 0x0031,
     IDC_TPROP_SURFRATIO, 0x403, 4, 0
-0x3a38, 0x0031, 
+0x3a38, 0x0031,
     IDC_TPROP_SURFRATIO, 0x403, 5, 0
-0x3631, 0x313a, "\000" 
+0x3631, 0x313a, "\000"
     0
 END
 
 IDD_SURFPROP_GEN DLGINIT
 BEGIN
     IDC_SPROP_TILE, 0x403, 2, 0
-0x0031, 
+0x0031,
     IDC_SPROP_TILE, 0x403, 2, 0
-0x0032, 
+0x0032,
     IDC_SPROP_TILE, 0x403, 2, 0
-0x0034, 
+0x0034,
     IDC_SPROP_TILE, 0x403, 2, 0
-0x0038, 
+0x0038,
     IDC_SPROP_TILE, 0x403, 3, 0
-0x3231, "\000" 
+0x3231, "\000"
     IDC_SPROP_TILE, 0x403, 3, 0
-0x3631, "\000" 
+0x3631, "\000"
     IDC_SPROP_TILE, 0x403, 3, 0
-0x3233, "\000" 
+0x3233, "\000"
     IDC_SPROP_TILE, 0x403, 3, 0
-0x3436, "\000" 
+0x3436, "\000"
     0
 END
 
 IDD_LGTPROP_GEN DLGINIT
 BEGIN
     IDC_LPROP_TYPE, 0x403, 7, 0
-0x6556, 0x7463, 0x726f, "\000" 
+0x6556, 0x7463, 0x726f, "\000"
     IDC_LPROP_TYPE, 0x403, 6, 0
-0x6f50, 0x6e69, 0x0074, 
+0x6f50, 0x6e69, 0x0074,
     IDC_LPROP_TYPE, 0x403, 11, 0
-0x7441, 0x6574, 0x756e, 0x7461, 0x6465, "\000" 
+0x7441, 0x6574, 0x756e, 0x7461, 0x6465, "\000"
     IDC_LPROP_TYPE, 0x403, 5, 0
-0x7053, 0x746f, "\000" 
+0x7053, 0x746f, "\000"
     0
 END
 
 IDD_CLRCREATE_NEWTXT DLGINIT
 BEGIN
     IDC_SAVECLR_SIZELIST, 0x403, 6, 0
-0x3631, 0x3178, 0x0036, 
+0x3631, 0x3178, 0x0036,
     IDC_SAVECLR_SIZELIST, 0x403, 6, 0
-0x3233, 0x3378, 0x0032, 
+0x3233, 0x3378, 0x0032,
     IDC_SAVECLR_SIZELIST, 0x403, 6, 0
-0x3436, 0x3678, 0x0034, 
+0x3436, 0x3678, 0x0034,
     IDC_SAVECLR_SIZELIST, 0x403, 8, 0
-0x3231, 0x7838, 0x3231, 0x0038, 
+0x3231, 0x7838, 0x3231, 0x0038,
     IDC_SAVECLR_SIZELIST, 0x403, 8, 0
-0x3532, 0x7836, 0x3532, 0x0036, 
+0x3532, 0x7836, 0x3532, 0x0036,
     0
 END
 
 IDD_TOOL_HEIGHT DLGINIT
 BEGIN
     IDC_TOOL_TC0, 0x403, 5, 0
-0x6f4e, 0x656e, "\000" 
+0x6f4e, 0x656e, "\000"
     IDC_TOOL_TC1, 0x403, 5, 0
-0x6f4e, 0x656e, "\000" 
+0x6f4e, 0x656e, "\000"
     IDC_TOOL_TC2, 0x403, 5, 0
-0x6f4e, 0x656e, "\000" 
+0x6f4e, 0x656e, "\000"
     IDC_TOOL_TC3, 0x403, 5, 0
-0x6f4e, 0x656e, "\000" 
+0x6f4e, 0x656e, "\000"
     IDC_TOOL_TC4, 0x403, 5, 0
-0x6f4e, 0x656e, "\000" 
+0x6f4e, 0x656e, "\000"
     IDC_TOOL_TC5, 0x403, 5, 0
-0x6f4e, 0x656e, "\000" 
+0x6f4e, 0x656e, "\000"
     IDC_TOOL_TC6, 0x403, 5, 0
-0x6f4e, 0x656e, "\000" 
+0x6f4e, 0x656e, "\000"
     IDC_TOOL_TC7, 0x403, 5, 0
-0x6f4e, 0x656e, "\000" 
+0x6f4e, 0x656e, "\000"
     0
 END
 
 IDD_TOOL_RANDOM DLGINIT
 BEGIN
     IDC_TOOL_TC0, 0x403, 5, 0
-0x6f4e, 0x656e, "\000" 
+0x6f4e, 0x656e, "\000"
     IDC_TOOL_TC1, 0x403, 5, 0
-0x6f4e, 0x656e, "\000" 
+0x6f4e, 0x656e, "\000"
     IDC_TOOL_TC2, 0x403, 5, 0
-0x6f4e, 0x656e, "\000" 
+0x6f4e, 0x656e, "\000"
     IDC_TOOL_TC3, 0x403, 5, 0
-0x6f4e, 0x656e, "\000" 
+0x6f4e, 0x656e, "\000"
     IDC_TOOL_TC4, 0x403, 5, 0
-0x6f4e, 0x656e, "\000" 
+0x6f4e, 0x656e, "\000"
     IDC_TOOL_TC5, 0x403, 5, 0
-0x6f4e, 0x656e, "\000" 
+0x6f4e, 0x656e, "\000"
     IDC_TOOL_TC6, 0x403, 5, 0
-0x6f4e, 0x656e, "\000" 
+0x6f4e, 0x656e, "\000"
     IDC_TOOL_TC7, 0x403, 5, 0
-0x6f4e, 0x656e, "\000" 
+0x6f4e, 0x656e, "\000"
     0
 END
 
 IDD_TXTPROP_SFLAGS DLGINIT
 BEGIN
     IDC_TXPRP_TILE, 0x403, 2, 0
-0x0031, 
+0x0031,
     IDC_TXPRP_TILE, 0x403, 2, 0
-0x0032, 
+0x0032,
     IDC_TXPRP_TILE, 0x403, 2, 0
-0x0034, 
+0x0034,
     IDC_TXPRP_TILE, 0x403, 2, 0
-0x0038, 
+0x0038,
     IDC_TXPRP_TILE, 0x403, 3, 0
-0x3231, "\000" 
+0x3231, "\000"
     IDC_TXPRP_TILE, 0x403, 3, 0
-0x3631, "\000" 
+0x3631, "\000"
     IDC_TXPRP_TILE, 0x403, 3, 0
-0x3233, "\000" 
+0x3233, "\000"
     IDC_TXPRP_TILE, 0x403, 3, 0
-0x3436, "\000" 
+0x3436, "\000"
     0
 END
 
 IDD_TOOL_ANGLE DLGINIT
 BEGIN
     IDC_TOOL_TC0, 0x403, 5, 0
-0x6f4e, 0x656e, "\000" 
+0x6f4e, 0x656e, "\000"
     IDC_TOOL_TC1, 0x403, 5, 0
-0x6f4e, 0x656e, "\000" 
+0x6f4e, 0x656e, "\000"
     IDC_TOOL_TC2, 0x403, 5, 0
-0x6f4e, 0x656e, "\000" 
+0x6f4e, 0x656e, "\000"
     IDC_TOOL_TC3, 0x403, 5, 0
-0x6f4e, 0x656e, "\000" 
+0x6f4e, 0x656e, "\000"
     IDC_TOOL_TC4, 0x403, 5, 0
-0x6f4e, 0x656e, "\000" 
+0x6f4e, 0x656e, "\000"
     IDC_TOOL_TC5, 0x403, 5, 0
-0x6f4e, 0x656e, "\000" 
+0x6f4e, 0x656e, "\000"
     IDC_TOOL_TC6, 0x403, 5, 0
-0x6f4e, 0x656e, "\000" 
+0x6f4e, 0x656e, "\000"
     IDC_TOOL_TC7, 0x403, 5, 0
-0x6f4e, 0x656e, "\000" 
+0x6f4e, 0x656e, "\000"
     0
 END
 
@@ -1187,7 +1201,7 @@ END
 //
 
 #ifdef APSTUDIO_INVOKED
-GUIDELINES DESIGNINFO DISCARDABLE 
+GUIDELINES DESIGNINFO DISCARDABLE
 BEGIN
     IDD_TXTVIEW, DIALOG
     BEGIN
@@ -1292,6 +1306,14 @@ BEGIN
         TOPMARGIN, 7
         BOTTOMMARGIN, 104
     END
+
+    IDD_TERRHTBLE_EDIT, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 179
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 62
+    END
 END
 #endif    // APSTUDIO_INVOKED
 
@@ -1301,18 +1323,18 @@ END
 // String Table
 //
 
-STRINGTABLE PRELOAD DISCARDABLE 
+STRINGTABLE PRELOAD DISCARDABLE
 BEGIN
     IDR_MAINFRAME           "Escher Terrain Editor\n\nEshted\nEscher Terrain Source Files (*.cst)\n.CST\nEshtedit.Document\nEshted Document"
 END
 
-STRINGTABLE PRELOAD DISCARDABLE 
+STRINGTABLE PRELOAD DISCARDABLE
 BEGIN
     AFX_IDS_APP_TITLE       "Escher Terrain Editor"
     AFX_IDS_IDLEMESSAGE     "Ready"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE DISCARDABLE
 BEGIN
     ID_INDICATOR_EXT        "EXT"
     ID_INDICATOR_CAPS       "CAP"
@@ -1322,7 +1344,7 @@ BEGIN
     ID_INDICATOR_REC        "REC"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE DISCARDABLE
 BEGIN
     ID_FILE_NEW             "Create a new terrain data set\nNew"
     ID_FILE_OPEN            "Open an existing terrain data set\nOpen"
@@ -1331,13 +1353,13 @@ BEGIN
     ID_FILE_SAVE_AS         "Save the active terrain data set with a new name\nSave As"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE DISCARDABLE
 BEGIN
     ID_APP_ABOUT            "Display program information, version number and copyright\nAbout"
     ID_APP_EXIT             "Quit the application; prompts to save documents\nExit"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE DISCARDABLE
 BEGIN
     ID_FILE_MRU_FILE1       "Open this document"
     ID_FILE_MRU_FILE2       "Open this document"
@@ -1345,18 +1367,18 @@ BEGIN
     ID_FILE_MRU_FILE4       "Open this document"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE DISCARDABLE
 BEGIN
     ID_NEXT_PANE            "Switch to the next window pane\nNext Pane"
     ID_PREV_PANE            "Switch back to the previous window pane\nPrevious Pane"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE DISCARDABLE
 BEGIN
     ID_WINDOW_SPLIT         "Split the active window into panes\nSplit"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE DISCARDABLE
 BEGIN
     ID_EDIT_CLEAR           "Erase the selection\nErase"
     ID_EDIT_CLEAR_ALL       "Erase everything\nErase All"
@@ -1371,13 +1393,13 @@ BEGIN
     ID_EDIT_REDO            "Redo the previously undone action\nRedo"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE DISCARDABLE
 BEGIN
     ID_VIEW_TOOLBAR         "Show or hide the toolbar\nToggle ToolBar"
     ID_VIEW_STATUS_BAR      "Show or hide the status bar\nToggle StatusBar"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE DISCARDABLE
 BEGIN
     AFX_IDS_SCSIZE          "Change the window size"
     AFX_IDS_SCMOVE          "Change the window position"
@@ -1388,13 +1410,13 @@ BEGIN
     AFX_IDS_SCCLOSE         "Close the active window and prompts to save the documents"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE DISCARDABLE
 BEGIN
     AFX_IDS_SCRESTORE       "Restore the window to normal size"
     AFX_IDS_SCTASKLIST      "Activate Task List"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE DISCARDABLE
 BEGIN
     ID_FILE_EXPORT          "Export current terrain data set to an Escher IFF file\nExport"
     ID_VIEW_ZOOM            "Adjust display zoom level\nZoom"
@@ -1407,7 +1429,7 @@ BEGIN
     ID_SURF_IMPORT          "Import surface color information\nImport Colors"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE DISCARDABLE
 BEGIN
     ID_SURF_PALETTE         "Select a Van Gogh palette for color references\nSelect Palette"
     ID_SURF_EDITTXT         "Edit a texture definition\nEdit Texture"
@@ -1418,7 +1440,7 @@ BEGIN
     ID_VIEW_ZOOM_NORM       "Zooms the surface information grid image to 100%\nZoom Normal"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE DISCARDABLE
 BEGIN
     ID_VIEW_RND_SPECULAR    "Render using colored, smoothly lit polygons with specular highlight\nSpecular"
     ID_VIEW_RND_DOTS        "Render using colored dots (fastest, no lighting)\nDots"
@@ -1434,7 +1456,7 @@ BEGIN
     ID_VIEW_ROTMOVEZ        "Render view scroll bars control rotation about and translation in Z\nRotate Z/Move Z"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE DISCARDABLE
 BEGIN
     ID_LGT_ADJUSTXY         "Render view scroll bars adjust the light source in X and Y\nAdjust Light X/Y"
     ID_LGT_ABRIGHT          "Render view scroll bars adjust the light source intensity value\nAdjust Light Intensity"
@@ -1448,7 +1470,7 @@ BEGIN
     ID_SURF_SAVETXT         "Saves the texture set to an external file\nSave Textures"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE DISCARDABLE
 BEGIN
     ID_VIEW_HOVER           "Render view scroll bars control translation in X and Z\nHover"
     ID_LGT_PROP             "Edit render view light properties\nLight Properties"
@@ -1466,7 +1488,7 @@ BEGIN
     ID_EDIT_ASSIGN_HEIGHT   "Assign textures/colors based on elevations\nHeight-based"
 END
 
-STRINGTABLE DISCARDABLE 
+STRINGTABLE DISCARDABLE
 BEGIN
     ID_EDIT_ASSIGN_ROLL     "Assign textures/colors based on random roll\nRandom Roll"
     ID_VIEW_SHOW_APP        "Shows surface information with colors for application bits or black for no application bits\nApplication Bits"
@@ -1495,7 +1517,7 @@ END
 #define _AFX_NO_OLE_RESOURCES
 #define _AFX_NO_TRACKER_RESOURCES
 #define _AFX_NO_PROPERTY_RESOURCES
-#include "afxres.rc"  	// Standard components
+#include "afxres.rc"    // Standard components
 
 /////////////////////////////////////////////////////////////////////////////
 #endif    // not APSTUDIO_INVOKED

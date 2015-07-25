@@ -1,33 +1,39 @@
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
-//           __ ,                                                      
-//            ,-| ~           ,               ,,                      
-//           ('||/__,        ||               ||                  _   
-//          (( |||  | \\ \\ =||=   _-_  \\/\\ ||/|,  _-_  ,._-_  / \\ 
-//          (( |||==| || ||  ||   || \\ || || || || || \\  ||   || || 
-//           ( / |  , || ||  ||   ||/   || || || |' ||/    ||   || || 
-//            -____/  \\/\\  \\,  \\,/  \\ \\ \\/   \\,/   \\,  \\_-| 
-//                                                               /  \ 
+//           __ ,
+//            ,-| ~           ,               ,,
+//           ('||/__,        ||               ||                  _
+//          (( |||  | \\ \\ =||=   _-_  \\/\\ ||/|,  _-_  ,._-_  / \\
+//          (( |||==| || ||  ||   || \\ || || || || || \\  ||   || ||
+//           ( / |  , || ||  ||   ||/   || || || |' ||/    ||   || ||
+//            -____/  \\/\\  \\,  \\,/  \\ \\ \\/   \\,/   \\,  \\_-|
+//                                                               /  \
 //                                                              '----`
 //                     Text Output and Font Management System
-//                        Microsoft Windows 95/NT Version
+//                       Microsoft Windows 95/98/NT Version
 //
-//            Copyright (c) 1995-1998 by Charybdis Enterprises, Inc.
-//                           All Rights Reserved.
+//  Copyright (c) 1995-1999 by Dan Higdon, Tim Little, and Chuck Walbourn
+//
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//
+// This file and all associated files are subject to the terms of the
+// GNU Lesser General Public License version 2 as published by the
+// Free Software Foundation (http://www.gnu.org).   They remain the
+// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+// See LICENSE.TXT in the distribution for a copy of this license.
+//
+// THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+// OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+// PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+// LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+// OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
-//           *** Charybdis Enterprises, Inc. Company Confidential ***
-//
-//  This file and all associated files are the company proprietary property
-//        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
-//
-// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+//                        http://www.mythos-engine.org/
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//
+// Created by Chuck Walbourn
 //
 // init.cpp
 //
@@ -40,7 +46,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #define WIN32_LEAN_AND_MEAN
@@ -124,9 +130,9 @@ BOOL InitApplication (HINSTANCE hInstance, int nCmdShow)
     wc.hIconSm = (HICON__*)LoadImage (hInstance,
                                       szAppName,
                                       IMAGE_ICON,
-                                      GetSystemMetrics(SM_CXSMICON), 
-                                      GetSystemMetrics(SM_CYSMICON), 
-                                      LR_DEFAULTCOLOR);              
+                                      GetSystemMetrics(SM_CXSMICON),
+                                      GetSystemMetrics(SM_CYSMICON),
+                                      LR_DEFAULTCOLOR);
 
     if (!RegisterClassEx (&wc))
         return FALSE;
@@ -140,7 +146,7 @@ BOOL InitApplication (HINSTANCE hInstance, int nCmdShow)
     hWndClient = CreateWindowEx (WS_EX_TOPMOST,
                                 szAppName, szTitle,
                                 WS_VISIBLE | WS_POPUP,
-                                0, 0, GameState::MAP_XSIZE, 
+                                0, 0, GameState::MAP_XSIZE,
                                       GameState::MAP_YSIZE,
                                 NULL, NULL, hInstance, NULL);
 
@@ -166,7 +172,7 @@ BOOL InitApplication (HINSTANCE hInstance, int nCmdShow)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 LRESULT CALLBACK ClientWndProc (HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-    LRESULT     res		= (LRESULT)0;
+    LRESULT     res             = (LRESULT)0;
 
     switch (message)
     {
@@ -215,7 +221,7 @@ LRESULT CALLBACK ClientWndProc (HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 // _charybdis_assert
-// 
+//
 // Handler for failed asserts.  If msg is set to non-NULL, then an assertMyth
 // was used with a comment.
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ

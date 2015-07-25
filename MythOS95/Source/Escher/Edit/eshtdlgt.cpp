@@ -8,29 +8,33 @@
 //ùùùùù²±²ùùùùùùù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùùùùùù²±²ùùùù²±²ùùùùùù
 //ùùùù²²²²²²²²²²ù²²²²²²²²ùùù²²²²²²²²ùù²²²ùùùù²²²ù²²²²²²²²²²ù²²²ùùùù²²²ùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùùùùùùùùù Microsoft Windows 95/NT Version ùùùùùùùùùùùùùùùùùùùùùùù
+//ùùùùùùùùùùùùùùùùù Microsoft Windows 95/98/NT Version ùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùCopyrightù(c)ù1994-1998ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
-//ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
+//ùùùCopyright (c) 1994-1999 by Dan Higdon, Tim Little, and Chuck Walbournùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
-//           *** Charybdis Enterprises, Inc. Company Confidential ***
+// This file and all associated files are subject to the terms of the
+// GNU Lesser General Public License version 2 as published by the
+// Free Software Foundation (http://www.gnu.org).   They remain the
+// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+// See LICENSE.TXT in the distribution for a copy of this license.
 //
-//  This file and all associated files are the company proprietary property
-//        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+// THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+// OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+// PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+// LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+// OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 //
-// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//
+//                        http://www.mythos-engine.org/
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
 //                        *** Escher Terrain Editor ***
 //
-// Chuck Walbourn
+// Created by Chuck Walbourn
 //
 // eshtdlgt.cpp
 //
@@ -41,7 +45,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include "stdafx.h"
@@ -120,7 +124,7 @@ void TextureViewDlg::DoDataExchange(CDataExchange* pDX)
     }
 }
 
-void TextureViewDlg::OnPaint() 
+void TextureViewDlg::OnPaint()
 {
     CPaintDC dc(this); // device context for painting
 
@@ -152,36 +156,36 @@ void TextureViewDlg::OnPaint()
 // CreateTextureAskDlg                                                      ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 BEGIN_MESSAGE_MAP(CreateTextureAskDlg, CDialog)
-	//{{AFX_MSG_MAP(CreateTextureAskDlg)
-	ON_BN_CLICKED(ID_CREATE_FROM_COLOR, OnCreateFromColor)
-	ON_BN_CLICKED(ID_CREATE_FROM_FILE, OnCreateFromFile)
-	//}}AFX_MSG_MAP
+        //{{AFX_MSG_MAP(CreateTextureAskDlg)
+        ON_BN_CLICKED(ID_CREATE_FROM_COLOR, OnCreateFromColor)
+        ON_BN_CLICKED(ID_CREATE_FROM_FILE, OnCreateFromFile)
+        //}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 CreateTextureAskDlg::CreateTextureAskDlg(CWnd* pParent /*=NULL*/)
-	: CDialog(CreateTextureAskDlg::IDD, pParent)
+        : CDialog(CreateTextureAskDlg::IDD, pParent)
 {
-	//{{AFX_DATA_INIT(CreateTextureAskDlg)
-		// NOTE: the ClassWizard will add member initialization here
-	//}}AFX_DATA_INIT
+        //{{AFX_DATA_INIT(CreateTextureAskDlg)
+                // NOTE: the ClassWizard will add member initialization here
+        //}}AFX_DATA_INIT
 }
 
 void CreateTextureAskDlg::DoDataExchange(CDataExchange* pDX)
 {
-	CDialog::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CreateTextureAskDlg)
-		// NOTE: the ClassWizard will add DDX and DDV calls here
-	//}}AFX_DATA_MAP
+        CDialog::DoDataExchange(pDX);
+        //{{AFX_DATA_MAP(CreateTextureAskDlg)
+                // NOTE: the ClassWizard will add DDX and DDV calls here
+        //}}AFX_DATA_MAP
 }
 
-void CreateTextureAskDlg::OnCreateFromColor() 
+void CreateTextureAskDlg::OnCreateFromColor()
 {
     EndDialog(CREATE_ASK_COLOR);
 }
 
-void CreateTextureAskDlg::OnCreateFromFile() 
+void CreateTextureAskDlg::OnCreateFromFile()
 {
-    EndDialog(CREATE_ASK_FILE);	
+    EndDialog(CREATE_ASK_FILE);
 }
 
 
@@ -189,26 +193,26 @@ void CreateTextureAskDlg::OnCreateFromFile()
 // CreateTextureDlg                                                         ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 BEGIN_MESSAGE_MAP(CreateTextureDlg, CDialog)
-	//{{AFX_MSG_MAP(CreateTextureDlg)
-	ON_WM_PAINT()
-	ON_WM_LBUTTONDOWN()
-	ON_BN_CLICKED(IDC_TVIEW_LOADBKTXT, OnLoadBgTexture)
-	ON_BN_CLICKED(IDC_TVIEW_SAVEAS, OnSaveAs)
-	//}}AFX_MSG_MAP
+        //{{AFX_MSG_MAP(CreateTextureDlg)
+        ON_WM_PAINT()
+        ON_WM_LBUTTONDOWN()
+        ON_BN_CLICKED(IDC_TVIEW_LOADBKTXT, OnLoadBgTexture)
+        ON_BN_CLICKED(IDC_TVIEW_SAVEAS, OnSaveAs)
+        //}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 CreateTextureDlg::CreateTextureDlg(CWnd* pParent /*=NULL*/)
-	: CDialog(CreateTextureDlg::IDD, pParent),
+        : CDialog(CreateTextureDlg::IDD, pParent),
     bmi(0),
     gmap(0),
     hpal(0),
     m_color(0),
     bg_is_dib(0)
 {
-	//{{AFX_DATA_INIT(CreateTextureDlg)
-	m_height = 0;
-	m_width = 0;
-	//}}AFX_DATA_INIT
+        //{{AFX_DATA_INIT(CreateTextureDlg)
+        m_height = 0;
+        m_width = 0;
+        //}}AFX_DATA_INIT
 }
 
 CreateTextureDlg::~CreateTextureDlg()
@@ -218,14 +222,14 @@ CreateTextureDlg::~CreateTextureDlg()
 
 void CreateTextureDlg::DoDataExchange(CDataExchange* pDX)
 {
-	CDialog::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CreateTextureDlg)
-	DDX_Control(pDX, IDC_BITMAP2, m_bitmap);
-	DDX_Text(pDX, IDC_TVIEW_HEIGHT, m_height);
-	DDV_MinMaxUInt(pDX, m_height, 0, 65535);
-	DDX_Text(pDX, IDC_TVIEW_WIDTH, m_width);
-	DDV_MinMaxUInt(pDX, m_width, 0, 65535);
-	//}}AFX_DATA_MAP
+        CDialog::DoDataExchange(pDX);
+        //{{AFX_DATA_MAP(CreateTextureDlg)
+        DDX_Control(pDX, IDC_BITMAP2, m_bitmap);
+        DDX_Text(pDX, IDC_TVIEW_HEIGHT, m_height);
+        DDV_MinMaxUInt(pDX, m_height, 0, 65535);
+        DDX_Text(pDX, IDC_TVIEW_WIDTH, m_width);
+        DDV_MinMaxUInt(pDX, m_width, 0, 65535);
+        //}}AFX_DATA_MAP
 
     if (!pDX->m_bSaveAndValidate)
     {
@@ -265,7 +269,7 @@ void CreateTextureDlg::do_image_background(XFBitmap *bm, XFBitmap *bg_bm, int w,
     VngoRect vprect(0, 0, w, h);
     VngoVVport8 *vp = new VngoVVport8(vprect, &(pDoc->palette), 0);
 
-    if (vp) 
+    if (vp)
     {
         vp->lock();
 
@@ -277,16 +281,16 @@ void CreateTextureDlg::do_image_background(XFBitmap *bm, XFBitmap *bg_bm, int w,
         {
             for (int y = 0; y < bm->height; y += bg_bm->height)
             {
-                for (int x = 0;  x < bm->width; x += bg_bm->width)        
+                for (int x = 0;  x < bm->width; x += bg_bm->width)
                 {
                     VngoTexture texture;
-            
+
                     texture.width = bg_bm->width;
                     texture.height = bg_bm->height;
                     texture.tex = bg_bm->data;
-        
+
                     VngoRect vrect(x,y, bg_bm->width, bg_bm->height);
-        
+
                     vp->image_trans(&vrect, &texture, 0);
                 }
             }
@@ -297,25 +301,25 @@ void CreateTextureDlg::do_image_background(XFBitmap *bm, XFBitmap *bg_bm, int w,
             vpoints[0].y = 0;
             vpoints[0].clr = colors[0];
             vpoints[0].shade = t;
-    
+
             vpoints[1].x = w - 1;
             vpoints[1].y = 0;
             vpoints[1].clr = colors[1];
             vpoints[1].shade = t;
-    
+
             vpoints[2].x = w - 1;
             vpoints[2].y = h - 1;
             vpoints[2].clr = colors[3];
             vpoints[2].shade = t;
-    
+
             vpoints[3].x = 0;
             vpoints[3].y = h - 1 ;
             vpoints[3].clr = colors[2];
             vpoints[3].shade = t;
-    
+
             vngo_smooth_rect(vp, vpoints);
         }
-        
+
         VngoTexture texture;
 
         texture.width = w;
@@ -358,7 +362,7 @@ BOOL CreateTextureDlg::setup_dib()
 
     if (bg_is_dib)
     {
-        // if we can't load the background bitmap,  then 
+        // if we can't load the background bitmap,  then
         // don't try to display it later...
         if (!theApp.LoadImage((LPCTSTR)bg_dib_fname, &bg_bm))
             bg_is_dib = FALSE;
@@ -405,10 +409,10 @@ BOOL CreateTextureDlg::setup_dib()
     ASSERT(bm.data != 0);
     BYTE *dptr=gmap;
     BYTE *sptr=bm.data;
+
     // First, we'll convert the bitmap data to a DIB
     if (bm.bpp == 1)
     {
-
         byte mypal[256];
 
         for(i=0; i < 256; i++)
@@ -428,6 +432,34 @@ BOOL CreateTextureDlg::setup_dib()
             }
         }
     }
+    else if (bm.bpp == 2)
+    {
+        VngoColor24bit  clr;
+
+        for(int y=0; y < bitmap_height; y++)
+        {
+            for(int x=0; x < bitmap_width; x++)
+            {
+                word pcolor = *sptr | (*(sptr+1) << 8);
+
+                sptr += 2;
+
+                clr.r = (pcolor >> 7) & 0xf8;
+                clr.g = (pcolor >> 2) & 0xf8;
+                clr.b = (pcolor << 3) & 0xf8;
+
+                if (clr.r == 248 && clr.g == 0 && clr.b == 248)
+                {   // If it is the transparent color skip it.
+                    dptr++;
+                }
+                else
+                {
+                    *(dptr++) = (byte)pDoc->palette.get_index(clr);
+                }
+                ASSERT(dptr <= (gmap + bitmap_width * bitmap_height));
+            }
+        }
+    }
     else
     {
         VngoColor24bit  clr;
@@ -440,7 +472,7 @@ BOOL CreateTextureDlg::setup_dib()
                 clr.r = *(sptr++);
                 clr.g = *(sptr++);
                 clr.b = *(sptr++);
-                if (clr.r == 255 && clr.g == 0 & clr.b == 255)
+                if (clr.r == 255 && clr.g == 0 && clr.b == 255)
                 {   // If it is the transparent color skip it.
                     dptr++;
                 }
@@ -466,34 +498,56 @@ BOOL CreateTextureDlg::setup_dib()
     {
         bg_bm.lock();
         bgptr = bg_bm.data;
-    
-    
+
+
         ASSERT(bg_bm.data != 0);
 
         BYTE *aptr=bggmap;
         BYTE *bptr=bg_bm.data;
+
         // First, we'll convert the bitmap data to a DIB
         if (bg_bm.bpp == 1)
         {
             byte mypal[256];
-    
+
             for(i=0; i < 256; i++)
             {
                 mypal[i] = (byte)pDoc->palette.get_index((VngoColor24bit)bg_bm.pal[i]);
             }
             // Force transparency to remain transparent.....
             mypal[255] = 255;
-    
+
             for(int y=0; y < bg_bm.height; y++)
             {
                 for(int x=0; x < bg_bm.width; x++)
                 {
                     *(aptr++) = mypal[*(bptr++)];
-    
+
                     ASSERT(aptr <= (bggmap + bg_bm.width * bg_bm.height));
                 }
             }
         }
+        else if (bg_bm.bpp == 2)
+        {
+            VngoColor24bit  clr;
+
+            for(int y=0; y < bg_bm.height; y++)
+            {
+                for(int x=0; x < bg_bm.width; x++)
+                {
+                    word pcolor = *bptr | (*(bptr+1) << 8);
+
+                    bptr += 2;
+
+                    clr.r = (pcolor >> 7) & 0xf8;
+                    clr.g = (pcolor >> 2) & 0xf8;
+                    clr.b = (pcolor << 3) & 0xf8;
+
+                    *(aptr++) = (byte)pDoc->palette.get_index(clr);
+                    ASSERT(aptr <= (bggmap + bg_bm.width * bg_bm.height));
+                }
+            }
+                }
         else
         {
             VngoColor24bit  clr;
@@ -590,9 +644,9 @@ void CreateTextureDlg::draw_selection_boxes(CPaintDC *pdc)
     br.DeleteObject();
 }
 
-void CreateTextureDlg::OnPaint() 
+void CreateTextureDlg::OnPaint()
 {
-	CPaintDC dc(this); // device context for painting
+        CPaintDC dc(this); // device context for painting
 
     if (!setup_dib())
         return;
@@ -620,7 +674,7 @@ void CreateTextureDlg::OnPaint()
     draw_selection_boxes(&dc);
 }
 
-void CreateTextureDlg::OnLButtonDown(UINT nFlags, CPoint point) 
+void CreateTextureDlg::OnLButtonDown(UINT nFlags, CPoint point)
 {
     int x1 = point.x;
     int y1 = point.y;
@@ -636,7 +690,7 @@ void CreateTextureDlg::OnLButtonDown(UINT nFlags, CPoint point)
     else if ( (x1 >= reg[3].left) && (x1 <= reg[3].right) && (y1 >= reg[3].top) && (y1 <= reg[3].bottom) )
         region = 3;
 
-    if (region != -1) 
+    if (region != -1)
     {
         ColorSelectPropPage dlga;
 
@@ -662,10 +716,10 @@ void CreateTextureDlg::OnLButtonDown(UINT nFlags, CPoint point)
         }
     }
 
-	CDialog::OnLButtonDown(nFlags, point);
+        CDialog::OnLButtonDown(nFlags, point);
 }
 
-void CreateTextureDlg::OnLoadBgTexture() 
+void CreateTextureDlg::OnLoadBgTexture()
 {
 
     CFileDialog dlg(TRUE,
@@ -695,7 +749,7 @@ void CreateTextureDlg::OnLoadBgTexture()
         }
         else
             bg_is_dib = FALSE;
-            
+
     }
 }
 
@@ -722,7 +776,7 @@ BOOL CreateTextureDlg::check_bitmap_size(const char *fname)
         }
 
         if (res)
-        {    
+        {
             switch (bm.height)
             {
                 case 16:
@@ -742,7 +796,7 @@ BOOL CreateTextureDlg::check_bitmap_size(const char *fname)
     return res;
 }
 
-void CreateTextureDlg::OnSaveAs() 
+void CreateTextureDlg::OnSaveAs()
 {
 
     CString newname;
@@ -783,7 +837,7 @@ void CreateTextureDlg::OnSaveAs()
             tclr = pDoc->palette.get_RGB(i);
             bm.pal[i] = (dword)(tclr.r | (tclr.g << 8) | (tclr.b << 16));
         }
-    
+
 
         theApp.SaveImage((LPCTSTR)dib_fname, &bm);
     }
@@ -796,28 +850,28 @@ void CreateTextureDlg::OnSaveAs()
 // CreateTextureFromColorDlg                                                ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 BEGIN_MESSAGE_MAP(CreateTextureFromColorDlg, CDialog)
-	//{{AFX_MSG_MAP(CreateTextureFromColorDlg)
-	ON_WM_PAINT()
-	ON_WM_LBUTTONDOWN()
-	ON_BN_CLICKED(IDC_SAVECLR, OnSaveColorToFile)
-	ON_CBN_SELCHANGE(IDC_SAVECLR_SIZELIST, OnSelectSize)
-	ON_BN_CLICKED(ID_MATCH_ALL_CLRS, OnSolidColor)
-	//}}AFX_MSG_MAP
+        //{{AFX_MSG_MAP(CreateTextureFromColorDlg)
+        ON_WM_PAINT()
+        ON_WM_LBUTTONDOWN()
+        ON_BN_CLICKED(IDC_SAVECLR, OnSaveColorToFile)
+        ON_CBN_SELCHANGE(IDC_SAVECLR_SIZELIST, OnSelectSize)
+        ON_BN_CLICKED(ID_MATCH_ALL_CLRS, OnSolidColor)
+        //}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 CreateTextureFromColorDlg::CreateTextureFromColorDlg(CWnd* pParent /*=NULL*/)
-	: CDialog(CreateTextureFromColorDlg::IDD, pParent),
+        : CDialog(CreateTextureFromColorDlg::IDD, pParent),
     bmi(0),
     gmap(0),
     hpal(0),
     m_color(0),
     pDoc(0)
 {
-	//{{AFX_DATA_INIT(CreateTextureFromColorDlg)
-	m_height = 0;
-	m_width = 0;
+        //{{AFX_DATA_INIT(CreateTextureFromColorDlg)
+        m_height = 0;
+        m_width = 0;
     m_size = -1;
-	//}}AFX_DATA_INIT
+        //}}AFX_DATA_INIT
 
     m_size = 4;
 
@@ -835,16 +889,16 @@ CreateTextureFromColorDlg::~CreateTextureFromColorDlg()
 
 void CreateTextureFromColorDlg::DoDataExchange(CDataExchange* pDX)
 {
-	CDialog::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CreateTextureFromColorDlg)
-	DDX_Control(pDX, IDC_SAVECLR_SIZELIST, m_listbox);
-	DDX_Control(pDX, IDC_BITMAP2, m_bitmap);
-	DDX_Text(pDX, IDC_TVIEW_HEIGHT, m_height);
-	DDV_MinMaxUInt(pDX, m_height, 0, 65535);
-	DDX_Text(pDX, IDC_TVIEW_WIDTH, m_width);
-	DDV_MinMaxUInt(pDX, m_width, 0, 65535);
+        CDialog::DoDataExchange(pDX);
+        //{{AFX_DATA_MAP(CreateTextureFromColorDlg)
+        DDX_Control(pDX, IDC_SAVECLR_SIZELIST, m_listbox);
+        DDX_Control(pDX, IDC_BITMAP2, m_bitmap);
+        DDX_Text(pDX, IDC_TVIEW_HEIGHT, m_height);
+        DDV_MinMaxUInt(pDX, m_height, 0, 65535);
+        DDX_Text(pDX, IDC_TVIEW_WIDTH, m_width);
+        DDV_MinMaxUInt(pDX, m_width, 0, 65535);
     DDX_CBIndex(pDX, IDC_SAVECLR_SIZELIST, m_size);
-	//}}AFX_DATA_MAP
+        //}}AFX_DATA_MAP
 
 }
 
@@ -879,7 +933,7 @@ void CreateTextureFromColorDlg::do_image_smoothing(XFBitmap *bm)
 
     VngoVVport8 *vp = new VngoVVport8(vprect, &(pDoc->palette), 0);
 
-    if (vp) 
+    if (vp)
     {
         vp->lock();
 
@@ -908,7 +962,7 @@ void CreateTextureFromColorDlg::do_image_smoothing(XFBitmap *bm)
         vpoints[3].shade = t;
 
         vngo_smooth_rect(vp, vpoints);
-        
+
         memcpy (bm->data, vp->vbuff.scrn_ptr, sizeof(BYTE) * w * h);
 
         vp->unlock();
@@ -921,7 +975,6 @@ void CreateTextureFromColorDlg::do_image_smoothing(XFBitmap *bm)
 BOOL CreateTextureFromColorDlg::create_bitmap_from_DIB(XFBitmap *bm, BYTE *gptr,
                                                         int w, int h, int bpp)
 {
-
     bm->release();
 
     bm->bpp = bpp;
@@ -965,23 +1018,23 @@ void CreateTextureFromColorDlg::setup_dib()
 
     switch(m_size)
     {
-        case 0: 
+        case 0:
             w = h = 16;
             break;
 
-        case 1: 
+        case 1:
             w = h = 32;
             break;
 
-        case 2: 
+        case 2:
             w = h = 64;
             break;
 
-        case 3: 
+        case 3:
             w = h = 128;
             break;
 
-        case 4: 
+        case 4:
             w = h = 256;
             break;
 
@@ -1022,10 +1075,10 @@ void CreateTextureFromColorDlg::setup_dib()
 
         // Modify the bitmap to have the tranparent color smoothing
         do_image_smoothing(bm);
-    
+
         // copy the bitmap data back into the DIB so we can display it
         memcpy(gmap, bm->data, sizeof(BYTE) * w * h);
-    
+
         bm->unlock();
     }
     else
@@ -1091,9 +1144,9 @@ void CreateTextureFromColorDlg::draw_selection_boxes(CPaintDC *pdc)
     br.DeleteObject();
 }
 
-void CreateTextureFromColorDlg::OnPaint() 
+void CreateTextureFromColorDlg::OnPaint()
 {
-	CPaintDC dc(this); // device context for painting
+        CPaintDC dc(this); // device context for painting
 
     setup_dib();
 
@@ -1126,7 +1179,7 @@ void CreateTextureFromColorDlg::OnPaint()
     draw_selection_boxes(&dc);
 }
 
-void CreateTextureFromColorDlg::OnLButtonDown(UINT nFlags, CPoint point) 
+void CreateTextureFromColorDlg::OnLButtonDown(UINT nFlags, CPoint point)
 {
     int x1 = point.x;
     int y1 = point.y;
@@ -1140,9 +1193,9 @@ void CreateTextureFromColorDlg::OnLButtonDown(UINT nFlags, CPoint point)
     else if ( (x1 >= reg[2].left) && (x1 <= reg[2].right) && (y1 >= reg[2].top) && (y1 <= reg[2].bottom) )
         region = 2;
     else if ( (x1 >= reg[3].left) && (x1 <= reg[3].right) && (y1 >= reg[3].top) && (y1 <= reg[3].bottom) )
-        region = 3;                                                  
+        region = 3;
 
-    if (region != -1) 
+    if (region != -1)
     {
         ColorSelectPropPage dlga;
 
@@ -1168,16 +1221,16 @@ void CreateTextureFromColorDlg::OnLButtonDown(UINT nFlags, CPoint point)
         }
     }
 
-	CDialog::OnLButtonDown(nFlags, point);
+        CDialog::OnLButtonDown(nFlags, point);
 }
 
-void CreateTextureFromColorDlg::OnSelectSize() 
+void CreateTextureFromColorDlg::OnSelectSize()
 {
     m_size = m_listbox.GetCurSel();
-    RedrawWindow();	
+    RedrawWindow();
 }
 
-void CreateTextureFromColorDlg::OnSolidColor() 
+void CreateTextureFromColorDlg::OnSolidColor()
 {
     ColorSelectPropPage dlga;
 
@@ -1205,7 +1258,7 @@ void CreateTextureFromColorDlg::OnSolidColor()
     }
 }
 
-void CreateTextureFromColorDlg::OnSaveColorToFile() 
+void CreateTextureFromColorDlg::OnSaveColorToFile()
 {
     CString filename;
 
@@ -1226,7 +1279,7 @@ void CreateTextureFromColorDlg::OnSaveColorToFile()
     if (dlg.DoModal() == IDOK)
     {
         filename = dlg.GetPathName();
-        
+
         char buff[256];
         // make sure that the filename has an extension!
         strcpy(buff, (LPCSTR)filename);
@@ -1259,7 +1312,7 @@ BEGIN_MESSAGE_MAP(TxtPropGenPage, CPropertyPage)
     ON_BN_CLICKED(IDC_TXTPRP_VIEW, OnView)
     ON_BN_CLICKED(IDC_TXTPRP_COLR, OnColor)
     ON_BN_CLICKED(IDC_TXTPRP_MAKENEW, OnCreateNewTexture)
-	//}}AFX_MSG_MAP
+        //}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 TxtPropGenPage::TxtPropGenPage()
@@ -1271,7 +1324,7 @@ TxtPropGenPage::TxtPropGenPage()
     //{{AFX_DATA_INIT(TxtPropGenPage)
     m_name = _T("");
     m_fname = _T("");
-	//}}AFX_DATA_INIT
+        //}}AFX_DATA_INIT
 
     for (int i=0; i < 4; i++)
         colors[i] = 0;
@@ -1299,7 +1352,7 @@ void TxtPropGenPage::DoDataExchange(CDataExchange* pDX)
     DDV_MaxChars(pDX, m_name, 15);
     DDX_Text(pDX, IDC_TXTPRP_FILE, m_fname);
     DDV_MaxChars(pDX, m_fname, 255);
-	//}}AFX_DATA_MAP
+        //}}AFX_DATA_MAP
 
     if (pDX->m_bSaveAndValidate)
     {
@@ -1374,7 +1427,7 @@ void TxtPropGenPage::DoDataExchange(CDataExchange* pDX)
     }
 }
 
-void TxtPropGenPage::OnBrowse() 
+void TxtPropGenPage::OnBrowse()
 {
     CFileDialog dlg(TRUE,
                     NULL, m_fname, OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY,
@@ -1471,6 +1524,37 @@ void TxtPropGenPage::OnView()
                 dptr += (4-skip);
         }
     }
+    else if (bm.bpp == 2)
+    {
+        VngoColor24bit  clr;
+
+        ASSERT(bm.bpp == 3);
+        for(int y=0; y < bm.height; y++)
+        {
+            for(int x=0; x < bm.width; x++)
+            {
+                word pcolor = *sptr | (*(sptr+1) << 8);
+
+                sptr += 2;
+
+                clr.r = (pcolor >> 7) & 0xf8;
+                clr.g = (pcolor >> 2) & 0xf8;
+                clr.b = (pcolor << 3) & 0xf8;
+                if (clr.r == 248 && clr.g == 0 && clr.b == 248)
+                {   // If it is the transparent color skip it.
+                    dptr++;
+                }
+                else
+                {
+                    *(dptr++) = (byte)pDoc->palette.get_index(clr);
+                }
+                ASSERT(dptr <= (gmap + ((bm.width+3) & ~0x3)*bm.height));
+            }
+            int skip = (bm.width & 0x3);
+            if (skip)
+                dptr += (4-skip);
+        }
+    }
     else
     {
         VngoColor24bit  clr;
@@ -1483,7 +1567,7 @@ void TxtPropGenPage::OnView()
                 clr.r = *(sptr++);
                 clr.g = *(sptr++);
                 clr.b = *(sptr++);
-                if (clr.r == 255 && clr.g == 0 & clr.b == 255)
+                if (clr.r == 255 && clr.g == 0 && clr.b == 255)
                 {   // If it is the transparent color skip it.
                     dptr++;
                 }
@@ -1519,7 +1603,7 @@ void TxtPropGenPage::OnView()
     delete gmap;
 }
 
-void TxtPropGenPage::OnColor() 
+void TxtPropGenPage::OnColor()
 {
     ColorSelectPropPage dlga;
 
@@ -1544,12 +1628,12 @@ void TxtPropGenPage::OnColor()
     }
 }
 
-void TxtPropGenPage::OnCreateNewTexture() 
+void TxtPropGenPage::OnCreateNewTexture()
 {
     if (!*m_fname)
     {
         CreateTextureAskDlg dlg;
-        
+
         int res = dlg.DoModal();
 
         if (res == CREATE_ASK_FILE)
@@ -1564,16 +1648,16 @@ void TxtPropGenPage::OnCreateNewTexture()
                             "Targa files (*.tga)|*.TGA|"
                             "All files (*.*)|*.*||",
                             this);
-        
+
             dlg.m_ofn.lpstrTitle = "Texture Bitmap File";
-        
+
             if (dlg.DoModal() == IDOK)
             {
                 // Create a CreateTextureDlg instance so we can use its
                 // member function check_bitmap_size() on the new filename...
                 CreateTextureDlg  tempdlg;
                 CString temp;
-                
+
                 temp = dlg.GetPathName();
                 if (tempdlg.check_bitmap_size((LPCTSTR)temp))
                 {
@@ -1581,7 +1665,7 @@ void TxtPropGenPage::OnCreateNewTexture()
 
                     HWND    hWndName = ::GetDlgItem(GetSafeHwnd(),IDC_TXPRP_NAME);
                     char    txtName[32];
-            
+
                     ::GetWindowText(hWndName, txtName, sizeof(txtName));
 
                     m_fname = temp;
@@ -1589,7 +1673,7 @@ void TxtPropGenPage::OnCreateNewTexture()
 
                     ::SetWindowText(hWndName, txtName);
                 }
-                else 
+                else
                     return;
             }
             else
@@ -1600,7 +1684,7 @@ void TxtPropGenPage::OnCreateNewTexture()
         {
             // we want to create a texture from a color!
             CreateTextureFromColorDlg dlg;
-        
+
             dlg.setup(pDoc);
             dlg.hpal = pDoc->hpal;
             dlg.m_color = 0;
@@ -1608,20 +1692,20 @@ void TxtPropGenPage::OnCreateNewTexture()
                 dlg.colors[i] = 0;
             dlg.m_width = 256;
             dlg.m_height = 256;
-        
-            dlg.DoModal();     
+
+            dlg.DoModal();
 
             HWND    hWndName = ::GetDlgItem(GetSafeHwnd(),IDC_TXPRP_NAME);
             char    txtName[32];
-    
+
             ::GetWindowText(hWndName, txtName, sizeof(txtName));
 
             m_fname = dlg.m_fname;
             UpdateData(FALSE);
-        
+
             ::SetWindowText(hWndName, txtName);
 
-            return;                
+            return;
         }
         else if (res == IDCANCEL)
             return;
@@ -1638,7 +1722,7 @@ void TxtPropGenPage::OnCreateNewTexture()
     dlg.m_width = bm.width;
     dlg.m_height = bm.width;
     dlg.dib_fname = m_fname;
-   
+
     for (int i=0; i <4; i++)
         colors[i] = pDoc->palette.get_index((VngoColor24bit)m_color);
 
@@ -1649,7 +1733,7 @@ void TxtPropGenPage::OnCreateNewTexture()
     dlg.hpal = pDoc->hpal;
 
     //ÄÄÄ Handle interaction
-    
+
     HWND    hWndName = ::GetDlgItem(GetSafeHwnd(),IDC_TXPRP_NAME);
     char    txtName[32];
 
@@ -1659,7 +1743,7 @@ void TxtPropGenPage::OnCreateNewTexture()
     {
         for (int i=0;i<4;i++)
             colors[i] = dlg.colors[i];
-                
+
         m_fname = dlg.dib_fname;
         UpdateData(FALSE);
     }
@@ -1693,13 +1777,13 @@ TxtPropSFlagsPage::TxtPropSFlagsPage()
     m_flipu = FALSE;
     m_flipv = FALSE;
     m_tile = -1;
-	m_notile = FALSE;
-	m_highonly = FALSE;
-	m_app0 = FALSE;
-	m_app1 = FALSE;
-	m_app2 = FALSE;
-	m_app3 = FALSE;
-	//}}AFX_DATA_INIT
+        m_notile = FALSE;
+        m_highonly = FALSE;
+        m_app0 = FALSE;
+        m_app1 = FALSE;
+        m_app2 = FALSE;
+        m_app3 = FALSE;
+        //}}AFX_DATA_INIT
 
     m_tile = 0;
 }
@@ -1723,13 +1807,13 @@ void TxtPropSFlagsPage::DoDataExchange(CDataExchange* pDX)
     DDX_Check(pDX, IDC_TXPRP_FLIPU, m_flipu);
     DDX_Check(pDX, IDC_TXPRP_FLIPV, m_flipv);
     DDX_CBIndex(pDX, IDC_TXPRP_TILE, m_tile);
-	DDX_Check(pDX, IDC_TXPROP_NOTILE, m_notile);
-	DDX_Check(pDX, IDC_TXPROP_HIGHONLY, m_highonly);
-	DDX_Check(pDX, IDC_TXPROP_APP0, m_app0);
-	DDX_Check(pDX, IDC_TXPROP_APP1, m_app1);
-	DDX_Check(pDX, IDC_TXPROP_APP2, m_app2);
-	DDX_Check(pDX, IDC_TXPROP_APP3, m_app3);
-	//}}AFX_DATA_MAP
+        DDX_Check(pDX, IDC_TXPROP_NOTILE, m_notile);
+        DDX_Check(pDX, IDC_TXPROP_HIGHONLY, m_highonly);
+        DDX_Check(pDX, IDC_TXPROP_APP0, m_app0);
+        DDX_Check(pDX, IDC_TXPROP_APP1, m_app1);
+        DDX_Check(pDX, IDC_TXPROP_APP2, m_app2);
+        DDX_Check(pDX, IDC_TXPROP_APP3, m_app3);
+        //}}AFX_DATA_MAP
 
     if (!pDX->m_bSaveAndValidate)
     {
@@ -1737,7 +1821,7 @@ void TxtPropSFlagsPage::DoDataExchange(CDataExchange* pDX)
     }
 }
 
-void TxtPropSFlagsPage::OnResetUsage() 
+void TxtPropSFlagsPage::OnResetUsage()
 {
     if (!UpdateData(TRUE))
         return;

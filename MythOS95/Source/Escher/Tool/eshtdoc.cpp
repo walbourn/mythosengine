@@ -8,23 +8,27 @@
 //ùùùùù²±²ùùùùùùù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùùùùùù²±²ùùùù²±²ùùùùùù
 //ùùùù²²²²²²²²²²ù²²²²²²²²ùùù²²²²²²²²ùù²²²ùùùù²²²ù²²²²²²²²²²ù²²²ùùùù²²²ùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùùùùùùùùù Microsoft Windows 95/NT Version ùùùùùùùùùùùùùùùùùùùùùùù
+//ùùùùùùùùùùùùùùùùù Microsoft Windows 95/98/NT Version ùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùCopyrightù(c)ù1994-1998ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
-//ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
+//ùùùCopyright (c) 1994-1999 by Dan Higdon, Tim Little, and Chuck Walbournùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
-//           *** Charybdis Enterprises, Inc. Company Confidential ***
+// This file and all associated files are subject to the terms of the
+// GNU Lesser General Public License version 2 as published by the
+// Free Software Foundation (http://www.gnu.org).   They remain the
+// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+// See LICENSE.TXT in the distribution for a copy of this license.
 //
-//  This file and all associated files are the company proprietary property
-//        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+// THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+// OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+// PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+// LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+// OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 //
-// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//
+//                        http://www.mythos-engine.org/
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
@@ -143,7 +147,7 @@ ToolDoc::ToolDoc() :
     nmeshes(0),
     meshes(0),
     hpal(0),
-    flags(COMPRESS | FLOATING)
+    flags(COMPRESS | FLOATING | TRUECOLOR)
 {
     int     i;
     char    *c;
@@ -246,6 +250,24 @@ void ToolDoc::DeleteContents()
     {
         EschMeshDraw    *t=mptr;
         mptr = (EschMeshDraw*) mptr->next();
+
+        for(ulong i=0; i < t->tmax; i++)
+        {
+            EschTexture *txptr=t->txt[i];
+            if (txptr && txptr->app_data)
+            {
+                switch (txptr->get_type() & ESCH_TXTT_BASEMASK)
+                {
+                    case ESCH_TXTT_STATIC:
+                        delete (XFBitmap*)(txptr->app_data);
+                        break;
+                    case ESCH_TXTT_MFRAME:
+                        delete [] (XFBitmap*)(txptr->app_data);
+                        break;
+                }
+                txptr->app_data=0;
+            }
+        }
         t->remove(1);
         delete t;
     }
@@ -261,7 +283,7 @@ void ToolDoc::DeleteContents()
         hpal=0;
     }
 
-        CDocument::DeleteContents();
+    CDocument::DeleteContents();
 }
 
 
@@ -648,16 +670,7 @@ esch_error_codes ToolDoc::serialize_store_mesh(XFParseIFF *iff, EschMeshDraw *ms
                 ASSERT(t->ptr->tex);
 
                 // Determine if transparent
-                BOOL transp=FALSE;
-                byte *tptr=(byte*)t->ptr->tex;
-                for(int j=0; j < (t->ptr->width*t->ptr->height); j++)
-                {
-                    if (*(tptr++) == VNGO_TRANSPARENT_COLOR)
-                    {
-                        transp=TRUE;
-                        break;
-                    }
-                }
+                BOOL transp = (t->flags & ESCH_TXT_TRANSP) ? TRUE : FALSE;
 
                 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Create EMTL form
                 if (iff->newform((t->get_type() == ESCH_TXTT_MFRAME)
@@ -682,9 +695,18 @@ esch_error_codes ToolDoc::serialize_store_mesh(XFParseIFF *iff, EschMeshDraw *ms
 
                 if (flags & TRUECOLOR)
                 {
-                    mheader.type = (transp)
-                                   ? ESCH_MTL_TYPE_32BIT
-                                   : ESCH_MTL_TYPE_24BIT;
+                    if (transp)
+                    {
+                        mheader.type = (flags & USE15BIT)
+                                       ? ESCH_MTL_TYPE_15BIT_TRANSP
+                                       : ESCH_MTL_TYPE_32BIT;
+                    }
+                    else
+                    {
+                        mheader.type = (flags & USE15BIT)
+                                       ? ESCH_MTL_TYPE_15BIT
+                                       : ESCH_MTL_TYPE_24BIT;
+                    }
                 }
                 else
                 {
@@ -714,16 +736,28 @@ esch_error_codes ToolDoc::serialize_store_mesh(XFParseIFF *iff, EschMeshDraw *ms
                 }
 
                 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Body
-                int bpp=1;
-                if (flags & TRUECOLOR)
-                    bpp = (transp) ? 4 : 3;
+                int bpp;
+                switch (mheader.type)
+                {
+                    case ESCH_MTL_TYPE_8BIT:            bpp=1;  break;
+                    case ESCH_MTL_TYPE_8BIT_TRANSP:     bpp=1;  break;
+                    case ESCH_MTL_TYPE_15BIT:           bpp=2;  break;
+                    case ESCH_MTL_TYPE_15BIT_TRANSP:    bpp=2;  break;
+                    case ESCH_MTL_TYPE_24BIT:           bpp=3;  break;
+                    case ESCH_MTL_TYPE_32BIT:           bpp=4;  break;
+                    default:
+                        ASSERT(FALSE);
+                        iff->leaveform();
+                        t->unlock();
+                        return ESCH_ERR_NOTSUPPORTED;
+                }
 
-                tptr = (byte*)t->ptr->tex;
-                for(j=0; j < (int)mheader.nframes; j++)
+                byte *tptr = (byte*)t->ptr->tex;
+                for(int j=0; j < (int)mheader.nframes; j++)
                 {
                     byte *body=tptr;
 
-                    if (flags & TRUECOLOR)
+                    if (bpp != 1)
                     {
                         body=new byte[mheader.xsize*mheader.ysize*bpp];
                         if (!body)
@@ -733,36 +767,300 @@ esch_error_codes ToolDoc::serialize_store_mesh(XFParseIFF *iff, EschMeshDraw *ms
                             return ESCH_ERR_NOMEMORY;
                         }
 
-                        byte *sptr=tptr;
-                        byte *dptr=body;
-                        for(int k=0; k < (int)(mheader.xsize*mheader.ysize); k++)
+                        if (t->app_data)
                         {
-                            if (*sptr == VNGO_TRANSPARENT_COLOR)
+                            //ÄÄÄÄ Loaded XFBitmap instance, use that to
+                            //ÄÄÄÄ get texture data instead of VngoTexture
+                            XFBitmap *bm = (t->get_type() == ESCH_TXTT_MFRAME)
+                                           ? &((XFBitmap*)t->app_data)[j]
+                                           : (XFBitmap*)t->app_data;
+
+                            bm->lock();
+
+                            ASSERT(bm != 0);
+
+                            switch (bm->bpp)
                             {
-                                assert(transp);
-                                *(dptr++) = 0;
-                                *(dptr++) = 0;
-                                *(dptr++) = 0;
-                                *(dptr++) = 0;
+                                case XFBM_BPP_15BIT:
+                                    switch (bpp)
+                                    {
+                                        case 2:
+                                            {
+                                                byte *sptr=bm->data;
+                                                byte *dptr=body;
+                                                for(int k=0;
+                                                    k < (int)(mheader.xsize*mheader.ysize);
+                                                    k++)
+                                                {
+                                                    word pcolor = *sptr | (*(sptr+1) << 8);
+
+                                                    if (transp && (pcolor & 0x8000))
+                                                    {
+                                                        *(dptr++) = *(sptr++);
+                                                        *(dptr++) = *(sptr++);
+                                                    }
+                                                    else
+                                                    {
+                                                        pcolor &= ~0x8000;
+                                                        VngoColor24bit clr((pcolor >> 7) & 0xf8,
+                                                                           (pcolor >> 2) & 0xf8,
+                                                                           (pcolor << 3) & 0xf8);
+
+                                                        if (transp
+                                                            && (clr.r == 248)
+                                                            && (clr.b == 248)
+                                                            && (clr.g == 0))
+                                                        {
+                                                            pcolor = ((255 >> 3) << 10)
+                                                                      + ((255) >> 3);
+
+                                                            pcolor |= 0x8000;
+
+                                                            *(dptr++) = byte(pcolor & 0xff);
+                                                            *(dptr++) = byte((pcolor & 0xff00) >> 8);
+                                                        }
+                                                        else
+                                                        {
+                                                            *(dptr++) = *(sptr++);
+                                                            *(dptr++) = *(sptr++);
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            break;
+                                        case 3:
+                                        case 4:
+                                            {
+                                                byte *sptr=bm->data;
+                                                byte *dptr=body;
+                                                for(int k=0;
+                                                    k < (int)(mheader.xsize*mheader.ysize);
+                                                    k++)
+                                                {
+                                                    word pcolor = *sptr | (*(sptr+1) << 8);
+
+                                                    sptr += 2;
+
+                                                    if ((bpp == 4)
+                                                        && (pcolor & 0x8000))
+                                                    {
+                                                        *(dptr++) = 255;
+                                                        *(dptr++) = 0;
+                                                        *(dptr++) = 255;
+                                                        *(dptr++) = 0;
+                                                    }
+                                                    else
+                                                    {
+                                                        pcolor &= ~0x8000;
+
+                                                        VngoColor24bit clr((pcolor >> 7) & 0xf8,
+                                                                           (pcolor >> 2) & 0xf8,
+                                                                           (pcolor << 3) & 0xf8);
+
+                                                        *(dptr++) = clr.r;
+                                                        *(dptr++) = clr.g;
+                                                        *(dptr++) = clr.b;
+
+                                                        if (bpp == 4)
+                                                        {
+                                                            if (transp
+                                                                && (clr.r == 248)
+                                                                && (clr.b == 248)
+                                                                && (clr.g == 0))
+                                                            {
+                                                                *(dptr++) = 0;
+                                                            }
+                                                            else
+                                                            {
+                                                                *(dptr++) = 255;
+                                                            }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                            break;
+                                    }
+                                    break;
+                                case XFBM_BPP_24BIT:
+                                    switch (bpp)
+                                    {
+                                        case 2:
+                                            {
+                                                byte *sptr=bm->data;
+                                                byte *dptr=body;
+                                                for(int k=0;
+                                                    k < (int)(mheader.xsize*mheader.ysize);
+                                                    k++)
+                                                {
+                                                    word pcolor = (((*sptr) >> 3) << 10)
+                                                                    + (((*(sptr+1)) >> 3) << 5)
+                                                                    + ((*(sptr+2)) >> 3);
+
+                                                    if (transp
+                                                        && (*sptr == 255)
+                                                        && (*(sptr+2) == 255)
+                                                        && (*(sptr+1) == 0))
+                                                    {
+                                                        pcolor |= 0x8000;
+                                                    }
+
+                                                    *(dptr++) = byte(pcolor & 0xff);
+                                                    *(dptr++) = byte((pcolor & 0xff00) >> 8);
+
+                                                    sptr += 3;
+                                                }
+                                            }
+                                            break;
+                                        case 3:
+                                            memcpy(body,bm->data,
+                                                   mheader.xsize*mheader.ysize*3);
+                                            break;
+                                        case 4:
+                                            {
+                                                byte *sptr=bm->data;
+                                                byte *dptr=body;
+                                                for(int k=0;
+                                                    k < (int)(mheader.xsize*mheader.ysize);
+                                                    k++)
+                                                {
+                                                    *(dptr++) = *sptr;
+                                                    *(dptr++) = *(sptr+1);
+                                                    *(dptr++) = *(sptr+2);
+
+                                                    if (transp
+                                                        && (*sptr == 255)
+                                                        && (*(sptr+2) == 255)
+                                                        && (*(sptr+1) == 255))
+                                                    {
+                                                        *(dptr++) = 0;
+                                                    }
+                                                    else
+                                                    {
+                                                        *(dptr++) = 255;
+                                                    }
+
+                                                    sptr += 3;
+                                                }
+                                            }
+                                            break;
+                                    }
+                                    break;
+                                case XFBM_BPP_32BIT:
+                                    switch (bpp)
+                                    {
+                                        case 2:
+                                            {
+                                                byte *sptr=bm->data;
+                                                byte *dptr=body;
+                                                for(int k=0;
+                                                    k < (int)(mheader.xsize*mheader.ysize);
+                                                    k++)
+                                                {
+                                                    word pcolor = (((*sptr) >> 3) << 10)
+                                                                    + (((*(sptr+1)) >> 3) << 5)
+                                                                    + ((*(sptr+2)) >> 3);
+
+                                                    if (*(sptr+3) < ESCH_ALPHA_TRANSP)
+                                                    {
+                                                        pcolor |= 0x8000;
+                                                    }
+
+                                                    *(dptr++) = byte(pcolor & 0xff);
+                                                    *(dptr++) = byte((pcolor & 0xff00) >> 8);
+
+                                                    sptr += 4;
+                                                }
+                                            }
+                                            break;
+                                        case 3:
+                                            {
+                                                byte *sptr=bm->data;
+                                                byte *dptr=body;
+                                                for(int k=0;
+                                                    k < (int)(mheader.xsize*mheader.ysize);
+                                                    k++)
+                                                {
+                                                    *(dptr++) = *(sptr++);
+                                                    *(dptr++) = *(sptr++);
+                                                    *(dptr++) = *(sptr++);
+                                                    sptr++;
+                                                }
+                                            }
+                                            break;
+                                        case 4:
+                                            memcpy(body,bm->data,
+                                                   mheader.xsize*mheader.ysize*4);
+                                            break;
+                                    }
+                                    break;
                             }
-                            else
+
+                            bm->unlock();
+                        }
+                        else
+                        {
+                            //ÄÄÄÄ Don't have XFBitmap, use VngoTexture...
+                            byte *sptr=tptr;
+                            byte *dptr=body;
+                            for(int k=0; k < (int)(mheader.xsize*mheader.ysize); k++)
                             {
                                 VngoColor24bit clr = palette->hw_pal.p[*sptr];
-                                *(dptr++) = clr.r;
-                                *(dptr++) = clr.g;
-                                *(dptr++) = clr.b;
 
-                                if (transp)
-                                    *(dptr++) = 255;
+                                switch (bpp)
+                                {
+                                    case 2:
+                                        {
+                                            word pcolor = ((clr.r >> 3) << 10)
+                                                           + ((clr.g >> 3) << 5)
+                                                           + (clr.b >> 3);
+
+                                            if (transp
+                                                && (*sptr == VNGO_TRANSPARENT_COLOR))
+                                            {
+                                                pcolor |= 0x8000;
+                                            }
+
+                                            *(dptr++) = byte(pcolor & 0xff);
+                                            *(dptr++) = byte((pcolor & 0xff00) >> 8);
+                                        }
+                                        break;
+                                    case 3:
+                                        *(dptr++) = clr.r;
+                                        *(dptr++) = clr.g;
+                                        *(dptr++) = clr.b;
+                                        break;
+                                    case 4:
+                                        if (*sptr == VNGO_TRANSPARENT_COLOR)
+                                        {
+                                            *(dptr++) = 255;
+                                            *(dptr++) = 0;
+                                            *(dptr++) = 255;
+                                            *(dptr++) = 0;
+                                        }
+                                        else
+                                        {
+                                            *(dptr++) = clr.r;
+                                            *(dptr++) = clr.g;
+                                            *(dptr++) = clr.b;
+                                            *(dptr++) = 255;
+                                        }
+                                        break;
+                                    default:
+                                        ASSERT(FALSE);
+                                        iff->leaveform();
+                                        t->unlock();
+                                        return ESCH_ERR_NOTSUPPORTED;
+                                }
+
+                                sptr++;
                             }
-                            sptr++;
                         }
                     }
 
                     byte *work = new byte[mheader.xsize*mheader.ysize*bpp];
                     if (!work)
                     {
-                        if (flags & TRUECOLOR)
+                        if (bpp != 1)
                             delete [] body;
                         iff->leaveform();
                         t->unlock();
@@ -770,34 +1068,41 @@ esch_error_codes ToolDoc::serialize_store_mesh(XFParseIFF *iff, EschMeshDraw *ms
                     }
 
                     dword size=0;
-                    if (flags & COMPRESS)
+                    if (mheader.compress == ESCH_MTL_COMPRESS_RLE)
                     {
-                        if (flags & TRUECOLOR)
+                        switch (bpp)
                         {
-                            if (transp)
-                            {
-                                size=XFParseXEB::compress_rle_32bpp(mheader.xsize,
+                            case 1:
+                                size=XFParseXEB::compress_rle_8bpp(mheader.xsize,
+                                                                   mheader.ysize,
+                                                                   body,work);
+                                break;
+                            case 2:
+                                size=XFParseXEB::compress_rle_16bpp(mheader.xsize,
                                                                     mheader.ysize,
                                                                     body,work);
-                            }
-                            else
-                            {
+                                break;
+                            case 3:
                                 size=XFParseXEB::compress_rle_24bpp(mheader.xsize,
                                                                     mheader.ysize,
                                                                     body,work);
-                            }
-                        }
-                        else
-                        {
-                            size=XFParseXEB::compress_rle_8bpp(mheader.xsize,
-                                                               mheader.ysize,
-                                                               body,work);
+                                break;
+                            case 4:
+                                size=XFParseXEB::compress_rle_32bpp(mheader.xsize,
+                                                                    mheader.ysize,
+                                                                    body,work);
+                                break;
+                            default:
+                                ASSERT(FALSE);
+                                iff->leaveform();
+                                t->unlock();
+                                return ESCH_ERR_NOTSUPPORTED;
                         }
                     }
 
                     if (size)
                     {
-                        if (flags & TRUECOLOR)
+                        if (bpp != 1)
                             delete [] body;
 
                         if (iff->write(iff->makeid('B','O','D','Y'),work,size))
@@ -813,14 +1118,14 @@ esch_error_codes ToolDoc::serialize_store_mesh(XFParseIFF *iff, EschMeshDraw *ms
                         if (iff->write(iff->makeid('B','O','D','Y'), body,
                                        (ulong)(mheader.xsize*mheader.ysize*bpp)))
                         {
-                            if (flags & TRUECOLOR)
+                            if (bpp != 1)
                                 delete [] body;
                             iff->leaveform();
                             t->unlock();
                             return ESCH_ERR_FILEERROR;
                         }
 
-                        if (flags & TRUECOLOR)
+                        if (bpp != 1)
                             delete [] body;
                     }
 
@@ -1488,7 +1793,8 @@ save_error_exit: ;
                         return;
                     }
 
-                    err=m->load(&iff,0,palette,0,pname,ESCH_MSHLD_USEMFTXT);
+                    err=m->load(&iff,0,palette,0,pname,ESCH_MSHLD_USEMFTXT
+                                                       | ESCH_MSHLD_TXTTCBM);
                     if (err!=ESCH_ERR_NONE)
                     {
                         delete m;
@@ -1789,7 +2095,7 @@ BOOL ToolDoc::OnNewDocument()
     *desc = 0;
     SetTitle(name);
 
-    flags = COMPRESS | FLOATING;
+    flags = COMPRESS | FLOATING | TRUECOLOR;
 
 //ÄÄÄ Load default palette (required)
     if (!LoadPalette(pfname))

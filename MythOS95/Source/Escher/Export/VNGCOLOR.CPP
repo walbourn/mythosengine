@@ -2,26 +2,33 @@
 //
 //                                                           %__________%
 //                                                          %/ . .  .   \%
-//           Van Gogh 2D-Display Library                     |  . .  o. | 
+//           Van Gogh 2D-Display Library                     |  . .  o. |
 //                                                           |. _  .   .|
-//          Microsoft Windows '95 Version                    | / \   .  | 
+//                   DOS Version                             | / \   .  |
 //                                                           |_|_|_._._.|
-// Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
-//              All rights reserved.                        %\__________/%
+//                                                           |.-.-.-.-..|
+//                                                          %\__________/%
 //                                                           %          %
+//
+//    Copyright (c) 1994-1999 by Dan Higdon, Tim Little, and Chuck Walbourn
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
-//           *** Charybdis Enterprises, Inc. Company Confidential ***
+// This file and all associated files are subject to the terms of the
+// GNU Lesser General Public License version 2 as published by the
+// Free Software Foundation (http://www.gnu.org).   They remain the
+// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+// See LICENSE.TXT in the distribution for a copy of this license.
 //
-//  This file and all associated files are the company proprietary property
-//        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+// THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+// OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+// PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+// LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+// OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 //
-// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//
+//                        http://www.mythos-engine.org/
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
@@ -35,7 +42,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include "debug.h"
@@ -122,7 +129,7 @@ void Vngo24to8bit::init(VngoPal *mypal)
             {
                 close = 0x7ffffff;      // reset close to greater than 256^3
                 for (c=0;c < 255;c++)
-                {                    
+                {
                     dr = (r<<3) - my_pal8->p[c].r;
                     dg = (g<<3) - my_pal8->p[c].g;
                     db = (b<<3) - my_pal8->p[c].b;
@@ -131,7 +138,7 @@ void Vngo24to8bit::init(VngoPal *mypal)
                     dg *= dg;
                     db *= db;
 #else  // This methos distorts color matching in order of eye sensitivity.
-#if 0   // These seemed a little too exagerated so for now we will use 
+#if 0   // These seemed a little too exagerated so for now we will use
         // some calmer values.
                     dr *= dr * 30;
                     dg *= dg * 59;
@@ -201,7 +208,7 @@ VngoColorHLS VngoColor24bit::to_HLS()
             max = db;
     else if (dg > db)
         max = dg;
-    else   
+    else
         max = db;
 
     if (dr < dg)
@@ -238,7 +245,7 @@ VngoColorHLS VngoColor24bit::to_HLS()
         while (c.h < 0)
             c.h = c.h + (Flx16)360;
     }
-    
+
     return (c);
 }
 

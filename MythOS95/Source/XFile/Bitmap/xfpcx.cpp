@@ -1,28 +1,32 @@
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
-//                            
+//
 //           ^           **   **   **** ***** *    ****     ^      Take me to
 //          (_)            * *     *      *   *    *       (_)    / your
 //     ^                    *      **     *   *    **            ^  leader...
 //    (_)       ^          * *     *      *   *    *            (_)
 //             (_)       **   **   *    ***** **** ****
 //
-//                      Microsoft Windows 95/NT Version
+//                    Microsoft Windows 95/98/NT Version
 //
-//            Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.
-//                              All Rights Reserved.
+//  Copyright (c) 1994-1999 by Dan Higdon, Tim Little, and Chuck Walbourn
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
-//           *** Charybdis Enterprises, Inc. Company Confidential ***
+// This file and all associated files are subject to the terms of the
+// GNU Lesser General Public License version 2 as published by the
+// Free Software Foundation (http://www.gnu.org).   They remain the
+// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+// See LICENSE.TXT in the distribution for a copy of this license.
 //
-//  This file and all associated files are the company proprietary property
-//        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+// THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+// OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+// PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+// LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+// OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 //
-// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//
+//                        http://www.mythos-engine.org/
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
@@ -38,7 +42,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include <assert.h>
@@ -121,7 +125,7 @@ xf_error_codes XFParsePCX::read(XFBitmap *b)
     b->width = (ushort) (header.xmax - header.xmin + 1);
     b->height = (ushort) (header.ymax - header.ymin + 1);
     b->bpp = XFBM_BPP_8BIT;
- 
+
 //ÄÄÄ Load image data ÄÄÄ
 
     // Allocate memory
@@ -195,14 +199,14 @@ xf_error_codes XFParsePCX::read(XFBitmap *b)
         {
             return (errorn=XF_ERR_NOMEMORY);
         }
-        
+
         b->pal = (dword *)ivory_hlock(b->palhandle);
         if (!b->pal)
         {
             b->release();
             return (errorn=XF_ERR_LOCKFAILED);
         }
-        
+
         memset(b->pal,0,sizeof(dword)*256);
 
         if (xf->read(work,1) != 1 || *work != 0xc)
@@ -283,11 +287,11 @@ xf_error_codes XFParsePCX::write(XFBitmap *b)
 
         err=b->lock();
         if (err)
-        {   
+        {
             return (errorn=err);
         }
     }
- 
+
 //ÄÄÄ Write out image ÄÄÄ
     if (!b->data)
     {
@@ -368,7 +372,7 @@ xf_error_codes XFParsePCX::write(XFBitmap *b)
             }
         }
     }
-        
+
 //ÄÄÄ Write out palette, if any ÄÄÄ
     if (header.planes == 1)
     {

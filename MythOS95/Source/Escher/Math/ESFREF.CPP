@@ -8,23 +8,27 @@
 //ùùùùù²±²ùùùùùùù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùùùùùù²±²ùùùù²±²ùùùùùù
 //ùùùù²²²²²²²²²²ù²²²²²²²²ùùù²²²²²²²²ùù²²²ùùùù²²²ù²²²²²²²²²²ù²²²ùùùù²²²ùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùùùùùùùùù Microsoft Windows 95/NT Version ùùùùùùùùùùùùùùùùùùùùùùù
+//ùùùùùùùùùùùùùùùùù Microsoft Windows 95/98/NT Version ùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùCopyrightù(c)ù1994-1998ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
-//ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
+//ùùùCopyright (c) 1994-1999 by Dan Higdon, Tim Little, and Chuck Walbournùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
-//           *** Charybdis Enterprises, Inc. Company Confidential ***
+// This file and all associated files are subject to the terms of the
+// GNU Lesser General Public License version 2 as published by the
+// Free Software Foundation (http://www.gnu.org).   They remain the
+// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+// See LICENSE.TXT in the distribution for a copy of this license.
 //
-//  This file and all associated files are the company proprietary property
-//        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+// THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+// OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+// PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+// LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+// OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 //
-// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//
+//                        http://www.mythos-engine.org/
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
@@ -42,7 +46,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include "escher.hpp"
@@ -71,7 +75,7 @@
 // Sets the position of the frame-of-reference in world coordinates.        ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 void EschFrameRef::set_position(const EschPoint *pt, dword update)
-{ 
+{
     orient.mtx[ESCH_MTX_J] = pt->x;
     orient.mtx[ESCH_MTX_K] = pt->y;
     orient.mtx[ESCH_MTX_L] = pt->z;
@@ -86,10 +90,10 @@ void EschFrameRef::set_position(const EschPoint *pt, dword update)
 void EschFrameRef::set_position(const float ix, const float iy, const float iz,
                                 dword update)
 
-{ 
+{
     orient.mtx[ESCH_MTX_J] = ix;
     orient.mtx[ESCH_MTX_K] = iy;
-    orient.mtx[ESCH_MTX_L] = iz; 
+    orient.mtx[ESCH_MTX_L] = iz;
 
 //ÄÄÄ Update inverse transform
     if (update & ESCH_UPD_INVERSE)
@@ -239,18 +243,18 @@ void EschFrameRef::rotatex(const float degrees, dword update)
     m[0] = orient.mtx[ESCH_MTX_B]*c - orient.mtx[ESCH_MTX_C]*s;
     m[1] = orient.mtx[ESCH_MTX_E]*c - orient.mtx[ESCH_MTX_F]*s;
     m[2] = orient.mtx[ESCH_MTX_H]*c - orient.mtx[ESCH_MTX_I]*s;
-    
+
     orient.mtx[ESCH_MTX_C] = orient.mtx[ESCH_MTX_B]*s
                              + orient.mtx[ESCH_MTX_C]*c;
     orient.mtx[ESCH_MTX_F] = orient.mtx[ESCH_MTX_E]*s
                              + orient.mtx[ESCH_MTX_F]*c;
     orient.mtx[ESCH_MTX_I] = orient.mtx[ESCH_MTX_H]*s
                              + orient.mtx[ESCH_MTX_I]*c;
-    
+
     orient.mtx[ESCH_MTX_B] = m[0];
     orient.mtx[ESCH_MTX_E] = m[1];
     orient.mtx[ESCH_MTX_H] = m[2];
-    
+
     dir.i = orient.mtx[ESCH_MTX_G];
     dir.j = orient.mtx[ESCH_MTX_H];
     dir.k = orient.mtx[ESCH_MTX_I];
@@ -278,7 +282,7 @@ void EschFrameRef::rotatex(const float degrees, dword update)
         //    +G(ks-lc+l) +H(ks-lc+l) +I(ks-lc+l)
         //    +J          +K          +L
 
-        float t1 = orient.mtx[ESCH_MTX_K] 
+        float t1 = orient.mtx[ESCH_MTX_K]
                    - orient.mtx[ESCH_MTX_K]*c - orient.mtx[ESCH_MTX_L]*s;
 
         float t2 = orient.mtx[ESCH_MTX_L]
@@ -336,18 +340,18 @@ void EschFrameRef::rotatey(const float degrees, dword update)
     m[0] = orient.mtx[ESCH_MTX_A]*c + orient.mtx[ESCH_MTX_C]*s;
     m[1] = orient.mtx[ESCH_MTX_D]*c + orient.mtx[ESCH_MTX_F]*s;
     m[2] = orient.mtx[ESCH_MTX_G]*c + orient.mtx[ESCH_MTX_I]*s;
-    
+
     orient.mtx[ESCH_MTX_C] = orient.mtx[ESCH_MTX_C]*c
                              - orient.mtx[ESCH_MTX_A]*s;
     orient.mtx[ESCH_MTX_F] = orient.mtx[ESCH_MTX_F]*c
                              - orient.mtx[ESCH_MTX_D]*s;
     orient.mtx[ESCH_MTX_I]= orient.mtx[ESCH_MTX_I]*c
                             - orient.mtx[ESCH_MTX_G]*s;
-    
+
     orient.mtx[ESCH_MTX_A] = m[0];
     orient.mtx[ESCH_MTX_D] = m[1];
     orient.mtx[ESCH_MTX_G] = m[2];
-    
+
     dir.i = orient.mtx[ESCH_MTX_G];
     dir.j = orient.mtx[ESCH_MTX_H];
     dir.k = orient.mtx[ESCH_MTX_I];
@@ -433,18 +437,18 @@ void EschFrameRef::rotatez(const float degrees, dword update)
     m[0] = orient.mtx[ESCH_MTX_A]*c - orient.mtx[ESCH_MTX_B]*s;
     m[1] = orient.mtx[ESCH_MTX_D]*c - orient.mtx[ESCH_MTX_E]*s;
     m[2] = orient.mtx[ESCH_MTX_G]*c - orient.mtx[ESCH_MTX_H]*s;
-    
+
     orient.mtx[ESCH_MTX_B]= orient.mtx[ESCH_MTX_A]*s
                             + orient.mtx[ESCH_MTX_B]*c;
     orient.mtx[ESCH_MTX_E]= orient.mtx[ESCH_MTX_D]*s
                             + orient.mtx[ESCH_MTX_E]*c;
     orient.mtx[ESCH_MTX_H]= orient.mtx[ESCH_MTX_G]*s
                             + orient.mtx[ESCH_MTX_H]*c;
-    
+
     orient.mtx[ESCH_MTX_A] = m[0];
     orient.mtx[ESCH_MTX_D] = m[1];
     orient.mtx[ESCH_MTX_G] = m[2];
-    
+
     dir.i = orient.mtx[ESCH_MTX_G];
     dir.j = orient.mtx[ESCH_MTX_H];
     dir.k = orient.mtx[ESCH_MTX_I];

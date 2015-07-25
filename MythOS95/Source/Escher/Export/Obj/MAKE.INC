@@ -2,21 +2,27 @@
 #
 #                              Makefile Include
 #
-#             Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.
-#                            All Rights Reserved.
+#                      Microsoft Windows 95/98/NT Version
+#
+#   Copyright (c) 1994-1999 by Dan Higdon, Tim Little, and Chuck Walbourn
 #
 #ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 #
-#           *** Charybdis Enterprises, Inc. Company Confidential ***
+# This file and all associated files are subject to the terms of the
+# GNU Lesser General Public License version 2 as published by the
+# Free Software Foundation (http://www.gnu.org).   They remain the
+# property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+# See LICENSE.TXT in the distribution for a copy of this license.
 #
-#  This file and all associated files are the company proprietary property
-#        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+# THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+# OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+# PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+# LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+# OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 #
-# CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-# TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-# IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-# AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-# INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+#ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+#
+#                        http://www.mythos-engine.org/
 #
 #ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 #
@@ -42,7 +48,7 @@
 #°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 #
 #                               Variables
-#                                
+#
 #°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
@@ -90,12 +96,12 @@ CCOPTIONS = -5s
 !endif
 
 !if "$(DEBUG)" == "NO"
-CCOPTIONS = $(CCOPTIONS) -ze -zp1 -zq -w3 -oatx -DNDEBUG  
+CCOPTIONS = $(CCOPTIONS) -ze -zp1 -zq -w3 -oatx -DNDEBUG
 !else if "$(DEBUG)" == "ASSERT"
 CCOPTIONS = $(CCOPTIONS) -ze -zp1 -zq -w3 -oatx
 !else
-#CCOPTIONS = $(CCOPTIONS) -ze -zp1 -zq -wx -hc -d2 -oatx -DDEBUG 
-CCOPTIONS = $(CCOPTIONS) -ze -zp1 -zq -wx -d2 -oatx -DDEBUG 
+#CCOPTIONS = $(CCOPTIONS) -ze -zp1 -zq -wx -hc -d2 -oatx -DDEBUG
+CCOPTIONS = $(CCOPTIONS) -ze -zp1 -zq -wx -d2 -oatx -DDEBUG
 !endif
 
 LB = wlib
@@ -103,10 +109,10 @@ LBOPTS = -q -b -c
 
 LINK = wlink
 !if ("$(DEBUG)" == "NO") || ("$(DEBUG)" == "ASSERT")
-LINKOPTS = op q libp $(LIBPATH) 
+LINKOPTS = op q libp $(LIBPATH)
 !else
-LINKOPTS = op q d all libp $(LIBPATH) 
-!endif      
+LINKOPTS = op q d all libp $(LIBPATH)
+!endif
 
 #°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 #
@@ -120,11 +126,11 @@ LINKOPTS = op q d all libp $(LIBPATH)
 
 # define how we compile a .C file
 {..\}.c{}.obj:
-	$(CC) $(CCOPTIONS) $<
+        $(CC) $(CCOPTIONS) $<
 
 # define how we compile a .CPP file
 {..\}.cpp{}.obj:
-	$(CPP) $(CCOPTIONS) $<
+        $(CPP) $(CCOPTIONS) $<
 
 #±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 #
@@ -137,7 +143,7 @@ LINKOPTS = op q d all libp $(LIBPATH)
 #ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
 setstden :
-	@set INCLUDE=$(INCLUDE)$(INCPATH)
+        @set INCLUDE=$(INCLUDE)$(INCPATH)
 
 #°±² End of make.inc ²±°
 

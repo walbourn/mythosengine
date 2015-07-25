@@ -8,59 +8,96 @@
                            /  /            \  \
                           /__/              \__\
  
-             Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.
-                            All Rights Reserved.
+    Copyright (c) 1994-1999 by Dan Higdon, Tim Little, and Chuck Walbourn
 
-                           Windows 95/NT Version
+                           Windows 95/98/NT Version
+
+ ---------------------------------------------------------------------------
+
+  This file and all associated files are subject to the terms of the
+  GNU Lesser General Public License version 2 as published by the
+  Free Software Foundation (http://www.gnu.org).   They remain the
+  property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+  See LICENSE.TXT in the distribution for a copy of this license.
+
+  THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+  OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+  PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIM ANY
+  LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+  OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+
+ ---------------------------------------------------------------------------
+
+                         http://www.mythos-engine.org/
 
  ---------------------------------------------------------------------------
 
                             W H A T ' S   N E W
 
-                       *** Version 1.72 Release ***
+                       *** Version 1.8 Release ***
 
-                               March 20, 1998
+			       July 8, 1999
 
  ---------------------------------------------------------------------------
- OPTIMIZATIONS
+ LICENSE
 
- The 15/16bpp rasterization functions in Van Gogh have been rewritten for
- faster performance and easier maintenance.
-
- The clipping routines in the Escher library have been optimized somewhat
- for better performance.
+ The MythOS library set is now licensed under the GNU Lesser Public License.
+ It was previously subject to a commercial license.
 
 
  ---------------------------------------------------------------------------
  3D HARDWARE
 
- Reworked Direct3D device initialization and termination to ensure good
- behavior with a variety of drivers.
-
- First cut of AMD-3D Technology enhancements added to the Escher library.
+ AMD-3D Technology enhancements added to the Escher math library.
 
 
  ---------------------------------------------------------------------------
- GAMMA CORRECTION
+ BACH
 
- Van Gogh now supports true gamma correction which is done automatically
- for loaded palettes and images converted to textures.
+ Added 3D sound interfaces, a CD audio control class, and a MIDI player
+ implementation using DirectMusic that comes with DirectX SDK V6.1.
 
 
  ---------------------------------------------------------------------------
- MEMORY MANAGER FIX
+ ESCHER
 
- There was a bug in the alignment logic for the Ivory memory manager which
- prevented allocated memory from being properly aligned on a paragraph
- boundary.
+ Various minor fixes to Escher including hither/yon clipping problems,
+ gradient camera backgrounds, and a new EschPlaneDraw drawable class.  Also
+ added a "Merge Verticies" option to the Escher 3DS R4 Exporter.
 
+
+ ---------------------------------------------------------------------------
+ HELP
+
+ The source files for the Programmer's and User's Guides are included in
+ this release.  To build the HLP file, run the 'make.bat' batch file in the
+ Source\Help directory (you will have to edit the batch file for the
+ proper location of the Help Compiler on your system).
+
+
+ ---------------------------------------------------------------------------
+ PANE
+
+ This release includes the preliminary Pane library that was never formerly
+ released.  It was used for internal projects at Charybdis Enterprises.
  
- ---------------------------------------------------------------------------
- MAX MOUSE RANGE
 
- Added a set_extents() routine to the MaxMouseDevice to set the range
- of the mouse values since in DirectDraw applications Windows can become
- confused about which extents are valid for the current mode.
+ ---------------------------------------------------------------------------
+ SIMGINE
+
+ Various minor fixes to SimGine and more work done on the Audio manager
+ classes to take advantage of the new functions in Bach.
+
+
+ ---------------------------------------------------------------------------
+ TURNER
+
+ Updated for DirectPlay4A interface that comes with DirectX SDK V6.1.
+
+
+ ---------------------------------------------------------------------------
+ XFILE
+
+ Added 15-bit per/pixel support for the .BMP file format.
 
 END OF DOCUMENT
-

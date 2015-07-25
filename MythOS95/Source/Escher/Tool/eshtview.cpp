@@ -8,23 +8,27 @@
 //ùùùùù²±²ùùùùùùù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùùùùùù²±²ùùùù²±²ùùùùùù
 //ùùùù²²²²²²²²²²ù²²²²²²²²ùùù²²²²²²²²ùù²²²ùùùù²²²ù²²²²²²²²²²ù²²²ùùùù²²²ùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùùùùùùùùù Microsoft Windows 95/NT Version ùùùùùùùùùùùùùùùùùùùùùùù
+//ùùùùùùùùùùùùùùùùù Microsoft Windows 95/98/NT Version ùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùCopyrightù(c)ù1994-1998ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
-//ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
+//ùùùCopyright (c) 1994-1999 by Dan Higdon, Tim Little, and Chuck Walbournùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
-//           *** Charybdis Enterprises, Inc. Company Confidential ***
+// This file and all associated files are subject to the terms of the
+// GNU Lesser General Public License version 2 as published by the
+// Free Software Foundation (http://www.gnu.org).   They remain the
+// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+// See LICENSE.TXT in the distribution for a copy of this license.
 //
-//  This file and all associated files are the company proprietary property
-//        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+// THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+// OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+// PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+// LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+// OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 //
-// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//
+//                        http://www.mythos-engine.org/
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
@@ -39,9 +43,9 @@
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-//             
+//
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include "stdafx.h"
@@ -68,75 +72,75 @@ static char BASED_CODE THIS_FILE[] = __FILE__;
 IMPLEMENT_DYNCREATE(ToolView, CView)
 
 BEGIN_MESSAGE_MAP(ToolView, CView)
-	//{{AFX_MSG_MAP(ToolView)
-	ON_WM_SIZE()
-	ON_COMMAND(ID_VIEW_RND_WIREFRAME, OnViewRndWireframe)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_RND_WIREFRAME, OnUpdateViewRndWireframe)
-	ON_COMMAND(ID_VIEW_RND_SOLID, OnViewRndSolid)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_RND_SOLID, OnUpdateViewRndSolid)
-	ON_COMMAND(ID_VIEW_RND_FLAT, OnViewRndFlat)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_RND_FLAT, OnUpdateViewRndFlat)
-	ON_COMMAND(ID_VIEW_RND_SMOOTH, OnViewRndSmooth)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_RND_SMOOTH, OnUpdateViewRndSmooth)
-	ON_COMMAND(ID_VIEW_RND_SPECULAR, OnViewRndSpecular)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_RND_SPECULAR, OnUpdateViewRndSpecular)
-	ON_COMMAND(ID_VIEW_RND_BACKFACE, OnViewRndBackface)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_RND_BACKFACE, OnUpdateViewRndBackface)
-	ON_COMMAND(ID_VIEW_RND_TEXTURES, OnViewRndTextures)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_RND_TEXTURES, OnUpdateViewRndTextures)
-	ON_COMMAND(ID_VIEW_RND_PERSPECTIVE, OnViewRndPerspective)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_RND_PERSPECTIVE, OnUpdateViewRndPerspective)
-	ON_COMMAND(ID_EDIT_PROP, OnEditProperties)
-	ON_UPDATE_COMMAND_UI(ID_EDIT_PROP, OnUpdateEditProperties)
-	ON_COMMAND(ID_VIEW_RND_ALL_LINES, OnViewRndShowAllLines)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_RND_ALL_LINES, OnUpdateViewRndShowAllLines)
-	ON_COMMAND(ID_EDIT_DELETE, OnEditDelete)
-	ON_UPDATE_COMMAND_UI(ID_EDIT_DELETE, OnUpdateEditDelete)
-	ON_COMMAND(ID_VIEW_REFRESH, OnViewRefresh)
-	ON_COMMAND(ID_VIEW_ROTXY, OnViewRotateXY)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_ROTXY, OnUpdateViewRotateXY)
-	ON_COMMAND(ID_VIEW_MOVEXY, OnViewMoveXY)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_MOVEXY, OnUpdateViewMoveXY)
-	ON_COMMAND(ID_VIEW_ROTMOVEZ, OnViewRotateMoveZ)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_ROTMOVEZ, OnUpdateViewRotateMoveZ)
-	ON_COMMAND(ID_MESH_MOVEIJ, OnMeshMoveIJ)
-	ON_UPDATE_COMMAND_UI(ID_MESH_MOVEIJ, OnUpdateMeshMoveIJ)
-	ON_UPDATE_COMMAND_UI(ID_MESH_ROTIJ, OnUpdateMeshRotateIJ)
-	ON_COMMAND(ID_MESH_ROTIJ, OnMeshRotateIJ)
-	ON_COMMAND(ID_MESH_ROTMOVEK, OnMeshRotateMoveK)
-	ON_UPDATE_COMMAND_UI(ID_MESH_ROTMOVEK, OnUpdateMeshRotateMoveK)
-	ON_COMMAND(ID_LGT_ADJUSTXY, OnLightAdjustXY)
-	ON_UPDATE_COMMAND_UI(ID_LGT_ADJUSTXY, OnUpdateLightAdjustXY)
-	ON_UPDATE_COMMAND_UI(ID_LGT_ABRIGHT, OnUpdateLightIntensity)
-	ON_COMMAND(ID_LGT_ABRIGHT, OnLightIntensity)
-	ON_COMMAND(ID_VIEW_ATTACHCAM, OnViewAttachCamera)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_ATTACHCAM, OnUpdateViewAttachCamera)
-	ON_COMMAND(ID_EDIT_NEW_CAM, OnEditNewCamera)
-	ON_COMMAND(ID_EDIT_NEW_LIGHT, OnEditNewLight)
-	ON_COMMAND(ID_VIEW_AUTOROTX, OnViewAutoRotateX)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_AUTOROTX, OnUpdateViewAutoRotateX)
-	ON_COMMAND(ID_VIEW_AUTOROTY, OnViewAutoRotateY)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_AUTOROTY, OnUpdateViewAutoRotateY)
-	ON_COMMAND(ID_VIEW_AUTOROTZ, OnViewAutoRotateZ)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_AUTOROTZ, OnUpdateViewAutoRotateZ)
-	ON_COMMAND(ID_VIEW_AUTOFAST, OnViewAutoRotateFast)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_AUTOFAST, OnUpdateViewAutoRotateFast)
-	ON_COMMAND(ID_VIEW_AUTOSLOW, OnViewAutoRotateSlow)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_AUTOSLOW, OnUpdateViewAutoRotateSlow)
-	ON_COMMAND(ID_VIEW_AUTOOFF, OnViewAutoRotateOff)
-	ON_COMMAND(ID_VIEW_RND_MSPACE, OnViewRndModelSpace)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_RND_MSPACE, OnUpdateViewRndModelSpace)
-	ON_COMMAND(ID_VIEW_SHOW_BOXEXTS, OnViewShowBoxExtents)
-	ON_COMMAND(ID_VIEW_SHOW_SPHEXTS, OnViewShowSphereExtents)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_SHOW_SPHEXTS, OnUpdateViewShowSphereExtents)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_SHOW_BOXEXTS, OnUpdateViewShowBoxExtents)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_RND_SORT, OnUpdateViewRndSort)
-	ON_COMMAND(ID_VIEW_RND_SORT, OnViewRndSort)
-	ON_COMMAND(ID_VIEW_RND_ALPHA, OnViewRndAlpha)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_RND_ALPHA, OnUpdateViewRndAlpha)
-	ON_COMMAND(ID_VIEW_RND_ORTHO, OnViewRndOrtho)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_RND_ORTHO, OnUpdateViewRndOrtho)
-	//}}AFX_MSG_MAP
+        //{{AFX_MSG_MAP(ToolView)
+        ON_WM_SIZE()
+        ON_COMMAND(ID_VIEW_RND_WIREFRAME, OnViewRndWireframe)
+        ON_UPDATE_COMMAND_UI(ID_VIEW_RND_WIREFRAME, OnUpdateViewRndWireframe)
+        ON_COMMAND(ID_VIEW_RND_SOLID, OnViewRndSolid)
+        ON_UPDATE_COMMAND_UI(ID_VIEW_RND_SOLID, OnUpdateViewRndSolid)
+        ON_COMMAND(ID_VIEW_RND_FLAT, OnViewRndFlat)
+        ON_UPDATE_COMMAND_UI(ID_VIEW_RND_FLAT, OnUpdateViewRndFlat)
+        ON_COMMAND(ID_VIEW_RND_SMOOTH, OnViewRndSmooth)
+        ON_UPDATE_COMMAND_UI(ID_VIEW_RND_SMOOTH, OnUpdateViewRndSmooth)
+        ON_COMMAND(ID_VIEW_RND_SPECULAR, OnViewRndSpecular)
+        ON_UPDATE_COMMAND_UI(ID_VIEW_RND_SPECULAR, OnUpdateViewRndSpecular)
+        ON_COMMAND(ID_VIEW_RND_BACKFACE, OnViewRndBackface)
+        ON_UPDATE_COMMAND_UI(ID_VIEW_RND_BACKFACE, OnUpdateViewRndBackface)
+        ON_COMMAND(ID_VIEW_RND_TEXTURES, OnViewRndTextures)
+        ON_UPDATE_COMMAND_UI(ID_VIEW_RND_TEXTURES, OnUpdateViewRndTextures)
+        ON_COMMAND(ID_VIEW_RND_PERSPECTIVE, OnViewRndPerspective)
+        ON_UPDATE_COMMAND_UI(ID_VIEW_RND_PERSPECTIVE, OnUpdateViewRndPerspective)
+        ON_COMMAND(ID_EDIT_PROP, OnEditProperties)
+        ON_UPDATE_COMMAND_UI(ID_EDIT_PROP, OnUpdateEditProperties)
+        ON_COMMAND(ID_VIEW_RND_ALL_LINES, OnViewRndShowAllLines)
+        ON_UPDATE_COMMAND_UI(ID_VIEW_RND_ALL_LINES, OnUpdateViewRndShowAllLines)
+        ON_COMMAND(ID_EDIT_DELETE, OnEditDelete)
+        ON_UPDATE_COMMAND_UI(ID_EDIT_DELETE, OnUpdateEditDelete)
+        ON_COMMAND(ID_VIEW_REFRESH, OnViewRefresh)
+        ON_COMMAND(ID_VIEW_ROTXY, OnViewRotateXY)
+        ON_UPDATE_COMMAND_UI(ID_VIEW_ROTXY, OnUpdateViewRotateXY)
+        ON_COMMAND(ID_VIEW_MOVEXY, OnViewMoveXY)
+        ON_UPDATE_COMMAND_UI(ID_VIEW_MOVEXY, OnUpdateViewMoveXY)
+        ON_COMMAND(ID_VIEW_ROTMOVEZ, OnViewRotateMoveZ)
+        ON_UPDATE_COMMAND_UI(ID_VIEW_ROTMOVEZ, OnUpdateViewRotateMoveZ)
+        ON_COMMAND(ID_MESH_MOVEIJ, OnMeshMoveIJ)
+        ON_UPDATE_COMMAND_UI(ID_MESH_MOVEIJ, OnUpdateMeshMoveIJ)
+        ON_UPDATE_COMMAND_UI(ID_MESH_ROTIJ, OnUpdateMeshRotateIJ)
+        ON_COMMAND(ID_MESH_ROTIJ, OnMeshRotateIJ)
+        ON_COMMAND(ID_MESH_ROTMOVEK, OnMeshRotateMoveK)
+        ON_UPDATE_COMMAND_UI(ID_MESH_ROTMOVEK, OnUpdateMeshRotateMoveK)
+        ON_COMMAND(ID_LGT_ADJUSTXY, OnLightAdjustXY)
+        ON_UPDATE_COMMAND_UI(ID_LGT_ADJUSTXY, OnUpdateLightAdjustXY)
+        ON_UPDATE_COMMAND_UI(ID_LGT_ABRIGHT, OnUpdateLightIntensity)
+        ON_COMMAND(ID_LGT_ABRIGHT, OnLightIntensity)
+        ON_COMMAND(ID_VIEW_ATTACHCAM, OnViewAttachCamera)
+        ON_UPDATE_COMMAND_UI(ID_VIEW_ATTACHCAM, OnUpdateViewAttachCamera)
+        ON_COMMAND(ID_EDIT_NEW_CAM, OnEditNewCamera)
+        ON_COMMAND(ID_EDIT_NEW_LIGHT, OnEditNewLight)
+        ON_COMMAND(ID_VIEW_AUTOROTX, OnViewAutoRotateX)
+        ON_UPDATE_COMMAND_UI(ID_VIEW_AUTOROTX, OnUpdateViewAutoRotateX)
+        ON_COMMAND(ID_VIEW_AUTOROTY, OnViewAutoRotateY)
+        ON_UPDATE_COMMAND_UI(ID_VIEW_AUTOROTY, OnUpdateViewAutoRotateY)
+        ON_COMMAND(ID_VIEW_AUTOROTZ, OnViewAutoRotateZ)
+        ON_UPDATE_COMMAND_UI(ID_VIEW_AUTOROTZ, OnUpdateViewAutoRotateZ)
+        ON_COMMAND(ID_VIEW_AUTOFAST, OnViewAutoRotateFast)
+        ON_UPDATE_COMMAND_UI(ID_VIEW_AUTOFAST, OnUpdateViewAutoRotateFast)
+        ON_COMMAND(ID_VIEW_AUTOSLOW, OnViewAutoRotateSlow)
+        ON_UPDATE_COMMAND_UI(ID_VIEW_AUTOSLOW, OnUpdateViewAutoRotateSlow)
+        ON_COMMAND(ID_VIEW_AUTOOFF, OnViewAutoRotateOff)
+        ON_COMMAND(ID_VIEW_RND_MSPACE, OnViewRndModelSpace)
+        ON_UPDATE_COMMAND_UI(ID_VIEW_RND_MSPACE, OnUpdateViewRndModelSpace)
+        ON_COMMAND(ID_VIEW_SHOW_BOXEXTS, OnViewShowBoxExtents)
+        ON_COMMAND(ID_VIEW_SHOW_SPHEXTS, OnViewShowSphereExtents)
+        ON_UPDATE_COMMAND_UI(ID_VIEW_SHOW_SPHEXTS, OnUpdateViewShowSphereExtents)
+        ON_UPDATE_COMMAND_UI(ID_VIEW_SHOW_BOXEXTS, OnUpdateViewShowBoxExtents)
+        ON_UPDATE_COMMAND_UI(ID_VIEW_RND_SORT, OnUpdateViewRndSort)
+        ON_COMMAND(ID_VIEW_RND_SORT, OnViewRndSort)
+        ON_COMMAND(ID_VIEW_RND_ALPHA, OnViewRndAlpha)
+        ON_UPDATE_COMMAND_UI(ID_VIEW_RND_ALPHA, OnUpdateViewRndAlpha)
+        ON_COMMAND(ID_VIEW_RND_ORTHO, OnViewRndOrtho)
+        ON_UPDATE_COMMAND_UI(ID_VIEW_RND_ORTHO, OnUpdateViewRndOrtho)
+        //}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 extern dword AutoRotate;
@@ -181,7 +185,7 @@ ToolView::~ToolView()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 void ToolView::AssertValid() const
 {
-	CView::AssertValid();
+        CView::AssertValid();
 }
 
 
@@ -190,7 +194,7 @@ void ToolView::AssertValid() const
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 void ToolView::Dump(CDumpContext& dc) const
 {
-	CView::Dump(dc);
+        CView::Dump(dc);
 }
 
 
@@ -199,8 +203,8 @@ void ToolView::Dump(CDumpContext& dc) const
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 ToolDoc* ToolView::GetDocument() // non-debug version is inline
 {
-	ASSERT(m_pDocument->IsKindOf(RUNTIME_CLASS(ToolDoc)));
-	return (ToolDoc*)m_pDocument;
+        ASSERT(m_pDocument->IsKindOf(RUNTIME_CLASS(ToolDoc)));
+        return (ToolDoc*)m_pDocument;
 }
 #endif //_DEBUG
 
@@ -215,8 +219,8 @@ ToolDoc* ToolView::GetDocument() // non-debug version is inline
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 void ToolView::OnIdle()
 {
-	ToolDoc* pDoc = GetDocument();
-	ASSERT_VALID(pDoc);
+        ToolDoc* pDoc = GetDocument();
+        ASSERT_VALID(pDoc);
 
     if (pDoc->meshes)
     {
@@ -235,7 +239,7 @@ void ToolView::OnIdle()
                     m->rotatez(degrees);
             }
         }
-        
+
         for(EschMeshDraw *m=pDoc->meshes; m != NULL; m=(EschMeshDraw*)m->next())
         {
             m->animate();
@@ -337,19 +341,19 @@ BOOL ToolView::ui_camera_properties(EschCameraEx *cam, int doupdate)
 
     EschPoint   pos;
     cam->get_position(&pos);
-	gdlg.m_xpos = pos.x;
-	gdlg.m_ypos = pos.y;
-	gdlg.m_zpos = pos.z;
+        gdlg.m_xpos = pos.x;
+        gdlg.m_ypos = pos.y;
+        gdlg.m_zpos = pos.z;
 
-	gdlg.m_idir = cam->eye.dir.i;
-	gdlg.m_jdir = cam->eye.dir.j;
-	gdlg.m_kdir = cam->eye.dir.k;
+        gdlg.m_idir = cam->eye.dir.i;
+        gdlg.m_jdir = cam->eye.dir.j;
+        gdlg.m_kdir = cam->eye.dir.k;
 
-	gdlg.m_itop = cam->top.i;
-	gdlg.m_jtop = cam->top.j;
-	gdlg.m_ktop = cam->top.k;
+        gdlg.m_itop = cam->top.i;
+        gdlg.m_jtop = cam->top.j;
+        gdlg.m_ktop = cam->top.k;
 
-	gdlg.m_fov  = cam->fov;
+        gdlg.m_fov  = cam->fov;
     gdlg.m_width = cam->width;
     gdlg.m_height = cam->height;
 
@@ -372,9 +376,9 @@ BOOL ToolView::ui_camera_properties(EschCameraEx *cam, int doupdate)
     VngoColor24bit clr = pDoc->palette->hw_pal.p[(byte)cam->bcolor];
     mdlg.m_bcolor = (clr.r | (clr.g << 8) | (clr.b << 16));
 
-	mdlg.m_hither = cam->hither;
-	mdlg.m_yon    = cam->yon;
-	mdlg.m_scalef = cam->factor;
+        mdlg.m_hither = cam->hither;
+        mdlg.m_yon    = cam->yon;
+        mdlg.m_scalef = cam->factor;
 
 //ÄÄÄ Extended
     CameraPropExPage        xdlg;
@@ -415,7 +419,7 @@ BOOL ToolView::ui_camera_properties(EschCameraEx *cam, int doupdate)
             cam->height = gdlg.m_height;
             cam->set_fov(gdlg.m_fov);
         }
-        
+
         //ÄÄÄ Application Flags
         dword flags = cam->flags;
         flags &= ~(ESCH_CAM_APP0
@@ -450,7 +454,7 @@ BOOL ToolView::ui_camera_properties(EschCameraEx *cam, int doupdate)
         cam->set_factor(mdlg.m_scalef);
         ASSERT(pDoc->palette != 0);
         cam->set_bcolor(pDoc->palette->get_index((VngoColor24bit)mdlg.m_bcolor));
-        
+
         //ÄÄÄ Extended
         if (cam->vport)
         {
@@ -707,7 +711,7 @@ BOOL ToolView::ui_light_properties(EschLight **lgt, int doupdate, int edittype)
         else
             flags &= ~ESCH_LGT_ATTEN;
 
-        
+
         //ÄÄÄ Extra
         switch ((*lgt)->get_type())
         {
@@ -800,7 +804,7 @@ BOOL ToolView::ui_mesh_properties(EschMeshDraw *msh, int doupdate)
     ASSERT(msh->mesh != 0);
     gdlg.m_nfaces = msh->mesh->nfaces;
     gdlg.m_nverts = msh->mesh->nverts;
- 
+
     if (msh->parent())      // Disabled
     {
         gdlg.m_parent = msh->parent()->name;
@@ -947,7 +951,7 @@ BOOL ToolView::ui_mesh_properties(EschMeshDraw *msh, int doupdate)
         msh->mesh->box.maxs[0]      = edlg.m_xmax;
         msh->mesh->box.maxs[1]      = edlg.m_ymax;
         msh->mesh->box.maxs[2]      = edlg.m_zmax;
-        
+
         //ÄÄÄ Application Flags
         dword flags = msh->mesh->flags;
         flags &= ~(ESCH_MSH_APP0
@@ -1020,12 +1024,12 @@ BOOL ToolView::ui_mesh_properties(EschMeshDraw *msh, int doupdate)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // ToolView - EditProperties                                                ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void ToolView::EditProperties() 
+void ToolView::EditProperties()
 {
     dword       sel;
     EschLight   *lgt;
 
-	sel = iTree.GetSelected();
+        sel = iTree.GetSelected();
 
     switch (sel & 0xffff0000)
     {
@@ -1058,8 +1062,8 @@ void ToolView::EditProperties()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // ToolView - Create                                                        ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-BOOL ToolView::Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName, DWORD dwStyle, 
-                      const RECT& rect, CWnd* pParentWnd, UINT nID, CCreateContext* pContext) 
+BOOL ToolView::Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName, DWORD dwStyle,
+                      const RECT& rect, CWnd* pParentWnd, UINT nID, CCreateContext* pContext)
 {
 //ÄÄÄ Create view window
     if (!CWnd::Create(lpszClassName, lpszWindowName, dwStyle, rect, pParentWnd, nID, pContext))
@@ -1120,7 +1124,7 @@ error_exit: ;
         if (wVp[i].m_hWnd)
             wVp[i].DestroyWindow();
     }
-    DestroyWindow();  
+    DestroyWindow();
     return FALSE;
 }
 
@@ -1128,7 +1132,7 @@ error_exit: ;
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // ToolView - OnInitialUpdate                                               ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void ToolView::OnInitialUpdate() 
+void ToolView::OnInitialUpdate()
 {
     switch (vpmode)
     {
@@ -1142,17 +1146,17 @@ void ToolView::OnInitialUpdate()
         break;
     }
 
-	CView::OnInitialUpdate();
+        CView::OnInitialUpdate();
 }
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // ToolView - OnUpdate                                                      ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void ToolView::OnUpdate(CView* pSender, LPARAM lHint, CObject* pHint) 
+void ToolView::OnUpdate(CView* pSender, LPARAM lHint, CObject* pHint)
 {
-	ToolDoc* pDoc = GetDocument();
-	ASSERT_VALID(pDoc);
+        ToolDoc* pDoc = GetDocument();
+        ASSERT_VALID(pDoc);
 
 //ÄÄ Reset AutoRotate clock
     if (!lHint)
@@ -1203,19 +1207,19 @@ void ToolView::OnUpdate(CView* pSender, LPARAM lHint, CObject* pHint)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // ToolView - OnActivateView                                                ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void ToolView::OnActivateView(BOOL bActivate, CView* pActivateView, CView* pDeactiveView) 
+void ToolView::OnActivateView(BOOL bActivate, CView* pActivateView, CView* pDeactiveView)
 {
     if (bActivate)
     {
-    	ToolDoc* pDoc = GetDocument();
-    	ASSERT_VALID(pDoc);
-        
+        ToolDoc* pDoc = GetDocument();
+        ASSERT_VALID(pDoc);
+
         CClientDC dc (this);
 
         SelectPalette(dc.m_hDC,pDoc->hpal,0);
         dc.RealizePalette ();
     }
-	CView::OnActivateView(bActivate, pActivateView, pDeactiveView);
+        CView::OnActivateView(bActivate, pActivateView, pDeactiveView);
 }
 
 
@@ -1224,15 +1228,15 @@ void ToolView::OnActivateView(BOOL bActivate, CView* pActivateView, CView* pDeac
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 void ToolView::OnDraw(CDC* pDC)
 {
-	ToolDoc* pDoc = GetDocument();
-	ASSERT_VALID(pDoc);
+        ToolDoc* pDoc = GetDocument();
+        ASSERT_VALID(pDoc);
 }
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // ToolView - OnSize                                                        ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void ToolView::OnSize(UINT nType, int cx, int cy) 
+void ToolView::OnSize(UINT nType, int cx, int cy)
 {
     int width_of_vports=0;
 
@@ -1256,14 +1260,14 @@ void ToolView::OnSize(UINT nType, int cx, int cy)
     if (iTree.m_hWnd)
         iTree.MoveWindow(0,0,cx - width_of_vports,cy);
 
-	CView::OnSize(nType, cx, cy);
+        CView::OnSize(nType, cx, cy);
 }
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // ToolView - OnEdit(Update)Delete                                          ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void ToolView::OnEditDelete() 
+void ToolView::OnEditDelete()
 {
     dword           sel;
     EschCameraEx    *cam;
@@ -1274,7 +1278,7 @@ void ToolView::OnEditDelete()
     ToolDoc* pDoc = GetDocument();
     ASSERT_VALID(pDoc);
 
-	sel = iTree.GetSelected();
+        sel = iTree.GetSelected();
 
     switch (sel & 0xffff0000)
     {
@@ -1363,7 +1367,7 @@ void ToolView::OnEditDelete()
     iTree.SetFocus();
 }
 
-void ToolView::OnUpdateEditDelete(CCmdUI* pCmdUI) 
+void ToolView::OnUpdateEditDelete(CCmdUI* pCmdUI)
 {
     switch (iTree.GetSelected() & 0xffff0000)
     {
@@ -1382,7 +1386,7 @@ void ToolView::OnUpdateEditDelete(CCmdUI* pCmdUI)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // ToolView - OnEditNewCamera                                               ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void ToolView::OnEditNewCamera() 
+void ToolView::OnEditNewCamera()
 {
     ToolDoc* pDoc = GetDocument();
     ASSERT_VALID(pDoc);
@@ -1410,7 +1414,7 @@ void ToolView::OnEditNewCamera()
     strncpy(cam->name,str,ESCH_MAX_NAME);
     ASSERT(pDoc->palette != 0);
     cam->set_bcolor(pDoc->palette->get_index(VngoColor24bit(20,20,32)));
-    
+
     if (ui_camera_properties(cam,0))
     {
         if (!pDoc->cameras)
@@ -1431,7 +1435,7 @@ void ToolView::OnEditNewCamera()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // ToolView - OnEditNewLight                                                ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void ToolView::OnEditNewLight() 
+void ToolView::OnEditNewLight()
 {
     ToolDoc* pDoc = GetDocument();
     ASSERT_VALID(pDoc);
@@ -1457,7 +1461,7 @@ void ToolView::OnEditNewLight()
     EschLight *lgt = new EschVectorLight;
     ASSERT(lgt);
     strncpy(lgt->name,str,ESCH_MAX_NAME);
-    
+
     if (ui_light_properties(&lgt,0,1))
     {
         if (!pDoc->lights)
@@ -1478,12 +1482,12 @@ void ToolView::OnEditNewLight()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // ToolView - OnEdit(Update)Properties                                      ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void ToolView::OnEditProperties() 
+void ToolView::OnEditProperties()
 {
     EditProperties();
 }
 
-void ToolView::OnUpdateEditProperties(CCmdUI* pCmdUI) 
+void ToolView::OnUpdateEditProperties(CCmdUI* pCmdUI)
 {
     pCmdUI->Enable( (iTree.GetSelected() & 0xffff) ? 1 : 0);
 }
@@ -1492,7 +1496,7 @@ void ToolView::OnUpdateEditProperties(CCmdUI* pCmdUI)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // ToolView - OnViewRefresh                                                 ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void ToolView::OnViewRefresh() 
+void ToolView::OnViewRefresh()
 {
     iTree.RedrawWindow();
 
@@ -1509,7 +1513,7 @@ void ToolView::OnViewRefresh()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // ToolView - OnView(Update)RndWireframe                                    ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void ToolView::OnViewRndWireframe() 
+void ToolView::OnViewRndWireframe()
 {
     switch (vpmode)
     {
@@ -1529,7 +1533,7 @@ void ToolView::OnViewRndWireframe()
     }
 }
 
-void ToolView::OnUpdateViewRndWireframe(CCmdUI* pCmdUI) 
+void ToolView::OnUpdateViewRndWireframe(CCmdUI* pCmdUI)
 {
     switch (vpmode)
     {
@@ -1552,7 +1556,7 @@ void ToolView::OnUpdateViewRndWireframe(CCmdUI* pCmdUI)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // ToolView - OnView(Update)RndSolid                                        ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void ToolView::OnViewRndSolid() 
+void ToolView::OnViewRndSolid()
 {
     switch (vpmode)
     {
@@ -1572,7 +1576,7 @@ void ToolView::OnViewRndSolid()
     }
 }
 
-void ToolView::OnUpdateViewRndSolid(CCmdUI* pCmdUI) 
+void ToolView::OnUpdateViewRndSolid(CCmdUI* pCmdUI)
 {
     switch (vpmode)
     {
@@ -1594,7 +1598,7 @@ void ToolView::OnUpdateViewRndSolid(CCmdUI* pCmdUI)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // ToolView - OnView(Update)RndFlat                                         ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void ToolView::OnViewRndFlat() 
+void ToolView::OnViewRndFlat()
 {
     switch (vpmode)
     {
@@ -1614,7 +1618,7 @@ void ToolView::OnViewRndFlat()
     }
 }
 
-void ToolView::OnUpdateViewRndFlat(CCmdUI* pCmdUI) 
+void ToolView::OnUpdateViewRndFlat(CCmdUI* pCmdUI)
 {
     switch (vpmode)
     {
@@ -1635,7 +1639,7 @@ void ToolView::OnUpdateViewRndFlat(CCmdUI* pCmdUI)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // ToolView - OnView(Update)RndSmooth                                       ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void ToolView::OnViewRndSmooth() 
+void ToolView::OnViewRndSmooth()
 {
     switch (vpmode)
     {
@@ -1655,7 +1659,7 @@ void ToolView::OnViewRndSmooth()
     }
 }
 
-void ToolView::OnUpdateViewRndSmooth(CCmdUI* pCmdUI) 
+void ToolView::OnUpdateViewRndSmooth(CCmdUI* pCmdUI)
 {
     switch (vpmode)
     {
@@ -1675,7 +1679,7 @@ void ToolView::OnUpdateViewRndSmooth(CCmdUI* pCmdUI)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // ToolView - OnView(Update)RndSpecular                                     ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void ToolView::OnViewRndSpecular() 
+void ToolView::OnViewRndSpecular()
 {
     switch (vpmode)
     {
@@ -1695,7 +1699,7 @@ void ToolView::OnViewRndSpecular()
     }
 }
 
-void ToolView::OnUpdateViewRndSpecular(CCmdUI* pCmdUI) 
+void ToolView::OnUpdateViewRndSpecular(CCmdUI* pCmdUI)
 {
     switch (vpmode)
     {
@@ -1714,7 +1718,7 @@ void ToolView::OnUpdateViewRndSpecular(CCmdUI* pCmdUI)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // ToolView - OnView(Update)RndShowAllLines                                 ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void ToolView::OnViewRndShowAllLines() 
+void ToolView::OnViewRndShowAllLines()
 {
     switch (vpmode)
     {
@@ -1730,7 +1734,7 @@ void ToolView::OnViewRndShowAllLines()
     }
 }
 
-void ToolView::OnUpdateViewRndShowAllLines(CCmdUI* pCmdUI) 
+void ToolView::OnUpdateViewRndShowAllLines(CCmdUI* pCmdUI)
 {
     switch (vpmode)
     {
@@ -1753,7 +1757,7 @@ void ToolView::OnUpdateViewRndShowAllLines(CCmdUI* pCmdUI)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // ToolView - OnView(Update)RndBackface                                     ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void ToolView::OnViewRndBackface() 
+void ToolView::OnViewRndBackface()
 {
     switch (vpmode)
     {
@@ -1769,7 +1773,7 @@ void ToolView::OnViewRndBackface()
     }
 }
 
-void ToolView::OnUpdateViewRndBackface(CCmdUI* pCmdUI) 
+void ToolView::OnUpdateViewRndBackface(CCmdUI* pCmdUI)
 {
     switch (vpmode)
     {
@@ -1788,7 +1792,7 @@ void ToolView::OnUpdateViewRndBackface(CCmdUI* pCmdUI)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // ToolView - OnView(Update)RndModelSpace                                   ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void ToolView::OnViewRndModelSpace() 
+void ToolView::OnViewRndModelSpace()
 {
     switch (vpmode)
     {
@@ -1804,7 +1808,7 @@ void ToolView::OnViewRndModelSpace()
     }
 }
 
-void ToolView::OnUpdateViewRndModelSpace(CCmdUI* pCmdUI) 
+void ToolView::OnUpdateViewRndModelSpace(CCmdUI* pCmdUI)
 {
     switch (vpmode)
     {
@@ -1823,7 +1827,7 @@ void ToolView::OnUpdateViewRndModelSpace(CCmdUI* pCmdUI)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // ToolView - OnView(Update)RndTextures                                     ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void ToolView::OnViewRndTextures() 
+void ToolView::OnViewRndTextures()
 {
     switch (vpmode)
     {
@@ -1839,7 +1843,7 @@ void ToolView::OnViewRndTextures()
     }
 }
 
-void ToolView::OnUpdateViewRndTextures(CCmdUI* pCmdUI) 
+void ToolView::OnUpdateViewRndTextures(CCmdUI* pCmdUI)
 {
     switch (vpmode)
     {
@@ -1858,7 +1862,7 @@ void ToolView::OnUpdateViewRndTextures(CCmdUI* pCmdUI)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // ToolView - OnView(Update)RndPerspective                                  ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void ToolView::OnViewRndPerspective() 
+void ToolView::OnViewRndPerspective()
 {
     switch (vpmode)
     {
@@ -1874,7 +1878,7 @@ void ToolView::OnViewRndPerspective()
     }
 }
 
-void ToolView::OnUpdateViewRndPerspective(CCmdUI* pCmdUI) 
+void ToolView::OnUpdateViewRndPerspective(CCmdUI* pCmdUI)
 {
     switch (vpmode)
     {
@@ -1893,7 +1897,7 @@ void ToolView::OnUpdateViewRndPerspective(CCmdUI* pCmdUI)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // ToolView - OnView(Update)RndAlpha                                        ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void ToolView::OnViewRndAlpha() 
+void ToolView::OnViewRndAlpha()
 {
     switch (vpmode)
     {
@@ -1909,7 +1913,7 @@ void ToolView::OnViewRndAlpha()
     }
 }
 
-void ToolView::OnUpdateViewRndAlpha(CCmdUI* pCmdUI) 
+void ToolView::OnUpdateViewRndAlpha(CCmdUI* pCmdUI)
 {
     switch (vpmode)
     {
@@ -1928,7 +1932,7 @@ void ToolView::OnUpdateViewRndAlpha(CCmdUI* pCmdUI)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // ToolView - OnView(Update)RndSort                                         ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void ToolView::OnViewRndSort() 
+void ToolView::OnViewRndSort()
 {
     switch (vpmode)
     {
@@ -1951,7 +1955,7 @@ void ToolView::OnViewRndSort()
     }
 }
 
-void ToolView::OnUpdateViewRndSort(CCmdUI* pCmdUI) 
+void ToolView::OnUpdateViewRndSort(CCmdUI* pCmdUI)
 {
     switch (vpmode)
     {
@@ -1970,7 +1974,7 @@ void ToolView::OnUpdateViewRndSort(CCmdUI* pCmdUI)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // ToolView - OnView(Update)RndOrtho                                        ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void ToolView::OnViewRndOrtho() 
+void ToolView::OnViewRndOrtho()
 {
     switch (vpmode)
     {
@@ -1988,7 +1992,7 @@ void ToolView::OnViewRndOrtho()
     }
 }
 
-void ToolView::OnUpdateViewRndOrtho(CCmdUI* pCmdUI) 
+void ToolView::OnUpdateViewRndOrtho(CCmdUI* pCmdUI)
 {
     switch (vpmode)
     {
@@ -2007,7 +2011,7 @@ void ToolView::OnUpdateViewRndOrtho(CCmdUI* pCmdUI)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // ToolView - OnViewShowSphereExtents                                       ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void ToolView::OnViewShowSphereExtents() 
+void ToolView::OnViewShowSphereExtents()
 {
     switch (vpmode)
     {
@@ -2019,7 +2023,7 @@ void ToolView::OnViewShowSphereExtents()
     }
 }
 
-void ToolView::OnUpdateViewShowSphereExtents(CCmdUI* pCmdUI) 
+void ToolView::OnUpdateViewShowSphereExtents(CCmdUI* pCmdUI)
 {
     switch (vpmode)
     {
@@ -2038,7 +2042,7 @@ void ToolView::OnUpdateViewShowSphereExtents(CCmdUI* pCmdUI)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // ToolView - OnViewShowBoxExtents                                          ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void ToolView::OnViewShowBoxExtents() 
+void ToolView::OnViewShowBoxExtents()
 {
     switch (vpmode)
     {
@@ -2050,7 +2054,7 @@ void ToolView::OnViewShowBoxExtents()
     }
 }
 
-void ToolView::OnUpdateViewShowBoxExtents(CCmdUI* pCmdUI) 
+void ToolView::OnUpdateViewShowBoxExtents(CCmdUI* pCmdUI)
 {
     switch (vpmode)
     {
@@ -2069,7 +2073,7 @@ void ToolView::OnUpdateViewShowBoxExtents(CCmdUI* pCmdUI)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // ToolView - On(Update)ViewAttachCamera                                    ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void ToolView::OnViewAttachCamera() 
+void ToolView::OnViewAttachCamera()
 {
     switch (vpmode)
     {
@@ -2081,9 +2085,9 @@ void ToolView::OnViewAttachCamera()
     }
 }
 
-void ToolView::OnUpdateViewAttachCamera(CCmdUI* pCmdUI) 
+void ToolView::OnUpdateViewAttachCamera(CCmdUI* pCmdUI)
 {
-	dword sel = iTree.GetSelected();
+        dword sel = iTree.GetSelected();
 
     switch (vpmode)
     {
@@ -2101,7 +2105,7 @@ void ToolView::OnUpdateViewAttachCamera(CCmdUI* pCmdUI)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // ToolView - On(Update)ViewRotateXY                                        ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void ToolView::OnViewRotateXY() 
+void ToolView::OnViewRotateXY()
 {
     switch (vpmode)
     {
@@ -2111,7 +2115,7 @@ void ToolView::OnViewRotateXY()
     }
 }
 
-void ToolView::OnUpdateViewRotateXY(CCmdUI* pCmdUI) 
+void ToolView::OnUpdateViewRotateXY(CCmdUI* pCmdUI)
 {
     switch (vpmode)
     {
@@ -2130,7 +2134,7 @@ void ToolView::OnUpdateViewRotateXY(CCmdUI* pCmdUI)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // ToolView - On(Update)ViewMoveXY                                          ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void ToolView::OnViewMoveXY() 
+void ToolView::OnViewMoveXY()
 {
     switch (vpmode)
     {
@@ -2140,7 +2144,7 @@ void ToolView::OnViewMoveXY()
     }
 }
 
-void ToolView::OnUpdateViewMoveXY(CCmdUI* pCmdUI) 
+void ToolView::OnUpdateViewMoveXY(CCmdUI* pCmdUI)
 {
     switch (vpmode)
     {
@@ -2159,7 +2163,7 @@ void ToolView::OnUpdateViewMoveXY(CCmdUI* pCmdUI)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // ToolView - On(Update)ViewRotateMoveZ                                     ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void ToolView::OnViewRotateMoveZ() 
+void ToolView::OnViewRotateMoveZ()
 {
     switch (vpmode)
     {
@@ -2169,7 +2173,7 @@ void ToolView::OnViewRotateMoveZ()
     }
 }
 
-void ToolView::OnUpdateViewRotateMoveZ(CCmdUI* pCmdUI) 
+void ToolView::OnUpdateViewRotateMoveZ(CCmdUI* pCmdUI)
 {
     switch (vpmode)
     {
@@ -2188,7 +2192,7 @@ void ToolView::OnUpdateViewRotateMoveZ(CCmdUI* pCmdUI)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // ToolView - On(Update)ViewAutoRotateOff                                   ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void ToolView::OnViewAutoRotateOff() 
+void ToolView::OnViewAutoRotateOff()
 {
     AutoRotate = 0;
 }
@@ -2197,13 +2201,13 @@ void ToolView::OnViewAutoRotateOff()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // ToolView - On(Update)ViewAutoRotateX                                     ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void ToolView::OnViewAutoRotateX() 
+void ToolView::OnViewAutoRotateX()
 {
     AutoRotate ^= AUTOROTATE_X;
     Clock.clear();
 }
 
-void ToolView::OnUpdateViewAutoRotateX(CCmdUI* pCmdUI) 
+void ToolView::OnUpdateViewAutoRotateX(CCmdUI* pCmdUI)
 {
     pCmdUI->SetCheck( (AutoRotate & AUTOROTATE_X) ? 1 : 0);
 }
@@ -2212,13 +2216,13 @@ void ToolView::OnUpdateViewAutoRotateX(CCmdUI* pCmdUI)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // ToolView - On(Update)ViewAutoRotateY                                     ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void ToolView::OnViewAutoRotateY() 
+void ToolView::OnViewAutoRotateY()
 {
     AutoRotate ^= AUTOROTATE_Y;
     Clock.clear();
 }
 
-void ToolView::OnUpdateViewAutoRotateY(CCmdUI* pCmdUI) 
+void ToolView::OnUpdateViewAutoRotateY(CCmdUI* pCmdUI)
 {
     pCmdUI->SetCheck( (AutoRotate & AUTOROTATE_Y) ? 1 : 0);
 }
@@ -2227,13 +2231,13 @@ void ToolView::OnUpdateViewAutoRotateY(CCmdUI* pCmdUI)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // ToolView - On(Update)ViewAutoRotateZ                                     ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void ToolView::OnViewAutoRotateZ() 
+void ToolView::OnViewAutoRotateZ()
 {
     AutoRotate ^= AUTOROTATE_Z;
     Clock.clear();
 }
 
-void ToolView::OnUpdateViewAutoRotateZ(CCmdUI* pCmdUI) 
+void ToolView::OnUpdateViewAutoRotateZ(CCmdUI* pCmdUI)
 {
     pCmdUI->SetCheck( (AutoRotate & AUTOROTATE_Z) ? 1 : 0);
 }
@@ -2242,13 +2246,13 @@ void ToolView::OnUpdateViewAutoRotateZ(CCmdUI* pCmdUI)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // ToolView - On(Update)ViewAutoRotateFast                                  ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void ToolView::OnViewAutoRotateFast() 
+void ToolView::OnViewAutoRotateFast()
 {
     AutoRotateSpeed = float(AUTOROTATE_FAST);
     Clock.clear();
 }
 
-void ToolView::OnUpdateViewAutoRotateFast(CCmdUI* pCmdUI) 
+void ToolView::OnUpdateViewAutoRotateFast(CCmdUI* pCmdUI)
 {
     pCmdUI->SetCheck( (AutoRotateSpeed == float(AUTOROTATE_FAST)) ? 1 : 0);
 }
@@ -2257,13 +2261,13 @@ void ToolView::OnUpdateViewAutoRotateFast(CCmdUI* pCmdUI)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // ToolView - On(Update)ViewAutoRotateSlow                                  ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void ToolView::OnViewAutoRotateSlow() 
+void ToolView::OnViewAutoRotateSlow()
 {
     AutoRotateSpeed = float(AUTOROTATE_SLOW);
     Clock.clear();
 }
 
-void ToolView::OnUpdateViewAutoRotateSlow(CCmdUI* pCmdUI) 
+void ToolView::OnUpdateViewAutoRotateSlow(CCmdUI* pCmdUI)
 {
     pCmdUI->SetCheck( (AutoRotateSpeed == float(AUTOROTATE_SLOW)) ? 1 : 0);
 }
@@ -2272,7 +2276,7 @@ void ToolView::OnUpdateViewAutoRotateSlow(CCmdUI* pCmdUI)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // ToolView - On(Update)MeshRotateIJ                                        ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void ToolView::OnMeshRotateIJ() 
+void ToolView::OnMeshRotateIJ()
 {
     switch (vpmode)
     {
@@ -2282,9 +2286,9 @@ void ToolView::OnMeshRotateIJ()
     }
 }
 
-void ToolView::OnUpdateMeshRotateIJ(CCmdUI* pCmdUI) 
+void ToolView::OnUpdateMeshRotateIJ(CCmdUI* pCmdUI)
 {
-	dword sel = iTree.GetSelected();
+        dword sel = iTree.GetSelected();
 
     switch (vpmode)
     {
@@ -2304,7 +2308,7 @@ void ToolView::OnUpdateMeshRotateIJ(CCmdUI* pCmdUI)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // ToolView - On(Update)Mesh                                                ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void ToolView::OnMeshMoveIJ() 
+void ToolView::OnMeshMoveIJ()
 {
     switch (vpmode)
     {
@@ -2314,9 +2318,9 @@ void ToolView::OnMeshMoveIJ()
     }
 }
 
-void ToolView::OnUpdateMeshMoveIJ(CCmdUI* pCmdUI) 
+void ToolView::OnUpdateMeshMoveIJ(CCmdUI* pCmdUI)
 {
-	dword sel = iTree.GetSelected();
+        dword sel = iTree.GetSelected();
 
     switch (vpmode)
     {
@@ -2336,7 +2340,7 @@ void ToolView::OnUpdateMeshMoveIJ(CCmdUI* pCmdUI)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // ToolView - On(Update)Mesh                                                ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void ToolView::OnMeshRotateMoveK() 
+void ToolView::OnMeshRotateMoveK()
 {
     switch (vpmode)
     {
@@ -2346,9 +2350,9 @@ void ToolView::OnMeshRotateMoveK()
     }
 }
 
-void ToolView::OnUpdateMeshRotateMoveK(CCmdUI* pCmdUI) 
+void ToolView::OnUpdateMeshRotateMoveK(CCmdUI* pCmdUI)
 {
-	dword sel = iTree.GetSelected();
+        dword sel = iTree.GetSelected();
 
     switch (vpmode)
     {
@@ -2368,7 +2372,7 @@ void ToolView::OnUpdateMeshRotateMoveK(CCmdUI* pCmdUI)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // ToolView - On(Update)LightAdjustXY                                       ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void ToolView::OnLightAdjustXY() 
+void ToolView::OnLightAdjustXY()
 {
     switch (vpmode)
     {
@@ -2378,9 +2382,9 @@ void ToolView::OnLightAdjustXY()
     }
 }
 
-void ToolView::OnUpdateLightAdjustXY(CCmdUI* pCmdUI) 
+void ToolView::OnUpdateLightAdjustXY(CCmdUI* pCmdUI)
 {
-	dword sel = iTree.GetSelected();
+        dword sel = iTree.GetSelected();
 
     switch (vpmode)
     {
@@ -2400,7 +2404,7 @@ void ToolView::OnUpdateLightAdjustXY(CCmdUI* pCmdUI)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // ToolView - On(Update)LightIntensity                                      ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void ToolView::OnLightIntensity() 
+void ToolView::OnLightIntensity()
 {
     switch (vpmode)
     {
@@ -2410,9 +2414,9 @@ void ToolView::OnLightIntensity()
     }
 }
 
-void ToolView::OnUpdateLightIntensity(CCmdUI* pCmdUI) 
+void ToolView::OnUpdateLightIntensity(CCmdUI* pCmdUI)
 {
-	dword sel = iTree.GetSelected();
+        dword sel = iTree.GetSelected();
 
     switch (vpmode)
     {

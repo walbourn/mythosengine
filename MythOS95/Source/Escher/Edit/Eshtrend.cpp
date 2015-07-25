@@ -8,29 +8,33 @@
 //ùùùùù²±²ùùùùùùù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùùùùùù²±²ùùùù²±²ùùùùùù
 //ùùùù²²²²²²²²²²ù²²²²²²²²ùùù²²²²²²²²ùù²²²ùùùù²²²ù²²²²²²²²²²ù²²²ùùùù²²²ùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùùùùùùùùù Microsoft Windows 95/NT Version ùùùùùùùùùùùùùùùùùùùùùùù
+//ùùùùùùùùùùùùùùùùù Microsoft Windows 95/98/NT Version ùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùCopyrightù(c)ù1994-1998ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
-//ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
+//ùùùCopyright (c) 1994-1999 by Dan Higdon, Tim Little, and Chuck Walbournùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
-//           *** Charybdis Enterprises, Inc. Company Confidential ***
+// This file and all associated files are subject to the terms of the
+// GNU Lesser General Public License version 2 as published by the
+// Free Software Foundation (http://www.gnu.org).   They remain the
+// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+// See LICENSE.TXT in the distribution for a copy of this license.
 //
-//  This file and all associated files are the company proprietary property
-//        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+// THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+// OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+// PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+// LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+// OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 //
-// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//
+//                        http://www.mythos-engine.org/
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
 //                        *** Escher Terrain Editor ***
 //
-// Chuck Walbourn
+// Created by Chuck Walbourn
 //
 // eshtrend.cpp
 //
@@ -43,7 +47,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include "stdafx.h"
@@ -69,17 +73,17 @@ static char BASED_CODE THIS_FILE[] = __FILE__;
 // TerrEditRender                                                           ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 BEGIN_MESSAGE_MAP(TerrEditRender, CWnd)
-	//{{AFX_MSG_MAP(TerrEditRender)
-	ON_WM_MOUSEMOVE()
-	ON_WM_RBUTTONDOWN()
-	ON_WM_PAINT()
-	ON_WM_HSCROLL()
-	ON_WM_VSCROLL()
-	ON_WM_SIZE()
-	ON_WM_NCRBUTTONDOWN()
-	ON_WM_LBUTTONDOWN()
-	ON_WM_LBUTTONUP()
-	//}}AFX_MSG_MAP
+        //{{AFX_MSG_MAP(TerrEditRender)
+        ON_WM_MOUSEMOVE()
+        ON_WM_RBUTTONDOWN()
+        ON_WM_PAINT()
+        ON_WM_HSCROLL()
+        ON_WM_VSCROLL()
+        ON_WM_SIZE()
+        ON_WM_NCRBUTTONDOWN()
+        ON_WM_LBUTTONDOWN()
+        ON_WM_LBUTTONUP()
+        //}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
@@ -335,9 +339,9 @@ void TerrEditRender::SetMode(rnd_ctrl_mode_type m)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrEditRender - OnPaint                                                 ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrEditRender::OnPaint() 
+void TerrEditRender::OnPaint()
 {
-	CPaintDC dc(this); // device context for painting
+        CPaintDC dc(this); // device context for painting
 
     TerrEditDoc* pDoc = (TerrEditDoc *) ((CView *) GetParent())->GetDocument();
     ASSERT_VALID(pDoc);
@@ -349,7 +353,7 @@ void TerrEditRender::OnPaint()
         SelectPalette(dc.m_hDC,pDoc->hpal,0);
         dc.RealizePalette();
     }
-	
+
     if (bmi && gmap)
     {
         SetDIBitsToDevice(dc.m_hDC, 0, 0,
@@ -363,7 +367,7 @@ void TerrEditRender::OnPaint()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrEditRender - OnHScroll                                               ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrEditRender::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) 
+void TerrEditRender::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 {
     int     t, pos, render=0;
     float   f;
@@ -590,7 +594,7 @@ void TerrEditRender::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
             break;
     }
 
-	CWnd::OnHScroll(nSBCode, nPos, pScrollBar);
+        CWnd::OnHScroll(nSBCode, nPos, pScrollBar);
 
     if (render)
     {
@@ -608,7 +612,7 @@ void TerrEditRender::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrEditRender - OnVScroll                                               ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrEditRender::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) 
+void TerrEditRender::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 {
     int     t, pos, render=0;
     float   f;
@@ -835,7 +839,7 @@ void TerrEditRender::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
             break;
     }
 
-	CWnd::OnVScroll(nSBCode, nPos, pScrollBar);
+        CWnd::OnVScroll(nSBCode, nPos, pScrollBar);
 
     if (render)
     {
@@ -853,7 +857,7 @@ void TerrEditRender::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrEditRender - OnLButtonDown                                           ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrEditRender::OnLButtonDown(UINT nFlags, CPoint point) 
+void TerrEditRender::OnLButtonDown(UINT nFlags, CPoint point)
 {
     if (!capture)
     {
@@ -868,7 +872,7 @@ void TerrEditRender::OnLButtonDown(UINT nFlags, CPoint point)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrEditRender - OnLButtonUp                                             ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrEditRender::OnLButtonUp(UINT nFlags, CPoint point) 
+void TerrEditRender::OnLButtonUp(UINT nFlags, CPoint point)
 {
     if (capture)
     {
@@ -886,7 +890,7 @@ void TerrEditRender::OnLButtonUp(UINT nFlags, CPoint point)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrEditRender - OnMouseMove                                             ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrEditRender::OnMouseMove(UINT nFlags, CPoint point) 
+void TerrEditRender::OnMouseMove(UINT nFlags, CPoint point)
 {
     ((TerrMainFrame *) AfxGetMainWnd())->SetMessageText("Ready");
 
@@ -963,7 +967,7 @@ void TerrEditRender::OnMouseMove(UINT nFlags, CPoint point)
             pDoc->SetLightsModifiedFlag();
             break;
     }
-    
+
     lastx = point.x;
     lasty = point.y;
 
@@ -978,7 +982,7 @@ void TerrEditRender::OnMouseMove(UINT nFlags, CPoint point)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrEditRender - OnRButtonDown                                           ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrEditRender::OnRButtonDown(UINT nFlags, CPoint point) 
+void TerrEditRender::OnRButtonDown(UINT nFlags, CPoint point)
 {
     if (capture)
         return;
@@ -1004,7 +1008,7 @@ void TerrEditRender::OnRButtonDown(UINT nFlags, CPoint point)
     modeMenu.AppendMenu(MF_STRING, ID_VIEW_RND_BACKFACE, "Backface");
     modeMenu.AppendMenu(MF_STRING, ID_VIEW_RND_TEXTURES, "Textures");
     modeMenu.AppendMenu(MF_STRING, ID_VIEW_RND_PERSPECTIVE, "Perspective");
-        
+
     //ÄÄÄ Menu
     CMenu   rMenu;
     rMenu.CreatePopupMenu();
@@ -1035,7 +1039,7 @@ void TerrEditRender::OnRButtonDown(UINT nFlags, CPoint point)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrEditRender - OnNcRButtonDown                                         ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrEditRender::OnNcRButtonDown(UINT nHitTest, CPoint point) 
+void TerrEditRender::OnNcRButtonDown(UINT nHitTest, CPoint point)
 {
     if (nHitTest & HTCAPTION)
     {
@@ -1052,19 +1056,19 @@ void TerrEditRender::OnNcRButtonDown(UINT nHitTest, CPoint point)
         return;
     }
 
-	CWnd::OnNcRButtonDown(nHitTest, point);
+        CWnd::OnNcRButtonDown(nHitTest, point);
 }
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrEditRender - OnSize                                                  ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrEditRender::OnSize(UINT nType, int cx, int cy) 
+void TerrEditRender::OnSize(UINT nType, int cx, int cy)
 {
     setup_vport(cx, cy);
     UpdateRender();
 
-	CWnd::OnSize(nType, cx, cy);
+        CWnd::OnSize(nType, cx, cy);
 }
 
 //°±² eof - eshtrend.cpp ²±°

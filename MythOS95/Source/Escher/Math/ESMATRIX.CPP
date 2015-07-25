@@ -8,23 +8,27 @@
 //ùùùùù²±²ùùùùùùù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùùùùùù²±²ùùùù²±²ùùùùùù
 //ùùùù²²²²²²²²²²ù²²²²²²²²ùùù²²²²²²²²ùù²²²ùùùù²²²ù²²²²²²²²²²ù²²²ùùùù²²²ùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùùùùùùùùù Microsoft Windows 95/NT Version ùùùùùùùùùùùùùùùùùùùùùùù
+//ùùùùùùùùùùùùùùùùù Microsoft Windows 95/98/NT Version ùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùCopyrightù(c)ù1994-1998ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
-//ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
+//ùùùCopyright (c) 1994-1999 by Dan Higdon, Tim Little, and Chuck Walbournùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
-//           *** Charybdis Enterprises, Inc. Company Confidential ***
+// This file and all associated files are subject to the terms of the
+// GNU Lesser General Public License version 2 as published by the
+// Free Software Foundation (http://www.gnu.org).   They remain the
+// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+// See LICENSE.TXT in the distribution for a copy of this license.
 //
-//  This file and all associated files are the company proprietary property
-//        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+// THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+// OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+// PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+// LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+// OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 //
-// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//
+//                        http://www.mythos-engine.org/
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
@@ -44,7 +48,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include "escher.hpp"
@@ -146,26 +150,26 @@ extern "C" void esch_flt_concatmatrix(const EschMatrix *s,
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 extern "C" float esch_detmatrix(const EschMatrix *m)
 {
-//     [A B C 0]      
+//     [A B C 0]
 // det [D E F 0] =  A |E F 0|  - B |D F 0|  + C |D E 0|   - 0 |D E F|
 //     [G H I 0]      |H I 0|      |G I 0|      |G H 0|       |G H I|
 //     [J K L 1]      |K L 1|      |J L 1|      |J K 1|       |H K L|
-// 
-// 
-//               =  A(                ) 
+//
+//
+//               =  A(                )
 //                   ( E|I 0| - F|H 0|)
 //                   (  |L 1|    |K 1|)
-// 
+//
 //                 -B(                )
 //                   ( D|I 0| - F|G 0|)
 //                   (  |L 1|    |J 1|)
-// 
+//
 //                 +C(                )
 //                   ( D|H 0| - E|G 0|)
 //                   (  |K 1|    |J 1|)
-// 
+//
 //               =  A(EI - FH) - B(DI - FG) + C(DH - EG)
-// 
+//
 
 // A |E F 0|
 //   |H I 0| = A (EI - FH)
@@ -174,8 +178,8 @@ extern "C" float esch_detmatrix(const EschMatrix *m)
     float det = m->mtx[ESCH_MTX_A]
                 * (m->mtx[ESCH_MTX_E]*m->mtx[ESCH_MTX_I] - m->mtx[ESCH_MTX_F]*m->mtx[ESCH_MTX_H]);
 
-// - B |D F 0| 
-//     |G I 0| = - B (DI - FG) 
+// - B |D F 0|
+//     |G I 0| = - B (DI - FG)
 //     |J L 1|
 
     det -= m->mtx[ESCH_MTX_B]
@@ -202,7 +206,7 @@ extern "C" float esch_detmatrix(const EschMatrix *m)
 extern "C" int esch_inversematrix(const EschMatrix *m, EschMatrix *d)
 {
 // [A B C 0]      det is A(EI - FH) - B(DI - FG) + C(DH - EG)
-// [D E F 0]      
+// [D E F 0]
 // [G H I 0]
 // [J K L 1]      The inverse is :-
 //
@@ -226,15 +230,15 @@ extern "C" int esch_inversematrix(const EschMatrix *m, EschMatrix *d)
 //    |E F 0|
 //    |H I 0| =  E|I 0| - F|H 0| + 0|H I| = EI - FH
 //    |K L 1|     |L 1|    |K 1|    |K L|
-//           
+//
 //    |D F 0|
 //   -|G I 0| = -D|I 0| + F|G 0| - 0|G I| = -DI + FG
 //    |J L 1|     |L 1|    |J 1|    |J L|
-//           
+//
 //    |D E 0|
 //    |G H 0| =  D|H 0| - E|G 0| + 0|G H| = DH - EG
 //    |J K 1|     |K 1|    |J 1|    |J K|
-//           
+//
 //    |D E F|
 //   -|G H I| = -D|H I| + E|G I| - F|G H| = -D(HL-KI) + E(GL-IJ) - F(GK-JH)
 //    |J K L|     |K L|    |J L|    |J K|
@@ -242,15 +246,15 @@ extern "C" int esch_inversematrix(const EschMatrix *m, EschMatrix *d)
 //    |B C 0|
 //   -|H I 0| = -B|I 0| + C|H 0| - 0|H I| = -BI + CH
 //    |K L 1|     |L 1|    |K 1|    |K L|
-//           
+//
 //    |A C 0|
 //    |G I 0| =  A|I 0| - C|G 0| + 0|G I| = AI - CG
 //    |J L 1|     |L 1|    |J 1|    |J L|
-//           
+//
 //    |A B 0|
 //   -|G H 0| = -A|H 0| + B|G 0| - 0|G H| = -AH + BG
 //    |J K 1|     |K 1|    |J 1|    |J K|
-//           
+//
 //    |A B C|
 //    |G H I| =  A|H I| - B|G I| + C|G H| = A(HL-KI) - B(GL-JI) + C(GK-JH)
 //    |J K L|     |K L|    |J L|    |J K|
@@ -258,15 +262,15 @@ extern "C" int esch_inversematrix(const EschMatrix *m, EschMatrix *d)
 //    |B C 0|
 //    |E F 0| =  B|F 0| - C|E 0| + 0|E F| = BF - CE
 //    |K L 1|     |L 1|    |K 1|    |K L|
-//           
+//
 //    |A C 0|
 //   -|D F 0| = -A|F 0| + C|D 0| - 0|D F| = -AF + CD
 //    |J L 1|     |L 1|    |J 1|    |J L|
-//           
+//
 //    |A B 0|
 //    |D E 0| =  A|E 0| - B|D 0| + 0|D E| = AE - BD
 //    |J K 1|     |K 1|    |J 1|    |J K|
-//           
+//
 //    |A B C|
 //   -|D E F| = -A|E F| + B|D F| - C|D E| = -A(EL-KF) + B(DL-JF) - C(DK-JE)
 //    |J K L|     |K L|    |J L|    |J K|
@@ -274,15 +278,15 @@ extern "C" int esch_inversematrix(const EschMatrix *m, EschMatrix *d)
 //    |B C 0|
 //   -|E F 0| = 0
 //    |H I 0|
-//           
+//
 //    |A C 0|
 //    |D F 0| = 0
 //    |G I 0|
-//           
+//
 //    |A B 0|
 //   -|D E 0| = 0
 //    |G H 0|
-//           
+//
 //    |A B C|
 //    |D E F| = det
 //    |G H I|
@@ -306,7 +310,7 @@ extern "C" int esch_inversematrix(const EschMatrix *m, EschMatrix *d)
 // <D>
 //     1      |D F 0|
 //   ----- * -|G I 0| = ( FG - DI ) / det
-//    det     |J L 1| 
+//    det     |J L 1|
 
     d->mtx[ESCH_MTX_D] = (mtx.mtx[ESCH_MTX_F]*mtx.mtx[ESCH_MTX_G]
                           - mtx.mtx[ESCH_MTX_D]*mtx.mtx[ESCH_MTX_I]) / det;
@@ -314,15 +318,15 @@ extern "C" int esch_inversematrix(const EschMatrix *m, EschMatrix *d)
 // <G>
 //     1      |D E 0|
 //   ----- *  |G H 0| = ( DH - EG ) / det
-//    det     |J K 1|    
+//    det     |J K 1|
 
     d->mtx[ESCH_MTX_G] = (mtx.mtx[ESCH_MTX_D]*mtx.mtx[ESCH_MTX_H]
                           - mtx.mtx[ESCH_MTX_E]*mtx.mtx[ESCH_MTX_G]) / det;
-      
+
 // <J>
 //     1      |D E F|       <IV1>      <IV2>      <IV3>
 //   ----- * -|G H I| = ( E(GL-IJ) - D(HL-KI) - F(GK-JH) ) / det
-//    det     |J K L| 
+//    det     |J K L|
 
     float iv1 = mtx.mtx[ESCH_MTX_G]*mtx.mtx[ESCH_MTX_L]
                 - mtx.mtx[ESCH_MTX_I]*mtx.mtx[ESCH_MTX_J];
@@ -332,7 +336,7 @@ extern "C" int esch_inversematrix(const EschMatrix *m, EschMatrix *d)
 
     float iv3 = mtx.mtx[ESCH_MTX_G]*mtx.mtx[ESCH_MTX_K]
                 - mtx.mtx[ESCH_MTX_J]*mtx.mtx[ESCH_MTX_H];
-    
+
     d->mtx[ESCH_MTX_J] = (mtx.mtx[ESCH_MTX_E]*iv1
                           - mtx.mtx[ESCH_MTX_D]*iv2
                           - mtx.mtx[ESCH_MTX_F]*iv3) / det;
@@ -340,7 +344,7 @@ extern "C" int esch_inversematrix(const EschMatrix *m, EschMatrix *d)
 // <B>
 //     1      |B C 0|
 //   ----- * -|H I 0| = ( CH - BI ) / det
-//    det     |K L 1|   
+//    det     |K L 1|
 
     d->mtx[ESCH_MTX_B] = (mtx.mtx[ESCH_MTX_C]*mtx.mtx[ESCH_MTX_H]
                           - mtx.mtx[ESCH_MTX_B]*mtx.mtx[ESCH_MTX_I]) / det;
@@ -348,23 +352,23 @@ extern "C" int esch_inversematrix(const EschMatrix *m, EschMatrix *d)
 // <E>
 //     1      |A C 0|
 //   ----- *  |G I 0| = ( AI - CG ) / det
-//    det     |J L 1|   
+//    det     |J L 1|
 
     d->mtx[ESCH_MTX_E] = (mtx.mtx[ESCH_MTX_A]*mtx.mtx[ESCH_MTX_I]
                           - mtx.mtx[ESCH_MTX_C]*mtx.mtx[ESCH_MTX_G]) / det;
 
-// <H>          
+// <H>
 //     1      |A B 0|
 //   ----- * -|G H 0| = ( BG - AH ) / det
-//    det     |J K 1|   
+//    det     |J K 1|
 
     d->mtx[ESCH_MTX_H] = (mtx.mtx[ESCH_MTX_B]*mtx.mtx[ESCH_MTX_G]
                           - mtx.mtx[ESCH_MTX_A]*mtx.mtx[ESCH_MTX_H]) / det;
 
-// <K>          
+// <K>
 //     1      |A B C|       <IV2>      <IV1>      <IV3>
 //   ----- *  |G H I| = ( A(HL-KI) - B(GL-JI) + C(GK-JH) ) / det
-//    det     |J K L|   
+//    det     |J K L|
 
     d->mtx[ESCH_MTX_K] = (mtx.mtx[ESCH_MTX_A]*iv2
                           - mtx.mtx[ESCH_MTX_B]*iv1
@@ -373,7 +377,7 @@ extern "C" int esch_inversematrix(const EschMatrix *m, EschMatrix *d)
 // <C>
 //     1      |B C 0|
 //   ----- *  |E F 0| = ( BF - CE ) / det
-//    det     |K L 1|   
+//    det     |K L 1|
 
     d->mtx[ESCH_MTX_C] = (mtx.mtx[ESCH_MTX_B]*mtx.mtx[ESCH_MTX_F]
                           - mtx.mtx[ESCH_MTX_C]*mtx.mtx[ESCH_MTX_E]) / det;
@@ -381,7 +385,7 @@ extern "C" int esch_inversematrix(const EschMatrix *m, EschMatrix *d)
 // <F>
 //     1      |A C 0|
 //   ----- * -|D F 0| = ( CD - AF ) / det
-//    det     |J L 1|   
+//    det     |J L 1|
 
     d->mtx[ESCH_MTX_F] = (mtx.mtx[ESCH_MTX_C]*mtx.mtx[ESCH_MTX_D]
                           - mtx.mtx[ESCH_MTX_A]*mtx.mtx[ESCH_MTX_F]) / det;
@@ -389,7 +393,7 @@ extern "C" int esch_inversematrix(const EschMatrix *m, EschMatrix *d)
 // <I>
 //     1      |A B 0|
 //   ----- *  |D E 0| = ( AE - BD ) / det
-//    det     |J K 1|   
+//    det     |J K 1|
 
     d->mtx[ESCH_MTX_I] = (mtx.mtx[ESCH_MTX_A]*mtx.mtx[ESCH_MTX_E]
                           - mtx.mtx[ESCH_MTX_B]*mtx.mtx[ESCH_MTX_D]) / det;
@@ -397,7 +401,7 @@ extern "C" int esch_inversematrix(const EschMatrix *m, EschMatrix *d)
 // <L>
 //     1      |A B C|
 //   ----- * -|D E F| = ( B(DL-JF) - A(EL-KF) - C(DK-JE) ) / det
-//    det     |J K L| 
+//    det     |J K L|
 
     iv1 = (mtx.mtx[ESCH_MTX_D]*mtx.mtx[ESCH_MTX_L]
            - mtx.mtx[ESCH_MTX_J]*mtx.mtx[ESCH_MTX_F]);

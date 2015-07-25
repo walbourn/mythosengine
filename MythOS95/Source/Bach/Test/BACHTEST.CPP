@@ -9,23 +9,27 @@
 //          ³  ³ OÙ OÙ    ÜÛÛÛÜÜÜÛÛÛß   ÛÛÛÛİßÛÜ  ßÛÛÜÜÛÛ  ÜÛÛÛÜ ÜÛÛÛÜ
 //         OÙ OÙ
 //                            C++ Music, Sound, and Effects Library
-//                               Microsoft Windows 95/NT Version
+//                               Microsoft Windows 95/98/NT Version
 //
-//           Copyright (c) 1995-1998 by Charybdis Enterprises, Inc.
-//                           All Rights Reserved.
+//  Copyright (c) 1995-1999 by Dan Higdon, Tim Little, and Chuck Walbourn
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
-//           *** Charybdis Enterprises, Inc. Company Confidential ***
+// This file and all associated files are subject to the terms of the
+// GNU Lesser General Public License version 2 as published by the
+// Free Software Foundation (http://www.gnu.org).   They remain the
+// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+// See LICENSE.TXT in the distribution for a copy of this license.
 //
-//  This file and all associated files are the company proprietary property
-//        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+// THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+// OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+// PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+// LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+// OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 //
-// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//
+//                        http://www.mythos-engine.org/
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
@@ -40,7 +44,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include <conio.h>
@@ -56,6 +60,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 BOOL PumpWindows();
+STATIC BOOL InitBachCD();
 STATIC BOOL InitApplication (HINSTANCE, int, int, int);
 LRESULT CALLBACK ClientWndProc (HWND, UINT, WPARAM, LPARAM);
 
@@ -74,15 +79,24 @@ HWND            hWndClient;
 const char      szAppName[]     = "Bach Tester";
 
 //ÄÄÄ Tester data
-BachDigital *BachDigi=0;
+BachDigital3D       *BachDigi=0;
+BachCD              *BachCd=0;
 
-BachStaticSample  *Chimes=0;
-BachStaticSample  *Tada=0;
-BachStaticSample  *Test=0;
+BachStaticSample    *Chimes=0;
+BachStaticSample    *Tada=0;
+BachStaticSample    *Test=0;
 
-BachFileSample    *File=0;
+BachFileSample      *File=0;
+
+BachSample3D        *Niceshot3D=0;
 
 BachSampleSequencer *Sequencer=0;
+
+BachMusic           *BachMus=0;
+
+BachSequence        *Bigcity=0;
+BachSequence        *Galactic=0;
+BachSequence        *Sherwood=0;
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
@@ -108,7 +122,7 @@ int APIENTRY WinMain (HINSTANCE hInstance,
     IvorySystem ivory;
 
 //ÄÄÄÄ Initialize Bach ÄÄÄÄ
-    BachDigi = new BachDigital(22500,BACH_DIGI_STEREO_16);
+    BachDigi = new BachDigital3D(22500,BACH_DIGI_STEREO_16);
     if (!BachDigi)
     {
         MessageBox(hWndClient,"Out of memory",
@@ -120,13 +134,48 @@ int APIENTRY WinMain (HINSTANCE hInstance,
     if (err)
     {
         char buff[128];
-        strcat(str_error(buff,err)," - Bach Init");
+        strcat(str_error(buff,err)," - Bach Digital Init");
+        MessageBox(hWndClient,buff,
+                   szAppName,MB_OK | MB_ICONEXCLAMATION);
+        return 1;
+    }
+
+    BachMus = new BachMusic();
+    if (!BachMus)
+    {
+        MessageBox(hWndClient,"Out of memory",
+                   szAppName,MB_OK | MB_ICONEXCLAMATION);
+        return 1;
+    }
+
+    err = BachMus->init(BachDigi,hWndClient,DMUS_EFFECT_REVERB);
+    if (err)
+    {
+        char buff[128];
+        strcat(str_error(buff,err)," - Bach Music Init");
         MessageBox(hWndClient,buff,
                    szAppName,MB_OK | MB_ICONEXCLAMATION);
         return 1;
     }
 
 //ÄÄÄÄ Load Samples ÄÄÄÄ
+    Niceshot3D = new BachSample3D(BachDigi);
+    if (!Niceshot3D)
+    {
+        MessageBox(hWndClient,"Out of memory",
+                   szAppName,MB_OK | MB_ICONEXCLAMATION);
+        return 1;
+    }
+    err=Niceshot3D->load_wav("NICESHOT.WAV");
+    if (err)
+    {
+        char buff[128];
+        strcat(str_error(buff,err)," - loading niceshot.wav");
+        MessageBox(hWndClient,buff,
+                   szAppName,MB_OK | MB_ICONEXCLAMATION);
+        return 1;
+    }
+
     Chimes = new BachStaticSample(BachDigi);
     if (!Chimes)
     {
@@ -178,6 +227,55 @@ int APIENTRY WinMain (HINSTANCE hInstance,
         return 1;
     }
 
+//ÄÄÄÄ Load Sequences ÄÄÄÄ
+    Bigcity = new BachSequence(BachMus);
+    if (!Bigcity)
+    {
+        MessageBox(hWndClient,"Out of memory",
+                   szAppName,MB_OK | MB_ICONEXCLAMATION);
+        return 1;
+    }
+    err=Bigcity->load_mid("BIGCITY.MID");
+    if (err)
+    {
+        char buff[128];
+        strcat(str_error(buff,err)," - loading bigcity.mid");
+        MessageBox(hWndClient,buff,
+                    szAppName,MB_OK | MB_ICONEXCLAMATION);
+    }
+
+    Galactic = new BachSequence(BachMus);
+    if (!Galactic)
+    {
+        MessageBox(hWndClient,"Out of memory",
+                   szAppName,MB_OK | MB_ICONEXCLAMATION);
+        return 1;
+    }
+    err=Galactic->load_mid("GALACTIC.MID");
+    if (err)
+    {
+        char buff[128];
+        strcat(str_error(buff,err)," - loading galactic.mid");
+        MessageBox(hWndClient,buff,
+                    szAppName,MB_OK | MB_ICONEXCLAMATION);
+    }
+
+    Sherwood = new BachSequence(BachMus);
+    if (!Sherwood)
+    {
+        MessageBox(hWndClient,"Out of memory",
+                   szAppName,MB_OK | MB_ICONEXCLAMATION);
+        return 1;
+    }
+    err=Sherwood->load_mid("SHERWOOD.MID");
+    if (err)
+    {
+        char buff[128];
+        strcat(str_error(buff,err)," - loading sherwood.mid");
+        MessageBox(hWndClient,buff,
+                    szAppName,MB_OK | MB_ICONEXCLAMATION);
+    }
+
 //ÄÄÄ Main Loop
     while (PumpWindows());
 
@@ -186,6 +284,21 @@ int APIENTRY WinMain (HINSTANCE hInstance,
     {
         delete Sequencer;
         Sequencer = 0;
+    }
+    if (Bigcity)
+    {
+        delete Bigcity;
+        Bigcity = 0;
+    }
+    if (Galactic)
+    {
+        delete Galactic;
+        Galactic = 0;
+    }
+    if (Sherwood)
+    {
+        delete Sherwood;
+        Sherwood = 0;
     }
     if (Chimes)
     {
@@ -202,13 +315,60 @@ int APIENTRY WinMain (HINSTANCE hInstance,
         delete Test;
         Test = 0;
     }
+    if (Niceshot3D)
+    {
+        delete Niceshot3D;
+        Niceshot3D = 0;
+    }
+    if (BachCd)
+    {
+        delete BachCd;
+        BachCd = 0;
+    }
     if (BachDigi)
     {
         delete BachDigi;
         BachDigi = 0;
     }
+    if (BachMus)
+    {
+        delete BachMus;
+        BachMus = 0;
+    }
 
     return 0;
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// InitBachCd
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+BOOL InitBachCd()
+{
+    if (BachCd)
+        return TRUE;
+
+    BachCd = new BachCD;
+    if (!BachCd)
+    {
+        MessageBox(hWndClient,"Bach Cd - Out of memory",
+                   szAppName,MB_OK | MB_ICONEXCLAMATION);
+        return FALSE;
+    }
+
+    bach_err_codes err = BachCd->init();
+    if (err)
+    {
+        char buff[128];
+        strcat(str_error(buff,err)," - Bach Cd Init");
+        MessageBox(hWndClient,buff,
+                   szAppName,MB_OK | MB_ICONEXCLAMATION);
+        delete BachCd;
+        BachCd =0;
+        return FALSE;
+    }
+
+    return TRUE;
 }
 
 
@@ -281,6 +441,104 @@ LRESULT CALLBACK ClientWndProc (HWND hWnd, UINT message, WPARAM wParam, LPARAM l
                             Test->play();
                     }
                     break;
+                case '5':
+                    if (Bigcity)
+                    {
+                        if (ctrl)
+                            Bigcity->queue();
+                        else if (shift)
+                            Bigcity->stop();
+                        else
+                            Bigcity->play();
+                    }
+                    break;
+                case '6':
+                    if (Galactic)
+                    {
+                        if (ctrl)
+                            Galactic->queue();
+                        else if (shift)
+                            Galactic->stop();
+                        else
+                            Galactic->play();
+                    }
+                    break;
+                case '7':
+                    if (Sherwood)
+                    {
+                        if (ctrl)
+                            Sherwood->queue();
+                        else if (shift)
+                            Sherwood->stop();
+                        else
+                            Sherwood->play();
+                    }
+                    break;
+                case '9':
+                    if (Niceshot3D)
+                    {
+                        if (ctrl)
+                            Niceshot3D->play(1);
+                        else if (shift)
+                            Niceshot3D->stop();
+                        else
+                            Niceshot3D->play();
+                    }
+                    break;
+                case VK_LEFT:
+                    if (Niceshot3D)
+                    {
+                        float x, y, z;
+
+                        Niceshot3D->get_position(x,y,z);
+
+                        x -= (shift) ? 0.1f : 0.5f;
+
+                        Niceshot3D->set_position(x,y,z);
+                    }
+                    break;
+                case VK_RIGHT:
+                    if (Niceshot3D)
+                    {
+                        float x, y, z;
+
+                        Niceshot3D->get_position(x,y,z);
+
+                        x += (shift) ? 0.1f : 0.5f;
+
+                        Niceshot3D->set_position(x,y,z);
+                    }
+                    break;
+                case VK_UP:
+                    if (Niceshot3D)
+                    {
+                        float x, y, z;
+
+                        Niceshot3D->get_position(x,y,z);
+
+                        y += (shift) ? 0.1f : 0.5f;
+
+                        Niceshot3D->set_position(x,y,z);
+                    }
+                    break;
+                case VK_DOWN:
+                    if (Niceshot3D)
+                    {
+                        float x, y, z;
+
+                        Niceshot3D->get_position(x,y,z);
+
+                        y -= (shift) ? 0.1f : 0.5f;
+
+                        Niceshot3D->set_position(x,y,z);
+                    }
+                    break;
+                case VK_HOME:
+                    if (Niceshot3D)
+                    {
+                        Niceshot3D->set_position(0,0,0);
+                    }
+                    break;
                 case 'F':
                     if (ctrl)
                     {
@@ -296,7 +554,7 @@ LRESULT CALLBACK ClientWndProc (HWND hWnd, UINT message, WPARAM wParam, LPARAM l
                     {
                         if (!File)
                         {
-                            File = new BachFileSample(BachDigi,16384);
+                            File = new BachFileSample(BachDigi,32768);
                             if (!File)
                             {
                                 MessageBox(hWndClient,"Out of memory!",
@@ -356,6 +614,69 @@ LRESULT CALLBACK ClientWndProc (HWND hWnd, UINT message, WPARAM wParam, LPARAM l
                         Sequencer->add(Tada);
                     }
                     break;
+                case 'C':
+                    if (InitBachCd())
+                    {
+                        if (ctrl)
+                        {
+                            char buff[4096];
+                            ulong ntrack = BachCd->get_num_tracks();
+                            wsprintf(buff, "CD Audio\nnumber of tracks = %d\n\n",
+                                     ntrack);
+
+                            for(ulong i=1; i <= ntrack; i++)
+                            {
+                                ulong sms, ems;
+                                char tbuff[128];
+
+                                bach_err_codes err=BachCd->get_track_info(i,sms,ems);
+                                if (err)
+                                {
+                                    strcat(str_error(tbuff,err)," - CD Audio get track info");
+                                    MessageBox(hWndClient,tbuff,
+                                               szAppName,MB_OK | MB_ICONEXCLAMATION);
+                                }
+                                else
+                                {
+                                    wsprintf(tbuff,"#%d = %d to %d\n",i,sms,ems);
+                                    strcat(buff,tbuff);
+                                }
+                            }
+                            MessageBox(hWndClient,buff,szAppName,MB_OK);
+                        }
+                        else if (shift)
+                        {
+                            bach_err_codes err = BachCd->stop();
+                            if (err)
+                            {
+                                char buff[128];
+                                strcat(str_error(buff,err)," - CD Audio stop");
+                                MessageBox(hWndClient,buff,
+                                        szAppName,MB_OK | MB_ICONEXCLAMATION);
+                            }
+                        }
+                        else
+                        {
+                            bach_err_codes err = BachCd->play();
+                            if (err)
+                            {
+                                char buff[128];
+                                strcat(str_error(buff,err)," - CD Audio stop");
+                                MessageBox(hWndClient,buff,
+                                        szAppName,MB_OK | MB_ICONEXCLAMATION);
+                            }
+                        }
+                    }
+                    break;
+                case 'E':
+                    if (InitBachCd())
+                    {
+                        if (shift)
+                            BachCd->retract();
+                        else
+                            BachCd->eject();
+                    }
+                    break;
                 case VK_SHIFT:
                     shift=1;
                     break;
@@ -382,6 +703,16 @@ LRESULT CALLBACK ClientWndProc (HWND hWnd, UINT message, WPARAM wParam, LPARAM l
             return 0;
 
         case WM_ACTIVATEAPP:
+            if (wParam)
+            {
+                if (BachMus)
+                    BachMus->activate();
+            }
+            else
+            {
+                if (BachMus)
+                    BachMus->deactivate();
+            }
             return 0;
 
         case WM_CLOSE:
@@ -423,6 +754,10 @@ char *str_error(char *str, bach_err_codes err)
         case BACH_ERR_BUSY:
             strcpy(str,"busy");
             break;
+        case BACH_ERR_ALREADYOPEN:
+            strcpy(str,"already open");
+            break;
+
         case BACH_ERR_FILENOTFOUND:
             strcpy(str,"file not found");
             break;
@@ -432,12 +767,14 @@ char *str_error(char *str, bach_err_codes err)
         case BACH_ERR_NOTFOUND:
             strcpy(str,"not found");
             break;
+
         case BACH_ERR_THREADFAILED:
             strcpy(str,"thread create failed");
             break;
         case BACH_ERR_EVENTFAILED:
             strcpy(str,"event create failed");
             break;
+
         case BACH_ERR_DSCONNECTFAIL:
             strcpy(str,"DirectSound connect failed");
             break;
@@ -462,6 +799,24 @@ char *str_error(char *str, bach_err_codes err)
         case BACH_ERR_DSFAILED:
             strcpy(str,"DirectSound failed");
             break;
+
+        case BACH_ERR_DMCONNECTFAIL:
+            strcpy(str,"DirectMusic connect failed");
+            break;
+        case BACH_ERR_DMFAILED:
+            strcpy(str,"DirectMusic failed");
+            break;
+
+        case BACH_ERR_MCIFAILED:
+            strcpy(str,"MCI failed");
+            break;
+        case BACH_ERR_MCIDEVOPEN:
+            strcpy(str,"MCI device open");
+            break;
+        case BACH_ERR_MCIOUTOFRANGE:
+            strcpy(str,"MCI out of range");
+            break;
+
         default:
             strcpy(str,"*unknown error*");
             break;

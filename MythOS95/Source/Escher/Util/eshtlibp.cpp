@@ -8,23 +8,27 @@
 //ששששש²±²ששששששש²±²שששש²±²ש²±²שששש²±²ש²±²שששש²±²ש²±²שששששששש²±²שששש²±²שששששש
 //שששש²²²²²²²²²²ש²²²²²²²²ששש²²²²²²²²שש²²²שששש²²²ש²²²²²²²²²²ש²²²שששש²²²ששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//ששששששששששששששששששש Microsoft Windows 95/NT Version ששששששששששששששששששששששש
+//ששששששששששששששששש Microsoft Windows 95/98/NT Version שששששששששששששששששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//שששששששששששCopyrightש(c)ש1994-1998שbyשCharybdisשEnterprises,שInc.שששששששששש
-//ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
+//שששCopyright (c) 1994-1999 by Dan Higdon, Tim Little, and Chuck Walbournששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
 //
-//           *** Charybdis Enterprises, Inc. Company Confidential ***
+// This file and all associated files are subject to the terms of the
+// GNU Lesser General Public License version 2 as published by the
+// Free Software Foundation (http://www.gnu.org).   They remain the
+// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+// See LICENSE.TXT in the distribution for a copy of this license.
 //
-//  This file and all associated files are the company proprietary property
-//        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+// THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+// OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+// PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+// LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+// OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 //
-// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+//ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
+//
+//                        http://www.mythos-engine.org/
 //
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
 //
@@ -39,7 +43,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include <conio.h>
@@ -117,8 +121,9 @@ extern "C" int      yyleng;
 extern XFParseIFF   *TxtIFF;
 extern XFParseIFF   *RmdrIFF;
 extern dword        Flags;
+extern VngoPal      *Palette;
 
-//ִִ Local         
+//ִִ Local
 STATIC int          CurrentToken;
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
@@ -179,7 +184,7 @@ void ctf()
         default:
             error("Invalid operation: expected include, description, "
                   " copyright, author, extract, or texture statement");
-            break;                  
+            break;
     }
 }
 
@@ -549,23 +554,39 @@ STATIC void texture()
         exit(1);
     }
 
-    if (txt.bms[0]->bpp == 1)
-        ctrlfl |= ESCH_TBLD_8BIT;
-    else if (txt.bms[0]->bpp == 3)
+    if (!(ctrlfl & (ESCH_TBLD_8BIT | ESCH_TBLD_15BIT | ESCH_TBLD_TC)))
     {
-        ctrlfl |= ESCH_TBLD_TC;
-        ctrlfl &= ~ESCH_TBLD_TRANSP;
+        if (txt.bms[0]->bpp == 1)
+        {
+            ctrlfl |= ESCH_TBLD_8BIT;
+        }
+        else if (txt.bms[0]->bpp == 2)
+        {
+            ctrlfl |= ESCH_TBLD_15BIT;
+        }
+        else if (txt.bms[0]->bpp == 3)
+        {
+            ctrlfl |= ESCH_TBLD_TC;
+            ctrlfl &= ~ESCH_TBLD_TRANSP;
+        }
+        else if (txt.bms[0]->bpp == 4)
+        {
+            ctrlfl |= ESCH_TBLD_TC | ESCH_TBLD_TRANSP;
+        }
+        else
+        {
+            error("Invalid bit-depth for frames");
+            exit(1);
+        }
     }
-    else if (txt.bms[0]->bpp == 4)
-    {
-        ctrlfl |= ESCH_TBLD_TC;
-    }
-
 
 //ִִִ Write texture
-    if (txt.save(TxtIFF, ctrlfl, 0))
+    esch_error_codes err = txt.save(TxtIFF, ctrlfl, Palette);
+    if (err)
     {
-        error("Failed to write texture");
+        char buff[128];
+        sprintf(buff,"Failed to write texture (error #%d)",err);
+        error(buff);
         exit(1);
     }
 
@@ -581,6 +602,7 @@ STATIC void texture()
 //                'flags' '=' <uinteger>                                    ³
 //                'transparent'                                             ³
 //                'notransparent'                                           ³
+//                'bpp' <integer>                                           ³
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִÙ
 STATIC void txtopts(EschBuildTexture &tbld, dword &ctrlfl)
 {
@@ -615,9 +637,38 @@ STATIC void txtopts(EschBuildTexture &tbld, dword &ctrlfl)
             ctrlfl &= ~ESCH_TBLD_TRANSP;
             break;
 
+        case YY_BPP:
+            {
+                match(YY_BPP);
+                match(YY_EQUAL);
+                ctrlfl &= ~(ESCH_TBLD_8BIT | ESCH_TBLD_15BIT | ESCH_TBLD_TC);
+                ulong bpp = uexpr();
+                switch (bpp)
+                {
+                    case 1:
+                        ctrlfl |= ESCH_TBLD_8BIT;
+                        break;
+                    case 2:
+                        ctrlfl |= ESCH_TBLD_15BIT;
+                        break;
+                    case 3:
+                        ctrlfl |= ESCH_TBLD_TC;
+                        ctrlfl &= ~ESCH_TBLD_TRANSP;
+                        break;
+                    case 4:
+                        ctrlfl |= ESCH_TBLD_TC | ESCH_TBLD_TRANSP;
+                        break;
+
+                    default:
+                        error("bpp must be followed by a 1, 2, 3, or 4");
+                        break;
+                }
+            }
+            break;
+
         default:
             error("expected 'rle', 'uncompressed', 'flags', 'transparent', "
-                  "'notransparent', or '{'");
+                  "'notransparent', 'bpp', or '{'");
     }
 }
 

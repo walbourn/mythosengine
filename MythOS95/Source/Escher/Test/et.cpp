@@ -8,23 +8,27 @@
 //ùùùùù²±²ùùùùùùù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùùùùùù²±²ùùùù²±²ùùùùùù
 //ùùùù²²²²²²²²²²ù²²²²²²²²ùùù²²²²²²²²ùù²²²ùùùù²²²ù²²²²²²²²²²ù²²²ùùùù²²²ùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùùùùùùùùù Microsoft Windows 95/NT Version ùùùùùùùùùùùùùùùùùùùùùùù
+//ùùùùùùùùùùùùùùùùù Microsoft Windows 95/98/NT Version ùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùCopyrightù(c)ù1994-1998ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
-//ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
+//ùùùCopyright (c) 1994-1999 by Dan Higdon, Tim Little, and Chuck Walbournùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
-//           *** Charybdis Enterprises, Inc. Company Confidential ***
+// This file and all associated files are subject to the terms of the
+// GNU Lesser General Public License version 2 as published by the
+// Free Software Foundation (http://www.gnu.org).   They remain the
+// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+// See LICENSE.TXT in the distribution for a copy of this license.
 //
-//  This file and all associated files are the company proprietary property
-//        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+// THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+// OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+// PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+// LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+// OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 //
-// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//
+//                        http://www.mythos-engine.org/
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
@@ -93,6 +97,7 @@ EscherTest::EscherTest (MaxDevices *d):
     explosion(0),
     sprite(0),
     metabox(0),
+    plane(0),
     curmesh(0),
     fire(0),
     partn(0),
@@ -445,6 +450,8 @@ EscherTest::EscherTest (MaxDevices *d):
 
         gberg_color(gvp->vbuff.pal->get_index(VngoColor24bit(255,255,255)),
                     VNGO_TRANSPARENT);
+
+        exts_color = gvp->vbuff.pal->get_index(VngoColor24bit(255,255,255));
     }
 }
 
@@ -518,6 +525,8 @@ EscherTest::~EscherTest ()
 
     if (scene)
     {
+        // Hack due to messed-up drawlist in some cases...
+        scene->meshes=0;
         delete scene;
         scene = 0;
     }
@@ -561,6 +570,12 @@ EscherTest::~EscherTest ()
     {
         delete metabox;
         metabox = 0;
+    }
+
+    if (plane)
+    {
+        delete plane;
+        plane = 0;
     }
 
     if (cam)
@@ -622,7 +637,7 @@ BOOL EscherTest::SetupFireTest()
         MessageBox("Couldn't create fire texture", MB_OK | MB_ICONEXCLAMATION);
         return FALSE;
     }
-    fire->set_flags(fire->flags | ESCH_TXT_SKIPANIMATE);
+    fire->set_flags(ESCH_TXT_SKIPANIMATE, 1);
 
     return TRUE;
 }
@@ -752,7 +767,7 @@ BOOL EscherTest::SetupMultiTest(const char *name)
     if (rate > 0)
         mtxt->set_rate(rate);
 
-    mtxt->set_flags(mtxt->flags | ESCH_TXT_SKIPANIMATE);
+    mtxt->set_flags(ESCH_TXT_SKIPANIMATE, 1);
 
     return TRUE;
 }
@@ -785,7 +800,7 @@ BOOL EscherTest::SetupSprite(const char *name)
     if (strstr(name,"infinite"))
     {
         sprite->set_position(0,0,100);
-        sprite->set_flags(sprite->flags | ESCH_SPRITE_INFINITE);
+        sprite->set_flags(ESCH_SPRITE_INFINITE, 1);
     }
     else
     {
@@ -798,14 +813,14 @@ BOOL EscherTest::SetupSprite(const char *name)
     {
         cam = new EschCameraEx(gvp);
         cam->set_position(0,0,-100);
-        cam->set_flags(cam->flags | ESCH_CAM_SHADE_SMOOTH
-                                | ESCH_CAM_SHADE_FLAT
-                                | ESCH_CAM_SHADE_SOLID
-                                | ESCH_CAM_SHADE_WIRE
-                                | ESCH_CAM_BACKCULL
-                                | ESCH_CAM_MODELSPACE
-                                | ESCH_CAM_ALPHA
-                                | ESCH_CAM_TEXTURED);
+        cam->set_flags(ESCH_CAM_SHADE_SMOOTH
+                       | ESCH_CAM_SHADE_FLAT
+                       | ESCH_CAM_SHADE_SOLID
+                       | ESCH_CAM_SHADE_WIRE
+                       | ESCH_CAM_BACKCULL
+                       | ESCH_CAM_MODELSPACE
+                       | ESCH_CAM_ALPHA
+                       | ESCH_CAM_TEXTURED, 1);
         cam->create_bg_bitmap(backgrnd);
     }
 
@@ -861,17 +876,15 @@ BOOL EscherTest::LoadScene(char *fn, dword in_type)
         }
 
         cam->attach(gvp);
-        cam->set_flags(cam->flags
-                        | ESCH_CAM_SHADE_SMOOTH
-                        | ESCH_CAM_SHADE_FLAT
-                        | ESCH_CAM_SHADE_SOLID
-                        | ESCH_CAM_SHADE_WIRE
-                        | ESCH_CAM_BACKCULL
-                        | ESCH_CAM_MODELSPACE
-                        | ESCH_CAM_PERSPECTIVE
-                        | ESCH_CAM_TEXTURED
-                        | ESCH_CAM_ALPHA
-                        );
+        cam->set_flags(ESCH_CAM_SHADE_SMOOTH
+                       | ESCH_CAM_SHADE_FLAT
+                       | ESCH_CAM_SHADE_SOLID
+                       | ESCH_CAM_SHADE_WIRE
+                       | ESCH_CAM_BACKCULL
+                       | ESCH_CAM_MODELSPACE
+                       | ESCH_CAM_PERSPECTIVE
+                       | ESCH_CAM_TEXTURED
+                       | ESCH_CAM_ALPHA, 1);
 
         cam->set_bcolor(mypal->get_index(VngoColor24bit(0,0,128)));
         cam->set_yon(2500);
@@ -889,7 +902,7 @@ BOOL EscherTest::LoadScene(char *fn, dword in_type)
         {
             if (curmesh && curmesh->txt)
             {
-                curmesh->set_flags(curmesh->flags | ESCH_MSHD_OWNSNOPRCTXT);
+                curmesh->set_flags(ESCH_MSHD_OWNSNOPRCTXT, 1);
                 curmesh->txt[0] = fire;
             }
             else
@@ -1091,16 +1104,15 @@ BOOL EscherTest::LoadTerrain(char *fn)
     {
         cam = new EschCameraEx(gvp);
         cam->set_position(0,terrain->get_height(0,0) + 2.0f,0);  // only two meters above the ground.
-        cam->set_flags(cam->flags | ESCH_CAM_SHADE_SMOOTH
-                                | ESCH_CAM_SHADE_FLAT
-                                | ESCH_CAM_SHADE_SOLID
-                                | ESCH_CAM_SHADE_WIRE
-                                | ESCH_CAM_BACKCULL
-                                | ESCH_CAM_MODELSPACE
-                                | ESCH_CAM_PERSPECTIVE
-                                | ESCH_CAM_TEXTURED
-                                | ESCH_CAM_ALPHA
-                                );
+        cam->set_flags(ESCH_CAM_SHADE_SMOOTH
+                       | ESCH_CAM_SHADE_FLAT
+                       | ESCH_CAM_SHADE_SOLID
+                       | ESCH_CAM_SHADE_WIRE
+                       | ESCH_CAM_BACKCULL
+                       | ESCH_CAM_MODELSPACE
+                       | ESCH_CAM_PERSPECTIVE
+                       | ESCH_CAM_TEXTURED
+                       | ESCH_CAM_ALPHA, 1);
         cam->set_bcolor(mypal->get_index(VngoColor24bit(0,0,128)));
         cam->create_bg_bitmap(backgrnd);
     }
@@ -1180,8 +1192,8 @@ BOOL EscherTest::SetupParticleSystem(const char *name)
     if (strstr(name,"color"))
     {
         prtgen->set_color(mypal,
-                          VngoColor24bit(200,0,0),
-                          VngoColor24bit(55,128,0));
+                          VngoColor24bit(0,200,0),
+                          VngoColor24bit(255,55,0));
     }
     else
     {
@@ -1215,16 +1227,12 @@ BOOL EscherTest::SetupParticleSystem(const char *name)
         float temp_part = (part_count < 1000)?100.0f:part_count / 10.0f;
         prtgen->set_parts(temp_part);
         prtgen->set_callback(esch_generate_line);
-        prtgen->set_color (mypal, VngoColor24bit (205,205,205),
-                           VngoColor24bit (50,50,50));
         prtgen->set_init_dir (0,1.f,0);
     }
     else
     {
         float temp_part = (part_count < 1000)?100.0f:part_count / 10.0f;
         prtgen->set_parts(temp_part,100);
-        prtgen->set_color (mypal, VngoColor24bit (205,205,205),
-                                  VngoColor24bit(50,50,50));
         prtgen->set_init_dir(0,-1.0f,0);
     }
     prtgen->set_lifetime(part_life,(part_life/4));
@@ -1234,15 +1242,14 @@ BOOL EscherTest::SetupParticleSystem(const char *name)
     {
         cam = new EschCameraEx(gvp);
         cam->set_position(0,0,-500);
-        cam->set_flags(cam->flags | ESCH_CAM_SHADE_SMOOTH
-                                | ESCH_CAM_SHADE_FLAT
-                                | ESCH_CAM_SHADE_SOLID
-                                | ESCH_CAM_SHADE_WIRE
-                                | ESCH_CAM_BACKCULL
-                                | ESCH_CAM_MODELSPACE
-                                | ESCH_CAM_TEXTURED
-                                | ESCH_CAM_ALPHA
-                                );
+        cam->set_flags(ESCH_CAM_SHADE_SMOOTH
+                       | ESCH_CAM_SHADE_FLAT
+                       | ESCH_CAM_SHADE_SOLID
+                       | ESCH_CAM_SHADE_WIRE
+                       | ESCH_CAM_BACKCULL
+                       | ESCH_CAM_MODELSPACE
+                       | ESCH_CAM_TEXTURED
+                       | ESCH_CAM_ALPHA, 1);
         cam->set_bcolor(mypal->get_index(VngoColor24bit(0,0,0)));
         cam->create_bg_bitmap(backgrnd);
     }
@@ -1279,21 +1286,20 @@ BOOL EscherTest::SetupStarfield(BOOL fixed, BOOL brights)
     starfield->set_color(mypal->get_index(VngoColor24bit(255,255,255)));
 
     if (fixed)
-        starfield->set_flags(starfield->flags | ESCH_SFLD_FTL);
+        starfield->set_flags(ESCH_SFLD_FTL, 1);
 
     if (!cam)
     {
         cam = new EschCameraEx(gvp);
         cam->set_position(0,0,-300);
-        cam->set_flags(cam->flags | ESCH_CAM_SHADE_SMOOTH
-                                | ESCH_CAM_SHADE_FLAT
-                                | ESCH_CAM_SHADE_SOLID
-                                | ESCH_CAM_SHADE_WIRE
-                                | ESCH_CAM_BACKCULL
-                                | ESCH_CAM_MODELSPACE
-                                | ESCH_CAM_TEXTURED
-                                | ESCH_CAM_ALPHA
-                                );
+        cam->set_flags(ESCH_CAM_SHADE_SMOOTH
+                       | ESCH_CAM_SHADE_FLAT
+                       | ESCH_CAM_SHADE_SOLID
+                       | ESCH_CAM_SHADE_WIRE
+                       | ESCH_CAM_BACKCULL
+                       | ESCH_CAM_MODELSPACE
+                       | ESCH_CAM_TEXTURED
+                       | ESCH_CAM_ALPHA, 1);
         cam->create_bg_bitmap(backgrnd);
         cam->set_yon(20000);
     }
@@ -1325,7 +1331,7 @@ BOOL EscherTest::SetupExplosion(const char *buff)
             MessageBox("Couldn't create fire texture", MB_OK | MB_ICONEXCLAMATION);
             return FALSE;
         }
-        fire->set_flags(fire->flags | ESCH_TXT_SKIPANIMATE);
+        fire->set_flags(ESCH_TXT_SKIPANIMATE, 1);
     }
 
     explosion = new EschPlosion(40,40,fire);
@@ -1336,9 +1342,9 @@ BOOL EscherTest::SetupExplosion(const char *buff)
     }
 
     if (strstr(buff,"circular"))
-        explosion->set_flags(explosion->flags | ESCH_PLSN_CIRCULAR);
+        explosion->set_flags(ESCH_PLSN_CIRCULAR, 1);
     else if (strstr(buff,"triangular"))
-        explosion->set_flags(explosion->flags | ESCH_PLSN_TRIANGULAR);
+        explosion->set_flags(ESCH_PLSN_TRIANGULAR, 1);
 
     explosion->set_step(0.02f);
     explosion->set_alpha(alpha);
@@ -1347,15 +1353,14 @@ BOOL EscherTest::SetupExplosion(const char *buff)
     {
         cam = new EschCameraEx(gvp);
         cam->set_position(0,0,-300);
-        cam->set_flags(cam->flags | ESCH_CAM_SHADE_SMOOTH
-                                | ESCH_CAM_SHADE_FLAT
-                                | ESCH_CAM_SHADE_SOLID
-                                | ESCH_CAM_SHADE_WIRE
-                                | ESCH_CAM_BACKCULL
-                                | ESCH_CAM_MODELSPACE
-                                | ESCH_CAM_TEXTURED
-                                | ESCH_CAM_ALPHA
-                                );
+        cam->set_flags(ESCH_CAM_SHADE_SMOOTH
+                       | ESCH_CAM_SHADE_FLAT
+                       | ESCH_CAM_SHADE_SOLID
+                       | ESCH_CAM_SHADE_WIRE
+                       | ESCH_CAM_BACKCULL
+                       | ESCH_CAM_MODELSPACE
+                       | ESCH_CAM_TEXTURED
+                       | ESCH_CAM_ALPHA, 1);
         cam->create_bg_bitmap(backgrnd);
     }
 
@@ -1408,14 +1413,14 @@ BOOL EscherTest::SetupMetabox(const char *buff)
     {
         cam = new EschCameraEx(gvp);
         cam->set_position(0,0,-100);
-        cam->set_flags(cam->flags | ESCH_CAM_SHADE_SMOOTH
-                                  | ESCH_CAM_SHADE_FLAT
-                                  | ESCH_CAM_SHADE_SOLID
-                                  | ESCH_CAM_SHADE_WIRE
-                                  | ESCH_CAM_BACKCULL
-                                  | ESCH_CAM_MODELSPACE
-                                  | ESCH_CAM_ALPHA
-                                  | ESCH_CAM_TEXTURED);
+        cam->set_flags(ESCH_CAM_SHADE_SMOOTH
+                       | ESCH_CAM_SHADE_FLAT
+                       | ESCH_CAM_SHADE_SOLID
+                       | ESCH_CAM_SHADE_WIRE
+                       | ESCH_CAM_BACKCULL
+                       | ESCH_CAM_MODELSPACE
+                       | ESCH_CAM_ALPHA
+                       | ESCH_CAM_TEXTURED, 1);
         cam->create_bg_bitmap(backgrnd);
     }
 
@@ -1428,6 +1433,60 @@ BOOL EscherTest::SetupMetabox(const char *buff)
 
     return TRUE;
 }
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// EscherTest - SetupPlane
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+BOOL EscherTest::SetupPlane(const char *buff)
+{
+    if (plane)
+        return FALSE;
+
+    plane = new EschPlaneDraw;
+    if (!plane)
+    {
+        MessageBox("Could not create plane",MB_OK | MB_ICONEXCLAMATION);
+        return FALSE;
+    }
+
+    plane->set_plane(0,1,0,0,-15,0);
+
+    plane->set_color(mypal->get_index(VngoColor24bit(0,255,0)));
+
+    if (mtxt)
+        plane->set_texture(mtxt);
+
+    plane->set_alpha(alpha);
+
+    if (!cam)
+    {
+        cam = new EschCameraEx(gvp);
+        cam->set_position(0,0,-100);
+        cam->set_flags(ESCH_CAM_SHADE_SMOOTH
+                       | ESCH_CAM_SHADE_FLAT
+                       | ESCH_CAM_SHADE_SOLID
+                       | ESCH_CAM_SHADE_WIRE
+                       | ESCH_CAM_MODELSPACE
+                       | ESCH_CAM_PERSPECTIVE
+                       | ESCH_CAM_ALPHA
+                       | ESCH_CAM_TEXTURED, 1);
+        cam->create_bg_bitmap(backgrnd);
+    }
+
+    cam->set_bcolor(mypal->get_index(VngoColor24bit(0,0,128)));
+
+    if (draws)
+        plane->sibling(draws);
+    else
+        draws = plane;
+
+    if (!light)
+        light = new EschVectorLight(-1,-1,-1);
+
+    return TRUE;
+}
+
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 // EscherTest - SetupAnimation
@@ -1768,6 +1827,11 @@ void EscherTest::ProcessEvents()
                 metabox->rotatex (float(-dy));
                 metabox->rotatey (float(-dx));
             }
+            if (plane)
+            {
+                plane->rotatex (float(dy));
+                plane->rotatey (float(dx));
+            }
             if (explosion)
             {
                 explosion->rotatex (float(-dy));
@@ -1786,6 +1850,8 @@ void EscherTest::ProcessEvents()
                 curmesh->rotatez (float(-dx));
             if (metabox)
                 metabox->rotatez (float(-dx));
+            if (plane)
+                plane->rotatez (float(dx));
             if (explosion)
                 explosion->rotatez (float(-dx));
             if (prtgen)
@@ -1798,6 +1864,8 @@ void EscherTest::ProcessEvents()
                 curmesh->rotatex (RotateDegrees);
             if (metabox)
                 metabox->rotatex (RotateDegrees);
+            if (plane)
+                plane->rotatex (-RotateDegrees);
             if (prtgen)
                 prtgen->rotatex (RotateDegrees);
         }
@@ -1808,6 +1876,8 @@ void EscherTest::ProcessEvents()
                 curmesh->rotatex (-RotateDegrees);
             if (metabox)
                 metabox->rotatex (-RotateDegrees);
+            if (plane)
+                plane->rotatex (RotateDegrees);
             if (explosion)
                 explosion->rotatex (-RotateDegrees);
             if (prtgen)
@@ -1820,6 +1890,8 @@ void EscherTest::ProcessEvents()
                 curmesh->rotatey (RotateDegrees);
             if (metabox)
                 metabox->rotatey (RotateDegrees);
+            if (plane)
+                plane->rotatey (-RotateDegrees);
             if (explosion)
                 explosion->rotatey (RotateDegrees);
             if (prtgen)
@@ -1832,6 +1904,8 @@ void EscherTest::ProcessEvents()
                 curmesh->rotatey (-RotateDegrees);
             if (metabox)
                 metabox->rotatey (-RotateDegrees);
+            if (plane)
+                plane->rotatey (RotateDegrees);
             if (explosion)
                 explosion->rotatey (-RotateDegrees);
             if (prtgen)
@@ -2029,7 +2103,7 @@ void EscherTest::ProcessEvents()
 
     if (events.check (ADJUST_ORTHO))
     {
-        float w = cam->width;
+        float w = (cam->flags & ESCH_CAM_ORTHO) ? cam->width : 100.0f;
 
         if (events.check (MOVEXY))
         {
@@ -2193,14 +2267,13 @@ void EscherTest::ProcessEvents()
     {
         if (cam->flags & ESCH_CAM_GRADIENT)
         {
-            cam->set_gradient(0);
+            cam->flags &= ~ESCH_CAM_GRADIENT;
         }
         else
         {
-            cam->create_gradient(32,
-                                 24, 0.5f,
-                                 VngoColor24bit(0,0,128),
-                                 VngoColor24bit(255,255,255));
+            cam->set_gradient(VngoColor24bit(0,0,128), 10,
+                              VngoColor24bit(0,128,0), 0,
+                              VngoColor24bit(128,0,0), -10);
         }
     }
 
@@ -2223,6 +2296,8 @@ void EscherTest::ProcessEvents()
                 sprite->set_alpha(alpha);
             if (metabox)
                 metabox->set_alpha(alpha);
+            if (plane)
+                plane->set_alpha(alpha);
         }
     }
 
@@ -2269,9 +2344,9 @@ void EscherTest::ProcessEvents()
             ptr = (EschMeshDraw*)ptr->next())
         {
             if (ptr->flags & ESCH_MSHD_NOEXTENTSCHK)
-                ptr->set_flags(ptr->flags & ~ESCH_MSHD_NOEXTENTSCHK);
+                ptr->set_flags(ESCH_MSHD_NOEXTENTSCHK, 0);
             else
-                ptr->set_flags(ptr->flags | ESCH_MSHD_NOEXTENTSCHK);
+                ptr->set_flags(ESCH_MSHD_NOEXTENTSCHK, 1);
         }
 
     }
@@ -2736,86 +2811,6 @@ void EscherTest::Render()
             EschSysInstance->sspace_mdepth=0;
             EschSysInstance->sspace_mbytes=0;
         }
-
-#if 0
-        EschVector v;
-
-        v.i = 1;
-        v.j = 0;
-        v.k = 0;
-        v.transform(&cam->eye.orient);
-
-        sprintf(buff,"(%5.3f %5.3f %5.3f)\n", float(v.i), float(v.j), float(v.k));
-        gt.out(buff);
-
-        v.k=0;
-        v.normalize();
-
-        float c_roll = v.i;
-
-        sprintf(buff," C_roll: %5.3f",float(c_roll));
-        gt.out(buff);
-
-        float roll = esch_acos(c_roll);
-        if (v.j < 0)
-            roll = -roll;
-
-        sprintf(buff," (angle %5.3f)\n",float(roll));
-        gt.out(buff);
-
-        v.i = 0;
-        v.j = 0;
-        v.k = 1;
-        v.transform(&cam->eye.orient);
-        EschVector v2 = v;
-
-        v.i=0;
-        v.normalize();
-
-        float c_pitch = v.k;
-
-        sprintf(buff," C_pitch: %5.3f",float(c_pitch));
-        gt.out(buff);
-
-        float pitch = esch_acos(c_pitch);
-        if (v.j < 0)
-            pitch = -pitch;
-
-        sprintf(buff," (angle %5.3f)\n",float(pitch));
-        gt.out(buff);
-
-        v2.j=0;
-        v2.normalize();
-
-        float c_yaw = v2.k;
-
-        sprintf(buff," C_yaw: %5.3f",float(c_yaw));
-        gt.out(buff);
-
-        float yaw = esch_acos(c_yaw);
-        if (v2.i < 0)
-            yaw = -yaw;
-
-        sprintf(buff," (angle %5.3f)\n",float(yaw));
-        gt.out(buff);
-
-        gt.outc('\n');
-        sprintf(buff,"%5.3f %5.3f %5.3f\n",
-                     float(cam->eye.orient.mtx[ESCH_MTX_A]),
-                     float(cam->eye.orient.mtx[ESCH_MTX_B]),
-                     float(cam->eye.orient.mtx[ESCH_MTX_C]));
-        gt.out(buff);
-        sprintf(buff,"%5.3f %5.3f %5.3f\n",
-                     float(cam->eye.orient.mtx[ESCH_MTX_D]),
-                     float(cam->eye.orient.mtx[ESCH_MTX_E]),
-                     float(cam->eye.orient.mtx[ESCH_MTX_F]));
-        gt.out(buff);
-        sprintf(buff,"%5.3f %5.3f %5.3f\n",
-                     float(cam->eye.orient.mtx[ESCH_MTX_G]),
-                     float(cam->eye.orient.mtx[ESCH_MTX_H]),
-                     float(cam->eye.orient.mtx[ESCH_MTX_I]));
-        gt.out(buff);
-#endif
     }
 
     if (keyframe_animation)

@@ -3,30 +3,36 @@
 //
 //            _,'|             _.-''``-...___..--';)
 //           /_ \'.      __..-' ,      ,--...--'''
-//          <\    .`--'''       `     /'     
+//          <\    .`--'''       `     /'
 //           `-';'               ;   ; ;  Felix the Fixed-point Library
 //     __...--''     ___...--_..'  .;.'
 //    (,__....----'''       (,..--''
 //
-//                    Microsoft Windows 95/NT Version
-//   
-//           Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.
-//                           All Rights Reserved.
+//                    Microsoft Windows 95/98/NT Version
+//
+//  Copyright (c) 1994-1999 by Dan Higdon, Tim Little, and Chuck Walbourn
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
-//           *** Charybdis Enterprises, Inc. Company Confidential ***
+// This file and all associated files are subject to the terms of the
+// GNU Lesser General Public License version 2 as published by the
+// Free Software Foundation (http://www.gnu.org).   They remain the
+// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+// See LICENSE.TXT in the distribution for a copy of this license.
 //
-//  This file and all associated files are the company proprietary property
-//        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
-//
-// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+// THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+// OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+// PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+// LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+// OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//
+//                        http://www.mythos-engine.org/
+//
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//
+// Created by Tim Little
 //
 //                         *** Tester Application ***
 //  Flxtest.cpp
@@ -36,14 +42,14 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include <stdio.h>
 #include <conio.h>
 #include <iostream.h>
 #include <stdlib.h>
-#include <time.h>       
+#include <time.h>
 #include <memory.h>
 #include <assert.h>
 #include <math.h>
@@ -90,7 +96,7 @@ void main()
    clock_t        ticks;
    clock_t        start;
 
-   cout << "°±² Felix Tester (C) 1994-1998 Charybdis Enterprises, Inc. ²±°\n";
+   cout << "°±² Felix Tester (C) 1994-1999 Charybdis Enterprises, Inc. ²±°\n";
 
    printf("\n\nMUL_DIV Section-------\n");
    a  = -32760;
@@ -126,7 +132,7 @@ void main()
    printf ("ASIN of %f is %f \n",(float)flx_sin(b),(float)flx_asin(flx_sin(b)));
    printf ("SIN of %f is %f \n",(float)c,(float)flx_sin(c));
    printf ("ASIN of %f is %f \n",(float)flx_sin(c),(float)flx_asin(flx_sin(c)));
-   
+
 
    printf("\n\nCOS Section-------\n");
    a = 17;
@@ -139,7 +145,7 @@ void main()
    printf ("ACOS of %f is %f \n",(float)flx_cos(b),(float)flx_acos(flx_cos(b)));
    printf ("COS of %f is %f \n",(float)c,(float)flx_cos(c));
    printf ("ACOS of %f is %f \n",(float)flx_cos(c),(float)flx_acos(flx_cos(c)));
-   
+
    printf("\n\nTAN Section-------\n");
    a = 17;
    b = 128;
@@ -151,7 +157,7 @@ void main()
    printf ("COT of %f is %f \n",(float)b,(float)flx_cot(b));
    printf ("TAN of %f is %f \n",(float)c,(float)flx_tan(c));
    printf ("COT of %f is %f \n",(float)c,(float)flx_cot(c));
-   
+
 
 
 

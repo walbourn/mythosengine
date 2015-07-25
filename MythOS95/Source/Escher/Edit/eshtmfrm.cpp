@@ -8,29 +8,33 @@
 //ùùùùù²±²ùùùùùùù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùùùùùù²±²ùùùù²±²ùùùùùù
 //ùùùù²²²²²²²²²²ù²²²²²²²²ùùù²²²²²²²²ùù²²²ùùùù²²²ù²²²²²²²²²²ù²²²ùùùù²²²ùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùùùùùùùùù Microsoft Windows 95/NT Version ùùùùùùùùùùùùùùùùùùùùùùù
+//ùùùùùùùùùùùùùùùùù Microsoft Windows 95/98/NT Version ùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùCopyrightù(c)ù1994-1998ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
-//ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
+//ùùùCopyright (c) 1994-1999 by Dan Higdon, Tim Little, and Chuck Walbournùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
-//           *** Charybdis Enterprises, Inc. Company Confidential ***
+// This file and all associated files are subject to the terms of the
+// GNU Lesser General Public License version 2 as published by the
+// Free Software Foundation (http://www.gnu.org).   They remain the
+// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+// See LICENSE.TXT in the distribution for a copy of this license.
 //
-//  This file and all associated files are the company proprietary property
-//        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+// THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+// OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+// PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+// LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+// OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 //
-// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//
+//                        http://www.mythos-engine.org/
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
 //                        *** Escher Terrain Editor ***
 //
-// Chuck Walbourn
+// Created by Chuck Walbourn
 //
 // eshtmfrm.cpp
 //
@@ -41,7 +45,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include "stdafx.h"
@@ -71,38 +75,38 @@ static char BASED_CODE THIS_FILE[] = __FILE__;
 IMPLEMENT_DYNCREATE(TerrMainFrame, CFrameWnd)
 
 BEGIN_MESSAGE_MAP(TerrMainFrame, CFrameWnd)
-	//{{AFX_MSG_MAP(TerrMainFrame)
-	ON_WM_CREATE()
-	ON_COMMAND(ID_TERR_PROP, OnTerrProperties)
-	ON_COMMAND(ID_TERR_IMPORT, OnTerrImport)
-	ON_COMMAND(ID_SURF_PALETTE, OnSurfPalette)
-	ON_COMMAND(ID_SURF_IMPORT, OnSurfImport)
-	ON_COMMAND(ID_FILE_EXPORT, OnFileExport)
-	ON_COMMAND(ID_SURF_DEFINETXT, OnSurfDefineTexture)
-	ON_COMMAND(ID_SURF_EDITTXT, OnSurfEditTexture)
-	ON_COMMAND(ID_SURF_DELETETXT, OnSurfDeleteTexture)
-	ON_COMMAND(ID_APP_HELP, OnAppHelp)
-	ON_COMMAND(ID_SURF_SAVETXT, OnSurfSaveTextures)
-	ON_UPDATE_COMMAND_UI(ID_SURF_SAVETXT, OnUpdateSurfSaveTextures)
-	ON_UPDATE_COMMAND_UI(ID_SURF_DELETETXT, OnUpdateSurfDeleteTexture)
-	ON_UPDATE_COMMAND_UI(ID_SURF_EDITTXT, OnUpdateSurfEditTexture)
-	ON_COMMAND(ID_SURF_LOADTXT, OnSurfLoadTextures)
-	ON_COMMAND(ID_SURF_DEFCLR, OnSurfDefineColor)
-	ON_COMMAND(ID_SURF_DELETECLR, OnSurfDeleteColor)
-	ON_UPDATE_COMMAND_UI(ID_SURF_DELETECLR, OnUpdateSurfDeleteColor)
-	ON_COMMAND(ID_SURF_EDITCLR, OnSurfEditColor)
-	ON_UPDATE_COMMAND_UI(ID_SURF_EDITCLR, OnUpdateSurfEditColor)
-	ON_COMMAND(ID_SURF_LOADCLR, OnSurfLoadColors)
-	ON_COMMAND(ID_SURF_SAVECLR, OnSurfSaveColors)
-	ON_UPDATE_COMMAND_UI(ID_SURF_SAVECLR, OnUpdateSurfSaveColors)
-	ON_COMMAND(ID_TERR_SETBASE, OnTerrSetBaseElevation)
-	ON_COMMAND(ID_SURF_REMTXT, OnSurfRemoveUnusedTxts)
-	ON_UPDATE_COMMAND_UI(ID_SURF_REMTXT, OnUpdateSurfRemoveUnusedTxts)
-	ON_COMMAND(IDS_FILE_FLOATING, OnFileFloating)
-	ON_UPDATE_COMMAND_UI(IDS_FILE_FLOATING, OnUpdateFileFloating)
-	ON_COMMAND(IDS_FILE_COMPRESS, OnFileCompress)
-	ON_UPDATE_COMMAND_UI(IDS_FILE_COMPRESS, OnUpdateFileCompress)
-	//}}AFX_MSG_MAP
+        //{{AFX_MSG_MAP(TerrMainFrame)
+        ON_WM_CREATE()
+        ON_COMMAND(ID_TERR_PROP, OnTerrProperties)
+        ON_COMMAND(ID_TERR_IMPORT, OnTerrImport)
+        ON_COMMAND(ID_SURF_PALETTE, OnSurfPalette)
+        ON_COMMAND(ID_SURF_IMPORT, OnSurfImport)
+        ON_COMMAND(ID_FILE_EXPORT, OnFileExport)
+        ON_COMMAND(ID_SURF_DEFINETXT, OnSurfDefineTexture)
+        ON_COMMAND(ID_SURF_EDITTXT, OnSurfEditTexture)
+        ON_COMMAND(ID_SURF_DELETETXT, OnSurfDeleteTexture)
+        ON_COMMAND(ID_APP_HELP, OnAppHelp)
+        ON_COMMAND(ID_SURF_SAVETXT, OnSurfSaveTextures)
+        ON_UPDATE_COMMAND_UI(ID_SURF_SAVETXT, OnUpdateSurfSaveTextures)
+        ON_UPDATE_COMMAND_UI(ID_SURF_DELETETXT, OnUpdateSurfDeleteTexture)
+        ON_UPDATE_COMMAND_UI(ID_SURF_EDITTXT, OnUpdateSurfEditTexture)
+        ON_COMMAND(ID_SURF_LOADTXT, OnSurfLoadTextures)
+        ON_COMMAND(ID_SURF_DEFCLR, OnSurfDefineColor)
+        ON_COMMAND(ID_SURF_DELETECLR, OnSurfDeleteColor)
+        ON_UPDATE_COMMAND_UI(ID_SURF_DELETECLR, OnUpdateSurfDeleteColor)
+        ON_COMMAND(ID_SURF_EDITCLR, OnSurfEditColor)
+        ON_UPDATE_COMMAND_UI(ID_SURF_EDITCLR, OnUpdateSurfEditColor)
+        ON_COMMAND(ID_SURF_LOADCLR, OnSurfLoadColors)
+        ON_COMMAND(ID_SURF_SAVECLR, OnSurfSaveColors)
+        ON_UPDATE_COMMAND_UI(ID_SURF_SAVECLR, OnUpdateSurfSaveColors)
+        ON_COMMAND(ID_TERR_SETBASE, OnTerrSetBaseElevation)
+        ON_COMMAND(ID_SURF_REMTXT, OnSurfRemoveUnusedTxts)
+        ON_UPDATE_COMMAND_UI(ID_SURF_REMTXT, OnUpdateSurfRemoveUnusedTxts)
+        ON_COMMAND(IDS_FILE_FLOATING, OnFileFloating)
+        ON_UPDATE_COMMAND_UI(IDS_FILE_FLOATING, OnUpdateFileFloating)
+        ON_COMMAND(IDS_FILE_COMPRESS, OnFileCompress)
+        ON_UPDATE_COMMAND_UI(IDS_FILE_COMPRESS, OnUpdateFileCompress)
+        //}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
@@ -112,39 +116,39 @@ END_MESSAGE_MAP()
 // toolbar buttons - IDs are command buttons
 static UINT BASED_CODE buttons[] =
 {
-	// same order as in the bitmap 'toolbar.bmp'
-	ID_FILE_NEW,
-	ID_FILE_OPEN,
-	ID_FILE_SAVE,
-		ID_SEPARATOR,
+        // same order as in the bitmap 'toolbar.bmp'
+        ID_FILE_NEW,
+        ID_FILE_OPEN,
+        ID_FILE_SAVE,
+                ID_SEPARATOR,
     ID_TERR_IMPORT,
     ID_SURF_IMPORT,
     ID_SURF_PALETTE,
-		ID_SEPARATOR,
+                ID_SEPARATOR,
     ID_VIEW_RENDER,
-		ID_SEPARATOR,
+                ID_SEPARATOR,
     ID_VIEW_ROTXY,
     ID_VIEW_MOVEXY,
     ID_VIEW_ROTMOVEZ,
     ID_LGT_ADJUSTXY,
     ID_LGT_ABRIGHT,
-		ID_SEPARATOR,
+                ID_SEPARATOR,
     ID_SURF_DEFINETXT,
     ID_SURF_EDITTXT,
     ID_SURF_DELETETXT,
-		ID_SEPARATOR,
+                ID_SEPARATOR,
     ID_SURF_DEFCLR,
     ID_SURF_EDITCLR,
     ID_SURF_DELETECLR,
-		ID_SEPARATOR,
-	ID_APP_ABOUT,
+                ID_SEPARATOR,
+        ID_APP_ABOUT,
 };
 
 static UINT BASED_CODE indicators[] =
 {
-	ID_SEPARATOR,           // status line indicator
+        ID_SEPARATOR,           // status line indicator
     ID_INDICATOR_CAPS,
-	ID_INDICATOR_NUM,
+        ID_INDICATOR_NUM,
     ID_INDICATOR_SCRL,
 };
 
@@ -184,7 +188,7 @@ TerrMainFrame::~TerrMainFrame()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 void TerrMainFrame::AssertValid() const
 {
-	CFrameWnd::AssertValid();
+        CFrameWnd::AssertValid();
 }
 
 
@@ -193,7 +197,7 @@ void TerrMainFrame::AssertValid() const
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 void TerrMainFrame::Dump(CDumpContext& dc) const
 {
-	CFrameWnd::Dump(dc);
+        CFrameWnd::Dump(dc);
 }
 #endif //_DEBUG
 
@@ -208,44 +212,44 @@ void TerrMainFrame::Dump(CDumpContext& dc) const
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 int TerrMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
-	if (CFrameWnd::OnCreate(lpCreateStruct) == -1)
-		return -1;
-	
-	if (!m_wndToolBar.Create(this) ||
-		!m_wndToolBar.LoadBitmap(IDR_MAINFRAME) ||
-		!m_wndToolBar.SetButtons(buttons,
-		  sizeof(buttons)/sizeof(UINT)))
-	{
-		TRACE0("Failed to create toolbar\n");
-		return -1;      // fail to create
-	}
+        if (CFrameWnd::OnCreate(lpCreateStruct) == -1)
+                return -1;
 
-	if (!m_wndStatusBar.Create(this) ||
-		!m_wndStatusBar.SetIndicators(indicators,
-		  sizeof(indicators)/sizeof(UINT)))
-	{
-		TRACE0("Failed to create status bar\n");
-		return -1;      // fail to create
-	}
+        if (!m_wndToolBar.Create(this) ||
+                !m_wndToolBar.LoadBitmap(IDR_MAINFRAME) ||
+                !m_wndToolBar.SetButtons(buttons,
+                  sizeof(buttons)/sizeof(UINT)))
+        {
+                TRACE0("Failed to create toolbar\n");
+                return -1;      // fail to create
+        }
 
-	// TODO: Delete these three lines if you don't want the toolbar to
-	//  be dockable
-	m_wndToolBar.EnableDocking(CBRS_ALIGN_ANY);
-	EnableDocking(CBRS_ALIGN_ANY);
-	DockControlBar(&m_wndToolBar);
+        if (!m_wndStatusBar.Create(this) ||
+                !m_wndStatusBar.SetIndicators(indicators,
+                  sizeof(indicators)/sizeof(UINT)))
+        {
+                TRACE0("Failed to create status bar\n");
+                return -1;      // fail to create
+        }
 
-	// TODO: Remove this if you don't want tool tips
-	m_wndToolBar.SetBarStyle(m_wndToolBar.GetBarStyle() |
-		CBRS_TOOLTIPS | CBRS_FLYBY);
+        // TODO: Delete these three lines if you don't want the toolbar to
+        //  be dockable
+        m_wndToolBar.EnableDocking(CBRS_ALIGN_ANY);
+        EnableDocking(CBRS_ALIGN_ANY);
+        DockControlBar(&m_wndToolBar);
 
-	return 0;
+        // TODO: Remove this if you don't want tool tips
+        m_wndToolBar.SetBarStyle(m_wndToolBar.GetBarStyle() |
+                CBRS_TOOLTIPS | CBRS_FLYBY);
+
+        return 0;
 }
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrMainFrame - OnFileExport                                             ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrMainFrame::OnFileExport() 
+void TerrMainFrame::OnFileExport()
 {
     CFileDialog dlg(FALSE,
                     "IFF", "EXPORT.IFF",
@@ -271,11 +275,11 @@ void TerrMainFrame::OnFileExport()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 void TerrMainFrame::OnFileCompress()
 {
-	TerrEditDoc *pDoc = (TerrEditDoc*)GetActiveDocument();
-	pDoc->ctrlfl ^= TerrEditDoc::COMPRESS;
+        TerrEditDoc *pDoc = (TerrEditDoc*)GetActiveDocument();
+        pDoc->ctrlfl ^= TerrEditDoc::COMPRESS;
 }
 
-void TerrMainFrame::OnUpdateFileCompress(CCmdUI* pCmdUI) 
+void TerrMainFrame::OnUpdateFileCompress(CCmdUI* pCmdUI)
 {
     TerrEditDoc *pDoc = (TerrEditDoc*)GetActiveDocument();
 
@@ -293,11 +297,11 @@ void TerrMainFrame::OnUpdateFileCompress(CCmdUI* pCmdUI)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 void TerrMainFrame::OnFileFloating()
 {
-	TerrEditDoc *pDoc = (TerrEditDoc*)GetActiveDocument();
-	pDoc->ctrlfl ^= TerrEditDoc::FLOATING;
+        TerrEditDoc *pDoc = (TerrEditDoc*)GetActiveDocument();
+        pDoc->ctrlfl ^= TerrEditDoc::FLOATING;
 }
 
-void TerrMainFrame::OnUpdateFileFloating(CCmdUI* pCmdUI) 
+void TerrMainFrame::OnUpdateFileFloating(CCmdUI* pCmdUI)
 {
     TerrEditDoc *pDoc = (TerrEditDoc*)GetActiveDocument();
 
@@ -312,7 +316,7 @@ void TerrMainFrame::OnUpdateFileFloating(CCmdUI* pCmdUI)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrMainFrame - OnTerrSetBaseElevation                                   ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrMainFrame::OnTerrSetBaseElevation() 
+void TerrMainFrame::OnTerrSetBaseElevation()
 {
     TerrEditDoc *pDoc = (TerrEditDoc*)GetActiveDocument();
     ASSERT_VALID(pDoc);
@@ -335,7 +339,7 @@ void TerrMainFrame::OnTerrSetBaseElevation()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrMainFrame - OnTerrProperties                                         ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrMainFrame::OnTerrProperties() 
+void TerrMainFrame::OnTerrProperties()
 {
     TerrEditDoc *pDoc = (TerrEditDoc*)GetActiveDocument();
     ASSERT_VALID(pDoc);
@@ -347,7 +351,7 @@ void TerrMainFrame::OnTerrProperties()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrMainFrame - OnTerrImport                                             ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrMainFrame::OnTerrImport() 
+void TerrMainFrame::OnTerrImport()
 {
     CFileDialog dlg(TRUE,
                     NULL, NULL,
@@ -373,7 +377,7 @@ void TerrMainFrame::OnTerrImport()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrMainFrame - OnSurfImport                                             ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrMainFrame::OnSurfImport() 
+void TerrMainFrame::OnSurfImport()
 {
     CFileDialog dlg(TRUE,
                     NULL, NULL,
@@ -396,7 +400,7 @@ void TerrMainFrame::OnSurfImport()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrMainFrame - OnSurfDefineTexture                                      ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrMainFrame::OnSurfDefineTexture() 
+void TerrMainFrame::OnSurfDefineTexture()
 {
     TerrEditDoc *pDoc = (TerrEditDoc*)GetActiveDocument();
     ASSERT_VALID(pDoc);
@@ -460,7 +464,7 @@ void TerrMainFrame::OnSurfDefineTexture()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrMainFrame - On(Update)SurfEditTexture                                ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrMainFrame::OnSurfEditTexture() 
+void TerrMainFrame::OnSurfEditTexture()
 {
     TerrEditView *pView = (TerrEditView*)GetActiveView();
     ASSERT_VALID(pView);
@@ -527,13 +531,13 @@ void TerrMainFrame::OnSurfEditTexture()
                 | ((fdlg.m_app1) ? ESCH_SURF_APP1 : 0)
                 | ((fdlg.m_app2) ? ESCH_SURF_APP2 : 0)
                 | ((fdlg.m_app3) ? ESCH_SURF_APP3 : 0);
-    
+
         //ÄÄÄ General
         pDoc->SetTexture(i,gdlg.m_name,gdlg.m_fname, gdlg.m_color, flags);
     }
 }
 
-void TerrMainFrame::OnUpdateSurfEditTexture(CCmdUI* pCmdUI) 
+void TerrMainFrame::OnUpdateSurfEditTexture(CCmdUI* pCmdUI)
 {
     TerrEditDoc *pDoc = (TerrEditDoc*)GetActiveDocument();
     ASSERT_VALID(pDoc);
@@ -545,7 +549,7 @@ void TerrMainFrame::OnUpdateSurfEditTexture(CCmdUI* pCmdUI)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrMainFrame - On(Update)SurfDeleteTexture                              ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrMainFrame::OnSurfDeleteTexture() 
+void TerrMainFrame::OnSurfDeleteTexture()
 {
     TerrEditView *pView = (TerrEditView*)GetActiveView();
     ASSERT_VALID(pView);
@@ -575,7 +579,7 @@ void TerrMainFrame::OnSurfDeleteTexture()
     }
 }
 
-void TerrMainFrame::OnUpdateSurfDeleteTexture(CCmdUI* pCmdUI) 
+void TerrMainFrame::OnUpdateSurfDeleteTexture(CCmdUI* pCmdUI)
 {
     TerrEditDoc *pDoc = (TerrEditDoc*)GetActiveDocument();
     ASSERT_VALID(pDoc);
@@ -587,7 +591,7 @@ void TerrMainFrame::OnUpdateSurfDeleteTexture(CCmdUI* pCmdUI)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrMainFrame - OnSurfRemoveUnusedTxts                                   ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrMainFrame::OnSurfRemoveUnusedTxts() 
+void TerrMainFrame::OnSurfRemoveUnusedTxts()
 {
     TerrEditDoc *pDoc = (TerrEditDoc*)GetActiveDocument();
     ASSERT_VALID(pDoc);
@@ -599,7 +603,7 @@ void TerrMainFrame::OnSurfRemoveUnusedTxts()
     }
 }
 
-void TerrMainFrame::OnUpdateSurfRemoveUnusedTxts(CCmdUI* pCmdUI) 
+void TerrMainFrame::OnUpdateSurfRemoveUnusedTxts(CCmdUI* pCmdUI)
 {
     TerrEditDoc *pDoc = (TerrEditDoc*)GetActiveDocument();
     ASSERT_VALID(pDoc);
@@ -611,7 +615,7 @@ void TerrMainFrame::OnUpdateSurfRemoveUnusedTxts(CCmdUI* pCmdUI)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrMainFrame - OnSurfLoadTextures                                       ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrMainFrame::OnSurfLoadTextures() 
+void TerrMainFrame::OnSurfLoadTextures()
 {
     CFileDialog dlg(TRUE,
                     NULL, NULL,
@@ -634,7 +638,7 @@ void TerrMainFrame::OnSurfLoadTextures()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrMainFrame - On(Update)SurfSaveTextures                               ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrMainFrame::OnSurfSaveTextures() 
+void TerrMainFrame::OnSurfSaveTextures()
 {
     CFileDialog dlg(FALSE,
                     "TS", "TxtSet",
@@ -653,7 +657,7 @@ void TerrMainFrame::OnSurfSaveTextures()
     }
 }
 
-void TerrMainFrame::OnUpdateSurfSaveTextures(CCmdUI* pCmdUI) 
+void TerrMainFrame::OnUpdateSurfSaveTextures(CCmdUI* pCmdUI)
 {
     TerrEditDoc *pDoc = (TerrEditDoc*)GetActiveDocument();
     ASSERT_VALID(pDoc);
@@ -665,7 +669,7 @@ void TerrMainFrame::OnUpdateSurfSaveTextures(CCmdUI* pCmdUI)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrMainFrame - On(Update)DefineColor                                    ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrMainFrame::OnSurfDefineColor() 
+void TerrMainFrame::OnSurfDefineColor()
 {
     TerrEditDoc *pDoc = (TerrEditDoc*)GetActiveDocument();
     ASSERT_VALID(pDoc);
@@ -725,14 +729,14 @@ void TerrMainFrame::OnSurfDefineColor()
                                     | ((dword)tclr.g << 8)
                                     | (dword)tclr.r, flags);
     }
-	
+
 }
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrMainFrame - On(Update)SurfEditColor                                  ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrMainFrame::OnSurfEditColor() 
+void TerrMainFrame::OnSurfEditColor()
 {
     TerrEditView *pView = (TerrEditView*)GetActiveView();
     ASSERT_VALID(pView);
@@ -797,10 +801,10 @@ void TerrMainFrame::OnSurfEditColor()
                                        | ((dword)tclr.g << 8)
                                        | (dword)tclr.r, flags);
     }
-	
+
 }
 
-void TerrMainFrame::OnUpdateSurfEditColor(CCmdUI* pCmdUI) 
+void TerrMainFrame::OnUpdateSurfEditColor(CCmdUI* pCmdUI)
 {
     TerrEditDoc *pDoc = (TerrEditDoc*)GetActiveDocument();
     ASSERT_VALID(pDoc);
@@ -812,7 +816,7 @@ void TerrMainFrame::OnUpdateSurfEditColor(CCmdUI* pCmdUI)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrMainFrame - On(Update)DeleteColor                                    ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrMainFrame::OnSurfDeleteColor() 
+void TerrMainFrame::OnSurfDeleteColor()
 {
     TerrEditView *pView = (TerrEditView*)GetActiveView();
     ASSERT_VALID(pView);
@@ -840,10 +844,10 @@ void TerrMainFrame::OnSurfDeleteColor()
     {
         pDoc->DeleteColor(i);
     }
-	
+
 }
 
-void TerrMainFrame::OnUpdateSurfDeleteColor(CCmdUI* pCmdUI) 
+void TerrMainFrame::OnUpdateSurfDeleteColor(CCmdUI* pCmdUI)
 {
     TerrEditDoc *pDoc = (TerrEditDoc*)GetActiveDocument();
     ASSERT_VALID(pDoc);
@@ -855,7 +859,7 @@ void TerrMainFrame::OnUpdateSurfDeleteColor(CCmdUI* pCmdUI)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrMainFrame - OnSurfLoadColors                                         ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrMainFrame::OnSurfLoadColors() 
+void TerrMainFrame::OnSurfLoadColors()
 {
     CFileDialog dlg(TRUE,
                     NULL, NULL,
@@ -878,7 +882,7 @@ void TerrMainFrame::OnSurfLoadColors()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrMainFrame - On(Update)SurfSaveColors                                 ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrMainFrame::OnSurfSaveColors() 
+void TerrMainFrame::OnSurfSaveColors()
 {
     CFileDialog dlg(FALSE,
                     "CS", "ClrSet",
@@ -897,7 +901,7 @@ void TerrMainFrame::OnSurfSaveColors()
     }
 }
 
-void TerrMainFrame::OnUpdateSurfSaveColors(CCmdUI* pCmdUI) 
+void TerrMainFrame::OnUpdateSurfSaveColors(CCmdUI* pCmdUI)
 {
     TerrEditDoc *pDoc = (TerrEditDoc*)GetActiveDocument();
     ASSERT_VALID(pDoc);
@@ -909,7 +913,7 @@ void TerrMainFrame::OnUpdateSurfSaveColors(CCmdUI* pCmdUI)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrMainFrame - OnSurfPalette                                            ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrMainFrame::OnSurfPalette() 
+void TerrMainFrame::OnSurfPalette()
 {
     TerrEditDoc *pDoc = (TerrEditDoc*)GetActiveDocument();
     ASSERT_VALID(pDoc);
@@ -936,12 +940,12 @@ void TerrMainFrame::OnSurfPalette()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrMainFrame - OnAppHelp                                                ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrMainFrame::OnAppHelp() 
+void TerrMainFrame::OnAppHelp()
 {
     int     i;
     char    *c;
     char    fname[256];
-  
+
     GetModuleFileName(NULL, fname, 256);
 
     for (i=strlen(fname), c = &fname[i-1]; i > 0; i--, c--)

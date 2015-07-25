@@ -1,33 +1,39 @@
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
-//           __ ,                                                      
-//            ,-| ~           ,               ,,                      
-//           ('||/__,        ||               ||                  _   
-//          (( |||  | \\ \\ =||=   _-_  \\/\\ ||/|,  _-_  ,._-_  / \\ 
-//          (( |||==| || ||  ||   || \\ || || || || || \\  ||   || || 
-//           ( / |  , || ||  ||   ||/   || || || |' ||/    ||   || || 
-//            -____/  \\/\\  \\,  \\,/  \\ \\ \\/   \\,/   \\,  \\_-| 
-//                                                               /  \ 
+//           __ ,
+//            ,-| ~           ,               ,,
+//           ('||/__,        ||               ||                  _
+//          (( |||  | \\ \\ =||=   _-_  \\/\\ ||/|,  _-_  ,._-_  / \\
+//          (( |||==| || ||  ||   || \\ || || || || || \\  ||   || ||
+//           ( / |  , || ||  ||   ||/   || || || |' ||/    ||   || ||
+//            -____/  \\/\\  \\,  \\,/  \\ \\ \\/   \\,/   \\,  \\_-|
+//                                                               /  \
 //                                                              '----`
 //                     Text Output and Font Management System
-//                        Microsoft Windows 95/NT Version
+//                       Microsoft Windows 95/98/NT Version
 //
-//            Copyright (c) 1995-1998 by Charybdis Enterprises, Inc.
-//                           All Rights Reserved.
+//  Copyright (c) 1995-1999 by Dan Higdon, Tim Little, and Chuck Walbourn
+//
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//
+// This file and all associated files are subject to the terms of the
+// GNU Lesser General Public License version 2 as published by the
+// Free Software Foundation (http://www.gnu.org).   They remain the
+// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+// See LICENSE.TXT in the distribution for a copy of this license.
+//
+// THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+// OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+// PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+// LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+// OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
-//           *** Charybdis Enterprises, Inc. Company Confidential ***
-//
-//  This file and all associated files are the company proprietary property
-//        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
-//
-// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+//                        http://www.mythos-engine.org/
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//
+// Created by Chuck Walbourn
 //
 // main.cpp
 //
@@ -40,7 +46,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #define WIN32_LEAN_AND_MEAN
@@ -97,11 +103,11 @@ int APIENTRY WinMain (HINSTANCE hInstance,
                       LPSTR     lpCmdLine,
                       int       nCmdShow)
 {
-	// Perform initializations.
+        // Perform initializations.
     // If we are already running, this routine will reactivate the older
     // application and return FALSE.
-	if (!InitApplication (hInstance, nCmdShow))
-		return FALSE;
+        if (!InitApplication (hInstance, nCmdShow))
+                return FALSE;
 
     // Initialize game here.
     IvorySystem ivory (1024*1024);
@@ -155,7 +161,7 @@ int APIENTRY WinMain (HINSTANCE hInstance,
         return FALSE;
     }
 
-	// Acquire and dispatch messages until a WM_QUIT message is received.
+        // Acquire and dispatch messages until a WM_QUIT message is received.
     while (game->PumpWindows())
     {
         // Do per-frame processing here
@@ -173,7 +179,7 @@ int APIENTRY WinMain (HINSTANCE hInstance,
     delete Devs;
     Devs=0;
 
-	return 0;
+        return 0;
 
     // This shuts up the compiler
     lpCmdLine;

@@ -8,29 +8,33 @@
 //ùùùùù²±²ùùùùùùù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùùùùùù²±²ùùùù²±²ùùùùùù
 //ùùùù²²²²²²²²²²ù²²²²²²²²ùùù²²²²²²²²ùù²²²ùùùù²²²ù²²²²²²²²²²ù²²²ùùùù²²²ùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùùùùùùùùù Microsoft Windows 95/NT Version ùùùùùùùùùùùùùùùùùùùùùùù
+//ùùùùùùùùùùùùùùùùù Microsoft Windows 95/98/NT Version ùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùCopyrightù(c)ù1994-1998ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
-//ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
+//ùùùCopyright (c) 1994-1999 by Dan Higdon, Tim Little, and Chuck Walbournùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
-//           *** Charybdis Enterprises, Inc. Company Confidential ***
+// This file and all associated files are subject to the terms of the
+// GNU Lesser General Public License version 2 as published by the
+// Free Software Foundation (http://www.gnu.org).   They remain the
+// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+// See LICENSE.TXT in the distribution for a copy of this license.
 //
-//  This file and all associated files are the company proprietary property
-//        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+// THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+// OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+// PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+// LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+// OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 //
-// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//
+//                        http://www.mythos-engine.org/
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
 //                        *** Escher Terrain Editor ***
 //
-// Chuck Walbourn
+// Created by Chuck Walbourn
 //
 // USGS DEM Parse class by Sean Gallagher
 //
@@ -43,7 +47,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include "stdafx.h"
@@ -182,7 +186,7 @@ USGSFileParseDEM::usgs_error USGSFileParseDEM::read_next_token(Token *tk)
         buff[i] = ch;
     }
 
-//ÄÄÄ Don't overrun our buffer...	
+//ÄÄÄ Don't overrun our buffer...
     if (i >= sizeof(buff))
         return ERR_TOKENTOOLONG;
 
@@ -263,7 +267,7 @@ USGSFileParseDEM::usgs_error USGSFileParseDEM::read_header_info()
     if (err)
         return err;
 
-    if (tk.flags != IS_UINT)	
+    if (tk.flags != IS_UINT)
         return ERR_INVALIDTOKEN;
 
     elev_units = tk.a;
@@ -356,7 +360,7 @@ USGSFileParseDEM::usgs_error USGSFileParseDEM::read_header_info()
         axis[2] = atof(buff);
     }
 
-//ÄÄÄ Get profile row count 
+//ÄÄÄ Get profile row count
     err=read_next_token(&tk);
     if (err)
         return err;
@@ -366,7 +370,7 @@ USGSFileParseDEM::usgs_error USGSFileParseDEM::read_header_info()
 
     profile_rows = tk.a;
 
-//ÄÄÄ Get profile column count 
+//ÄÄÄ Get profile column count
     err=read_next_token(&tk);
     if (err)
         return err;
@@ -402,7 +406,7 @@ USGSFileParseDEM::usgs_error USGSFileParseDEM::read_profile(USGSProfileDEM *prof
 
     prof->row_id = tk.a;
 
-//ÄÄÄ Get column id 
+//ÄÄÄ Get column id
     err=read_next_token(&tk);
     if (err)
         return err;
@@ -422,7 +426,7 @@ USGSFileParseDEM::usgs_error USGSFileParseDEM::read_profile(USGSProfileDEM *prof
 
     prof->rows = tk.a;
 
-//ÄÄÄ Get number of columns 
+//ÄÄÄ Get number of columns
     err=read_next_token(&tk);
     if (err)
         return err;
@@ -525,7 +529,7 @@ USGSFileParseDEM::usgs_error USGSFileParseDEM::read(const char *fname)
     memset(profiles, 0, sizeof(USGSProfileDEM)*data_size);
 
 //ÄÄÄ Read profiles
-    dlg.m_pbar.SetRange(0, data_size);
+    dlg.m_pbar.SetRange(0, short(data_size));
     dlg.m_status = "Reading profiles";
     dlg.UpdateData(FALSE);
     dlg.RedrawWindow();
@@ -663,7 +667,7 @@ USGSFileParseDEM::usgs_error USGSFileParseDEM::expand_data(long longitude,
                     int xpos = (j*arc_seconds_x) + k;
                     int ypos = (i*arc_seconds_y) + l;
                     //
-                    // if we are not overshooting the end of the target data area, 
+                    // if we are not overshooting the end of the target data area,
                     // move the data to the dest.
                     //
                     if ((xpos < width) && (ypos < depth))
@@ -693,7 +697,7 @@ const char *USGSFileParseDEM::get_error_string(usgs_error err)
         case ERR_INVALIDPARMS:
             return "Invalid parameters were given to the reader";
         case ERR_FILEERROR:
-            return "A file error occurred";     
+            return "A file error occurred";
         case ERR_NOPROFILES:
         case ERR_INVALIDPROFILE:
             return "Invalid profile counts were encountered";

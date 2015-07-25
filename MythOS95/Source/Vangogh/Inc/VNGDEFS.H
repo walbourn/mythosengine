@@ -4,24 +4,31 @@
 //                                                          %/ . .  .   \%
 //           Van Gogh 2D-Display Library                     |  . .  o. |
 //                                                           |. _  .   .|
-// Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.    | / \   .  |
-//              All rights reserved.                         |_|_|_._._.|
+//        Microsoft Windows 95/98/NT Version                 | / \   .  |
+//                                                           |_|_|_._._.|
 //                                                           |.-.-.-.-..|
 //                                                          %\__________/%
 //                                                           %          %
 //
+//  Copyright (c) 1994-1999 by Dan Higdon, Tim Little, and Chuck Walbourn
+//
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
-//           *** Charybdis Enterprises, Inc. Company Confidential ***
+// This file and all associated files are subject to the terms of the
+// GNU Lesser General Public License version 2 as published by the
+// Free Software Foundation (http://www.gnu.org).   They remain the
+// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+// See LICENSE.TXT in the distribution for a copy of this license.
 //
-//  THIS FILE AND ALL ASSOCIATED FILES ARE THE COMPANY PROPRIETARY PROPERTY
-//        OF CHARYBDIS ENTERPRISES, INC.  UNAUTHORIZED USE PROHIBITED.
+// THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+// OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+// PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+// LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+// OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 //
-// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//
+//                        http://www.mythos-engine.org/
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
@@ -77,13 +84,14 @@ extern "C" {
 #define VNGO_ACTIVE_HAZE_DEV    0x1000
 #define VNGO_PASSIVE_HAZE_DEV   0x2000
 #define VNGO_HAZE_ON            0x4000
+#define VNGO_FILTER_AUTOCORRECT 0x8000
 
 // Flags for the ViewPort Drawing control.
-#define VNGO_DITHER_OFF         0x1000
-#define VNGO_DITHER_4X4         0x2000
-#define VNGO_TRUE_ALPHA         0x4000
-#define VNGO_TEXTURE_FILTER     0x8000
-#define VNGO_DEBUG_OUTLINE      0x10000
+#define VNGO_DITHER_OFF         0x10000
+#define VNGO_DITHER_4X4         0x20000
+#define VNGO_TRUE_ALPHA         0x40000
+#define VNGO_TEXTURE_FILTER     0x80000
+#define VNGO_DEBUG_OUTLINE      0x100000
 
 #define VNGO_MYMEM_SHADE        0x10
 #define VNGO_MYMEM_HAZE         0x20
@@ -256,6 +264,7 @@ enum _vngo_texture_dim
     TEX256x64       = 22,
     TEX256x128      = 23,
     TEX256x256      = 24,
+    TEX_UNDEFINED   = 0xff,
 };
 
 typedef enum _vngo_texture_dim VngoTextureSize;

@@ -8,23 +8,27 @@
 //ùùùùù²±²ùùùùùùù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùùùùùù²±²ùùùù²±²ùùùùùù
 //ùùùù²²²²²²²²²²ù²²²²²²²²ùùù²²²²²²²²ùù²²²ùùùù²²²ù²²²²²²²²²²ù²²²ùùùù²²²ùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùùùùùùùùù Microsoft Windows 95/NT Version ùùùùùùùùùùùùùùùùùùùùùùù
+//ùùùùùùùùùùùùùùùùù Microsoft Windows 95/98/NT Version ùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùCopyrightù(c)ù1994-1998ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
-//ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
+//ùùùCopyright (c) 1994-1999 by Dan Higdon, Tim Little, and Chuck Walbournùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
-//           *** Charybdis Enterprises, Inc. Company Confidential ***
+// This file and all associated files are subject to the terms of the
+// GNU Lesser General Public License version 2 as published by the
+// Free Software Foundation (http://www.gnu.org).   They remain the
+// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+// See LICENSE.TXT in the distribution for a copy of this license.
 //
-//  This file and all associated files are the company proprietary property
-//        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+// THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+// OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+// PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+// LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+// OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 //
-// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//
+//                        http://www.mythos-engine.org/
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
@@ -39,9 +43,9 @@
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-//             
+//
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include "stdafx.h"
@@ -67,16 +71,16 @@ extern ulong BitDepth;
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
 BEGIN_MESSAGE_MAP(ToolVPort, CWnd)
-	//{{AFX_MSG_MAP(ToolVPort)
-	ON_WM_SIZE()
-	ON_WM_PAINT()
-	ON_WM_RBUTTONDOWN()
-	ON_WM_HSCROLL()
-	ON_WM_VSCROLL()
-	ON_WM_LBUTTONDOWN()
-	ON_WM_MOUSEMOVE()
-	ON_WM_LBUTTONUP()
-	//}}AFX_MSG_MAP
+        //{{AFX_MSG_MAP(ToolVPort)
+        ON_WM_SIZE()
+        ON_WM_PAINT()
+        ON_WM_RBUTTONDOWN()
+        ON_WM_HSCROLL()
+        ON_WM_VSCROLL()
+        ON_WM_LBUTTONDOWN()
+        ON_WM_MOUSEMOVE()
+        ON_WM_LBUTTONUP()
+        //}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
@@ -263,6 +267,33 @@ void ToolVPort::SetCamera(EschCameraEx *c)
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// ToolVPort - extents_render                                               ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+void ToolVPort::extents_render(EschMeshDraw *ptr)
+{
+    for(; ptr != NULL; ptr = (EschMeshDraw*)ptr->next())
+    {
+        if (!(ptr->flags & ESCH_DRW_SKIP))
+        {
+            dword color = cam->bcolor ^ 255;
+
+            if (extra_flags & BOX_EXTS)
+            {
+                ptr->mesh->box.draw(&ptr->world,color);
+            }
+            if (extra_flags & SPHERE_EXTS)
+            {
+                ptr->draw_extents(color);
+            }
+
+            if (ptr->child())
+                extents_render((EschMeshDraw*)ptr->child());
+        }
+    }
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // ToolVPort - Render                                                       ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 void ToolVPort::Render(void)
@@ -288,22 +319,7 @@ void ToolVPort::Render(void)
 
     if (extra_flags & (SPHERE_EXTS | BOX_EXTS))
     {
-        for(EschMeshDraw *ptr=pDoc->meshes;
-            ptr != NULL;
-            ptr = (EschMeshDraw*)ptr->next())
-        {
-            if (!(ptr->flags & ESCH_DRW_SKIP))
-            {
-                if (extra_flags & BOX_EXTS)
-                {
-                    ptr->mesh->box.draw(&ptr->world,cam->bcolor ^ 255);
-                }
-                if (extra_flags & SPHERE_EXTS)
-                {
-                    ptr->draw_extents(cam->bcolor ^ 255);
-                }
-            }
-        }
+        extents_render(pDoc->meshes);
     }
 
     ec.pop();
@@ -403,9 +419,9 @@ void ToolVPort::SetMode(rnd_ctrl_mode_type m, void *t)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // ViewerVPort - OnPaint                                                    ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void ToolVPort::OnPaint() 
+void ToolVPort::OnPaint()
 {
-	CPaintDC dc(this);
+        CPaintDC dc(this);
 
     CRect   rect;
     GetClientRect(&rect);
@@ -434,7 +450,7 @@ void ToolVPort::OnPaint()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // ViewerVPort - OnSize                                                     ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void ToolVPort::OnSize(UINT nType, int cx, int cy) 
+void ToolVPort::OnSize(UINT nType, int cx, int cy)
 {
     cx &= ~0x3;
 
@@ -444,14 +460,14 @@ void ToolVPort::OnSize(UINT nType, int cx, int cy)
         cam->attach(gvp);
     Render();
 
-	CWnd::OnSize(nType, cx, cy);
+        CWnd::OnSize(nType, cx, cy);
 }
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // ToolVPort - OnHScroll                                                    ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void ToolVPort::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) 
+void ToolVPort::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 {
     int             t, pos, render=0;
     float           f;
@@ -802,7 +818,7 @@ void ToolVPort::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
             break;
     }
 
-	CWnd::OnHScroll(nSBCode, nPos, pScrollBar);
+        CWnd::OnHScroll(nSBCode, nPos, pScrollBar);
 
     if (render)
     {
@@ -815,7 +831,7 @@ void ToolVPort::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // ToolVPort - OnVScroll                                                    ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void ToolVPort::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) 
+void ToolVPort::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 {
     int             t, pos, render=0;
     float           f;
@@ -1168,7 +1184,7 @@ void ToolVPort::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
             break;
     }
 
-	CWnd::OnVScroll(nSBCode, nPos, pScrollBar);
+        CWnd::OnVScroll(nSBCode, nPos, pScrollBar);
 
     if (render)
     {
@@ -1181,7 +1197,7 @@ void ToolVPort::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // ViewerVPort - OnLButtonDown                                              ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void ToolVPort::OnLButtonDown(UINT nFlags, CPoint point) 
+void ToolVPort::OnLButtonDown(UINT nFlags, CPoint point)
 {
     if (!capture)
     {
@@ -1196,7 +1212,7 @@ void ToolVPort::OnLButtonDown(UINT nFlags, CPoint point)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // ViewerVPort - OnLButtonUp                                                ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void ToolVPort::OnLButtonUp(UINT nFlags, CPoint point) 
+void ToolVPort::OnLButtonUp(UINT nFlags, CPoint point)
 {
     if (capture)
     {
@@ -1209,7 +1225,7 @@ void ToolVPort::OnLButtonUp(UINT nFlags, CPoint point)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // ViewerVPort - OnMouseMove                                                ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void ToolVPort::OnMouseMove(UINT nFlags, CPoint point) 
+void ToolVPort::OnMouseMove(UINT nFlags, CPoint point)
 {
     if (!capture)
         return;
@@ -1334,7 +1350,7 @@ void ToolVPort::OnMouseMove(UINT nFlags, CPoint point)
             render=1;
             break;
     }
-    
+
     lastx = point.x;
     lasty = point.y;
 
@@ -1349,7 +1365,7 @@ void ToolVPort::OnMouseMove(UINT nFlags, CPoint point)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // ViewerVPort - OnRButtonDown                                              ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void ToolVPort::OnRButtonDown(UINT nFlags, CPoint point) 
+void ToolVPort::OnRButtonDown(UINT nFlags, CPoint point)
 {
     if (capture)
     {
@@ -1403,7 +1419,7 @@ void ToolVPort::OnRButtonDown(UINT nFlags, CPoint point)
     autoMenu.AppendMenu(MF_SEPARATOR);
     autoMenu.AppendMenu(MF_STRING, ID_VIEW_AUTOFAST, "Fast");
     autoMenu.AppendMenu(MF_STRING, ID_VIEW_AUTOSLOW, "Slow");
-        
+
     //ÄÄÄ Menu
     CMenu   rMenu;
     rMenu.CreatePopupMenu();
@@ -1425,7 +1441,7 @@ void ToolVPort::OnRButtonDown(UINT nFlags, CPoint point)
     rMenu.AppendMenu(MF_SEPARATOR);
     rMenu.AppendMenu(MF_STRING | MF_POPUP, (unsigned int) autoMenu.m_hMenu, "Auto-Rotate");
 
- 
+
 //ÄÄÄ Display and perform action
     ASSERT(AfxGetMainWnd());
     rMenu.TrackPopupMenu( TPM_RIGHTBUTTON | TPM_LEFTALIGN,

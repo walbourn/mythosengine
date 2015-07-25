@@ -9,23 +9,27 @@
 //          ³  ³ OÙ OÙ    ÜÛÛÛÜÜÜÛÛÛß   ÛÛÛÛÝßÛÜ  ßÛÛÜÜÛÛ  ÜÛÛÛÜ ÜÛÛÛÜ
 //         OÙ OÙ
 //                            C++ Music, Sound, and Effects Library
-//                               Microsoft Windows 95/NT Version
+//                               Microsoft Windows 95/98/NT Version
 //
-//           Copyright (c) 1995-1998 by Charybdis Enterprises, Inc.
-//                           All Rights Reserved.
+//  Copyright (c) 1995-1999 by Dan Higdon, Tim Little, and Chuck Walbourn
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
-//           *** Charybdis Enterprises, Inc. Company Confidential ***
+// This file and all associated files are subject to the terms of the
+// GNU Lesser General Public License version 2 as published by the
+// Free Software Foundation (http://www.gnu.org).   They remain the
+// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+// See LICENSE.TXT in the distribution for a copy of this license.
 //
-//  This file and all associated files are the company proprietary property
-//        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+// THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+// OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+// PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+// LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+// OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 //
-// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//
+//                        http://www.mythos-engine.org/
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
@@ -119,6 +123,35 @@ BachFileSample::~BachFileSample ()
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°±  Operations  ±°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//                            °° Protected °°
+// BachFileSample - createbuffer
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+bach_err_codes BachFileSample::createbuffer(WAVEFORMATEX *wfmt)
+{
+    if (!dsound)
+        return BACH_ERR_UNINITIALIZED;
+
+    if (!wfmt)
+        return BACH_ERR_INVALIDPARAMS;
+
+    DSBUFFERDESC bd;
+    memset (&bd, 0, sizeof (DSBUFFERDESC));
+
+    bd.dwSize = sizeof (DSBUFFERDESC);
+    bd.dwFlags = DSBCAPS_CTRLDEFAULT;
+    bd.dwBufferBytes = buffer_size;
+    bd.lpwfxFormat = wfmt;
+
+    if (dsound->CreateSoundBuffer (&bd, &sbuffer_next, NULL) != DS_OK)
+    {
+        return BACH_ERR_DSSECCREATFAIL;
+    }
+
+    return BACH_ERR_NONE;
+}
+
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 // BachFileSample - release
@@ -420,32 +453,32 @@ bach_err_codes BachFileSample::ready_raw (XFile *xf, bach_digi_fmt f, ulong r,
 //ÄÄ Setup format
     WAVEFORMATEX    wfmt;
     memset(&wfmt,0,sizeof(wfmt));
-    
+
     switch (f)
     {
         //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Mono 8-bit
         case BACH_DIGI_MONO_8:
-            wfmt.nChannels		= 1;
+            wfmt.nChannels      = 1;
             wfmt.wBitsPerSample = 8;
-		    wfmt.nBlockAlign    = 1;
+            wfmt.nBlockAlign    = 1;
             break;
         //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Mono 16-bit
         case BACH_DIGI_MONO_16:
-            wfmt.nChannels		= 1;
+            wfmt.nChannels      = 1;
             wfmt.wBitsPerSample = 16;
-		    wfmt.nBlockAlign    = 2;
+            wfmt.nBlockAlign    = 2;
             break;
         //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Stereo 8-bit
         case BACH_DIGI_STEREO_8:
-            wfmt.nChannels		= 2;
+            wfmt.nChannels      = 2;
             wfmt.wBitsPerSample = 8;
-		    wfmt.nBlockAlign    = 2;
+            wfmt.nBlockAlign    = 2;
             break;
         //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Stereo 16-bit
         case BACH_DIGI_STEREO_16:
-            wfmt.nChannels		= 2;
+            wfmt.nChannels      = 2;
             wfmt.wBitsPerSample = 16;
-		    wfmt.nBlockAlign    = 4;
+            wfmt.nBlockAlign    = 4;
             break;
         //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Unknown
         default:
@@ -454,8 +487,8 @@ bach_err_codes BachFileSample::ready_raw (XFile *xf, bach_digi_fmt f, ulong r,
 
     wfmt.wFormatTag      = WAVE_FORMAT_PCM;
     wfmt.nSamplesPerSec  = r;
-    wfmt.cbSize			 = 0;
-	wfmt.nAvgBytesPerSec = r * wfmt.nBlockAlign;
+    wfmt.cbSize          = 0;
+    wfmt.nAvgBytesPerSec = r * wfmt.nBlockAlign;
 
 //ÄÄÄ Try to create sound buffer if we need one
     if (!sbuffer
@@ -468,18 +501,9 @@ bach_err_codes BachFileSample::ready_raw (XFile *xf, bach_digi_fmt f, ulong r,
             sbuffer_next = 0;
         }
 
-        DSBUFFERDESC bd;
-        memset (&bd, 0, sizeof (DSBUFFERDESC));
-
-        bd.dwSize = sizeof (DSBUFFERDESC);
-        bd.dwFlags = DSBCAPS_CTRLDEFAULT;
-        bd.dwBufferBytes = buffer_size;
-        bd.lpwfxFormat = &wfmt;
-
-        if (dsound->CreateSoundBuffer (&bd, &sbuffer_next, NULL) != DS_OK)
-        {
-            return BACH_ERR_DSSECCREATFAIL;
-        }
+        bach_err_codes err = createbuffer(&wfmt);
+        if (err)
+            return err;
 
         assertMyth("BachFileSample::ready_wav needs valid sbuffer",
                    sbuffer_next != 0);
@@ -634,18 +658,11 @@ bach_err_codes BachFileSample::ready_wav (XFile *xf, XFParseIFF *iff,
             sbuffer_next = 0;
         }
 
-        DSBUFFERDESC bd;
-        memset (&bd, 0, sizeof (DSBUFFERDESC));
-
-        bd.dwSize = sizeof (DSBUFFERDESC);
-        bd.dwFlags = DSBCAPS_CTRLDEFAULT;
-        bd.dwBufferBytes = buffer_size;
-        bd.lpwfxFormat = &wfmt;
-
-        if (dsound->CreateSoundBuffer (&bd, &sbuffer_next, NULL) != DS_OK)
+        bach_err_codes err = createbuffer(&wfmt);
+        if (err)
         {
             iff->leaveform();
-            return BACH_ERR_DSSECCREATFAIL;
+            return err;
         }
 
         assertMyth("BachFileSample::ready_wav needs valid sbuffer",
@@ -831,7 +848,7 @@ DWORD WINAPI BachFileSample::thread_proc (LPVOID lpUser)
                     if (size < size1)
                     {
                         memset (ptr1 + size, (that->fmt == BACH_DIGI_MONO_16
-                                              || that->fmt == BACH_DIGI_STEREO_16) 
+                                              || that->fmt == BACH_DIGI_STEREO_16)
                                              ? 0 : 127, size1 - size);
                     }
                 }
@@ -972,7 +989,7 @@ DWORD WINAPI BachFileSample::thread_proc (LPVOID lpUser)
                     if (size < size1)
                     {
                         memset (ptr1 + size, (that->fmt == BACH_DIGI_MONO_16
-                                              || that->fmt == BACH_DIGI_STEREO_16) 
+                                              || that->fmt == BACH_DIGI_STEREO_16)
                                              ? 0 : 127, size1 - size);
                     }
                 }
@@ -987,7 +1004,7 @@ DWORD WINAPI BachFileSample::thread_proc (LPVOID lpUser)
                     if (!that->xfile)
                     {
                         memset (ptr2, (that->fmt == BACH_DIGI_MONO_16
-                                       || that->fmt == BACH_DIGI_STEREO_16) 
+                                       || that->fmt == BACH_DIGI_STEREO_16)
                                       ? 0 : 127, size2);
                     }
                     else
@@ -1016,7 +1033,7 @@ DWORD WINAPI BachFileSample::thread_proc (LPVOID lpUser)
                             if (size < size2)
                             {
                                 memset (ptr2 + size, (that->fmt == BACH_DIGI_MONO_16
-                                                      || that->fmt == BACH_DIGI_STEREO_16) 
+                                                      || that->fmt == BACH_DIGI_STEREO_16)
                                                      ? 0 : 127, size2 - size);
                             }
                         }

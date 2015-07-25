@@ -8,29 +8,33 @@
 //ששששש²±²ששששששש²±²שששש²±²ש²±²שששש²±²ש²±²שששש²±²ש²±²שששששששש²±²שששש²±²שששששש
 //שששש²²²²²²²²²²ש²²²²²²²²ששש²²²²²²²²שש²²²שששש²²²ש²²²²²²²²²²ש²²²שששש²²²ששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//ששששששששששששששששששש Microsoft Windows 95/NT Version ששששששששששששששששששששששש
+//ששששששששששששששששש Microsoft Windows 95/98/NT Version שששששששששששששששששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//שששששששששששCopyrightש(c)ש1994-1998שbyשCharybdisשEnterprises,שInc.שששששששששש
-//ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
+//שששCopyright (c) 1994-1999 by Dan Higdon, Tim Little, and Chuck Walbournששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
 //
-//           *** Charybdis Enterprises, Inc. Company Confidential ***
+// This file and all associated files are subject to the terms of the
+// GNU Lesser General Public License version 2 as published by the
+// Free Software Foundation (http://www.gnu.org).   They remain the
+// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+// See LICENSE.TXT in the distribution for a copy of this license.
 //
-//  This file and all associated files are the company proprietary property
-//        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+// THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+// OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+// PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+// LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+// OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 //
-// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+//ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
+//
+//                        http://www.mythos-engine.org/
 //
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
 //
 //                        *** Escher Terrain Editor ***
 //
-// Chuck Walbourn
+// Created by Chuck Walbourn
 //
 // eshtdoc.cpp
 //
@@ -2638,6 +2642,16 @@ void TerrEditDoc::UITerrainProperities(CWnd *parent, UINT ipage, int edit)
         color_bands[9] = hdlg.m_brown;
         color_bands[10] = hdlg.m_red;
 
+        //ִִִ Height table
+        if (htable && !edit && htdlg.changed)
+        {
+            for(long i=0; i < 256; i++)
+                htable[i] = htdlg.htable[i];
+
+            ComputeNormals(NORMALS_SMOOTH);
+            ComputeNormals(NORMALS_FLAT);
+        }
+
         //ִִִ Misc
         memset(desc,0,sizeof(desc));
         strncpy(desc,mdlg.m_desc,255);
@@ -2652,7 +2666,7 @@ void TerrEditDoc::UITerrainProperities(CWnd *parent, UINT ipage, int edit)
         SetModifiedFlag();
         SetLightsModifiedFlag();
         if (!edit)
-            UpdateAllViews(NULL,HINT_UPDATETERR|HINT_UPDATECOLR,NULL);
+            UpdateAllViews(NULL,HINT_UPDATETERR|HINT_UPDATECOLR|HINT_UPDATELIGHTS,NULL);
     }
 }
 
@@ -3168,6 +3182,20 @@ BOOL TerrEditDoc::load_and_recolor_texture(int ind, const char *fname)
             return FALSE;
     }
 
+    switch (bm.bpp)
+    {
+        case 1:
+        case 2:
+        case 3:
+            break;
+        default:
+            MessageBox(NULL,
+                       "Input bitmap file must be 8-bit, 15-bit, or 24-bit.",
+                       "Texture Load Error",
+                       MB_OK | MB_ICONEXCLAMATION);
+            return FALSE;
+    }
+
     //
     // Install new texture
     //
@@ -3208,9 +3236,6 @@ BOOL TerrEditDoc::load_and_recolor_texture(int ind, const char *fname)
                                        VNGO_TEXTURE_8BIT);
 
     // Recolor image using current palette
-
-    ASSERT(bm.bpp == 1 || bm.bpp == 3);
-
     if (bm.bpp == 1)
     {
         int mypal[256];
@@ -3223,6 +3248,24 @@ BOOL TerrEditDoc::load_and_recolor_texture(int ind, const char *fname)
         for(i=0; i < bm.width * bm.height; i++)
         {
             ((byte*)txt->ptr->tex)[i] = (byte)mypal[bm.data[i]];
+        }
+    }
+    else if (bm.bpp == 2)
+    {
+        VngoColor24bit  clr;
+        byte            *sptr, *dptr;
+
+        for(i=0, sptr=bm.data, dptr=(byte*)txt->ptr->tex; i < bm.width * bm.height; i++)
+        {
+            word pcolor = *sptr | (*(sptr+1) << 8);
+
+            sptr += 2;
+
+            clr.r = (pcolor >> 7) & 0xf8;
+            clr.g = (pcolor >> 2) & 0xf8;
+            clr.b = (pcolor << 3) & 0xf8;
+
+            *(dptr++) = (byte)palette.get_index(clr);
         }
     }
     else // bpp == 3

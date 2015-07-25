@@ -1,5 +1,5 @@
 :Base MythOS.HLP
-:Title MythOS for Windows 95/NT
+:Title MythOS for Windows 9x/NT
 :Index =MythOS.HLP
 1 Notice=NOTICE@mythos.hlp
 1 MythOS Programmer's Guide
@@ -157,6 +157,7 @@
 4 Basic Drawables
 5 EschPointDraw Class=PG_ESCH_POINTDRAW
 5 EschLineDraw Class=PG_ESCH_LINEDRAW
+5 EschPlaneDraw Class=PG_ESCH_PLANEDRAW
 5 EschSprite Class=PG_ESCH_SPRITE
 4 Particle Drawables
 5 EschParticle Class=PG_ESCH_PARTICLE
@@ -239,6 +240,7 @@
 3 Text Output Class=PG_GBERG_TEXTCLASS
 2 Turner
 3 Overview=PG_TURNER_OVERVIEW
+3 TurnerClassic Class=PG_TURNER_CLASSIC
 3 TurnerNetwork Class=PG_TURNER_NETWORK
 3 TurnerNetworkUI Class=PG_TURNER_NETWORKUI
 2 Newton
@@ -250,15 +252,28 @@
 2 Bach
 3 Overview=PG_BACH_OVERVIEW
 3 Digital Sound Source Class=PG_BACH_DIGI
+3 Digital 3D Sound Source Class=PG_BACH_DIGI3D
 3 Base Sample Class=PG_BACH_SAMPLE
 3 Static Sample Class=PG_BACH_STATICSAMPLE
+3 3D Sample Class=PG_BACH_SAMPLE3D
 3 File Sample Class=PG_BACH_FILESAMPLE
 3 Sample Sequencer Class=PG_BACH_SAMPLESEQ
+3 CD Audio Class=PG_BACH_CD
+3 Music Sound Source Class=PG_BACH_MUSIC
+3 Music Sequence Class=PG_BACH_SEQUENCE
 2 Spielberg
 3 Overview=PG_SBERG_OVERVIEW
 3 SpielbergPlayer Class=PG_SBERG_PLAYER
 3 SpielbergAMPlayer Class=PG_SBERG_AMPLAYER
 3 SpielbergAMStreamPlayer Class=PG_SBERG_AMSTREAMPLAYER
+2 Pane
+3 Overview=PG_PANE_OVERVIEW
+3 PaneImageScroll Class=PG_PANE_IMAGESCROLL
+3 PaneInputText Class=PG_PANE_INPUTTEXT
+3 PaneListBox Class=PG_PANE_LISTBOX
+3 PaneTextScroll Class=PG_PANE_TEXTSCROLL
+3 PaneDie Class=PG_PANE_DIE
+3 PaneDieT Template=PG_PANE_DIET
 1 MythOS User's Guide
 2 About this guide=UG_ABOUT
 2 Overview=UG_OVERVIEW

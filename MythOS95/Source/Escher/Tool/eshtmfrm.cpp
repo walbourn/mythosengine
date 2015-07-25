@@ -8,23 +8,27 @@
 //ùùùùù²±²ùùùùùùù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùùùùùù²±²ùùùù²±²ùùùùùù
 //ùùùù²²²²²²²²²²ù²²²²²²²²ùùù²²²²²²²²ùù²²²ùùùù²²²ù²²²²²²²²²²ù²²²ùùùù²²²ùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùùùùùùùùù Microsoft Windows 95/NT Version ùùùùùùùùùùùùùùùùùùùùùùù
+//ùùùùùùùùùùùùùùùùù Microsoft Windows 95/98/NT Version ùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùCopyrightù(c)ù1994-1998ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
-//ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
+//ùùùCopyright (c) 1994-1999 by Dan Higdon, Tim Little, and Chuck Walbournùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
-//           *** Charybdis Enterprises, Inc. Company Confidential ***
+// This file and all associated files are subject to the terms of the
+// GNU Lesser General Public License version 2 as published by the
+// Free Software Foundation (http://www.gnu.org).   They remain the
+// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+// See LICENSE.TXT in the distribution for a copy of this license.
 //
-//  This file and all associated files are the company proprietary property
-//        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+// THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+// OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+// PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+// LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+// OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 //
-// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//
+//                        http://www.mythos-engine.org/
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
@@ -39,9 +43,9 @@
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-//             
+//
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include "stdafx.h"
@@ -69,57 +73,59 @@ static char BASED_CODE THIS_FILE[] = __FILE__;
 IMPLEMENT_DYNCREATE(ToolFrame, CFrameWnd)
 
 BEGIN_MESSAGE_MAP(ToolFrame, CFrameWnd)
-	//{{AFX_MSG_MAP(ToolFrame)
-	ON_WM_CREATE()
-	ON_COMMAND(ID_FILE_PALETTE, OnFilePalette)
-	ON_COMMAND(ID_APP_HELP, OnAppHelp)
-	ON_COMMAND(ID_FILE_COMPRESS, OnFileCompress)
-	ON_UPDATE_COMMAND_UI(ID_FILE_COMPRESS, OnUpdateFileCompress)
-	ON_COMMAND(ID_FILE_TRUECOLOR, OnFileTruecolor)
-	ON_UPDATE_COMMAND_UI(ID_FILE_TRUECOLOR, OnUpdateFileTruecolor)
-	ON_COMMAND(ID_FILE_FLOATING, OnFileFloating)
-	ON_UPDATE_COMMAND_UI(ID_FILE_FLOATING, OnUpdateFileFloating)
-	//}}AFX_MSG_MAP
+        //{{AFX_MSG_MAP(ToolFrame)
+        ON_WM_CREATE()
+        ON_COMMAND(ID_FILE_PALETTE, OnFilePalette)
+        ON_COMMAND(ID_APP_HELP, OnAppHelp)
+        ON_COMMAND(ID_FILE_COMPRESS, OnFileCompress)
+        ON_UPDATE_COMMAND_UI(ID_FILE_COMPRESS, OnUpdateFileCompress)
+        ON_COMMAND(ID_FILE_TRUECOLOR, OnFileTruecolor)
+        ON_UPDATE_COMMAND_UI(ID_FILE_TRUECOLOR, OnUpdateFileTruecolor)
+        ON_COMMAND(ID_FILE_FLOATING, OnFileFloating)
+        ON_UPDATE_COMMAND_UI(ID_FILE_FLOATING, OnUpdateFileFloating)
+        ON_COMMAND(ID_FILE_15BIT, OnFile15bit)
+        ON_UPDATE_COMMAND_UI(ID_FILE_15BIT, OnUpdateFile15bit)
+        //}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // Arrays of IDs used to initialize control bars                            ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-	
+
 // toolbar buttons - IDs are command buttons
 static UINT BASED_CODE buttons[] =
 {
-	// same order as in the bitmap 'toolbar.bmp'
-	ID_FILE_NEW,
-	ID_FILE_OPEN,
-	ID_FILE_SAVE,
-		ID_SEPARATOR,
+        // same order as in the bitmap 'toolbar.bmp'
+        ID_FILE_NEW,
+        ID_FILE_OPEN,
+        ID_FILE_SAVE,
+                ID_SEPARATOR,
     ID_FILE_PALETTE,
-		ID_SEPARATOR,
-	ID_EDIT_CUT,
-	ID_EDIT_COPY,
-	ID_EDIT_PASTE,
-		ID_SEPARATOR,
+                ID_SEPARATOR,
+        ID_EDIT_CUT,
+        ID_EDIT_COPY,
+        ID_EDIT_PASTE,
+                ID_SEPARATOR,
     ID_VIEW_ROTXY,
     ID_VIEW_MOVEXY,
     ID_VIEW_ROTMOVEZ,
-		ID_SEPARATOR,
+                ID_SEPARATOR,
     ID_MESH_ROTIJ,
     ID_MESH_MOVEIJ,
     ID_MESH_ROTMOVEK,
-		ID_SEPARATOR,
+                ID_SEPARATOR,
     ID_LGT_ADJUSTXY,
     ID_LGT_ABRIGHT,
-		ID_SEPARATOR,
-	ID_APP_ABOUT,
+                ID_SEPARATOR,
+        ID_APP_ABOUT,
 };
 
 static UINT BASED_CODE indicators[] =
 {
-	ID_SEPARATOR,           // status line indicator
-	ID_INDICATOR_CAPS,
-	ID_INDICATOR_NUM,
-	ID_INDICATOR_SCRL,
+        ID_SEPARATOR,           // status line indicator
+        ID_INDICATOR_CAPS,
+        ID_INDICATOR_NUM,
+        ID_INDICATOR_SCRL,
 };
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
@@ -158,7 +164,7 @@ ToolFrame::~ToolFrame()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 void ToolFrame::AssertValid() const
 {
-	CFrameWnd::AssertValid();
+        CFrameWnd::AssertValid();
 }
 
 
@@ -167,7 +173,7 @@ void ToolFrame::AssertValid() const
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 void ToolFrame::Dump(CDumpContext& dc) const
 {
-	CFrameWnd::Dump(dc);
+        CFrameWnd::Dump(dc);
 }
 #endif //_DEBUG
 
@@ -181,7 +187,7 @@ void ToolFrame::Dump(CDumpContext& dc) const
 // ToolFrame - OnIdle                                                       ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 void ToolFrame::OnIdle()
-{   
+{
     if (GetActiveView())
         ((ToolView*)GetActiveView())->OnIdle();
 }
@@ -197,41 +203,41 @@ void ToolFrame::OnIdle()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 int ToolFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
-	if (CFrameWnd::OnCreate(lpCreateStruct) == -1)
-		return -1;
-	
-	if (!m_wndToolBar.Create(this) ||
-		!m_wndToolBar.LoadBitmap(IDR_MAINFRAME) ||
-		!m_wndToolBar.SetButtons(buttons,
-		  sizeof(buttons)/sizeof(UINT)))
-	{
-		TRACE0("Failed to create toolbar\n");
-		return -1;      // fail to create
-	}
+        if (CFrameWnd::OnCreate(lpCreateStruct) == -1)
+                return -1;
 
-	if (!m_wndStatusBar.Create(this) ||
-		!m_wndStatusBar.SetIndicators(indicators,
-		  sizeof(indicators)/sizeof(UINT)))
-	{
-		TRACE0("Failed to create status bar\n");
-		return -1;      // fail to create
-	}
+        if (!m_wndToolBar.Create(this) ||
+                !m_wndToolBar.LoadBitmap(IDR_MAINFRAME) ||
+                !m_wndToolBar.SetButtons(buttons,
+                  sizeof(buttons)/sizeof(UINT)))
+        {
+                TRACE0("Failed to create toolbar\n");
+                return -1;      // fail to create
+        }
 
-	m_wndToolBar.EnableDocking(CBRS_ALIGN_ANY);
-	EnableDocking(CBRS_ALIGN_ANY);
-	DockControlBar(&m_wndToolBar);
+        if (!m_wndStatusBar.Create(this) ||
+                !m_wndStatusBar.SetIndicators(indicators,
+                  sizeof(indicators)/sizeof(UINT)))
+        {
+                TRACE0("Failed to create status bar\n");
+                return -1;      // fail to create
+        }
 
-	m_wndToolBar.SetBarStyle(m_wndToolBar.GetBarStyle() |
-		CBRS_TOOLTIPS | CBRS_FLYBY);
+        m_wndToolBar.EnableDocking(CBRS_ALIGN_ANY);
+        EnableDocking(CBRS_ALIGN_ANY);
+        DockControlBar(&m_wndToolBar);
 
-	return 0;
+        m_wndToolBar.SetBarStyle(m_wndToolBar.GetBarStyle() |
+                CBRS_TOOLTIPS | CBRS_FLYBY);
+
+        return 0;
 }
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // ToolFrame - OnFilePalette                                                ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void ToolFrame::OnFilePalette() 
+void ToolFrame::OnFilePalette()
 {
     ToolDoc *pDoc = (ToolDoc*)GetActiveDocument();
     ASSERT_VALID(pDoc);
@@ -259,13 +265,13 @@ void ToolFrame::OnFilePalette()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // ToolFrame - On(Update)FileCompress                                       ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void ToolFrame::OnFileCompress() 
+void ToolFrame::OnFileCompress()
 {
     ToolDoc *pDoc = (ToolDoc*)GetActiveDocument();
     pDoc->flags ^= ToolDoc::COMPRESS;
 }
 
-void ToolFrame::OnUpdateFileCompress(CCmdUI* pCmdUI) 
+void ToolFrame::OnUpdateFileCompress(CCmdUI* pCmdUI)
 {
     ToolDoc *pDoc = (ToolDoc*)GetActiveDocument();
 
@@ -280,13 +286,13 @@ void ToolFrame::OnUpdateFileCompress(CCmdUI* pCmdUI)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // ToolFrame - On(Update)Truecolor                                          ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void ToolFrame::OnFileTruecolor() 
+void ToolFrame::OnFileTruecolor()
 {
     ToolDoc *pDoc = (ToolDoc*)GetActiveDocument();
     pDoc->flags ^= ToolDoc::TRUECOLOR;
 }
 
-void ToolFrame::OnUpdateFileTruecolor(CCmdUI* pCmdUI) 
+void ToolFrame::OnUpdateFileTruecolor(CCmdUI* pCmdUI)
 {
     ToolDoc *pDoc = (ToolDoc*)GetActiveDocument();
 
@@ -299,15 +305,41 @@ void ToolFrame::OnUpdateFileTruecolor(CCmdUI* pCmdUI)
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// ToolFrame - On(Update)15bit                                              ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+void ToolFrame::OnFile15bit()
+{
+    ToolDoc *pDoc = (ToolDoc*)GetActiveDocument();
+    pDoc->flags ^= ToolDoc::USE15BIT;
+}
+
+void ToolFrame::OnUpdateFile15bit(CCmdUI* pCmdUI)
+{
+    ToolDoc *pDoc = (ToolDoc*)GetActiveDocument();
+
+        if (pDoc && (pDoc->flags & ToolDoc::TRUECOLOR))
+        {
+                pCmdUI->Enable(TRUE);
+        pCmdUI->SetCheck((pDoc->flags & ToolDoc::USE15BIT) ? 1 : 0);
+    }
+        else
+        {
+                pCmdUI->Enable(FALSE);
+                pCmdUI->SetCheck(0);
+        }
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // ToolFrame - On(Update)Floating                                           ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void ToolFrame::OnFileFloating() 
+void ToolFrame::OnFileFloating()
 {
     ToolDoc *pDoc = (ToolDoc*)GetActiveDocument();
     pDoc->flags ^= ToolDoc::FLOATING;
 }
 
-void ToolFrame::OnUpdateFileFloating(CCmdUI* pCmdUI) 
+void ToolFrame::OnUpdateFileFloating(CCmdUI* pCmdUI)
 {
     ToolDoc *pDoc = (ToolDoc*)GetActiveDocument();
 
@@ -322,12 +354,12 @@ void ToolFrame::OnUpdateFileFloating(CCmdUI* pCmdUI)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // ToolFrame - OnAppHelp                                                    ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void ToolFrame::OnAppHelp() 
+void ToolFrame::OnAppHelp()
 {
     int     i;
     char    *c;
     char    fname[256];
-  
+
     GetModuleFileName(NULL, fname, 256);
 
     for (i=strlen(fname), c = &fname[i-1]; i > 0; i--, c--)

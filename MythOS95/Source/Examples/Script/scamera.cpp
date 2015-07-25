@@ -1,31 +1,35 @@
 //ммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммм
 //
-//                                /\    /\ 
-//                               /  \  /  \ 
-//                              /    \/    \ 
-//                             /  /\    /\  \ 
+//                                /\    /\
+//                               /  \  /  \
+//                              /    \/    \
+//                             /  /\    /\  \
 //                            /  /  \  /  Y T H O S
-//                           /  /    \/    \  \ 
-//                          /  /            \  \ 
-//                         /__/              \__\ 
+//                           /  /    \/    \  \
+//                          /  /            \  \
+//                         /__/              \__\
 //
-//                    Microsoft Windows 95/NT Version
+//                  Microsoft Windows 95/98/NT Version
 //
-//            Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.
-//                           All Rights Reserved.
+//  Copyright (c) 1994-1999 by Dan Higdon, Tim Little, and Chuck Walbourn
 //
 //ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд
 //
-//           *** Charybdis Enterprises, Inc. Company Confidential ***
+// This file and all associated files are subject to the terms of the
+// GNU Lesser General Public License version 2 as published by the
+// Free Software Foundation (http://www.gnu.org).   They remain the
+// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+// See LICENSE.TXT in the distribution for a copy of this license.
 //
-//  This file and all associated files are the company proprietary property
-//        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+// THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+// OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+// PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+// LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+// OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 //
-// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+//ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд
+//
+//                        http://www.mythos-engine.org/
 //
 //ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд
 //
@@ -97,7 +101,7 @@ extern int                  CurrentToken;
 
 //ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд
 // create_camera
-//            
+//
 //         create_camera :- camera '=' <name> [ file=<file> ] '{' <body> '}'
 //
 //ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд
@@ -138,7 +142,7 @@ void create_camera()
                 YY_esc_allowed=0;
                 match(YY_EQUAL);
                 YY_esc_allowed=1;
-                
+
                 if (CurrentToken != YY_STRING
                     || !xf_exist(yytext))
                     error("file needs valid filename");
@@ -205,7 +209,7 @@ void create_camera()
 
 //ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд
 // modify_camera
-//            
+//
 //         modify_camera :- camera '=' <name> '{' <body> '}'
 //
 //ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд
@@ -665,12 +669,12 @@ STATIC void camera_body(EschCameraEx *cam)
                 if (r < 0 || r > 255)
                     error("Red component out of range");
                 match(YY_COMMA);
-                                
+
                 int g = expr();
                 if (g < 0 || g > 255)
                     error("Green component out of range");
                 match(YY_COMMA);
-                                
+
                 int b = expr();
                 if (b < 0 || b > 255)
                     error("Blue component out of range");
@@ -759,7 +763,7 @@ STATIC void camera_body(EschCameraEx *cam)
                     break;
 
                 default:
-                    {       
+                    {
                         float h1 = (float)rexpr();
                         match(YY_COMMA);
 

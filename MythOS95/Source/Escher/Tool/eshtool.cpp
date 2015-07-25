@@ -8,23 +8,27 @@
 //ùùùùù²±²ùùùùùùù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùùùùùù²±²ùùùù²±²ùùùùùù
 //ùùùù²²²²²²²²²²ù²²²²²²²²ùùù²²²²²²²²ùù²²²ùùùù²²²ù²²²²²²²²²²ù²²²ùùùù²²²ùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùùùùùùùùù Microsoft Windows 95/NT Version ùùùùùùùùùùùùùùùùùùùùùùù
+//ùùùùùùùùùùùùùùùùù Microsoft Windows 95/98/NT Version ùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùCopyrightù(c)ù1994-1998ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
-//ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
+//ùùùCopyright (c) 1994-1999 by Dan Higdon, Tim Little, and Chuck Walbournùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
-//           *** Charybdis Enterprises, Inc. Company Confidential ***
+// This file and all associated files are subject to the terms of the
+// GNU Lesser General Public License version 2 as published by the
+// Free Software Foundation (http://www.gnu.org).   They remain the
+// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+// See LICENSE.TXT in the distribution for a copy of this license.
 //
-//  This file and all associated files are the company proprietary property
-//        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+// THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+// OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+// PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+// LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+// OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 //
-// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//
+//                        http://www.mythos-engine.org/
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
@@ -42,9 +46,9 @@
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-//             
+//
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include "stdafx.h"
@@ -60,7 +64,7 @@
 //
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
-#define VERSION "2.04"
+#define VERSION "2.06"
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
@@ -78,12 +82,12 @@ static char BASED_CODE THIS_FILE[] = __FILE__;
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
 BEGIN_MESSAGE_MAP(ToolApp, CWinApp)
-	//{{AFX_MSG_MAP(ToolApp)
-	ON_COMMAND(ID_APP_ABOUT, OnAppAbout)
-	//}}AFX_MSG_MAP
-	// Standard file based document commands
-	ON_COMMAND(ID_FILE_NEW, CWinApp::OnFileNew)
-	ON_COMMAND(ID_FILE_OPEN, CWinApp::OnFileOpen)
+        //{{AFX_MSG_MAP(ToolApp)
+        ON_COMMAND(ID_APP_ABOUT, OnAppAbout)
+        //}}AFX_MSG_MAP
+        // Standard file based document commands
+        ON_COMMAND(ID_FILE_NEW, CWinApp::OnFileNew)
+        ON_COMMAND(ID_FILE_OPEN, CWinApp::OnFileOpen)
 END_MESSAGE_MAP()
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
@@ -128,27 +132,27 @@ BOOL ToolApp::InitInstance()
     if (MythOS->init())
         return FALSE;
 
-	// Standard initialization
+        // Standard initialization
 
-	Enable3dControls();
+        Enable3dControls();
 
-	LoadStdProfileSettings();  // Load standard INI file options (including MRU)
+        LoadStdProfileSettings();  // Load standard INI file options (including MRU)
 
-	// Register document templates
+        // Register document templates
 
-	CSingleDocTemplate* pDocTemplate;
-	pDocTemplate = new CSingleDocTemplate(
-		IDR_MAINFRAME,
-		RUNTIME_CLASS(ToolDoc),
-		RUNTIME_CLASS(ToolFrame),       // main SDI frame window
-		RUNTIME_CLASS(ToolView));
-	AddDocTemplate(pDocTemplate);
+        CSingleDocTemplate* pDocTemplate;
+        pDocTemplate = new CSingleDocTemplate(
+                IDR_MAINFRAME,
+                RUNTIME_CLASS(ToolDoc),
+                RUNTIME_CLASS(ToolFrame),       // main SDI frame window
+                RUNTIME_CLASS(ToolView));
+        AddDocTemplate(pDocTemplate);
 
-	// Enable DDE Execute open
-	EnableShellOpen();
-	RegisterShellFileTypes(TRUE);
+        // Enable DDE Execute open
+        EnableShellOpen();
+        RegisterShellFileTypes(TRUE);
 
-	// simple command line parsing
+        // simple command line parsing
     if (strstr(m_lpCmdLine,"-demo"))
     {
         AutoRotate = AUTOROTATE_Y;
@@ -165,29 +169,29 @@ BOOL ToolApp::InitInstance()
         BitDepth=15;
     }
 
-	if (m_lpCmdLine[0] == '\0'
+        if (m_lpCmdLine[0] == '\0'
         || m_lpCmdLine[0] == '-')
-	{
-		// create a new (empty) document
-		OnFileNew();
-	}
-	else
-	{
-		// open an existing document
-		OpenDocumentFile(m_lpCmdLine);
-	}
+        {
+                // create a new (empty) document
+                OnFileNew();
+        }
+        else
+        {
+                // open an existing document
+                OpenDocumentFile(m_lpCmdLine);
+        }
 
-	// Enable drag/drop open
-	m_pMainWnd->DragAcceptFiles();
+        // Enable drag/drop open
+        m_pMainWnd->DragAcceptFiles();
 
-	return TRUE;
+        return TRUE;
 }
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // ToolApp - Run                                                            ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-int ToolApp::Run() 
+int ToolApp::Run()
 {
     ASSERT_VALID(this);
 
@@ -263,35 +267,35 @@ int ToolApp::ExitInstance()
 class CAboutDlg : public CDialog
 {
 public:
-	CAboutDlg();
+        CAboutDlg();
 
 // Dialog Data
-	//{{AFX_DATA(CAboutDlg)
-	enum { IDD = IDD_ABOUTBOX };
-	CStatic	m_verdate;
-	//}}AFX_DATA
+        //{{AFX_DATA(CAboutDlg)
+        enum { IDD = IDD_ABOUTBOX };
+        CStatic m_verdate;
+        //}}AFX_DATA
 
 // Implementation
 protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-	//{{AFX_MSG(CAboutDlg)
-		// No message handlers
-	//}}AFX_MSG
-	DECLARE_MESSAGE_MAP()
+        virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+        //{{AFX_MSG(CAboutDlg)
+                // No message handlers
+        //}}AFX_MSG
+        DECLARE_MESSAGE_MAP()
 };
 
 CAboutDlg::CAboutDlg() : CDialog(CAboutDlg::IDD)
 {
-	//{{AFX_DATA_INIT(CAboutDlg)
-	//}}AFX_DATA_INIT
+        //{{AFX_DATA_INIT(CAboutDlg)
+        //}}AFX_DATA_INIT
 }
 
 void CAboutDlg::DoDataExchange(CDataExchange* pDX)
 {
-	CDialog::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CAboutDlg)
-	DDX_Control(pDX, IDC_ABOUT_VERSION, m_verdate);
-	//}}AFX_DATA_MAP
+        CDialog::DoDataExchange(pDX);
+        //{{AFX_DATA_MAP(CAboutDlg)
+        DDX_Control(pDX, IDC_ABOUT_VERSION, m_verdate);
+        //}}AFX_DATA_MAP
 
     if (!pDX->m_bSaveAndValidate)
     {
@@ -300,9 +304,9 @@ void CAboutDlg::DoDataExchange(CDataExchange* pDX)
 }
 
 BEGIN_MESSAGE_MAP(CAboutDlg, CDialog)
-	//{{AFX_MSG_MAP(CAboutDlg)
-		// No message handlers
-	//}}AFX_MSG_MAP
+        //{{AFX_MSG_MAP(CAboutDlg)
+                // No message handlers
+        //}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 
@@ -316,8 +320,8 @@ END_MESSAGE_MAP()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 void ToolApp::OnAppAbout()
 {
-	CAboutDlg aboutDlg;
-	aboutDlg.DoModal();
+        CAboutDlg aboutDlg;
+        aboutDlg.DoModal();
 }
 
 
@@ -328,7 +332,7 @@ void ToolApp::OnAppAbout()
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 // _charybdis_assert
-// 
+//
 // Handler for failed asserts.  If msg is set to non-NULL, then an assertMyth
 // was used with a comment.
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ

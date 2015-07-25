@@ -9,23 +9,27 @@
 //                          /  /            \  \
 //                         /__/              \__\
 //
-//                    Microsoft Windows 95/NT Version
+//                  Microsoft Windows 95/98/NT Version
 //
-//            Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.
-//                           All Rights Reserved.
+//  Copyright (c) 1994-1999 by Dan Higdon, Tim Little, and Chuck Walbourn
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
-//           *** Charybdis Enterprises, Inc. Company Confidential ***
+// This file and all associated files are subject to the terms of the
+// GNU Lesser General Public License version 2 as published by the
+// Free Software Foundation (http://www.gnu.org).   They remain the
+// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+// See LICENSE.TXT in the distribution for a copy of this license.
 //
-//  This file and all associated files are the company proprietary property
-//        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+// THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+// OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+// PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+// LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+// OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 //
-// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//
+//                        http://www.mythos-engine.org/
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
@@ -140,11 +144,11 @@ struct GenericData: public PacketData
 //
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 
-TurnerNetwork   *Net    = 0;
+TurnerClassic   *Net    = 0;
 
 // {1E6E9FA3-1200-11cf-887E-00400516ED44}
 const GUID LANDER_GUID =
-{ 0x1e6e9fa3, 0x1200, 0x11cf, { 0x88, 0x7e, 0x0, 0x40, 0x5, 0x16, 0xed, 0x44 } };
+{ 0x1e6e9fa3, 0x1200, 0x11cf, { 0x88, 0x7e, 0x0, 0x40, 0x5, 0x16, 0xed, 0x45 } };
 
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
@@ -161,7 +165,7 @@ const GUID LANDER_GUID =
 // LanderNetwork - Constructor
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 LanderNetwork::LanderNetwork (int players):
-    TurnerNetwork (LANDER_GUID, "Lander Mania!", players)
+    TurnerClassic (LANDER_GUID, "Lander Mania!", players)
 {
 }
 
@@ -169,16 +173,16 @@ LanderNetwork::LanderNetwork (int players):
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 // LanderNetwork - handle_msg
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-int LanderNetwork::handle_msg (DPID from, DPID to, void *msg, size_t msg_len)
+void LanderNetwork::handle_msg (DPID from, DPID to, LPVOID ptr, DWORD size)
 {
-    GenericData  *pkt = (GenericData *)msg;
+    GenericData  *pkt = (GenericData *)ptr;
 
     switch (pkt->type)
     {
         case LanderPositionData::LANDER_POSITION:
             // there is only one other possible player, so it must be them.
             // The message is just a point (the lander location)
-            ((LanderPositionData *)msg)->stuff_into (theSim.game->get_lander (from));
+            ((LanderPositionData *)ptr)->stuff_into (theSim.game->get_lander (from));
             break;
 
         case LanderPositionData::TERRAIN_DATA:
@@ -188,49 +192,54 @@ int LanderNetwork::handle_msg (DPID from, DPID to, void *msg, size_t msg_len)
             break;
     }
 
-    return 0;
+    return;
 }
 
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// LanderNetwork - handle_chat
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+void LanderNetwork::handle_chat (DPID fromplayer, DPID toplayer, DPID togroup,
+                                 LPSTR msg)
+{
+}
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 // LanderNetwork - sys_newplayer
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-int LanderNetwork::sys_newplayer (DPID id, LPCSTR short_name, LPCSTR long_name)
+void LanderNetwork::sys_newplayer (DPID player,
+                                   LPCSTR short_name, LPCSTR long_name,
+                                   LPVOID data, DWORD size, DPID pgroup, DWORD _flags)
 {
-    Lander *lander = theSim.game->init_lander (id);
+    Lander *lander = theSim.game->init_lander (player);
 
     if (lander == 0)
-        return 1;
+        return;
 
-    if (is_creator ())
+    if (is_host())
     {
         // Inform the other player of the terrain they will be flying over
         int buf_len = sizeof (*theSim.game->terrain.aHeights) * theSim.game->terrain.cHeights
                     + sizeof (PacketData::data_types);
         void *buf = new char [buf_len];
         if (!buf)
-            return 1;
+            return;
 
         ((GenericData *)buf)->type = LanderPositionData::TERRAIN_DATA;
         memcpy (&((GenericData *)buf)->data,
                 theSim.game->terrain.aHeights,
                 theSim.game->terrain.cHeights);
-        send (theSim.game->aLanders[0]->player_id, id, buf, buf_len);
+        send (theSim.game->aLanders[0]->player_id, player, buf, buf_len);
         delete [] buf;
     }
-
-    return 0;
 }
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 // LanderNetwork - sys_delplayer
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-int LanderNetwork::sys_delplayer (DPID id)
+void LanderNetwork::sys_delplayer (DPID player, DWORD _flags)
 {
-    theSim.game->kill_lander (id);
-
-    return 0;
+    theSim.game->kill_lander (player);
 }
 
 
@@ -721,7 +730,7 @@ void LanderGame::activate()
                     if (net_ui.connect ())
                     {
                         // We're on line!
-                        if (Net->is_creator ())
+                        if (Net->is_host())
                         {
                             // OutputDebugString ("We are the creator\n");
                         }
@@ -732,7 +741,7 @@ void LanderGame::activate()
                         }
 
                         // Lander #0 is your lander!
-                        aLanders[0]->player_id = Net->create_player (Net->is_creator () ?
+                        aLanders[0]->player_id = Net->create_player (Net->is_host() ?
                                                                     "Veteran": "Newbie",
                                                                     "Lunar Lander Pilot");
                     }
@@ -820,14 +829,10 @@ void LanderGame::deactivate()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 void LanderGame::process_events()
 {
-    // No message should be larger than this!
-    char    buf[4096];
-
     // Only network stuff needs to be processed
     if (Net && Net->is_active ())
     {
-        while (Net->receive (buf, sizeof (buf)) != DPERR_NOMESSAGES)
-            ;
+        Net->receive_all();
     }
 
     MaxEventList events = evt->process();

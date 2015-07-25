@@ -1,34 +1,40 @@
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
-//                oooooooooo.                                 
-//                `888'   `Y8b                                
-//                 888     888  .ooooo.    oooooooo  .ooooo.  
-//                 888oooo888' d88' `88b  d'""7d8P  d88' `88b 
-//                 888    `88b 888   888    .d8P'   888   888 
-//                 888    .88P 888   888  .d8P'  .P 888   888 
-//                o888bood8P'  `Y8bod8P' d8888888P  `Y8bod8P' 
-//                           _                       
-//                          /_\     |    _  _ | _ ._ 
-//                         /   \  \_||_|(_|(_||(/_|  
-//                                       _| _|       
-//                       Microsoft Windows '95 Version
+//                oooooooooo.
+//                `888'   `Y8b
+//                 888     888  .ooooo.    oooooooo  .ooooo.
+//                 888oooo888' d88' `88b  d'""7d8P  d88' `88b
+//                 888    `88b 888   888    .d8P'   888   888
+//                 888    .88P 888   888  .d8P'  .P 888   888
+//                o888bood8P'  `Y8bod8P' d8888888P  `Y8bod8P'
+//                           _
+//                          /_\     |    _  _ | _ ._
+//                         /   \  \_||_|(_|(_||(/_|
+//                                       _| _|
+//                     Microsoft Windows 95/98/NT Version
 //
-//            Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.
-//                           All Rights Reserved.
+//  Copyright (c) 1994-1999 by Dan Higdon, Tim Little, and Chuck Walbourn
+//
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//
+// This file and all associated files are subject to the terms of the
+// GNU Lesser General Public License version 2 as published by the
+// Free Software Foundation (http://www.gnu.org).   They remain the
+// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+// See LICENSE.TXT in the distribution for a copy of this license.
+//
+// THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+// OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+// PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+// LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+// OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
-//           *** Charybdis Enterprises, Inc. Company Confidential ***
-//
-//  This file and all associated files are the company proprietary property
-//        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
-//
-// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+//                        http://www.mythos-engine.org/
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//
+// Created by Dan Higdon
 //
 // Test application, C++
 //
@@ -40,7 +46,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #define WIN32_LEAN_AND_MEAN
@@ -78,14 +84,14 @@ class MySemTask: public BozoTask
     int instance;
 
 public:
-    MySemTask (int _instance): instance (_instance) 
+    MySemTask (int _instance): instance (_instance)
     {
         cout << "Creating " << instance << endl;
     }
 
-    ~MySemTask ()  
-    { 
-        cout << "Destroying" << instance << endl; 
+    ~MySemTask ()
+    {
+        cout << "Destroying" << instance << endl;
     }
 
     void run ()
@@ -107,14 +113,14 @@ class MySimpleTask: public BozoTask
     int instance;
 
 public:
-    MySimpleTask (int _instance): instance (_instance) 
+    MySimpleTask (int _instance): instance (_instance)
     {
         cout << "Creating " << instance << endl;
     }
 
-    ~MySimpleTask ()  
-    { 
-        cout << "Destroying" << instance << endl; 
+    ~MySimpleTask ()
+    {
+        cout << "Destroying" << instance << endl;
     }
 
     void run ()
@@ -226,7 +232,7 @@ extern "C" int mythos_atexit( register void ( *__func )( void ) )
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 // _charybdis_assert
-// 
+//
 // Handler for failed asserts.  If msg is set to non-NULL, then an assertMyth
 // was used with a comment.
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ

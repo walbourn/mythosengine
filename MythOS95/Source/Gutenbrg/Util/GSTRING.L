@@ -1,31 +1,35 @@
 /*ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
- *           __ ,                                                  
- *            ,-| ~           ,               ,,                      
- *           ('||/__,        ||               ||                  _   
- *          (( |||  | \\ \\ =||=   _-_  \\/\\ ||/|,  _-_  ,._-_  / \\ 
- *          (( |||==| || ||  ||   || \\ || || || || || \\  ||   || || 
- *           ( / |  , || ||  ||   ||/   || || || |' ||/    ||   || || 
- *            -____/  \\/\\  \\,  \\,/  \\ \\ \\/   \\,/   \\,  \\_-| 
- *                                                               /  \ 
+ *           __ ,
+ *            ,-| ~           ,               ,,
+ *           ('||/__,        ||               ||                  _
+ *          (( |||  | \\ \\ =||=   _-_  \\/\\ ||/|,  _-_  ,._-_  / \\
+ *          (( |||==| || ||  ||   || \\ || || || || || \\  ||   || ||
+ *           ( / |  , || ||  ||   ||/   || || || |' ||/    ||   || ||
+ *            -____/  \\/\\  \\,  \\,/  \\ \\ \\/   \\,/   \\,  \\_-|
+ *                                                               /  \
  *                                                              '----`
  *                     Text Output and Font Management System
- *                        Microsoft Windows 95/NT Version
+ *                       Microsoft Windows 95/98/NT Version
  *
- *            Copyright (c) 1995-1998 by Charybdis Enterprises, Inc.
- *                           All Rights Reserved.
+ *  Copyright (c) 1995-1999 by Dan Higdon, Tim Little, and Chuck Walbourn
  *
  *ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
  *
- *           *** Charybdis Enterprises, Inc. Company Confidential ***
+ * This file and all associated files are subject to the terms of the
+ * GNU Lesser General Public License version 2 as published by the
+ * Free Software Foundation (http://www.gnu.org).   They remain the
+ * property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+ * See LICENSE.TXT in the distribution for a copy of this license.
  *
- *  This file and all associated files are the company proprietary property
- *        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+ * THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+ * OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+ * PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+ * LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+ * OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
  *
- * CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
- * TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
- * IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
- * AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
- * INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+ *ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ *
+ *                        http://www.mythos-engine.org/
  *
  *ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
  *
@@ -41,7 +45,7 @@
 /*°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
  *
  *                             Startup Block
- *                               
+ *
  *°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
  */
 
@@ -106,7 +110,7 @@ integer     {digit}+
 "\n"                            { YY_lineno++; }
 
 {ws}                            { /* Skip */ }
-                            
+
 ";".*$                          { /* Comments, skip */ }
 
 "{"                             return(YY_LBRACE);
@@ -137,12 +141,12 @@ integer     {digit}+
 
 "stringtable"                   return(YY_STRINGTABLE);
 
-0x{hexdig}+                     { 
+0x{hexdig}+                     {
                                     YY_integer = strtoul((char *) &yytext[2],NULL,16);
                                     return(YY_INTEGER);
                                 }
 
-{integer}                       { 
+{integer}                       {
                                     YY_integer = atol(yytext);
                                     return(YY_INTEGER);
                                 }
@@ -240,7 +244,7 @@ integer     {digit}+
 {id}                            {
                                     return YY_ID;
                                 }
-   
+
 .                               { /* Skip */
                                 }
 
@@ -255,7 +259,7 @@ int yy_pushfile(const char *fname)
 
     // Handle first include
     if (YY_depth == 1)
-    {   
+    {
         YY_stack[0] = yy_current_buffer;
     }
 
@@ -273,14 +277,14 @@ int yy_pushfile(const char *fname)
     }
 
     yy_switch_to_buffer(YY_stack[YY_depth]);
-    
+
     return 0;
 }
 
 int yywrap()
 {
     if (YY_depth < 1)
-        return 1;    
+        return 1;
 
     yy_switch_to_buffer(YY_stack[YY_depth-1]);
 

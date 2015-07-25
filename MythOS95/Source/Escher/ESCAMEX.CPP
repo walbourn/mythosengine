@@ -8,23 +8,27 @@
 //ùùùùù²±²ùùùùùùù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùùùùùù²±²ùùùù²±²ùùùùùù
 //ùùùù²²²²²²²²²²ù²²²²²²²²ùùù²²²²²²²²ùù²²²ùùùù²²²ù²²²²²²²²²²ù²²²ùùùù²²²ùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùùùùùùùùù Microsoft Windows 95/NT Version ùùùùùùùùùùùùùùùùùùùùùùù
+//ùùùùùùùùùùùùùùùùù Microsoft Windows 95/98/NT Version ùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùCopyrightù(c)ù1994-1998ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
-//ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
+//ùùùCopyright (c) 1994-1999 by Dan Higdon, Tim Little, and Chuck Walbournùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
-//           *** Charybdis Enterprises, Inc. Company Confidential ***
+// This file and all associated files are subject to the terms of the
+// GNU Lesser General Public License version 2 as published by the
+// Free Software Foundation (http://www.gnu.org).   They remain the
+// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+// See LICENSE.TXT in the distribution for a copy of this license.
 //
-//  This file and all associated files are the company proprietary property
-//        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+// THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+// OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+// PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+// LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+// OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 //
-// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//
+//                        http://www.mythos-engine.org/
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
@@ -45,6 +49,14 @@
 
 #include "escher.hpp"
 
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//
+//                                Equates
+//
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+#define ES_MAX_VERTS    9
+
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
 //                                 Code
@@ -62,32 +74,27 @@
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 EschCameraEx::EschCameraEx(VngoVport *vp) :
     EschCamera(vp),
-    bg_bitmap(0),
-    grd_pal(0)
+    bg_bitmap(0)
 {
 };
 
 EschCameraEx::EschCameraEx(const char *fname, const char *cname) :
     EschCamera(fname,cname),
-    bg_bitmap(0),
-    grd_pal(0)
+    bg_bitmap(0)
 {
 };
 
 EschCameraEx::EschCameraEx(const EschCamera &cam) :
     EschCamera(cam),
-    bg_bitmap(0),
-    grd_pal(0)
+    bg_bitmap(0)
 {
 };
 
 EschCameraEx::EschCameraEx(const EschCameraEx &cam) :
     EschCamera(cam),
-    bg_bitmap(cam.bg_bitmap),
-    grd_pal(cam.grd_pal)
+    bg_bitmap(cam.bg_bitmap)
 {
-    flags &= ~(ESCH_CAM_OWNSBITMAP
-               | ESCH_CAM_OWNSGRADIENT);
+    flags &= ~(ESCH_CAM_OWNSBITMAP);
 };
 
 
@@ -132,9 +139,7 @@ const EschCameraEx &EschCameraEx::operator = (const EschCameraEx &cam)
         EschCamera::operator = (cam);
 
         bg_bitmap = cam.bg_bitmap;
-        grd_pal = cam.grd_pal;
-        flags &= ~(ESCH_CAM_OWNSBITMAP
-                   | ESCH_CAM_OWNSGRADIENT);
+        flags &= ~(ESCH_CAM_OWNSBITMAP);
     }
     return *this;
 }
@@ -156,16 +161,8 @@ void EschCameraEx::release()
     }
     bg_bitmap=0;
 
-//ÄÄÄ Release gradient palette
-    if ((flags & ESCH_CAM_OWNSGRADIENT) && grd_pal)
-    {
-        delete grd_pal;
-    }
-    grd_pal=0;
-
 //ÄÄÄ Clear any owns bits
-    flags &= ~(ESCH_CAM_OWNSBITMAP
-               | ESCH_CAM_OWNSGRADIENT);
+    flags &= ~(ESCH_CAM_OWNSBITMAP);
 }
 
 
@@ -176,6 +173,11 @@ void EschCameraEx::release()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 int EschCameraEx::pre_rend()
 {
+    static VngoPointF   vpt[ES_MAX_VERTS];
+    static VngoPointF3  ivpt[ES_MAX_VERTS];
+    static VngoPointF3  ovpt[ES_MAX_VERTS];
+    static VngoPointF3  cvpt[10];
+
     assertMyth("EschCameraEx::pre_rend needs viewport & palette",
                vport != 0 && vport->vbuff.pal != 0);
 
@@ -219,241 +221,213 @@ int EschCameraEx::pre_rend()
             vport->image_trans(&rect,bg_bitmap);
         }
         //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Gradient Background
-        else if ((flags & ESCH_CAM_GRADIENT) && grd_pal)
+        else if (flags & ESCH_CAM_GRADIENT)
         {
+            int     turnonz=0, turnonhaze=0, edge_adj, swidth, sheight;
+            float   tx, ty, tv, width, height;
+
             //ÄÄÄ Just clear Z-buffer
             vport->clear_screen_off();
             vport->reset();
-#if 0
-#if 0
-            float pitch_sin = eye.dir.j;
-
-            float pitch = esch_asin(pitch_sin);
-
-            if (top.j.flx < 0)
+            if (vport->vflags & VNGO_ZBUFFER_ACTIVE)
             {
-                pitch = pitch-180.0f;
+                turnonz = 1;
+                vport->zbuffer_off();
+            }
+            if (vport->vflags & VNGO_HAZE_ON)
+            {
+                turnonhaze = 1;
+                vport->haze_off();
             }
 
-            float c_pitch = esch_cos(pitch);
-
-            float roll_sin = top.i;
-
-
-            float c_roll = 1.0f;
-
-            float c_tilt = c_roll;
-            float c = c_pitch;
-
-#else
-            //ÄÄÄ Compute view angle
-            float ti = top.i;
-            float tj = top.j;
-            float tk = top.k;
-
-            float c = tj / esch_sqrt(ti*ti + tj*tj);
-            if (c > float(1))
-                c = float(1);
-            if (c < float(-1))
-                c = float(-1);
-
-            float c_tilt = tk / esch_sqrt(tj*tj + tk*tk);
-            if (c_tilt > float(1))
-                c_tilt = float(1);
-            if (c_tilt < float(-1))
-                c_tilt = float(-1);
-#endif
-#else
-            EschVector rv1;
-            EschVector rv2 = top;
-            rv1.i = 1.0f;
-            rv1.j = 0;
-            rv1.k = 0;
-            rv1.transform(&eye.orient);
-
-            float roll = esch_asin(rv2.i);
-
-            if (rv2.j < 0)
+            //ÄÄÄ Determine position of 'level-line'
+            EschVector tdir(eye.dir.i, 0, eye.dir.k);
+            float mag = tdir.magnitude();
+            if (mag <= 0)
             {
-                if (rv2.i < 0)
+                if (eye.dir.j > 0)
                 {
-                    roll = (-180.0f - roll);
+                    VngoRect    rect(0,0,vport->vbuff.width,vport->vbuff.height);
+                    vport->frect(&rect, grd_top);
                 }
                 else
                 {
-                    roll = (180.0f - roll);
+                    VngoRect    rect(0,0,vport->vbuff.width,vport->vbuff.height);
+                    vport->frect(&rect, grd_bottom);
                 }
             }
-            float c_roll = esch_cos(roll);
-            float s_roll = esch_sin(roll);
-
-
-            EschVector pv1 = top;
-            EschVector pv2 = eye.dir;
-
-            float pitch = esch_asin(pv2.j);
-
-            if (pv1.j < 0)
-                pitch = 180.0f-pitch;
-
-            if (pitch > 180.0f)
-            {
-                pitch = -(180.0f - (pitch - 180.0f));
-            }
-
-            float c_pitch = esch_cos(pitch);
-            float s_pitch = esch_sin(pitch);
-
-#endif
-            //ÄÄÄ Compute shades for gradient polygon
-#if 1
-            long sh_top = 0;
-            long sh_bottom = 255;
-
-            if (pitch < 0)
-            {
-                sh_top = long(255.0f * (-s_pitch));
-            }
             else
             {
-                sh_bottom = long(255.0f * (1.0f - s_pitch));
+                // Don't think this is right for ORTHO cameras...
+
+                tdir /= mag;
+
+                tdir *= (((yon-hither) * 0.25f) + hither);
+
+                EschVector left = tdir;
+                left.rotatey(88);
+
+                EschVector right = tdir;
+                right.rotatey(-88);
+
+                // 0  grd_top       1
+                // 2                3
+                // 4  grd_mid       5
+                // 6                7
+                // 8  grd_bottom    9
+
+                tv = grd_topy;
+                if (flags & ESCH_CAM_GRADIENT_FIXED)
+                    tv -= eye.orient.mtx[ESCH_MTX_K];
+
+                cvpt[0].wx = left.i;
+                cvpt[0].wy = left.j + ((tv > yon) ? tv : yon);
+                cvpt[0].wz = left.k;
+                cvpt[0].clr = grd_top;
+
+                cvpt[1].wx = right.i;
+                cvpt[1].wy = right.j + ((tv > yon) ? tv : yon);
+                cvpt[1].wz = right.k;
+                cvpt[1].clr = grd_top;
+
+                cvpt[2].wx = left.i;
+                cvpt[2].wy = left.j + tv;
+                cvpt[2].wz = left.k;
+                cvpt[2].clr = grd_top;
+
+                cvpt[3].wx = right.i;
+                cvpt[3].wy = right.j + tv;
+                cvpt[3].wz = right.k;
+                cvpt[3].clr = grd_top;
+
+                tv = grd_midy;
+                if (flags & ESCH_CAM_GRADIENT_FIXED)
+                    tv -= eye.orient.mtx[ESCH_MTX_K];
+
+                cvpt[4].wx = left.i;
+                cvpt[4].wy = left.j + tv;
+                cvpt[4].wz = left.k;
+                cvpt[4].clr = grd_mid;
+
+                cvpt[5].wx = right.i;
+                cvpt[5].wy = right.j + tv;
+                cvpt[5].wz = right.k;
+                cvpt[5].clr = grd_mid;
+
+                tv = grd_bottomy;
+                if (flags & ESCH_CAM_GRADIENT_FIXED)
+                    tv -= eye.orient.mtx[ESCH_MTX_K];
+
+                cvpt[6].wx = left.i;
+                cvpt[6].wy = left.j + tv;
+                cvpt[6].wz = left.k;
+                cvpt[6].clr = grd_bottom;
+
+                cvpt[7].wx = right.i;
+                cvpt[7].wy = right.j + tv;
+                cvpt[7].wz = right.k;
+                cvpt[7].clr = grd_bottom;
+
+                cvpt[8].wx = left.i;
+                cvpt[8].wy = left.j + ((tv < -yon) ? tv : -yon);
+                cvpt[8].wz = left.k;
+                cvpt[8].clr = grd_bottom;
+
+                cvpt[9].wx = right.i;
+                cvpt[9].wy = right.j + ((tv < -yon) ? tv : -yon);
+                cvpt[9].wz = right.k;
+                cvpt[9].clr = grd_bottom;
+
+                for(int i=0; i < 10; i++)
+                {
+                    ((EschVector*)&cvpt[i])->transform(&eye.iorient);
+                }
+
+                tx = xscalar;
+                ty = yscalar;
+
+                edge_adj = vport->skips_last_pix();
+                swidth = vport->vbuff.width + edge_adj;
+                sheight = vport->vbuff.height + edge_adj;
+
+                height = float(vport->vbuff.height >> 1);
+                width = float(vport->vbuff.width >> 1);
+
+                for(i=0; i < 8; i++)
+                {
+                    ulong count=3;
+                    for(int j=0; j < 3; j++)
+                        ivpt[j] = cvpt[i+j];
+
+                    int clip = esch_clip_to_frustrum(&count, ivpt, ovpt, this, 0);
+
+                    if (clip != 0)
+                    {
+                        if (clip == -1)
+                        {
+                            count = 3;
+                            for(ulong j=0; j < 3; j++)
+                            {
+                                tv = (ivpt[j].wx * tx) / ivpt[j].wz;
+
+                                vpt[j].x = float(floor(tv + width + 0.5f));
+
+                                tv = (ivpt[j].wy * ty) / ivpt[j].wz;
+
+                                vpt[j].y = float(floor(height - tv + 0.5f));
+
+                                vpt[j].z = 0.99998f;
+
+                                vpt[j].clr = ivpt[j].clr;
+
+                                if (vpt[j].x < 0.f)
+                                    vpt[j].x = 0.f;
+                                else if (vpt[j].x >= swidth)
+                                    vpt[j].x = float(swidth-1);
+                                if (vpt[j].y < 0.f)
+                                    vpt[j].y = 0.f;
+                                else if (vpt[j].y >= sheight)
+                                    vpt[j].y = float(sheight - 1);
+                            }
+                        }
+                        else
+                        {
+                            for(ulong j=0; j < count; j++)
+                            {
+                                tv = (ovpt[j].wx * tx) / ovpt[j].wz;
+
+                                vpt[j].x = float(floor(tv + width + 0.5f));
+
+                                tv = (ovpt[j].wy * ty) / ovpt[j].wz;
+
+                                vpt[j].y = float(floor(height - tv + 0.5f));
+
+                                vpt[j].z = 0.99998f;
+
+                                vpt[j].clr = ovpt[j].clr;
+
+                                if (vpt[j].x < 0.f)
+                                    vpt[j].x = 0.f;
+                                else if (vpt[j].x >= swidth)
+                                    vpt[j].x = float(swidth-1);
+                                if (vpt[j].y < 0.f)
+                                    vpt[j].y = 0.f;
+                                else if (vpt[j].y >= sheight)
+                                    vpt[j].y = float(sheight - 1);
+                            }
+                        }
+
+                        if (count >= 3)
+                            vport->grpoly(count, vpt);
+                    }
+                }
             }
-/*
-            long sh_top = (pitch < 0)
-                          ? long(float(255)*(float(1)-c_pitch)) : 0;
 
-            long sh_bottom = (pitch > 0)
-                             ? long(float(255)*c_pitch)
-                             : 255;
-*/
-#else
-            long sh_top = 0;
-            long sh_bottom = 255;
-
-
-#endif
-
-            if (sh_top > 250)
-                sh_top = 250;
-            if (sh_bottom > 250)
-                sh_bottom = 250;
-
-            VngoPoint vpt[4];
-            vpt[0].x = 0;
-            vpt[0].y = 0;
-            vpt[0].z = 0xfffeffff;
-            vpt[0].clr = bcolor;
-            if (top.i >= 0)
-            {
-                vpt[0].shade = (c_roll > 0)
-                               ? sh_top
-                               : (long(float(sh_bottom-sh_top)*(-c_roll))
-                                  + sh_top);
-            }
-            else
-            {
-                vpt[0].shade = (c_roll < 0)
-                               ? sh_bottom
-                               : (long(float(sh_bottom-sh_top)*(float(1)-c_roll))
-                                  + sh_top);
-            }
-
-            vpt[1].x = vport->vbuff.width - 1;
-            vpt[1].y = 0;
-            vpt[1].z = 0xfffeffff;
-            vpt[1].clr = bcolor;
-            if (top.i >= 0)
-            {
-                vpt[1].shade = (c_roll > 0)
-                               ? (long(float(sh_bottom-sh_top)*(float(1)-c_roll))
-                                  + sh_top)
-                               : sh_bottom;
-            }
-            else
-            {
-                vpt[1].shade = (c_roll < 0)
-                               ? (long(float(sh_bottom-sh_top)*(-c_roll))
-                                  + sh_top)
-                               : sh_top;
-            }
-
-            vpt[2].x = vport->vbuff.width - 1;
-            vpt[2].y = vport->vbuff.height - 1;
-            vpt[2].z = 0xfffeffff;
-            vpt[2].clr = bcolor;
-            if (top.i >= 0)
-            {
-                vpt[2].shade = (c_roll > 0)
-                               ? sh_bottom
-                               : (long(float(sh_bottom-sh_top)*(float(1)+c_roll))
-                                  + sh_top);
-            }
-            else
-            {
-                vpt[2].shade = (c_roll < 0)
-                               ? sh_top
-                               : (long(float(sh_bottom-sh_top)*c_roll)
-                                  + sh_top);
-            }
-
-            vpt[3].x = 0;
-            vpt[3].y = vport->vbuff.height - 1;
-            vpt[3].z = 0xfffeffff;
-            vpt[3].clr = bcolor;
-            if (top.i >= 0)
-            {
-                vpt[3].shade = (c_roll > 0)
-                               ? (long(float(sh_bottom-sh_top)*c_roll)
-                                  + sh_top)
-                               : sh_top;
-            }
-            else
-            {
-                vpt[3].shade = (c_roll < 0)
-                               ? (long(float(sh_bottom-sh_top)*(float(1)+c_roll))
-                                  + sh_top)
-                               : sh_bottom;
-            }
-
-            //ÄÄÄ Draw gradient polygon
-            assertMyth("EschCameraEx::pre_rend() needs palette in current context's vport",
-                       vport->vbuff.pal != 0);
-
-            VngoShadePal *orig = vport->vbuff.pal->shd_pal;
-            vport->vbuff.pal->shd_pal = grd_pal;
-#if 0
-            dword tval = vpt[0].shade;
-            vpt[0].clr = (tval << 16) | (tval << 8) | 250 | VNGO_COLOR_24BIT;
-            tval = vpt[1].shade;
-            vpt[1].clr = (tval << 16) | (tval << 8) | 250 | VNGO_COLOR_24BIT;
-            tval = vpt[2].shade;
-            vpt[2].clr = (tval << 16) | (tval << 8) | 250 | VNGO_COLOR_24BIT;
-            tval = vpt[3].shade;
-            vpt[3].clr = (tval << 16) | (tval << 8) | 250 | VNGO_COLOR_24BIT;
-
-            if (vport->get_zmap())
-            {
-                vport->grpoly(4, vpt);
-            }
-            else
-            {
-                vport->zbuffer_off();
-                vport->grpoly(4, vpt);
+            //ÄÄÄ Cleanup
+            if (turnonz)
                 vport->zbuffer_on();
-            }
-#else
-            if (vport->get_zmap())
-            {
-                vport->gpoly(4, vpt);
-            }
-            else
-            {
-                vport->zbuffer_off();
-                vport->gpoly(4, vpt);
-                vport->zbuffer_on();
-            }
-#endif
-            vport->vbuff.pal->shd_pal = orig;
+            if (turnonhaze)
+                vport->haze_on();
         }
         //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Solid Color Background
         else
@@ -639,141 +613,29 @@ int EschCameraEx::set_haze(float start, float mid, VngoColor24bit tcolor)
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// EschCameraEx - set_gradient                                              ³
+// EschCameraEx - set_haze                                                  ³
 //                                                                          ³
-// Sets up the gradient background palette, freeing the old one if owned by ³
-// the camera, returning 0 on success, or 1 if setting the palette failed.  ³
+// Sets up hazing information in viewport.                                  ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-int EschCameraEx::set_gradient(VngoShadePal *grdp, int owns)
+void EschCameraEx::set_gradient(VngoColor24bit top, float topy,
+                                VngoColor24bit mid, float midy,
+                                VngoColor24bit bottom, float bottomy,
+                                int fixed)
 {
-//ÄÄÄ Free old gradient palette, if owned by Camera
-    if ((flags & ESCH_CAM_OWNSGRADIENT) && grd_pal)
-    {
-        delete grd_pal;
-    }
-    grd_pal=0;
+    grd_top = top.b | (top.g << 8) | (top.r << 16) | VNGO_COLOR_24BIT;
+    grd_mid = mid.b | (mid.g << 8) | (mid.r << 16) | VNGO_COLOR_24BIT;
+    grd_bottom = bottom.b | (bottom.g << 8) | (bottom.r << 16)
+                 | VNGO_COLOR_24BIT;
 
-    flags &= ~(ESCH_CAM_OWNSGRADIENT|ESCH_CAM_GRADIENT);
-
-//ÄÄÄ Test for valid palette
-    if (!grdp)
-        return 1;
-
-//ÄÄÄ Setup palette, if valid
-    grd_pal = grdp;
-    if (owns)
-        flags |= ESCH_CAM_OWNSGRADIENT;
+    grd_topy = topy;
+    grd_midy = midy;
+    grd_bottomy = bottomy;
 
     flags |= ESCH_CAM_GRADIENT;
-
-    return 0;
-}
-
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// EschCameraEx - create_gradient                                           ³
-//                                                                          ³
-// Generates a new gradient background shade palette given shade levels,    ³
-// break-point level, break-point percentage, and start and end colors.     ³
-//                                                                          ³
-// Note: This ramps in RGB space which gives better results that ramping in ³
-//       HLS space, which results in 'strange' changes in hues.             ³
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-esch_error_codes EschCameraEx::create_gradient(ushort levels,
-                                               ushort blevel, float bpercent,
-                                               VngoColor24bit color1,
-                                               VngoColor24bit color2)
-{
-//ÄÄÄ Verify input
-    if (!vport || !vport->vbuff.pal)
-        return ESCH_ERR_NEEDVPORT;
-
-    switch (levels)
-    {
-        case 8:
-        case 16:
-        case 32:
-        case 64:
-        case 128:
-        case 256:
-            break;
-        return ESCH_ERR_INVALIDPARMS;
-    }
-
-//ÄÄÄ Free old gradient palette, if owned by Camera
-    if ((flags & ESCH_CAM_OWNSGRADIENT) && grd_pal)
-    {
-        delete grd_pal;
-    }
-    grd_pal=0;
-
-    flags &= ~(ESCH_CAM_OWNSGRADIENT|ESCH_CAM_GRADIENT);
-
-//ÄÄÄ Create new gradient table
-    grd_pal = new VngoShadePal8 (levels);
-    if (!grd_pal)
-        return ESCH_ERR_NOMEMORY;
-
-    flags |= ESCH_CAM_OWNSGRADIENT | ESCH_CAM_GRADIENT;
-
-    //ÄÄÄ Setup each color (for gradient, all colors map to same for now...)
-    VngoPal *pal = vport->vbuff.pal;
-
-    for (ulong qt=0; qt < VNGO_PAL_SIZE; qt++)
-    {
-        byte *shl = &(*((VngoShadePal8*)grd_pal))[qt].shl[0];
-
-        float colorr = float(color1.r);
-        float colorg = float(color1.g);
-        float colorb = float(color1.b);
-
-        VngoColor24bit bcolor
-            ((byte)(long)(colorr + (float(color2.r - color1.r) * bpercent)),
-             (byte)(long)(colorg + (float(color2.g - color1.g) * bpercent)),
-             (byte)(long)(colorb + (float(color2.b - color1.b) * bpercent)));
-
-        int lvl=0;
-
-        //ÄÄÄ Linear from color 1 to break point
-        {
-            float rstep = float(bcolor.r - color1.r) / float(blevel);
-            float gstep = float(bcolor.g - color1.g) / float(blevel);
-            float bstep = float(bcolor.b - color1.b) / float(blevel);
-
-            for(; lvl < blevel; lvl++)
-            {
-                shl[lvl] = (byte)pal->get_index(VngoColor24bit
-                                                ((byte)(long)colorr,
-                                                 (byte)(long)colorg,
-                                                 (byte)(long)colorb));
-
-                colorr += rstep;
-                colorg += gstep;
-                colorb += bstep;
-            }
-        }
-
-        //ÄÄÄ Linear from break point to color 2
-        {
-            float rstep = float(color2.r - bcolor.r) / float(levels - blevel);
-            float gstep = float(color2.g - bcolor.g) / float(levels - blevel);
-            float bstep = float(color2.b - bcolor.b) / float(levels - blevel);
-
-            for(; lvl < levels; lvl++)
-            {
-                shl[lvl] = (byte)pal->get_index(VngoColor24bit
-                                                ((byte)(long)colorr,
-                                                 (byte)(long)colorg,
-                                                 (byte)(long)colorb));
-
-                colorr += rstep;
-                colorg += gstep;
-                colorb += bstep;
-            }
-        }
-    }
-
-    return ESCH_ERR_NONE;
+    if (fixed)
+        flags |= ESCH_CAM_GRADIENT_FIXED;
+    else
+        flags &= ~ESCH_CAM_GRADIENT_FIXED;
 }
 
 //°±² End of module - escamex.cpp ²±°

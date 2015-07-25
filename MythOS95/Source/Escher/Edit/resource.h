@@ -38,6 +38,7 @@
 #define IDD_SETBASEELV                  167
 #define IDB_ABOUT                       168
 #define IDB_LOGO                        169
+#define IDD_TERRHTBLE_EDIT              170
 #define IDC_TPROP_WIDTH                 1000
 #define IDC_TPROP_DEPTH                 1001
 #define IDC_LPROP_TYPE                  1002
@@ -233,6 +234,9 @@
 #define IDC_SETBASE_ELV                 1164
 #define IDC_SETBASE_MIN                 1165
 #define IDC_SETBASE_MAX                 1166
+#define IDC_TPROP_HSCALE                1166
+#define IDC_TPROP_HCLIP                 1167
+#define IDC_VALUE                       1167
 #define ID_FILE_EXPORT                  32787
 #define ID_VIEW_ZOOM                    32790
 #define ID_TERR_IMPORT                  32792
@@ -301,9 +305,9 @@
 #ifdef APSTUDIO_INVOKED
 #ifndef APSTUDIO_READONLY_SYMBOLS
 #define _APS_3D_CONTROLS                     1
-#define _APS_NEXT_RESOURCE_VALUE        170
+#define _APS_NEXT_RESOURCE_VALUE        171
 #define _APS_NEXT_COMMAND_VALUE         32874
-#define _APS_NEXT_CONTROL_VALUE         1166
+#define _APS_NEXT_CONTROL_VALUE         1168
 #define _APS_NEXT_SYMED_VALUE           101
 #endif
 #endif

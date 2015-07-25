@@ -1,26 +1,49 @@
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
+//                               Jb
+//                               $$$c
+//             $$$$$$$$$$$$$$$$$$$$$$b       d$$$$$$$$$$$$$$$$$$$$$P
+//            .$$$$$$$$$$$$$$$$$$$$$$$$.     $$$$$$$$$$$$$$$$$$$$$$
+//            ^""""""$$$$$P""""3$$$$$$$$c   d$$$$$""""$$$$$$"""""""
+//                  4$$$$$"    $$$$$$$$$$b  $$$$$F   .$$$$$F
+//                  $$$$$P    4$$$$$$$$$$$$$$$$$$    d$$$$$
+//                 4$$$$$"    $$$$$$$$$$$$$$$$$$P    $$$$$F
+//                 $$$$$$    4$$$$$""$$$$$$$$$$$    d$$$$$
+//                4$$$$$"    $$$$$$  ^$$$$$$$$$P    $$$$$F
+//                $$$$$$    4$$$$$%    *$$$$$$$"   J$$$$$
+//               4$$$$$%    $$$$$$      ^$$$$$P    $$$$$F
+//               """"""     """"""        *$$$"    """"""
+//                                         "$$
+//                                          ^%
 //
-//                           Turner - Networking
+//                         Turner - Networking Library
 //
-//            Copyright (c) 1995-1997 by Charybdis Enterprises, Inc.
-//                           All Rights Reserved.
+//                    Microsoft Windows 95/98/NT Version
+//
+//  Copyright (c) 1995-1999 by Dan Higdon, Tim Little, and Chuck Walbourn
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
-//           *** Charybdis Enterprises, Inc. Company Confidential ***
+// This file and all associated files are subject to the terms of the
+// GNU Lesser General Public License version 2 as published by the
+// Free Software Foundation (http://www.gnu.org).   They remain the
+// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+// See LICENSE.TXT in the distribution for a copy of this license.
 //
-//  This file and all associated files are the company proprietary property
-//        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
-//
-// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+// THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+// OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+// PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+// LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+// OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
-// Turner Network Interface
+//                        http://www.mythos-engine.org/
+//
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//
+// Created by Dan Higdon and Chuck Walbourn
+//
+// Turner Classic interface
 //
 // turner.cpp
 //
@@ -39,30 +62,13 @@
 
 #include "Turner.hpp"
 
-//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-//
-//                                Equates
-//
-//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-
-//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-//
-//                               Structures
-//
-//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-
-//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-//
-//                               Routines
-//
-//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
 //                                 Data
 //
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 
+int TurnerCOMInit;
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
@@ -70,96 +76,234 @@
 //
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°±  Constructors/Destructors  ±°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-// TurnerNetwork - Constructor
-//
+// TurnerClassic - Constructor
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-TurnerNetwork::TurnerNetwork (GUID _guid, const char *_name, int _players):
-    is_opened (FALSE),
-    creator (FALSE),
-    hMessageEvent (NULL),
-    pIDP (0)
+TurnerClassic::TurnerClassic (GUID _guid, const char *_name,
+                              int _players, DWORD sflags) :
+    rbuffer(0),
+    flags(0),
+    sendfl(0),
+    pIDP (0),
+    playerid (0)
 {
-    // Fill in the common fields of the session descriptor.
     memset (&session, 0, sizeof (session));
-    session.dwSize      = sizeof (session);
-    session.dwFlags     = DPSESSION_KEEPALIVE;
-    session.guidInstance    = GUID_NULL;
-    session.guidApplication = _guid;
-    session.dwMaxPlayers= _players;
-    session.lpszSessionNameA = szSessionName;
-    strcpy (szSessionName, _name);
+    session.dwSize              = sizeof (session);
+    session.dwFlags             = sflags;
+    session.guidInstance        = GUID_NULL;
+    session.guidApplication     = _guid;
+    session.dwMaxPlayers        = _players;
+    session.lpszSessionNameA    = sessionName;
+
+    *sessionName = 0;
+    *password = 0;
+    if (_name)
+        strncpy (sessionName, _name, sizeof(sessionName));
 }
 
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-// TurnerNetwork - Copy Constructor
-//
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-TurnerNetwork::TurnerNetwork (const TurnerNetwork &m):
-    is_opened (FALSE),
-    pIDP (0)
+TurnerClassic::TurnerClassic (GUID _guid, const char *_name,
+                              int _players, const char *_passwd,
+                              DWORD sflags) :
+    rbuffer(0),
+    flags(0),
+    sendfl(0),
+    pIDP (0),
+    playerid (0)
 {
-    // Hidden, should never be called
-    assertMyth ("TurnerNetwork::TurnerNetwork (TurnerNetwork &) cannot be called", 0);
+    memset (&session, 0, sizeof (session));
+    session.dwSize              = sizeof (session);
+    session.dwFlags             = sflags;
+    session.guidInstance        = GUID_NULL;
+    session.guidApplication     = _guid;
+    session.dwMaxPlayers        = _players;
+    session.lpszSessionNameA    = sessionName;
+    session.lpszPasswordA       = password;
+
+    *sessionName = 0;
+    *password = 0;
+    if (_name)
+        strncpy (sessionName, _name, sizeof(sessionName));
+    if (_passwd)
+        strncpy (password, _passwd, sizeof(password));
 }
 
 
-
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-// TurnerNetwork - operator =
-//
+// TurnerClassic - Destructor
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-TurnerNetwork &TurnerNetwork::operator = (const TurnerNetwork &m)
-{
-    // Hidden, should never be called
-    assertMyth ("TurnerNetwork::operator = cannot be called", 0);
-
-    return *this;
-}
-
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-// TurnerNetwork - Destructor
-//
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-TurnerNetwork::~TurnerNetwork()
+TurnerClassic::~TurnerClassic()
 {
     close ();
 }
 
 
+
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°±  Operations  ±°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-// TurnerNetwork - packet_ready
-//  returns whether or not a packet is available for the current player.
-//  It is more efficient to check with this method than to call Recieve
-//  and check for an error condition.
-//
-//  This method will always return FALSE if a message event was not
-//  created during game create/connect.
+// TurnerClassic - select_provider
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-BOOL TurnerNetwork::packet_ready ()
+int TurnerClassic::select_provider (LPGUID guid)
 {
-    return hMessageEvent == NULL
-           || WaitForSingleObject (&hMessageEvent, 0) != WAIT_TIMEOUT;
+    close();
+
+//ÄÄÄ Initialize COM
+    if (!TurnerCOMInit)
+    {
+        CoInitialize(NULL);
+        TurnerCOMInit=1;
+    }
+
+//ÄÄÄ Create an address from the guid
+    IDirectPlayLobbyA   *lobby;
+    char                address[128];
+    DWORD               adsize = sizeof(address);
+
+    int res = DirectPlayLobbyCreate( NULL, &lobby, NULL, NULL, 0 );
+    if (FAILED(res))
+        return res;
+
+    res = lobby->CreateAddress( *guid, DPAID_ServiceProvider,
+                                NULL, 0, address, &adsize );
+
+    lobby->Release();
+
+    if (FAILED(res))
+        return res;
+
+//ÄÄÄ Connect to DirectPlay
+    res = CoCreateInstance(CLSID_DirectPlay,
+                           NULL,
+                           CLSCTX_INPROC_SERVER,
+                           IID_IDirectPlay4A,
+                           (void **) &pIDP);
+
+    if (FAILED(res))
+    {
+        pIDP=0;
+        return res;
+    }
+
+
+    res = pIDP->InitializeConnection(address, 0);
+    if (FAILED(res))
+    {
+        pIDP->Release();
+        pIDP = 0;
+    }
+
+    return res;
 }
 
-
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-// TurnerNetwork - select_provider
-//  Create a DirectPlay interface to the specified DP provider.
-//  (Usually this value will be selected by the UI)
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-int TurnerNetwork::select_provider (LPGUID provider_guid)
+int TurnerClassic::select_provider (LPVOID address)
 {
-    IDirectPlay *pIDP1;
-    int res;
-    if ((res = DirectPlayCreate (provider_guid, &pIDP1, NULL)) == DP_OK)
+    close();
+
+//ÄÄÄ Initialize COM
+    if (!TurnerCOMInit)
     {
-        pIDP1->QueryInterface (IID_IDirectPlay2A, (LPVOID *)&pIDP);
-        pIDP1->Release();
+        CoInitialize(NULL);
+        TurnerCOMInit=1;
+    }
+
+//ÄÄÄ Connect to DirectPlay
+    int res = CoCreateInstance(CLSID_DirectPlay,
+                               NULL,
+                               CLSCTX_INPROC_SERVER,
+                               IID_IDirectPlay4A,
+                               (void **) &pIDP);
+
+    if (FAILED(res))
+    {
+        pIDP=0;
+        return res;
+    }
+
+    res = pIDP->InitializeConnection(address, 0);
+    if (FAILED(res))
+    {
+        pIDP->Release();
+        pIDP = 0;
+    }
+
+    return res;
+}
+
+int TurnerClassic::select_provider (turner_provider provider, LPVOID data)
+{
+    close();
+
+    IDirectPlayLobbyA   *lobby;
+    DWORD               size;
+    char                address[128];
+    DWORD               adsize = sizeof(address);
+
+    int res = DirectPlayLobbyCreate( NULL, &lobby, NULL, NULL, 0 );
+    if (FAILED(res))
+        return res;
+
+    switch (provider)
+    {
+        case TURNER_PROVIDER_IPX:
+            res = lobby->CreateAddress( DPSPGUID_IPX, DPAID_INet,
+                                        NULL, 0, address, &adsize );
+            break;
+        case TURNER_PROVIDER_TCPIP:
+            size = (data) ? strlen((char*)data)+1 : 0;
+            res = lobby->CreateAddress( DPSPGUID_TCPIP, DPAID_INet,
+                                        data, size, address, &adsize );
+            break;
+        case TURNER_PROVIDER_MODEM:
+            size = (data) ? strlen((char*)data)+1 : 0;
+            res = lobby->CreateAddress( DPSPGUID_MODEM, DPAID_Phone,
+                                        data, size, address, &adsize );
+            break;
+        case TURNER_PROVIDER_SERIAL:
+            size = (data) ? sizeof(DPCOMPORTADDRESS) : 0;
+            res = lobby->CreateAddress( DPSPGUID_SERIAL, DPAID_ComPort,
+                                        data, size, address, &adsize );
+            break;
+        default:
+            lobby->Release();
+            return DPERR_UNSUPPORTED;
+    }
+
+    lobby->Release();
+
+    if (FAILED(res))
+        return res;
+
+//ÄÄÄ Initialize COM
+    if (!TurnerCOMInit)
+    {
+        CoInitialize(NULL);
+        TurnerCOMInit=1;
+    }
+
+//ÄÄÄ Connect to DirectPlay
+    res = CoCreateInstance(CLSID_DirectPlay,
+                           NULL,
+                           CLSCTX_INPROC_SERVER,
+                           IID_IDirectPlay4A,
+                           (void **) &pIDP);
+
+    if (FAILED(res))
+    {
+        pIDP=0;
+        return res;
+    }
+
+    res = pIDP->InitializeConnection(address, 0);
+    if (FAILED(res))
+    {
+        pIDP->Release();
+        pIDP = 0;
     }
 
     return res;
@@ -167,153 +311,100 @@ int TurnerNetwork::select_provider (LPGUID provider_guid)
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-// TurnerNetwork - create_game
-//  Create a new game of the type specified during construction.
+// TurnerClassic - close
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-int TurnerNetwork::create_game (BOOL bCreateEvent)
+void TurnerClassic::close ()
 {
-    if (pIDP == 0)
+    if (pIDP)
+    {
+        if (flags & TURNER_FLAGS_OPEN)
+        {
+            pIDP->Close ();
+        }
+
+        pIDP->Release ();
+        pIDP = 0;
+    }
+
+    if (rbuffer)
+    {
+        delete [] rbuffer;
+        rbuffer=0;
+    }
+
+    playerid = 0;
+
+    flags &= ~(TURNER_FLAGS_OPEN | TURNER_FLAGS_HOST);
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// TurnerClassic - create_game
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+int TurnerClassic::create_game ()
+{
+    if (!pIDP)
         return DPERR_UNAVAILABLE;
 
-    HRESULT res = pIDP->Open (&session,DPOPEN_CREATE);
+    if (flags & TURNER_FLAGS_OPEN)
+        return DPERR_ALREADYINITIALIZED;
+
+    int res = pIDP->Open (&session,DPOPEN_CREATE);
     Sleep(100);
 
-    is_opened = (res == DP_OK);
-    creator = is_opened;
+    flags &= ~(TURNER_FLAGS_OPEN | TURNER_FLAGS_HOST);
 
-#if 0
-    // Allow for an event to signal packet arrival (more efficient, but possibly undesirable)
-    if (bCreateEvent)
+    if (res == DP_OK)
     {
-        hMessageEvent = CreateEvent (NULL, FALSE, FALSE, NULL);
-        if (hMessageEvent == NULL)
-            return -1;
+        flags |= TURNER_FLAGS_OPEN | TURNER_FLAGS_HOST;
+        return DP_OK;
     }
-#endif
 
     return res;
 }
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-// TurnerNetwork - create_player
-//  Creates a new player ID, given short and long names.
+// static _player_callback
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-DPID TurnerNetwork::create_player (const char *short_name, const char *long_name)
+static BOOL CALLBACK _player_callback (DPID id,
+                                       DWORD dwType,
+                                       LPCDPNAME lpcName,
+                                       DWORD flags,
+                                       LPVOID context)
 {
-    if (pIDP == 0)
-        return 0;
+    TurnerClassic  *net = (TurnerClassic *)context;
 
-    DPID id = 0;
-
-    DPNAME dp_name;
-    dp_name.dwSize = sizeof (dp_name);
-    dp_name.dwFlags  = 0;
-    dp_name.lpszShortNameA = (char *)short_name;
-    dp_name.lpszLongNameA  = (char *)long_name;
-
-    pIDP->CreatePlayer (&id, &dp_name, hMessageEvent, 0, 0, 0);
-    Sleep(500);
-
-    return id;
-}
-
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-// TurnerNetwork - destroy_player
-//  Creates a new player ID, given short and long names.
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-void TurnerNetwork::destroy_player (DPID id)
-{
-    if (pIDP != 0)
-        pIDP->DestroyPlayer (id);
-}
-
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-// TurnerNetwork - create_group
-//  Creates a new group ID, given short and long names.
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-DPID TurnerNetwork::create_group (const char *short_name, const char *long_name)
-{
-    if (pIDP == 0)
-        return 0;
-
-    DPID id = 0;
-
-    DPNAME dp_name;
-    dp_name.dwSize = sizeof (dp_name);
-    dp_name.dwFlags  = 0;
-    dp_name.lpszShortNameA = (char *)short_name;
-    dp_name.lpszLongNameA  = (char *)long_name;
-    pIDP->CreateGroup (&id, &dp_name, 0, 0, 0);
-
-    return id;
-}
-
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-// TurnerNetwork - destroy_group
-//  Creates a new group ID, given short and long names.
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-void TurnerNetwork::destroy_group (DPID id)
-{
-    if (pIDP != 0)
-        pIDP->DestroyGroup (id);
-}
-
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-// TurnerNetwork - static _player_callback
-//  This is the enumeration function for TurnerNetwork::connect_game
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-BOOL CALLBACK _player_callback (DPID id, DWORD dwType, LPCDPNAME lpcName, DWORD flags, LPVOID context)
-{
-    // Add the player to the internal list of players
-    TurnerNetwork  *net = (TurnerNetwork *)context;
-
-    if (dwType == DPPLAYERTYPE_GROUP)
-        net->sys_newgroup (id, lpcName->lpszShortNameA, lpcName->lpszLongNameA);
-    else
-        net->sys_newplayer (id, lpcName->lpszShortNameA, lpcName->lpszLongNameA);
+    if (dwType == DPPLAYERTYPE_PLAYER)
+    {
+        net->sys_newplayer (id, lpcName->lpszShortNameA, lpcName->lpszLongNameA,
+                            0, 0, 0, 0);
+    }
 
     return TRUE;
 }
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-// TurnerNetwork - connect_game
-//  Open a connection to the specified session of the
-//  game specified during construction.
+// TurnerClassic - connect_game
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-int TurnerNetwork::connect_game (GUID guidSession, BOOL bCreateEvent)
+int TurnerClassic::connect_game (GUID guidSession)
 {
-    if (pIDP == 0)
+    if (!pIDP)
         return DPERR_UNAVAILABLE;
 
-    // Fill in the rest of the session flags
     session.guidInstance = guidSession;
-    HRESULT res = pIDP->Open (&session, DPOPEN_JOIN);
+    int res = pIDP->Open (&session, DPOPEN_JOIN);
     Sleep(100);
 
-    is_opened = (res == DP_OK);
-    creator = FALSE;
+    flags &= ~(TURNER_FLAGS_OPEN | TURNER_FLAGS_HOST);
 
-    // Allow for an event to signal packet arrival (more efficient, but possibly undesirable)
-#if 0
-    if (bCreateEvent)
-    {
-        hMessageEvent = CreateEvent (NULL, FALSE, FALSE, NULL);
-        if (hMessageEvent == NULL)
-            return -1;
-    }
-#endif
-
-    // Populate our existing group and player tables
     if (res == DP_OK)
     {
-        pIDP->EnumGroups  (&guidSession, _player_callback, this, DPENUMPLAYERS_REMOTE);
-        pIDP->EnumPlayers (&guidSession, _player_callback, this, DPENUMPLAYERS_REMOTE);
+        flags |= TURNER_FLAGS_OPEN;
+        pIDP->EnumPlayers (&guidSession, _player_callback, this,
+                           DPENUMPLAYERS_REMOTE);
+        return DP_OK;
     }
 
     return res;
@@ -321,103 +412,250 @@ int TurnerNetwork::connect_game (GUID guidSession, BOOL bCreateEvent)
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-// TurnerNetwork - join_group
+// TurnerClassic - set_session_desc
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-int TurnerNetwork::join_group  (DPID group, DPID player)
+int TurnerClassic::set_session_desc(DPSESSIONDESC2 &desc)
 {
-    if (pIDP == 0)
-        return DPERR_UNAVAILABLE;
+    if (flags & TURNER_FLAGS_OPEN)
+    {
+        if (!(flags & TURNER_FLAGS_HOST))
+            return DPERR_ACCESSDENIED;
 
-    return pIDP->AddPlayerToGroup (group, player);
+        session.dwFlags &= ~(DPSESSION_JOINDISABLED
+                             | DPSESSION_NEWPLAYERSDISABLED
+                             | DPSESSION_NODATAMESSAGES
+                             | DPSESSION_NOPRESERVEORDER
+                             | DPSESSION_PRIVATE);
+        session.dwFlags |= (desc.dwFlags & (DPSESSION_JOINDISABLED
+                                            | DPSESSION_NEWPLAYERSDISABLED
+                                            | DPSESSION_NODATAMESSAGES
+                                            | DPSESSION_NOPRESERVEORDER
+                                            | DPSESSION_PRIVATE));
+    }
+    else
+    {
+        session.dwFlags = desc.dwFlags;
+        session.guidInstance = desc.guidInstance;
+        session.guidApplication = desc.guidApplication;
+    }
+
+    session.dwMaxPlayers    = desc.dwMaxPlayers;
+    session.dwUser1         = desc.dwUser1;
+    session.dwUser2         = desc.dwUser2;
+    session.dwUser3         = desc.dwUser3;
+    session.dwUser4         = desc.dwUser4;
+
+    if (desc.lpszSessionNameA && desc.lpszSessionNameA != sessionName)
+    {
+        strncpy(sessionName,desc.lpszSessionNameA,sizeof(sessionName));
+    }
+
+    if (desc.lpszPasswordA && desc.lpszPasswordA != password)
+    {
+        session.lpszPasswordA = password;
+        strncpy(password,desc.lpszPasswordA,sizeof(password));
+    }
+
+    if (flags & TURNER_FLAGS_OPEN)
+    {
+        assert(pIDP != 0);
+        return pIDP->SetSessionDesc(&session, 0);
+    }
+
+    return 0;
 }
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-// TurnerNetwork - leave_group
+// TurnerClassic - create_player
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-int TurnerNetwork::leave_group (DPID group, DPID player)
+DPID TurnerClassic::create_player (const char *short_name,
+                                   const char *long_name,
+                                   LPVOID data, DWORD size,
+                                   DWORD _flags)
 {
-    if (pIDP == 0)
-        return DPERR_UNAVAILABLE;
+    if (!pIDP)
+        return 0;
 
-    return pIDP->DeletePlayerFromGroup (group, player);
+    DPID id = 0;
+
+    DPNAME dp_name;
+    dp_name.dwSize = sizeof (dp_name);
+    dp_name.dwFlags  = 0;
+    dp_name.lpszShortNameA = (char *)short_name;
+    dp_name.lpszLongNameA  = (char *)long_name;
+
+    pIDP->CreatePlayer (&id, &dp_name, NULL, data, size, _flags);
+    Sleep(500);
+
+    playerid = id;
+
+    return id;
 }
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-// TurnerNetwork - close
-//  Close the connection to the game.
+// TurnerClassic - destroy_player
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-void TurnerNetwork::close ()
+void TurnerClassic::destroy_player (DPID player)
 {
     if (pIDP)
-    {
-        is_opened = FALSE;
-        pIDP->Close ();
-        pIDP->Release ();
-        pIDP = 0;
-    }
-
-    if (hMessageEvent)
-    {
-        CloseHandle (hMessageEvent);
-        hMessageEvent = NULL;
-    }
+        pIDP->DestroyPlayer (player);
 }
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-// TurnerNetwork - receive
-//  get and process the next packet in the queue.
+// TurnerClassic - set_player_name
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-int TurnerNetwork::receive (void *ptr, size_t sz)
+int TurnerClassic::set_player_name(DPID player,
+                                   const char *short_name, const char *long_name,
+                                   DWORD _flags)
 {
-    if (pIDP == 0)
+    if (!pIDP)
         return DPERR_UNAVAILABLE;
 
-    DPID    from;
-    DPID    to;
+    DPNAME dp_name;
+    dp_name.dwSize = sizeof (dp_name);
+    dp_name.dwFlags  = 0;
+    dp_name.lpszShortNameA = (char *)short_name;
+    dp_name.lpszLongNameA  = (char *)long_name;
+
+    return pIDP->SetPlayerName(player, &dp_name, _flags);
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// TurnerClassic - set_player_data
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+int TurnerClassic::set_player_data(DPID player, LPVOID data,
+                                   DWORD size, DWORD _flags)
+{
+    if (!pIDP)
+        return DPERR_UNAVAILABLE;
+
+    return pIDP->SetPlayerData(player, data, size, _flags);
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// TurnerClassic - receive
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+int TurnerClassic::receive ()
+{
+    DPID    from, to;
     HRESULT res;
+    DWORD   size;
 
-    // If there is an event handle, use it instead of relying on Receive()
-    // (This is supposedly more efficient)
-    Sleep(0);
-    if (!packet_ready ())
-        return DPERR_NOMESSAGES;
+    if (!pIDP)
+        return DPERR_UNAVAILABLE;
 
-    res = pIDP->Receive (&from, &to,
-                         DPRECEIVE_ALL,
-                         ptr, (LPDWORD)&sz);
-
-    switch (res)
+    if (!rbuffer)
     {
-    case DPERR_NOMESSAGES:
-        // This is just fine, but unlikely if you have a message event defined
-        break;
+        rbuffer = new char[TURNER_INIT_BUFFER];
+        if (!rbuffer)
+            return DPERR_OUTOFMEMORY;
 
-    case DP_OK:
-        // Yaaay!  We got a message
-        if (from == 0)
-            handle_sysmsg ((DPMSG_GENERIC *)ptr, sz);
-        else
-            handle_msg (from, to, ptr, sz);
-        break;
+        rbsize = TURNER_INIT_BUFFER;
     }
 
-    return res;
+    for(;;)
+    {
+        Sleep(0);
+        res = pIDP->Receive (&from, &to,
+                             DPRECEIVE_ALL,
+                             rbuffer, (LPDWORD)&size);
+
+        switch (res)
+        {
+            case DPERR_BUFFERTOOSMALL:
+                if (size > TURNER_MAX_BUFFER)
+                    return DPERR_SENDTOOBIG;
+
+                delete [] rbuffer;
+
+                while (rbsize < size)
+                    rbsize *= 2;
+
+                rbuffer = new char[rbsize];
+                if (!rbuffer)
+                    return DPERR_OUTOFMEMORY;
+                break;
+
+            case DP_OK:
+                if (!from)
+                    handle_sysmsg (to, (DPMSG_GENERIC *)rbuffer, size);
+                else
+                    handle_msg (from, to, rbuffer, size);
+                return DP_OK;
+
+            default:
+                return res;
+        }
+    }
 }
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-// TurnerNetwork - send
-//  Send a packet to the specified player (from a specified player)
+// TurnerClassic - receive_all
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-int TurnerNetwork::send (DPID player, DPID dest, void *ptr, size_t sz)
+int TurnerClassic::receive_all (DWORD timeout)
 {
-    if (pIDP == 0)
+    if (!timeout)
+    {
+        for(;;)
+        {
+            int res = receive();
+            if (res != DP_OK)
+                return res;
+        }
+    }
+    else
+    {
+        DWORD time = GetTickCount() + timeout;
+        for(;;)
+        {
+            int res = receive();
+            if (res != DP_OK)
+                return res;
+
+            if (time <= GetTickCount())
+                return DPERR_TIMEOUT;
+        }
+    }
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// TurnerClassic - send
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+int TurnerClassic::send (DPID from, DPID to, LPVOID data, DWORD size)
+{
+    if (!pIDP)
         return DPERR_UNAVAILABLE;
 
-    int res = pIDP->Send (player, dest, 0, ptr, sz);
+    if (!from)
+        from = playerid;
+
+    int res = pIDP->SendEx (from, to, sendfl, data, size,
+                            0, 0, NULL, NULL);
+    Sleep(0);
+
+    return res;
+}
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// TurnerClassic - send_guaranteed
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+int TurnerClassic::send_guaranteed (DPID from, DPID to, LPVOID data, DWORD size)
+{
+    if (!pIDP)
+        return DPERR_UNAVAILABLE;
+
+    if (!from)
+        from = playerid;
+
+    int res = pIDP->SendEx (from, to, sendfl | DPSEND_GUARANTEED, data, size,
+                            0, 0, NULL, NULL);
     Sleep(0);
 
     return res;
@@ -425,15 +663,18 @@ int TurnerNetwork::send (DPID player, DPID dest, void *ptr, size_t sz)
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-// TurnerNetwork - broadcast
-//  Broadcast a packet to all players from a specified player.
+// TurnerClassic - broadcast
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-int TurnerNetwork::broadcast (DPID player, void *ptr, size_t sz)
+int TurnerClassic::broadcast (DPID from, LPVOID data, DWORD size)
 {
-    if (pIDP == 0)
+    if (!pIDP)
         return DPERR_UNAVAILABLE;
 
-    int res = pIDP->Send (player, 0, 0, ptr, sz);
+    if (!from)
+        from = playerid;
+
+    int res = pIDP->SendEx (from, DPID_ALLPLAYERS, sendfl,
+                            data, size, 0, 0, NULL, NULL);
     Sleep(0);
 
     return res;
@@ -441,145 +682,385 @@ int TurnerNetwork::broadcast (DPID player, void *ptr, size_t sz)
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-// TurnerNetwork - handle_msg
-//  Handle ordinary messages
-//  Overload this member for application message processing
+// TurnerClassic - broadcast_guaranteed
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-int TurnerNetwork::handle_msg (DPID from, DPID to, void *pmsg, size_t msg_len)
+int TurnerClassic::broadcast_guaranteed (DPID from, LPVOID data, DWORD size)
 {
-    return DP_OK;
+    if (!pIDP)
+        return DPERR_UNAVAILABLE;
+
+    if (!from)
+        from = playerid;
+
+    int res = pIDP->SendEx (from, DPID_ALLPLAYERS, sendfl | DPSEND_GUARANTEED,
+                            data, size, 0, 0, NULL, NULL);
+    Sleep(0);
+
+    return res;
 }
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-// TurnerNetwork - handle_sysmsg
-//  Handles any system messages that are received.
-//  Overload this member for custom system message processing
+// TurnerClassic - send_chat
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-int TurnerNetwork::handle_sysmsg (DPMSG_GENERIC *pmsg, size_t msg_len)
+int TurnerClassic::send_chat (DPID from, DPID to, char *msg, DWORD _flags)
 {
+    if (!pIDP)
+        return DPERR_UNAVAILABLE;
+
+    DPCHAT dp_chat;
+    dp_chat.dwSize = sizeof(DPCHAT);
+    dp_chat.dwFlags = 0;
+    dp_chat.lpszMessageA = msg;
+
+    if (!from)
+        from = playerid;
+
+    return pIDP->SendChatMessage(from, to, _flags, &dp_chat);
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// TurnerClassic - broadcast_chat
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+int TurnerClassic::broadcast_chat (DPID from, char *msg, DWORD _flags)
+{
+    if (!pIDP)
+        return DPERR_UNAVAILABLE;
+
+    DPCHAT dp_chat;
+    dp_chat.dwSize = sizeof(DPCHAT);
+    dp_chat.dwFlags = 0;
+    dp_chat.lpszMessageA = msg;
+
+    if (!from)
+        from = playerid;
+
+    return pIDP->SendChatMessage(from, DPID_ALLPLAYERS, _flags, &dp_chat);
+}
+
+
+
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°±  System Message Process Routines  ±°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// TurnerClassic - handle_sysmsg
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+void TurnerClassic::handle_sysmsg (DPID to, DPMSG_GENERIC *pmsg, DWORD size)
+{
+    assertMyth("TurnerClassic::handle_sysmsg needs valid input", pmsg != 0);
+
     switch (pmsg->dwType)
     {
-    case DPSYS_CREATEPLAYERORGROUP:
-        {
-            DPMSG_CREATEPLAYERORGROUP *msg = (DPMSG_CREATEPLAYERORGROUP *)pmsg;
+        case DPSYS_SETSESSIONDESC:
+            {
+                DPMSG_SETSESSIONDESC *msg = (DPMSG_SETSESSIONDESC*)pmsg;
 
-            if (msg->dwPlayerType == DPPLAYERTYPE_PLAYER)
-                return sys_newplayer (msg->dpId, msg->dpnName.lpszShortNameA,
-                                                                                                 msg->dpnName.lpszLongNameA);
-            else
-                return sys_newgroup  (msg->dpId, msg->dpnName.lpszShortNameA,
-                                                                                                 msg->dpnName.lpszLongNameA);
-        }
-        break;
+                if (!(flags & TURNER_FLAGS_HOST))
+                {
+                    session.dwFlags = msg->dpDesc.dwFlags;
+                    session.guidInstance = msg->dpDesc.guidInstance;
+                    session.guidApplication = msg->dpDesc.guidApplication;
+                    session.dwMaxPlayers = msg->dpDesc.dwMaxPlayers;
+                    session.dwCurrentPlayers = msg->dpDesc.dwCurrentPlayers;
+                    if (msg->dpDesc.lpszSessionNameA)
+                    {
+                        session.lpszSessionNameA = sessionName;
+                        strncpy(sessionName,msg->dpDesc.lpszSessionNameA,
+                                sizeof(sessionName));
+                    }
+                    if (msg->dpDesc.lpszPasswordA)
+                    {
+                        session.lpszPasswordA = password;
+                        strncpy(password,msg->dpDesc.lpszPasswordA,
+                                sizeof(password));
+                    }
+                    session.dwUser1 = msg->dpDesc.dwUser1;
+                    session.dwUser2 = msg->dpDesc.dwUser2;
+                    session.dwUser3 = msg->dpDesc.dwUser3;
+                    session.dwUser4 = msg->dpDesc.dwUser4;
+                }
 
-    case DPSYS_DELETEPLAYERFROMGRP:
-        {
-            DPMSG_ADDPLAYERTOGROUP *msg = (DPMSG_ADDPLAYERTOGROUP *)pmsg;
+                sys_set_session_desc(msg->dpDesc);
+            }
+            break;
 
-            return sys_remove_player_from_group (msg->dpIdGroup, msg->dpIdGroup);
-        }
+        case DPSYS_HOST:
+            flags |= TURNER_FLAGS_HOST;
+            sys_host ();
+            break;
 
-    case DPSYS_ADDPLAYERTOGROUP:
-        {
-            DPMSG_ADDPLAYERTOGROUP *msg = (DPMSG_ADDPLAYERTOGROUP *)pmsg;
+        case DPSYS_SESSIONLOST:
+            sys_no_session ();
+            break;
 
-            return sys_add_player_to_group (msg->dpIdGroup, msg->dpIdGroup);
-        }
-        break;
+        case DPSYS_CREATEPLAYERORGROUP:
+            {
+                DPMSG_CREATEPLAYERORGROUP *msg = (DPMSG_CREATEPLAYERORGROUP *)pmsg;
+                switch (msg->dwPlayerType)
+                {
+                    case DPPLAYERTYPE_PLAYER:
+                        sys_newplayer (msg->dpId,
+                                       msg->dpnName.lpszShortNameA,
+                                       msg->dpnName.lpszLongNameA,
+                                       msg->lpData, msg->dwDataSize,
+                                       msg->dpIdParent, msg->dwFlags);
+                        break;
+                }
+            }
+            break;
 
-    case DPSYS_DESTROYPLAYERORGROUP:
-        {
-            DPMSG_DESTROYPLAYERORGROUP *msg = (DPMSG_DESTROYPLAYERORGROUP *)pmsg;
+        case DPSYS_DESTROYPLAYERORGROUP:
+            {
+                DPMSG_DESTROYPLAYERORGROUP *msg = (DPMSG_DESTROYPLAYERORGROUP *)pmsg;
 
-            if (msg->dwPlayerType == DPPLAYERTYPE_PLAYER)
-                    return sys_delplayer (msg->dpId);
-                        else
-                    return sys_delgroup (msg->dpId);
-        }
-        break;
+                switch (msg->dwPlayerType)
+                {
+                    case DPPLAYERTYPE_PLAYER:
+                        sys_delplayer (msg->dpId,msg->dwFlags);
+                        break;
+                }
+            }
+            break;
 
-    case DPSYS_SESSIONLOST:
-        {
-            // Requested reply was denied
-            return sys_no_session ();
-        }
-        break;
+        case DPSYS_SETPLAYERORGROUPNAME:
+            {
+                DPMSG_SETPLAYERORGROUPNAME *msg = (DPMSG_SETPLAYERORGROUPNAME *)pmsg;
+                switch (msg->dwPlayerType)
+                {
+                    case DPPLAYERTYPE_PLAYER:
+                        sys_set_player_name(msg->dpId,
+                                            msg->dpnName.lpszShortNameA,
+                                            msg->dpnName.lpszLongNameA);
+                        break;
+                }
+            }
+            break;
+
+        case DPSYS_SETPLAYERORGROUPDATA:
+            {
+                DPMSG_SETPLAYERORGROUPDATA *msg = (DPMSG_SETPLAYERORGROUPDATA *)pmsg;
+                switch (msg->dwPlayerType)
+                {
+                    case DPPLAYERTYPE_PLAYER:
+                        sys_set_player_data(msg->dpId,
+                                            msg->lpData, msg->dwDataSize);
+                        break;
+                }
+            }
+            break;
+
+        case DPSYS_CHAT:
+            {
+                DPMSG_CHAT *msg = (DPMSG_CHAT*)pmsg;
+                handle_chat(msg->idFromPlayer, msg->idToPlayer,
+                            msg->idToGroup, msg->lpChat->lpszMessageA);
+                break;
+            }
+            break;
     }
+}
 
-    return 0;
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// TurnerClassic - sys_set_session_desc
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+void TurnerClassic::sys_set_session_desc(DPSESSIONDESC2 &desc)
+{
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// TurnerClassic - sys_host
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+void TurnerClassic::sys_host ()
+{
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// TurnerClassic - sys_no_session
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+void TurnerClassic::sys_no_session ()
+{
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// TurnerClassic - sys_newplayer
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+void TurnerClassic::sys_newplayer (DPID player,
+                                  LPCSTR short_name, LPCSTR long_name,
+                                  LPVOID data, DWORD size, DPID pgroup,
+                                  DWORD _flags)
+{
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// TurnerClassic - sys_delplayer
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+void TurnerClassic::sys_delplayer (DPID player, DWORD _flags)
+{
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// TurnerClassic - sys_set_player_name
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+void TurnerClassic::sys_set_player_name (DPID player,
+                                         LPCSTR short_name, LPCSTR long_name)
+{
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// TurnerClassic - sys_set_player_data
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+void TurnerClassic::sys_set_player_data(DPID player, LPVOID data, DWORD size)
+{
 }
 
 
 
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°±  Enumeration Routines  ±°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-// TurnerNetwork - sys_newplayer
-//
+// TurnerClassic - enum_providers
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-int TurnerNetwork::sys_newplayer (DPID id, LPCSTR short_name, LPCSTR long_name)
+void TurnerClassic::enum_providers()
+{
+    DirectPlayEnumerate (enum_serviceprovider, (LPVOID)this);
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// TurnerClassic - enum_sessions
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+void TurnerClassic::enum_sessions(DWORD timeout)
+{
+    if (!pIDP)
+        return;
+
+    DPSESSIONDESC2 desc;
+    memset (&desc, 0, sizeof (desc));
+    desc.dwSize = sizeof (desc);
+    desc.guidInstance = session.guidInstance;
+
+    pIDP->EnumSessions (&desc, timeout,
+                        enum_sessions, (LPVOID)this, (DWORD)NULL);
+
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// TurnerClassic - handle_enum_provider
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+int TurnerClassic::handle_enum_provider(LPGUID _guid, LPSTR _desc,
+                                        DWORD _majver, DWORD _minver)
 {
     return 0;
 }
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-// TurnerNetwork - sys_newgroup
-//
+// TurnerClassic - handle_enum_session
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-int TurnerNetwork::sys_newgroup (DPID id, LPCSTR short_name, LPCSTR long_name)
+int TurnerClassic::handle_enum_session(LPCDPSESSIONDESC2 _session,
+                                       LPDWORD _timeout,
+                                       DWORD _flags)
 {
     return 0;
 }
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-// TurnerNetwork - sys_delplayer
-//
+// TurnerClassic - enum_serviceprovider
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-int TurnerNetwork::sys_delplayer (DPID id)
+BOOL CALLBACK TurnerClassic::enum_serviceprovider (LPGUID _guid,
+                                                   LPSTR _desc,
+                                                   DWORD _majver,
+                                                   DWORD _minver,
+                                                   LPVOID _this)
 {
-    return 0;
+    return ((TurnerClassic*)_this)->handle_enum_provider(_guid,_desc,_majver,_minver);
 }
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-// TurnerNetwork - sys_delgroup
-//
+// TurnerClassic - enum_sessions
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-int TurnerNetwork::sys_delgroup (DPID id)
+BOOL CALLBACK TurnerClassic::enum_sessions (LPCDPSESSIONDESC2 _session,
+                                            LPDWORD _timeout,
+                                            DWORD _flags,
+                                            LPVOID _this)
 {
-    return 0;
+    return ((TurnerClassic*)_this)->handle_enum_session(_session,_timeout,_flags);
+}
+
+
+
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°°°±  Utility Routines  ±°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// TurnerClassic - get_caps
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+int TurnerClassic::get_caps(LPDPCAPS caps, DWORD _flags)
+{
+    if (!pIDP)
+        return DPERR_UNAVAILABLE;
+
+    memset(caps,0,sizeof(caps));
+    caps->dwSize = sizeof(DPCAPS);
+
+    return pIDP->GetCaps(caps, _flags);
 }
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-// TurnerNetwork - sys_no_session
-//
+// TurnerClassic - get_player_caps
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-int TurnerNetwork::sys_no_session ()
+int TurnerClassic::get_player_caps(DPID player, LPDPCAPS caps, DWORD _flags)
 {
-    return 0;
+    if (!pIDP)
+        return DPERR_UNAVAILABLE;
+
+    memset(caps,0,sizeof(caps));
+    caps->dwSize = sizeof(DPCAPS);
+
+    return pIDP->GetPlayerCaps(player, caps, _flags);
 }
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-// TurnerNetwork - sys_add_player_to_group
-//
+// TurnerClassic - get_send_message_queue
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-int TurnerNetwork::sys_add_player_to_group (DPID group, DPID player)
+int TurnerClassic::get_send_message_queue(DPID from, DPID to,
+                                          LPDWORD nmsgs, LPDWORD nbytes)
 {
-    return 0;
+    if (!pIDP)
+        return DPERR_UNAVAILABLE;
+
+    return pIDP->GetMessageQueue(from,to,DPMESSAGEQUEUE_SEND,nmsgs,nbytes);
 }
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-// TurnerNetwork - sys_remove_player_from_group
-//
+// TurnerClassic - get_receive_message_queue
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-int TurnerNetwork::sys_remove_player_from_group (DPID group, DPID player)
+int TurnerClassic::get_receive_message_queue(DPID from, DPID to,
+                                             LPDWORD nmsgs, LPDWORD nbytes)
 {
-    return 0;
+    if (!pIDP)
+        return DPERR_UNAVAILABLE;
+
+    return pIDP->GetMessageQueue(from,to,DPMESSAGEQUEUE_RECEIVE,nmsgs,nbytes);
 }
 
 //°±² End of module - turner.cpp ²±°
-

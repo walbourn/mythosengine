@@ -8,23 +8,27 @@
 //ששששש²±²ששששששש²±²שששש²±²ש²±²שששש²±²ש²±²שששש²±²ש²±²שששששששש²±²שששש²±²שששששש
 //שששש²²²²²²²²²²ש²²²²²²²²ששש²²²²²²²²שש²²²שששש²²²ש²²²²²²²²²²ש²²²שששש²²²ששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//ששששששששששששששששששש Microsoft Windows 95/NT Version ששששששששששששששששששששששש
+//ששששששששששששששששש Microsoft Windows 95/98/NT Version שששששששששששששששששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//שששששששששששCopyrightש(c)ש1994-1998שbyשCharybdisשEnterprises,שInc.שששששששששש
-//ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
+//שששCopyright (c) 1994-1999 by Dan Higdon, Tim Little, and Chuck Walbournששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
 //
-//           *** Charybdis Enterprises, Inc. Company Confidential ***
+// This file and all associated files are subject to the terms of the
+// GNU Lesser General Public License version 2 as published by the
+// Free Software Foundation (http://www.gnu.org).   They remain the
+// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+// See LICENSE.TXT in the distribution for a copy of this license.
 //
-//  This file and all associated files are the company proprietary property
-//        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+// THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+// OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+// PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+// LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+// OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 //
-// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+//ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
+//
+//                        http://www.mythos-engine.org/
 //
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
 //
@@ -39,7 +43,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include <conio.h>
@@ -85,8 +89,8 @@ STATIC dword   Flags=0;
 STATIC ulong   Line=0;
 STATIC ulong   Maxline=24;
 
-char Util_name[] = "°± Escher Directory - (C) 1994-1998 Charybdis Enterprises, Inc. ±°\n"
-                   "                      All Rights Reserved.  " __DATE__ "\n";
+char Util_name[] = "°± Escher Directory - (C) 1994-1999 by D. Higdon, T. Little, C. Walbourn ±°\n"
+                   "                      subject to GNU LGPL " __DATE__ "\n";
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
@@ -156,7 +160,7 @@ void main(int argc, char *argv[])
         print_error(iff,"Failed to open file");
         return;
     }
-   
+
 //ִִִ Print outline of file contents
     cout << Util_name;
     cout << "   File: " << fn << "\n";
@@ -187,12 +191,12 @@ STATIC void print_help(int full)
 STATIC void print_error(XFParseIFF &xp, char *s)
 {
     cout << "±±± ";
-   
+
     if (s)
     {
         cout << s << ", ";
     }
-   
+
     switch (xp.error())
     {
         case XF_ERR_NOTIFF:
@@ -229,7 +233,7 @@ STATIC void print_error(XFParseIFF &xp, char *s)
             cout << "error " << (int)xp.error();
             break;
     }
-   
+
     cout << "\n";
     pause();
 }
@@ -280,7 +284,7 @@ STATIC void directory(XFParseIFF &iff)
                     print_error(iff,"Problem reading scene header");
                 }
                 else
-                {  
+                {
                     cout << sheader.name << "\n";
                     pause();
                     cout << "       # Cameras: " << sheader.ncameras << "\n";
@@ -309,7 +313,7 @@ STATIC void directory(XFParseIFF &iff)
                 cout << "\n";
                 pause();
             }
-            
+
         }
         //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ Misc data
         else if (iff.makeid('D','E','S','C') == iff.chunkid)
@@ -320,7 +324,7 @@ STATIC void directory(XFParseIFF &iff)
             {
                 print_error(iff,"Problem reading scene description");
             }
-            else 
+            else
             {
                 cout << "   Desc: " <<  buff << endl;
                 pause();
@@ -334,11 +338,11 @@ STATIC void directory(XFParseIFF &iff)
             {
                 print_error(iff,"Problem reading scene author string");
             }
-            else 
+            else
             {
                 cout << " Author: " <<  buff << endl;
                 pause();
-            }                         
+            }
         }
         else if (iff.makeid('(','C',')',' ') == iff.chunkid)
         {
@@ -348,7 +352,7 @@ STATIC void directory(XFParseIFF &iff)
             {
                 print_error(iff,"Problem reading scene copyright notice");
             }
-            else 
+            else
             {
                 cout << " Notice: " <<  buff << endl;
                 pause();
@@ -404,8 +408,8 @@ STATIC void directory(XFParseIFF &iff)
                         {
                             print_error(iff,"Problem reading object header");
                         }
-                        else 
-                        {  
+                        else
+                        {
                             cout << "³" << mheader.name;
                             cout.flush();
                             printf( "\tFLAGS: %x",mheader.flags);
@@ -539,8 +543,8 @@ STATIC void directory(XFParseIFF &iff)
                         {
                             print_error(iff,"Problem reading hierarchy chunk");
                         }
-                        else 
-                        {  
+                        else
+                        {
                             cout << "³ HIER: " << ehier.parent << "\n";
                             pause();
                         }
@@ -588,7 +592,7 @@ STATIC void directory(XFParseIFF &iff)
                                 print_error(iff,"Problem reading object materials");
                             }
                             else
-                            {  
+                            {
                                 cout << "³ MTLS:\n";
                                 pause();
                                 for(i=0; i < mheader.nmtls; i++)
@@ -729,7 +733,7 @@ STATIC void directory(XFParseIFF &iff)
                     cout << "ִ";
                 cout << "\n";
                 pause();
-               
+
                 cout << "³" << adata.name;
                 cout.flush();
                 printf( "\tFLAGS: %x\n",adata.flags);
@@ -738,7 +742,7 @@ STATIC void directory(XFParseIFF &iff)
                                    << ((adata.color >> 8) & 0xff) << " "
                                    << ((adata.color >> 16) & 0xff) << "\n";
                 pause();
-               
+
                 cout << "ְ";
                 for(i=1; i < MAXCOLUMN; i++)
                     cout << "ִ";
@@ -792,7 +796,7 @@ STATIC void directory(XFParseIFF &iff)
                 cout << "ִ";
             cout << "\n";
             pause();
-        
+
             cout << "³" << vdata.name;
             cout.flush();
             printf( "\tFLAGS: %x\n",vdata.flags);
@@ -805,7 +809,7 @@ STATIC void directory(XFParseIFF &iff)
                  << vdata.j << " "
                  << vdata.k << "\n";
             pause();
-        
+
             cout << "ְ";
             for(i=1; i < MAXCOLUMN; i++)
                 cout << "ִ";
@@ -871,7 +875,7 @@ STATIC void directory(XFParseIFF &iff)
             }
             cout << "\n";
             pause();
-            
+
             cout << "³" << pdata.name;
             cout.flush();
             printf( "\tFLAGS: %x\n",pdata.flags);
@@ -885,7 +889,7 @@ STATIC void directory(XFParseIFF &iff)
                  << pdata.y << " "
                  << pdata.z << "\n";
             pause();
-            
+
             cout << "ְ";
             for(i=1; i < MAXCOLUMN; i++)
                 cout << "ִ";
@@ -893,7 +897,7 @@ STATIC void directory(XFParseIFF &iff)
             pause();
         }
         //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ (Fast) Attenuated Light
-        else if (iff.makeid('E','A','T','N') == iff.chunkid 
+        else if (iff.makeid('E','A','T','N') == iff.chunkid
                  || iff.makeid('E','A','T','1') == iff.chunkid
                  || iff.makeid('E','F','A','T') == iff.chunkid
                  || iff.makeid('E','F','A','1') == iff.chunkid)
@@ -954,7 +958,7 @@ STATIC void directory(XFParseIFF &iff)
             }
             cout << "\n";
             pause();
-            
+
             cout << "³" << adata.name;
             cout.flush();
             printf( "\tFLAGS: %x\n",adata.flags);
@@ -972,7 +976,7 @@ STATIC void directory(XFParseIFF &iff)
             cout << "³ RNGS: " << adata.inner << " "
                  << adata.outer << "\n";
             pause();
-            
+
             cout << "ְ";
             for(i=1; i < MAXCOLUMN; i++)
                 cout << "ִ";
@@ -981,13 +985,13 @@ STATIC void directory(XFParseIFF &iff)
         }
         //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ Spot Light
         else if (iff.makeid('E','S','P','T') == iff.chunkid
-                 || iff.makeid('E','S','P','1') == iff.chunkid 
+                 || iff.makeid('E','S','P','1') == iff.chunkid
                  || iff.makeid('E','F','S','P') == iff.chunkid
                  || iff.makeid('E','F','S','1') == iff.chunkid)
         {
             EschFileLightSpot   sdata;
 
-            if (iff.makeid('E','S','P','1') == iff.chunkid 
+            if (iff.makeid('E','S','P','1') == iff.chunkid
                 || iff.makeid('E','F','S','1') == iff.chunkid)
             {
                 if (iff.chunkSize != sizeof(sdata))
@@ -1048,7 +1052,7 @@ STATIC void directory(XFParseIFF &iff)
             }
             cout << "\n";
             pause();
-            
+
             cout << "³" << sdata.name;
             cout.flush();
             printf( "\tFLAGS: %x\n",sdata.flags);
@@ -1074,7 +1078,7 @@ STATIC void directory(XFParseIFF &iff)
             cout << "³ RNGS: " << sdata.inner << " "
                  << sdata.outer << "\n";
             pause();
-            
+
             cout << "ְ";
             for(i=1; i < MAXCOLUMN; i++)
                 cout << "ִ";
@@ -1173,7 +1177,7 @@ STATIC void directory(XFParseIFF &iff)
                         {
                             print_error(iff,"Problem reading terrain description");
                         }
-                        else 
+                        else
                         {
                             cout << "³  DESC: " <<  buff << endl;
                             pause();
@@ -1187,7 +1191,7 @@ STATIC void directory(XFParseIFF &iff)
                         {
                             print_error(iff,"Problem reading terrain author string");
                         }
-                        else 
+                        else
                         {
                             cout << "³  AUTH: " <<  buff << endl;
                             pause();
@@ -1201,7 +1205,7 @@ STATIC void directory(XFParseIFF &iff)
                         {
                             print_error(iff,"Problem reading terrain copyright notice");
                         }
-                        else 
+                        else
                         {
                             cout << "³   (C): " <<  buff << endl;
                             pause();
@@ -1217,8 +1221,8 @@ STATIC void directory(XFParseIFF &iff)
                         {
                             print_error(iff,"Problem reading terrain color bands chunk");
                         }
-                        else 
-                        {  
+                        else
+                        {
                             cout << "³  Height-based color bands present:" << thcolor.blue << endl;
                             pause();
                             cout << "³  \tBlue:" << thcolor.blue << endl;
@@ -1278,7 +1282,7 @@ STATIC void directory(XFParseIFF &iff)
                                 print_error(iff,"Problem reading terrain materials names");
                             }
                             else
-                            {  
+                            {
                                 cout << "³ MTLS:\n";
                                 pause();
                                 for(i=0; i < theader.ntxts; i++)
@@ -1348,7 +1352,7 @@ STATIC void directory_EMTL(XFParseIFF &iff)
             print_error(iff,"Problem reading object materials data header");
         }
         else
-        {  
+        {
             char name[ESCH_MAX_NAME+1];
             strncpy(name,mtlhdr.name,ESCH_MAX_NAME);
             name[ESCH_MAX_NAME] = 0;
@@ -1367,11 +1371,20 @@ STATIC void directory_EMTL(XFParseIFF &iff)
                 case ESCH_MTL_TYPE_8BIT_TRANSP:
                     cout << " 8bits xprnt";
                     break;
+                case ESCH_MTL_TYPE_15BIT:
+                    cout << " 15bits";
+                    break;
+                case ESCH_MTL_TYPE_15BIT_TRANSP:
+                    cout << " 15bits xprnt";
+                    break;
                 case ESCH_MTL_TYPE_24BIT:
                     cout << " 24bits";
                     break;
                 case ESCH_MTL_TYPE_32BIT:
                     cout << " 32bits";
+                    break;
+                default:
+                    cout << " ?bits";
                     break;
             }
 
@@ -1428,7 +1441,7 @@ STATIC void pause(void)
 
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
 // _charybdis_assert
-// 
+//
 // Handler for failed asserts.  If msg is set to non-NULL, then an assertMyth
 // was used with a comment.
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ

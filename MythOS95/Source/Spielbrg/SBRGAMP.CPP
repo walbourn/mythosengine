@@ -2,7 +2,7 @@
 //                                                      _o######ooooooo-_
 //     Spielberg -- Animation player library          o#####o_o#####~~~~~~
 //                                                   ################o__o
-//       Microsoft Windows 95/NT Version           _o###########~~~~~###~
+//      Microsoft Windows 95/98/NT Version        _o###########~~~~~###~
 //                                               o##############
 //                                            _o###############~
 //                                          _o#########~ooo~##~
@@ -21,21 +21,25 @@
 //          o##########~~~~    ~~~##########       ~~~~#############o
 //         #####~~~~~~                ~~~
 //
-//           Copyright (c) 1996-1998 by Charybdis Enterprises, Inc.
-//                           All Rights Reserved.
+//  Copyright (c) 1996-1999 by Dan Higdon, Tim Little, and Chuck Walbourn
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
-//           *** Charybdis Enterprises, Inc. Company Confidential ***
+// This file and all associated files are subject to the terms of the
+// GNU Lesser General Public License version 2 as published by the
+// Free Software Foundation (http://www.gnu.org).   They remain the
+// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+// See LICENSE.TXT in the distribution for a copy of this license.
 //
-//  This file and all associated files are the company proprietary property
-//        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+// THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+// OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+// PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+// LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+// OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 //
-// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//
+//                        http://www.mythos-engine.org/
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
@@ -48,9 +52,9 @@
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-//             
+//
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include "spielbrg.hpp"
@@ -266,14 +270,14 @@ sberg_err_codes SpielbergAMPlayer::play()
 
     if (get_flags() & SBERG_PLAYER_PLAYING)
         return SBERG_ERR_NONE;
-    
+
 //ÄÄÄ Get media control interface
     IMediaControl *am_mediactrl=0;
     HRESULT hr=am_graph->QueryInterface(IID_IMediaControl,
                                         (void**)&am_mediactrl);
     if (FAILED(hr))
         return SBERG_ERR_AMQUERYIFAILED;
-    
+
 //ÄÄÄ Start playing
     hr=am_mediactrl->Run();
 
@@ -303,7 +307,7 @@ sberg_err_codes SpielbergAMPlayer::stop()
 
     if (!(get_flags() & SBERG_PLAYER_PLAYING))
         return SBERG_ERR_NONE;
-    
+
 //ÄÄÄ Get media control & position interfaces
     IMediaControl *am_mediactrl=0;
     HRESULT hr=am_graph->QueryInterface(IID_IMediaControl,
@@ -366,7 +370,7 @@ sberg_err_codes SpielbergAMPlayer::pause()
 
     if (flags & SBERG_PLAYER_PAUSED)
         return SBERG_ERR_NONE;
-    
+
 //ÄÄÄ Get media control interface
     IMediaControl *am_mediactrl=0;
     HRESULT hr=am_graph->QueryInterface(IID_IMediaControl,
@@ -405,14 +409,14 @@ sberg_err_codes SpielbergAMPlayer::resume()
 
     if (!(flags & SBERG_PLAYER_PAUSED))
         return SBERG_ERR_NONE;
-    
+
 //ÄÄÄ Get media control interface
     IMediaControl *am_mediactrl=0;
     HRESULT hr=am_graph->QueryInterface(IID_IMediaControl,
                                         (void**)&am_mediactrl);
     if (FAILED(hr))
         return SBERG_ERR_AMQUERYIFAILED;
-    
+
 //ÄÄÄ Resume playback
     hr=am_mediactrl->Run();
 
@@ -438,7 +442,7 @@ sberg_err_codes SpielbergAMPlayer::set_position(ulong ms)
 {
     if (!am_graph)
         return SBERG_ERR_UNINITIALIZED;
-    
+
 //ÄÄÄ Get media control & position interfaces
     IMediaControl *am_mediactrl=0;
     HRESULT hr=am_graph->QueryInterface(IID_IMediaControl,
@@ -482,7 +486,7 @@ ulong SpielbergAMPlayer::get_position() const
 {
     if (!am_graph)
         return 0;
-    
+
 //ÄÄÄ Get media position interface
     IMediaPosition *am_mediapos=0;
     HRESULT hr=am_graph->QueryInterface(IID_IMediaPosition,
@@ -516,7 +520,7 @@ sberg_err_codes SpielbergAMPlayer::get_info(SpielbergInfo *info) const
         return SBERG_ERR_UNINITIALIZED;
 
     memset(info,0,sizeof(SpielbergInfo));
-    
+
 //ÄÄÄ Get media position interface
     IMediaPosition *am_mediapos=0;
     HRESULT hr=am_graph->QueryInterface(IID_IMediaPosition,
@@ -568,7 +572,7 @@ dword SpielbergAMPlayer::get_flags()
 {
     if (!am_graph)
         return flags;
-    
+
 //ÄÄÄ Get media event interface
     IMediaEvent *am_mediaevt;
     HRESULT hr=am_graph->QueryInterface(IID_IMediaEvent,

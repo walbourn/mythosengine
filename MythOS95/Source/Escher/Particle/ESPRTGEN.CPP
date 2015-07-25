@@ -8,23 +8,27 @@
 //ùùùùù²±²ùùùùùùù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùùùùùù²±²ùùùù²±²ùùùùùù
 //ùùùù²²²²²²²²²²ù²²²²²²²²ùùù²²²²²²²²ùù²²²ùùùù²²²ù²²²²²²²²²²ù²²²ùùùù²²²ùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùùùùùùùùù Microsoft Windows 95/NT Version ùùùùùùùùùùùùùùùùùùùùùùù
+//ùùùùùùùùùùùùùùùùù Microsoft Windows 95/98/NT Version ùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùCopyrightù(c)ù1994-1998ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
-//ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
+//ùùùCopyright (c) 1994-1999 by Dan Higdon, Tim Little, and Chuck Walbournùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
-//           *** Charybdis Enterprises, Inc. Company Confidential ***
+// This file and all associated files are subject to the terms of the
+// GNU Lesser General Public License version 2 as published by the
+// Free Software Foundation (http://www.gnu.org).   They remain the
+// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+// See LICENSE.TXT in the distribution for a copy of this license.
 //
-//  This file and all associated files are the company proprietary property
-//        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+// THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+// OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+// PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+// LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+// OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 //
-// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//
+//                        http://www.mythos-engine.org/
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
@@ -116,6 +120,8 @@ EschParticleGenerator::~EschParticleGenerator()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 esch_error_codes EschParticleGenerator::init(ulong mc)
 {
+    part_accum = 0;
+
 //ÄÄÄ Call base
     esch_error_codes err = EschParticleSystem::init(mc);
     if (err)
@@ -272,34 +278,61 @@ ulong EschParticleGenerator::generate()
         else
             parms.size = mean_size;
 
-
         //ÄÄÄ Compute color
-        if (pal && (var_color_r || var_color_g || var_color_b))
+        if (pal)
         {
-            float r = float(mean_color_r) + RANDOM()*float(var_color_r);
-            if (r > 255)
-                r = 255;
-            else if (r < 0)
-                r = 0;
+            float           t;
+            VngoColor24bit  clr;
 
-            float g = float(mean_color_g) + RANDOM()*float(var_color_g);
-            if (g > 255)
-                g = 255;
-            else if (g < 0)
-                g = 0;
+            if (var_color_r > 0)
+                t = float(mean_color_r) + RANDOM()*float(var_color_r);
+            else
+                t = float(mean_color_r);
 
-            float b = float(mean_color_b) + RANDOM()*float(var_color_b);
-            if (b > 255)
-                b = 255;
-            else if (b < 0)
-                b = 0;
+            if (t > 255)
+                t = 255;
+            else if (t < 0)
+                t = 0;
 
-            parms.color = pal->get_index(VngoColor24bit(byte(r),
-                                                        byte(g),
-                                                        byte(b)));
+            clr.r = byte(t);
+
+            if (var_color_g > 0)
+                t = float(mean_color_g) + RANDOM()*float(var_color_g);
+            else
+                t = float(mean_color_g);
+
+            if (t > 255)
+                t = 255;
+            else if (t < 0)
+                t = 0;
+
+            clr.g = byte(t);
+
+            if (var_color_b > 0)
+                t = float(mean_color_b) + RANDOM()*float(var_color_b);
+            else
+                t = float(mean_color_b);
+
+            if (t > 255)
+                t = 255;
+            else if (t < 0)
+                t = 0;
+
+            clr.b = byte(t);
+
+            if (pal->flags & (VNGO_15BIT|VNGO_16BIT))
+            {
+                parms.color = clr.compress24() | VNGO_COLOR_24BIT;
+            }
+            else
+            {
+                parms.color = pal->get_index(clr);
+            }
         }
         else
+        {
             parms.color = cindex;
+        }
 
         //ÄÄÄ Compute lifetime
         if (var_life > 0)

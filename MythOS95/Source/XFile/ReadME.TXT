@@ -5,23 +5,27 @@
      (_)       ^          * *     *      *   *    *            (_)
               (_)       **   **   *    ***** **** ****
 
-                        Microsoft Windows 95/NT Version
- 
-             Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.
-                               All Rights Reserved.
- 
+                      Microsoft Windows 95/98/NT Version
+
+    Copyright (c) 1994-1999 by Dan Higdon, Tim Little, and Chuck Walbourn
+  
  ---------------------------------------------------------------------------
- 
-            *** Charybdis Enterprises, Inc. Company Confidential ***
- 
-   This file and all associated files are the company proprietary property
-         of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
- 
-  CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-  TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-  IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-  AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-  INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+
+  This file and all associated files are subject to the terms of the
+  GNU Lesser General Public License version 2 as published by the
+  Free Software Foundation (http://www.gnu.org).   They remain the
+  property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+  See LICENSE.TXT in the distribution for a copy of this license.
+
+  THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+  OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+  PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+  LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+  OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+
+ ---------------------------------------------------------------------------
+
+                         http://www.mythos-engine.org/
 
  ---------------------------------------------------------------------------
 
@@ -35,32 +39,25 @@
                              _Library Status_
 
  Notes by: Chuck Walbourn
- Updated: January 2, 1998
+ Updated: August 24, 1998
 
  Changes for this release --------------------------------------------------
 
-   o Minor updates to comments.
+   o Added 15-bit support to the BMP reader/writer.
 
 
  Proposed changes ----------------------------------------------------------
 
    ° NOTE:  Due to the Unisys patent, XFileGIF will not be implemented. °
 
+   o XFCompress class that acts as an interface to ZLIB.  Possibly a
+     XFParseZIP class.
+
+   o XFParsePNG, XFParseJPEG making use of freeware libraries.
+
    o XFileMemMapped to take advantage of the Win32 memory-mapped system
      for reading files.
 
    o XFileRAM needs a method for attaching/loading a binary resource entry.
-
-   o XFileX file-system-in-a-file class plus associated compactor and
-     directory tools
-
-   o XFParse classes will need changes to take advantage of XFileX classes,
-     but they will only require that all code be recompiled.
-
-   o General XFile compression and encryption support (probably as a
-     special XFileDiskEx or as a filter XFile which writes to another XFile
-     instance).
-
-   o Additional XFParse bitmaps objects for new formats (PNM, IMG, JPG)
 
 *** END OF FILE ***

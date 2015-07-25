@@ -8,29 +8,33 @@
 //ùùùùù²±²ùùùùùùù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùùùùùù²±²ùùùù²±²ùùùùùù
 //ùùùù²²²²²²²²²²ù²²²²²²²²ùùù²²²²²²²²ùù²²²ùùùù²²²ù²²²²²²²²²²ù²²²ùùùù²²²ùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùùùùùùùùù Microsoft Windows 95/NT Version ùùùùùùùùùùùùùùùùùùùùùùù
+//ùùùùùùùùùùùùùùùùù Microsoft Windows 95/98/NT Version ùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùCopyrightù(c)ù1994-1998ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
-//ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
+//ùùùCopyright (c) 1994-1999 by Dan Higdon, Tim Little, and Chuck Walbournùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
-//           *** Charybdis Enterprises, Inc. Company Confidential ***
+// This file and all associated files are subject to the terms of the
+// GNU Lesser General Public License version 2 as published by the
+// Free Software Foundation (http://www.gnu.org).   They remain the
+// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+// See LICENSE.TXT in the distribution for a copy of this license.
 //
-//  This file and all associated files are the company proprietary property
-//        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+// THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+// OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+// PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+// LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+// OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 //
-// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//
+//                        http://www.mythos-engine.org/
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
 //                        *** Escher Terrain Editor ***
 //
-// Chuck Walbourn
+// Created by Chuck Walbourn
 //
 // eshtgrid.cpp
 //
@@ -43,7 +47,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include "stdafx.h"
@@ -231,7 +235,7 @@ void TerrEditGrid::UpdateSurfaceColors()
         colors[1] = (byte)pDoc->palette.get_index (VngoColor24bit (0, 100, 255));
         colors[2] = (byte)pDoc->palette.get_index (VngoColor24bit (255, 255, 255));
         colors[3] = (byte)pDoc->palette.get_index (VngoColor24bit (0, 120, 0));
-        colors[4] = (byte)pDoc->palette.get_index (VngoColor24bit (0, 185, 0)); 
+        colors[4] = (byte)pDoc->palette.get_index (VngoColor24bit (0, 185, 0));
         colors[5] = (byte)pDoc->palette.get_index (VngoColor24bit (255, 255, 0));
         colors[6] = (byte)pDoc->palette.get_index (VngoColor24bit (254, 185, 0));
         colors[7] = (byte)pDoc->palette.get_index (VngoColor24bit (255, 128, 0));
@@ -266,7 +270,7 @@ void TerrEditGrid::UpdateSurfaceColors()
         for(y=0, sptr=pDoc->surfinfo, dptr=gmap;
             y < depth; y++)
         {
-            dptr = gmap + (scanw * (depth - y - 1)); 
+            dptr = gmap + (scanw * (depth - y - 1));
 
             for(x=0; x < width; x++)
             {
@@ -289,7 +293,7 @@ void TerrEditGrid::UpdateSurfaceColors()
 
         VngoPal *pal = &pDoc->palette;
         byte colors[16] =
-        { 
+        {
             (byte)pal->get_index(VngoColor24bit(64, 64, 64)), // NONE
             (byte)pal->get_index(VngoColor24bit(255,0,  0)),  // A0
             (byte)pal->get_index(VngoColor24bit(0,  255,0)),  // A1
@@ -310,7 +314,7 @@ void TerrEditGrid::UpdateSurfaceColors()
 
         for(y=0, sptr=pDoc->surfinfo, dptr=gmap; y < depth; y++)
         {
-            dptr = gmap + (scanw * (depth - y - 1)); 
+            dptr = gmap + (scanw * (depth - y - 1));
 
             for(x=0; x < width; x++)
             {
@@ -331,7 +335,7 @@ void TerrEditGrid::UpdateSurfaceColors()
 
         for(y=0, sptr=pDoc->surfinfo, dptr=gmap; y < depth; y++)
         {
-            dptr = gmap + (scanw * (depth - y - 1)); 
+            dptr = gmap + (scanw * (depth - y - 1));
 
             for(x=0; x < width; x++)
             {
@@ -348,7 +352,7 @@ void TerrEditGrid::UpdateSurfaceColors()
                     color = black;
                 }
                 else
-                {    
+                {
                     color = sptr->cind;
                 }
 
@@ -449,7 +453,7 @@ void TerrEditGrid::SetPosition(int x, int y, int upscroll)
     }
 
     if (ypos != y)
-    {   
+    {
         int h = ((depth << zoomshift) - rect.bottom);
         if (h < 0)
             h = 0;
@@ -986,7 +990,7 @@ void TerrEditGrid::assign(CRect r)
         dword color = 0;
         byte cind = 0;
 
-        if (i == LB_ERR) 
+        if (i == LB_ERR)
         {
             i = pView->GetCurrentColorSel();
 
@@ -1108,7 +1112,7 @@ void TerrEditGrid::assign(CRect r)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrEditGrid - OnPaint                                                   ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrEditGrid::OnPaint() 
+void TerrEditGrid::OnPaint()
 {
         CPaintDC dc(this); // device context for painting
 
@@ -1133,7 +1137,7 @@ void TerrEditGrid::OnPaint()
     {
         StretchDIBits(dc.m_hDC, -xpos, -ypos, width << zoomshift, depth << zoomshift,
                       0, 0, width, depth,
-                      gmap, bmi, DIB_PAL_COLORS, SRCCOPY); 
+                      gmap, bmi, DIB_PAL_COLORS, SRCCOPY);
     }
     else
     {
@@ -1147,7 +1151,7 @@ void TerrEditGrid::OnPaint()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrEditGrid - OnHScroll                                                 ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrEditGrid::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) 
+void TerrEditGrid::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 {
     switch (nSBCode)
     {
@@ -1176,7 +1180,7 @@ void TerrEditGrid::OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrEditGrid - OnVScroll                                                 ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrEditGrid::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar) 
+void TerrEditGrid::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 {
     switch (nSBCode)
     {
@@ -1205,7 +1209,7 @@ void TerrEditGrid::OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrEditGrid - OnSize                                                    ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrEditGrid::OnSize(UINT nType, int cx, int cy) 
+void TerrEditGrid::OnSize(UINT nType, int cx, int cy)
 {
         CWnd::OnSize(nType, cx, cy);
 
@@ -1216,7 +1220,7 @@ void TerrEditGrid::OnSize(UINT nType, int cx, int cy)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrEditGrid - OnLButtonDown                                             ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrEditGrid::OnLButtonDown(UINT nFlags, CPoint point) 
+void TerrEditGrid::OnLButtonDown(UINT nFlags, CPoint point)
 {
 //ÄÄÄ Get position on surface data
     int xspos = (point.x + xpos) >> zoomshift;
@@ -1289,7 +1293,7 @@ void TerrEditGrid::OnLButtonDown(UINT nFlags, CPoint point)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrEditGrid - OnLButtonUp                                               ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrEditGrid::OnLButtonUp(UINT nFlags, CPoint point) 
+void TerrEditGrid::OnLButtonUp(UINT nFlags, CPoint point)
 {
     if (!rectactive)
     {
@@ -1298,7 +1302,7 @@ void TerrEditGrid::OnLButtonUp(UINT nFlags, CPoint point)
     else
     {
 //ÄÄÄ If rectangle was active, take action based on last rectangle set by
-//ÄÄÄ MouseMove 
+//ÄÄÄ MouseMove
         rectactive=FALSE;
         ReleaseCapture();
 
@@ -1316,7 +1320,7 @@ void TerrEditGrid::OnLButtonUp(UINT nFlags, CPoint point)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrEditGrid - OnRButtonDown                                             ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrEditGrid::OnRButtonDown(UINT nFlags, CPoint point) 
+void TerrEditGrid::OnRButtonDown(UINT nFlags, CPoint point)
 {
     if (rectactive)
     {
@@ -1372,8 +1376,8 @@ void TerrEditGrid::OnRButtonDown(UINT nFlags, CPoint point)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrEditGrid - OnMouseMove                                               ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrEditGrid::OnMouseMove(UINT nFlags, CPoint point) 
-{  
+void TerrEditGrid::OnMouseMove(UINT nFlags, CPoint point)
+{
 //ÄÄÄ Update status area string
     char str[256];
 
@@ -1415,7 +1419,7 @@ void TerrEditGrid::OnMouseMove(UINT nFlags, CPoint point)
                         x,z,h,x2,z2,h2);
         }
         else if (a_method)
-        {   
+        {
             sprintf(str,"Select upper-left (%3d,%3d)\t\t"
                         "(X: %8.2f, Z: %8.2f, [H: %8.2f]) "
                         "- (X: %8.2f, Z: %8.2f, [H: %8.2f])",

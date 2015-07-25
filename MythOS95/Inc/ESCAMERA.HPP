@@ -8,23 +8,27 @@
 //ששששש²±²ששששששש²±²שששש²±²ש²±²שששש²±²ש²±²שששש²±²ש²±²שששששששש²±²שששש²±²שששששש
 //שששש²²²²²²²²²²ש²²²²²²²²ששש²²²²²²²²שש²²²שששש²²²ש²²²²²²²²²²ש²²²שששש²²²ששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//ששששששששששששששששששש Microsoft Windows 95/NT Version ששששששששששששששששששששששש
+//ששששששששששששששששש Microsoft Windows 95/98/NT Version שששששששששששששששששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//שששששששששששCopyrightש(c)ש1994-1998שbyשCharybdisשEnterprises,שInc.שששששששששש
-//ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
+//שששCopyright (c) 1994-1999 by Dan Higdon, Tim Little, and Chuck Walbournששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
 //
-//           *** Charybdis Enterprises, Inc. Company Confidential ***
+// This file and all associated files are subject to the terms of the
+// GNU Lesser General Public License version 2 as published by the
+// Free Software Foundation (http://www.gnu.org).   They remain the
+// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+// See LICENSE.TXT in the distribution for a copy of this license.
 //
-//  This file and all associated files are the company proprietary property
-//        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+// THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+// OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+// PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+// LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+// OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 //
-// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+//ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
+//
+//                        http://www.mythos-engine.org/
 //
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
 //
@@ -53,9 +57,9 @@
 #endif
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-//             
+//
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include <portable.h>
@@ -323,9 +327,9 @@ public:
         }
     }
 
-    void set_yon(const float y, dword update=ESCH_UPD_ALL) 
-    { 
-        yon=y; 
+    void set_yon(const float y, dword update=ESCH_UPD_ALL)
+    {
+        yon=y;
         if (update & ESCH_UPD_SCALAR)
         {
             compute_frustrum();
@@ -336,6 +340,13 @@ public:
     void set_bcolor(const dword c=0) { bcolor=c; }
 
     void set_flags(const dword f) { flags=f; }
+    void set_flags(const dword m, const int on)
+    {
+        if (on)
+            flags |= m;
+        else
+            flags &= ~m;
+    }
 
     void set_app_data(void *p) { app_data = p; }
 
@@ -382,10 +393,17 @@ public:
     //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ¿
     // Public data members (should be changed only by utility functions).   ³
     //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִÙ
-    short           bg_offx;                // Bitmap Background window offset
-    short           bg_offy;
-    VngoTexture     *bg_bitmap;             // Bitmap background
-    VngoShadePal    *grd_pal;               // Gradient shade palette
+    short               bg_offx;            // Bitmap Background window offset
+    short               bg_offy;
+    VngoTexture         *bg_bitmap;         // Bitmap background
+
+    dword               grd_top;            // Gradient colors
+    dword               grd_mid;
+    dword               grd_bottom;
+
+    float               grd_topy;           // Heights for gradient changes
+    float               grd_midy;
+    float               grd_bottomy;
 
     //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ¿
     // Constructor/Destructors                                              ³
@@ -416,11 +434,9 @@ public:
     int set_haze(float start, float mid);
     int set_haze(float start, float mid, VngoColor24bit tcolor);
 
-    int set_gradient(VngoShadePal *grdp, int owns=1);
-    esch_error_codes create_gradient(ushort levels,
-                                     ushort blevel, float bpercent,
-                                     VngoColor24bit color1,
-                                     VngoColor24bit color2);
+    void set_gradient(VngoColor24bit top, float topy,
+                      VngoColor24bit mid, float midy,
+                      VngoColor24bit bottom, float bottomy, int fixed=0);
 };
 
 #ifdef __WATCOMC__

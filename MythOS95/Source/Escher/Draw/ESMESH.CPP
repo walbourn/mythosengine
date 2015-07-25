@@ -8,23 +8,27 @@
 //ùùùùù²±²ùùùùùùù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùùùùùù²±²ùùùù²±²ùùùùùù
 //ùùùù²²²²²²²²²²ù²²²²²²²²ùùù²²²²²²²²ùù²²²ùùùù²²²ù²²²²²²²²²²ù²²²ùùùù²²²ùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùùùùùùùùù Microsoft Windows 95/NT Version ùùùùùùùùùùùùùùùùùùùùùùù
+//ùùùùùùùùùùùùùùùùù Microsoft Windows 95/98/NT Version ùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùCopyrightù(c)ù1994-1998ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
-//ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
+//ùùùCopyright (c) 1994-1999 by Dan Higdon, Tim Little, and Chuck Walbournùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
-//           *** Charybdis Enterprises, Inc. Company Confidential ***
+// This file and all associated files are subject to the terms of the
+// GNU Lesser General Public License version 2 as published by the
+// Free Software Foundation (http://www.gnu.org).   They remain the
+// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+// See LICENSE.TXT in the distribution for a copy of this license.
 //
-//  This file and all associated files are the company proprietary property
-//        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+// THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+// OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+// PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+// LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+// OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 //
-// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//
+//                        http://www.mythos-engine.org/
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
@@ -32,9 +36,9 @@
 //
 // esmesh.cpp
 //
-// Contains the code for the EschMesh container class.  This class is 
-// used to contain the original polygonal object data and is referred to 
-// and used by one ore more EschMeshDraw objects, thus reducing memory 
+// Contains the code for the EschMesh container class.  This class is
+// used to contain the original polygonal object data and is referred to
+// and used by one ore more EschMeshDraw objects, thus reducing memory
 // usage for multiple copies of the same mesh display simultaneously.
 //
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
@@ -42,7 +46,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include "escher.hpp"
@@ -521,14 +525,14 @@ esch_error_codes EschMesh::load(XFParseIFF *iff,
 
                 if (tmpptr->flags & ESCH_FACE_ALPHA)
                 {
-                    tptr->alpha_a = 
-                    tptr->alpha_b = 
+                    tptr->alpha_a =
+                    tptr->alpha_b =
                     tptr->alpha_c = byte((tmpptr->flags & ESCH_FACEV2_ALPHA_MASK) >> 20);
                 }
                 else
                 {
-                    tptr->alpha_a = 
-                    tptr->alpha_b = 
+                    tptr->alpha_a =
+                    tptr->alpha_b =
                     tptr->alpha_c = 255;
                 }
 
@@ -598,14 +602,14 @@ esch_error_codes EschMesh::load(XFParseIFF *iff,
                 tptr->self_illum = byte((tmpptr->flags & ESCH_FACEV1_SILLUM_MASK) >> 16);
                 if (tmpptr->flags & ESCH_FACE_ALPHA)
                 {
-                    tptr->alpha_a = 
-                    tptr->alpha_b = 
+                    tptr->alpha_a =
+                    tptr->alpha_b =
                     tptr->alpha_c = byte((tmpptr->flags & ESCH_FACEV1_ALPHA_MASK) >> 20);
                 }
                 else
                 {
-                    tptr->alpha_a = 
-                    tptr->alpha_b = 
+                    tptr->alpha_a =
+                    tptr->alpha_b =
                     tptr->alpha_c = 255;
                 }
 
@@ -632,7 +636,7 @@ esch_error_codes EschMesh::load(XFParseIFF *iff,
                 err=ESCH_ERR_FILEERROR;
                 goto error_exit;
             }
-         
+
             sphere.center.x=ext.cenx;
             sphere.center.y=ext.ceny;
             sphere.center.z=ext.cenz;
@@ -659,7 +663,7 @@ esch_error_codes EschMesh::load(XFParseIFF *iff,
                 err=ESCH_ERR_FILEERROR;
                 goto error_exit;
             }
-         
+
             sphere.center.x=ext.cenx / 65536.0f;
             sphere.center.y=ext.ceny / 65536.0f;
             sphere.center.z=ext.cenz / 65536.0f;
@@ -681,7 +685,7 @@ esch_error_codes EschMesh::load(XFParseIFF *iff,
                 err=ESCH_ERR_INVALIDDATA;
                 goto error_exit;
             }
-            if (iff->read(m)) 
+            if (iff->read(m))
             {
                 err=ESCH_ERR_FILEERROR;
                 goto error_exit;
@@ -697,7 +701,7 @@ esch_error_codes EschMesh::load(XFParseIFF *iff,
                 err=ESCH_ERR_INVALIDDATA;
                 goto error_exit;
             }
-            if (iff->read(&mtx)) 
+            if (iff->read(&mtx))
             {
                 err=ESCH_ERR_FILEERROR;
                 goto error_exit;
@@ -767,6 +771,8 @@ esch_error_codes EschMesh::load(XFParseIFF *iff,
                     dword tfl = ESCH_TXTLD_ALL;
                     if (!(ctrlfl & ESCH_MSHLD_SHARETXT))
                         tfl &= ~ESCH_TXTLD_SHARE;
+                    if (ctrlfl & ESCH_MSHLD_TXTTCBM)
+                        tfl |= ESCH_TXTLD_TCBITMAP;
 
                     txt[i] = EschTexture::file_load(emtl[i].name,pal,tfl);
                 }
@@ -816,6 +822,8 @@ esch_error_codes EschMesh::load(XFParseIFF *iff,
                 dword tfl = ESCH_TXTLD_ALL;
                 if (!(ctrlfl & ESCH_MSHLD_SHARETXT))
                     tfl &= ~ESCH_TXTLD_SHARE;
+                if (ctrlfl & ESCH_MSHLD_TXTTCBM)
+                    tfl |= ESCH_TXTLD_TCBITMAP;
 
                 err=t->load(iff, (emtl) ? emtl[i].name : 0, tfl, pal);
 
@@ -845,7 +853,7 @@ esch_error_codes EschMesh::load(XFParseIFF *iff,
     else
     {
 //ÄÄ Process texture/materials
-        
+
         EschFace *ptr = (EschFace*)ivory_hlock(f);
         if (!ptr)
         {

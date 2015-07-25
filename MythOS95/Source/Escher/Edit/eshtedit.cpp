@@ -8,29 +8,33 @@
 //ששששש²±²ששששששש²±²שששש²±²ש²±²שששש²±²ש²±²שששש²±²ש²±²שששששששש²±²שששש²±²שששששש
 //שששש²²²²²²²²²²ש²²²²²²²²ששש²²²²²²²²שש²²²שששש²²²ש²²²²²²²²²²ש²²²שששש²²²ששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//ששששששששששששששששששש Microsoft Windows 95/NT Version ששששששששששששששששששששששש
+//ששששששששששששששששש Microsoft Windows 95/98/NT Version שששששששששששששששששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//שששששששששששCopyrightש(c)ש1994-1998שbyשCharybdisשEnterprises,שInc.שששששששששש
-//ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
+//שששCopyright (c) 1994-1999 by Dan Higdon, Tim Little, and Chuck Walbournששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
 //
-//           *** Charybdis Enterprises, Inc. Company Confidential ***
+// This file and all associated files are subject to the terms of the
+// GNU Lesser General Public License version 2 as published by the
+// Free Software Foundation (http://www.gnu.org).   They remain the
+// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+// See LICENSE.TXT in the distribution for a copy of this license.
 //
-//  This file and all associated files are the company proprietary property
-//        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+// THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+// OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+// PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+// LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+// OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 //
-// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+//ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
+//
+//                        http://www.mythos-engine.org/
 //
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
 //
 //                        *** Escher Terrain Editor ***
 //
-// Chuck Walbourn
+// Created by Chuck Walbourn
 //
 // eshtedit.cpp
 //
@@ -44,7 +48,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include "stdafx.h"
@@ -60,7 +64,7 @@
 //
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
-#define VERSION "2.11"
+#define VERSION "2.12"
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
@@ -78,14 +82,14 @@ static char BASED_CODE THIS_FILE[] = __FILE__;
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִÙ
 
 BEGIN_MESSAGE_MAP(TerrEditApp, CWinApp)
-	//{{AFX_MSG_MAP(TerrEditApp)
-	ON_COMMAND(ID_APP_ABOUT, OnAppAbout)
-		// NOTE - the ClassWizard will add and remove mapping macros here.
-		//    DO NOT EDIT what you see in these blocks of generated code!
-	//}}AFX_MSG_MAP
-	// Standard file based document commands
-	ON_COMMAND(ID_FILE_NEW, CWinApp::OnFileNew)
-	ON_COMMAND(ID_FILE_OPEN, CWinApp::OnFileOpen)
+        //{{AFX_MSG_MAP(TerrEditApp)
+        ON_COMMAND(ID_APP_ABOUT, OnAppAbout)
+                // NOTE - the ClassWizard will add and remove mapping macros here.
+                //    DO NOT EDIT what you see in these blocks of generated code!
+        //}}AFX_MSG_MAP
+        // Standard file based document commands
+        ON_COMMAND(ID_FILE_NEW, CWinApp::OnFileNew)
+        ON_COMMAND(ID_FILE_OPEN, CWinApp::OnFileOpen)
 END_MESSAGE_MAP()
 
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ¿
@@ -125,46 +129,46 @@ BOOL TerrEditApp::InitInstance()
     if (MythOS->init())
         return FALSE;
 
-	// Standard initialization
-	// If you are not using these features and wish to reduce the size
-	//  of your final executable, you should remove from the following
-	//  the specific initialization routines you do not need.
-    
-	Enable3dControls();
+        // Standard initialization
+        // If you are not using these features and wish to reduce the size
+        //  of your final executable, you should remove from the following
+        //  the specific initialization routines you do not need.
 
-	LoadStdProfileSettings();  // Load standard INI file options (including MRU)
+        Enable3dControls();
 
-	// Register the application's document templates.  Document templates
-	//  serve as the connection between documents, frame windows and views.
+        LoadStdProfileSettings();  // Load standard INI file options (including MRU)
 
-	CSingleDocTemplate* pDocTemplate;
-	pDocTemplate = new CSingleDocTemplate(
-		IDR_MAINFRAME,
-		RUNTIME_CLASS(TerrEditDoc),
-		RUNTIME_CLASS(TerrMainFrame),       // main SDI frame window
-		RUNTIME_CLASS(TerrEditView));
-	AddDocTemplate(pDocTemplate);
+        // Register the application's document templates.  Document templates
+        //  serve as the connection between documents, frame windows and views.
 
-	// Enable DDE Execute open
-	EnableShellOpen();
-	RegisterShellFileTypes(TRUE);
+        CSingleDocTemplate* pDocTemplate;
+        pDocTemplate = new CSingleDocTemplate(
+                IDR_MAINFRAME,
+                RUNTIME_CLASS(TerrEditDoc),
+                RUNTIME_CLASS(TerrMainFrame),       // main SDI frame window
+                RUNTIME_CLASS(TerrEditView));
+        AddDocTemplate(pDocTemplate);
 
-	// simple command line parsing
-	if (m_lpCmdLine[0] == '\0')
-	{
-		// create a new (empty) document
-		OnFileNew();
-	}
-	else
-	{
-		// open an existing document
-		OpenDocumentFile(m_lpCmdLine);
-	}
+        // Enable DDE Execute open
+        EnableShellOpen();
+        RegisterShellFileTypes(TRUE);
 
-	// Enable drag/drop open
-	m_pMainWnd->DragAcceptFiles();
+        // simple command line parsing
+        if (m_lpCmdLine[0] == '\0')
+        {
+                // create a new (empty) document
+                OnFileNew();
+        }
+        else
+        {
+                // open an existing document
+                OpenDocumentFile(m_lpCmdLine);
+        }
 
-	return TRUE;
+        // Enable drag/drop open
+        m_pMainWnd->DragAcceptFiles();
+
+        return TRUE;
 }
 
 
@@ -212,7 +216,7 @@ BOOL TerrEditApp::LoadImage(const char *fname, XFBitmap *bm)
     {
         b = new XFParsePCX(bm);
     }
-    else 
+    else
     {
         char str[256];
         sprintf(str,"Cannot read given input file:\n%s",fname);
@@ -231,7 +235,7 @@ BOOL TerrEditApp::LoadImage(const char *fname, XFBitmap *bm)
         MessageBox(NULL,str, "Bitmap Load Error",
                    MB_OK | MB_ICONEXCLAMATION);
         delete b;
-        return FALSE;                   
+        return FALSE;
     }
 
     delete b;
@@ -268,10 +272,11 @@ BOOL TerrEditApp::SaveImage(const char *fname, XFBitmap *bm)
     {
         b = new XFParseLBM(bm);
     }
-    else if ((strstr(fname,".tga") || strstr(fname,".TGA")) && bm->bpp == 3)
+    else if ((strstr(fname,".tga") || strstr(fname,".TGA"))
+             && (bm->bpp == 2 || bm->bpp == 3))
     {
         b = new XFParseTGA(bm);
-        
+
     }
     else if ((strstr(fname,".pcx") || strstr(fname,".PCX")) && bm->bpp == 1)
     {
@@ -301,7 +306,7 @@ BOOL TerrEditApp::SaveImage(const char *fname, XFBitmap *bm)
         MessageBox(NULL,str, "Bitmap Load Error",
                    MB_OK | MB_ICONEXCLAMATION);
         delete b;
-        return FALSE;                   
+        return FALSE;
     }
 
     delete b;
@@ -325,35 +330,35 @@ BOOL TerrEditApp::SaveImage(const char *fname, XFBitmap *bm)
 class CAboutDlg : public CDialog
 {
 public:
-	CAboutDlg();
+        CAboutDlg();
 
 // Dialog Data
-	//{{AFX_DATA(CAboutDlg)
-	enum { IDD = IDD_ABOUTBOX };
-	CStatic	m_verdate;
-	//}}AFX_DATA
+        //{{AFX_DATA(CAboutDlg)
+        enum { IDD = IDD_ABOUTBOX };
+        CStatic m_verdate;
+        //}}AFX_DATA
 
 // Implementation
 protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-	//{{AFX_MSG(CAboutDlg)
-		// No message handlers
-	//}}AFX_MSG
-	DECLARE_MESSAGE_MAP()
+        virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+        //{{AFX_MSG(CAboutDlg)
+                // No message handlers
+        //}}AFX_MSG
+        DECLARE_MESSAGE_MAP()
 };
 
 CAboutDlg::CAboutDlg() : CDialog(CAboutDlg::IDD)
 {
-	//{{AFX_DATA_INIT(CAboutDlg)
-	//}}AFX_DATA_INIT
+        //{{AFX_DATA_INIT(CAboutDlg)
+        //}}AFX_DATA_INIT
 }
 
 void CAboutDlg::DoDataExchange(CDataExchange* pDX)
 {
-	CDialog::DoDataExchange(pDX);
-	//{{AFX_DATA_MAP(CAboutDlg)
-	DDX_Control(pDX, IDC_ABOUT_VERSION, m_verdate);
-	//}}AFX_DATA_MAP
+        CDialog::DoDataExchange(pDX);
+        //{{AFX_DATA_MAP(CAboutDlg)
+        DDX_Control(pDX, IDC_ABOUT_VERSION, m_verdate);
+        //}}AFX_DATA_MAP
 
     if (!pDX->m_bSaveAndValidate)
     {
@@ -362,9 +367,9 @@ void CAboutDlg::DoDataExchange(CDataExchange* pDX)
 }
 
 BEGIN_MESSAGE_MAP(CAboutDlg, CDialog)
-	//{{AFX_MSG_MAP(CAboutDlg)
-		// No message handlers
-	//}}AFX_MSG_MAP
+        //{{AFX_MSG_MAP(CAboutDlg)
+                // No message handlers
+        //}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 
@@ -380,8 +385,8 @@ END_MESSAGE_MAP()
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִÙ
 void TerrEditApp::OnAppAbout()
 {
-	CAboutDlg aboutDlg;
-	aboutDlg.DoModal();
+        CAboutDlg aboutDlg;
+        aboutDlg.DoModal();
 }
 
 
@@ -392,7 +397,7 @@ void TerrEditApp::OnAppAbout()
 
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
 // _charybdis_assert
-// 
+//
 // Handler for failed asserts.  If msg is set to non-NULL, then an assertMyth
 // was used with a comment.
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ

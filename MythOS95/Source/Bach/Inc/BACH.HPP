@@ -1,31 +1,35 @@
 //ЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭ
 //
-//                        мммммммммм                       мммм        
-//     кФФП                ллл     ллм                     оллл        
-//     Г  Г       кФФП     ллл     ллл   мммм      ммммм    ллл ммм    
-//     Г  Г кФФП  Г  Г     лллммммлллп  п  олн    ллп   пл  лллллплл   
-//     Г  Г Г  Г  Г  Г     ллл     ллм  млллллн  ллл        ллл   ллл  
-//    Oй Oй Г  Г  Г  Г     ллл     ллл олн  ллл  ллл    мл  ллл   ллл  
-//          Г  Г Oй Oй    млллмммлллп   ллллнплм  пллммлл  млллм млллм 
-//         Oй Oй  
+//                        мммммммммм                       мммм
+//     кФФП                ллл     ллм                     оллл
+//     Г  Г       кФФП     ллл     ллл   мммм      ммммм    ллл ммм
+//     Г  Г кФФП  Г  Г     лллммммлллп  п  олн    ллп   пл  лллллплл
+//     Г  Г Г  Г  Г  Г     ллл     ллм  млллллн  ллл        ллл   ллл
+//    Oй Oй Г  Г  Г  Г     ллл     ллл олн  ллл  ллл    мл  ллл   ллл
+//          Г  Г Oй Oй    млллмммлллп   ллллнплм  пллммлл  млллм млллм
+//         Oй Oй
 //                            C++ Music, Sound, and Effects Library
-//                               Microsoft Windows 95/NT Version
+//                               Microsoft Windows 95/98/NT Version
 //
-//           Copyright (c) 1995-1998 by Charybdis Enterprises, Inc.
-//                           All Rights Reserved.
+//  Copyright (c) 1995-1999 by Dan Higdon, Tim Little, and Chuck Walbourn
 //
 //ФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФ
 //
-//           *** Charybdis Enterprises, Inc. Company Confidential ***
+// This file and all associated files are subject to the terms of the
+// GNU Lesser General Public License version 2 as published by the
+// Free Software Foundation (http://www.gnu.org).   They remain the
+// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+// See LICENSE.TXT in the distribution for a copy of this license.
 //
-//  This file and all associated files are the company proprietary property
-//        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+// THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+// OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+// PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+// LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+// OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 //
-// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+//ФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФ
+//
+//                        http://www.mythos-engine.org/
 //
 //ФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФ
 //
@@ -41,15 +45,17 @@
 #define __BACH_HPP    1
 
 //ААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААА
-//             
+//
 //                                Includes
-//                                
+//
 //ААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААААА
 
 //ФФФ Standard headers
 #include <windows.h>
 #include <mmsystem.h>
 #include <dsound.h>
+#include <dmusicc.h>
+#include <dmusici.h>
 
 //ФФФ Charybdis headers
 #include <assert.h>
@@ -63,9 +69,10 @@
 //ФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФФй
 #include "bachdefs.h"
 #include "bachdigi.hpp"
+#include "bachcd.hpp"
+#include "bachmus.hpp"
 #include "bachmisc.hpp"
 
 #endif
 
 //АБВ End of header - bach.hpp ВБА
-

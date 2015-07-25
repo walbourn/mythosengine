@@ -8,21 +8,27 @@
 //ששששש²±²ששששששש²±²שששש²±²ש²±²שששש²±²ש²±²שששש²±²ש²±²שששששששש²±²שששש²±²שששששש
 //שששש²²²²²²²²²²ש²²²²²²²²ששש²²²²²²²²שש²²²שששש²²²ש²²²²²²²²²²ש²²²שששש²²²ששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//שששששששששששCopyrightש(c)ש1994-1998שbyשCharybdisשEnterprises,שInc.שששששששששש
-//ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
+//ששששששששששששששששש Microsoft Windows 95/98/NT Version שששששששששששששששששששששש
+//ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
+//שששCopyright (c) 1994-1999 by Dan Higdon, Tim Little, and Chuck Walbournששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
 //
-//           *** Charybdis Enterprises, Inc. Company Confidential ***
+// This file and all associated files are subject to the terms of the
+// GNU Lesser General Public License version 2 as published by the
+// Free Software Foundation (http://www.gnu.org).   They remain the
+// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+// See LICENSE.TXT in the distribution for a copy of this license.
 //
-//  This file and all associated files are the company proprietary property
-//        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+// THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+// OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+// PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+// LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+// OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 //
-// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+//ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
+//
+//                        http://www.mythos-engine.org/
 //
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
 //
@@ -40,7 +46,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include <string.h>
@@ -82,24 +88,24 @@ float det_mtx(float *m)
 {
     double  r;
 
-//     [A B C 0]      
+//     [A B C 0]
 // det [D E F 0] =  A |E F 0|  - B |D F 0|  + C |D E 0|   - 0 |D E F|
 //     [G H I 0]      |H I 0|      |G I 0|      |G H 0|       |G H I|
 //     [J K L 1]      |K L 1|      |J L 1|      |J K 1|       |H K L|
-// 
-// 
-//               =  A(                ) 
+//
+//
+//               =  A(                )
 //                   ( E|I 0| - F|H 0|)
 //                   (  |L 1|    |K 1|)
-// 
+//
 //                 -B(                )
 //                   ( D|I 0| - F|G 0|)
 //                   (  |L 1|    |J 1|)
-// 
+//
 //                 +C(                )
 //                   ( D|H 0| - E|G 0|)
 //                   (  |K 1|    |J 1|)
-// 
+//
 //               =  A(EI - FH) - B(DI - FG) + C(DH - EG)
 
 // A |E F 0|
@@ -108,8 +114,8 @@ float det_mtx(float *m)
 
     r = m[MTX_A] * ( m[MTX_E]*m[MTX_I] - m[MTX_F]*m[MTX_H] );
 
-// - B |D F 0| 
-//     |G I 0| = - B (DI - FG) 
+// - B |D F 0|
+//     |G I 0| = - B (DI - FG)
 //     |J L 1|
 
     r = r - m[MTX_B] * ( m[MTX_D]*m[MTX_I] - m[MTX_F]*m[MTX_G] );
@@ -142,7 +148,7 @@ int inverse_mtx(float *m, float *inv)
     memcpy(tm,m,sizeof(float)*12);
 
 // [A B C 0]      det is A(EI - FH) - B(DI - FG) + C(DH - EG)
-// [D E F 0]      
+// [D E F 0]
 // [G H I 0]
 // [J K L 1]      The inverse is :-
 //
@@ -167,21 +173,21 @@ int inverse_mtx(float *m, float *inv)
 // <A>
 //     1      |E F 0|
 //   ----- *  |H I 0| = ( EI - FH ) / det
-//    det     |K L 1|    
+//    det     |K L 1|
 
     inv[MTX_A] = (tm[MTX_E]*tm[MTX_I] - tm[MTX_F]*tm[MTX_H]) / det;
 
 // <D>
 //     1      |D F 0|
 //   ----- * -|G I 0| = ( FG - DI ) / det
-//    det     |J L 1| 
+//    det     |J L 1|
 
     inv[MTX_D] = (tm[MTX_F]*tm[MTX_G] - tm[MTX_D]*tm[MTX_I]) / det;
 
 // <G>
 //     1      |D E 0|
 //   ----- *  |G H 0| = ( DH - EG ) / det
-//    det     |J K 1|    
+//    det     |J K 1|
 
     inv[MTX_G] = (tm[MTX_D]*tm[MTX_H] - tm[MTX_E]*tm[MTX_G]) / det;
 
@@ -199,7 +205,7 @@ int inverse_mtx(float *m, float *inv)
 // <B>
 //     1      |B C 0|
 //   ----- * -|H I 0| = ( CH - BI ) / det
-//    det     |K L 1|   
+//    det     |K L 1|
 
     inv[MTX_B] = (tm[MTX_C]*tm[MTX_H] - tm[MTX_B]*tm[MTX_I]) / det;
 
@@ -210,14 +216,14 @@ int inverse_mtx(float *m, float *inv)
 
     inv[MTX_E] = (tm[MTX_A]*tm[MTX_I] - tm[MTX_C]*tm[MTX_G]) / det;
 
-// <H>          
+// <H>
 //     1      |A B 0|
 //   ----- * -|G H 0| = ( BG - AH ) / det
 //    det     |J K 1|
 
     inv[MTX_H] = (tm[MTX_B]*tm[MTX_G] - tm[MTX_A]*tm[MTX_H]) / det;
 
-// <K>          
+// <K>
 //     1      |A B C|       <IV2>      <IV1>      <IV3>
 //   ----- *  |G H I| = ( A(HL-KI) - B(GL-JI) + C(GK-JH) ) / det
 //    det     |J K L|

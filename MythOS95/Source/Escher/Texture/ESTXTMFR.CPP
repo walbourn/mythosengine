@@ -8,23 +8,27 @@
 //ששששש²±²ששששששש²±²שששש²±²ש²±²שששש²±²ש²±²שששש²±²ש²±²שששששששש²±²שששש²±²שששששש
 //שששש²²²²²²²²²²ש²²²²²²²²ששש²²²²²²²²שש²²²שששש²²²ש²²²²²²²²²²ש²²²שששש²²²ששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//ששששששששששששששששששש Microsoft Windows 95/NT Version ששששששששששששששששששששששש
+//ששששששששששששששששש Microsoft Windows 95/98/NT Version שששששששששששששששששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//שששששששששששCopyrightש(c)ש1994-1998שbyשCharybdisשEnterprises,שInc.שששששששששש
-//ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
+//שששCopyright (c) 1994-1999 by Dan Higdon, Tim Little, and Chuck Walbournששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
 //
-//           *** Charybdis Enterprises, Inc. Company Confidential ***
+// This file and all associated files are subject to the terms of the
+// GNU Lesser General Public License version 2 as published by the
+// Free Software Foundation (http://www.gnu.org).   They remain the
+// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+// See LICENSE.TXT in the distribution for a copy of this license.
 //
-//  This file and all associated files are the company proprietary property
-//        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+// THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+// OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+// PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+// LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+// OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 //
-// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+//ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
+//
+//                        http://www.mythos-engine.org/
 //
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
 //
@@ -39,7 +43,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include "escher.hpp"
@@ -295,6 +299,8 @@ esch_error_codes EschMultiFrameTexture::create(ushort n, XFBitmap *bms,
     memset(data, 0, base + size*n);
 
     flags = ESCH_TXT_LOCKED | ESCH_TXT_OWNSDATA;
+    if (trans)
+        flags |= ESCH_TXT_TRANSP;
 
 //ִִִ Create texture from input
     for(i=0; i < n; i++)
@@ -348,9 +354,16 @@ esch_error_codes EschMultiFrameTexture::create(ushort n, XFBitmap *bms,
 // chunk.  If a 'tname' is given and the name doesn't match that in the     ³
 // form, an error is returned.                                              ³
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִÙ
+esch_error_codes EschMultiFrameTexture::load(const char *fname,
+                                             const char *tname,
+                                             dword ctrlfl, VngoPal *pal)
+{
+    return EschTexture::load(fname,tname,ctrlfl,pal);
+}
+
 esch_error_codes EschMultiFrameTexture::load(XFParseIFF *iff,
                                              const char *tname,
-                                             dword ctrlfl, 
+                                             dword ctrlfl,
                                              VngoPal *pal)
 {
     assertMyth("EschMultiFrameTexture::load needs iff pointer",
@@ -396,11 +409,19 @@ esch_error_codes EschMultiFrameTexture::load(XFParseIFF *iff,
         return ESCH_ERR_NOTSUPPORTED;
     }
 
+//ִִ Found, so load
+    flags = (header.flags & ~(ESCH_TXT_LOCKED
+                              | ESCH_TXT_OWNSDATA
+                              | ESCH_TXT_SHARED
+                              | ESCH_TXT_TRANSP));
+
     switch (header.type)
     {
         case ESCH_MTL_TYPE_8BIT:
         case ESCH_MTL_TYPE_8BIT_TRANSP:
             break;
+        case ESCH_MTL_TYPE_15BIT:
+        case ESCH_MTL_TYPE_15BIT_TRANSP:
         case ESCH_MTL_TYPE_24BIT:
         case ESCH_MTL_TYPE_32BIT:
             if (!pal)
@@ -414,8 +435,17 @@ esch_error_codes EschMultiFrameTexture::load(XFParseIFF *iff,
             return ESCH_ERR_NOTSUPPORTED;
     }
 
-//ִִ Found, so load
-    flags = ESCH_TXT_OWNSDATA;
+    switch (header.type)
+    {
+        case ESCH_MTL_TYPE_8BIT_TRANSP:
+        case ESCH_MTL_TYPE_15BIT_TRANSP:
+        case ESCH_MTL_TYPE_32BIT:
+            flags |= ESCH_TXT_OWNSDATA | ESCH_TXT_TRANSP;
+            break;
+        default:
+            flags |= ESCH_TXT_OWNSDATA;
+            break;
+    }
 
     max = header.nframes;
 
@@ -439,7 +469,29 @@ esch_error_codes EschMultiFrameTexture::load(XFParseIFF *iff,
 
     memset(data, 0, base + size*header.nframes);
 
-    flags = ESCH_TXT_LOCKED | ESCH_TXT_OWNSDATA | header.flags;
+    flags |= ESCH_TXT_LOCKED;
+
+//ִִ Handle TC Bitmap return, if requested
+    XFBitmap *bms=0;
+    if ((ctrlfl & ESCH_TXTLD_TCBITMAP)
+        && header.type != ESCH_MTL_TYPE_8BIT
+        && header.type != ESCH_MTL_TYPE_8BIT_TRANSP)
+    {
+        if (app_data)
+        {
+            iff->leaveform();
+            return ESCH_ERR_INVALIDPARMS;
+        }
+
+        bms = new XFBitmap[header.nframes];
+        if (!bms)
+        {
+            iff->leaveform();
+            return ESCH_ERR_NOMEMORY;
+        }
+
+        app_data = bms;
+    }
 
 //ִִִ Create texture from body chunks
     for(ushort i=0; i < header.nframes; i++)
@@ -451,6 +503,7 @@ esch_error_codes EschMultiFrameTexture::load(XFParseIFF *iff,
         switch (header.type)
         {
             case ESCH_MTL_TYPE_8BIT_TRANSP:
+            case ESCH_MTL_TYPE_15BIT_TRANSP:
             case ESCH_MTL_TYPE_32BIT:
                 tflags |= VNGO_TEXTURE_TRANSPARENT;
                 break;
@@ -467,8 +520,8 @@ esch_error_codes EschMultiFrameTexture::load(XFParseIFF *iff,
             iff->leaveform();
             return ESCH_ERR_INVALIDDATA;
         }
-        
-        esch_error_codes err=load_body(iff,header,pal);
+
+        esch_error_codes err=load_body(iff,header,pal,(bms) ? &bms[i] : 0);
         if (err)
         {
             iff->leaveform();

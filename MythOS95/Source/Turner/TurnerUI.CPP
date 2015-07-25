@@ -1,24 +1,47 @@
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
+//                               Jb
+//                               $$$c
+//             $$$$$$$$$$$$$$$$$$$$$$b       d$$$$$$$$$$$$$$$$$$$$$P
+//            .$$$$$$$$$$$$$$$$$$$$$$$$.     $$$$$$$$$$$$$$$$$$$$$$
+//            ^""""""$$$$$P""""3$$$$$$$$c   d$$$$$""""$$$$$$"""""""
+//                  4$$$$$"    $$$$$$$$$$b  $$$$$F   .$$$$$F
+//                  $$$$$P    4$$$$$$$$$$$$$$$$$$    d$$$$$
+//                 4$$$$$"    $$$$$$$$$$$$$$$$$$P    $$$$$F
+//                 $$$$$$    4$$$$$""$$$$$$$$$$$    d$$$$$
+//                4$$$$$"    $$$$$$  ^$$$$$$$$$P    $$$$$F
+//                $$$$$$    4$$$$$%    *$$$$$$$"   J$$$$$
+//               4$$$$$%    $$$$$$      ^$$$$$P    $$$$$F
+//               """"""     """"""        *$$$"    """"""
+//                                         "$$
+//                                          ^%
 //
-//                           Turner - Networking
+//                         Turner - Networking Library
 //
-//            Copyright (c) 1995-1997 by Charybdis Enterprises, Inc.
-//                           All Rights Reserved.
+//                    Microsoft Windows 95/98/NT Version
+//
+//  Copyright (c) 1995-1999 by Dan Higdon, Tim Little, and Chuck Walbourn
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
-//           *** Charybdis Enterprises, Inc. Company Confidential ***
+// This file and all associated files are subject to the terms of the
+// GNU Lesser General Public License version 2 as published by the
+// Free Software Foundation (http://www.gnu.org).   They remain the
+// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+// See LICENSE.TXT in the distribution for a copy of this license.
 //
-//  This file and all associated files are the company proprietary property
-//        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
-//
-// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+// THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+// OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+// PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+// LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+// OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//
+//                        http://www.mythos-engine.org/
+//
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//
+// Created by Dan Higdon and Chuck Walbourn
 //
 // Turner Network Interface - UI module
 //
@@ -42,24 +65,6 @@
 
 #include "Turner.hpp"
 
-//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-//
-//                                Equates
-//
-//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-
-//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-//
-//                               Structures
-//
-//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-
-//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-//
-//                               Routines
-//
-//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
 //                                 Data
@@ -74,17 +79,18 @@ TurnerNetworkUI *TurnerNetworkUI::g_this = 0;
 //
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 
-
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 // TurnerNetworkUI - Constructor
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 TurnerNetworkUI::TurnerNetworkUI (HWND _hWnd,
-                                  TurnerNetwork *_net,
-                                  int _max_sessions):
+                                  TurnerClassic *_net,
+                                  int _max_sessions,
+                                  dword _timeout):
     hWnd (_hWnd),
     net (_net),
     max_sessions (_max_sessions),
     current_session (0),
+    timeout (_timeout),
     sessions (0)
 {
     // There can only be one of these created at a a time
@@ -92,7 +98,7 @@ TurnerNetworkUI::TurnerNetworkUI (HWND _hWnd,
 
     g_this = this;
 
-    if (max_sessions != 0)
+    if (max_sessions > 0)
         sessions = new GUID[max_sessions];
 }
 
@@ -112,46 +118,41 @@ TurnerNetworkUI::~TurnerNetworkUI ()
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-// TurnerNetworkUI - create_or_join
+// TurnerNetworkUI - connect
+//
+//  Connect to a user-selected game.  Note that this member does not
+//  create a player, which must be done by the calling application.
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-int TurnerNetworkUI::create_or_join ()
+BOOL TurnerNetworkUI::connect ()
 {
-    return DialogBoxParam (NULL, (LPCTSTR) IDD_MAXNETWORK_Q_CREATE, hWnd,
-                           (DLGPROC) DlgProcQCreate, (LPARAM)net);
-}
+    // Be sure we aren't already initialized.
+    if (net->pIDP != NULL)
+        return FALSE;
 
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-// TurnerNetworkUI - DlgProcQCreate
-//  Dialog proc used by create_or_join
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-BOOL CALLBACK TurnerNetworkUI::DlgProcQCreate (HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
-{
-    switch (msg)
+    if (!get_provider ())
+        return FALSE;
+
+    // Select whether to connect to a game or create a new one
+    switch (create_or_join ())
     {
-    case WM_COMMAND:
-        switch (wParam)
+    case 1:             // Create
         {
-        case IDC_MAXNETWORK_CREATE:
-            EndDialog(hDlg, 1);
-            return TRUE;
-
-        case IDC_MAXNETWORK_CONNECT:
-            EndDialog(hDlg, 2);
-            return TRUE;
-
-        case IDCANCEL:
-            EndDialog(hDlg, -1);
-            return TRUE;
+            int res = net->create_game();
+            return (res == DP_OK) ? TRUE : FALSE;
         }
-        break;
 
+    case 2:             // Connect
+        return select_session ();
+
+    default:
+        return FALSE;
     }
-    return FALSE;
 }
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-// TurnerNetworkUI - GetProvider
+// TurnerNetworkUI - get_provider
+//
 //  Prompt the user for a connection provider, and initialize the
 //  network object to use the one selected by the user.
 //  Returns:    TRUE if a service selected
@@ -159,21 +160,24 @@ BOOL CALLBACK TurnerNetworkUI::DlgProcQCreate (HWND hDlg, UINT msg, WPARAM wPara
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 int TurnerNetworkUI::get_provider ()
 {
-    return DialogBoxParam (NULL, (LPCTSTR)IDD_MAXNETWORK_CHOOSEPROVIDER, hWnd,
-                           (DLGPROC)DlgProcChooseProvider, (LPARAM)net);
+    return DialogBoxParam (NULL,
+                           (LPCTSTR)IDD_MAXNETWORK_CHOOSEPROVIDER,
+                           hWnd,
+                           (DLGPROC)dlg_chooseprovider,
+                           (LPARAM)this);
 }
 
 
-
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-// TurnerNetworkUI - static EnumSP
+// TurnerNetworkUI - enum_serviceprovider
+//
 //  Used by DlgProcChooseProvider
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-BOOL CALLBACK TurnerNetworkUI::EnumSP (LPGUID lpGuid,
-                                       LPSTR  lpDesc,
-                                       DWORD  dwMajorVersion,
-                                       DWORD  dwMinorVersion,
-                                       LPVOID lpv)
+BOOL CALLBACK TurnerNetworkUI::enum_serviceprovider (LPGUID lpGuid,
+                                                     LPSTR  lpDesc,
+                                                     DWORD  dwMajorVersion,
+                                                     DWORD  dwMinorVersion,
+                                                     LPVOID lpv)
 {
     HWND hWnd = (HWND)lpv;
 
@@ -187,79 +191,129 @@ BOOL CALLBACK TurnerNetworkUI::EnumSP (LPGUID lpGuid,
 }
 
 
-
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-// TurnerNetworkUI - static DlgProcChooseProvider
+// TurnerNetworkUI - dlg_chooseprovider
+//
 //  The dialog proc for get_provider
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-BOOL CALLBACK TurnerNetworkUI::DlgProcChooseProvider (HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
+BOOL CALLBACK TurnerNetworkUI::dlg_chooseprovider (HWND hDlg,
+                                                   UINT msg,
+                                                   WPARAM wParam,
+                                                   LPARAM lParam)
 {
-    static  LONG iIndex;
-    static  HWND hWndCtl;
-    static  TurnerNetwork  *net;
+    LONG                    iIndex;
+    static  HWND            hWndCtl;
+    static  TurnerClassic   *net;
 
     switch (msg)
     {
-    case WM_INITDIALOG:
+        case WM_INITDIALOG:
+            net = ((TurnerNetworkUI*)lParam)->net;
+            hWndCtl = GetDlgItem (hDlg, IDC_MAXNETWORK_LIST1);
 
-        // Remember this!
-        net = (TurnerNetwork *)lParam;
-        hWndCtl = GetDlgItem (hDlg, IDC_MAXNETWORK_LIST1);
-
-        if (net == 0 || hWndCtl == 0)
-        {
-            EndDialog (hDlg, TRUE);
-            return TRUE;
-        }
-
-        DirectPlayEnumerate (EnumSP, (LPVOID) hWndCtl);
-        SetFocus (hWndCtl);
-        SendMessage (hWndCtl, LB_SETCURSEL, 0, 0);
-        return FALSE;
-
-    case WM_COMMAND:
-        switch (HIWORD (wParam))
-        {
-        case LBN_SELCHANGE:
-            iIndex = SendMessage ((HWND) lParam, LB_GETCURSEL, 0, 0);
-            hWndCtl = (HWND) lParam;
-            return FALSE;
-
-        case LBN_DBLCLK:
-            iIndex = SendMessage ((HWND) lParam, LB_GETCURSEL, 0, 0);
-            if (iIndex != LB_ERR)
+            if (net == 0 || hWndCtl == 0)
             {
-                net->select_provider ((LPGUID)SendMessage (hWndCtl, LB_GETITEMDATA, iIndex, 0));
-
                 EndDialog (hDlg, TRUE);
                 return TRUE;
             }
-            break;
 
-        case 0:
+            DirectPlayEnumerate (enum_serviceprovider, (LPVOID) hWndCtl);
+            SetFocus (hWndCtl);
+            iIndex=0;
+            SendMessage (hWndCtl, LB_SETCURSEL, 0, 0);
+            return FALSE;
+
+        case WM_COMMAND:
             switch (LOWORD(wParam))
             {
-            case IDOK:
-                if (iIndex != LB_ERR)
-                {
-                    LPGUID lpGuid = (LPGUID) SendMessage (hWndCtl, LB_GETITEMDATA, iIndex, 0);
-                    if (lpGuid)
+                case IDOK:
+                    iIndex = SendMessage (hWndCtl, LB_GETCURSEL, 0, 0);
+                    if (iIndex != LB_ERR)
                     {
-                        net->select_provider (lpGuid);
-                        EndDialog (hDlg, TRUE);
+                        LPGUID lpGuid = (LPGUID) SendMessage (hWndCtl, LB_GETITEMDATA, iIndex, 0);
+                        if (lpGuid)
+                        {
+                            net->select_provider (lpGuid);
+                            EndDialog (hDlg, TRUE);
+                        }
+                        else
+                            EndDialog (hDlg, FALSE);
+
+                        return TRUE;
                     }
-                    else
-                        EndDialog (hDlg, FALSE);
+                    break;
 
+                case IDCANCEL:
+                    EndDialog (hDlg, FALSE);
                     return TRUE;
-                }
-                break;
 
-            case IDCANCEL:
-                EndDialog (hDlg, FALSE);
-                return TRUE;
+                case IDC_MAXNETWORK_LIST1:
+                    switch (HIWORD (wParam))
+                    {
+                        case LBN_DBLCLK:
+                            iIndex = SendMessage ((HWND) lParam, LB_GETCURSEL, 0, 0);
+                            if (iIndex != LB_ERR)
+                            {
+                                LPGUID lpGuid = (LPGUID) SendMessage (hWndCtl, LB_GETITEMDATA, iIndex, 0);
+                                if (lpGuid)
+                                {
+                                    net->select_provider (lpGuid);
+                                    EndDialog (hDlg, TRUE);
+                                }
+                                else
+                                    EndDialog (hDlg, FALSE);
+                            }
+                            break;
+                    }
+                    break;
             }
-        }
+            break;
+    }
+    return FALSE;
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// TurnerNetworkUI - create_or_join
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+int TurnerNetworkUI::create_or_join ()
+{
+    return DialogBoxParam (NULL,
+                           (LPCTSTR) IDD_MAXNETWORK_Q_CREATE,
+                           hWnd,
+                           (DLGPROC) dlg_qcreate,
+                           (LPARAM)this);
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// TurnerNetworkUI - dlg_qcreate
+//
+//  Dialog proc used by create_or_join
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+BOOL CALLBACK TurnerNetworkUI::dlg_qcreate (HWND hDlg,
+                                            UINT msg,
+                                            WPARAM wParam,
+                                            LPARAM lParam)
+{
+    switch (msg)
+    {
+        case WM_COMMAND:
+            switch (LOWORD(wParam))
+            {
+                case IDC_MAXNETWORK_CREATE:
+                    EndDialog(hDlg, 1);
+                    return TRUE;
+
+                case IDC_MAXNETWORK_CONNECT:
+                    EndDialog(hDlg, 2);
+                    return TRUE;
+
+                case IDCANCEL:
+                    EndDialog(hDlg, -1);
+                    return TRUE;
+            }
+            break;
     }
     return FALSE;
 }
@@ -273,19 +327,140 @@ int TurnerNetworkUI::select_session ()
     assertMyth ("TurnerNetworkUI::select_session must be called after a service provider is chosen",
                 net->pIDP != 0);
 
-    return DialogBoxParam (NULL, (LPCTSTR) IDD_MAXNETWORK_SELSESSION, hWnd,
-                           (DLGPROC) DlgProcSelSession, (LPARAM)net);
+    return DialogBoxParam (NULL,
+                           (LPCTSTR) IDD_MAXNETWORK_SELSESSION,
+                           hWnd,
+                           (DLGPROC) dlg_selectsession,
+                           (LPARAM)this);
 }
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-// TurnerNetworkUI - static EnumSession
+// TurnerNetworkUI - dlg_selectsession
+//
+//  Dialog proc used by select_session
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+BOOL CALLBACK TurnerNetworkUI::dlg_selectsession (HWND hDlg,
+                                                  UINT msg,
+                                                  WPARAM wParam,
+                                                  LPARAM lParam)
+{
+    LONG                    iIndex;
+    DPSESSIONDESC2          dpDesc;
+
+    static  HWND            hWndCtl = 0;
+    static  TurnerClassic   *net = 0;
+
+    switch (msg)
+    {
+        case WM_INITDIALOG:
+            net = ((TurnerNetworkUI*)lParam)->net;
+            hWndCtl = GetDlgItem (hDlg, IDC_MAXNETWORK_LIST1);
+
+            if (net == NULL || hWndCtl == NULL)
+            {
+                EndDialog (hDlg, FALSE);
+                return TRUE;
+            }
+
+            memset (&dpDesc, 0, sizeof (dpDesc));
+            dpDesc.dwSize = sizeof (dpDesc);
+            dpDesc.guidInstance = net->session.guidInstance;
+
+            net->pIDP->EnumSessions (&dpDesc,
+                                     ((TurnerNetworkUI*)lParam)->timeout,
+                                     enum_sessions,
+                                     (LPVOID)hWndCtl, (DWORD)NULL);
+
+            SetFocus (hWndCtl);
+            return FALSE;
+
+        case WM_COMMAND:
+            switch (LOWORD(wParam))
+            {
+                case IDOK:
+
+                    iIndex  = SendMessage (hWndCtl, LB_GETCURSEL, 0, 0);
+                    if (iIndex == LB_ERR)
+                    {
+                        net->close ();
+                        EndDialog (hDlg, FALSE);
+                        return TRUE;
+                    }
+                    else
+                    {
+                        DWORD session = SendMessage (hWndCtl, LB_GETITEMDATA, iIndex, 0);
+                        if (session == LB_ERR)
+                        {
+                            net->close ();
+                            EndDialog (hDlg, FALSE);
+                            return TRUE;
+                        }
+
+                        HRESULT hr = net->connect_game (g_this->sessions[session]);
+                        if (hr != DP_OK)
+                        {
+                            net->close ();
+                            EndDialog (hDlg, FALSE);
+                            return TRUE;
+                        }
+                    }
+
+                    EndDialog (hDlg, TRUE);
+                    return TRUE;
+
+                case IDCANCEL:
+                    net->close ();
+                    EndDialog (hDlg, FALSE);
+                    return TRUE;
+
+                case IDC_MAXNETWORK_LIST1:
+                    switch (HIWORD (wParam))
+                    {
+                        case LBN_DBLCLK:
+                            iIndex = SendMessage (hWndCtl, LB_GETCURSEL, 0, 0);
+                            if (iIndex != LB_ERR)
+                            {
+                                DWORD session = SendMessage (hWndCtl, LB_GETITEMDATA, iIndex, 0);
+                                if (session == LB_ERR)
+                                {
+                                    net->close ();
+                                    EndDialog (hDlg, FALSE);
+                                    return TRUE;
+                                }
+
+                                HRESULT hr = net->connect_game (g_this->sessions[session]);
+                                if (hr != DP_OK)
+                                {
+                                    net->close ();
+                                    EndDialog (hDlg, FALSE);
+                                    return TRUE;
+                                }
+
+                                // Successfully connected to a gaming session.
+                                EndDialog (hDlg, TRUE);
+                                return TRUE;
+                            }
+                            break;
+                    }
+                    break;
+            }
+            break;
+    }
+
+    return FALSE;
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// TurnerNetworkUI - enum_sessions
+//
 //  session enumeration proc used by DlgProcSelSession
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-BOOL CALLBACK TurnerNetworkUI::EnumSession (LPCDPSESSIONDESC2 lpDPGameDesc,
-                                            LPDWORD lpdwTimeOut,
-                                            DWORD dwFlags,
-                                            LPVOID lpContext)
+BOOL CALLBACK TurnerNetworkUI::enum_sessions(LPCDPSESSIONDESC2 lpDPGameDesc,
+                                             LPDWORD lpdwTimeOut,
+                                             DWORD dwFlags,
+                                             LPVOID lpContext)
 {
     HWND hWndCtl = (HWND)lpContext;
 
@@ -310,122 +485,5 @@ BOOL CALLBACK TurnerNetworkUI::EnumSession (LPCDPSESSIONDESC2 lpDPGameDesc,
         return FALSE;
     }
 }
-
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-// TurnerNetworkUI - DlgProcSelSession
-//  Dialog proc used by select_session
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-BOOL CALLBACK TurnerNetworkUI::DlgProcSelSession (HWND hDlg, UINT msg, WPARAM wParam, LPARAM lParam)
-{
-    static  TurnerNetwork  *net = 0;
-    static  LONG        iIndex  = 0;
-    static  HWND        hWndCtl = 0;
-
-    DPSESSIONDESC2 dpDesc;
-
-    switch (msg)
-    {
-    case WM_INITDIALOG:
-        net = (TurnerNetwork *)lParam;
-        hWndCtl = GetDlgItem (hDlg, IDC_MAXNETWORK_LIST1);
-        if (net == NULL || hWndCtl == NULL)
-        {
-            EndDialog (hDlg, FALSE);
-            return TRUE;
-        }
-        memset (&dpDesc, 0, sizeof (dpDesc));
-        dpDesc.dwSize = sizeof (dpDesc);
-        dpDesc.guidInstance = net->session.guidInstance;
-
-        // enum sessions with 5 second timeout
-        net->pIDP->EnumSessions (&dpDesc, (DWORD)5000, EnumSession, (LPVOID)hWndCtl, (DWORD)NULL);
-
-        SetFocus (hWndCtl);
-        return FALSE;
-
-    case WM_COMMAND:
-        switch (HIWORD (wParam))
-        {
-        case LBN_SELCHANGE:
-            iIndex  = SendMessage ((HWND)lParam, LB_GETCURSEL, 0, 0);
-            hWndCtl = (HWND)lParam;
-            return FALSE;
-
-        case 0:
-            if (LOWORD(wParam) == IDCANCEL)
-            {
-                net->close ();
-                EndDialog (hDlg, FALSE);
-                return TRUE;
-            }
-            //
-            // Fall Through.
-            //
-        case LBN_DBLCLK:
-            if (HIWORD(wParam) == LBN_DBLCLK)
-            {
-                hWndCtl = (HWND)lParam;
-                iIndex = SendMessage (hWndCtl, LB_GETCURSEL, 0, 0);
-            }
-
-            if (iIndex != LB_ERR)
-            {
-                DWORD session = SendMessage (hWndCtl, LB_GETITEMDATA, iIndex, 0);
-                if (session == LB_ERR)
-                {
-                    net->close ();
-                    EndDialog (hDlg, FALSE);
-                    return TRUE;
-                }
-
-                HRESULT hr = net->connect_game (g_this->sessions[session]);
-                if (hr != DP_OK)
-                {
-                    net->close ();
-                    EndDialog (hDlg, FALSE);
-                    return TRUE;
-                }
-
-                // Successfully connected to a gaming session.
-                EndDialog (hDlg, TRUE);
-                return TRUE;
-            }
-        }
-    }
-
-    return FALSE;
-}
-
-
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-// TurnerNetworkUI - connect
-//  Connect to a user-selected game.  Note that this member does not
-//  create a player, which must be done by the calling application.
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-BOOL TurnerNetworkUI::connect ()
-{
-    // Be sure we aren't already initialized.
-    if (net->pIDP != NULL)
-        return FALSE;
-
-    if (!get_provider ())
-        return FALSE;
-
-    // Select whether to connect to a game or create a new one
-    switch (create_or_join ())
-    {
-    case 1:             // Create
-        return net->create_game () == DP_OK;
-
-    case 2:             // Connect
-        return select_session ();
-
-    default:
-        return FALSE;
-    }
-}
-
 
 //°±² End of module - turnerui.cpp ²±°

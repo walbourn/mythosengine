@@ -8,23 +8,27 @@
 //ùùùùù²±²ùùùùùùù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùùùùùù²±²ùùùù²±²ùùùùùù
 //ùùùù²²²²²²²²²²ù²²²²²²²²ùùù²²²²²²²²ùù²²²ùùùù²²²ù²²²²²²²²²²ù²²²ùùùù²²²ùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùùùùùùùùù Microsoft Windows 95/NT Version ùùùùùùùùùùùùùùùùùùùùùùù
+//ùùùùùùùùùùùùùùùùù Microsoft Windows 95/98/NT Version ùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùCopyrightù(c)ù1994-1998ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
-//ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
+//ùùùCopyright (c) 1994-1999 by Dan Higdon, Tim Little, and Chuck Walbournùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
-//           *** Charybdis Enterprises, Inc. Company Confidential ***
+// This file and all associated files are subject to the terms of the
+// GNU Lesser General Public License version 2 as published by the
+// Free Software Foundation (http://www.gnu.org).   They remain the
+// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+// See LICENSE.TXT in the distribution for a copy of this license.
 //
-//  This file and all associated files are the company proprietary property
-//        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+// THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+// OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+// PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+// LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+// OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 //
-// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//
+//                        http://www.mythos-engine.org/
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
@@ -364,57 +368,130 @@ void EschMeshDraw::draw()
         }
 
         //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Transform face's verts
-        //ÄÄÄ Vertex A
-        if (!(ec.vflags[face->a] & ESCH_VVERT_TRANSFORMED))
+        if (EschSysInstance->flags & ESCH_SYS_AMD3D)
         {
-            ec.vflags[face->a] |= ESCH_VVERT_TRANSFORMED;
-
-            ec.verts[face->a].transform(&frame,
-                                        (EschPoint*)(&ec.vpoints[face->a]));
-
-            if (vn && (level & ESCH_CAM_SHADE_SMOOTH))
+            //ÄÄÄ Vertex A
+            if (!(ec.vflags[face->a] & ESCH_VVERT_TRANSFORMED))
             {
-                ec.verts[face->a].transform(&world,&vn[face->a]);
-                ec.verts[face->a].normal.transform(&world,
-                                                   &vn[face->a].normal);
-                if (world.scalef != 1.0)
-                    vn[face->a].normal.normalize();
+                ec.vflags[face->a] |= ESCH_VVERT_TRANSFORMED;
+
+                esch_amd3d_nofpu_transform(&ec.verts[face->a],
+                                           &frame.orient,
+                                           &ec.vpoints[face->a]);
+
+                if (vn && (level & ESCH_CAM_SHADE_SMOOTH))
+                {
+                    esch_amd3d_nofpu_transform(&ec.verts[face->a],
+                                               &world.orient,
+                                               &vn[face->a]);
+                    esch_amd3d_nofpu_transform_notran(&ec.verts[face->a].normal,
+                                                      &world.orient,
+                                                      &vn[face->a].normal);
+                    if (world.scalef != 1.0)
+                        esch_amd3d_nofpu_normalize(&vn[face->a].normal);
+                }
             }
-        }
 
-        //ÄÄÄ Vertex B
-        if (!(ec.vflags[face->b] & ESCH_VVERT_TRANSFORMED))
-        {
-            ec.vflags[face->b] |= ESCH_VVERT_TRANSFORMED;
-
-            ec.verts[face->b].transform(&frame,
-                                        (EschPoint*)(&ec.vpoints[face->b]));
-
-            if (vn && (level & ESCH_CAM_SHADE_SMOOTH))
+            //ÄÄÄ Vertex B
+            if (!(ec.vflags[face->b] & ESCH_VVERT_TRANSFORMED))
             {
-                ec.verts[face->b].transform(&world,&vn[face->b]);
-                ec.verts[face->b].normal.transform(&world,
-                                                   &vn[face->b].normal);
-                if (world.scalef != 1.0)
-                    vn[face->b].normal.normalize();
+                ec.vflags[face->b] |= ESCH_VVERT_TRANSFORMED;
+
+                esch_amd3d_nofpu_transform(&ec.verts[face->b],
+                                           &frame.orient,
+                                           &ec.vpoints[face->b]);
+
+                if (vn && (level & ESCH_CAM_SHADE_SMOOTH))
+                {
+                    esch_amd3d_nofpu_transform(&ec.verts[face->b],
+                                               &world.orient,
+                                               &vn[face->b]);
+                    esch_amd3d_nofpu_transform_notran(&ec.verts[face->b].normal,
+                                                      &world.orient,
+                                                      &vn[face->b].normal);
+                    if (world.scalef != 1.0)
+                        esch_amd3d_nofpu_normalize(&vn[face->b].normal);
+                }
             }
-        }
 
-        //ÄÄÄ Vertex C
-        if (!(ec.vflags[face->c] & ESCH_VVERT_TRANSFORMED))
-        {
-            ec.vflags[face->c] |= ESCH_VVERT_TRANSFORMED;
-
-            ec.verts[face->c].transform(&frame,
-                                        (EschPoint*)(&ec.vpoints[face->c]));
-
-            if (vn && (level & ESCH_CAM_SHADE_SMOOTH))
+            //ÄÄÄ Vertex C
+            if (!(ec.vflags[face->c] & ESCH_VVERT_TRANSFORMED))
             {
-                ec.verts[face->c].transform(&world,&vn[face->c]);
-                ec.verts[face->c].normal.transform(&world,
-                                                   &vn[face->c].normal);
-                if (world.scalef != 1.0)
-                    vn[face->c].normal.normalize();
+                ec.vflags[face->c] |= ESCH_VVERT_TRANSFORMED;
+
+                esch_amd3d_nofpu_transform(&ec.verts[face->c],
+                                           &frame.orient,
+                                           &ec.vpoints[face->c]);
+
+                if (vn && (level & ESCH_CAM_SHADE_SMOOTH))
+                {
+                    esch_amd3d_nofpu_transform(&ec.verts[face->c],
+                                               &world.orient,
+                                               &vn[face->c]);
+                    esch_amd3d_nofpu_transform_notran(&ec.verts[face->c].normal,
+                                                      &world.orient,
+                                                      &vn[face->c].normal);
+                    if (world.scalef != 1.0)
+                        esch_amd3d_nofpu_normalize(&vn[face->c].normal);
+                }
+            }
+
+            esch_amd3d_fpureset();
+        }
+        else
+        {
+            //ÄÄÄ Vertex A
+            if (!(ec.vflags[face->a] & ESCH_VVERT_TRANSFORMED))
+            {
+                ec.vflags[face->a] |= ESCH_VVERT_TRANSFORMED;
+
+                ec.verts[face->a].transform(&frame,
+                                            (EschPoint*)(&ec.vpoints[face->a]));
+
+                if (vn && (level & ESCH_CAM_SHADE_SMOOTH))
+                {
+                    ec.verts[face->a].transform(&world,&vn[face->a]);
+                    ec.verts[face->a].normal.transform(&world,
+                                                    &vn[face->a].normal);
+                    if (world.scalef != 1.0)
+                        vn[face->a].normal.normalize();
+                }
+            }
+
+            //ÄÄÄ Vertex B
+            if (!(ec.vflags[face->b] & ESCH_VVERT_TRANSFORMED))
+            {
+                ec.vflags[face->b] |= ESCH_VVERT_TRANSFORMED;
+
+                ec.verts[face->b].transform(&frame,
+                                            (EschPoint*)(&ec.vpoints[face->b]));
+
+                if (vn && (level & ESCH_CAM_SHADE_SMOOTH))
+                {
+                    ec.verts[face->b].transform(&world,&vn[face->b]);
+                    ec.verts[face->b].normal.transform(&world,
+                                                    &vn[face->b].normal);
+                    if (world.scalef != 1.0)
+                        vn[face->b].normal.normalize();
+                }
+            }
+
+            //ÄÄÄ Vertex C
+            if (!(ec.vflags[face->c] & ESCH_VVERT_TRANSFORMED))
+            {
+                ec.vflags[face->c] |= ESCH_VVERT_TRANSFORMED;
+
+                ec.verts[face->c].transform(&frame,
+                                            (EschPoint*)(&ec.vpoints[face->c]));
+
+                if (vn && (level & ESCH_CAM_SHADE_SMOOTH))
+                {
+                    ec.verts[face->c].transform(&world,&vn[face->c]);
+                    ec.verts[face->c].normal.transform(&world,
+                                                    &vn[face->c].normal);
+                    if (world.scalef != 1.0)
+                        vn[face->c].normal.normalize();
+                }
             }
         }
 

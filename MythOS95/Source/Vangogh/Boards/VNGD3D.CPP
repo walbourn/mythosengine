@@ -4,32 +4,40 @@
 //                                                          %/ . .  .   \%
 //           Van Gogh 2D-Display Library                     |  . .  o. |
 //                                                           |. _  .   .|
-//          Microsoft Windows '95 Version                    | / \   .  |
+//        Microsoft Windows 95/98/NT Version                 | / \   .  |
 //                                                           |_|_|_._._.|
-// Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
-//              All rights reserved.                        %\__________/%
+//                                                           |.-.-.-.-..|
+//                                                          %\__________/%
 //                                                           %          %
 //
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-//
-//           *** Charybdis Enterprises, Inc. Company Confidential ***
-//
-//  This file and all associated files are the company proprietary property
-//        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
-//
-// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+//  Copyright (c) 1994-1999 by Dan Higdon, Tim Little, and Chuck Walbourn
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//
+// This file and all associated files are subject to the terms of the
+// GNU Lesser General Public License version 2 as published by the
+// Free Software Foundation (http://www.gnu.org).   They remain the
+// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+// See LICENSE.TXT in the distribution for a copy of this license.
+//
+// THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+// OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+// PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+// LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+// OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+//
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//
+//                        http://www.mythos-engine.org/
+//
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//
+// Created by Tim Little
 //
 // vngd3d.cpp
 //
-//     The C pluss pluss Direct3D view port classes.
+// Direct3D
 //
-//ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ Revision History ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
@@ -250,6 +258,7 @@ VNGError VngoVportD3D::init (VngoRect &dim,VngoPal *my_pal,dword flags,VngoScree
         }
     }
 
+    filter_auto_correct_on();
     haze_off();
     return (VNGO_NO_ERROR);
 }
@@ -891,6 +900,12 @@ VNGError VngoVportD3D::frect(VngoRect *rect,dword color)
         tclr.g = byte((color & 0x7e0) >> 3);
         tclr.b = byte((color & 0x1f) << 3);
     }
+    else if (color & VNGO_COLOR_24BIT)
+    {
+        tclr.r = byte((color & 0xff0000) >> 16);
+        tclr.g = byte((color & 0xff00) >> 8);
+        tclr.b = byte(color & 0xff);
+    }
     else
     {
         tclr = vbuff.pal->get_RGB(color);
@@ -906,6 +921,31 @@ VNGError VngoVportD3D::pixel (VngoPoint *pt, VngoColor24bit *rgb_val)
         p2.x += 1;
     else
         p2.x -= 1;
+
+    if (!rgb_val && pt->clr & (VNGO_COLOR_15BIT | VNGO_COLOR_16BIT | VNGO_COLOR_24BIT))
+    {
+        VngoColor24bit tclr;
+        if (pt->clr & VNGO_COLOR_15BIT)
+        {
+            tclr.r = byte((pt->clr & 0x7c00) >> 7);
+            tclr.g = byte((pt->clr & 0x3e0) >> 2);
+            tclr.b = byte((pt->clr & 0x1f) << 3);
+        }
+        else if (pt->clr & VNGO_COLOR_16BIT)
+        {
+            tclr.r = byte((pt->clr & 0xf800) >> 8);
+            tclr.g = byte((pt->clr & 0x7e0) >> 3);
+            tclr.b = byte((pt->clr & 0x1f) << 3);
+        }
+        else if (pt->clr & VNGO_COLOR_24BIT)
+        {
+            tclr.r = byte((pt->clr & 0xff0000) >> 16);
+            tclr.g = byte((pt->clr & 0xff00) >> 8);
+            tclr.b = byte(pt->clr & 0xff);
+        }
+        return line(pt,&p2,&tclr);
+    }
+
     return line(pt,&p2,rgb_val);
 }
 VNGError VngoVportD3D::pixel (VngoPointF *pt, VngoColor24bit *rgb_val)
@@ -916,6 +956,31 @@ VNGError VngoVportD3D::pixel (VngoPointF *pt, VngoColor24bit *rgb_val)
         p2.x += 1.f;
     else
         p2.x -= 1.f;
+
+    if (!rgb_val && pt->clr & (VNGO_COLOR_15BIT | VNGO_COLOR_16BIT | VNGO_COLOR_24BIT))
+    {
+        VngoColor24bit tclr;
+        if (pt->clr & VNGO_COLOR_15BIT)
+        {
+            tclr.r = byte((pt->clr & 0x7c00) >> 7);
+            tclr.g = byte((pt->clr & 0x3e0) >> 2);
+            tclr.b = byte((pt->clr & 0x1f) << 3);
+        }
+        else if (pt->clr & VNGO_COLOR_16BIT)
+        {
+            tclr.r = byte((pt->clr & 0xf800) >> 8);
+            tclr.g = byte((pt->clr & 0x7e0) >> 3);
+            tclr.b = byte((pt->clr & 0x1f) << 3);
+        }
+        else if (pt->clr & VNGO_COLOR_24BIT)
+        {
+            tclr.r = byte((pt->clr & 0xff0000) >> 16);
+            tclr.g = byte((pt->clr & 0xff00) >> 8);
+            tclr.b = byte(pt->clr & 0xff);
+        }
+        return line(pt,&p2,&tclr);
+    }
+
     return line(pt,&p2,rgb_val);
 }
 
@@ -929,7 +994,32 @@ VNGError VngoVportD3D::clip_pixel (VngoPoint *pt, VngoColor24bit *rgb_val,
         vprect.clip_to(*clip_rect);
     }
     if (vprect.point_in(*pt))
+    {
+        if (!rgb_val && pt->clr & (VNGO_COLOR_15BIT | VNGO_COLOR_16BIT | VNGO_COLOR_24BIT))
+        {
+            VngoColor24bit tclr;
+            if (pt->clr & VNGO_COLOR_15BIT)
+            {
+                tclr.r = byte((pt->clr & 0x7c00) >> 7);
+                tclr.g = byte((pt->clr & 0x3e0) >> 2);
+                tclr.b = byte((pt->clr & 0x1f) << 3);
+            }
+            else if (pt->clr & VNGO_COLOR_16BIT)
+            {
+                tclr.r = byte((pt->clr & 0xf800) >> 8);
+                tclr.g = byte((pt->clr & 0x7e0) >> 3);
+                tclr.b = byte((pt->clr & 0x1f) << 3);
+            }
+            else if (pt->clr & VNGO_COLOR_24BIT)
+            {
+                tclr.r = byte((pt->clr & 0xff0000) >> 16);
+                tclr.g = byte((pt->clr & 0xff00) >> 8);
+                tclr.b = byte(pt->clr & 0xff);
+            }
+            return pixel(pt,&tclr);
+        }
         return pixel(pt,rgb_val);
+    }
 
     return VNGO_NO_ERROR;
 }
@@ -951,7 +1041,32 @@ VNGError VngoVportD3D::clip_pixel (VngoPointF *pt, VngoColor24bit *rgb_val,
         vprect.clip_to(*clip_rect);
     }
     if (vprect.point_in(tpt))
+    {
+        if (!rgb_val && tpt.clr & (VNGO_COLOR_15BIT | VNGO_COLOR_16BIT | VNGO_COLOR_24BIT))
+        {
+            VngoColor24bit tclr;
+            if (tpt.clr & VNGO_COLOR_15BIT)
+            {
+                tclr.r = byte((tpt.clr & 0x7c00) >> 7);
+                tclr.g = byte((tpt.clr & 0x3e0) >> 2);
+                tclr.b = byte((tpt.clr & 0x1f) << 3);
+            }
+            else if (tpt.clr & VNGO_COLOR_16BIT)
+            {
+                tclr.r = byte((tpt.clr & 0xf800) >> 8);
+                tclr.g = byte((tpt.clr & 0x7e0) >> 3);
+                tclr.b = byte((tpt.clr & 0x1f) << 3);
+            }
+            else if (tpt.clr & VNGO_COLOR_24BIT)
+            {
+                tclr.r = byte((tpt.clr & 0xff0000) >> 16);
+                tclr.g = byte((tpt.clr & 0xff00) >> 8);
+                tclr.b = byte(tpt.clr & 0xff);
+            }
+            return pixel(&tpt,&tclr);
+        }
         return pixel(&tpt,rgb_val);
+    }
 
     return VNGO_NO_ERROR;
 }
@@ -1720,7 +1835,8 @@ VNGError VngoVportD3D::tpoly (int count,VngoPoint pts[],VngoTexture *tex)
     if (tex->flags & VNGO_TEXTURE_TRANSPARENT)
     {
         dflags |= VNGO_D3DSFLAGS_CKEY_ENABLE;
-        dflags &= ~VNGO_D3DSFLAGS_FILTER;
+        if (vflags & VNGO_FILTER_AUTOCORRECT)
+            dflags &= ~VNGO_D3DSFLAGS_FILTER;
     }
 
     screen->set_draw_state(dflags,((VngoD3DTexture3D*)tptr)->handle);
@@ -1819,7 +1935,8 @@ VNGError VngoVportD3D::tpoly (int count,VngoPointF pts[],VngoTexture *tex)
     if (tex->flags & VNGO_TEXTURE_TRANSPARENT)
     {
         dflags |= VNGO_D3DSFLAGS_CKEY_ENABLE;
-        dflags &= ~VNGO_D3DSFLAGS_FILTER;
+        if (vflags & VNGO_FILTER_AUTOCORRECT)
+            dflags &= ~VNGO_D3DSFLAGS_FILTER;
     }
 
     screen->set_draw_state(dflags,((VngoD3DTexture3D*)tptr)->handle);
@@ -1924,7 +2041,8 @@ VNGError VngoVportD3D::tpoly_persp (int count,VngoPoint pts[],VngoTexture *tex)
     if (tex->flags & VNGO_TEXTURE_TRANSPARENT)
     {
         dflags |= VNGO_D3DSFLAGS_CKEY_ENABLE;
-        dflags &= ~VNGO_D3DSFLAGS_FILTER;
+        if (vflags & VNGO_FILTER_AUTOCORRECT)
+            dflags &= ~VNGO_D3DSFLAGS_FILTER;
     }
 
     screen->set_draw_state(dflags,((VngoD3DTexture3D*)tptr)->handle);
@@ -2026,7 +2144,8 @@ VNGError VngoVportD3D::tpoly_persp (int count,VngoPointF pts[],VngoTexture *tex)
     if (tex->flags & VNGO_TEXTURE_TRANSPARENT)
     {
         dflags |= VNGO_D3DSFLAGS_CKEY_ENABLE;
-        dflags &= ~VNGO_D3DSFLAGS_FILTER;
+        if (vflags & VNGO_FILTER_AUTOCORRECT)
+            dflags &= ~VNGO_D3DSFLAGS_FILTER;
     }
 
     screen->set_draw_state(dflags,((VngoD3DTexture3D*)tptr)->handle);
@@ -2128,7 +2247,8 @@ VNGError VngoVportD3D::gtpoly (int count,VngoPoint pts[],VngoTexture *tex)
     if (tex->flags & VNGO_TEXTURE_TRANSPARENT)
     {
         dflags |= VNGO_D3DSFLAGS_CKEY_ENABLE;
-        dflags &= ~VNGO_D3DSFLAGS_FILTER;
+        if (vflags & VNGO_FILTER_AUTOCORRECT)
+            dflags &= ~VNGO_D3DSFLAGS_FILTER;
     }
 
     screen->set_draw_state(dflags,((VngoD3DTexture3D*)tptr)->handle);
@@ -2224,7 +2344,8 @@ VNGError VngoVportD3D::gtpoly (int count,VngoPointF pts[],VngoTexture *tex)
     if (tex->flags & VNGO_TEXTURE_TRANSPARENT)
     {
         dflags |= VNGO_D3DSFLAGS_CKEY_ENABLE;
-        dflags &= ~VNGO_D3DSFLAGS_FILTER;
+        if (vflags & VNGO_FILTER_AUTOCORRECT)
+            dflags &= ~VNGO_D3DSFLAGS_FILTER;
     }
 
     screen->set_draw_state(dflags,((VngoD3DTexture3D*)tptr)->handle);
@@ -2330,7 +2451,8 @@ VNGError VngoVportD3D::gtpoly_persp (int count,VngoPoint pts[],VngoTexture *tex)
     if (tex->flags & VNGO_TEXTURE_TRANSPARENT)
     {
         dflags |= VNGO_D3DSFLAGS_CKEY_ENABLE;
-        dflags &= ~VNGO_D3DSFLAGS_FILTER;
+        if (vflags & VNGO_FILTER_AUTOCORRECT)
+            dflags &= ~VNGO_D3DSFLAGS_FILTER;
     }
 
     screen->set_draw_state(dflags,((VngoD3DTexture3D*)tptr)->handle);
@@ -2433,7 +2555,8 @@ VNGError VngoVportD3D::gtpoly_persp (int count,VngoPointF pts[],VngoTexture *tex
     if (tex->flags & VNGO_TEXTURE_TRANSPARENT)
     {
         dflags |= VNGO_D3DSFLAGS_CKEY_ENABLE;
-        dflags &= ~VNGO_D3DSFLAGS_FILTER;
+        if (vflags & VNGO_FILTER_AUTOCORRECT)
+            dflags &= ~VNGO_D3DSFLAGS_FILTER;
     }
 
     screen->set_draw_state(dflags,((VngoD3DTexture3D*)tptr)->handle);
@@ -2893,7 +3016,8 @@ VNGError VngoVportD3D::tpoly_a (int count,VngoPoint pts[],VngoTexture *tex,long 
     if (tex->flags & VNGO_TEXTURE_TRANSPARENT)
     {
         dflags |= VNGO_D3DSFLAGS_CKEY_ENABLE;
-        dflags &= ~VNGO_D3DSFLAGS_FILTER;
+        if (vflags & VNGO_FILTER_AUTOCORRECT)
+            dflags &= ~VNGO_D3DSFLAGS_FILTER;
     }
 
     screen->set_draw_state(dflags,((VngoD3DTexture3D*)tptr)->handle);
@@ -2993,7 +3117,8 @@ VNGError VngoVportD3D::tpoly_a (int count,VngoPointF pts[],VngoTexture *tex,long
     if (tex->flags & VNGO_TEXTURE_TRANSPARENT)
     {
         dflags |= VNGO_D3DSFLAGS_CKEY_ENABLE;
-        dflags &= ~VNGO_D3DSFLAGS_FILTER;
+        if (vflags & VNGO_FILTER_AUTOCORRECT)
+            dflags &= ~VNGO_D3DSFLAGS_FILTER;
     }
 
     screen->set_draw_state(dflags,((VngoD3DTexture3D*)tptr)->handle);
@@ -3101,7 +3226,8 @@ VNGError VngoVportD3D::tpoly_persp_a (int count,VngoPoint pts[],VngoTexture *tex
     if (tex->flags & VNGO_TEXTURE_TRANSPARENT)
     {
         dflags |= VNGO_D3DSFLAGS_CKEY_ENABLE;
-        dflags &= ~VNGO_D3DSFLAGS_FILTER;
+        if (vflags & VNGO_FILTER_AUTOCORRECT)
+            dflags &= ~VNGO_D3DSFLAGS_FILTER;
     }
 
     screen->set_draw_state(dflags,((VngoD3DTexture3D*)tptr)->handle);
@@ -3204,7 +3330,8 @@ VNGError VngoVportD3D::tpoly_persp_a (int count,VngoPointF pts[],VngoTexture *te
     if (tex->flags & VNGO_TEXTURE_TRANSPARENT)
     {
         dflags |= VNGO_D3DSFLAGS_CKEY_ENABLE;
-        dflags &= ~VNGO_D3DSFLAGS_FILTER;
+        if (vflags & VNGO_FILTER_AUTOCORRECT)
+            dflags &= ~VNGO_D3DSFLAGS_FILTER;
     }
 
     screen->set_draw_state(dflags,((VngoD3DTexture3D*)tptr)->handle);
@@ -3307,7 +3434,8 @@ VNGError VngoVportD3D::gtpoly_a (int count,VngoPoint pts[],VngoTexture *tex,long
     if (tex->flags & VNGO_TEXTURE_TRANSPARENT)
     {
         dflags |= VNGO_D3DSFLAGS_CKEY_ENABLE;
-        dflags &= ~VNGO_D3DSFLAGS_FILTER;
+        if (vflags & VNGO_FILTER_AUTOCORRECT)
+            dflags &= ~VNGO_D3DSFLAGS_FILTER;
     }
 
     screen->set_draw_state(dflags,((VngoD3DTexture3D*)tptr)->handle);
@@ -3406,7 +3534,8 @@ VNGError VngoVportD3D::gtpoly_a (int count,VngoPointF pts[],VngoTexture *tex,lon
     if (tex->flags & VNGO_TEXTURE_TRANSPARENT)
     {
         dflags |= VNGO_D3DSFLAGS_CKEY_ENABLE;
-        dflags &= ~VNGO_D3DSFLAGS_FILTER;
+        if (vflags & VNGO_FILTER_AUTOCORRECT)
+            dflags &= ~VNGO_D3DSFLAGS_FILTER;
     }
 
     screen->set_draw_state(dflags,((VngoD3DTexture3D*)tptr)->handle);
@@ -3510,7 +3639,8 @@ VNGError VngoVportD3D::gtpoly_persp_a (int count,VngoPointF pts[],VngoTexture *t
     if (tex->flags & VNGO_TEXTURE_TRANSPARENT)
     {
         dflags |= VNGO_D3DSFLAGS_CKEY_ENABLE;
-        dflags &= ~VNGO_D3DSFLAGS_FILTER;
+        if (vflags & VNGO_FILTER_AUTOCORRECT)
+            dflags &= ~VNGO_D3DSFLAGS_FILTER;
     }
 
     screen->set_draw_state(dflags,((VngoD3DTexture3D*)tptr)->handle);
@@ -3617,7 +3747,8 @@ VNGError VngoVportD3D::gtpoly_persp_a (int count,VngoPoint pts[],VngoTexture *te
     if (tex->flags & VNGO_TEXTURE_TRANSPARENT)
     {
         dflags |= VNGO_D3DSFLAGS_CKEY_ENABLE;
-        dflags &= ~VNGO_D3DSFLAGS_FILTER;
+        if (vflags & VNGO_FILTER_AUTOCORRECT)
+            dflags &= ~VNGO_D3DSFLAGS_FILTER;
     }
 
     screen->set_draw_state(dflags,((VngoD3DTexture3D*)tptr)->handle);

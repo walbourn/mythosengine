@@ -1,28 +1,32 @@
 ;ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
-;                            
+;
 ;           ^           **   **   **** ***** *    ****     ^      Take me to
 ;          (_)            * *     *      *   *    *       (_)    / your
 ;     ^                    *      **     *   *    **            ^  leader...
 ;    (_)       ^          * *     *      *   *    *            (_)
 ;             (_)       **   **   *    ***** **** ****
 ;
-;                      Microsoft Windows 95/NT Version
+;                    Microsoft Windows 95/98/NT Version
 ;
-;            Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.
-;                              All Rights Reserved.
+;  Copyright (c) 1994-1999 by Dan Higdon, Tim Little, and Chuck Walbourn
 ;
 ;ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 ;
-;           *** Charybdis Enterprises, Inc. Company Confidential ***
+; This file and all associated files are subject to the terms of the
+; GNU Lesser General Public License version 2 as published by the
+; Free Software Foundation (http://www.gnu.org).   They remain the
+; property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+; See LICENSE.TXT in the distribution for a copy of this license.
 ;
-;  This file and all associated files are the company proprietary property
-;        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+; THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+; OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+; PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+; LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+; OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 ;
-; Charybdis Enterprises, Inc. makes no warranties, express or implied, as
-; to the correctness of this code or any derivative works which incorporate
-; it.  Charybdis Enterprises, Inc. provides the code on an "as-is" basis
-; and explicitly disclaims any liability, including consequential and
-; incidental damages for errors, omissions, and other problems in the code.
+;ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+;
+;                        http://www.mythos-engine.org/
 ;
 ;ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 ;
@@ -123,7 +127,7 @@ XF_ERR_INVALIDPARAMETER        EQU 057h
 XF_ERR_NETWRITEFAULT           EQU 058h
 XF_ERR_NETFUNCNOTSUPPORTED     EQU 059h
 XF_ERR_REQHWNOTFOUND           EQU 05ah
-   
+
 XF_ERR_NOTOPEN                 EQU 20000001h    ;XFile errors
 XF_ERR_ALREADYOPEN             EQU 20000002h
 XF_ERR_LOCKFAILED              EQU 20000003h
@@ -137,7 +141,7 @@ XF_ERR_NOTSUPPORTED            EQU 20002000h    ;XFileBitmap errors
 XF_ERR_INVALIDHEADER           EQU 20002001h
 XF_ERR_INVALIDPALETTE          EQU 20002002h
 XF_ERR_INVALIDIMAGE            EQU 20002003h
-                                           
+
 XF_ERR_NOTIFF                  EQU 20003000h    ;XFileIFF errors
 XF_ERR_CHUCKNOTFOUND           EQU 20003001h ;For backwards compat
 XF_ERR_CHUNKNOTFOUND           EQU 20003001h
@@ -159,7 +163,7 @@ XF_OPEN_WRITE                  EQU 02h      ; Write-mode
 XF_OPEN_APPEND                 EQU 04h      ; Append to current file, if any
 XF_OPEN_CREATE                 EQU 08h      ; Create new file and set to 0 length
 XF_OPEN_EXCLUSIVE              EQU 010h     ; Fails if creating file already existing
-                                           
+
 XF_OPEN_KILL                   EQU 01000h   ; Kills on close (XFileDisk only)
 
 XF_OPEN_READONLY               EQU 010000h  ; File attributes (server/open)
@@ -209,7 +213,7 @@ XF_STATUS_LASTWRITE            EQU 040000h  ; Last action was a write
 XF_MAX_PATH                    EQU 260      ; maximum length of full pathname
 XF_MAX_DRIVE                   EQU 3        ; maximum length of drive component
 XF_MAX_DIR                     EQU 256      ; maximum length of path component
-XF_MAX_FNAME                   EQU 256 	    ; maximum length of file name component
+XF_MAX_FNAME                   EQU 256      ; maximum length of file name component
 XF_MAX_EXT                     EQU 256      ; maximum length of extension component
 XF_MAX_NAME                    EQU 256      ; maximum length of file name (with extension)
 

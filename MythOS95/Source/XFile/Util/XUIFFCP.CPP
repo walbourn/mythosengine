@@ -1,28 +1,32 @@
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
-//                            
+//
 //           ^           **   **   **** ***** *    ****     ^      Take me to
 //          (_)            * *     *      *   *    *       (_)    / your
 //     ^                    *      **     *   *    **            ^  leader...
 //    (_)       ^          * *     *      *   *    *            (_)
 //             (_)       **   **   *    ***** **** ****
 //
-//                      Microsoft Windows 95/NT Version
+//                    Microsoft Windows 95/98/NT Version
 //
-//            Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.
-//                              All Rights Reserved.
+//  Copyright (c) 1994-1999 by Dan Higdon, Tim Little, and Chuck Walbourn
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
-//           *** Charybdis Enterprises, Inc. Company Confidential ***
+// This file and all associated files are subject to the terms of the
+// GNU Lesser General Public License version 2 as published by the
+// Free Software Foundation (http://www.gnu.org).   They remain the
+// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+// See LICENSE.TXT in the distribution for a copy of this license.
 //
-//  This file and all associated files are the company proprietary property
-//        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+// THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+// OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+// PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+// LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+// OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 //
-// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//
+//                        http://www.mythos-engine.org/
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
@@ -39,7 +43,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include <conio.h>
@@ -131,7 +135,7 @@ extern byte         *Work;
 extern ulong        WorkSize;
 extern dword        Flags;
 
-//ÄÄ Local         
+//ÄÄ Local
 STATIC dword        ChunkOpts;
 STATIC ulong        ChunkSize;
 STATIC ulong        ChunkMaxSize;
@@ -239,7 +243,7 @@ STATIC void iff(void)
             break;
         default:
             error("Invalid operation: expected a form, chunk, merge, include, or bitmap");
-            break;                  
+            break;
     }
 }
 
@@ -337,7 +341,7 @@ STATIC void chunk(void)
 
 //ÄÄÄ Identifier
         case YY_STRING:
-           
+
             if (strlen(yytext) != 4)
                 error("Chunk identifier must be 4 characters");
 
@@ -558,7 +562,7 @@ STATIC void data(void)
                         repcount = uexpr();
                         match(YY_RBRACKET);
                     }
-               
+
                     add_to_work((byte)(char)t,repcount);
 
                     if (CurrentToken == YY_RBRACE)
@@ -581,7 +585,7 @@ STATIC void data(void)
                     repcount = uexpr();
                     match(YY_RBRACKET);
                 }
-               
+
                 add_to_work((byte)(char)t,repcount);
             }
             break;
@@ -643,10 +647,10 @@ STATIC void data(void)
                 for(;;)
                 {
                     t=expr();
-                    
+
                     if (t < (-32768) || t > 32767)
                         warning("Expression exceeds size of word");
-                    
+
                     repcount=1;
                     if (CurrentToken == YY_LBRACKET)
                     {
@@ -691,10 +695,10 @@ STATIC void data(void)
                 for(;;)
                 {
                     ut=uexpr();
-                    
+
                     if (ut < 0 || ut > 65535)
                         warning("Expression exceeds size of unsigned word");
-                    
+
                     repcount=1;
                     if (CurrentToken == YY_LBRACKET)
                     {
@@ -976,7 +980,7 @@ STATIC void data(void)
                         match(YY_RBRACKET);
                     }
 
-                    if (ChunkOpts & CHUNKOPTS_INTEL) 
+                    if (ChunkOpts & CHUNKOPTS_INTEL)
                     {
                         add_to_work(rdouble.dqword[0],repcount);
                         add_to_work(rdouble.dqword[1],repcount);
@@ -1005,7 +1009,7 @@ STATIC void data(void)
                     match(YY_RBRACKET);
                 }
 
-                if (ChunkOpts & CHUNKOPTS_INTEL) 
+                if (ChunkOpts & CHUNKOPTS_INTEL)
                 {
                     add_to_work(rdouble.dqword[0],repcount);
                     add_to_work(rdouble.dqword[1],repcount);
@@ -1095,14 +1099,14 @@ STATIC void merge(void)
     switch(CurrentToken)
     {
         case YY_STRING:
-        
+
             if (!(Flags & FLAGS_QUIET))
             {
                 for(i=0; i < IFF->depth; i++)
                     cout << "  ";
                 cout << "   merging '" << yytext << "'\n";
             }
-     
+
             if (iffm.open(yytext,XF_OPEN_READ | XF_OPEN_DENYWRITE))
             {
                 cout << "Error merging '" << yytext << "'\n";
@@ -1110,11 +1114,11 @@ STATIC void merge(void)
             }
             else
             {
-     
+
                 while (iffm.next() == XF_ERR_NONE)
                 {
                     size=iffm.chunkSize;
-     
+
                     if (!(Flags & FLAGS_QUIET))
                     {
                         for(i=0; i < IFF->depth; i++)
@@ -1135,31 +1139,31 @@ STATIC void merge(void)
                         }
                         cout << "' " << iffm.chunkSize << " bytes\n";
                     }
-     
+
                     if (size > WorkSize)
                     {
                         expand_work(size);
                     }
-                    
+
                     if (iffm.read(Work))
                     {
                         print_error(&iffm,"Failed to read merge chunk");
                         iffm.close();
                         exit(1);
                     }
-     
+
                     if (IFF->write(iffm.chunkid,Work,size))
                     {
                         print_error(IFF,"Failed to write merge chunk");
                         iffm.close();
                         exit(1);
                     }
-     
+
                 }
-     
+
                 iffm.close();
             }
-     
+
             match(YY_STRING);
             break;
         default:
@@ -1247,7 +1251,7 @@ STATIC void bitmap(void)
         for(i=0; i < IFF->depth; i++)
             cout << "  ";
         cout << "   inserting bitmap '" << fname << "' as form ";
-        
+
         if (Flags & FLAGS_XEB)
         {
             cout << "'XFEB'\n";
@@ -1495,7 +1499,7 @@ STATIC long integer(void)
     }
     else
         error("Integer expected");
-    
+
     return(t);
 }
 

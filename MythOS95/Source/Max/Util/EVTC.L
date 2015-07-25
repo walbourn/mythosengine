@@ -1,36 +1,41 @@
 /*ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
- *
- *                  ooo        ooooo                       
- *                  `88.       .888'                       
- *                   888b     d'888   .oooo.   oooo    ooo 
- *                   8 Y88. .P  888  `P  )88b   `88b..8P'  
- *                   8  `888'   888   .oP"888     Y888'    
- *                   8    Y     888  d8(  888   .o8"'88b   
- *                  o8o        o888o `Y888""8o o88'   888o 
+ *                  ooo        ooooo
+ *                  `88.       .888'
+ *                   888b     d'888   .oooo.   oooo    ooo
+ *                   8 Y88. .P  888  `P  )88b   `88b..8P'
+ *                   8  `888'   888   .oP"888     Y888'
+ *                   8    Y     888  d8(  888   .o8"'88b
+ *                  o8o        o888o `Y888""8o o88'   888o
  *
  *                          Across the event horizon...
  *
- *                        Microsoft Windows 95/NT Version
+ *                       Microsoft Windows 95/98/NT Version
  *
- *            Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.
- *                            All Rights Reserved.
+ *  Copyright (c) 1994-1999 by Dan Higdon, Tim Little, and Chuck Walbourn
  *
  *ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
  *
- *           *** Charybdis Enterprises, Inc. Company Confidential ***
+ * This file and all associated files are subject to the terms of the
+ * GNU Lesser General Public License version 2 as published by the
+ * Free Software Foundation (http://www.gnu.org).   They remain the
+ * property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+ * See LICENSE.TXT in the distribution for a copy of this license.
  *
- *  This file and all associated files are the company proprietary property
- *        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+ * THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+ * OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+ * PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+ * LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+ * OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
  *
- * CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
- * TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
- * IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
- * AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
- * INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+ *ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+ *
+ *                        http://www.mythos-engine.org/
  *
  *ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
  *
  *                              *** Utilities ***
+ *
+ * Created by Dan Higdon
  *
  * FLEX scanner language description for IFF Event Complier
  *
@@ -40,7 +45,7 @@
 /*°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
  *
  *                             Startup Block
- *                               
+ *
  *°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
  */
 
@@ -59,7 +64,7 @@ long       YY_integer;
 int        YY_lineno=1;
 
 /* This is a table that converts a-z into scan codes */
-static int scan_cnv[128] = 
+static int scan_cnv[128] =
 {
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x0e, 0x0f, 0x1c, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -271,7 +276,7 @@ integer    {digit}+
  *
  *°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
  */
-                                
+
 %%
 
 "\n"            { YY_lineno++; }
@@ -296,73 +301,73 @@ mouseb          return(YY_MOUSEB);
 mousedelta      return(YY_MOUSEDELTA);
 mouserange      return(YY_MOUSERANGE);
 
-#f1             { YY_integer = DIK_F1;		return(YY_INTEGER); }
-#f2             { YY_integer = DIK_F2;		return(YY_INTEGER); }
-#f3             { YY_integer = DIK_F3;		return(YY_INTEGER); }
-#f4             { YY_integer = DIK_F4;		return(YY_INTEGER); }
-#f5             { YY_integer = DIK_F5;		return(YY_INTEGER); }
-#f6             { YY_integer = DIK_F6;		return(YY_INTEGER); }
-#f7             { YY_integer = DIK_F7;		return(YY_INTEGER); }
-#f8             { YY_integer = DIK_F8;		return(YY_INTEGER); }
-#f9             { YY_integer = DIK_F9;		return(YY_INTEGER); }
-#f10            { YY_integer = DIK_F10;		return(YY_INTEGER); }
-#f11            { YY_integer = DIK_F11;		return(YY_INTEGER); }
-#f12            { YY_integer = DIK_F12;		return(YY_INTEGER); }
-#f13            { YY_integer = DIK_F13;		return(YY_INTEGER); }
-#f14            { YY_integer = DIK_F14;		return(YY_INTEGER); }
-#f15            { YY_integer = DIK_F15;		return(YY_INTEGER); }
+#f1             { YY_integer = DIK_F1;          return(YY_INTEGER); }
+#f2             { YY_integer = DIK_F2;          return(YY_INTEGER); }
+#f3             { YY_integer = DIK_F3;          return(YY_INTEGER); }
+#f4             { YY_integer = DIK_F4;          return(YY_INTEGER); }
+#f5             { YY_integer = DIK_F5;          return(YY_INTEGER); }
+#f6             { YY_integer = DIK_F6;          return(YY_INTEGER); }
+#f7             { YY_integer = DIK_F7;          return(YY_INTEGER); }
+#f8             { YY_integer = DIK_F8;          return(YY_INTEGER); }
+#f9             { YY_integer = DIK_F9;          return(YY_INTEGER); }
+#f10            { YY_integer = DIK_F10;         return(YY_INTEGER); }
+#f11            { YY_integer = DIK_F11;         return(YY_INTEGER); }
+#f12            { YY_integer = DIK_F12;         return(YY_INTEGER); }
+#f13            { YY_integer = DIK_F13;         return(YY_INTEGER); }
+#f14            { YY_integer = DIK_F14;         return(YY_INTEGER); }
+#f15            { YY_integer = DIK_F15;         return(YY_INTEGER); }
 
-#alt            { YY_integer = 0x401;		return(YY_INTEGER); }	// Special "fake" code
-#lalt           { YY_integer = DIK_LMENU;	return(YY_INTEGER); }
-#ralt           { YY_integer = DIK_RMENU;	return(YY_INTEGER); }
-#ctrl           { YY_integer = 0x402;		return(YY_INTEGER); }	// Special "fake" code
-#lctrl          { YY_integer = DIK_LCONTROL;	return(YY_INTEGER); }
-#rctrl          { YY_integer = DIK_RCONTROL;	return(YY_INTEGER); }
-#shift          { YY_integer = 0x403;		return(YY_INTEGER); }	// Special "fake" code
-#lshift         { YY_integer = DIK_LSHIFT;	return(YY_INTEGER); }
-#rshift         { YY_integer = DIK_RSHIFT;	return(YY_INTEGER); }
+#alt            { YY_integer = 0x401;           return(YY_INTEGER); }   // Special "fake" code
+#lalt           { YY_integer = DIK_LMENU;       return(YY_INTEGER); }
+#ralt           { YY_integer = DIK_RMENU;       return(YY_INTEGER); }
+#ctrl           { YY_integer = 0x402;           return(YY_INTEGER); }   // Special "fake" code
+#lctrl          { YY_integer = DIK_LCONTROL;    return(YY_INTEGER); }
+#rctrl          { YY_integer = DIK_RCONTROL;    return(YY_INTEGER); }
+#shift          { YY_integer = 0x403;           return(YY_INTEGER); }   // Special "fake" code
+#lshift         { YY_integer = DIK_LSHIFT;      return(YY_INTEGER); }
+#rshift         { YY_integer = DIK_RSHIFT;      return(YY_INTEGER); }
 
-#esc            { YY_integer = DIK_ESCAPE;	return(YY_INTEGER); }
-#tab            { YY_integer = DIK_TAB;		return(YY_INTEGER); }
-#caps           { YY_integer = DIK_CAPITAL;	return(YY_INTEGER); }
+#esc            { YY_integer = DIK_ESCAPE;      return(YY_INTEGER); }
+#tab            { YY_integer = DIK_TAB;         return(YY_INTEGER); }
+#caps           { YY_integer = DIK_CAPITAL;     return(YY_INTEGER); }
 #prtscr         { YY_integer = 0x12a; return(YY_INTEGER); }
-#numlock        { YY_integer = DIK_NUMLOCK;	return(YY_INTEGER); }
-#scroll         { YY_integer = DIK_SCROLL;	return(YY_INTEGER); }
+#numlock        { YY_integer = DIK_NUMLOCK;     return(YY_INTEGER); }
+#scroll         { YY_integer = DIK_SCROLL;      return(YY_INTEGER); }
 #pause          { YY_integer = 0x11d; return(YY_INTEGER); }
-#sysreq         { YY_integer = DIK_SYSRQ;	return(YY_INTEGER); }
+#sysreq         { YY_integer = DIK_SYSRQ;       return(YY_INTEGER); }
 
-#space          { YY_integer = DIK_SPACE;	return(YY_INTEGER); }
-#enter          { YY_integer = DIK_RETURN;	return(YY_INTEGER); }
-#backspace      { YY_integer = DIK_BACK;	return(YY_INTEGER); }
+#space          { YY_integer = DIK_SPACE;       return(YY_INTEGER); }
+#enter          { YY_integer = DIK_RETURN;      return(YY_INTEGER); }
+#backspace      { YY_integer = DIK_BACK;        return(YY_INTEGER); }
 
-#end            { YY_integer = DIK_NUMPAD1;	return(YY_INTEGER); }
-#down           { YY_integer = DIK_NUMPAD2;	return(YY_INTEGER); }
-#pgdn           { YY_integer = DIK_NUMPAD3;	return(YY_INTEGER); }
-#left           { YY_integer = DIK_NUMPAD4;	return(YY_INTEGER); }
-#center         { YY_integer = DIK_NUMPAD5;	return(YY_INTEGER); }
-#right          { YY_integer = DIK_NUMPAD6;	return(YY_INTEGER); }
-#home           { YY_integer = DIK_NUMPAD7;	return(YY_INTEGER); }
-#up             { YY_integer = DIK_NUMPAD8;	return(YY_INTEGER); }
-#pgup           { YY_integer = DIK_NUMPAD9;	return(YY_INTEGER); }
-#insert         { YY_integer = DIK_NUMPAD0;	return(YY_INTEGER); }
-#del            { YY_integer = DIK_DECIMAL;	return(YY_INTEGER); }
+#end            { YY_integer = DIK_NUMPAD1;     return(YY_INTEGER); }
+#down           { YY_integer = DIK_NUMPAD2;     return(YY_INTEGER); }
+#pgdn           { YY_integer = DIK_NUMPAD3;     return(YY_INTEGER); }
+#left           { YY_integer = DIK_NUMPAD4;     return(YY_INTEGER); }
+#center         { YY_integer = DIK_NUMPAD5;     return(YY_INTEGER); }
+#right          { YY_integer = DIK_NUMPAD6;     return(YY_INTEGER); }
+#home           { YY_integer = DIK_NUMPAD7;     return(YY_INTEGER); }
+#up             { YY_integer = DIK_NUMPAD8;     return(YY_INTEGER); }
+#pgup           { YY_integer = DIK_NUMPAD9;     return(YY_INTEGER); }
+#insert         { YY_integer = DIK_NUMPAD0;     return(YY_INTEGER); }
+#del            { YY_integer = DIK_DECIMAL;     return(YY_INTEGER); }
 
-#grayminus      { YY_integer = DIK_SUBTRACT;	return(YY_INTEGER); }
-#grayplus       { YY_integer = DIK_ADD;		return(YY_INTEGER); }
-#grayenter      { YY_integer = DIK_NUMPADENTER;	return(YY_INTEGER); }
-#graymul        { YY_integer = DIK_MULTIPLY;	return(YY_INTEGER); }
-#graydiv        { YY_integer = DIK_DIVIDE;	return(YY_INTEGER); }
+#grayminus      { YY_integer = DIK_SUBTRACT;    return(YY_INTEGER); }
+#grayplus       { YY_integer = DIK_ADD;         return(YY_INTEGER); }
+#grayenter      { YY_integer = DIK_NUMPADENTER; return(YY_INTEGER); }
+#graymul        { YY_integer = DIK_MULTIPLY;    return(YY_INTEGER); }
+#graydiv        { YY_integer = DIK_DIVIDE;      return(YY_INTEGER); }
 
-#grayend        { YY_integer = DIK_END;		return(YY_INTEGER); }
-#graydown       { YY_integer = DIK_DOWN;	return(YY_INTEGER); }
-#graypgdn       { YY_integer = DIK_PGDN;	return(YY_INTEGER); }
-#grayleft       { YY_integer = DIK_LEFT;	return(YY_INTEGER); }
-#grayright      { YY_integer = DIK_RIGHT;	return(YY_INTEGER); }
-#grayhome       { YY_integer = DIK_HOME;	return(YY_INTEGER); }
-#grayup         { YY_integer = DIK_UP;		return(YY_INTEGER); }
-#graypgup       { YY_integer = DIK_PGUP;	return(YY_INTEGER); }
-#grayinsert     { YY_integer = DIK_INSERT;	return(YY_INTEGER); }
-#graydel        { YY_integer = DIK_DELETE;	return(YY_INTEGER); }
+#grayend        { YY_integer = DIK_END;         return(YY_INTEGER); }
+#graydown       { YY_integer = DIK_DOWN;        return(YY_INTEGER); }
+#graypgdn       { YY_integer = DIK_PGDN;        return(YY_INTEGER); }
+#grayleft       { YY_integer = DIK_LEFT;        return(YY_INTEGER); }
+#grayright      { YY_integer = DIK_RIGHT;       return(YY_INTEGER); }
+#grayhome       { YY_integer = DIK_HOME;        return(YY_INTEGER); }
+#grayup         { YY_integer = DIK_UP;          return(YY_INTEGER); }
+#graypgup       { YY_integer = DIK_PGUP;        return(YY_INTEGER); }
+#grayinsert     { YY_integer = DIK_INSERT;      return(YY_INTEGER); }
+#graydel        { YY_integer = DIK_DELETE;      return(YY_INTEGER); }
 
 0x{hexdig}+     {   YY_integer = strtoul ((char *) &yytext[2],NULL,16);
                     return(YY_INTEGER);
@@ -402,7 +407,7 @@ int yy_pushfile(const char *fname)
 
     // Handle first include
     if (YY_depth == 1)
-    {   
+    {
         YY_stack[0] = yy_current_buffer;
     }
 
@@ -420,14 +425,14 @@ int yy_pushfile(const char *fname)
     }
 
     yy_switch_to_buffer(YY_stack[YY_depth]);
-    
+
     return 0;
 }
 
 int yywrap (void)
 {
     if (YY_depth < 1)
-        return 1;    
+        return 1;
 
     yy_switch_to_buffer(YY_stack[YY_depth-1]);
 

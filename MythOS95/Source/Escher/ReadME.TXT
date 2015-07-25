@@ -7,23 +7,27 @@
       ///       ///    /// ///    /// ///    /// ///        ///    ///
      ////////// ////////   ////////  ///.   ///.////////// ///    ///.
 
-                     Microsoft Windows 95/NT Version
+                    Microsoft Windows 95/98/NT Version
 
-            Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.
-                           All Rights Reserved.
+    Copyright (c) 1994-1999 by Dan Higdon, Tim Little, and Chuck Walbourn
 
  ---------------------------------------------------------------------------
- 
-            *** Charybdis Enterprises, Inc. Company Confidential ***
- 
-   This file and all associated files are the company proprietary property
-         of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
- 
-  CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-  TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-  IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-  AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-  INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+
+ This file and all associated files are subject to the terms of the
+ GNU Lesser General Public License version 2 as published by the
+ Free Software Foundation (http://www.gnu.org).   They remain the
+ property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+ See LICENSE.TXT in the distribution for a copy of this license.
+
+ THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+ OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+ PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+ LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+ OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+
+ ---------------------------------------------------------------------------
+
+                        http://www.mythos-engine.org/
 
  ---------------------------------------------------------------------------
 
@@ -37,87 +41,55 @@
                              _Library Status_
 
  Notes by: Chuck Walbourn
- Updated: March 20, 1998
+ Updated: October 23, 1998
 
  Changes for this release --------------------------------------------------
 
-    o Element
+    o Fixed EschMetaBox class to work correctly with perspective correction and
+      to pay attention to the limits flags for texturing.
 
-        - Internal changes and optimizations for the clipping routines.
-        - Lines now properly clip in 3D.
+    o Added EschPlaneDraw class for drawing infinite planes with lighting and texturing.
 
-    o Particles
+    o Fixed hither/yon clipping bug.
 
-        - Added EschParticleLine class.
-        - Various changes and opimizations.  These have not been fully
-          developed or documented at this time.
+    o EschParticleGenerator now uses VNGO_COLOR_24BIT format for 15- and 16-
+      bit devices when given RGB color ranges.
 
-    o Terrain
+    o Added base version of 'sibling' back into EschGeometry.
 
-        - Optimizations and bug fixes for the terrain and tree tops.
+    o EschCameraEx gradient background redone.
 
-    o Math
+    o Added set_flags(mask, on) which takes the or'd set of flags and sets or
+      clears them from the flags variable based on the value of 'on'.
 
-        - Added first cut of AMD-3D Technology enhancements: esch_transform,
-          esch_transform_notran, esch_cross, esch_normalize, and
-          esch_concatmatrix are now function pointers set by the
-          enable_amd3d() member of EschSystem to AMD-3D only versions.
+    o Fixed problem with time-based particle generation (it was clearing
+      the accumulator on every call to set_parts()).
+
+    o Changed particles to have a new ESCH_PRT_CULLIFNOTVISIBLE flag instead
+      of just assumming this is a valid assumption.
+
+    o Added new ESCH_MTL_TYPE_15BIT and ESCH_MTL_TYPE_15BIT_TRANSP formats
+      and updated the texture classes, builder classes, Texture Librarian,
+      Escher Tool, and Escher Directory.   Also added color conversions to
+      EschBuildTexture class.  Added ESCH_TXTLD_TCBITMAP/ESCH_MSHLD_TXTTCBM
+      functionality for use by Escher Tool to retain original data format on
+      texture load.
+
+    o Moved partitioning drawables into PARTN directory from DRAW; moved
+      terrain drawables into TERRAIN directory from DRAW.
+
+    o Changes for Escher Exporter, Escher Tool, and Terrain Editor.
+      See Export\ReadME.TXT, Tool\ReadME.TXT, and Edit\ReadME.TXT
 
 
- Pending changes -----------------------------------------------------------
+ Proposed Changes -----------------------------------------------------------
 
-    o Element Sort
+    o Needs a 3D Studio MAX Plugin for exporting data directly from MAX.
 
-        - Implement more sophisticated scheme to resolve some common
-          missorting cases with Zmax-only approach that is currently
-          in use (TRUESORT).
 
-    o Partitioning
+ Future notes ---------------------------------------------------------------
 
-        - Quad/Octtree optimizations for draw(), pick(), and direction
-          traverse() walks.
-        - BSP-based partitioning methods -- this requires a method for
-          creating the partitioning off-line since the BSP-build process
-          cannot be done effectively in real-time.
-
-    o Camera
-
-        - Gradient background needs completion/debugging.
-
-    o Math
-
-        - Cubic spline interpolation.
-        - 4X4 matrix implementations
-        - esch_detmatrix() and esch_inversematrix() could have AMD-3D
-          versions.
-
-    o Drawables
-
-        - Cubic spline drawable.
-        - Tesselated object drawables.
-        - EschPlaneDraw for finite and infinite planes.
-        - EschSprite may still have some rotation problems.
-        - EschStarfield could use a load function.  Would be great
-          if it could handle starchart input for realistic placement
-          of the stars.
-        - The terrain drawables don't seem to work correctly in ORTHO mode.
-
-    o Lights
-
-        - Regionalized lighting mechanism would be useful.
-        - Shadow support using projected 'fake' ground-plane shadows.
-        - Colored lights (will require changes to Van Gogh).
-
-    o Tools
-
-        - Exporter plug-in for 3D Studio MAX and EschBuildCamera
-          and EschBuildLight classes for use by this new tool.
-
-    o Textures
-
-        - EschFireTexture may need some cleanup and updated docs.
-        - Rework to use a more generic "materials" interface.
-
-    o Total rewrite planned for MythOS 98
+ This library and all associated tools will be retired in a future release
+ of MythOS and replaced with an entirely new 3D pipeline.
 
 *** END OF FILE ***

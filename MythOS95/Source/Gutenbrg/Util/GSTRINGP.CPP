@@ -1,31 +1,35 @@
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
-//           __ ,                                                  
-//            ,-| ~           ,               ,,                      
-//           ('||/__,        ||               ||                  _   
-//          (( |||  | \\ \\ =||=   _-_  \\/\\ ||/|,  _-_  ,._-_  / \\ 
-//          (( |||==| || ||  ||   || \\ || || || || || \\  ||   || || 
-//           ( / |  , || ||  ||   ||/   || || || |' ||/    ||   || || 
-//            -____/  \\/\\  \\,  \\,/  \\ \\ \\/   \\,/   \\,  \\_-| 
-//                                                               /  \ 
+//           __ ,
+//            ,-| ~           ,               ,,
+//           ('||/__,        ||               ||                  _
+//          (( |||  | \\ \\ =||=   _-_  \\/\\ ||/|,  _-_  ,._-_  / \\
+//          (( |||==| || ||  ||   || \\ || || || || || \\  ||   || ||
+//           ( / |  , || ||  ||   ||/   || || || |' ||/    ||   || ||
+//            -____/  \\/\\  \\,  \\,/  \\ \\ \\/   \\,/   \\,  \\_-|
+//                                                               /  \
 //                                                              '----`
 //                     Text Output and Font Management System
-//                        Microsoft Windows 95/NT Version
+//                       Microsoft Windows 95/98/NT Version
 //
-//            Copyright (c) 1995-1998 by Charybdis Enterprises, Inc.
-//                           All Rights Reserved.
+//  Copyright (c) 1995-1999 by Dan Higdon, Tim Little, and Chuck Walbourn
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
-//           *** Charybdis Enterprises, Inc. Company Confidential ***
+// This file and all associated files are subject to the terms of the
+// GNU Lesser General Public License version 2 as published by the
+// Free Software Foundation (http://www.gnu.org).   They remain the
+// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+// See LICENSE.TXT in the distribution for a copy of this license.
 //
-//  This file and all associated files are the company proprietary property
-//        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+// THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+// OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+// PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+// LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+// OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 //
-// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//
+//                        http://www.mythos-engine.org/
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
@@ -40,7 +44,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include <stdio.h>
@@ -118,7 +122,7 @@ extern byte         *Work;
 extern ulong        WorkSize;
 extern dword        Flags;
 
-//ÄÄ Local         
+//ÄÄ Local
 STATIC ulong        WorkCurrent;
 
 STATIC int          CurrentToken;
@@ -129,7 +133,7 @@ STATIC char         cpp_comment[] =
 {
     "//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿\r\n"
     "// Gutenberg -- Font and external string support                            ³\r\n"
-    "// (C) 1995-1998 by Charybdis Enterprises, Inc.  All Rights Reserved.            ³\r\n"
+    "// (C) 1995-1999 by Charybdis Enterprises, Inc.  All Rights Reserved.            ³\r\n"
     "//                                                                          ³\r\n"
     "// String identifier header file for C++                                    ³\r\n"
     "//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ\r\n"
@@ -139,7 +143,7 @@ STATIC char         c_comment[] =
 {
     "/*ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿\r\n"
     " * Gutenberg -- Font and external string support                            ³\r\n"
-    " * (C) 1995-1998 by Charybdis Enterprises, Inc.  All Rights Reserved.            ³\r\n"
+    " * (C) 1995-1999 by Charybdis Enterprises, Inc.  All Rights Reserved.            ³\r\n"
     " *                                                                          ³\r\n"
     " * String identifier header file for C/C++                                  ³\r\n"
     " *ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ\r\n"
@@ -195,7 +199,7 @@ STATIC void cst(void)
             break;
         default:
             error("Invalid operation, expected a stringtable or include block");
-            break;                  
+            break;
     }
 }
 
@@ -226,7 +230,7 @@ STATIC void stringtable(void)
     {
         cout << "\n   ° StringTable °\n";
     }
-    
+
     while (CurrentToken && CurrentToken != YY_LBRACE)
     {
         opts(&hdr,auth,desc,copy);
@@ -273,13 +277,13 @@ STATIC void stringtable(void)
         warning("String table is empty, not written");
     }
     else {
-        
+
         if (IFF.newform(IFF.makeid('G','T','X','T')))
         {
             print_error(IFF,"Could not create form");
             exit(1);
         }
-        
+
         //ÄÄÄ Output header and information blocks
         if (IFF.write(IFF.makeid('H','D','R',' '),&hdr,sizeof(GBergFileTextHDR)))
         {
@@ -549,7 +553,7 @@ STATIC ulong uinteger(void)
         t=(ulong)YY_integer;
         match(YY_INTEGER);
     }
-    
+
     return(t);
 }
 
@@ -599,7 +603,7 @@ STATIC ulong uterm(void)
 STATIC ulong ufactor(void)
 {
     ulong   t;
-    
+
     switch(CurrentToken)
     {
         case YY_LPAREN:
@@ -705,7 +709,7 @@ STATIC void add_to_work(ulong num, const char *str, ulong slen)
 
     memcpy((char*)&Work[WorkCurrent],str,slen);
     WorkCurrent += slen;
-    
+
     Work[WorkCurrent++]=0;
 }
 

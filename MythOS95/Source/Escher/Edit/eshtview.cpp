@@ -8,29 +8,33 @@
 //ùùùùù²±²ùùùùùùù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùùùùùù²±²ùùùù²±²ùùùùùù
 //ùùùù²²²²²²²²²²ù²²²²²²²²ùùù²²²²²²²²ùù²²²ùùùù²²²ù²²²²²²²²²²ù²²²ùùùù²²²ùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùùùùùùùùù Microsoft Windows 95/NT Version ùùùùùùùùùùùùùùùùùùùùùùù
+//ùùùùùùùùùùùùùùùùù Microsoft Windows 95/98/NT Version ùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùCopyrightù(c)ù1994-1998ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
-//ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
+//ùùùCopyright (c) 1994-1999 by Dan Higdon, Tim Little, and Chuck Walbournùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
-//           *** Charybdis Enterprises, Inc. Company Confidential ***
+// This file and all associated files are subject to the terms of the
+// GNU Lesser General Public License version 2 as published by the
+// Free Software Foundation (http://www.gnu.org).   They remain the
+// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+// See LICENSE.TXT in the distribution for a copy of this license.
 //
-//  This file and all associated files are the company proprietary property
-//        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+// THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+// OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+// PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+// LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+// OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 //
-// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//
+//                        http://www.mythos-engine.org/
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
 //                        *** Escher Terrain Editor ***
 //
-// Chuck Walbourn
+// Created by Chuck Walbourn
 //
 // eshtview.cpp
 //
@@ -44,7 +48,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include "stdafx.h"
@@ -72,78 +76,78 @@ static char BASED_CODE THIS_FILE[] = __FILE__;
 IMPLEMENT_DYNCREATE(TerrEditView, CView)
 
 BEGIN_MESSAGE_MAP(TerrEditView, CView)
-	//{{AFX_MSG_MAP(TerrEditView)
-	ON_WM_SIZE()
-	ON_COMMAND(ID_VIEW_RENDER, OnViewRender)
-	ON_COMMAND(ID_VIEW_RND_DOTS, OnViewRndDots)
-	ON_COMMAND(ID_VIEW_RND_WIREFRAME, OnViewRndWireframe)
-	ON_COMMAND(ID_VIEW_RND_SOLID, OnViewRndSolid)
-	ON_COMMAND(ID_VIEW_RND_FLAT, OnViewRndFlat)
-	ON_COMMAND(ID_VIEW_RND_SMOOTH, OnViewRndSmooth)
-	ON_COMMAND(ID_VIEW_RND_SPECULAR, OnViewRndSpecular)
-	ON_COMMAND(ID_VIEW_RND_BACKFACE, OnViewRndBackface)
-	ON_COMMAND(ID_VIEW_RND_TEXTURES, OnViewRndTextures)
-	ON_COMMAND(ID_VIEW_REFRESH, OnViewRefresh)
-	ON_COMMAND(ID_VIEW_RND_PERSPECTIVE, OnViewRndPerspective)
-	ON_COMMAND(ID_VIEW_ROTXY, OnViewRotateXY)
-	ON_COMMAND(ID_VIEW_MOVEXY, OnViewMoveXY)
-	ON_COMMAND(ID_VIEW_ROTMOVEZ, OnViewRotateMoveZ)
-	ON_COMMAND(ID_LGT_ADJUSTXY, OnLightAdjustXY)
-	ON_COMMAND(ID_LGT_ABRIGHT, OnLightAdjustIntensity)
-	ON_COMMAND(ID_VIEW_ZOOM_NORM, OnViewZoomNormal)
-	ON_COMMAND(ID_VIEW_ZOOM_LARGE, OnViewZoomLarge)
-	ON_COMMAND(ID_VIEW_ZOOM_MED, OnViewZoomMedium)
-	ON_COMMAND(ID_VIEW_ZOOM_XLARGE, OnViewZoomExLarge)
-	ON_COMMAND(ID_VIEW_PROP, OnViewProperties)
-	ON_COMMAND(ID_VIEW_ZOOM_MEGA, OnViewZoomMega)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_RENDER, OnUpdateViewRender)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_ROTXY, OnUpdateViewRotateXY)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_MOVEXY, OnUpdateViewMoveXY)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_ROTMOVEZ, OnUpdateViewRotateMoveZ)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_PROP, OnUpdateViewProperties)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_ZOOM_NORM, OnUpdateViewZoomNormal)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_ZOOM_MED, OnUpdateViewZoomMedium)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_ZOOM_LARGE, OnUpdateViewZoomLarge)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_ZOOM_XLARGE, OnUpdateViewZoomExLarge)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_ZOOM_MEGA, OnUpdateViewZoomMega)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_RND_DOTS, OnUpdateViewRndDots)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_RND_WIREFRAME, OnUpdateViewRndWireframe)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_RND_SOLID, OnUpdateViewRndSolid)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_RND_FLAT, OnUpdateViewRndFlat)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_RND_SMOOTH, OnUpdateViewRndSmooth)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_RND_SPECULAR, OnUpdateViewRndSpecular)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_RND_BACKFACE, OnUpdateViewRndBackface)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_RND_TEXTURES, OnUpdateViewRndTextures)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_RND_PERSPECTIVE, OnUpdateViewRndPerspective)
-	ON_UPDATE_COMMAND_UI(ID_LGT_ABRIGHT, OnUpdateLightAdjustIntensity)
-	ON_UPDATE_COMMAND_UI(ID_LGT_ADJUSTXY, OnUpdateLightAdjustXY)
-	ON_COMMAND(ID_EDIT_UNDO, OnEditUndo)
-	ON_UPDATE_COMMAND_UI(ID_EDIT_UNDO, OnUpdateEditUndo)
-	ON_COMMAND(ID_VIEW_HOVER, OnViewHover)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_HOVER, OnUpdateViewHover)
-	ON_COMMAND(ID_LGT_PROP, OnLightProperties)
-	ON_UPDATE_COMMAND_UI(ID_LGT_PROP, OnUpdateLightProperties)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_SHOW_COLORS, OnUpdateViewShowColors)
-	ON_COMMAND(ID_VIEW_SHOW_COLORS, OnViewShowColors)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_SHOW_SHADED, OnUpdateViewShowShaded)
-	ON_COMMAND(ID_VIEW_SHOW_SHADED, OnViewShowShaded)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_SHOW_TXTONLY, OnUpdateViewShowTexturesOnly)
-	ON_COMMAND(ID_VIEW_SHOW_TXTONLY, OnViewShowTexturesOnly)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_SHOW_HGT, OnUpdateViewShowHeight)
-	ON_COMMAND(ID_VIEW_SHOW_HGT, OnViewShowHeight)
-	ON_COMMAND(ID_EDIT_FLIPH, OnEditFlipHorizontal)
-	ON_COMMAND(ID_EDIT_FLIPV, OnEditFlipVertical)
-	ON_COMMAND(ID_EDIT_ROT90, OnEditRotate90)
-	ON_COMMAND(ID_EDIT_ROTN90, OnEditRotateNegative90)
-	ON_COMMAND(ID_EDIT_ASSIGN_HEIGHT, OnEditAssignByHeight)
-	ON_UPDATE_COMMAND_UI(ID_EDIT_ASSIGN_HEIGHT, OnUpdateEditAssignByHeight)
-	ON_COMMAND(ID_EDIT_ASSIGN_ROLL, OnEditAssignByRandomRoll)
-	ON_UPDATE_COMMAND_UI(ID_EDIT_ASSIGN_ROLL, OnUpdateEditAssignByRandomRoll)
-	ON_COMMAND(ID_VIEW_SHOW_APP, OnViewShowAppBits)
-	ON_UPDATE_COMMAND_UI(ID_VIEW_SHOW_APP, OnUpdateViewShowAppBits)
-	ON_COMMAND(ID_EDIT_ASSIGN_ANGLE, OnEditAssignByAngle)
-	ON_UPDATE_COMMAND_UI(ID_EDIT_ASSIGN_ANGLE, OnUpdateEditAssignByAngle)
-	//}}AFX_MSG_MAP
+        //{{AFX_MSG_MAP(TerrEditView)
+        ON_WM_SIZE()
+        ON_COMMAND(ID_VIEW_RENDER, OnViewRender)
+        ON_COMMAND(ID_VIEW_RND_DOTS, OnViewRndDots)
+        ON_COMMAND(ID_VIEW_RND_WIREFRAME, OnViewRndWireframe)
+        ON_COMMAND(ID_VIEW_RND_SOLID, OnViewRndSolid)
+        ON_COMMAND(ID_VIEW_RND_FLAT, OnViewRndFlat)
+        ON_COMMAND(ID_VIEW_RND_SMOOTH, OnViewRndSmooth)
+        ON_COMMAND(ID_VIEW_RND_SPECULAR, OnViewRndSpecular)
+        ON_COMMAND(ID_VIEW_RND_BACKFACE, OnViewRndBackface)
+        ON_COMMAND(ID_VIEW_RND_TEXTURES, OnViewRndTextures)
+        ON_COMMAND(ID_VIEW_REFRESH, OnViewRefresh)
+        ON_COMMAND(ID_VIEW_RND_PERSPECTIVE, OnViewRndPerspective)
+        ON_COMMAND(ID_VIEW_ROTXY, OnViewRotateXY)
+        ON_COMMAND(ID_VIEW_MOVEXY, OnViewMoveXY)
+        ON_COMMAND(ID_VIEW_ROTMOVEZ, OnViewRotateMoveZ)
+        ON_COMMAND(ID_LGT_ADJUSTXY, OnLightAdjustXY)
+        ON_COMMAND(ID_LGT_ABRIGHT, OnLightAdjustIntensity)
+        ON_COMMAND(ID_VIEW_ZOOM_NORM, OnViewZoomNormal)
+        ON_COMMAND(ID_VIEW_ZOOM_LARGE, OnViewZoomLarge)
+        ON_COMMAND(ID_VIEW_ZOOM_MED, OnViewZoomMedium)
+        ON_COMMAND(ID_VIEW_ZOOM_XLARGE, OnViewZoomExLarge)
+        ON_COMMAND(ID_VIEW_PROP, OnViewProperties)
+        ON_COMMAND(ID_VIEW_ZOOM_MEGA, OnViewZoomMega)
+        ON_UPDATE_COMMAND_UI(ID_VIEW_RENDER, OnUpdateViewRender)
+        ON_UPDATE_COMMAND_UI(ID_VIEW_ROTXY, OnUpdateViewRotateXY)
+        ON_UPDATE_COMMAND_UI(ID_VIEW_MOVEXY, OnUpdateViewMoveXY)
+        ON_UPDATE_COMMAND_UI(ID_VIEW_ROTMOVEZ, OnUpdateViewRotateMoveZ)
+        ON_UPDATE_COMMAND_UI(ID_VIEW_PROP, OnUpdateViewProperties)
+        ON_UPDATE_COMMAND_UI(ID_VIEW_ZOOM_NORM, OnUpdateViewZoomNormal)
+        ON_UPDATE_COMMAND_UI(ID_VIEW_ZOOM_MED, OnUpdateViewZoomMedium)
+        ON_UPDATE_COMMAND_UI(ID_VIEW_ZOOM_LARGE, OnUpdateViewZoomLarge)
+        ON_UPDATE_COMMAND_UI(ID_VIEW_ZOOM_XLARGE, OnUpdateViewZoomExLarge)
+        ON_UPDATE_COMMAND_UI(ID_VIEW_ZOOM_MEGA, OnUpdateViewZoomMega)
+        ON_UPDATE_COMMAND_UI(ID_VIEW_RND_DOTS, OnUpdateViewRndDots)
+        ON_UPDATE_COMMAND_UI(ID_VIEW_RND_WIREFRAME, OnUpdateViewRndWireframe)
+        ON_UPDATE_COMMAND_UI(ID_VIEW_RND_SOLID, OnUpdateViewRndSolid)
+        ON_UPDATE_COMMAND_UI(ID_VIEW_RND_FLAT, OnUpdateViewRndFlat)
+        ON_UPDATE_COMMAND_UI(ID_VIEW_RND_SMOOTH, OnUpdateViewRndSmooth)
+        ON_UPDATE_COMMAND_UI(ID_VIEW_RND_SPECULAR, OnUpdateViewRndSpecular)
+        ON_UPDATE_COMMAND_UI(ID_VIEW_RND_BACKFACE, OnUpdateViewRndBackface)
+        ON_UPDATE_COMMAND_UI(ID_VIEW_RND_TEXTURES, OnUpdateViewRndTextures)
+        ON_UPDATE_COMMAND_UI(ID_VIEW_RND_PERSPECTIVE, OnUpdateViewRndPerspective)
+        ON_UPDATE_COMMAND_UI(ID_LGT_ABRIGHT, OnUpdateLightAdjustIntensity)
+        ON_UPDATE_COMMAND_UI(ID_LGT_ADJUSTXY, OnUpdateLightAdjustXY)
+        ON_COMMAND(ID_EDIT_UNDO, OnEditUndo)
+        ON_UPDATE_COMMAND_UI(ID_EDIT_UNDO, OnUpdateEditUndo)
+        ON_COMMAND(ID_VIEW_HOVER, OnViewHover)
+        ON_UPDATE_COMMAND_UI(ID_VIEW_HOVER, OnUpdateViewHover)
+        ON_COMMAND(ID_LGT_PROP, OnLightProperties)
+        ON_UPDATE_COMMAND_UI(ID_LGT_PROP, OnUpdateLightProperties)
+        ON_UPDATE_COMMAND_UI(ID_VIEW_SHOW_COLORS, OnUpdateViewShowColors)
+        ON_COMMAND(ID_VIEW_SHOW_COLORS, OnViewShowColors)
+        ON_UPDATE_COMMAND_UI(ID_VIEW_SHOW_SHADED, OnUpdateViewShowShaded)
+        ON_COMMAND(ID_VIEW_SHOW_SHADED, OnViewShowShaded)
+        ON_UPDATE_COMMAND_UI(ID_VIEW_SHOW_TXTONLY, OnUpdateViewShowTexturesOnly)
+        ON_COMMAND(ID_VIEW_SHOW_TXTONLY, OnViewShowTexturesOnly)
+        ON_UPDATE_COMMAND_UI(ID_VIEW_SHOW_HGT, OnUpdateViewShowHeight)
+        ON_COMMAND(ID_VIEW_SHOW_HGT, OnViewShowHeight)
+        ON_COMMAND(ID_EDIT_FLIPH, OnEditFlipHorizontal)
+        ON_COMMAND(ID_EDIT_FLIPV, OnEditFlipVertical)
+        ON_COMMAND(ID_EDIT_ROT90, OnEditRotate90)
+        ON_COMMAND(ID_EDIT_ROTN90, OnEditRotateNegative90)
+        ON_COMMAND(ID_EDIT_ASSIGN_HEIGHT, OnEditAssignByHeight)
+        ON_UPDATE_COMMAND_UI(ID_EDIT_ASSIGN_HEIGHT, OnUpdateEditAssignByHeight)
+        ON_COMMAND(ID_EDIT_ASSIGN_ROLL, OnEditAssignByRandomRoll)
+        ON_UPDATE_COMMAND_UI(ID_EDIT_ASSIGN_ROLL, OnUpdateEditAssignByRandomRoll)
+        ON_COMMAND(ID_VIEW_SHOW_APP, OnViewShowAppBits)
+        ON_UPDATE_COMMAND_UI(ID_VIEW_SHOW_APP, OnUpdateViewShowAppBits)
+        ON_COMMAND(ID_EDIT_ASSIGN_ANGLE, OnEditAssignByAngle)
+        ON_UPDATE_COMMAND_UI(ID_EDIT_ASSIGN_ANGLE, OnUpdateEditAssignByAngle)
+        //}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
@@ -194,7 +198,7 @@ TerrEditView::~TerrEditView()
 #ifdef _DEBUG
 void TerrEditView::AssertValid() const
 {
-	CView::AssertValid();
+        CView::AssertValid();
 }
 
 
@@ -203,7 +207,7 @@ void TerrEditView::AssertValid() const
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 void TerrEditView::Dump(CDumpContext& dc) const
 {
-	CView::Dump(dc);
+        CView::Dump(dc);
 }
 
 
@@ -212,8 +216,8 @@ void TerrEditView::Dump(CDumpContext& dc) const
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 TerrEditDoc* TerrEditView::GetDocument() // non-debug version is inline
 {
-	ASSERT(m_pDocument->IsKindOf(RUNTIME_CLASS(TerrEditDoc)));
-	return (TerrEditDoc*)m_pDocument;
+        ASSERT(m_pDocument->IsKindOf(RUNTIME_CLASS(TerrEditDoc)));
+        return (TerrEditDoc*)m_pDocument;
 }
 #endif //_DEBUG
 
@@ -227,7 +231,7 @@ TerrEditDoc* TerrEditView::GetDocument() // non-debug version is inline
 // TerrEditView - Create                                                    ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 BOOL TerrEditView::Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName,
-                          DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID, CCreateContext* pContext) 
+                          DWORD dwStyle, const RECT& rect, CWnd* pParentWnd, UINT nID, CCreateContext* pContext)
 {
 //ÄÄÄ Create base window
     if (!CWnd::Create(lpszClassName, lpszWindowName, dwStyle, rect, pParentWnd, nID, pContext))
@@ -277,7 +281,7 @@ BOOL TerrEditView::Create(LPCTSTR lpszClassName, LPCTSTR lpszWindowName,
 
 
 
-//ÄÄÄ Create child window for terrain grid 
+//ÄÄÄ Create child window for terrain grid
     if (!grid.Create(NULL,
                      "Surface Information Grid",
                      WS_CHILD
@@ -339,7 +343,7 @@ void TerrEditView::OnDraw(CDC* pDC)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrEditView - OnInitialUpdate                                           ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrEditView::OnInitialUpdate() 
+void TerrEditView::OnInitialUpdate()
 {
     TerrEditDoc* pDoc = GetDocument();
     ASSERT_VALID(pDoc);
@@ -354,7 +358,7 @@ void TerrEditView::OnInitialUpdate()
     rend.terr.flags = ESCH_TRN_DOTS;
     rend.SetMode(RNDCTRL_ROTATEXY);
 
-	CView::OnInitialUpdate();
+        CView::OnInitialUpdate();
 }
 
 
@@ -364,7 +368,7 @@ void TerrEditView::OnInitialUpdate()
 // Hit values: 0 - update all data                                          ³
 //             otherwise bitmask of sections to update                      ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrEditView::OnUpdate(CView* pSender, LPARAM lHint, CObject* pHint) 
+void TerrEditView::OnUpdate(CView* pSender, LPARAM lHint, CObject* pHint)
 {
     TerrEditDoc* pDoc = GetDocument();
     ASSERT_VALID(pDoc);
@@ -416,7 +420,7 @@ void TerrEditView::OnUpdate(CView* pSender, LPARAM lHint, CObject* pHint)
     if (!lHint || (lHint & (HINT_UPDATECOLR|HINT_UPDATELIGHTS)))
     {
         grid.UpdateSurfaceColors();
-            
+
         if (grid.m_hWnd)
             grid.Invalidate();
     }
@@ -444,7 +448,7 @@ void TerrEditView::OnUpdate(CView* pSender, LPARAM lHint, CObject* pHint)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrEditView - OnSize                                                    ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrEditView::OnSize(UINT nType, int cx, int cy) 
+void TerrEditView::OnSize(UINT nType, int cx, int cy)
 {
     cx &= ~0x3;
 
@@ -465,15 +469,15 @@ void TerrEditView::OnSize(UINT nType, int cx, int cy)
 
     if (rend.m_hWnd)
         rend.MoveWindow(gridright, rendertop, cx - gridright, cy - rendertop);
-       
-	CView::OnSize(nType, cx, cy);
+
+        CView::OnSize(nType, cx, cy);
 }
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrEditView - On(Update)EditUndo                                        ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrEditView::OnEditUndo() 
+void TerrEditView::OnEditUndo()
 {
     TerrEditDoc* pDoc = GetDocument();
     ASSERT_VALID(pDoc);
@@ -481,7 +485,7 @@ void TerrEditView::OnEditUndo()
     pDoc->PopUndo();
 }
 
-void TerrEditView::OnUpdateEditUndo(CCmdUI* pCmdUI) 
+void TerrEditView::OnUpdateEditUndo(CCmdUI* pCmdUI)
 {
     TerrEditDoc* pDoc = GetDocument();
     ASSERT_VALID(pDoc);
@@ -493,7 +497,7 @@ void TerrEditView::OnUpdateEditUndo(CCmdUI* pCmdUI)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrEditView - OnEditFlipHorizontal                                      ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrEditView::OnEditFlipHorizontal() 
+void TerrEditView::OnEditFlipHorizontal()
 {
     TerrEditDoc* pDoc = GetDocument();
     ASSERT_VALID(pDoc);
@@ -505,7 +509,7 @@ void TerrEditView::OnEditFlipHorizontal()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrEditView - OnEditFlipVertical                                        ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrEditView::OnEditFlipVertical() 
+void TerrEditView::OnEditFlipVertical()
 {
     TerrEditDoc* pDoc = GetDocument();
     ASSERT_VALID(pDoc);
@@ -517,7 +521,7 @@ void TerrEditView::OnEditFlipVertical()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrEditView - OnEditRotate90                                            ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrEditView::OnEditRotate90() 
+void TerrEditView::OnEditRotate90()
 {
     TerrEditDoc* pDoc = GetDocument();
     ASSERT_VALID(pDoc);
@@ -529,7 +533,7 @@ void TerrEditView::OnEditRotate90()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrEditView - OnEditRotateNegative90                                    ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrEditView::OnEditRotateNegative90() 
+void TerrEditView::OnEditRotateNegative90()
 {
     TerrEditDoc* pDoc = GetDocument();
     ASSERT_VALID(pDoc);
@@ -541,7 +545,7 @@ void TerrEditView::OnEditRotateNegative90()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrEditView - On(Update)EditAssignByHeight                              ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrEditView::OnEditAssignByHeight() 
+void TerrEditView::OnEditAssignByHeight()
 {
     TerrEditDoc* pDoc = GetDocument();
     ASSERT_VALID(pDoc);
@@ -559,7 +563,7 @@ void TerrEditView::OnEditAssignByHeight()
                         dlg.area, dlg.m_preserve);
 }
 
-void TerrEditView::OnUpdateEditAssignByHeight(CCmdUI* pCmdUI) 
+void TerrEditView::OnUpdateEditAssignByHeight(CCmdUI* pCmdUI)
 {
     TerrEditDoc* pDoc = GetDocument();
     ASSERT_VALID(pDoc);
@@ -571,7 +575,7 @@ void TerrEditView::OnUpdateEditAssignByHeight(CCmdUI* pCmdUI)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrEditView - On(Update)EditAssignByRandomRoll                          ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrEditView::OnEditAssignByRandomRoll() 
+void TerrEditView::OnEditAssignByRandomRoll()
 {
     TerrEditDoc* pDoc = GetDocument();
     ASSERT_VALID(pDoc);
@@ -590,7 +594,7 @@ void TerrEditView::OnEditAssignByRandomRoll()
                             dlg.area, dlg.m_preserve);
 }
 
-void TerrEditView::OnUpdateEditAssignByRandomRoll(CCmdUI* pCmdUI) 
+void TerrEditView::OnUpdateEditAssignByRandomRoll(CCmdUI* pCmdUI)
 {
     TerrEditDoc* pDoc = GetDocument();
     ASSERT_VALID(pDoc);
@@ -602,7 +606,7 @@ void TerrEditView::OnUpdateEditAssignByRandomRoll(CCmdUI* pCmdUI)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrEditView - On(Update)EditAssignByAngle                               ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrEditView::OnEditAssignByAngle() 
+void TerrEditView::OnEditAssignByAngle()
 {
     TerrEditDoc* pDoc = GetDocument();
     ASSERT_VALID(pDoc);
@@ -622,7 +626,7 @@ void TerrEditView::OnEditAssignByAngle()
                        dlg.area, dlg.m_preserve);
 }
 
-void TerrEditView::OnUpdateEditAssignByAngle(CCmdUI* pCmdUI) 
+void TerrEditView::OnUpdateEditAssignByAngle(CCmdUI* pCmdUI)
 {
     TerrEditDoc* pDoc = GetDocument();
     ASSERT_VALID(pDoc);
@@ -634,7 +638,7 @@ void TerrEditView::OnUpdateEditAssignByAngle(CCmdUI* pCmdUI)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrEditView - OnViewRefresh                                             ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrEditView::OnViewRefresh() 
+void TerrEditView::OnViewRefresh()
 {
     txtList.RedrawWindow();
     colorList.RedrawWindow();
@@ -653,12 +657,12 @@ void TerrEditView::OnViewRefresh()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrEditView - On(Update)ViewRender                                      ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrEditView::OnUpdateViewRender(CCmdUI* pCmdUI) 
+void TerrEditView::OnUpdateViewRender(CCmdUI* pCmdUI)
 {
     pCmdUI->SetCheck(displayrender);
 }
 
-void TerrEditView::OnViewRender() 
+void TerrEditView::OnViewRender()
 {
     displayrender = !displayrender;
 
@@ -681,13 +685,13 @@ void TerrEditView::OnViewRender()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrEditView - On(Update)ViewHover                                       ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrEditView::OnUpdateViewHover(CCmdUI* pCmdUI) 
+void TerrEditView::OnUpdateViewHover(CCmdUI* pCmdUI)
 {
     pCmdUI->SetCheck((rend.GetMode() == RNDCTRL_HOVER) ? 1 : 0);
     pCmdUI->Enable(displayrender);
 }
 
-void TerrEditView::OnViewHover() 
+void TerrEditView::OnViewHover()
 {
     rend.SetMode(RNDCTRL_HOVER);
 }
@@ -696,13 +700,13 @@ void TerrEditView::OnViewHover()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrEditView - On(Update)ViewRotateXY                                    ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrEditView::OnUpdateViewRotateXY(CCmdUI* pCmdUI) 
+void TerrEditView::OnUpdateViewRotateXY(CCmdUI* pCmdUI)
 {
     pCmdUI->SetCheck((rend.GetMode() == RNDCTRL_ROTATEXY) ? 1 : 0);
     pCmdUI->Enable(displayrender);
 }
 
-void TerrEditView::OnViewRotateXY() 
+void TerrEditView::OnViewRotateXY()
 {
     rend.SetMode(RNDCTRL_ROTATEXY);
 }
@@ -711,13 +715,13 @@ void TerrEditView::OnViewRotateXY()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrEditView - On(Update)ViewMoveXY                                      ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrEditView::OnUpdateViewMoveXY(CCmdUI* pCmdUI) 
+void TerrEditView::OnUpdateViewMoveXY(CCmdUI* pCmdUI)
 {
     pCmdUI->SetCheck((rend.GetMode() == RNDCTRL_MOVEXY) ? 1 : 0);
     pCmdUI->Enable(displayrender);
 }
 
-void TerrEditView::OnViewMoveXY() 
+void TerrEditView::OnViewMoveXY()
 {
     rend.SetMode(RNDCTRL_MOVEXY);
 }
@@ -726,13 +730,13 @@ void TerrEditView::OnViewMoveXY()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrEditView - On(Update)ViewRotateMoveZ                                 ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrEditView::OnUpdateViewRotateMoveZ(CCmdUI* pCmdUI) 
+void TerrEditView::OnUpdateViewRotateMoveZ(CCmdUI* pCmdUI)
 {
     pCmdUI->SetCheck((rend.GetMode() == RNDCTRL_ROTMOVEZ) ? 1 : 0);
     pCmdUI->Enable(displayrender);
 }
 
-void TerrEditView::OnViewRotateMoveZ() 
+void TerrEditView::OnViewRotateMoveZ()
 {
     rend.SetMode(RNDCTRL_ROTMOVEZ);
 }
@@ -741,12 +745,12 @@ void TerrEditView::OnViewRotateMoveZ()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrEditView - On(Update)ViewProperties                                  ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrEditView::OnUpdateViewProperties(CCmdUI* pCmdUI) 
+void TerrEditView::OnUpdateViewProperties(CCmdUI* pCmdUI)
 {
     pCmdUI->Enable(displayrender);
 }
 
-void TerrEditView::OnViewProperties() 
+void TerrEditView::OnViewProperties()
 {
     TerrEditDoc* pDoc = GetDocument();
     ASSERT_VALID(pDoc);
@@ -758,12 +762,12 @@ void TerrEditView::OnViewProperties()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrEditView - On(Update)ViewZoomNormal                                  ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrEditView::OnUpdateViewZoomNormal(CCmdUI* pCmdUI) 
+void TerrEditView::OnUpdateViewZoomNormal(CCmdUI* pCmdUI)
 {
     pCmdUI->SetCheck((grid.GetZoomLevel() == 0) ? 1 : 0);
 }
 
-void TerrEditView::OnViewZoomNormal() 
+void TerrEditView::OnViewZoomNormal()
 {
     grid.SetZoomLevel(0);
     grid.RedrawWindow();
@@ -773,12 +777,12 @@ void TerrEditView::OnViewZoomNormal()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrEditView - On(Update)ViewZoomMedium                                  ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrEditView::OnUpdateViewZoomMedium(CCmdUI* pCmdUI) 
+void TerrEditView::OnUpdateViewZoomMedium(CCmdUI* pCmdUI)
 {
     pCmdUI->SetCheck((grid.GetZoomLevel() == 1) ? 1 : 0);
 }
 
-void TerrEditView::OnViewZoomMedium() 
+void TerrEditView::OnViewZoomMedium()
 {
     grid.SetZoomLevel(1);
     grid.RedrawWindow();
@@ -788,12 +792,12 @@ void TerrEditView::OnViewZoomMedium()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrEditView - On(Update)ViewZoomLarge                                   ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrEditView::OnUpdateViewZoomLarge(CCmdUI* pCmdUI) 
+void TerrEditView::OnUpdateViewZoomLarge(CCmdUI* pCmdUI)
 {
     pCmdUI->SetCheck((grid.GetZoomLevel() == 2) ? 1 : 0);
 }
 
-void TerrEditView::OnViewZoomLarge() 
+void TerrEditView::OnViewZoomLarge()
 {
     grid.SetZoomLevel(2);
     grid.RedrawWindow();
@@ -803,12 +807,12 @@ void TerrEditView::OnViewZoomLarge()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrEditView - On(Update)ViewZoomExLarge                                 ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrEditView::OnUpdateViewZoomExLarge(CCmdUI* pCmdUI) 
+void TerrEditView::OnUpdateViewZoomExLarge(CCmdUI* pCmdUI)
 {
     pCmdUI->SetCheck((grid.GetZoomLevel() == 3) ? 1 : 0);
 }
 
-void TerrEditView::OnViewZoomExLarge() 
+void TerrEditView::OnViewZoomExLarge()
 {
     grid.SetZoomLevel(3);
     grid.RedrawWindow();
@@ -818,12 +822,12 @@ void TerrEditView::OnViewZoomExLarge()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrEditView - On(Update)ViewZoomMega                                    ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrEditView::OnUpdateViewZoomMega(CCmdUI* pCmdUI) 
+void TerrEditView::OnUpdateViewZoomMega(CCmdUI* pCmdUI)
 {
     pCmdUI->SetCheck((grid.GetZoomLevel() == 4) ? 1 : 0);
 }
 
-void TerrEditView::OnViewZoomMega() 
+void TerrEditView::OnViewZoomMega()
 {
     grid.SetZoomLevel(4);
     grid.RedrawWindow();
@@ -833,14 +837,14 @@ void TerrEditView::OnViewZoomMega()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrEditView - On(Update)ViewShowColors                                  ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrEditView::OnUpdateViewShowColors(CCmdUI* pCmdUI) 
+void TerrEditView::OnUpdateViewShowColors(CCmdUI* pCmdUI)
 {
     pCmdUI->SetCheck((grid.GetMode() == SURFDSP_COLORS) ? 1 : 0);
 }
 
-void TerrEditView::OnViewShowColors() 
+void TerrEditView::OnViewShowColors()
 {
-    grid.SetMode(SURFDSP_COLORS);	
+    grid.SetMode(SURFDSP_COLORS);
     grid.RedrawWindow();
 }
 
@@ -848,14 +852,14 @@ void TerrEditView::OnViewShowColors()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrEditView - On(Update)ViewShowShaded                                  ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrEditView::OnUpdateViewShowShaded(CCmdUI* pCmdUI) 
+void TerrEditView::OnUpdateViewShowShaded(CCmdUI* pCmdUI)
 {
     pCmdUI->SetCheck((grid.GetMode() == SURFDSP_SHADED) ? 1 : 0);
 }
 
-void TerrEditView::OnViewShowShaded() 
+void TerrEditView::OnViewShowShaded()
 {
-    grid.SetMode(SURFDSP_SHADED);	
+    grid.SetMode(SURFDSP_SHADED);
     grid.RedrawWindow();
 }
 
@@ -863,14 +867,14 @@ void TerrEditView::OnViewShowShaded()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrEditView - On(Update)ViewShowHeight                                  ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrEditView::OnUpdateViewShowHeight(CCmdUI* pCmdUI) 
+void TerrEditView::OnUpdateViewShowHeight(CCmdUI* pCmdUI)
 {
     pCmdUI->SetCheck((grid.GetMode() == SURFDSP_HGT) ? 1 : 0);
 }
 
-void TerrEditView::OnViewShowHeight() 
+void TerrEditView::OnViewShowHeight()
 {
-    grid.SetMode(SURFDSP_HGT);	
+    grid.SetMode(SURFDSP_HGT);
     grid.RedrawWindow();
 }
 
@@ -878,14 +882,14 @@ void TerrEditView::OnViewShowHeight()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrEditView - On(Update)ViewShowTexturesOnly                            ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrEditView::OnUpdateViewShowTexturesOnly(CCmdUI* pCmdUI) 
+void TerrEditView::OnUpdateViewShowTexturesOnly(CCmdUI* pCmdUI)
 {
     pCmdUI->SetCheck((grid.GetMode() == SURFDSP_TXTONLY) ? 1 : 0);
 }
 
-void TerrEditView::OnViewShowTexturesOnly() 
+void TerrEditView::OnViewShowTexturesOnly()
 {
-    grid.SetMode(SURFDSP_TXTONLY);	
+    grid.SetMode(SURFDSP_TXTONLY);
     grid.RedrawWindow();
 }
 
@@ -893,14 +897,14 @@ void TerrEditView::OnViewShowTexturesOnly()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrEditView - On(Update)ViewShowAppBits                                 ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrEditView::OnUpdateViewShowAppBits(CCmdUI* pCmdUI) 
+void TerrEditView::OnUpdateViewShowAppBits(CCmdUI* pCmdUI)
 {
     pCmdUI->SetCheck((grid.GetMode() == SURFDSP_APPBITS) ? 1 : 0);
 }
 
-void TerrEditView::OnViewShowAppBits() 
+void TerrEditView::OnViewShowAppBits()
 {
-    grid.SetMode(SURFDSP_APPBITS);	
+    grid.SetMode(SURFDSP_APPBITS);
     grid.RedrawWindow();
 }
 
@@ -908,13 +912,13 @@ void TerrEditView::OnViewShowAppBits()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrEditView - On(Update)ViewRndDots                                     ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrEditView::OnUpdateViewRndDots(CCmdUI* pCmdUI) 
+void TerrEditView::OnUpdateViewRndDots(CCmdUI* pCmdUI)
 {
-	pCmdUI->SetCheck((rend.terr.flags & ESCH_TRN_DOTS) ? 1 : 0);
+        pCmdUI->SetCheck((rend.terr.flags & ESCH_TRN_DOTS) ? 1 : 0);
     pCmdUI->Enable(displayrender);
 }
 
-void TerrEditView::OnViewRndDots() 
+void TerrEditView::OnViewRndDots()
 {
     TerrEditDoc* pDoc = GetDocument();
     ASSERT_VALID(pDoc);
@@ -936,13 +940,13 @@ void TerrEditView::OnViewRndDots()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrEditView - On(Update)ViewRndWireframe                                ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrEditView::OnUpdateViewRndWireframe(CCmdUI* pCmdUI) 
+void TerrEditView::OnUpdateViewRndWireframe(CCmdUI* pCmdUI)
 {
     TerrEditDoc* pDoc = GetDocument();
     ASSERT_VALID(pDoc);
 
-   	pCmdUI->SetCheck( (!(rend.terr.flags & ESCH_TRN_DOTS)
-	                   && (pDoc->cam.flags & (ESCH_CAM_SHADE_WIRE
+        pCmdUI->SetCheck( (!(rend.terr.flags & ESCH_TRN_DOTS)
+                           && (pDoc->cam.flags & (ESCH_CAM_SHADE_WIRE
                                               | ESCH_CAM_SHADE_SOLID
                                               | ESCH_CAM_SHADE_FLAT
                                               | ESCH_CAM_SHADE_SMOOTH
@@ -950,7 +954,7 @@ void TerrEditView::OnUpdateViewRndWireframe(CCmdUI* pCmdUI)
     pCmdUI->Enable(displayrender);
 }
 
-void TerrEditView::OnViewRndWireframe() 
+void TerrEditView::OnViewRndWireframe()
 {
     TerrEditDoc* pDoc = GetDocument();
     ASSERT_VALID(pDoc);
@@ -971,20 +975,20 @@ void TerrEditView::OnViewRndWireframe()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrEditView - On(Update)ViewRndSolid                                    ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrEditView::OnUpdateViewRndSolid(CCmdUI* pCmdUI) 
+void TerrEditView::OnUpdateViewRndSolid(CCmdUI* pCmdUI)
 {
     TerrEditDoc* pDoc = GetDocument();
     ASSERT_VALID(pDoc);
 
-   	pCmdUI->SetCheck( (!(rend.terr.flags & ESCH_TRN_DOTS)
-	                   && (pDoc->cam.flags & (ESCH_CAM_SHADE_SOLID
+        pCmdUI->SetCheck( (!(rend.terr.flags & ESCH_TRN_DOTS)
+                           && (pDoc->cam.flags & (ESCH_CAM_SHADE_SOLID
                                               | ESCH_CAM_SHADE_FLAT
                                               | ESCH_CAM_SHADE_SMOOTH
                                               | ESCH_CAM_SHADE_SPECULAR))==ESCH_CAM_SHADE_SOLID) ? 1 : 0);
     pCmdUI->Enable(displayrender);
 }
 
-void TerrEditView::OnViewRndSolid() 
+void TerrEditView::OnViewRndSolid()
 {
     TerrEditDoc* pDoc = GetDocument();
     ASSERT_VALID(pDoc);
@@ -993,9 +997,9 @@ void TerrEditView::OnViewRndSolid()
     pDoc->cam.flags &= ~(ESCH_CAM_SHADE_SPECULAR
                          | ESCH_CAM_SHADE_SMOOTH
                          | ESCH_CAM_SHADE_FLAT);
-    pDoc->cam.flags |= ESCH_CAM_SHADE_WIRE 
+    pDoc->cam.flags |= ESCH_CAM_SHADE_WIRE
                        | ESCH_CAM_SHADE_SOLID;
-                  
+
     pDoc->SetModifiedFlag();
     pDoc->SetLightsModifiedFlag();
     pDoc->UpdateAllViews(NULL, HINT_UPDATELIGHTS, NULL);
@@ -1005,19 +1009,19 @@ void TerrEditView::OnViewRndSolid()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrEditView - On(Update)ViewRndFlat                                     ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrEditView::OnUpdateViewRndFlat(CCmdUI* pCmdUI) 
+void TerrEditView::OnUpdateViewRndFlat(CCmdUI* pCmdUI)
 {
     TerrEditDoc* pDoc = GetDocument();
     ASSERT_VALID(pDoc);
 
-   	pCmdUI->SetCheck( (!(rend.terr.flags & ESCH_TRN_DOTS)
-	                   && (pDoc->cam.flags & (ESCH_CAM_SHADE_FLAT
+        pCmdUI->SetCheck( (!(rend.terr.flags & ESCH_TRN_DOTS)
+                           && (pDoc->cam.flags & (ESCH_CAM_SHADE_FLAT
                                               | ESCH_CAM_SHADE_SMOOTH
                                               | ESCH_CAM_SHADE_SPECULAR))==ESCH_CAM_SHADE_FLAT) ? 1 : 0);
     pCmdUI->Enable(displayrender);
 }
 
-void TerrEditView::OnViewRndFlat() 
+void TerrEditView::OnViewRndFlat()
 {
     TerrEditDoc* pDoc = GetDocument();
     ASSERT_VALID(pDoc);
@@ -1028,7 +1032,7 @@ void TerrEditView::OnViewRndFlat()
     pDoc->cam.flags |= ESCH_CAM_SHADE_WIRE
                        | ESCH_CAM_SHADE_SOLID
                        | ESCH_CAM_SHADE_FLAT;
-    
+
     pDoc->SetModifiedFlag();
     pDoc->SetLightsModifiedFlag();
     pDoc->UpdateAllViews(NULL, HINT_UPDATELIGHTS, NULL);
@@ -1038,18 +1042,18 @@ void TerrEditView::OnViewRndFlat()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrEditView - On(Update)ViewRndSmooth                                   ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrEditView::OnUpdateViewRndSmooth(CCmdUI* pCmdUI) 
+void TerrEditView::OnUpdateViewRndSmooth(CCmdUI* pCmdUI)
 {
     TerrEditDoc* pDoc = GetDocument();
     ASSERT_VALID(pDoc);
 
-   	pCmdUI->SetCheck( (!(rend.terr.flags & ESCH_TRN_DOTS)
-	                   && (pDoc->cam.flags & (ESCH_CAM_SHADE_SMOOTH
+        pCmdUI->SetCheck( (!(rend.terr.flags & ESCH_TRN_DOTS)
+                           && (pDoc->cam.flags & (ESCH_CAM_SHADE_SMOOTH
                                               | ESCH_CAM_SHADE_SPECULAR))==ESCH_CAM_SHADE_SMOOTH) ? 1 : 0);
     pCmdUI->Enable(displayrender);
 }
 
-void TerrEditView::OnViewRndSmooth() 
+void TerrEditView::OnViewRndSmooth()
 {
     TerrEditDoc* pDoc = GetDocument();
     ASSERT_VALID(pDoc);
@@ -1070,17 +1074,17 @@ void TerrEditView::OnViewRndSmooth()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrEditView - On(Update)ViewRndSpecular                                 ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrEditView::OnUpdateViewRndSpecular(CCmdUI* pCmdUI) 
+void TerrEditView::OnUpdateViewRndSpecular(CCmdUI* pCmdUI)
 {
     TerrEditDoc* pDoc = GetDocument();
     ASSERT_VALID(pDoc);
 
-   	pCmdUI->SetCheck( (!(rend.terr.flags & ESCH_TRN_DOTS)
-	                   && (pDoc->cam.flags & ESCH_CAM_SHADE_SPECULAR)) ? 1 : 0);
+        pCmdUI->SetCheck( (!(rend.terr.flags & ESCH_TRN_DOTS)
+                           && (pDoc->cam.flags & ESCH_CAM_SHADE_SPECULAR)) ? 1 : 0);
     pCmdUI->Enable(displayrender);
 }
 
-void TerrEditView::OnViewRndSpecular() 
+void TerrEditView::OnViewRndSpecular()
 {
     TerrEditDoc* pDoc = GetDocument();
     ASSERT_VALID(pDoc);
@@ -1101,16 +1105,16 @@ void TerrEditView::OnViewRndSpecular()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrEditView - On(Update)ViewRndBackface                                 ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrEditView::OnUpdateViewRndBackface(CCmdUI* pCmdUI) 
+void TerrEditView::OnUpdateViewRndBackface(CCmdUI* pCmdUI)
 {
     TerrEditDoc* pDoc = GetDocument();
     ASSERT_VALID(pDoc);
 
-   	pCmdUI->SetCheck( (pDoc->cam.flags & ESCH_CAM_BACKCULL) ? 1 : 0);
+        pCmdUI->SetCheck( (pDoc->cam.flags & ESCH_CAM_BACKCULL) ? 1 : 0);
     pCmdUI->Enable(displayrender);
 }
 
-void TerrEditView::OnViewRndBackface() 
+void TerrEditView::OnViewRndBackface()
 {
     TerrEditDoc* pDoc = GetDocument();
     ASSERT_VALID(pDoc);
@@ -1125,16 +1129,16 @@ void TerrEditView::OnViewRndBackface()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrEditView - On(Update)ViewRndTextures                                 ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrEditView::OnUpdateViewRndTextures(CCmdUI* pCmdUI) 
+void TerrEditView::OnUpdateViewRndTextures(CCmdUI* pCmdUI)
 {
     TerrEditDoc* pDoc = GetDocument();
     ASSERT_VALID(pDoc);
 
-   	pCmdUI->SetCheck( (pDoc->cam.flags & ESCH_CAM_TEXTURED) ? 1 : 0);
+        pCmdUI->SetCheck( (pDoc->cam.flags & ESCH_CAM_TEXTURED) ? 1 : 0);
     pCmdUI->Enable(displayrender);
 }
 
-void TerrEditView::OnViewRndTextures() 
+void TerrEditView::OnViewRndTextures()
 {
     TerrEditDoc* pDoc = GetDocument();
     ASSERT_VALID(pDoc);
@@ -1149,16 +1153,16 @@ void TerrEditView::OnViewRndTextures()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrEditView - On(Update)ViewRndPerspective                              ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrEditView::OnUpdateViewRndPerspective(CCmdUI* pCmdUI) 
+void TerrEditView::OnUpdateViewRndPerspective(CCmdUI* pCmdUI)
 {
     TerrEditDoc* pDoc = GetDocument();
     ASSERT_VALID(pDoc);
 
-   	pCmdUI->SetCheck( (pDoc->cam.flags & ESCH_CAM_PERSPECTIVE) ? 1 : 0);
+        pCmdUI->SetCheck( (pDoc->cam.flags & ESCH_CAM_PERSPECTIVE) ? 1 : 0);
     pCmdUI->Enable( (displayrender && (pDoc->cam.flags & ESCH_CAM_TEXTURED)) ? TRUE : FALSE);
 }
 
-void TerrEditView::OnViewRndPerspective() 
+void TerrEditView::OnViewRndPerspective()
 {
     TerrEditDoc* pDoc = GetDocument();
     ASSERT_VALID(pDoc);
@@ -1173,13 +1177,13 @@ void TerrEditView::OnViewRndPerspective()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrEditView - On(Update)LightAdjustXY                                   ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrEditView::OnUpdateLightAdjustXY(CCmdUI* pCmdUI) 
+void TerrEditView::OnUpdateLightAdjustXY(CCmdUI* pCmdUI)
 {
-   	pCmdUI->SetCheck( (rend.GetMode() == RNDCTRL_LIGHTXY) ? 1 : 0);
+        pCmdUI->SetCheck( (rend.GetMode() == RNDCTRL_LIGHTXY) ? 1 : 0);
     pCmdUI->Enable(displayrender);
 }
 
-void TerrEditView::OnLightAdjustXY() 
+void TerrEditView::OnLightAdjustXY()
 {
     rend.SetMode(RNDCTRL_LIGHTXY);
 }
@@ -1188,13 +1192,13 @@ void TerrEditView::OnLightAdjustXY()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrEditView - On(Update)LightAdjustIntensity                            ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrEditView::OnUpdateLightAdjustIntensity(CCmdUI* pCmdUI) 
+void TerrEditView::OnUpdateLightAdjustIntensity(CCmdUI* pCmdUI)
 {
-   	pCmdUI->SetCheck( (rend.GetMode() == RNDCTRL_LIGHTBRIGHT) ? 1 : 0);
+        pCmdUI->SetCheck( (rend.GetMode() == RNDCTRL_LIGHTBRIGHT) ? 1 : 0);
     pCmdUI->Enable(displayrender);
 }
 
-void TerrEditView::OnLightAdjustIntensity() 
+void TerrEditView::OnLightAdjustIntensity()
 {
     rend.SetMode(RNDCTRL_LIGHTBRIGHT);
 }
@@ -1203,12 +1207,12 @@ void TerrEditView::OnLightAdjustIntensity()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrEditView - On(Update)LightProperties                                 ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrEditView::OnUpdateLightProperties(CCmdUI* pCmdUI) 
+void TerrEditView::OnUpdateLightProperties(CCmdUI* pCmdUI)
 {
     pCmdUI->Enable(displayrender);
 }
 
-void TerrEditView::OnLightProperties() 
+void TerrEditView::OnLightProperties()
 {
     TerrEditDoc* pDoc = GetDocument();
     ASSERT_VALID(pDoc);

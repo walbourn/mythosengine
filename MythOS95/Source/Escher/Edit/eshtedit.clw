@@ -2,13 +2,13 @@
 
 [General Info]
 Version=1
-LastClass=TerrMainFrame
+LastClass=TerrHTableEdit
 LastTemplate=CDialog
 NewFileInclude1=#include "stdafx.h"
 NewFileInclude2=#include "eshtedit.h"
 LastPage=0
 
-ClassCount=38
+ClassCount=39
 Class1=TerrPropGenPage
 Class2=TerrPropHColrPage
 Class3=TerrPropHTablePage
@@ -46,40 +46,42 @@ Class34=TerrMainFrame
 Class35=TerrEditRender
 Class36=TerrEditView
 
-ResourceCount=31
-Resource1=IDD_ABOUTBOX
-Resource2=IDD_SETBASEELV
-Resource3=IDD_TERRPROP_GEN
-Resource4=IDD_TERRPROP_MISC
-Resource5=IDD_PROGRESS
-Resource6=IDD_EXPORTSTAT
-Resource7=IDD_SURFPROP_GEN
-Resource8=IDD_TXTPROP_GEN
-Resource9=IDD_CAMPROP_MISC
-Resource10=IDD_CAMPROP_GEN
-Resource11=IDD_TXTVIEW
-Resource12=IDD_CAMPROP_LOD
-Resource13=IDD_LGTPROP_GEN
-Resource14=IDD_LGTPROP_EXTRA
-Resource15=IDD_TERRPROP_HGTCLR
-Resource16=IDD_COLORSELECT
-Resource17=IDD_CLRPROP_GEN
-Resource18=IDD_TXTCREATE_NEW
-Resource19=IDD_CLRCREATE_NEWTXT
-Resource20=IDD_TXTCREATE_ASK
-Resource21=IDD_SHADEREVIEW
-Resource22=IDD_DEMIMPORT
-Resource23=IDD_DEMPROGRESS
-Resource24=IDD_TERRPROP_HTBL
-Resource25=IDD_TOOL_HEIGHT
-Resource26=IDD_TOOL_RANDOM
-Resource27=IDD_CAMPROP_EX
-Resource28=IDD_TXTPROP_SFLAGS
-Resource29=IDD_TOOL_ANGLE
+ResourceCount=32
+Resource1=IDD_LOCATE
+Resource2=IDD_TOOL_ANGLE
+Resource3=IDD_ABOUTBOX
+Resource4=IDR_MAINFRAME
+Resource5=IDD_TERRPROP_GEN
+Resource6=IDD_TERRPROP_MISC
+Resource7=IDD_PROGRESS
+Resource8=IDD_EXPORTSTAT
+Resource9=IDD_SURFPROP_GEN
+Resource10=IDD_TXTPROP_GEN
+Resource11=IDD_CAMPROP_MISC
+Resource12=IDD_CAMPROP_GEN
+Resource13=IDD_TXTVIEW
+Resource14=IDD_CAMPROP_LOD
+Resource15=IDD_LGTPROP_GEN
+Resource16=IDD_LGTPROP_EXTRA
+Resource17=IDD_TERRPROP_HGTCLR
+Resource18=IDD_COLORSELECT
+Resource19=IDD_CLRPROP_GEN
+Resource20=IDD_TXTCREATE_NEW
+Resource21=IDD_CLRCREATE_NEWTXT
+Resource22=IDD_TXTCREATE_ASK
+Resource23=IDD_SHADEREVIEW
+Resource24=IDD_DEMIMPORT
+Resource25=IDD_SETBASEELV
+Resource26=IDD_TERRPROP_HTBL
+Resource27=IDD_TOOL_HEIGHT
+Resource28=IDD_TOOL_RANDOM
+Resource29=IDD_CAMPROP_EX
 Class37=LocateDlg
-Resource30=IDD_LOCATE
+Resource30=IDD_TXTPROP_SFLAGS
 Class38=SetBaseElvDlg
-Resource31=IDR_MAINFRAME
+Resource31=IDD_DEMPROGRESS
+Resource32=IDD_TERRHTBLE_EDIT
+Class39=TerrHTableEdit
 
 [CLS:TerrPropGenPage]
 Type=0
@@ -98,6 +100,9 @@ Type=0
 BaseClass=CPropertyPage
 HeaderFile=eshtdlg.h
 ImplementationFile=eshtdlg.cpp
+LastObject=IDC_TPROP_HCLIP
+Filter=D
+VirtualFilter=idWC
 
 [CLS:TerrPropMiscPage]
 Type=0
@@ -377,9 +382,10 @@ Control37=IDC_STATIC,static,1342308352
 [DLG:IDD_TERRPROP_HTBL]
 Type=1
 Class=TerrPropHTablePage
-ControlCount=2
+ControlCount=3
 Control1=IDC_TROP_HGTS,listbox,1352744960
-Control2=IDC_STATIC,static,1342308353
+Control2=IDC_TPROP_HSCALE,button,1342242816
+Control3=IDC_TPROP_HCLIP,button,1342242816
 
 [DLG:IDD_TERRPROP_MISC]
 Type=1
@@ -484,7 +490,7 @@ Control9=IDC_CPROP_HOVER,edit,1350631552
 [DLG:IDD_CAMPROP_EX]
 Type=1
 Class=CameraPropExPage
-ControlCount=14
+ControlCount=10
 Control1=65535,button,1342177287
 Control2=IDC_CPROP_BMBACK,button,1342242819
 Control3=IDC_CPROP_BITMAP,button,1342242816
@@ -492,13 +498,9 @@ Control4=65535,button,1342177287
 Control5=IDC_CPROP_HAZE,button,1342242819
 Control6=IDC_CPROP_HCOLR,button,1342242816
 Control7=65535,static,1342308354
-Control8=IDC_CPROP_LEVEL,edit,1350631552
+Control8=IDC_CPROP_STARTZ,edit,1350631552
 Control9=65535,static,1342308354
-Control10=IDC_CPROP_SLEVEL,edit,1350631552
-Control11=65535,static,1342308354
-Control12=IDC_CPROP_BLEVEL,edit,1350631552
-Control13=65535,static,1342308354
-Control14=IDC_CPROP_BPERC,edit,1350631552
+Control10=IDC_CPROP_MIDZ,edit,1350631552
 
 [DLG:IDD_SURFPROP_GEN]
 Type=1
@@ -982,6 +984,7 @@ LastObject=IDC_SETBASE_ELV
 
 [DLG:IDD_ABOUTBOX]
 Type=1
+Class=?
 ControlCount=8
 Control1=IDC_STATIC,static,1342177294
 Control2=IDC_STATIC,static,1342177294
@@ -991,4 +994,21 @@ Control5=IDOK,button,1342373889
 Control6=IDC_STATIC,button,1342177287
 Control7=IDC_STATIC,static,1342308353
 Control8=IDC_STATIC,static,1342308353
+
+[DLG:IDD_TERRHTBLE_EDIT]
+Type=1
+Class=TerrHTableEdit
+ControlCount=3
+Control1=IDC_VALUE,edit,1350631552
+Control2=IDOK,button,1342242817
+Control3=IDCANCEL,button,1342242816
+
+[CLS:TerrHTableEdit]
+Type=0
+HeaderFile=eshtdlg.h
+ImplementationFile=eshtdlg.cpp
+BaseClass=CDialog
+Filter=D
+VirtualFilter=dWC
+LastObject=IDC_VALUE
 

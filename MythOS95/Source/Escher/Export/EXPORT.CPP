@@ -8,21 +8,31 @@
 //ùùùùù²±²ùùùùùùù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùùùùùù²±²ùùùù²±²ùùùùùù
 //ùùùù²²²²²²²²²²ù²²²²²²²²ùùù²²²²²²²²ùù²²²ùùùù²²²ù²²²²²²²²²²ù²²²ùùùù²²²ùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùCopyrightù(c)ù1994-1998ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
-//ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
+//ùùùùùùùùùùùùùùùùù Microsoft Windows 95/98/NT Version ùùùùùùùùùùùùùùùùùùùùùù
+//ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
+//ùùùCopyright (c) 1994-1999 by Dan Higdon, Tim Little, and Chuck Walbournùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
-//           *** Charybdis Enterprises, Inc. Company Confidential ***
+// This file and all associated files are subject to the terms of the
+// GNU Lesser General Public License version 2 as published by the
+// Free Software Foundation (http://www.gnu.org).   They remain the
+// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+// See LICENSE.TXT in the distribution for a copy of this license.
 //
-//  This file and all associated files are the company proprietary property
-//        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+// THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+// OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+// PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+// LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+// OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 //
-// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//
+//                        http://www.mythos-engine.org/
+//
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//
+//                 http://www.charybdis.com/products/mythos.html
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
@@ -149,6 +159,8 @@ STATIC int export_mesh(XFParseIFF &iff, ItemData *idata,
                        XVData *verts, XFData *faces, VngoPal *pal);
 STATIC int export_keyframes();
 
+STATIC int merge_verticies( ItemData *idata,
+XVData *verts, XFData *faces);
 STATIC void compute_box_extents( ItemData *idata,
                                  XVData *verts,
                                  EschFileMeshEXNT *mextents );
@@ -163,6 +175,12 @@ STATIC ulong compress_rle_8bpp(ushort w, ushort h, byte *data, byte *cdata);
 STATIC ulong compress_rle_24bpp(ushort w, ushort h, byte *data, byte *cdata);
 STATIC ulong compress_rle_32bpp(ushort w, ushort h, byte *data, byte *cdata);
 
+STATIC void init_key_data();
+STATIC void capture_hierarchy_rotations();
+STATIC void process_child (int parent, int this_node, int this_keyframe);
+STATIC esch_limb_type get_token (char name[22]);
+STATIC void str_to_upper (char name[22]);
+
 STATIC int load_pal(VngoPal *pal,char *infile);
 
 STATIC int check_abort();
@@ -170,12 +188,6 @@ STATIC int check_abort();
 STATIC float det_mtx(float *m);
 STATIC int inverse_mtx(float *m, float *inv);
 STATIC void concat_mtx(float *ina, float *b, float *res);
-
-STATIC void init_key_data();
-STATIC void capture_hierarchy_rotations();
-STATIC void process_child (int parent, int this_node, int this_keyframe);
-STATIC esch_limb_type get_token (char name[22]);
-STATIC void str_to_upper (char name[22]);
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
@@ -205,6 +217,7 @@ extern "C" int material_mode;
 extern "C" int hierarchy_mode;
 extern "C" int orientation_mode;
 extern "C" int format_mode;
+extern "C" int vertex_mode;
 
 extern "C" int keys_flag;
 
@@ -1235,6 +1248,97 @@ STATIC int export_mesh(XFParseIFF &iff, ItemData *idata,
         return 1;
     }
 
+//ÄÄÄ Save original u,v since these might change in merge...
+    EschFace *efaces = new EschFace[idata->item.m.faces];
+    if (!efaces)
+    {
+        gfx_continu_line("Out of Memory!");
+        return 1;
+    }
+    memset(efaces,0,idata->item.m.faces*sizeof(EschFace));
+
+    // Fill out vertex mapping parameters
+    for(int i=0; i < idata->item.m.faces; i++)
+    {
+        if (idata->item.m.tverts)
+        {
+            float u[3] = { verts[faces[i].a].u,
+                           verts[faces[i].b].u,
+                           verts[faces[i].c].u };
+            float v[3] = { verts[faces[i].a].v,
+                           verts[faces[i].b].v,
+                           verts[faces[i].c].v };
+
+            if (faces[i].flags & XF_UWRAP)
+            {
+                int max = 0;
+
+                for(int j=1; j < 3; j++)
+                {
+                    if (u[j] > u[max])
+                        max = j;
+                }
+
+                float nextu = ceil(u[max]);
+
+                for(j=0; j < 3; j++)
+                {
+                    if (max == j)
+                        continue;
+
+                    if (fabs(u[max] - (u[j]+nextu)) < fabs(u[max] - u[j]))
+                    {
+                        u[j] += nextu;
+                    }
+                }
+            }
+
+            efaces[i].u[0] = u[0];
+            efaces[i].u[1] = u[1];
+            efaces[i].u[2] = u[2];
+
+            // 3DS Uses the opposite definition of v, so we
+            // have to negate it to result in right-side up
+            // images.
+            if (faces[i].flags & XF_VWRAP)
+            {
+                int max = 0;
+
+                for(int j=1; j < 3; j++)
+                {
+                    if (v[j] > v[max])
+                        max = j;
+                }
+
+                float nextv = ceil(v[max]);
+
+                for(j=0; j < 3; j++)
+                {
+                    if (max == j)
+                        continue;
+
+                    if (fabs(v[max] - (v[j]+nextv)) < fabs(v[max] - v[j]))
+                    {
+                        v[j] += nextv;
+                    }
+                }
+            }
+
+            efaces[i].v[0] = -v[0];
+            efaces[i].v[1] = -v[1];
+            efaces[i].v[2] = -v[2];
+        }
+    }
+
+//ÄÄÄ Merge verticies if requested (only changes nverts)
+    if (vertex_mode == 2)
+    {
+        sprintf(buff,"Object '%s': Merging verticies...",idata->name);
+        gfx_set_gasgauge(buff,0,1);
+        if (merge_verticies(idata,verts,faces))
+            return 1;
+    }
+
 //ÄÄÄ Create Header
     EschFileMeshHDR mheader;
     memset(&mheader,0,sizeof(mheader));
@@ -1330,14 +1434,6 @@ STATIC int export_mesh(XFParseIFF &iff, ItemData *idata,
     }
     memset(everts,0,idata->item.m.verts*sizeof(EschVertex));
 
-    EschFace *efaces = new EschFace[idata->item.m.faces];
-    if (!efaces)
-    {
-        gfx_continu_line("Out of Memory!");
-        return 1;
-    }
-    memset(efaces,0,idata->item.m.faces*sizeof(EschFace));
-
     EschFileMeshMTL *emtls = new EschFileMeshMTL[256];
     if (!emtls)
     {
@@ -1357,7 +1453,7 @@ STATIC int export_mesh(XFParseIFF &iff, ItemData *idata,
     gfx_set_gasgauge(buff,0,steps);
 
     int nmtls=0;
-    for(int i=0; i < idata->item.m.faces; i++)
+    for(i=0; i < idata->item.m.faces; i++)
     {
         gfx_set_gasgauge("",i,steps);
 
@@ -1408,81 +1504,6 @@ STATIC int export_mesh(XFParseIFF &iff, ItemData *idata,
         efaces[i].normal.i = vr[0];
         efaces[i].normal.j = vr[1];
         efaces[i].normal.k = vr[2];
-
-        // Fill out vertex mapping parameters
-        if (idata->item.m.tverts)
-        {
-            float u[3] = { verts[faces[i].a].u,
-                           verts[faces[i].b].u,
-                           verts[faces[i].c].u };
-            float v[3] = { verts[faces[i].a].v,
-                           verts[faces[i].b].v,
-                           verts[faces[i].c].v };
-
-#if 1
-            if (faces[i].flags & XF_UWRAP)
-            {
-                int max = 0;
-
-                for(int j=1; j < 3; j++)
-                {
-                    if (u[j] > u[max])
-                        max = j;
-                }
-
-                float nextu = ceil(u[max]);
-
-                for(j=0; j < 3; j++)
-                {
-                    if (max == j)
-                        continue;
-
-                    if (fabs(u[max] - (u[j]+nextu)) < fabs(u[max] - u[j]))
-                    {
-                        u[j] += nextu;
-                    }
-                }
-            }
-#endif
-
-            efaces[i].u[0] = u[0];
-            efaces[i].u[1] = u[1];
-            efaces[i].u[2] = u[2];
-
-            // 3DS Uses the opposite definition of v, so we
-            // have to negate it to result in right-side up
-            // images.
-
-#if 1
-            if (faces[i].flags & XF_VWRAP)
-            {
-                int max = 0;
-
-                for(int j=1; j < 3; j++)
-                {
-                    if (v[j] > v[max])
-                        max = j;
-                }
-
-                float nextv = ceil(v[max]);
-
-                for(j=0; j < 3; j++)
-                {
-                    if (max == j)
-                        continue;
-
-                    if (fabs(v[max] - (v[j]+nextv)) < fabs(v[max] - v[j]))
-                    {
-                        v[j] += nextv;
-                    }
-                }
-            }
-#endif
-
-            efaces[i].v[0] = -v[0];
-            efaces[i].v[1] = -v[1];
-            efaces[i].v[2] = -v[2];
-        }
 
         efaces[i].flags |= ESCH_FACE_WIRE
                            | ESCH_FACE_SOLID;
@@ -2474,6 +2495,72 @@ error_exit:;
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// merge_verticies                                                          ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+STATIC int merge_verticies( ItemData *idata, XVData *verts, XFData *faces )
+{
+    long nverts = idata->item.m.verts;
+
+    XVData *vert = verts;
+    for(int v=0; v < nverts; v++, vert++)
+    {
+        if (check_abort())
+            return 1;
+
+        gfx_set_gasgauge("",v,nverts);
+
+        // Scam against all other verticies (we've already scanned below)
+        XVData *vert2 = vert+1;
+        for(int v2=v+1; v2 < nverts;)
+        {
+            if (vert->x == vert2->x
+                && vert->y == vert2->y
+                && vert->z == vert2->z)
+            {
+                // Remove references to merged vertex
+                XFData *face = faces;
+                for(int f=0; f < idata->item.m.faces; f++, face++)
+                {
+                    if (face->a == v2)
+                        face->a = v;
+                    else if (face->a > v2)
+                        face->a--;
+
+                    if (face->b == v2)
+                        face->b = v;
+                    else if (face->b > v2)
+                        face->b--;
+
+                    if (face->c == v2)
+                        face->c = v;
+                    else if (face->c > v2)
+                        face->c--;
+                }
+
+                // Shift down by one (slow, but easy)
+                if (v2 < (nverts-1))
+                {
+                    memcpy(vert2,vert2+1,
+                           (nverts-v2-1) * sizeof(XVData));
+                }
+
+                nverts--;
+            }
+            else
+            {
+              v2++;
+              vert2++;
+            }
+        }
+    }
+
+    idata->item.m.verts = nverts;
+
+    return 0;
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // compute_box_extents                                                      ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 STATIC void compute_box_extents( ItemData *idata,
@@ -3316,114 +3403,6 @@ esch_token esch_token_list[ESCH_KEYFRAME_TOKEN_COUNT] =
     "SHELL",0x40400
 };
 
-esch_limb_type get_token (char name[22])
-{
-    char buff[256];
-    for (int i=0; i<ESCH_KEYFRAME_TOKEN_COUNT; i++)
-    {
-        if (strstr(esch_token_list[i].name, &name[0]))
-        {
-            return esch_token_list[i].type;
-        }
-    }
-    return ESCH_KEYFRAME_NONE;
-}
-
-void str_to_upper (char str[22])
-{
-    char *ptr = str;
-    for (int i=0; i<22; i++)
-    {
-        if (ptr == '\0')
-        {
-            return;
-        }
-        else
-        {
-            *ptr = toupper(*ptr);
-        }
-        ptr ++;
-    }
-}
-
-
-
-
-
-//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°° Misc °°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// load_pal                                                                 ³
-//                                                                          ³
-//     Palette loader...                                                    ³
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-STATIC int load_pal(VngoPal *pal,char *infile)
-{
-    int err;
-
-    err=pal->init(0,infile);
-
-    return(err);
-}
-
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// check_abort                                                              ³
-//                                                                          ³
-// Checks to see if ESC was pressed and "Abort Export" answered yes         ³
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-STATIC int check_abort()
-{
-    int status;
-
-    gfx_key_hit(status);
-    if (status)
-    {
-        gfx_get_key(status);
-        if (status==ESC)
-        {
-            gfx_yes_no_line("Abort export?", status);
-            if (status)
-                return 1;
-        }
-    }
-
-    return 0;
-}
-
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// Empty ivory functions                                                    ³
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-#pragma off(unreferenced);
-
-IvoryArena *ivory_arena_initialize (IvoryArena *arena, size_t arena_size)
-{
-    return 0;
-}
-
-void ivory_arena_clear (IvoryArena *arena)
-{
-}
-
-void *ivory_arena_zalloc (IvoryArena *arena, size_t size)
-{
-    return 0;
-}
-
-void *ivory_alloc (size_t size)
-{
-    return malloc(size);
-}
-
-void ivory_free (void **ptr)
-{
-    free(*ptr);
-    *ptr=0;
-}
-
 
 void init_key_data()
 {
@@ -3472,6 +3451,7 @@ void init_key_data()
         morph_key = 0;
     }
 }
+
 
 void capture_hierarchy_rotations()
 {
@@ -3639,6 +3619,7 @@ void capture_hierarchy_rotations()
     }
 }
 
+
 void process_child (int parent, int this_node, int this_keyframe)
 {
     float matrix_par[4][3];
@@ -3797,6 +3778,113 @@ void process_child (int parent, int this_node, int this_keyframe)
             process_child(this_node, child_node, j);
         }
     }
+}
+
+
+esch_limb_type get_token (char name[22])
+{
+    char buff[256];
+    for (int i=0; i<ESCH_KEYFRAME_TOKEN_COUNT; i++)
+    {
+        if (strstr(esch_token_list[i].name, &name[0]))
+        {
+            return esch_token_list[i].type;
+        }
+    }
+    return ESCH_KEYFRAME_NONE;
+}
+
+void str_to_upper (char str[22])
+{
+    char *ptr = str;
+    for (int i=0; i<22; i++)
+    {
+        if (ptr == '\0')
+        {
+            return;
+        }
+        else
+        {
+            *ptr = toupper(*ptr);
+        }
+        ptr ++;
+    }
+}
+
+
+
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°° Misc °°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// load_pal                                                                 ³
+//                                                                          ³
+//     Palette loader...                                                    ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+STATIC int load_pal(VngoPal *pal,char *infile)
+{
+    int err;
+
+    err=pal->init(0,infile);
+
+    return(err);
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// check_abort                                                              ³
+//                                                                          ³
+// Checks to see if ESC was pressed and "Abort Export" answered yes         ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+STATIC int check_abort()
+{
+    int status;
+
+    gfx_key_hit(status);
+    if (status)
+    {
+        gfx_get_key(status);
+        if (status==ESC)
+        {
+            gfx_yes_no_line("Abort export?", status);
+            if (status)
+                return 1;
+        }
+    }
+
+    return 0;
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// Empty ivory functions                                                    ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+#pragma off(unreferenced);
+
+IvoryArena *ivory_arena_initialize (IvoryArena *arena, size_t arena_size)
+{
+    return 0;
+}
+
+void ivory_arena_clear (IvoryArena *arena)
+{
+}
+
+void *ivory_arena_zalloc (IvoryArena *arena, size_t size)
+{
+    return 0;
+}
+
+void *ivory_alloc (size_t size)
+{
+    return malloc(size);
+}
+
+void ivory_free (void **ptr)
+{
+    free(*ptr);
+    *ptr=0;
 }
 
 

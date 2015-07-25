@@ -8,23 +8,27 @@
 //ששששש²±²ששששששש²±²שששש²±²ש²±²שששש²±²ש²±²שששש²±²ש²±²שששששששש²±²שששש²±²שששששש
 //שששש²²²²²²²²²²ש²²²²²²²²ששש²²²²²²²²שש²²²שששש²²²ש²²²²²²²²²²ש²²²שששש²²²ששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//ששששששששששששששששששש Microsoft Windows 95/NT Version ששששששששששששששששששששששש
+//ששששששששששששששששש Microsoft Windows 95/98/NT Version שששששששששששששששששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//שששששששששששCopyrightש(c)ש1994-1998שbyשCharybdisשEnterprises,שInc.שששששששששש
-//ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
+//שששCopyright (c) 1994-1999 by Dan Higdon, Tim Little, and Chuck Walbournששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
 //
-//           *** Charybdis Enterprises, Inc. Company Confidential ***
+// This file and all associated files are subject to the terms of the
+// GNU Lesser General Public License version 2 as published by the
+// Free Software Foundation (http://www.gnu.org).   They remain the
+// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+// See LICENSE.TXT in the distribution for a copy of this license.
 //
-//  This file and all associated files are the company proprietary property
-//        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+// THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+// OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+// PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+// LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+// OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 //
-// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+//ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
+//
+//                        http://www.mythos-engine.org/
 //
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
 //
@@ -185,7 +189,7 @@ void EschMetabox::draw()
     face.flags = (limits & (ESCH_FACE_WIRE
                             | ESCH_FACE_SOLID
                             | ESCH_FACE_ONESIDED
-                            | ESCH_FACE_TEXTURED))
+                            | ESCH_FACE_ALLOWPERSP))
                  | ESCH_FACE_ABLINE
                  | ESCH_FACE_BCLINE
                  | ESCH_FACE_CALINE;
@@ -213,7 +217,7 @@ void EschMetabox::draw()
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ Setup/Draw Faces
     if (flags & ESCH_MBOX_TOP)
     {
-        if (txt[ESCH_MBOX_FACE_TOP])
+        if ((limits & ESCH_FACE_TEXTURED) && txt[ESCH_MBOX_FACE_TOP])
             face.flags |= ESCH_FACE_TEXTURED;
         else
             face.flags &= ~ESCH_FACE_TEXTURED;
@@ -249,7 +253,7 @@ void EschMetabox::draw()
 
     if (flags & ESCH_MBOX_BOTTOM)
     {
-        if (txt[ESCH_MBOX_FACE_BOTTOM])
+        if ((limits & ESCH_FACE_TEXTURED) && txt[ESCH_MBOX_FACE_BOTTOM])
             face.flags |= ESCH_FACE_TEXTURED;
         else
             face.flags &= ~ESCH_FACE_TEXTURED;
@@ -285,7 +289,7 @@ void EschMetabox::draw()
 
     if (flags & ESCH_MBOX_FRONT)
     {
-        if (txt[ESCH_MBOX_FACE_FRONT])
+        if ((limits & ESCH_FACE_TEXTURED) && txt[ESCH_MBOX_FACE_FRONT])
             face.flags |= ESCH_FACE_TEXTURED;
         else
             face.flags &= ~ESCH_FACE_TEXTURED;
@@ -321,7 +325,7 @@ void EschMetabox::draw()
 
     if (flags & ESCH_MBOX_BACK)
     {
-        if (txt[ESCH_MBOX_FACE_BACK])
+        if ((limits & ESCH_FACE_TEXTURED) && txt[ESCH_MBOX_FACE_BACK])
             face.flags |= ESCH_FACE_TEXTURED;
         else
             face.flags &= ~ESCH_FACE_TEXTURED;
@@ -357,7 +361,7 @@ void EschMetabox::draw()
 
     if (flags & ESCH_MBOX_LEFT)
     {
-        if (txt[ESCH_MBOX_FACE_LEFT])
+        if ((limits & ESCH_FACE_TEXTURED) && txt[ESCH_MBOX_FACE_LEFT])
             face.flags |= ESCH_FACE_TEXTURED;
         else
             face.flags &= ~ESCH_FACE_TEXTURED;
@@ -393,7 +397,7 @@ void EschMetabox::draw()
 
     if (flags & ESCH_MBOX_RIGHT)
     {
-        if (txt[ESCH_MBOX_FACE_RIGHT])
+        if ((limits & ESCH_FACE_TEXTURED) && txt[ESCH_MBOX_FACE_RIGHT])
             face.flags |= ESCH_FACE_TEXTURED;
         else
             face.flags &= ~ESCH_FACE_TEXTURED;

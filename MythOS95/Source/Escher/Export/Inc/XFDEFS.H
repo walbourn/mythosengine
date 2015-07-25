@@ -1,26 +1,30 @@
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
-//                            
+//
 //           ^           **   **   **** ***** *    ****     ^      Take me to
 //          (_)            * *     *      *   *    *       (_)    / your
 //     ^                    *      **     *   *    **            ^  leader...
 //    (_)       ^          * *     *      *   *    *            (_)
 //             (_)       **   **   *    ***** **** ****
 //
-//            Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.
-//                             All Rights Reserved.
+//    Copyright (c) 1994-1999 by Dan Higdon, Tim Little, and Chuck Walbourn
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
-//           *** Charybdis Enterprises, Inc. Company Confidential ***
+// This file and all associated files are subject to the terms of the
+// GNU Lesser General Public License version 2 as published by the
+// Free Software Foundation (http://www.gnu.org).   They remain the
+// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+// See LICENSE.TXT in the distribution for a copy of this license.
 //
-//  This file and all associated files are the company proprietary property
-//        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+// THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+// OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+// PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+// LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+// OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 //
-// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//
+//                        http://www.mythos-engine.org/
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
@@ -131,7 +135,7 @@ typedef enum _xf_error_codes {
     XF_ERR_NETWRITEFAULT                =0x58,
     XF_ERR_NETFUNCNOTSUPPORTED          =0x59,
     XF_ERR_REQHWNOTFOUND                =0x5a,
- 
+
                                         // 256-511 Reserved for low-level errors
     XF_ERR_EOF                          =256,
 
@@ -145,13 +149,13 @@ typedef enum _xf_error_codes {
     XF_ERR_SECTION_NOT_FOUND            =1001,
     XF_ERR_NEEDREADORWRITE              =1002,
     XF_ERR_NAME_TOO_LONG                =1003,
-    
+
                                         // 2000-2999 Reserved for XFileBitmap
     XF_ERR_NOTSUPPORTED                 =2000,
     XF_ERR_INVALIDHEADER                =2001,
     XF_ERR_INVALIDPALETTE               =2002,
     XF_ERR_INVALIDIMAGE                 =2003,
- 
+
                                         // 3000-3999 Reserved for XFileIFF
     XF_ERR_NOTIFF                       =3000,
     XF_ERR_CHUCKNOTFOUND                =3001,
@@ -187,7 +191,7 @@ typedef enum _xf_error_codes {
 #define XF_OPEN_DENYWRITE       0x20000000
 #define XF_OPEN_DENYREAD        0x30000000
 #define XF_OPEN_DENYNONE        0x40000000
-                                
+
 #define XF_OPEN_PRIVATE         0x80000000  // Inheritance for open (high bit)
 
 
@@ -217,10 +221,10 @@ typedef enum _xf_error_codes {
 //--- File related maximums
 #ifdef __cplusplus
 const ulong XF_MAX_PATH        =144;    // maximum length of full pathname
-const ulong XF_MAX_DRIVE       =3;	    // maximum length of drive component
+const ulong XF_MAX_DRIVE       =3;          // maximum length of drive component
 const ulong XF_MAX_DIR         =130;    // maximum length of path component
-const ulong XF_MAX_FNAME       =9;   	// maximum length of file name component
-const ulong XF_MAX_EXT         =5;	    // maximum length of extension component
+const ulong XF_MAX_FNAME       =9;      // maximum length of file name component
+const ulong XF_MAX_EXT         =5;          // maximum length of extension component
 const ulong XF_MAX_NAME        =13;     // maximum length of file name (with extension)
 
 #else
@@ -230,8 +234,8 @@ const ulong XF_MAX_NAME        =13;     // maximum length of file name (with ext
 #define XF_MAX_PATH            144      // maximum length of full pathname
 #define XF_MAX_DRIVE           3        // maximum length of drive component
 #define XF_MAX_DIR             130      // maximum length of path component
-#define XF_MAX_FNAME           9   	    // maximum length of file name component
-#define XF_MAX_EXT             5	    // maximum length of extension component
+#define XF_MAX_FNAME           9            // maximum length of file name component
+#define XF_MAX_EXT             5            // maximum length of extension component
 #define XF_MAX_NAME            13       // maximum length of file name (with extension)
 #ifdef __WATCOMC__
 #pragma on(unreferenced);

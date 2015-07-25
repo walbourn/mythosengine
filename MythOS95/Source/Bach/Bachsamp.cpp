@@ -9,23 +9,27 @@
 //          ³  ³ OÙ OÙ    ÜÛÛÛÜÜÜÛÛÛß   ÛÛÛÛÝßÛÜ  ßÛÛÜÜÛÛ  ÜÛÛÛÜ ÜÛÛÛÜ
 //         OÙ OÙ
 //                            C++ Music, Sound, and Effects Library
-//                               Microsoft Windows 95/NT Version
+//                               Microsoft Windows 95/98/NT Version
 //
-//           Copyright (c) 1995-1998 by Charybdis Enterprises, Inc.
-//                           All Rights Reserved.
+//  Copyright (c) 1995-1999 by Dan Higdon, Tim Little, and Chuck Walbourn
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
-//           *** Charybdis Enterprises, Inc. Company Confidential ***
+// This file and all associated files are subject to the terms of the
+// GNU Lesser General Public License version 2 as published by the
+// Free Software Foundation (http://www.gnu.org).   They remain the
+// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+// See LICENSE.TXT in the distribution for a copy of this license.
 //
-//  This file and all associated files are the company proprietary property
-//        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+// THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+// OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+// PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+// LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+// OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 //
-// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//
+//                        http://www.mythos-engine.org/
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
@@ -88,7 +92,6 @@ short BachSample::db_table[] =
 // BachSample - Constructor
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 BachSample::BachSample(BachDigital *digi) :
-    dsound(digi->dsound),
     sbuffer(0),
     flags (0),
     fmt (BACH_DIGI_MONO_8),
@@ -96,11 +99,14 @@ BachSample::BachSample(BachDigital *digi) :
     app_data (0)
 {
     assertMyth("BachSample needs initialized BachDigital object",
-               digi->dsound != 0);
+               digi && digi->dsound != 0);
+
+    dsound = digi->dsound;
+    if (dsound)
+        dsound->AddRef();
 }
 
 BachSample::BachSample (BachSample const &b) :
-    dsound(b.dsound),
     sbuffer(0),
     flags (b.flags),
     fmt (b.fmt),
@@ -109,6 +115,10 @@ BachSample::BachSample (BachSample const &b) :
 {
     assertMyth("BachSample needs initialized BachDigital object",
                b.dsound != 0);
+
+    dsound = b.dsound;
+    if (dsound)
+        dsound->AddRef();
 
     if (b.sbuffer)
     {
@@ -130,6 +140,12 @@ BachSample::BachSample (BachSample const &b) :
 BachSample::~BachSample()
 {
     release();
+
+    if (dsound)
+    {
+        dsound->Release();
+        dsound=0;
+    }
 }
 
 
@@ -148,7 +164,6 @@ BachSample &BachSample::operator = (BachSample const &that)
         stop();
         release();
 
-        dsound = that.dsound;
         flags = that.flags & ~BACH_SMP_OWNSDATA;
         fmt = that.fmt;
         rate = that.rate;
@@ -156,6 +171,10 @@ BachSample &BachSample::operator = (BachSample const &that)
 
         assertMyth("BachSample::operator = needs initialized BachDigital object",
                    that.dsound != 0);
+
+        dsound = that.dsound;
+        if (dsound)
+            dsound->AddRef();
 
         if (that.sbuffer)
         {

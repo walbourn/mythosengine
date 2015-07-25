@@ -8,23 +8,27 @@
 //ששששש²±²ששששששש²±²שששש²±²ש²±²שששש²±²ש²±²שששש²±²ש²±²שששששששש²±²שששש²±²שששששש
 //שששש²²²²²²²²²²ש²²²²²²²²ששש²²²²²²²²שש²²²שששש²²²ש²²²²²²²²²²ש²²²שששש²²²ששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//ששששששששששששששששששש Microsoft Windows 95/NT Version ששששששששששששששששששששששש
+//ששששששששששששששששש Microsoft Windows 95/98/NT Version שששששששששששששששששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//שששששששששששCopyrightש(c)ש1994-1998שbyשCharybdisשEnterprises,שInc.שששששששששש
-//ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
+//שששCopyright (c) 1994-1999 by Dan Higdon, Tim Little, and Chuck Walbournששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
 //
-//           *** Charybdis Enterprises, Inc. Company Confidential ***
+// This file and all associated files are subject to the terms of the
+// GNU Lesser General Public License version 2 as published by the
+// Free Software Foundation (http://www.gnu.org).   They remain the
+// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+// See LICENSE.TXT in the distribution for a copy of this license.
 //
-//  This file and all associated files are the company proprietary property
-//        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+// THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+// OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+// PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+// LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+// OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 //
-// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+//ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
+//
+//                        http://www.mythos-engine.org/
 //
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
 //
@@ -46,7 +50,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include <conio.h>
@@ -109,7 +113,7 @@ struct Surface
     word    na;
 };
 
-struct Poly    
+struct Poly
 {
     short   num;
     short   surf;
@@ -149,8 +153,8 @@ STATIC void generate(const char *name,
 STATIC dword   Flags=0;
 
 STATIC char Util_name[]
-        = "°± Escher Lightwave Converter - (C) 1997-1998 Charybdis Enterprises, Inc. ±°\n"
-          "                                All Rights Reserved.  " __DATE__ "\n";
+        = "°Escher Lightwave Converter - (C) 1997-9 by D. Higdon, T. Little, C. Walbourn°\n"
+          "                                subject to GNU LGPL " __DATE__ "\n";
 
 XFParseIFF     IFF;
 
@@ -222,24 +226,24 @@ void main(int argc, char *argv[])
                 case '1':
                     Flags |= FLAGS_FORCE_1SIDED;
                     break;
-                    
+
                 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ Force two-sided
                 case '2':
                     Flags |= FLAGS_FORCE_2SIDED;
                     break;
-                    
+
                 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ Quick extents
                 case 'k':
                 case 'K':
                     Flags |= FLAGS_QUICK_EXTS;
                     break;
-                    
+
                 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ Fixed-point
                 case 'f':
                 case 'F':
                     Flags |= FLAGS_FIXED;
                     break;
-                    
+
                 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ Output file
 
                 case 'O':
@@ -332,7 +336,7 @@ void main(int argc, char *argv[])
         print_error(iff,"Failed to open file");
         return;
     }
-   
+
 //ִִִ Find
     if (iff.seekform(iff.makeid('L','W','O','B')))
     {
@@ -440,12 +444,12 @@ STATIC void print_help(int full)
 STATIC void print_error(XFParseIFF &xp, char *s)
 {
     cout << "±±± ";
-   
+
     if (s)
     {
         cout << s << ", ";
     }
-   
+
     switch (xp.error())
     {
         case XF_ERR_NOTIFF:
@@ -482,7 +486,7 @@ STATIC void print_error(XFParseIFF &xp, char *s)
             cout << "error " << (int)xp.error();
             break;
     }
-   
+
     cout << endl;
 }
 
@@ -511,7 +515,7 @@ STATIC void print_info(Point *points, ulong maxpoints,
         }
     }
 
-    if (!(Flags & FLAGS_QUIET) 
+    if (!(Flags & FLAGS_QUIET)
         || Flags & FLAGS_INFO)
     {
         printf("           %i points\n",maxpoints);
@@ -545,7 +549,7 @@ STATIC void print_info(Point *points, ulong maxpoints,
         }
     }
 
-    if (!(Flags & FLAGS_QUIET) 
+    if (!(Flags & FLAGS_QUIET)
         || Flags & FLAGS_INFO)
     {
         printf("           %i polygons\n",maxpolys);
@@ -570,7 +574,7 @@ STATIC void print_info(Point *points, ulong maxpoints,
         }
     }
 
-    if (!(Flags & FLAGS_QUIET) 
+    if (!(Flags & FLAGS_QUIET)
         || Flags & FLAGS_INFO)
     {
         printf("           %i surfaces\n",maxsurfs);
@@ -580,7 +584,7 @@ STATIC void print_info(Point *points, ulong maxpoints,
 
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
 // _charybdis_assert
-// 
+//
 // Handler for failed asserts.  If msg is set to non-NULL, then an assertMyth
 // was used with a comment.
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
@@ -666,7 +670,7 @@ STATIC Point *process_points(XFParseIFF &iff, ulong &max)
         cout << "±±± Out of memory!" << endl;
         return NULL;
     }
-    
+
     if (iff.read(data))
     {
         cout << "±±± Failed to read points" << endl;
@@ -730,7 +734,7 @@ STATIC Surface *process_surface_list(XFParseIFF &iff, ulong &max)
         cout << "±±± Out of memory!" << endl;
         return NULL;
     }
-    
+
     if (iff.read(data))
     {
         cout << "±±± Failed to read surface list" << endl;
@@ -848,7 +852,7 @@ STATIC Poly *process_polygons(XFParseIFF &iff, ulong &max)
         cout << "±±± Out of memory!" << endl;
         return NULL;
     }
-    
+
     if (iff.read(data))
     {
         cout << "±±± Failed to read polygons" << endl;
@@ -939,7 +943,7 @@ STATIC Poly *process_polygons(XFParseIFF &iff, ulong &max)
                     if (Flags & FLAGS_DETAILPOLYS)
                     {
                         polys[i].num = numverts;
-    
+
                         short *pptr = new short[numverts];
                         if (!pptr)
                         {
@@ -1040,7 +1044,7 @@ STATIC BOOL process_surfaces(XFParseIFF &iff, Surface *surfs, ulong max)
             else if (id == iff.makeid('F','L','A','G')
                      && size == 2)
             {
-                ushort flags = (*ptr << 8) | *(ptr+1); 
+                ushort flags = (*ptr << 8) | *(ptr+1);
 
                 if (flags & LW_SURF_FLAG_DOUBLE_SIDED
                     && !(Flags & FLAGS_FORCE_1SIDED))
@@ -1056,7 +1060,7 @@ STATIC BOOL process_surfaces(XFParseIFF &iff, Surface *surfs, ulong max)
             else if (id == iff.makeid('L','U','M','I')
                      && size == 2)
             {
-                short value = (*ptr << 8) | *(ptr+1); 
+                short value = (*ptr << 8) | *(ptr+1);
 
                 if (value > 0)
                     surf->selfi = byte((value-1) & 0xff);
@@ -1064,7 +1068,7 @@ STATIC BOOL process_surfaces(XFParseIFF &iff, Surface *surfs, ulong max)
             else if (id == iff.makeid('S','P','E','C')
                      && size == 2)
             {
-                short value = (*ptr << 8) | *(ptr+1); 
+                short value = (*ptr << 8) | *(ptr+1);
 
                 if (value >= 128)
                     surf->flags |= ESCH_FACE_SPECULAR;
@@ -1116,7 +1120,7 @@ STATIC void generate(const char *name,
         }
     }
 
-    if (!(Flags & FLAGS_QUIET) 
+    if (!(Flags & FLAGS_QUIET)
         || Flags & FLAGS_INFO)
     {
         printf("           %i faces generated\n", mfaces);
@@ -1157,7 +1161,7 @@ STATIC void generate(const char *name,
             }
         }
     }
-    
+
 //ִִִ Add faces
     if (!(Flags & FLAGS_QUIET))
     {

@@ -13,29 +13,31 @@
 //
 //                     A Simluator Framework for MythOS(tm)
 //
-//                      Microsoft Windows 95/NT Version
+//                     Microsoft Windows 95/98/NT Version
 //
-//            Copyright (c) 1997-1998 by Charybdis Enterprises, Inc.
-//                           All Rights Reserved.
-//
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-//
-//           *** Charybdis Enterprises, Inc. Company Confidential ***
-//
-//  This file and all associated files are the company proprietary property
-//        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
-//
-// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+//  Copyright (c) 1997-1999 by Dan Higdon, Tim Little, and Chuck Walbourn
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
-// MythOS is a trademark of Charybdis Enterprises, Inc.
+// This file and all associated files are subject to the terms of the
+// GNU Lesser General Public License version 2 as published by the
+// Free Software Foundation (http://www.gnu.org).   They remain the
+// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+// See LICENSE.TXT in the distribution for a copy of this license.
+//
+// THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+// OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+// PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+// LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+// OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//
+//                        http://www.mythos-engine.org/
+//
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//
+// Created by Dan Higdon and Chuck Walbourn
 //
 // simgine.hpp
 //
@@ -101,6 +103,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #define SIM_MAX_APPNAME                 16
+#define SIM_MAX_TARGET                  16
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
@@ -133,19 +136,24 @@ public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Public data members                                                  ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-    HINSTANCE   hInstance;                  // Current instance
-    HWND        hWndClient;                 // Client window
-    char        appName[SIM_MAX_APPNAME];   // Application name
-    LPSTR       cmdLine;                    // Command line
-    int         cmdShow;                    // Command show bits
-    dword       startup;                    // Control startup flags
-    ushort      startup_width;              // Starting window size
-    ushort      startup_height;
-    ushort      startup_bitdepth;           // Starting bit-depth
-    ushort      na;
-    dword       startup_memsize;            // Ivory static memory size
-    dword       startup_arenasize;          // Escher arena memory space
-    dword       startup_sortsize;           // Escher sort memory space
+    HINSTANCE       hInstance;                  // Current instance
+    HWND            hWndClient;                 // Client window
+    char            appName[SIM_MAX_APPNAME];   // Application name
+    LPSTR           cmdLine;                    // Command line
+    int             cmdShow;                    // Command show bits
+    dword           startup;                    // Control startup flags
+    ushort          startup_width;              // Starting window size
+    ushort          startup_height;
+    ushort          startup_bitdepth;           // Starting bit-depth
+    ushort          startup_nchannels;          // Number of audio channels
+    ushort          startup_nreserved;          // Number of reserved channels
+    ushort          startup_nchannels3d;        // Number of 3D audio channels
+    ulong           startup_drate;              // Driver rate for audio
+    bach_digi_fmt   startup_dformat;            // Driver format for audio
+    dword           startup_memsize;            // Ivory static memory size
+    dword           startup_arenasize;          // Escher arena memory space
+    dword           startup_sortsize;           // Escher sort memory space
+    char            startup_target[SIM_MAX_TARGET]; // Direct3D target device
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Constructor/Destructors                                              ³

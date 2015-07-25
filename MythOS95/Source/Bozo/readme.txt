@@ -10,25 +10,29 @@
                             /_\     |    _  _ | _ ._ 
                            /   \  \_||_|(_|(_||(/_|  
                                          _| _|       
-                        Microsoft Windows 95 Version
+                     Microsoft Windows 95/98/NT Version
   
-              Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.
-                             All Rights Reserved.
+    Copyright (c) 1994-1999 by Dan Higdon, Tim Little, and Chuck Walbourn
   
-  ---------------------------------------------------------------------------
-  
-             *** Charybdis Enterprises, Inc. Company Confidential ***
-  
-    This file and all associated files are the company proprietary property
-          of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
-  
-   CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-   TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-   IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-   AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-   INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
-  
-  ---------------------------------------------------------------------------
+ ---------------------------------------------------------------------------
+
+  This file and all associated files are subject to the terms of the
+  GNU Lesser General Public License version 2 as published by the
+  Free Software Foundation (http://www.gnu.org).   They remain the
+  property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+  See LICENSE.TXT in the distribution for a copy of this license.
+
+  THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+  OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+  PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+  LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+  OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+
+ ---------------------------------------------------------------------------
+
+                         http://www.mythos-engine.org/
+
+ ---------------------------------------------------------------------------
   
                             _Library Status_
 
@@ -39,8 +43,15 @@
 
     o Updated copyrights
 
-    Note: It seems that Visual C++ V5.0 handling of stack variables prevents
-          the workaround for use under Windows 95 from operating correctly.
-          Therefore, we no longer recommend using Bozo in your applications.
+    Note: It seems that Visual C++ V5.0 handling of stack variables
+          prevents the workaround for use under Windows 9x/NT from operating
+	  correctly. Therefore, we no longer recommend using Bozo in your
+	  applications.
+
+
+  Future notes --------------------------------------------------------------
+
+  This library will be dropped in a future release of MythOS due to the
+  many problems with allocating client stacks within the Windows environment.
 
 *** END OF FILE ***

@@ -8,23 +8,27 @@
 ;ששששש²±²ששששששש²±²שששש²±²ש²±²שששש²±²ש²±²שששש²±²ש²±²שששששששש²±²שששש²±²שששששש
 ;שששש²²²²²²²²²²ש²²²²²²²²ששש²²²²²²²²שש²²²שששש²²²ש²²²²²²²²²²ש²²²שששש²²²ששששששש
 ;ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-;ששששששששששששששששששש Microsoft Windows 95/NT Version ששששששששששששששששששששששש
+;ששששששששששששששששש Microsoft Windows 95/98/NT Version שששששששששששששששששששששש
 ;ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-;שששששששששששCopyrightש(c)ש1994-1998שbyשCharybdisשEnterprises,שInc.שששששששששש
-;ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
+;שששCopyright (c) 1994-1999 by Dan Higdon, Tim Little, and Chuck Walbournששש
 ;ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
 ;ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
 ;
-;           *** Charybdis Enterprises, Inc. Company Confidential ***
+; This file and all associated files are subject to the terms of the
+; GNU Lesser General Public License version 2 as published by the
+; Free Software Foundation (http://www.gnu.org).   They remain the
+; property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+; See LICENSE.TXT in the distribution for a copy of this license.
 ;
-;  This file and all associated files are the company proprietary property
-;        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+; THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+; OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+; PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+; LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+; OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 ;
-; CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-; TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-; IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-; AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-; INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+;ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
+;
+;                        http://www.mythos-engine.org/
 ;
 ;ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
 ;
@@ -34,13 +38,19 @@
 ;
 ; Contains the arithemetic operations customized for the AMD-3D
 ; extensions.  These routines perform a FEMMS to exit the MMX
-; state on return to be FPU safe after exit.
+; state on return to be FPU safe after exit except the _nofpu_
+; versions which require fpureset be called before a FPU command is
+; executed.
 ;
 ;       esch_amd3d_transform
 ;       esch_amd3d_transform_notran
 ;       esch_amd3d_cross
 ;       esch_amd3d_normalize
 ;       esch_amd3d_concatmatrix
+;       esch_amd3d_fpureset
+;       esch_amd3d_nofpu_transform
+;       esch_amd3d_nofpu_transform_notran
+;       esch_amd3d_nofpu_normalize
 ;
 ; WARNING:  All these routines assume that mythos_detect_amd3d() or a
 ;           similiar mechanism was used to verify that the run-time
@@ -103,17 +113,17 @@ _TEXT  SEGMENT PARA PUBLIC USE32 'CODE'
         ALIGN   16
 START_PROC      esch_amd3d_transform, C vect:DWORD, m:DWORD, dest:DWORD
         mov             ecx,    vect
-	movq	        mm0,	[ecx]		; j, i in mm0
-	movd	        mm1,	[ecx+8]         ; 0, k in mm1
+        movq            mm0,    [ecx]           ; j, i in mm0
+        movd            mm1,    [ecx+8]         ; 0, k in mm1
 
         punpckhdq       mm2,    mm0             ; j, undef in mm2
 
         mov             edx,    m
-	movq		mm3,	[edx]		; B, A in mm3
+        movq            mm3,    [edx]           ; B, A in mm3
         movq            mm6,    mm0             ; j, i in mm6
 
         movq            mm4,    [edx+8]         ; D, C in mm4
-        punpckldq       mm0,	mm0		; i, i in mm0
+        punpckldq       mm0,    mm0             ; i, i in mm0
 
         movq            mm5,    [edx+16]        ; F, E in mm5
         pfmul           mm3,    mm0             ; Bi, Ai in mm3
@@ -122,7 +132,7 @@ START_PROC      esch_amd3d_transform, C vect:DWORD, m:DWORD, dest:DWORD
         pfmul           mm4,    mm6             ; Dj, Ci in mm4
 
         movq            mm7,    [edx+24]        ; H, G in mm7
-        punpckldq       mm1,	mm1		; k, k in mm1
+        punpckldq       mm1,    mm1             ; k, k in mm1
         pfmul           mm5,    mm2             ; Fj, Ej in mm5
 
         movq            mm0,    [edx+32]        ; J, I in mm0
@@ -174,17 +184,17 @@ END_PROC        esch_amd3d_transform
         ALIGN   16
 START_PROC      esch_amd3d_transform_notran, C vect:DWORD, m:DWORD, dest:DWORD
         mov             ecx,    vect
-	movq	        mm0,	[ecx]		; j, i in mm0
-	movd	        mm1,	[ecx+8]         ; 0, k in mm1
+        movq            mm0,    [ecx]           ; j, i in mm0
+        movd            mm1,    [ecx+8]         ; 0, k in mm1
 
         punpckhdq       mm2,    mm0             ; j, undef in mm2
 
         mov             edx,    m
-	movq		mm3,	[edx]		; B, A in mm3
+        movq            mm3,    [edx]           ; B, A in mm3
         movq            mm6,    mm0             ; j, i in mm6
 
         movq            mm4,    [edx+8]         ; D, C in mm4
-        punpckldq       mm0,	mm0		; i, i in mm0
+        punpckldq       mm0,    mm0             ; i, i in mm0
 
         movq            mm5,    [edx+16]        ; F, E in mm5
         pfmul           mm3,    mm0             ; Bi, Ai in mm3
@@ -193,7 +203,7 @@ START_PROC      esch_amd3d_transform_notran, C vect:DWORD, m:DWORD, dest:DWORD
         pfmul           mm4,    mm6             ; Dj, Ci in mm4
 
         movq            mm7,    [edx+24]        ; H, G in mm7
-        punpckldq       mm1,	mm1		; k, k in mm1
+        punpckldq       mm1,    mm1             ; k, k in mm1
         pfmul           mm5,    mm2             ; Fj, Ej in mm5
 
         movd            mm0,    [edx+32]        ; 0, I in mm0
@@ -270,9 +280,9 @@ START_PROC      esch_amd3d_cross, C v1:DWORD, v2:DWORD, dest:DWORD
         pfsub           mm4,    mm3             ; 0, v1.i*v2.j - v1.j*v2.i in mm4
 
         mov             eax,    dest            ; store result
-	movd		[eax],	mm0
-        movd		[eax+4],mm1
-	movd		[eax+8],mm4
+        movd            [eax],  mm0
+        movd            [eax+4],mm1
+        movd            [eax+8],mm4
 
         femms                                   ; exit MMX state
         ret
@@ -292,8 +302,8 @@ END_PROC        esch_amd3d_cross
 START_PROC      esch_amd3d_normalize, C vect:DWORD
 
         mov             ecx,    vect
-	movq	        mm0,    [ecx]           ; j, i in mm0
-	movd	        mm1,	[ecx+8]	        ; 0, k in mm1
+        movq            mm0,    [ecx]           ; j, i in mm0
+        movd            mm1,    [ecx+8]         ; 0, k in mm1
 
         movq            mm4,    mm0             ; j, i in mm4
         movq            mm3,    mm1             ; 0, k in mm3
@@ -301,27 +311,27 @@ START_PROC      esch_amd3d_normalize, C vect:DWORD
         pfmul           mm0,    mm0             ; j*j, i*i in mm0
         pfmul           mm1,    mm1             ; 0, k*k in mm1
 
-	pfacc	        mm0,	mm0		; (X), i*i+j*j in mm0
+        pfacc           mm0,    mm0             ; (X), i*i+j*j in mm0
         pfadd           mm0,    mm1             ; (X), i*i+j*j+k*k in mm0
 
         movd            eax,    mm0             ; length into eax
-	pfrsqrt         mm1,	mm0             ; approx. 1/mag in mm1
-	movq	        mm2,	mm1
+        pfrsqrt         mm1,    mm0             ; approx. 1/mag in mm1
+        movq            mm2,    mm1
 
         cmp             eax,    038D1B717h      ; 0.0001
         jl              exit                    ; if length < 0.0001
 
-	pfmul           mm1,	mm1             ; refine rsqrt
-	pfrsqit1        mm1,	mm0
-	pfrcpit2        mm1,	mm2		; (X), 1/mag in mm1
+        pfmul           mm1,    mm1             ; refine rsqrt
+        pfrsqit1        mm1,    mm0
+        pfrcpit2        mm1,    mm2             ; (X), 1/mag in mm1
 
-	punpckldq	mm1,	mm1             ; 1/mag, 1/mag in mm1
+        punpckldq       mm1,    mm1             ; 1/mag, 1/mag in mm1
 
-	pfmul	        mm3,	mm1             ; 0, k/mag in mm3
-	pfmul	        mm4,	mm1             ; j/mag, i/mag in mm2
+        pfmul           mm3,    mm1             ; 0, k/mag in mm3
+        pfmul           mm4,    mm1             ; j/mag, i/mag in mm2
 
-	movd	        [ecx+8],mm3             ; store result
-	movq	        [ecx],	mm4
+        movd            [ecx+8],mm3             ; store result
+        movq            [ecx],  mm4
 
 exit:
         femms                                   ; exit MMX state
@@ -366,15 +376,15 @@ START_PROC      esch_amd3d_concatmatrix, C source:DWORD, new:DWORD, dest:DWORD
 ;ִִִ Calculate the A' = Aa+Bd+Cg, B' = Ab+Be+Ch, C' = Ac+Bf+Ci
 
         movd            mm7,    [edx+8]         ; 0, c in mm7
-	movd            mm6,    [edx+32]        ; 0, i in mm6
+        movd            mm6,    [edx+32]        ; 0, i in mm6
 
-	punpckldq       mm7,    [edx+20]        ; f, c in mm7
+        punpckldq       mm7,    [edx+20]        ; f, c in mm7
 
-	movq            mm0,    [edi]           ; B, A in mm0
-	movd            mm3,    [edi+8]         ; 0, C in mm3
+        movq            mm0,    [edi]           ; B, A in mm0
+        movd            mm3,    [edi+8]         ; 0, C in mm3
 
-	movq            mm1,    mm0             ; B, A in mm1
-	pfmul           mm0,    mm7             ; Bf, Ac in mm0
+        movq            mm1,    mm0             ; B, A in mm1
+        pfmul           mm0,    mm7             ; Bf, Ac in mm0
 
         movq            mm2,    mm1             ; B, A in mm2
         punpckldq       mm1,    mm1             ; A, A in mm1
@@ -503,6 +513,211 @@ START_PROC      esch_amd3d_concatmatrix, C source:DWORD, new:DWORD, dest:DWORD
         pop             esi
         ret
 END_PROC        esch_amd3d_concatmatrix
+
+
+;ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ¿
+; esch_adm3d_fpureset                                                      ³
+;                                                                          ³
+; void (void);                                                             ³
+;                                                                          ³
+; Performs a FEMMS command to reset the FPU.  For use in batch processing  ³
+; along with nofpu routines.                                               ³
+;ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִÙ
+
+        ALIGN   16
+START_PROC      esch_amd3d_fpureset, C
+        femms                                   ; exit MMX state
+        ret
+END_PROC        esch_amd3d_fpureset
+
+
+;ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ¿
+; esch_amd3d_nofpu_transform                                               ³
+;                                                                          ³
+; void (void *vect,EschMatrix *m);                                         ³
+;                                                                          ³
+; This function transforms the vector/point, by the matrix m but leaves the³
+; processor in the MMX state which is not FPU safe.                        ³
+;ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִÙ
+
+;
+;             [A B C 0]   [ Ai+Dj+Gk+J ]
+; [i j k 1] * [D E F 0] = [ Bi+Ej+Hk+K ]
+;             [G H I 0]   [ Ci+Fj+Ik+L ]
+;             [J K L 1]   [      1     ]
+;
+
+        ALIGN   16
+START_PROC      esch_amd3d_nofpu_transform, C vect:DWORD, m:DWORD, dest:DWORD
+        mov             ecx,    vect
+        movq            mm0,    [ecx]           ; j, i in mm0
+        movd            mm1,    [ecx+8]         ; 0, k in mm1
+
+        punpckhdq       mm2,    mm0             ; j, undef in mm2
+
+        mov             edx,    m
+        movq            mm3,    [edx]           ; B, A in mm3
+        movq            mm6,    mm0             ; j, i in mm6
+
+        movq            mm4,    [edx+8]         ; D, C in mm4
+        punpckldq       mm0,    mm0             ; i, i in mm0
+
+        movq            mm5,    [edx+16]        ; F, E in mm5
+        pfmul           mm3,    mm0             ; Bi, Ai in mm3
+
+        punpckhdq       mm2,    mm2             ; j, j in mm2
+        pfmul           mm4,    mm6             ; Dj, Ci in mm4
+
+        movq            mm7,    [edx+24]        ; H, G in mm7
+        punpckldq       mm1,    mm1             ; k, k in mm1
+        pfmul           mm5,    mm2             ; Fj, Ej in mm5
+
+        movq            mm0,    [edx+32]        ; J, I in mm0
+        pfmul           mm7,    mm1             ; Hk, Gk in mm7
+
+        movq            mm2,    [edx+40]        ; L, K in mm2
+        pfmul           mm1,    mm0             ; (X), Ik in mm1
+
+        punpckhdq       mm0,    mm4             ; Dj, J in mm0
+        pfadd           mm3,    mm7             ; Bi+Hk, Ai+Gk in mm3
+
+        punpckldq       mm1,    mm4             ; Ci, Ik in mm1
+        pfadd           mm2,    mm5             ; Fj+L, Ej+K in mm2
+
+        pfacc           mm0,    mm1             ; Ci+Ik, Dj+J in mm0
+        movq            mm4,    mm0
+
+        punpckldq       mm0,    mm2             ; Ej+K, Dj+J in mm0
+        punpckhdq       mm4,    mm2             ; Fj+L, Ci+Ik
+
+        pfadd           mm0,    mm3             ; Bi+Ej+Hk+K, Ai+Dj+Gk+J
+        pfacc           mm4,    mm5             ; (X), Ci+Fj+Ik+L
+
+        mov             eax,    dest            ; store result
+        movq            [eax],  mm0
+        movd            [eax+8],mm4
+
+        ret
+END_PROC        esch_amd3d_nofpu_transform
+
+
+;ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ¿
+; esch_amd3d_nofpu_transform_notran                                        ³
+;                                                                          ³
+; void (void *vect,EschMatrix *m);                                         ³
+;                                                                          ³
+; This function transforms the vector/point, by the matrix m ignoring      ³
+; translations but leaves the processor in the MMX state which is not FPU  ³
+; safe.                                                                    ³
+;ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִÙ
+
+;
+;             [A B C 0]   [ Ai+Dj+Gk ]
+; [i j k 1] * [D E F 0] = [ Bi+Ej+Hk ]
+;             [G H I 0]   [ Ci+Fj+Ik ]
+;             [J K L 1]   [    1     ]
+;
+
+        ALIGN   16
+START_PROC      esch_amd3d_nofpu_transform_notran, C vect:DWORD, m:DWORD, dest:DWORD
+        mov             ecx,    vect
+        movq            mm0,    [ecx]           ; j, i in mm0
+        movd            mm1,    [ecx+8]         ; 0, k in mm1
+
+        punpckhdq       mm2,    mm0             ; j, undef in mm2
+
+        mov             edx,    m
+        movq            mm3,    [edx]           ; B, A in mm3
+        movq            mm6,    mm0             ; j, i in mm6
+
+        movq            mm4,    [edx+8]         ; D, C in mm4
+        punpckldq       mm0,    mm0             ; i, i in mm0
+
+        movq            mm5,    [edx+16]        ; F, E in mm5
+        pfmul           mm3,    mm0             ; Bi, Ai in mm3
+
+        punpckhdq       mm2,    mm2             ; j, j in mm2
+        pfmul           mm4,    mm6             ; Dj, Ci in mm4
+
+        movq            mm7,    [edx+24]        ; H, G in mm7
+        punpckldq       mm1,    mm1             ; k, k in mm1
+        pfmul           mm5,    mm2             ; Fj, Ej in mm5
+
+        movd            mm0,    [edx+32]        ; 0, I in mm0
+        pfmul           mm7,    mm1             ; Hk, Gk in mm7
+
+        movq            mm6,    mm4             ; Dj, Ci in mm6
+        pfmul           mm0,    mm1             ; 0, Ik in mm0
+
+        movq            mm1,    mm5             ; Fj, Ej in mm1
+        pfadd           mm3,    mm7             ; Bi+Hk, Ai+Gk in mm3
+
+        punpckhdq       mm5,    mm5             ; Fj, Fj in mm5
+        pfadd           mm0,    mm6             ; (X), Ci+Ik in mm0
+
+        punpckldq       mm1,    mm1             ; Ej, Ej in mm1
+        pfadd           mm0,    mm5             ; (X), Ci+Fj+Ik in mm0
+
+        punpckhdq       mm4,    mm1             ; Ej, Dj in mm4
+        pfadd           mm3,    mm4             ; Bi+Ej+Hk, Ai+Dj+Gk in mm3
+
+        mov             eax,    dest            ; store result
+        movq            [eax],  mm3
+        movd            [eax+8],mm0
+
+        ret
+END_PROC        esch_amd3d_nofpu_transform_notran
+
+
+;ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ¿
+; esch_amd3d_nofpu_normalize                                               ³
+;                                                                          ³
+; EVector * (EschVector *v1,EschVector *v2,EschVector *dest);              ³
+;                                                                          ³
+; Normalizes the vector (if the magnitude is too small, leaves the vector  ³
+; unchanged) but leaves the processor in the MMX state which is not FPU    ³
+; safe.                                                                    ³
+;ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִÙ
+
+        ALIGN   16
+START_PROC      esch_amd3d_nofpu_normalize, C vect:DWORD
+
+        mov             ecx,    vect
+        movq            mm0,    [ecx]           ; j, i in mm0
+        movd            mm1,    [ecx+8]         ; 0, k in mm1
+
+        movq            mm4,    mm0             ; j, i in mm4
+        movq            mm3,    mm1             ; 0, k in mm3
+
+        pfmul           mm0,    mm0             ; j*j, i*i in mm0
+        pfmul           mm1,    mm1             ; 0, k*k in mm1
+
+        pfacc           mm0,    mm0             ; (X), i*i+j*j in mm0
+        pfadd           mm0,    mm1             ; (X), i*i+j*j+k*k in mm0
+
+        movd            eax,    mm0             ; length into eax
+        pfrsqrt         mm1,    mm0             ; approx. 1/mag in mm1
+        movq            mm2,    mm1
+
+        cmp             eax,    038D1B717h      ; 0.0001
+        jl              exit                    ; if length < 0.0001
+
+        pfmul           mm1,    mm1             ; refine rsqrt
+        pfrsqit1        mm1,    mm0
+        pfrcpit2        mm1,    mm2             ; (X), 1/mag in mm1
+
+        punpckldq       mm1,    mm1             ; 1/mag, 1/mag in mm1
+
+        pfmul           mm3,    mm1             ; 0, k/mag in mm3
+        pfmul           mm4,    mm1             ; j/mag, i/mag in mm2
+
+        movd            [ecx+8],mm3             ; store result
+        movq            [ecx],  mm4
+
+exit:
+        femms                                   ; exit MMX state
+        ret
+END_PROC        esch_amd3d_nofpu_normalize
 
 _text   ends
         end

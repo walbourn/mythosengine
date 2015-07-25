@@ -8,23 +8,27 @@
 //ששששש²±²ששששששש²±²שששש²±²ש²±²שששש²±²ש²±²שששש²±²ש²±²שששששששש²±²שששש²±²שששששש
 //שששש²²²²²²²²²²ש²²²²²²²²ששש²²²²²²²²שש²²²שששש²²²ש²²²²²²²²²²ש²²²שששש²²²ששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//ששששששששששששששששששש Microsoft Windows 95/NT Version ששששששששששששששששששששששש
+//ששששששששששששששששש Microsoft Windows 95/98/NT Version שששששששששששששששששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//שששששששששששCopyrightש(c)ש1994-1998שbyשCharybdisשEnterprises,שInc.שששששששששש
-//ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
+//שששCopyright (c) 1994-1999 by Dan Higdon, Tim Little, and Chuck Walbournששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
 //
-//           *** Charybdis Enterprises, Inc. Company Confidential ***
+// This file and all associated files are subject to the terms of the
+// GNU Lesser General Public License version 2 as published by the
+// Free Software Foundation (http://www.gnu.org).   They remain the
+// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+// See LICENSE.TXT in the distribution for a copy of this license.
 //
-//  This file and all associated files are the company proprietary property
-//        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+// THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+// OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+// PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+// LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+// OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 //
-// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+//ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
+//
+//                        http://www.mythos-engine.org/
 //
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
 //
@@ -46,7 +50,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include "escher.hpp"
@@ -98,7 +102,7 @@ EschAttenLight::EschAttenLight(const EschPoint *pnt, float i, float o) :
     flags |= ESCH_LGT_ATTEN;
 };
 
-EschAttenLight::EschAttenLight(float ix, float iy, float iz, float i, float o) : 
+EschAttenLight::EschAttenLight(float ix, float iy, float iz, float i, float o) :
     EschPointLight(ix,iy,iz),
     inner(i),
     outer(o)
@@ -159,7 +163,7 @@ void EschAttenLight::setup(const EschFrameRef *fr)
 // vertex and then computes a dot product.  The distance is used to         ³
 // attenuate the intensity.                                                 ³
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִÙ
-void EschAttenLight::shine(const EschVertex *v, VngoPoint *vpt, int revnrml) const 
+void EschAttenLight::shine(const EschVertex *v, VngoPoint *vpt, int revnrml) const
 {
     if (!(flags & ESCH_LGT_OFF))
     {
@@ -189,7 +193,7 @@ void EschAttenLight::shine(const EschVertex *v, VngoPoint *vpt, int revnrml) con
             {
                 dot = (revnrml) ? -dot : 0;
             }
-        
+
             // Compute intensity output (including attenuation)
             float inten = _intensity;
 
@@ -229,8 +233,8 @@ void EschAttenLight::shine(const EschVertex *v, VngoPoint *vpt, int revnrml) con
 // vertex and then computes a dot product.  The distance is used to         ³
 // attenuate the intensity.                                                 ³
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִÙ
-void EschAttenLight::hishine(const EschVertex *v, VngoPoint *vpt, int revnrml) const 
-{                                                           
+void EschAttenLight::hishine(const EschVertex *v, VngoPoint *vpt, int revnrml) const
+{
     if (!(flags & ESCH_LGT_OFF))
     {
         // Compute point source lighting vector
@@ -259,7 +263,7 @@ void EschAttenLight::hishine(const EschVertex *v, VngoPoint *vpt, int revnrml) c
             {
                 dot = (revnrml) ? -dot : 0;
             }
-        
+
             // Compute intensity output (including attenuation)
             float inten = _hintensity;
 

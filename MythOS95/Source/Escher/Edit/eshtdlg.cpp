@@ -8,29 +8,33 @@
 //ששששש²±²ששששששש²±²שששש²±²ש²±²שששש²±²ש²±²שששש²±²ש²±²שששששששש²±²שששש²±²שששששש
 //שששש²²²²²²²²²²ש²²²²²²²²ששש²²²²²²²²שש²²²שששש²²²ש²²²²²²²²²²ש²²²שששש²²²ששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//ששששששששששששששששששש Microsoft Windows 95/NT Version ששששששששששששששששששששששש
+//ששששששששששששששששש Microsoft Windows 95/98/NT Version שששששששששששששששששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//שששששששששששCopyrightש(c)ש1994-1998שbyשCharybdisשEnterprises,שInc.שששששששששש
-//ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
+//שששCopyright (c) 1994-1999 by Dan Higdon, Tim Little, and Chuck Walbournששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
 //
-//           *** Charybdis Enterprises, Inc. Company Confidential ***
+// This file and all associated files are subject to the terms of the
+// GNU Lesser General Public License version 2 as published by the
+// Free Software Foundation (http://www.gnu.org).   They remain the
+// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+// See LICENSE.TXT in the distribution for a copy of this license.
 //
-//  This file and all associated files are the company proprietary property
-//        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+// THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+// OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+// PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+// LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+// OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 //
-// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+//ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
+//
+//                        http://www.mythos-engine.org/
 //
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
 //
 //                        *** Escher Terrain Editor ***
 //
-// Chuck Walbourn
+// Created by Chuck Walbourn
 //
 // eshtdlg.cpp
 //
@@ -399,7 +403,8 @@ IMPLEMENT_DYNCREATE(TerrPropHTablePage, CPropertyPage)
 
 BEGIN_MESSAGE_MAP(TerrPropHTablePage, CPropertyPage)
         //{{AFX_MSG_MAP(TerrPropHTablePage)
-                // NOTE: the ClassWizard will add message map macros here
+        ON_BN_CLICKED(IDC_TPROP_HSCALE, OnScale)
+        ON_BN_CLICKED(IDC_TPROP_HCLIP, OnClipToMax)
         //}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -411,6 +416,8 @@ TerrPropHTablePage::TerrPropHTablePage() : CPropertyPage(TerrPropHTablePage::IDD
 
     for(long i=0; i < 256; i++)
         htable[i] = 0;
+
+    changed = FALSE;
 }
 
 TerrPropHTablePage::~TerrPropHTablePage()
@@ -434,6 +441,62 @@ void TerrPropHTablePage::DoDataExchange(CDataExchange* pDX)
             sprintf(buff,"[%d]  %6.2f",i,(float)htable[i]);
             m_list.AddString(buff);
         }
+    }
+}
+
+void TerrPropHTablePage::OnScale()
+{
+    TerrHTableEdit  dlg;
+
+    dlg.SetWindowText("Enter scaling value");
+
+retry:
+    dlg.m_value = 1.0f;
+    if (dlg.DoModal() == IDOK)
+    {
+        if (dlg.m_value <= 0)
+        {
+            AfxMessageBox("Scale must be positive", MB_OK);
+            goto retry;
+        }
+        else
+        {
+            for(long i=0; i < 256; i++)
+            {
+                htable[i] *= dlg.m_value;
+            }
+            changed=TRUE;
+            UpdateData(FALSE);
+        }
+    }
+}
+
+void TerrPropHTablePage::OnClipToMax()
+{
+    TerrHTableEdit  dlg;
+
+    dlg.SetWindowText("Enter maximum height value");
+
+    for(long i=0; i < 256; i++)
+    {
+        if (htable[i] > dlg.m_value)
+        {
+            dlg.m_value = htable[i];
+        }
+    }
+
+    if (dlg.DoModal() == IDOK)
+    {
+        for(long i=0; i < 256; i++)
+        {
+            if (htable[i] > dlg.m_value)
+            {
+                htable[i] = dlg.m_value;
+                changed=TRUE;
+            }
+        }
+        if (changed)
+            UpdateData(FALSE);
     }
 }
 
@@ -480,6 +543,32 @@ void TerrPropMiscPage::DoDataExchange(CDataExchange* pDX)
         m_auth.TrimRight();
         m_desc.TrimRight();
     }
+}
+
+
+//ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ¿
+// TerrHTableEdit                                                           ³
+//ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִÙ
+BEGIN_MESSAGE_MAP(TerrHTableEdit, CDialog)
+        //{{AFX_MSG_MAP(TerrHTableEdit)
+                // NOTE: the ClassWizard will add message map macros here
+        //}}AFX_MSG_MAP
+END_MESSAGE_MAP()
+
+TerrHTableEdit::TerrHTableEdit(CWnd* pParent /*=NULL*/)
+        : CDialog(TerrHTableEdit::IDD, pParent)
+{
+        //{{AFX_DATA_INIT(TerrHTableEdit)
+        m_value = 0.0f;
+        //}}AFX_DATA_INIT
+}
+
+void TerrHTableEdit::DoDataExchange(CDataExchange* pDX)
+{
+        CDialog::DoDataExchange(pDX);
+        //{{AFX_DATA_MAP(TerrHTableEdit)
+        DDX_Text(pDX, IDC_VALUE, m_value);
+        //}}AFX_DATA_MAP
 }
 
 

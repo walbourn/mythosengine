@@ -8,23 +8,27 @@
 //ששששש²±²ששששששש²±²שששש²±²ש²±²שששש²±²ש²±²שששש²±²ש²±²שששששששש²±²שששש²±²שששששש
 //שששש²²²²²²²²²²ש²²²²²²²²ששש²²²²²²²²שש²²²שששש²²²ש²²²²²²²²²²ש²²²שששש²²²ששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//ששששששששששששששששששש Microsoft Windows 95/NT Version ששששששששששששששששששששששש
+//ששששששששששששששששש Microsoft Windows 95/98/NT Version שששששששששששששששששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//שששששששששששCopyrightש(c)ש1994-1998שbyשCharybdisשEnterprises,שInc.שששששששששש
-//ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
+//שששCopyright (c) 1994-1999 by Dan Higdon, Tim Little, and Chuck Walbournששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
 //
-//           *** Charybdis Enterprises, Inc. Company Confidential ***
+// This file and all associated files are subject to the terms of the
+// GNU Lesser General Public License version 2 as published by the
+// Free Software Foundation (http://www.gnu.org).   They remain the
+// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+// See LICENSE.TXT in the distribution for a copy of this license.
 //
-//  This file and all associated files are the company proprietary property
-//        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+// THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+// OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+// PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+// LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+// OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 //
-// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+//ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
+//
+//                        http://www.mythos-engine.org/
 //
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
 //
@@ -39,7 +43,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include <conio.h>
@@ -86,8 +90,8 @@ IvorySystem     Ivory;
 extern "C" FILE *yyin;
 
 STATIC char Util_name[]
-        = "°± Escher Texture Librarian - (C) 1997-1998 Charybdis Enterprises, Inc. ±°\n"
-          "                              All Rights Reserved.  " __DATE__ "\n";
+        = "°Escher Texture Librarian - (C) 1997-9 by D. Higdon, T. Little, C. Walbourn°\n"
+          "                            subject to GNU LGPL  " __DATE__ "\n";
 
 XFParseIFF      *TxtIFF=0;
 XFParseIFF      *RmdrIFF=0;
@@ -508,7 +512,7 @@ error_exit : ;
     cleanup();
 
     delete [] fn;
-    
+
     return 1;
 }
 
@@ -729,10 +733,10 @@ int dump(XFParseIFF &iff, XFile &xf)
                 }
 
                 char buff[256];
-                sprintf(buff,"texture \"%s\" flags=0x%x %s\r\n",
+                sprintf(buff,"texture \"%s\" flags=0x%x %s bpp=%d\r\n",
                              tname, tbld.tflags,
-                             ((Flags & FLAGS_XPARENT)
-                              && (tbld.bms[0]->bpp == 1)) ? "transparent" : "");
+                             (tbld.tflags & ESCH_TXT_TRANSP) ? "transparent" : "",
+                             tbld.bms[0]->bpp);
 
                 if (xf.write(buff,strlen(buff)) != strlen(buff)
                     || xf.write("{\r\n",sizeof("{\r\n")-1) != sizeof("{\r\n")-1)
@@ -773,7 +777,7 @@ int dump(XFParseIFF &iff, XFile &xf)
                             break;
                         }
                     }
-                    
+
                     xf_remove(fname);
 
                     assert(tbld.bms[f] != 0);
@@ -999,12 +1003,12 @@ STATIC void print_help(int full)
 void print_error(XFParseIFF *xp, char *s)
 {
     cout << "±±± ";
-   
+
     if (s)
     {
         cout << s << ", ";
     }
-   
+
     switch (xp->error())
     {
         case XF_ERR_NOTIFF:
@@ -1041,7 +1045,7 @@ void print_error(XFParseIFF *xp, char *s)
             cout << "error " << (int)xp->error();
             break;
     }
-   
+
     cout << "\n";
 }
 
@@ -1063,7 +1067,7 @@ STATIC int load_pal(VngoPal *pal,char *infile)
 
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
 // _charybdis_assert
-// 
+//
 // Handler for failed asserts.  If msg is set to non-NULL, then an assertMyth
 // was used with a comment.
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ

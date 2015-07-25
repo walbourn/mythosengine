@@ -67,6 +67,11 @@ cd spielbrg
 call mk %1
 if ERRORLEVEL 1 goto error
 cd ..
+rem ÄÄÄÄ Pane 95 ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+cd pane
+call mk %1
+if ERRORLEVEL 1 goto error
+cd ..
 rem ÄÄÄÄ System 95 ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 cd system
 call mk %1
@@ -172,6 +177,11 @@ call mk
 if ERRORLEVEL 1 goto error
 cd ..\..
 rem ÄÄÄÄ Turner 95 ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+cd turner\test
+call mk clean
+call mk
+if ERRORLEVEL 1 goto error
+cd ..\..
 rem ÄÄÄÄ Newton 95 ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 cd newton\test
 call mk clean
@@ -190,7 +200,13 @@ call mk clean
 call mk
 if ERRORLEVEL 1 goto error
 cd ..\..
-rem ÄÄÄÄ SimGine ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+rem ÄÄÄÄ System 95 ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+cd system\test
+call mk clean
+call mk
+if ERRORLEVEL 1 goto error
+cd ..\..
+rem ÄÄÄÄ SimGine ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 cd simgine\test
 call mk clean
 call mk

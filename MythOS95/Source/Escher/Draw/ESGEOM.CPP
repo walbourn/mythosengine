@@ -8,23 +8,27 @@
 //ùùùùù²±²ùùùùùùù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùùùùùù²±²ùùùù²±²ùùùùùù
 //ùùùù²²²²²²²²²²ù²²²²²²²²ùùù²²²²²²²²ùù²²²ùùùù²²²ù²²²²²²²²²²ù²²²ùùùù²²²ùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùùùùùùùùù Microsoft Windows 95/NT Version ùùùùùùùùùùùùùùùùùùùùùùù
+//ùùùùùùùùùùùùùùùùù Microsoft Windows 95/98/NT Version ùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùCopyrightù(c)ù1994-1998ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
-//ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
+//ùùùCopyright (c) 1994-1999 by Dan Higdon, Tim Little, and Chuck Walbournùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
-//           *** Charybdis Enterprises, Inc. Company Confidential ***
+// This file and all associated files are subject to the terms of the
+// GNU Lesser General Public License version 2 as published by the
+// Free Software Foundation (http://www.gnu.org).   They remain the
+// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+// See LICENSE.TXT in the distribution for a copy of this license.
 //
-//  This file and all associated files are the company proprietary property
-//        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+// THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+// OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+// PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+// LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+// OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 //
-// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//
+//                        http://www.mythos-engine.org/
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
@@ -35,7 +39,7 @@
 // Contains the code for the EschGeometry class which forms the basic
 // opertional code and data for the 3D objects in the environment.
 //
-// EschGeometry is the abstract base class for the 3D objects which includes 
+// EschGeometry is the abstract base class for the 3D objects which includes
 // the tree connections, frame of reference, extents, and various object
 // operations.
 //
@@ -44,7 +48,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include "escher.hpp"
@@ -144,6 +148,11 @@ void EschGeometry::draw()
 // This routine inserts the object into the geometry tree as the sibling of ³
 // the given object.                                                        ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+void EschGeometry::sibling(EschDrawable *myprev)
+{
+    EschDrawable::sibling(myprev);
+}
+
 void EschGeometry::sibling(EschGeometry *myprev, dword update)
 {
     assertMyth("EschGeometry::sibling must have myprev",
@@ -184,7 +193,7 @@ void EschGeometry::adopt(EschGeometry *myparent, dword update)
 
     assertMyth("EschGeometry::adopt requires that object not already be in a list",
                iparent == 0 && inext == 0 && iprev == 0);
-   
+
     iparent = myparent;
 
     if (iparent->ichild)
@@ -340,7 +349,7 @@ float EschGeometry::ray(const EschPoint *pt, const EschVector *v, int coarse) co
 
 //ÄÄÄ Perform intersection check (Ray/Sphere intersection)
     float dist=sphere->ray(&point,&ray);
-    
+
     if (dist <= 0)
         return 0;
 
@@ -388,7 +397,7 @@ esch_error_codes EschGeometry::pick(EschPicking *data) const
             != (ESCH_PICK_NOWALK|ESCH_PICK_NOSETUP))
             return ESCH_ERR_INVALIDPARMS;
 
-        //ÄÄÄ Test to see if ray hit our expanded extent first to 
+        //ÄÄÄ Test to see if ray hit our expanded extent first to
         //ÄÄÄ see if this object or any of its children should be checked
 
         // Transform ray into local coords
@@ -447,7 +456,7 @@ esch_error_codes EschGeometry::collide(EschCollision *data) const
             != (ESCH_CLSN_NOWALK|ESCH_CLSN_NOSETUP))
             return ESCH_ERR_INVALIDPARMS;
 
-        //ÄÄÄ Test to see if we hit our expanded extent first to 
+        //ÄÄÄ Test to see if we hit our expanded extent first to
         //ÄÄÄ see if this object or any of its children should be checked
 
         // Transform test sphere into local coords
@@ -493,7 +502,7 @@ esch_error_codes EschGeometry::collide(EschCollision *data) const
 void EschGeometry::animate()
 {
     for (EschGeometry *ptr=ichild; ptr; ptr = (EschGeometry*) ptr->next())
-    {                                   
+    {
         if (!(ptr->flags & ESCH_DRW_SKIPANIMATE))
             ptr->animate();
     }

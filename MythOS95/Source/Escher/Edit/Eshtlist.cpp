@@ -8,29 +8,33 @@
 //ùùùùù²±²ùùùùùùù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùùùùùù²±²ùùùù²±²ùùùùùù
 //ùùùù²²²²²²²²²²ù²²²²²²²²ùùù²²²²²²²²ùù²²²ùùùù²²²ù²²²²²²²²²²ù²²²ùùùù²²²ùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùùùùùùùùù Microsoft Windows 95/NT Version ùùùùùùùùùùùùùùùùùùùùùùù
+//ùùùùùùùùùùùùùùùùù Microsoft Windows 95/98/NT Version ùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùùCopyrightù(c)ù1994-1998ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
-//ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
+//ùùùCopyright (c) 1994-1999 by Dan Higdon, Tim Little, and Chuck Walbournùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
-//           *** Charybdis Enterprises, Inc. Company Confidential ***
+// This file and all associated files are subject to the terms of the
+// GNU Lesser General Public License version 2 as published by the
+// Free Software Foundation (http://www.gnu.org).   They remain the
+// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+// See LICENSE.TXT in the distribution for a copy of this license.
 //
-//  This file and all associated files are the company proprietary property
-//        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+// THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+// OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+// PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+// LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+// OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 //
-// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//
+//                        http://www.mythos-engine.org/
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
 //                        *** Escher Terrain Editor ***
 //
-// Chuck Walbourn
+// Created by Chuck Walbourn
 //
 // eshtlist.cpp
 //
@@ -43,7 +47,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include "stdafx.h"
@@ -68,12 +72,12 @@ static char BASED_CODE THIS_FILE[] = __FILE__;
 // TerrEditList                                                             ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 BEGIN_MESSAGE_MAP(TerrEditList, CListBox)
-	//{{AFX_MSG_MAP(TerrEditList)
-	ON_WM_RBUTTONDOWN()
-	ON_WM_MOUSEMOVE()
-	ON_WM_LBUTTONDBLCLK()
-	ON_WM_LBUTTONDOWN()
-	//}}AFX_MSG_MAP
+        //{{AFX_MSG_MAP(TerrEditList)
+        ON_WM_RBUTTONDOWN()
+        ON_WM_MOUSEMOVE()
+        ON_WM_LBUTTONDBLCLK()
+        ON_WM_LBUTTONDOWN()
+        //}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
@@ -121,7 +125,7 @@ void TerrEditList::UpdateContents()
     int err = 0;
 
     int i = GetCurSel();
-    if (i != LB_ERR) 
+    if (i != LB_ERR)
     {
         strcpy(buff, pDoc->txtName[i]);
     }
@@ -137,10 +141,10 @@ void TerrEditList::UpdateContents()
     // Set on the currently selected here!
 
 
-    if (!err) 
+    if (!err)
     {
 
-        for (i=0; i< pDoc->txtNumb; i++) 
+        for (i=0; i< pDoc->txtNumb; i++)
         {
             if (!strcmp(buff, pDoc->txtName[i]))
             {
@@ -160,7 +164,7 @@ void TerrEditList::UpdateContents()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrEditList - OnLButtonDblClk                                           ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrEditList::OnLButtonDblClk(UINT nFlags, CPoint point) 
+void TerrEditList::OnLButtonDblClk(UINT nFlags, CPoint point)
 {
     CWnd *w = AfxGetMainWnd();
 
@@ -179,7 +183,7 @@ void TerrEditList::OnLButtonDblClk(UINT nFlags, CPoint point)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrEditList - OnLButtonDown                                             ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrEditList::OnLButtonDown(UINT nFlags, CPoint point) 
+void TerrEditList::OnLButtonDown(UINT nFlags, CPoint point)
 {
 
     BOOL flag;
@@ -187,17 +191,17 @@ void TerrEditList::OnLButtonDown(UINT nFlags, CPoint point)
     SetCurSel(i);
 
     TerrEditDoc* pDoc = (TerrEditDoc *) ((CView *) GetParent())->GetDocument();
-    
+
     pDoc->UpdateAllViews(0, HINT_UPDATETXTLIST, 0);
 
-	CListBox::OnLButtonDown(nFlags, point);
+        CListBox::OnLButtonDown(nFlags, point);
 }
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrEditList - OnRButtonDown                                             ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrEditList::OnRButtonDown(UINT nFlags, CPoint point) 
+void TerrEditList::OnRButtonDown(UINT nFlags, CPoint point)
 {
     CRect   rct;
     GetWindowRect (&rct);
@@ -226,11 +230,11 @@ void TerrEditList::OnRButtonDown(UINT nFlags, CPoint point)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrEditList - OnMouseMove                                               ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrEditList::OnMouseMove(UINT nFlags, CPoint point) 
+void TerrEditList::OnMouseMove(UINT nFlags, CPoint point)
 {
     ((TerrMainFrame *) AfxGetMainWnd())->SetMessageText("Ready");
-    
-	CListBox::OnMouseMove(nFlags, point);
+
+        CListBox::OnMouseMove(nFlags, point);
 }
 
 
@@ -250,19 +254,19 @@ TerrColorList::~TerrColorList()
 
 
 BEGIN_MESSAGE_MAP(TerrColorList, CListBox)
-	//{{AFX_MSG_MAP(TerrColorList)
-	ON_WM_LBUTTONDBLCLK()
-	ON_WM_MOUSEMOVE()
-	ON_WM_RBUTTONDOWN()
-	ON_WM_LBUTTONDOWN()
-	//}}AFX_MSG_MAP
+        //{{AFX_MSG_MAP(TerrColorList)
+        ON_WM_LBUTTONDBLCLK()
+        ON_WM_MOUSEMOVE()
+        ON_WM_RBUTTONDOWN()
+        ON_WM_LBUTTONDOWN()
+        //}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrColorList - OnLButtonDblClk                                          ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrColorList::OnLButtonDblClk(UINT nFlags, CPoint point) 
+void TerrColorList::OnLButtonDblClk(UINT nFlags, CPoint point)
 {
     CWnd *w = AfxGetMainWnd();
 
@@ -288,17 +292,17 @@ void TerrColorList::OnLButtonDblClk(UINT nFlags, CPoint point)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrColorList - OnMouseMove                                              ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrColorList::OnMouseMove(UINT nFlags, CPoint point) 
+void TerrColorList::OnMouseMove(UINT nFlags, CPoint point)
 {
     ((TerrMainFrame *) AfxGetMainWnd())->SetMessageText("Ready");
-    
-	CListBox::OnMouseMove(nFlags, point);
+
+        CListBox::OnMouseMove(nFlags, point);
 }
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrColorList - OnRButtonDown                                            ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrColorList::OnRButtonDown(UINT nFlags, CPoint point) 
+void TerrColorList::OnRButtonDown(UINT nFlags, CPoint point)
 {
     CRect   rct;
     GetWindowRect (&rct);
@@ -327,7 +331,7 @@ void TerrColorList::OnRButtonDown(UINT nFlags, CPoint point)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrColorList - OnLButtonDown                                            ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrColorList::OnLButtonDown(UINT nFlags, CPoint point) 
+void TerrColorList::OnLButtonDown(UINT nFlags, CPoint point)
 {
     BOOL flag;
     int i = ItemFromPoint(point, flag);
@@ -336,8 +340,8 @@ void TerrColorList::OnLButtonDown(UINT nFlags, CPoint point)
     TerrEditDoc* pDoc = (TerrEditDoc *) ((CView *) GetParent())->GetDocument();
 
     pDoc->UpdateAllViews(0, HINT_UPDATECLRLIST, 0);
-	
-	CListBox::OnLButtonDown(nFlags, point);
+
+        CListBox::OnLButtonDown(nFlags, point);
 }
 
 
@@ -355,7 +359,7 @@ void TerrColorList::UpdateContents()
 
     int err = 0;
     int i = GetCurSel();
-    if (i != LB_ERR) 
+    if (i != LB_ERR)
     {
         strcpy(buff, pDoc->colorName[i]);
     }
@@ -370,7 +374,7 @@ void TerrColorList::UpdateContents()
     if (!err)
     {
         // Set on the currently selected here!
-        for (i=0; i< pDoc->colorNumb; i++) 
+        for (i=0; i< pDoc->colorNumb; i++)
         {
             if (!strcmp(buff, pDoc->colorName[i]))
             {

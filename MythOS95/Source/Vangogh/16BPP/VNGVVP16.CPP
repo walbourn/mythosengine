@@ -4,32 +4,38 @@
 //                                                          %/ . .  .   \%
 //           Van Gogh 2D-Display Library                     |  . .  o. |
 //                                                           |. _  .   .|
-//          Microsoft Windows '95 Version                    | / \   .  |
+//        Microsoft Windows 95/98/NT Version                 | / \   .  |
 //                                                           |_|_|_._._.|
-// Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
-//              All rights reserved.                        %\__________/%
+//                                                           |.-.-.-.-..|
+//                                                          %\__________/%
 //                                                           %          %
 //
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-//
-//           *** Charybdis Enterprises, Inc. Company Confidential ***
-//
-//  This file and all associated files are the company proprietary property
-//        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
-//
-// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+//  Copyright (c) 1994-1999 by Dan Higdon, Tim Little, and Chuck Walbourn
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
-// vngvp8.cpp
+// This file and all associated files are subject to the terms of the
+// GNU Lesser General Public License version 2 as published by the
+// Free Software Foundation (http://www.gnu.org).   They remain the
+// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+// See LICENSE.TXT in the distribution for a copy of this license.
 //
-//     The C pluss pluss 8bpp view port classes.
+// THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+// OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+// PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+// LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+// OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 //
-//ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ Revision History ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//
+//                        http://www.mythos-engine.org/
+//
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//
+// Created by Tim Little
+//
+// vngvvp16.cpp
+//
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
@@ -383,9 +389,48 @@ VNGError VngoVVport16::pixel(VngoPoint *pt, VngoColor24bit *rgb_val)
     }
     else
     {
-        VngoShadePal16   *tp = (VngoShadePal16 *)vbuff.pal->shd_pal;
-        VngoColorShade16 *tc = &(*tp)[pt->clr];
-        rgb = tc->shl[pt->shade >> 3];
+        if (pt->clr & (VNGO_COLOR_15BIT | VNGO_COLOR_16BIT | VNGO_COLOR_24BIT))
+        {
+            if (pt->clr & VNGO_COLOR_15BIT)
+            {
+                if (vbuff.pal->flags & VNGO_15BIT)
+                {
+                    rgb = word(pt->clr & ~VNGO_COLOR_15BIT);
+                }
+                else
+                    return VNGO_NOT_SUPPORTED;
+            }
+            else if (pt->clr & VNGO_COLOR_16BIT)
+            {
+                if (vbuff.pal->flags & VNGO_16BIT)
+                {
+                    rgb = word(pt->clr & ~VNGO_COLOR_16BIT);
+                }
+                else
+                    return VNGO_NOT_SUPPORTED;
+            }
+            else
+            {
+                if (vbuff.pal->flags & VNGO_15BIT)
+                {
+                    rgb =  word((pt->clr & 0xf80000) >> 9);
+                    rgb |= word((pt->clr & 0xf800) >> 6);
+                    rgb |= word((pt->clr & 0xf8) >> 3);
+                }
+                else
+                {
+                    rgb =  word((pt->clr & 0xf80000) >> 8);
+                    rgb |= word((pt->clr & 0xfc00) >> 5);
+                    rgb |= word((pt->clr & 0xf8) >> 3);
+                }
+            }
+        }
+        else
+        {
+            VngoShadePal16   *tp = (VngoShadePal16 *)vbuff.pal->shd_pal;
+            VngoColorShade16 *tc = &(*tp)[pt->clr];
+            rgb = tc->shl[pt->shade >> 3];
+        }
     }
 
     dword dest;
@@ -488,11 +533,39 @@ VNGError VngoVVport16::frect(VngoRect *rect,dword color)
         {
             for (int j=0;j < rect->dx;j++)
             {
-                dptr[j] = short(color);
+                dptr[j] = word(color);
             }
             dptr+= (vbuff.pitch >> 1);
         }
         return VNGO_NO_ERROR;
+    }
+    else if (color & VNGO_COLOR_24BIT)
+    {
+        word tcolor;
+        if (vbuff.pal->flags & VNGO_15BIT)
+        {
+            tcolor = word(((color & 0xf80000) >> 9) |
+                          ((color & 0xf800) >> 6) |
+                          ((color & 0xf8) >> 3));
+        }
+        else
+        {
+            tcolor = word(((color & 0xf80000) >> 8) |
+                          ((color & 0xfc00) >> 5) |
+                          ((color & 0xf8) >> 3));
+        }
+        dword dest = dword(vbuff.scrn_ptr) + vbuff.ytable[rect->y];
+        word *dptr = ((word *)dest) + rect->x;
+        for (int i=0;i < rect->dy;i++)
+        {
+            for (int j=0;j < rect->dx;j++)
+            {
+                dptr[j] = tcolor;
+            }
+            dptr+= (vbuff.pitch >> 1);
+        }
+        return VNGO_NO_ERROR;
+
     }
     else
     {

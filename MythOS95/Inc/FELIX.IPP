@@ -3,30 +3,36 @@
 //
 //            _,'|             _.-''``-...___..--';)
 //           /_ \'.      __..-' ,      ,--...--'''
-//          <\    .`--'''       `     /'     
+//          <\    .`--'''       `     /'
 //           `-';'               ;   ; ;  Felix the Fixed-point Library
 //     __...--''     ___...--_..'  .;.'
 //    (,__....----'''       (,..--''
 //
-//                    Microsoft Windows 95/NT Version
-//   
-//           Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.
-//                           All Rights Reserved.
+//                    Microsoft Windows 95/98/NT Version
+//
+//  Copyright (c) 1994-1999 by Dan Higdon, Tim Little, and Chuck Walbourn
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
-//           *** Charybdis Enterprises, Inc. Company Confidential ***
+// This file and all associated files are subject to the terms of the
+// GNU Lesser General Public License version 2 as published by the
+// Free Software Foundation (http://www.gnu.org).   They remain the
+// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+// See LICENSE.TXT in the distribution for a copy of this license.
 //
-// This file and all associated files are the company proprietary property
-//       of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
-//
-// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+// THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+// OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+// PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+// LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+// OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//
+//                        http://www.mythos-engine.org/
+//
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//
+// Created by Tim Little
 //
 // felix.ipp
 //
@@ -36,9 +42,9 @@
 #define __FELIX_IPP     1
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-//             
+//
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
@@ -69,7 +75,7 @@
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
-//							   Inline Functions
+//                                                         Inline Functions
 //
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
@@ -92,10 +98,10 @@ inline Flx16 flx_muldiv(Flx16 a,Flx16 b, Flx16 c)
     Flx16 ret_val;
 
     _asm {
-        mov     eax,a.flx       
-        mov     edx,b.flx       
-        mov     ecx,c.flx       
-        imul    edx             
+        mov     eax,a.flx
+        mov     edx,b.flx
+        mov     ecx,c.flx
+        imul    edx
 
         cmp     ecx,0
         jge     t2
@@ -111,7 +117,7 @@ t1:
         jge     error_trap
         mov     ecx,c.flx
         pop     edx
-        idiv    ecx             
+        idiv    ecx
         jmp     done
 
 error_trap:
@@ -125,7 +131,7 @@ t3:
         mov     eax,0x80000000
 
 done:
-        mov     ret_val.flx,eax 
+        mov     ret_val.flx,eax
     };
 
     return (ret_val);
@@ -157,39 +163,39 @@ inline Flx16 flx_16div16(Flx16 a,Flx16 b)
 #ifdef INLINE_FELIX
 
     _asm {
-	mov	edx,a.flx
-	xor	eax,eax
-	shrd	eax,edx,16
-	sar	edx,16
+        mov     edx,a.flx
+        xor     eax,eax
+        shrd    eax,edx,16
+        sar     edx,16
 #ifdef SAFE_DIVIDE
-	mov	ecx,b.flx
-	cmp	ecx,0
-	jge	jump_1
-	neg	ecx
+        mov     ecx,b.flx
+        cmp     ecx,0
+        jge     jump_1
+        neg     ecx
 jump_1:
-	push	edx
-	cmp	edx,0
-	jge	jump_2
-	neg	edx
+        push    edx
+        cmp     edx,0
+        jge     jump_2
+        neg     edx
 jump_2:
-	shr	ecx,1
-	cmp	edx,ecx
-	jge	error_trap
-	pop	edx
+        shr     ecx,1
+        cmp     edx,ecx
+        jge     error_trap
+        pop     edx
 #endif
-	idiv	b.flx
-	mov	ret_val.flx,eax
-	jmp	_done
+        idiv    b.flx
+        mov     ret_val.flx,eax
+        jmp     _done
 #ifdef SAFE_DIVIDE
 error_trap:
-	pop	edx
-	xor	edx,b.flx
-	cmp	edx,0
-	jl	jump_3
-	mov	ret_val.flx,0x7fffffff
-	jmp	_done
+        pop     edx
+        xor     edx,b.flx
+        cmp     edx,0
+        jl      jump_3
+        mov     ret_val.flx,0x7fffffff
+        jmp     _done
 jump_3:
-	mov	ret_val.flx,0x80000000
+        mov     ret_val.flx,0x80000000
 #endif
 _done:
     }
@@ -327,7 +333,7 @@ inline int operator > (const Flx16 a, const Flx16 b)
 }
 
 inline int operator > (const Flx16 a, const int b)
-{                       
+{
    return(a.flx>(b << 16));
 }
 
@@ -379,7 +385,7 @@ inline int operator <= (const Flx16 a, const int b)
 inline int operator <= (const int a, const Flx16 b)
 {
    return((a << 16)<=b.flx);
-}                    
+}
 
 
 inline Flx16 operator += (Flx16 &a, const Flx16 b)

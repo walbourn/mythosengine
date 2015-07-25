@@ -1,35 +1,76 @@
 
-                                    Turner
+                                 Jb
+                                 $$$c
+               $$$$$$$$$$$$$$$$$$$$$$b       d$$$$$$$$$$$$$$$$$$$$$P
+              .$$$$$$$$$$$$$$$$$$$$$$$$.     $$$$$$$$$$$$$$$$$$$$$$
+              ^""""""$$$$$P""""3$$$$$$$$c   d$$$$$""""$$$$$$"""""""
+                    4$$$$$"    $$$$$$$$$$b  $$$$$F   .$$$$$F
+                    $$$$$P    4$$$$$$$$$$$$$$$$$$    d$$$$$
+                   4$$$$$"    $$$$$$$$$$$$$$$$$$P    $$$$$F
+                   $$$$$$    4$$$$$""$$$$$$$$$$$    d$$$$$
+                  4$$$$$"    $$$$$$  ^$$$$$$$$$P    $$$$$F
+                  $$$$$$    4$$$$$%    *$$$$$$$"   J$$$$$
+                 4$$$$$%    $$$$$$      ^$$$$$P    $$$$$F
+                 """"""     """"""        *$$$"    """"""
+                                           "$$
+                                            ^%
+  
+                           Turner - Networking Library
+  
+                      Microsoft Windows 95/98/NT Version
+  
+    Copyright (c) 1995-1999 by Dan Higdon, Tim Little, and Chuck Walbourn
+  
+ ---------------------------------------------------------------------------
 
-                          Microsoft Windows '95 Version
+  This file and all associated files are subject to the terms of the
+  GNU Lesser General Public License version 2 as published by the
+  Free Software Foundation (http://www.gnu.org).   They remain the
+  property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+  See LICENSE.TXT in the distribution for a copy of this license.
 
-              Copyright (c) 1994 - 1997 by Charybdis Enterprises, Inc.
-                             All Rights Reserved.
+  THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+  OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+  PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+  LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+  OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 
-  --------------------------------------------------------------------------
+ ---------------------------------------------------------------------------
 
-             *** Charybdis Enterprises, Inc. Company Confidential ***
+                         http://www.mythos-engine.org/
 
-    This file and all associated files are the company proprietary property
-          of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
-
-   CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-   TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-   IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-   AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-   INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
-
-  --------------------------------------------------------------------------
+ ---------------------------------------------------------------------------
 
                               _Library Status_
 
-  Notes by: Dan Higdon
-  Updated:  March 11, 1997
+  Notes by: Chuck Walbourn
+  Updated:  July 6, 1999
 
   Changes for this release --------------------------------------------------
 
-	- Converted over to the IDirectPlay2 interface
+  - Updated for new DirectPlay4A interface.
 
-    - Added some delays after Open and CreatePlayer.
+  - The recieve routine no longer returns data to the caller as you must
+    implement handle_msg() and handle_chat() in order to use TurnerNetwork.
+    The system will allocate the memory required to store messages for
+    the Recieve.
+
+  - Lots of additional functions exposed and the interface has been broken
+    out into TurnerClassic and TurnerNetwork to simplify learning the
+    commands.  Also renamed 'creator' to more logical 'host' since you
+    can have migrating hosts.
+
+  - Most virtuals have changed parameter lists and these will compile
+    without warnings in dervied code, BUT WILL NOT OPERATE.  You should
+    therefore check each overload in classes derived from TurnerNetwork to
+    make sure you have matching signatures.
+
+
+
+  Proposed future changes ---------------------------------------------------
+
+  - A TurnerSecureNetwork class should be derived from TurnerNetwork
+    to add secure session support with both encrypted and/or signed
+    sending.
 
 *** END OF FILE ***

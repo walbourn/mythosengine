@@ -8,23 +8,27 @@
 //ששששש²±²ששששששש²±²שששש²±²ש²±²שששש²±²ש²±²שששש²±²ש²±²שששששששש²±²שששש²±²שששששש
 //שששש²²²²²²²²²²ש²²²²²²²²ששש²²²²²²²²שש²²²שששש²²²ש²²²²²²²²²²ש²²²שששש²²²ששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//ששששששששששששששששששש Microsoft Windows 95/NT Version ששששששששששששששששששששששש
+//ששששששששששששששששש Microsoft Windows 95/98/NT Version שששששששששששששששששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//שששששששששששCopyrightש(c)ש1994-1998שbyשCharybdisשEnterprises,שInc.שששששששששש
-//ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
+//שששCopyright (c) 1994-1999 by Dan Higdon, Tim Little, and Chuck Walbournששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
 //
-//           *** Charybdis Enterprises, Inc. Company Confidential ***
+// This file and all associated files are subject to the terms of the
+// GNU Lesser General Public License version 2 as published by the
+// Free Software Foundation (http://www.gnu.org).   They remain the
+// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+// See LICENSE.TXT in the distribution for a copy of this license.
 //
-//  This file and all associated files are the company proprietary property
-//        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+// THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+// OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+// PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+// LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+// OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 //
-// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+//ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
+//
+//                        http://www.mythos-engine.org/
 //
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
 //
@@ -173,6 +177,7 @@ typedef enum _esch_error_codes
 #define ESCH_TXT_OWNSDATA           0x10000 // Texture should free data on destruct
 #define ESCH_TXT_SHARED             0x20000 // Texture instance shares
                                             // data in texture cache
+#define ESCH_TXT_TRANSP             0x40000 // Texture has transparency
 
 #define ESCH_TXT_APP0               0x1000000   // Application defined bits
 #define ESCH_TXT_APP1               0x2000000
@@ -200,6 +205,8 @@ typedef enum _esch_error_codes
 #define ESCH_TXTLD_MFRAME           0x2
 
 #define ESCH_TXTLD_ALL              0xf
+
+#define ESCH_TXTLD_TCBITMAP         0x10
 
 
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ¿
@@ -240,7 +247,7 @@ typedef enum _esch_error_codes
 #define ESCH_CAM_GRADIENT           0x200000    // Gradient background (Ex)
 
 #define ESCH_CAM_OWNSBITMAP         0x400000    // Owns background bitmap (Ex)
-#define ESCH_CAM_OWNSGRADIENT       0x800000    // Owns gradient palette (Ex)
+#define ESCH_CAM_GRADIENT_FIXED     0x800000    // Gradient values in world coords (Ex)
 
 #define ESCH_CAM_APP0               0x1000000   // Application defined bits
 #define ESCH_CAM_APP1               0x2000000
@@ -388,6 +395,7 @@ typedef enum _esch_error_codes
 #define ESCH_DRWT_PRTN_QUAD         0x0720
 #define ESCH_DRWT_PRTN_OCT          0x0730
 #define ESCH_DRWT_LINEDRAW          0x0800
+#define ESCH_DRWT_PLANEDRAW         0x0900
 #define ESCH_DRWT_STARFIELD         0x1000
 #define ESCH_DRWT_EXPLOSION         0x1100
 #define ESCH_DRWT_METABOX           0x1200
@@ -396,6 +404,8 @@ typedef enum _esch_error_codes
 //ִִִ EschParticle
 
 #define ESCH_PRT_TIMEBASED          0x10000 // Lifetime based on interval
+#define ESCH_PRT_CULLIFOUTOFVIEW    0x20000 // Remove if out of view
+#define ESCH_PRT_WASVISIBLE         0x40000 // Flag for CULL option
 
 //ִִִ EschParticleGenerator
 
@@ -551,6 +561,8 @@ typedef enum _esch_error_codes
 
 #define ESCH_MSHLD_ALL              0xf
 
+#define ESCH_MSHLD_TXTTCBM          0x10
+
 
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ¿
 // EschScene                                                                ³
@@ -637,6 +649,7 @@ typedef enum _esch_error_codes
 #define ESCH_TBLD_8BIT              0x1
 #define ESCH_TBLD_TC                0x2
 #define ESCH_TBLD_COMPRESS          0x4
+#define ESCH_TBLD_15BIT             0x8
 
 #define ESCH_TBLD_TRANSP            0x10
 
@@ -837,6 +850,8 @@ typedef long esch_limb_type;
 
 #define ESCH_MAX_NAME               16      // maximum name length
 #define ESCH_MAX_ORTHOCOUNT         4096
+
+#define ESCH_ALPHA_TRANSP           128     // Alpha cut-off for transparency
 
 #endif
 

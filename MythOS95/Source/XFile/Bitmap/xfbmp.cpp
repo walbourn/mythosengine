@@ -1,28 +1,32 @@
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
-//                            
+//
 //           ^           **   **   **** ***** *    ****     ^      Take me to
 //          (_)            * *     *      *   *    *       (_)    / your
 //     ^                    *      **     *   *    **            ^  leader...
 //    (_)       ^          * *     *      *   *    *            (_)
 //             (_)       **   **   *    ***** **** ****
 //
-//                      Microsoft Windows 95/NT Version
+//                    Microsoft Windows 95/98/NT Version
 //
-//            Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.
-//                              All Rights Reserved.
+//  Copyright (c) 1994-1999 by Dan Higdon, Tim Little, and Chuck Walbourn
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
-//           *** Charybdis Enterprises, Inc. Company Confidential ***
+// This file and all associated files are subject to the terms of the
+// GNU Lesser General Public License version 2 as published by the
+// Free Software Foundation (http://www.gnu.org).   They remain the
+// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+// See LICENSE.TXT in the distribution for a copy of this license.
 //
-//  This file and all associated files are the company proprietary property
-//        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+// THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+// OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+// PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+// LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+// OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 //
-// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
-// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
-// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
-// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
-// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//
+//                        http://www.mythos-engine.org/
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
@@ -39,7 +43,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include <assert.h>
@@ -130,6 +134,7 @@ xf_error_codes XFParseBMP::read(XFBitmap *b)
          || (iheader.biBitCount != 1
              && iheader.biBitCount != 4
              && iheader.biBitCount != 8
+             && iheader.biBitCount != 16
              && iheader.biBitCount != 24)
          || !iheader.biWidth
          || !iheader.biHeight
@@ -155,6 +160,10 @@ xf_error_codes XFParseBMP::read(XFBitmap *b)
     {
         b->bpp = XFBM_BPP_MONO;
     }
+    else if (iheader.biBitCount == 16)
+    {
+        b->bpp = XFBM_BPP_15BIT;
+    }
     else if (iheader.biBitCount == 24)
     {
         b->bpp = XFBM_BPP_24BIT;
@@ -163,7 +172,7 @@ xf_error_codes XFParseBMP::read(XFBitmap *b)
     {
         b->bpp = XFBM_BPP_8BIT;
     }
- 
+
 //ÄÄÄ Get palette data ÄÄÄ
     if (iheader.biBitCount == 4 || iheader.biBitCount == 8)
     {
@@ -254,7 +263,7 @@ xf_error_codes XFParseBMP::read(XFBitmap *b)
         //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ 1 Bits per Pixel
         case 1:
             w = ((b->width+7) >> 3);
- 
+
             for (ptr=b->data+(w*(b->height-1)), y=0;
                  y < b->height; y++, ptr -= w)
             {
@@ -263,7 +272,7 @@ xf_error_codes XFParseBMP::read(XFBitmap *b)
                     b->release();
                     return (errorn=XF_ERR_INVALIDIMAGE);
                 }
- 
+
                 // Skip any padding
                 i = (w & 0x3);
                 if (i)
@@ -284,22 +293,22 @@ xf_error_codes XFParseBMP::read(XFBitmap *b)
                 for(ptr=b->data+(b->width*(b->height-1)), y=0;
                     y < b->height; y++, ptr -= b->width)
                 {
-                    
+
                     if (xf->read(ptr,(b->width+1)>>1) != ulong (b->width+1) >> 1)
                     {
                         b->release();
                         return (errorn=XF_ERR_INVALIDIMAGE);
                     }
- 
+
                     // Expand nibbles into bytes
                     for (sptr=ptr+((b->width+1)>>1)-1, dptr=ptr+b->width-1, x=b->width;
-                        x > 0; 
+                        x > 0;
                         x -= 2)
                     {
                         *(dptr--) = (byte) (*sptr & 0xf);
                         *(dptr--) = (byte) ((*(sptr--) & 0xf0) >> 4);
                     }
-                    
+
                     // Skip any padding
                     i = (((b->width+1)>>1) & 0x3);
                     if (i)
@@ -369,13 +378,13 @@ xf_error_codes XFParseBMP::read(XFBitmap *b)
 
                                 // Expand nibbles into bytes
                                 for (sptr=ptr+((i+1)>>1)-1, dptr=ptr+i-1, x=i;
-                                     x > 0; 
+                                     x > 0;
                                      x -= 2)
                                 {
                                     *(dptr--) = (byte) (*sptr & 0xf);
                                     *(dptr--) = (byte) ((*(sptr--) & 0xf0) >> 4);
                                 }
-                    
+
                                 ptr += i;
 
                                 if (((i+1)>>1) & 0x1)
@@ -414,7 +423,7 @@ xf_error_codes XFParseBMP::read(XFBitmap *b)
 rle4_end:;
             }
             break;
- 
+
         //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ 8 Bits per Pixel
         case 8:
             if (!iheader.biCompression)
@@ -428,7 +437,7 @@ rle4_end:;
                         b->release();
                         return (errorn=XF_ERR_INVALIDIMAGE);
                     }
- 
+
                     // Skip any padding
                     i = ((b->width) & 0x3);
                     if (i)
@@ -529,21 +538,49 @@ rle4_end:;
 rle8_end:;
             }
             break;
- 
-        //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ 24 Bits per Pixel
-        case 24:
-            w = b->width * 3;
- 
+
+
+        //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ 16 Bits per Pixel
+        case 16:
+            w = b->width * 2;
+
             for (ptr=b->data+(w*(b->height-1)), y=0;
                  y < b->height; y++, ptr -= w)
             {
-                                                             
+
                 if (xf->read(ptr,w) != w)
                 {
                     b->release();
                     return (errorn=XF_ERR_INVALIDIMAGE);
                 }
- 
+
+                // Skip any padding
+                i = (w & 0x3);
+                if (i)
+                {
+                    if (xf->read(work,4-i) != ulong (4-i))
+                    {
+                        b->release();
+                        return (errorn=XF_ERR_INVALIDIMAGE);
+                    }
+                }
+            }
+            break;
+
+        //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ 24 Bits per Pixel
+        case 24:
+            w = b->width * 3;
+
+            for (ptr=b->data+(w*(b->height-1)), y=0;
+                 y < b->height; y++, ptr -= w)
+            {
+
+                if (xf->read(ptr,w) != w)
+                {
+                    b->release();
+                    return (errorn=XF_ERR_INVALIDIMAGE);
+                }
+
                 // Skip any padding
                 i = (w & 0x3);
                 if (i)
@@ -566,7 +603,7 @@ rle8_end:;
             }
             break;
     }
- 
+
     return XF_ERR_NONE;
 }
 
@@ -591,37 +628,38 @@ xf_error_codes XFParseBMP::write(XFBitmap *b)
     File_header     fheader;
     Info_header     iheader;
     byte            work[4*256];
- 
+
     if (!b)
         b = bm;
 
 //ÄÄÄ Check for unsupported formats ÄÄÄ
     if (!b->width || !b->height)
         return XF_ERR_NOTSUPPORTED;
- 
+
     switch (b->bpp)
     {
         case XFBM_BPP_MONO:
         case XFBM_BPP_8BIT:
+        case XFBM_BPP_15BIT:
         case XFBM_BPP_24BIT:
             break;
         default:
             return XF_ERR_NOTSUPPORTED;
     }
- 
+
 //ÄÄÄ Create/write file header ÄÄÄ
     // Save to later write out Size and OffBits...
     headerpos=xf->tell();
     memset(&fheader,0,sizeof(File_header));
     fheader.bfType[0]='B';
     fheader.bfType[1]='M';
- 
+
     if (xf->write(&fheader,sizeof(File_header)) != sizeof(File_header))
     {
         errorn=xf->error();
         return errorn;
     }
- 
+
 //ÄÄÄ Create/write image header ÄÄÄ
     memset(&iheader,0,sizeof(Info_header));
     iheader.biSize=40;
@@ -637,6 +675,9 @@ xf_error_codes XFParseBMP::write(XFBitmap *b)
         case XFBM_BPP_8BIT:
             iheader.biBitCount = 8;
             break;
+        case XFBM_BPP_15BIT:
+            iheader.biBitCount = 16;
+            break;
         case XFBM_BPP_24BIT:
             iheader.biBitCount = 24;
             break;
@@ -644,7 +685,7 @@ xf_error_codes XFParseBMP::write(XFBitmap *b)
 
                                             //ÄÄÄ Doesn't compress on output
     iheader.biCompression=0;
- 
+
     if (xf->write(&iheader,sizeof(Info_header)) != sizeof(Info_header))
     {
         errorn=xf->error();
@@ -661,7 +702,7 @@ xf_error_codes XFParseBMP::write(XFBitmap *b)
 
         err=b->lock();
         if (err)
-        {   
+        {
             return (errorn=err);
         }
     }
@@ -675,7 +716,7 @@ xf_error_codes XFParseBMP::write(XFBitmap *b)
                 b->unlock();
             return (errorn=XF_ERR_INVALIDPALETTE);
         }
-         
+
         for (i=0, ptr=(byte*)b->pal; i < 256; i++)
         {
              work[i*4+3] = 0;
@@ -708,7 +749,7 @@ xf_error_codes XFParseBMP::write(XFBitmap *b)
             return errorn;
         }
     }
- 
+
 //ÄÄÄ Write out image ÄÄÄ
     if (!b->data)
     {
@@ -716,11 +757,11 @@ xf_error_codes XFParseBMP::write(XFBitmap *b)
             b->unlock();
         return (errorn=XF_ERR_INVALIDIMAGE);
     }
-        
+
     fheader.bfOffBits=xf->tell() - headerpos;
- 
+
     work[0]=work[1]=work[2]=0;
- 
+
     switch (iheader.biBitCount)
     {
         //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ 1 Bits per Pixel
@@ -737,7 +778,7 @@ xf_error_codes XFParseBMP::write(XFBitmap *b)
                     errorn=xf->error();
                     return errorn;
                 }
- 
+
                 // Pad, if needed.
                 i=(w & 0x3);
                 if (i)
@@ -749,7 +790,7 @@ xf_error_codes XFParseBMP::write(XFBitmap *b)
                         errorn=xf->error();
                         return errorn;
                     }
-                    
+
                 }
             }
             break;
@@ -759,7 +800,7 @@ xf_error_codes XFParseBMP::write(XFBitmap *b)
             for(ptr=b->data+(b->width*(b->height-1)), y=0;
                 y < b->height; y++, ptr -= b->width)
             {
- 
+
                 if (xf->write(ptr,b->width) != b->width)
                 {
                     if (!locked)
@@ -767,7 +808,41 @@ xf_error_codes XFParseBMP::write(XFBitmap *b)
                     errorn=xf->error();
                     return errorn;
                 }
- 
+
+                // Pad, if needed.
+                i=b->width & 0x3;
+                if (i)
+                {
+                    if (xf->write(work,4-i) != ulong (4-i))
+                    {
+                        errorn=xf->error();
+                        if (!locked)
+                            b->unlock();
+                        return errorn;
+                    }
+                }
+            }
+            break;
+
+
+        //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ 15 Bits per Pixel
+        case 16:
+            w= b->width*2;
+
+            // If this doesn't work we will reorder to BRG.
+
+            for(ptr=b->data+(w*(b->height-1)), y=0;
+                y < b->height; y++, ptr -= w)
+            {
+
+                if (xf->write(ptr,w) != ulong(w))
+                {
+                    if (!locked)
+                        b->unlock();
+                    errorn=xf->error();
+                    return errorn;
+                }
+
                 // Pad, if needed.
                 i=b->width & 0x3;
                 if (i)
@@ -790,7 +865,7 @@ xf_error_codes XFParseBMP::write(XFBitmap *b)
             tmp = new byte[w];
             if (!tmp)
                 return XF_ERR_NOMEMORY;
- 
+
             for(ptr=b->data+(w*(b->height-1)), y=0;
                 y < b->height; y++, ptr -= w)
             {
@@ -811,7 +886,7 @@ xf_error_codes XFParseBMP::write(XFBitmap *b)
                     delete [] tmp;
                     return errorn;
                 }
- 
+
                 // Pad, if needed.
                 i=(w & 0x3);
                 if (i)
@@ -824,7 +899,7 @@ xf_error_codes XFParseBMP::write(XFBitmap *b)
                         delete [] tmp;
                         return errorn;
                     }
-                    
+
                 }
             }
 
@@ -845,7 +920,7 @@ xf_error_codes XFParseBMP::write(XFBitmap *b)
         return errorn;
     }
     xf->seek_set(pos);
- 
+
     return XF_ERR_NONE;
 }
 

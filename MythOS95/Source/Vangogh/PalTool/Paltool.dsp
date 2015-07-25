@@ -1,5 +1,5 @@
 # Microsoft Developer Studio Project File - Name="Paltool" - Package Owner=<4>
-# Microsoft Developer Studio Generated Build File, Format Version 5.00
+# Microsoft Developer Studio Generated Build File, Format Version 6.00
 # ** DO NOT EDIT **
 
 # TARGTYPE "Win32 (x86) Application" 0x0101
@@ -22,6 +22,7 @@ CFG=Paltool - Win32 Debug
 !MESSAGE 
 
 # Begin Project
+# PROP AllowPerConfigDependencies 0
 # PROP Scc_ProjName ""
 # PROP Scc_LocalPath ""
 CPP=cl.exe
@@ -38,8 +39,9 @@ RSC=rc.exe
 # PROP Use_Debug_Libraries 1
 # PROP Output_Dir ".\WinDebug"
 # PROP Intermediate_Dir ".\WinDebug"
+# PROP Ignore_Export_Lib 0
 # ADD BASE CPP /nologo /MD /W3 /GX /Zi /Od /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_AFXDLL" /FR /Yu"stdafx.h" /c
-# ADD CPP /nologo /MDd /W3 /Gm /GX /Zi /Od /I "..\..\inc" /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /Yu"stdafx.h" /FD /c
+# ADD CPP /nologo /MDd /W3 /Gm /GX /ZI /Od /I "..\..\inc" /I "..\..\..\inc" /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /Yu"stdafx.h" /FD /c
 # SUBTRACT CPP /Fr
 # ADD MTL /mktyplib203
 # ADD BASE RSC /l 0x409 /d "_DEBUG" /d "_AFXDLL"
@@ -50,7 +52,7 @@ BSC32=bscmake.exe
 LINK32=link.exe
 # ADD BASE LINK32 /nologo /subsystem:windows /debug /machine:I386
 # SUBTRACT BASE LINK32 /pdb:none
-# ADD LINK32 winmm.lib ..\..\lib\mythos.lib ..\..\lib\ivorymfc.lib ..\..\lib\bozo.lib ..\..\lib\xfile.lib ..\..\lib\chronos.lib ..\..\lib\escher.lib ..\..\lib\gutenbrg.lib ..\..\lib\felix.lib ..\..\lib\vangogh.lib /nologo /version:4 /subsystem:windows /debug /machine:I386 /nodefaultlib:"libc" /VERSION:4,0
+# ADD LINK32 winmm.lib mythos.lib ivorymfc.lib bozo.lib xfile.lib chronos.lib escher.lib gutenbrg.lib felix.lib vangogh.lib /nologo /version:4 /subsystem:windows /debug /machine:I386 /nodefaultlib:"libc" /libpath:"..\..\lib" /libpath:"..\..\..\lib" /VERSION:4,0
 # SUBTRACT LINK32 /pdb:none
 
 !ELSEIF  "$(CFG)" == "Paltool - Win32 Release"
@@ -64,7 +66,7 @@ LINK32=link.exe
 # PROP Output_Dir ".\WinRel"
 # PROP Intermediate_Dir ".\WinRel"
 # ADD BASE CPP /nologo /MD /W3 /GX /O2 /D "NDEBUG" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_AFXDLL" /FR /Yu"stdafx.h" /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /I "..\..\inc" /D "NDEBUG" /D "WIN32" /D "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /Yu"stdafx.h" /FD /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "..\..\inc" /I "..\..\..\inc" /D "NDEBUG" /D "WIN32" /D "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /Yu"stdafx.h" /FD /c
 # SUBTRACT CPP /Fr
 # ADD MTL /mktyplib203
 # ADD BASE RSC /l 0x409 /d "NDEBUG" /d "_AFXDLL"
@@ -75,7 +77,7 @@ BSC32=bscmake.exe
 LINK32=link.exe
 # ADD BASE LINK32 /nologo /subsystem:windows /machine:I386
 # SUBTRACT BASE LINK32 /pdb:none
-# ADD LINK32 winmm.lib ..\..\lib\mythos.lib ..\..\lib\ivorymfc.lib ..\..\lib\bozo.lib ..\..\lib\xfile.lib ..\..\lib\chronos.lib ..\..\lib\escher.lib ..\..\lib\gutenbrg.lib ..\..\lib\felix.lib ..\..\lib\vangogh.lib /nologo /version:4 /subsystem:windows /machine:I386 /nodefaultlib:"libc" /VERSION:4,0
+# ADD LINK32 winmm.lib mythos.lib ivorymfc.lib bozo.lib xfile.lib chronos.lib escher.lib gutenbrg.lib felix.lib vangogh.lib /nologo /version:4 /subsystem:windows /machine:I386 /nodefaultlib:"libc" /libpath:"..\..\lib" /libpath:"..\..\..\lib" /VERSION:4,0
 # SUBTRACT LINK32 /pdb:none
 
 !ENDIF 
