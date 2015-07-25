@@ -96,6 +96,8 @@ LanderApp::~LanderApp()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 BOOL LanderApp::init_instance()
 {
+    float gamma=1.0f;
+
 //ÄÄÄ Load settings from .INI file
     {
         XFParseINI ini;
@@ -156,6 +158,15 @@ BOOL LanderApp::init_instance()
                     startup_bitdepth = 16;
                 }
             }
+
+            if (!ini.read("Gamma",buff))
+            {
+                gamma = float(atof(buff));
+                if (gamma < 0.5f)
+                    gamma = 0.5f;
+                else if (gamma > 2.0f)
+                    gamma = 2.0f;
+            }
         }
 
         //ÄÄÄ Startup parameters
@@ -205,6 +216,8 @@ BOOL LanderApp::init_instance()
                    appName, MB_ICONEXCLAMATION | MB_OK);
         return FALSE;
     }
+
+    MythOS->Vangogh.set_gamma(gamma);
 
 //ÄÄÄ Install fonts
     if (gberg_install_font(szIFF, "9x15")

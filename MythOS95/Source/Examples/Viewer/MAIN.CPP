@@ -120,6 +120,7 @@ int APIENTRY WinMain (HINSTANCE hInstance,
     int         bpp = 16;
     screen_type scrndevice = SCREEN_DIB;
     dword       scrnflags = 0;
+    float       gamma = 1.0f;
     BOOL        use_dinput = FALSE;
     char        palname[256];
     
@@ -150,16 +151,6 @@ int APIENTRY WinMain (HINSTANCE hInstance,
                         scrndevice = SCREEN_DDRAW;
                     else if (strstr(buff,"d3d"))
                         scrndevice = SCREEN_D3D;
-#ifdef _OEMS
-#ifdef _3DFX
-                    else if (strstr(buff,"3dfx"))
-                        scrndevice = SCREEN_3DFX;
-#endif
-#ifdef _CLEAR3D
-                    else if (strstr(buff,"cl3d"))
-                        scrndevice = SCREEN_CL3D;
-#endif
-#endif
                     else
                         scrndevice = SCREEN_DIB;
                 }
@@ -195,6 +186,15 @@ int APIENTRY WinMain (HINSTANCE hInstance,
 
                 if (!ini.read("Palette",buff))
                     strncpy(palname,buff,sizeof(palname));
+
+                if (!ini.read("Gamma",buff))
+                {
+                    gamma = float(atof(buff));
+                    if (gamma < 0.5f)
+                        gamma = 0.5f;
+                    else if (gamma > 2.0f)
+                        gamma = 2.0f;
+                }
             }
 
             //ÄÄÄ Startup parameters
@@ -248,6 +248,8 @@ int APIENTRY WinMain (HINSTANCE hInstance,
     if (MythOS->init (MYTHOS_ESCHER_ARENA_SIZE, MYTHOS_ESCHER_SORT_SIZE, 0))
         return 1;
 
+    MythOS->Vangogh.set_gamma(gamma);
+
 //ÄÄÄ Install Fonts
     if (gberg_install_font("ARIAL-15.IFF", 0))
         return 1;
@@ -300,20 +302,6 @@ int APIENTRY WinMain (HINSTANCE hInstance,
                 Screen = new VngoDirect3D(hWndClient);
                 scrnflags |= VNGO_3DDEVICE | VNGO_ALLOC_ZBUFFER;
                 break;
-#ifdef _OEMS
-#ifdef _3DFX
-            case SCREEN_3DFX:
-                Screen = new Vngo3Dfx();
-                scrnflags |= VNGO_ALLOC_ZBUFFER;
-                break;
-#endif
-#ifdef _CLEAR3D
-            case SCREEN_CL3D:
-                Screen = new VngoClear3D(hWndClient);
-                scrnflags |= VNGO_ALLOC_ZBUFFER;
-                break;
-#endif
-#endif
         }
 
         if (!Screen
@@ -373,25 +361,6 @@ int APIENTRY WinMain (HINSTANCE hInstance,
                                          VNGO_ZBUFFER_DEV, Screen);
             }
             break;
-#ifdef _OEMS
-#ifdef _3DFX
-        case SCREEN_3DFX:
-            {
-                VngoRect rct(0,0,width,height);
-                Vport = new VngoVport3Dfx(rct, Palette, VNGO_ZBUFFER_DEV);
-            }
-            break;
-#endif
-#ifdef _CLEAR3D
-        case SCREEN_CL3D:
-            {
-                VngoRect rct(0,0,width,height);
-                Vport = new VngoVportCL3D(rct, Palette,
-                                          VNGO_ZBUFFER_DEV, Screen);
-            }
-            break;
-#endif
-#endif
     }
 
     if (!Vport)

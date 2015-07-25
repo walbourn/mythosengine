@@ -29,25 +29,36 @@
 ;
 ;ฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤ
 ;
-;                               3D SCRIPT EXAMPLE
+;                              3D VIEWER EXAMPLE
 ;
 ; Created by Chuck Walbourn
 ;
-; script.ini
+; viewer.ini
 ;
 ;อออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออ
 
 [Screen]
 FullScreen=yes
 ;Device=DIB
-Device=DDRAW
-;Device=D3D
+;Device=DDRAW
+Device=D3D
 ;Resolution=320x240x8
-Resolution=640x480x8
+;Resolution=640x480x8
 ;Resolution=640x480x15
-;Resolution=640x480x16
+Resolution=640x480x16
 Palette=DEFAULT.PAL
-Gamma=1.0
+Gamma=2.0
 
 [StartUp]
 DirectInput=yes
+
+[Camera]
+Yon=2500
+BackgroundColor=0x000000
+HazeStart=0.5
+HazeMidpoint=0.85
+
+[View]
+;SceneFile1=EXPORT.IFF
+SceneFile1=VENUS.IFF
+;SceneFile1=TEAPOT4K.IFF

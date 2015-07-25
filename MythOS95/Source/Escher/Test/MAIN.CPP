@@ -109,11 +109,23 @@ int APIENTRY WinMain (HINSTANCE hInstance,
     ChronosSystem   chronos;
     GBergSystem     gberg;
     EschSystem      *esys;
+    VngoSystem      *vsys;
 
     if (load_font("8X13.IFF"))
         return FALSE;
 
     gberg_select_font("8x13");
+
+    vsys=new VngoSystem;
+    if (!vsys)
+    {
+        MessageBeep(0);
+        MessageBox(hWndClient,
+                   "Failed to initalize Van Gogh",
+                   "Fatal Error",
+                   MB_OK);
+        return FALSE;
+    }
 
     esys=new EschSystem;
     if (!esys
@@ -165,6 +177,19 @@ int APIENTRY WinMain (HINSTANCE hInstance,
     char        buff[128];
 
     ini.open(".\\ET.INI",XF_OPEN_READ);
+
+    ini.section("Screen");
+    if (!ini.read("Gamma",buff))
+    {
+        float gamma = float(atof(buff));
+        if (gamma < 0.5f)
+             gamma = 0.5f;
+        else if (gamma > 2.0f)
+             gamma = 2.0f;
+
+        vsys->set_gamma(gamma);
+    }
+
     ini.section("Startup");
 
     if (!ini.read("BackgroundBMP",buff))
@@ -401,6 +426,7 @@ int APIENTRY WinMain (HINSTANCE hInstance,
     Devs=0;
 
     delete esys;
+    delete vsys;
 
     return 0;
 

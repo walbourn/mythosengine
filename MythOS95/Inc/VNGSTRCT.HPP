@@ -180,9 +180,6 @@ public:
 class VngoPointF
 {
 public:
-    float   wx;
-    float   wy;
-    float   wz;
     float   x;
     float   y;
     float   z;

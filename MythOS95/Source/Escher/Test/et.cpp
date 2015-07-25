@@ -1186,6 +1186,7 @@ BOOL EscherTest::SetupParticleSystem(const char *name)
         {
             MessageBox("Must have Sprite Test enabled",
                        MB_OK | MB_ICONEXCLAMATION);
+            return FALSE;
         }
         float temp_part = (part_count < 1000)?100.0f:part_count / 10.0f;
         prtgen->set_parts(temp_part);
@@ -1279,6 +1280,7 @@ BOOL EscherTest::SetupStarfield(BOOL fixed, BOOL brights)
                                 | ESCH_CAM_ALPHA
                                 );
         cam->create_bg_bitmap(backgrnd);
+        cam->set_yon(20000);
     }
 
     cam->set_bcolor(mypal->get_index(VngoColor24bit(0,0,0)));

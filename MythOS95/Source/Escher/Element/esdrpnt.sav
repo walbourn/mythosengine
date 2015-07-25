@@ -82,7 +82,7 @@ extern "C" void esch_clipdraw_point(dword ctrlfl)
 //ÄÄÄ Setup local pointer to current camera
     assertMyth("esch_clipdraw_point needs camera in current context",
                EschCurrent != 0 && EschCurrent->camera != 0);
-    
+
     cam = EschCurrent->camera;
 
     cflags = cam->flags;
@@ -98,16 +98,16 @@ extern "C" void esch_clipdraw_point(dword ctrlfl)
         //ÄÄÄ Left/right/top/bottom plane clipping
         if (cflags & ESCH_CAM_ORTHO)
         {
-            zx = cam->xsize;
-            zy = cam->ysize;
+            zx = cam->xsize - 1;
+            zy = cam->ysize - 1;
         }
         else
         {
-            zx = EschTempVPointF.z * cam->xsize;
-            zy = EschTempVPointF.z * cam->ysize;
+            zx = (EschTempVPointF.z * cam->xsize) - 1;
+            zy = (EschTempVPointF.z * cam->ysize) - 1;
         }
 
-        if (EschTempVPointF.x < -zx 
+        if (EschTempVPointF.x < -zx
             || EschTempVPointF.x > zx
             || EschTempVPointF.y < -zy
             || EschTempVPointF.y > zy)
@@ -164,7 +164,7 @@ extern "C" void esch_clipdraw_point(dword ctrlfl)
     if (EschTempVPointF.y > float(height-1))
         EschTempVPointF.y = float(height-1);
 #endif
-    
+
 //ÄÄÄ Mark as visible
     assertMyth("esch_clipdraw_point needs valid draw data in context",
                EschCurrent != 0 && EschCurrent->current != 0);

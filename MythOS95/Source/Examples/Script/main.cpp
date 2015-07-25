@@ -126,6 +126,7 @@ int APIENTRY WinMain (HINSTANCE hInstance,
     int         bpp = 16;
     screen_type scrndevice = SCREEN_DIB;
     dword       scrnflags = 0;
+    float       gamma = 1.0f;
     BOOL        use_dinput = FALSE;
     char        palname[256];
     
@@ -156,16 +157,6 @@ int APIENTRY WinMain (HINSTANCE hInstance,
                         scrndevice = SCREEN_DDRAW;
                     else if (strstr(buff,"d3d"))
                         scrndevice = SCREEN_D3D;
-#ifdef _OEMS
-#ifdef _3DFX
-                    else if (strstr(buff,"3dfx"))
-                        scrndevice = SCREEN_3DFX;
-#endif
-#ifdef _CLEAR3D
-                    else if (strstr(buff,"cl3d"))
-                        scrndevice = SCREEN_CL3D;
-#endif
-#endif
                     else
                         scrndevice = SCREEN_DIB;
                 }
@@ -201,6 +192,15 @@ int APIENTRY WinMain (HINSTANCE hInstance,
 
                 if (!ini.read("Palette",buff))
                     strncpy(palname,buff,sizeof(palname));
+
+                if (!ini.read("Gamma",buff))
+                {
+                    gamma = float(atof(buff));
+                    if (gamma < 0.5f)
+                        gamma = 0.5f;
+                    else if (gamma > 2.0f)
+                        gamma = 2.0f;
+                }
             }
 
             //ÄÄÄ Startup parameters
@@ -245,6 +245,8 @@ int APIENTRY WinMain (HINSTANCE hInstance,
     MythOS = new MythosSystem (MYTHOS_MEM_SIZE);
     if (!MythOS)
         return 1;
+
+    MythOS->Vangogh.set_gamma(gamma);
 
     //ÄÄÄ Create the devices
     if (use_dinput)
