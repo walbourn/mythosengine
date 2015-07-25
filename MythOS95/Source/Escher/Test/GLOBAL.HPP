@@ -97,6 +97,8 @@ protected:
     MaxEventList    single_events;  // Most current event set, momentary
     MaxEventList    toggle_events;
 
+    void draw_extents(EschMeshDraw *ptr);
+
 public:     // Construction/Destruction
 //    enum { MAP_XSIZE = 320, MAP_YSIZE = 240 };
 //    enum { MAP_XSIZE = 640, MAP_YSIZE = 480 };

@@ -150,7 +150,6 @@ class VngoDIB : public VngoScreenManager
 public:
     HRESULT             err;
     LPDIRECTDRAW        dd;
-    LPDIRECTDRAW2       dd2;
     BITMAPINFO          *bmi;
     HDC                 hdc;
     BYTE                *gmap;
@@ -182,7 +181,6 @@ class VngoDirectDraw : public VngoScreenManager
 public:
     HRESULT                 err;
     LPDIRECTDRAW            dd;
-    LPDIRECTDRAW2           dd2;
     LPDIRECTDRAWSURFACE     FrontBuffer;
     LPDIRECTDRAWSURFACE     BackBuffer;
     LPDIRECTDRAWSURFACE     Primary;
@@ -217,7 +215,6 @@ class VngoHybrid : public VngoScreenManager
 public:
     HRESULT                 err;
     LPDIRECTDRAW            dd;
-    LPDIRECTDRAW2           dd2;
     LPDIRECTDRAWSURFACE     FrontBuffer;
     LPDIRECTDRAWSURFACE     BackBuffer;
     LPDIRECTDRAWSURFACE     Primary;
@@ -251,15 +248,11 @@ class VngoDirect3D : public VngoScreenManager
 public:
     HRESULT                 err;
     LPDIRECTDRAW            dd;
-    LPDIRECTDRAW2           dd2;
     LPDIRECTDRAWSURFACE     FrontBuffer;
     LPDIRECTDRAWSURFACE     BackBuffer;
     LPDIRECTDRAWSURFACE     Primary;
     LPDIRECTDRAWSURFACE     ZBuffer;
-    LPDIRECTDRAWSURFACE     DirtyCursor;
-    LPDIRECTDRAWSURFACE     Cursor;
     VngoSurfaceManager      *SurfaceManager;
-    LPDIRECTDRAWPALETTE     Palette;
     DDSURFACEDESC           ddsd;
     HFONT                   AppFont;
     HWND                    hWndClient;

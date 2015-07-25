@@ -82,26 +82,52 @@ void main()
 {
     cout << "°°°± Mythos System Tester ±°°°\n";
 
+    cout << "\n\n°°°± Mythos System Detect Tester ±°°°\n";
+
+    if (mythos_detect_mmx())
+    {
+        cout << "MMX detected\n";
+    }
+    else
+    {
+        cout << "MMX not present\n";
+    }
+
+    if (mythos_detect_amd3d())
+    {
+        cout << "AMD-3D detected\n";
+    }
+    else
+    {
+        cout << "AMD-3D not present\n";
+    }
+
     cout << "\n\n°°°± Mythos AtExit Tester ±°°°\n";
 
-    if (mythos_atexit( atexit_1 )) {
+    if (mythos_atexit( atexit_1 ))
+    {
         cout << "²²² Error registering atexit 1!\n";
     }
-    else {
+    else
+    {
         cout << "Atexit 1 registered.\n";
     }
 
-    if (mythos_atexit( atexit_2 )) {
+    if (mythos_atexit( atexit_2 ))
+    {
         cout << "²²² Error registering atexit 2!\n";
     }
-    else {
+    else
+    {
         cout << "Atexit 2 registered.\n";
     }
 
-    if (mythos_atexit( atexit_3 )) {
+    if (mythos_atexit( atexit_3 ))
+    {
         cout << "²²² Error registering atexit 3!\n";
     }
-    else {
+    else
+    {
         cout << "Atexit 3 registered.\n";
     }
 

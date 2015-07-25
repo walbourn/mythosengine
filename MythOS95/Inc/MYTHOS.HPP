@@ -82,9 +82,9 @@
 //
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
-class MythosSystem {
+class MythosSystem
+{
 public:
-
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Public data members                                                  ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
@@ -93,8 +93,8 @@ public:
     MaxSystem       Max;
     ChronosSystem   Chronos;
     GBergSystem     Gutenberg;
-    EschSystem      Escher;
     VngoSystem      Vangogh;
+    EschSystem      Escher;
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Constructor/Destructors                                              ³
@@ -115,6 +115,9 @@ public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
     int atexit( register void ( *__func )( void ) ) { return mythos_atexit(__func); }
     void atexit_remove( register void ( *__func )( void ) ) { mythos_atexit_remove(__func); }
+
+    int detect_mmx() { return mythos_detect_mmx(); }
+    int detect_amd3d() { return mythos_detect_amd3d(); }
 };
 
 #ifdef __WATCOMC__

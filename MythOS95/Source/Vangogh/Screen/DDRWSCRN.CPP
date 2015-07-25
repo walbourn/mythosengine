@@ -45,7 +45,6 @@
 
 VngoDirectDraw::VngoDirectDraw():
     dd(0),
-    dd2(0),
     FrontBuffer(NULL),
     BackBuffer(NULL),
     Primary(NULL),
@@ -65,7 +64,6 @@ VngoDirectDraw::VngoDirectDraw():
 
 VngoDirectDraw::VngoDirectDraw(HWND hwndclient):
     dd(0),
-    dd2(0),
     FrontBuffer(NULL),
     BackBuffer(NULL),
     Primary(NULL),

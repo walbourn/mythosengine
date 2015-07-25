@@ -63,8 +63,13 @@
 //дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
 MythosSystem::MythosSystem(ulong ivory_size,
                            ivory_init_codes ivory_opt) :
-    Ivory(ivory_size,ivory_opt), Bozo(), Max(), Chronos(),
-    Escher(), Gutenberg(), Vangogh()
+    Ivory(ivory_size,ivory_opt),
+    Bozo(),
+    Max(),
+    Chronos(),
+    Gutenberg(), 
+    Vangogh(),
+    Escher()
 {
 };
 

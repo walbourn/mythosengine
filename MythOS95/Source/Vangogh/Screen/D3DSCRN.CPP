@@ -64,15 +64,11 @@ BOOL CALLBACK FindDeviceCallback(GUID *lpGUID,LPSTR szName,LPSTR szDevice,LPVOID
 
 VngoDirect3D::VngoDirect3D():
     dd(0),
-    dd2(0),
     Primary(NULL),
     FrontBuffer(NULL),
     BackBuffer(NULL),
     ZBuffer(NULL),
-    DirtyCursor(NULL),
-    Cursor(NULL),
     SurfaceManager(NULL),
-    Palette(NULL),
     d3d(NULL),
     d3dDevice(NULL),
     d3dViewport(NULL),
@@ -89,15 +85,11 @@ VngoDirect3D::VngoDirect3D():
 
 VngoDirect3D::VngoDirect3D(HWND hwndclient,char *targetname):
     dd(0),
-    dd2(0),
     Primary(NULL),
     FrontBuffer(NULL),
     BackBuffer(NULL),
     ZBuffer(NULL),
-    DirtyCursor(NULL),
-    Cursor(NULL),
     SurfaceManager(NULL),
-    Palette(NULL),
     d3d(NULL),
     d3dDevice(NULL),
     d3dViewport(NULL),
@@ -244,12 +236,6 @@ VNGError VngoDirect3D::set_mode(int _width, int _height, int bpp, VngoPal *_pal,
     {
         ZBuffer->Release();
         ZBuffer = NULL;
-    }
-
-    if (Palette)
-    {
-        Palette->Release();
-        Palette = NULL;
     }
 
     // Creat surfaces.
@@ -683,37 +669,6 @@ VNGError VngoDirect3D::set_mode(int _width, int _height, int bpp, VngoPal *_pal,
     d3dDevice->SetRenderState(D3DRENDERSTATE_TEXTUREHANDLE,NULL);
     d3dDevice->SetRenderState(D3DRENDERSTATE_LASTPIXEL,FALSE);
 
-
-    //
-    // Now create the cursor buffers.
-    //
-    if (0)
-    {
-        ddsd.dwFlags = DDSD_CAPS | DDSD_HEIGHT | DDSD_WIDTH;
-
-        ddsd.ddsCaps.dwCaps = DDSCAPS_SYSTEMMEMORY;
-        ddsd.dwHeight = 32;
-        ddsd.dwWidth = 32;
-        // Please note that the ddsd.ddpfPixelFormat is still here from
-        // the last surface we queried.
-
-        ddsd.dwHeight = height;
-        ddsd.dwWidth = width;
-        err = dd->CreateSurface (&ddsd, &DirtyCursor, NULL);
-        if (err != DD_OK)
-        {
-            term();
-            return VNGO_INTERNAL_ERROR;
-        }
-        err = dd->CreateSurface (&ddsd, &Cursor,NULL);
-        if (err != DD_OK)
-        {
-            term();
-            return VNGO_INTERNAL_ERROR;
-        }
-    }
-
-
     return VNGO_NO_ERROR;
 }
 
@@ -800,37 +755,9 @@ VNGError VngoDirect3D::flip()
 
 VNGError VngoDirect3D::set_palette(VngoPal *p,Flx16 brightness)
 {
-    if (!Palette)
-        return VNGO_NOT_SUPPORTED;
-
     pal = p;
 
-    PALETTEENTRY        ape[256];
-
-    // make the palette we want.
-    for (int i=0; i < 256; i++)
-    {
-        VngoColorHLS hls;
-        VngoColor24bit rgb;
-
-        hls = ((VngoPal8*)p)->hw_pal.p[i];
-        hls.l += brightness;
-        if(hls.l < 0)
-            hls.l = 0;
-        else if (hls.l > Flx16(1))
-            hls.l = Flx16(1);
-
-        rgb = hls;
-
-        ape[i].peRed   = rgb.r;
-        ape[i].peGreen = rgb.g;
-        ape[i].peBlue  = rgb.b;
-    }
-
-    Palette->SetEntries(0,0,256,ape);
-
     return VNGO_NO_ERROR;
-
 }
 
 void VngoDirect3D::open_frame()
@@ -856,10 +783,32 @@ VNGError VngoDirect3D::term()
 
     close_frame();
 
+
+    if ((lflags & VNGO_SET_RESOLUTION) && dd != NULL)
+        dd->RestoreDisplayMode();
+
+    if (d3dViewport)
+    {
+        d3dViewport->Release();
+        d3dViewport = NULL;
+    }
+
+    if (d3dDevice)
+    {
+        d3dDevice->Release();
+        d3dDevice = NULL;
+    }
+
     if (SurfaceManager)
     {
         delete SurfaceManager;
         SurfaceManager = NULL;
+    }
+
+    if (ZBuffer)
+    {
+        ZBuffer->Release();
+        ZBuffer = NULL;
     }
 
     if (FrontBuffer)
@@ -880,39 +829,16 @@ VNGError VngoDirect3D::term()
         BackBuffer = NULL;
     }
 
-    if (ZBuffer)
+    if (Primary)
     {
-        ZBuffer->Release();
-        ZBuffer = NULL;
+        Primary->Release();
+        Primary = NULL;
     }
 
-    if (Cursor)
-    {
-        Cursor->Release();
-        Cursor = NULL;
-    }
-
-    if (DirtyCursor)
-    {
-        DirtyCursor->Release();
-        DirtyCursor = NULL;
-    }
     if (VgSystem->D3DTx)
     {
         delete VgSystem->D3DTx;
         VgSystem->D3DTx = NULL;
-    }
-
-    if (d3dViewport)
-    {
-        d3dViewport->Release();
-        d3dViewport = NULL;
-    }
-
-    if (d3dDevice)
-    {
-        d3dDevice->Release();
-        d3dDevice = NULL;
     }
 
     if (d3d)
@@ -921,29 +847,13 @@ VNGError VngoDirect3D::term()
         d3d=NULL;
     }
 
-    if (Primary)
-    {
-        Primary->Release();
-        Primary = NULL;
-    }
-
-
-    if (Palette)
-    {
-        Palette->Release();
-        Palette = NULL;
-    }
-
-    if (dd2)
-    {
-        dd2->RestoreDisplayMode();
-        dd2->SetCooperativeLevel(hWndClient,DDSCL_NORMAL);
-        dd2->Release();
-        dd2 = NULL;
-    }
-
     if (dd)
     {
+
+        // Restore the normal cooperative level.
+
+        dd->SetCooperativeLevel(hWndClient,DDSCL_NORMAL);
+
         dd->Release();
         dd = NULL;
     }

@@ -44,6 +44,65 @@
 
 #include "escher.hpp"
 
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//
+//                               Routines
+//
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+extern "C" int mythos_detect_mmx();
+extern "C" int mythos_detect_amd3d();
+
+//ÄÄÄ Float math routines
+extern "C" void esch_flt_transform(const void *s,
+                                   const EschMatrix *m, void *d);
+extern "C" void esch_flt_transform_notran(const void *s,
+                                          const EschMatrix *m, void *d);
+extern "C" EschVector *esch_flt_cross(const EschVector *v1,
+                                      const EschVector *v2,
+                                      EschVector *dest);
+extern "C" void esch_flt_normalize(EschVector *vect);
+extern "C" void esch_flt_concatmatrix(const EschMatrix *s,
+                                      const EschMatrix *m,
+                                      EschMatrix *d);
+
+//ÄÄÄ AMD-3D Specific routines
+extern "C" void esch_amd3d_transform(const void *s,
+                                     const EschMatrix *m, void *d);
+extern "C" void esch_amd3d_transform_notran(const void *s,
+                                            const EschMatrix *m, void *d);
+extern "C" EschVector *esch_amd3d_cross(const EschVector *v1,
+                                        const EschVector *v2,
+                                        EschVector *dest);
+extern "C" void esch_amd3d_normalize(EschVector *vect);
+extern "C" void esch_amd3d_concatmatrix(const EschMatrix *s,
+                                        const EschMatrix *m,
+                                        EschMatrix *d);
+
+//±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+//
+//                                 Data
+//
+//±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+
+//ÄÄÄ Point and vector operations
+void (*esch_transform)(const void *s,
+                       const EschMatrix *m, void *d) = esch_flt_transform;
+void (*esch_transform_notran)(const void *s,
+                              const EschMatrix *m,
+                              void *d) = esch_flt_transform_notran;
+
+//ÄÄ Vector functions
+EschVector *(*esch_cross)(const EschVector *v1,
+                          const EschVector *v2,
+                          EschVector *dest) = esch_flt_cross;
+extern "C" void (*esch_normalize)(EschVector *vect) = esch_flt_normalize;
+
+//ÄÄ Matrix functions
+extern "C" void (*esch_concatmatrix)(const EschMatrix *s,
+                                     const EschMatrix *m,
+                                     EschMatrix *d) = esch_flt_concatmatrix;
+
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
 //                                 Code
@@ -58,6 +117,7 @@
 // EschSystem - Constructor                                                 ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 EschSystem::EschSystem(ulong arena_size, ulong sort_size) :
+    flags(0),
     wspace_mbytes(0),
     wspace_sbytes(0),
     wspace(0),
@@ -125,6 +185,17 @@ esch_error_codes EschSystem::init(ulong arena_size, ulong sort_size)
                arena_size > 0 && sort_size > 0);
 
     release();
+
+//ÄÄ Setup initial flags
+    if (mythos_detect_amd3d())
+    {
+        flags = ESCH_SYS_MMX_FOUND
+                | ESCH_SYS_AMD3D_FOUND;
+    }
+    else if (mythos_detect_mmx())
+    {
+        flags = ESCH_SYS_MMX_FOUND;
+    }
 
 //ÄÄ Create workspace arena
     wspace=(IvoryArena*)ivory_alloc(arena_size);
@@ -210,6 +281,41 @@ void EschSystem::release()
         ivory_free((void**)&sspace);
     }
     sroot=0;
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// EschSystem - enable/disable_amd3d                                        ³
+//                                                                          ³
+// Turns on or off the AMD-3D optimized versions of routines.               ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+esch_error_codes EschSystem::enable_amd3d()
+{
+    if (!(flags & ESCH_SYS_AMD3D_FOUND))
+        return ESCH_ERR_NOTSUPPORTED;
+
+    flags |= ESCH_SYS_AMD3D;
+
+    esch_transform          = esch_amd3d_transform;
+    esch_transform_notran   = esch_amd3d_transform_notran;
+
+    esch_cross              = esch_amd3d_cross;
+    esch_normalize          = esch_amd3d_normalize;
+    esch_concatmatrix       = esch_amd3d_concatmatrix;
+
+    return ESCH_ERR_NONE;
+}
+
+void EschSystem::disable_amd3d()
+{
+    flags &= ~ESCH_SYS_AMD3D;
+
+    esch_transform          = esch_flt_transform;
+    esch_transform_notran   = esch_flt_transform_notran;
+
+    esch_cross              = esch_flt_cross;
+    esch_normalize          = esch_flt_normalize;
+    esch_concatmatrix       = esch_flt_concatmatrix;
 }
 
 //°±² End of module - essystem.cpp ²±°

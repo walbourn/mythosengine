@@ -1,7 +1,8 @@
  ============================================================================
 
-                       Ivory -- A Memory Management Library
-                          Microsoft Windows '95 Version
+                      Ivory -- A Memory Management Library
+
+                         Microsoft Windows 95/NT Version
 
              Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.
                             All Rights Reserved.
@@ -24,17 +25,10 @@
                              _Library Status_
 
  Notes by:  Dan Higdon
- Updated:  February 22, 1998
+ Updated:  March 11, 1998
 
   Changes for this release --------------------------------------------------
 
-    o Boy do I feel sheepish.  The AllocationHeader prepended to every
-      data block was only 8 bytes long.  So, while the block itself was
-      paragraph aligned, the pointer returned to the user wasn't.
-      This has been corrected.
-
-  Pending changes -----------------------------------------------------------
-
-    o None
+    o Fixed bug in ivory_free().
 
 *** END OF FILE ***

@@ -87,14 +87,15 @@ extern "C" {
 //
 //같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같�
 
+// System detection
+int mythos_detect_mmx();
+int mythos_detect_amd3d();
+
 // At-exit chain handling
 int mythos_atexit( register void ( *__func )( void ) );
 void mythos_atexit_remove( register void ( *__func )( void ) );
 
 #ifdef __WATCOMC__
-#pragma aux (_ASMSTKCALL_) mythos_atexit;
-#pragma aux (_ASMSTKCALL_) mythos_atexit_remove;
-
 #pragma pack();
 #endif
 

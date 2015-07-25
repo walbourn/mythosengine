@@ -225,12 +225,12 @@ int EschKeyframeDraw::step(float interval, float scalar, float time, float shift
 
     if (parent()
         && next()
-        && next()->get_type()==ESCH_DRWT_SKELETON)
+        && (next()->get_type()&0x0fff)==ESCH_DRWT_SKELETON)
     {
         retval2 = ((EschKeyframeDraw *)next())->step(interval, scalar,time,shift);
     }
     if (child() &&
-        (child()->get_type()==ESCH_DRWT_SKELETON))
+        ((child()->get_type()&0x0fff)==ESCH_DRWT_SKELETON))
     {
         retval2 = ((EschKeyframeDraw *)child())->step(interval, scalar,time,shift);
     }
@@ -246,7 +246,7 @@ int EschKeyframeDraw::set_key(EschKeyframe *key, float scalar, float chain_time)
     // find an empty spot
     // if none found, cancel one of the ones that is going
     int keynum;
-    if (get_type()==ESCH_DRWT_SKELETON)
+    if ((get_type()&0x0fff)==ESCH_DRWT_SKELETON)
     {
         keynum = get_keyframe_spot(key);
 
@@ -293,7 +293,7 @@ int EschKeyframeDraw::set_key(EschKeyframe *key, float scalar, float chain_time)
         }
         if (parent()
             && next()
-            && next()->get_type()==ESCH_DRWT_SKELETON)
+            && (next()->get_type()&0x0fff)==ESCH_DRWT_SKELETON)
         {
             EschKeyframe *temp;
             temp = EschKeyframeMan->get (((EschLimbSegment *)next())->get_ktype(), key->root->m_type, 0);
@@ -301,7 +301,7 @@ int EschKeyframeDraw::set_key(EschKeyframe *key, float scalar, float chain_time)
             ((EschKeyframeDraw *)next())->set_key (temp, scalar, chain_time);
         }
 
-        if (child() && (child()->get_type()==ESCH_DRWT_SKELETON))
+        if (child() && ((child()->get_type()&0x0fff)==ESCH_DRWT_SKELETON))
         {
             EschKeyframe *temp;
             temp = EschKeyframeMan->get (((EschLimbSegment *)child())->get_ktype(), key->root->m_type, 0);
@@ -1716,12 +1716,12 @@ void EschKeyframeDraw::set_activity(int num)
 
     if (parent()
         && next()
-        && next()->get_type()==ESCH_DRWT_SKELETON)
+        && (next()->get_type()&0x0fff)==ESCH_DRWT_SKELETON)
     {
         ((EschKeyframeDraw *)next())->set_activity (num);
     }
 
-    if (child() && (child()->get_type()==ESCH_DRWT_SKELETON))
+    if (child() && ((child()->get_type()&0x0fff)==ESCH_DRWT_SKELETON))
     {
         ((EschKeyframeDraw *)child())->set_activity (num);
     }
@@ -1736,12 +1736,12 @@ void EschKeyframeDraw::set_inactivity(int num)
 
     if (parent()
         && next()
-        && next()->get_type()==ESCH_DRWT_SKELETON)
+        && (next()->get_type()&0x0fff)==ESCH_DRWT_SKELETON)
     {
         ((EschKeyframeDraw *)next())->set_inactivity (num);
     }
 
-    if (child() && (child()->get_type()==ESCH_DRWT_SKELETON))
+    if (child() && ((child()->get_type()&0x0fff)==ESCH_DRWT_SKELETON))
     {
         ((EschKeyframeDraw *)child())->set_inactivity (num);
     }
@@ -1852,7 +1852,7 @@ void EschKeyframeDraw::align_swapping_keys()
         for (int i=0; i<key_chain_count; i++)
         {
             if (child()
-                && (child()->get_type()==ESCH_DRWT_SKELETON))
+                && ((child()->get_type()&0x0fff)==ESCH_DRWT_SKELETON))
             {
                 ((EschKeyframeDraw *)child())->align_child(i, this);
             }

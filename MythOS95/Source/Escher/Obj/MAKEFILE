@@ -70,6 +70,7 @@ LIB = escher
 
 OBJS = \
 espch.obj\
+esamd3d.obj\
 esbldmsh.obj\
 esbldtxt.obj\
 escamera.obj\
@@ -176,6 +177,9 @@ all: setstden $(LIB).pch $(LIB).lib
 
 {..\Math\}.cpp{}.obj:
         $(CPP) $(CCOPTIONS) /Yuescher.hpp /Fp$(LIB).pch $<
+
+{..\Math\}.asm{}.obj:
+        $(ASM) $(ASMOPTS) $<
 
 {..\Motion\}.cpp{}.obj:
         $(CPP) $(CCOPTIONS) /Yuescher.hpp /Fp$(LIB).pch $<

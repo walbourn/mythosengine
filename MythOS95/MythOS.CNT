@@ -7,6 +7,7 @@
 2 Overview=PG_OVERVIEW
 2 System
 3 Overview=PG_SYSTEM_OVERVIEW
+3 System Detection=PG_SYSTEM_DETECT
 3 At-exit Handling=PG_SYSTEM_ATEXIT
 3 System Object=PG_SYSTEM_OBJECT
 2 Ivory

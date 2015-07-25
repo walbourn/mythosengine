@@ -27,7 +27,7 @@
                             _Library Status_
 
   Notes by:  Tim Little
-  Updated:   March 9, 1998
+  Updated:   March 16, 1998
 
   Changes for this release --------------------------------------------------
 
@@ -43,7 +43,10 @@
 
     o Dropped incomplete 3Dfx, MSI, and Clear3D implementations.
 
-    o Fixed texture caching and hazing problems with D3D.
+    o Fixed texture caching and hazing problems with D3D.  Cleaned up
+      init/term of D3D device to ensure good behavior.
+
+    o Removed unused variables in Direct3D, DIB, and DirectDraw viewports.
 
 
   Pending changes -----------------------------------------------------------

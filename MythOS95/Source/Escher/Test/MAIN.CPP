@@ -78,18 +78,6 @@ extern ulong EschDrawnTris;
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-// MythOS provided functions
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-extern "C" int mythos_atexit (register void (*__func) (void))
-{
-    return atexit (__func);
-}
-
-extern "C" void mythos_atexit_remove (register void (*__func) (void))
-{
-}
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 // WinMain
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -191,6 +179,15 @@ int APIENTRY WinMain (HINSTANCE hInstance,
     }
 
     ini.section("Startup");
+
+    if (!ini.read("AllowAMD3D",buff))
+    {
+        strlwr(buff);
+        if (strstr(buff,"yes") || strstr(buff,"on"))
+        {
+            esys->enable_amd3d();
+        }
+    }
 
     if (!ini.read("BackgroundBMP",buff))
     {
@@ -414,6 +411,11 @@ int APIENTRY WinMain (HINSTANCE hInstance,
 
 //    char buff[128];
     mode->End(buff);
+
+    if (esys->flags & ESCH_SYS_AMD3D)
+        strcat(buff," AMD-3D Enabled\n");
+    else if (esys->flags & ESCH_SYS_AMD3D_FOUND)
+        strcat(buff," AMD-3D Disabled\n");
 
     // Clean up the mode here
     // (destructors get most of it)

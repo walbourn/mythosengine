@@ -96,11 +96,12 @@ class EschElement;
 //дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
 class EschSystem
 {
-
 public:
     //дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
     // Public data members.                                                 Ё
     //дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+    dword               flags;          // System state flags
+
     //дд Workspace information
     ulong               wspace_mbytes;  // Work-space needed
     ulong               wspace_sbytes;  // Size of work-space
@@ -136,13 +137,15 @@ public:
     EschSystem(ulong arena_size=0, ulong sort_size=0);
     virtual ~EschSystem();
 
-    void release();
-
     //дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
     // Operations                                                           Ё
     //дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
     esch_error_codes init(ulong arena_size=ESCH_DEFAULT_ARENA,
                           ulong sort_size=ESCH_DEFAULT_SORT);
+    void release();
+
+    esch_error_codes enable_amd3d();
+    void disable_amd3d();
 };
 
 #ifdef __WATCOMC__

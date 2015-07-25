@@ -41,9 +41,9 @@
 
  ---------------------------------------------------------------------------
 
-                         *** Version 1.71 Release ***
+                         *** Version 1.72 Release ***
 
-                               March 9, 1998
+                               March 20, 1998
 
  This is the eight full release of the MythOS collection.  Usage of this 
  library is subject to your license agreement.  All materials herein 

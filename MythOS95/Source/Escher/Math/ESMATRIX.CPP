@@ -35,7 +35,7 @@
 // Contains the functions that are called by the EschMatrix class
 // in the 'math' header.
 //
-//         esch_concatmatrix
+//         esch_flt_concatmatrix
 //         esch_detmatrix
 //         esch_inversematrix
 //
@@ -56,13 +56,14 @@
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// esch_contactmatrix                                                       ³
+// esch_flt_concatmatrix                                                    ³
 //                                                                          ³
 // This contatenates matrix 'm' to the matrix 's' and puts the results into ³
 // matrix 'd' assuming the implied last column is [0 0 0 1].                ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-extern "C" void esch_concatmatrix(const EschMatrix *s, const EschMatrix *m,
-                                  EschMatrix *d)
+extern "C" void esch_flt_concatmatrix(const EschMatrix *s,
+                                      const EschMatrix *m,
+                                      EschMatrix *d)
 {
 // [A B C 0]      [a b c 0]    [Aa+Bd+Cg   Ab+Be+Ch   Ac+Bf+Ci   0]
 // [D E F 0]      [d e f 0]    [Da+Ed+Fg   Db+Ee+Fh   Dc+Ef+Fi   0]

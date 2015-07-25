@@ -38,10 +38,12 @@
                              _Library Status_
 
  Notes by: Chuck Walbourn
- Updated: February 5, 1998
+ Updated: March 12, 1998
 
  Changes for this release --------------------------------------------------
 
- o Updated for new Van Gogh system.
+ o Added mythos_detect_mmx and mythos_detect_amd3d routines to use the CPUID
+   function to check for support of the MMX(TM) and AMD-3D instruction set
+   extensions.
 
 *** END OF FILE ***

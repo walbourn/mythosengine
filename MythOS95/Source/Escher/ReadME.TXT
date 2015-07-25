@@ -37,7 +37,7 @@
                              _Library Status_
 
  Notes by: Chuck Walbourn
- Updated: March 9, 1998
+ Updated: March 20, 1998
 
  Changes for this release --------------------------------------------------
 
@@ -55,6 +55,13 @@
     o Terrain
 
         - Optimizations and bug fixes for the terrain and tree tops.
+
+    o Math
+
+        - Added first cut of AMD-3D Technology enhancements: esch_transform,
+          esch_transform_notran, esch_cross, esch_normalize, and
+          esch_concatmatrix are now function pointers set by the
+          enable_amd3d() member of EschSystem to AMD-3D only versions.
 
 
  Pending changes -----------------------------------------------------------
@@ -81,6 +88,8 @@
 
         - Cubic spline interpolation.
         - 4X4 matrix implementations
+        - esch_detmatrix() and esch_inversematrix() could have AMD-3D
+          versions.
 
     o Drawables
 

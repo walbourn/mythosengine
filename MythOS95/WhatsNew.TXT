@@ -17,9 +17,9 @@
 
                             W H A T ' S   N E W
 
-                       *** Version 1.71 Release ***
+                       *** Version 1.72 Release ***
 
-                               March 9, 1998
+                               March 20, 1998
 
  ---------------------------------------------------------------------------
  OPTIMIZATIONS
@@ -29,6 +29,15 @@
 
  The clipping routines in the Escher library have been optimized somewhat
  for better performance.
+
+
+ ---------------------------------------------------------------------------
+ 3D HARDWARE
+
+ Reworked Direct3D device initialization and termination to ensure good
+ behavior with a variety of drivers.
+
+ First cut of AMD-3D Technology enhancements added to the Escher library.
 
 
  ---------------------------------------------------------------------------

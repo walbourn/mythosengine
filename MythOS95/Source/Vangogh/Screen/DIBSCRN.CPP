@@ -41,7 +41,6 @@ const int COLORS = 256;
 
 VngoDIB::VngoDIB():
     dd(0),
-    dd2(0),
     bmi(0),
     hdc(0),
     gmap(0),
@@ -59,7 +58,6 @@ VngoDIB::VngoDIB():
 
 VngoDIB::VngoDIB(HWND hwndclient):
     dd(0),
-    dd2(0),
     bmi(0),
     hdc(0),
     gmap(0),

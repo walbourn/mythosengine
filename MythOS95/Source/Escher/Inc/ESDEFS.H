@@ -131,6 +131,16 @@ typedef enum _esch_error_codes
 
 
 //дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+// EschSystem                                                               Ё
+//дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+
+#define ESCH_SYS_AMD3D              0x2
+
+#define ESCH_SYS_MMX_FOUND          0x10000
+#define ESCH_SYS_AMD3D_FOUND        0x20000
+
+
+//дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
 // EschElement                                                              Ё
 //дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
 
@@ -370,6 +380,7 @@ typedef enum _esch_error_codes
 #define ESCH_DRWT_PGENERATOR        0x0310
 #define ESCH_DRWT_GEOM              0x0400
 #define ESCH_DRWT_MESH              0x0410
+#define ESCH_DRWT_SKELETON          0x0411
 #define ESCH_DRWT_TERRAIN           0x0500
 #define ESCH_DRWT_SPRITE            0x0600
 #define ESCH_DRWT_PARTITION         0x0700
@@ -381,7 +392,6 @@ typedef enum _esch_error_codes
 #define ESCH_DRWT_EXPLOSION         0x1100
 #define ESCH_DRWT_METABOX           0x1200
 #define ESCH_DRWT_LOD               0x1300
-#define ESCH_DRWT_SKELETON          0x2000
 
 //ддд EschParticle
 

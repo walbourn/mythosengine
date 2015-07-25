@@ -842,9 +842,24 @@ BOOL EscherTest::LoadScene(char *fn, dword in_type)
         return FALSE;
     }
 
-    if (!cam && scene->cameras)
+    if (!cam)
     {
-        cam = new EschCameraEx(*scene->cameras);
+        if (scene->cameras)
+        {
+             cam = new EschCameraEx(*scene->cameras);
+             if (!cam)
+                return FALSE;
+        }
+        else
+        {
+             cam = new EschCameraEx;
+             if (!cam)
+                return FALSE;
+
+             cam->set_position(0,0,500);
+             cam->set_lookat(0,0,0);
+        }
+
         cam->attach(gvp);
         cam->set_flags(cam->flags
                         | ESCH_CAM_SHADE_SMOOTH
@@ -1255,7 +1270,7 @@ BOOL EscherTest::SetupStarfield(BOOL fixed, BOOL brights)
 
     starfield = new EschStarfield;
     if (!starfield
-        || starfield->create_stars(1000,(brights) ? 1 : 0))
+        || starfield->create_stars(10000,(brights) ? 1 : 0))
     {
         MessageBox("Could not create starfield", MB_OK | MB_ICONEXCLAMATION);
         return FALSE;
@@ -2621,6 +2636,30 @@ void EscherTest::ProcessEvents()
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// draw_extents
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+void EscherTest::draw_extents(EschMeshDraw *ptr)
+{
+    if (!ptr)
+        return;
+
+    for(;ptr != NULL; ptr = (EschMeshDraw*)ptr->next())
+    {
+        if (!(ptr->flags & ESCH_DRW_SKIP))
+        {
+            if (drawexts & 0x2)
+                ptr->mesh->box.draw(&ptr->world,exts_color);
+            if (drawexts & 0x1)
+                ptr->draw_extents(exts_color);
+
+            if (ptr->child())
+                draw_extents((EschMeshDraw*)ptr->child());
+        }
+    }
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 // EscherTest - Render
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 void EscherTest::Render()
@@ -2643,22 +2682,7 @@ void EscherTest::Render()
     {
         if (drawexts)
         {
-            for(EschMeshDraw *ptr=scene->meshes;
-                ptr != NULL;
-                ptr = (EschMeshDraw*)ptr->next())
-            {
-                if (!(ptr->flags & ESCH_DRW_SKIP))
-                {
-                    if (drawexts & 0x2)
-                    {
-                        ptr->mesh->box.draw(&ptr->world,exts_color);
-                    }
-                    if (drawexts & 0x1)
-                    {
-                        ptr->draw_extents(exts_color);
-                    }
-                }
-            }
+            draw_extents(scene->meshes);
         }
     }
 

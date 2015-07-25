@@ -457,6 +457,8 @@ void ivory_free (void **ptr)
 //ÄÄÄ If our block is now the last thing in memory, return it to wildspace
     if (freeblk == (AllocationHeader *)main_memory->next_free)
     {
+        int freesize = freeblk->size;
+
 #if 1
         //ÄÄÄ Unlock and decommit the memory.  We guarantee that
         //ÄÄÄ everything below next_free-BLKSIZE inclusive is decommitted.
@@ -464,8 +466,8 @@ void ivory_free (void **ptr)
         //ÄÄÄ at the top and bottom.
 
         //ÄÄÄ Get the top and bottom page pointers, rounded down and up respectively
-        dword bottom_page = ((dword)main_memory->next_free + PAGE_SIZE-1) & PAGE_MASK;
-        dword top_page    = ((dword)main_memory->next_free + freeblk->size) & PAGE_MASK;
+        dword bottom_page = ((dword)freeblk + PAGE_SIZE-1) & PAGE_MASK;
+        dword top_page    = ((dword)freeblk + freesize) & PAGE_MASK;
 
         if (top_page > bottom_page)
         {
@@ -473,7 +475,7 @@ void ivory_free (void **ptr)
         }
 #endif
 
-        main_memory->next_free += freeblk->size;
+        main_memory->next_free += freesize;
 
         //ÄÄÄ Make sure that we no longer point at this memory.
         if (prevblk)

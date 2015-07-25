@@ -94,7 +94,8 @@ ivorymfc.lib\
 xfile.lib\
 felix.lib\
 vangogh.lib\
-escher.lib
+escher.lib\
+mythos.lib
 
 all: setstden $(EXEDIR).exe $(EXELW).exe $(EXETLIB).exe
 

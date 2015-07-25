@@ -1,7 +1,7 @@
 @echo off
 echo 같같같굉 Mythos 95 System Tester 껑같같같같같같같같같같같같같같같같같같�
 cd obj
-call nmaker /nologo %1 %2 %3 %4 %5 %6 %7 %8 %9
+call nmake /nologo %1 %2 %3 %4 %5 %6 %7 %8 %9
 cd ..
 if ERRORLEVEL 1 goto error
 echo 같같같굉 Mythos 95 System Tester - Done 껑같같같같같같같같같같같같같같같

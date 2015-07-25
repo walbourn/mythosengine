@@ -35,9 +35,10 @@
 // Contains the various arithmetic operations for the EschVector class
 // in the 'math' header.
 //
-//        esch_cross
-//        esch_dot
-//        esch_magnitude
+//      esch_flt_cross
+//      esch_dot
+//      esch_flt_magnitude
+//      esch_flt_normalize
 //
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
 
@@ -56,12 +57,13 @@
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// esch_cross                                                               ³
+// esch_flt_cross                                                           ³
 //                                                                          ³
 // Computes the cross-product of the two vectors.                           ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-extern "C" EschVector *esch_cross(const EschVector *v1, const EschVector *v2,
-                                  EschVector *dest)
+extern "C" EschVector *esch_flt_cross(const EschVector *v1,
+                                      const EschVector *v2,
+                                      EschVector *dest)
 {
 //
 // (i', j', k') = v1 CROSS v2
@@ -101,17 +103,38 @@ extern "C" float esch_dot(const EschVector *v1, const EschVector *v2)
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// esch_magnitude                                                           ³
+// esch_flt_magnitude                                                       ³
 //                                                                          ³
 // Returns the magnitude of the vector.                                     ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-extern "C" float esch_magnitude(const EschVector *vect)
+extern "C" float esch_flt_magnitude(const EschVector *vect)
 {
 // magnitude = sqrt(i^2 + j^2 + k^3)
 
     return esch_sqrt(vect->i*vect->i
                      + vect->j*vect->j
                      + vect->k*vect->k);
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// esch_flt_normalize                                                       ³
+//                                                                          ³
+// Normalizes the vector (if the magnitude is too small, leaves the vector  ³
+// unchanged).                                                              ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+extern "C" void esch_flt_normalize(EschVector *vect)
+{
+    float mag = esch_sqrt(vect->i*vect->i
+                          + vect->j*vect->j
+                          + vect->k*vect->k);
+
+    if (mag >= 0.0001f)
+    {
+        vect->i /= mag;
+        vect->j /= mag;
+        vect->k /= mag;
+    }
 }
 
 //°±² End of module - esvector.cpp ²±°

@@ -61,7 +61,10 @@ INCPATH   = ;..\inc;$(MYTH95ROOT)\inc;
 
 LIB = mythos
 
-OBJS = mytatext.obj\
+OBJS = \
+mytamd3d.obj\
+mytatext.obj\
+mytmmx.obj\
 mythos.obj
 
 #컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�

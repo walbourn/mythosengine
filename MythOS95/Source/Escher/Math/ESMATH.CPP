@@ -38,8 +38,8 @@
 //      esch_rotatex
 //      esch_rotatey
 //      esch_rotatez
-//      esch_transform
-//      esch_transform_notran
+//      esch_flt_transform
+//      esch_flt_transform_notran
 //
 // These routines assume that the EschPoint and EschVector classes are
 // identical to the assembly routine with x/i, y/j, z/k as the first
@@ -146,11 +146,11 @@ extern "C" void esch_rotatez(const void *s,const float deg, void *d)
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// esch_transform                                                           ³
+// esch_flt_transform                                                       ³
 //                                                                          ³
 // This transforms the vector/point by the matrix 'm'.                      ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-extern "C" void esch_transform(const void *s, const EschMatrix *m, void *d)
+extern "C" void esch_flt_transform(const void *s, const EschMatrix *m, void *d)
 {
 //
 //             [A B C 0]   [ Ai+Dj+Gk+J ]
@@ -181,11 +181,11 @@ extern "C" void esch_transform(const void *s, const EschMatrix *m, void *d)
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// esch_transform_notran                                                    ³
+// esch_flt_transform_notran                                                ³
 //                                                                          ³
 // This transforms the vector/point by the matrix 'm' ignoring translation. ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-extern "C" void esch_transform_notran(const void *s,const EschMatrix *m,
+extern "C" void esch_flt_transform_notran(const void *s,const EschMatrix *m,
                                       void *d)
 {
 //
