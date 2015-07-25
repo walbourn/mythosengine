@@ -1,0 +1,2197 @@
+{\rtf1
+{\comment
+ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
+
+                              S I M   G I N E
+
+                     A Simluator Framework for MythOS(tm)
+
+                      Microsoft Windows 95/98/NT Version
+
+   Copyright (c) 1997-1999 by Dan Higdon, Tim Little, and Chuck Walbourn
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ This file and all associated files are subject to the terms of the
+ GNU Lesser General Public License version 2 as published by the
+ Free Software Foundation (http://www.gnu.org).   They remain the
+ property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+ See LICENSE.TXT in the distribution for a copy of this license.
+
+ THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+ OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+ PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+ LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+ OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+                        http://www.mythos-engine.org/
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ SimGine is a component of the MythOS(tm) collection.
+
+ MythOS is a trademark of Charybdis Enterprises, Inc.
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ simgine.rtf
+
+ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
+}
+
+{\fonttbl
+\f0\fswiss Arial;
+\f1\froman Times New Roman;
+\f2\fmodern Courier New;
+\f3\fswiss MS Sans Serif;
+\f4\froman MS Serif;
+}
+\deff1
+\fs21
+
+{\colortbl;
+\red128\green128\blue128;
+\red0\green0\blue128;
+\red0\green128\blue0;
+\red128\green0\blue0;
+}
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+About this guide                                                          ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote SG_ABOUT}
+${\footnote About the SimGine Framework Guide}
++{\footnote BW_XSG_1}
+{\b\f0{\cf2\scaps SimGine Framework Guide}\line\fs32 About this guide}\par\pard\sb100
+
+This guide describes the {\i SimGine} C++ library which provides an advanced
+ framework for developing simulation-style titles using MythOS\'99.  This
+ document assumes familiarity with the MythOS libraries and Windows 32-bit
+ programming using the Win32 API.  Some familiarity with MFC would also
+ provide a good background for the intended use of {\i SimGine}.
+\par
+
+This library was developed as an replacement for the original {\i GameFrame}
+ MythOS example, but much of the design developed from the basic concepts
+ presented in that example.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+Overview                                                                  ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote SG_OVERVIEW}
+${\footnote Overview}
++{\footnote BW_XSG_1}
+{\b\f0{\cf2\scaps SimGine Framework Guide}\line\fs32 Overview}\par\pard\sb100
+
+{\i SimGine} is a C++ framework for developing simulations and other
+ titles using MythOS\'99.  Some portions of the framework would be applicable
+ in any full-screen application.  {\i SimGine} includes all Windows startup
+ code and some basic functionality for managing the mode of the application
+ as well as a number of support classes for developing simulations.
+\par
+
+Usage of the {\i SimGine} library is best explained by an example, which is
+ provided by the {\i SimGine} tester.
+\par
+
+{\cf2
+Here are the basic requirements needed to develop a Windows full-screen
+ game using {\i SimGine}:
+\par
+
+1) Create an instance of a {\uldb SimGine}{\v SG_SIMGINE}-derived application
+ class in global data space (so that it is initialized by the
+ compiler-generated stub before calling WinMain).  Override the virtual member
+ init_instance() and exit_instance() to create and destroy other required
+ data objects.  The base init_instance() creates the application window,
+ {\uldb SimScreen}{\v SG_SIMSCREEN} instance, and
+ {\uldb SimAudio}{\v SG_SIMAUDIO} instance.
+\par
+
+2) During the init_instance() member of your SimGine class, create one or
+ more {\uldb SimState}{\v SG_SIMSTATE}-derived classes to handle the
+ individual states (or modes) of the game--usually a single screen or
+ group of related screens are placed within a SimState.  Be sure to set the
+ global variable Mode to the SimState you wish to start the application in.
+ Drawing should be done via the SimScreen class and audio output should
+ be handled by calling the SimAudio class.  A specialized SimState,
+ called {\uldb SimulatorState}{\v SG_SIMULATORSTATE}, should be used as the
+ base class for the state which represents the running simulation.
+\par
+
+3) Pass control between the states by using switch_to().  Pointers to
+ the states should be kept in the SimGine class, but could be stored in
+ global variables if needed.
+\par
+
+4) To exit the application, call SimGine::exit().
+\par
+}
+
+\line{\b\fs28 Features}\par
+
+C++ structure for easy creation and maintence of full-screen Windows titles.
+\par
+
+Provides centralized management for video and audio processing.
+\par
+
+Includes a model hierarchy for development of simulators in a C++
+ heirarchy.
+\par
+
+\line{\b\fs28 Future Work}\par
+
+This library will be expanded as time allows to include other generic
+ support classes for developing applications.
+\par
+
+\line{\b\fs28 Organization}\par
+
+The {\i SimGine} library consists of a number of classes as follows:
+\par
+
+Application Class\line
+\tab {\uldb SimGine}{\v SG_SIMGINE}
+\par
+
+Support Classes\line
+\tab {\uldb SimAudio}{\v SG_SIMAUDIO}\line
+\tab {\uldb SimText}{\v SG_SIMTEXT}\line
+\tab {\uldb SimTimeTable}{\v SG_SIMTIMETABLE}
+\par
+
+Screen Classes\line
+\tab {\uldb SimScreen}{\v SG_SIMSCREEN}\line
+\tab {\uldb SimScreenDD}{\v SG_SIMSCREENDD}\line
+\tab {\uldb SimScreenDIB}{\v SG_SIMSCREENDIB}\line
+\tab {\uldb SimScreenD3D}{\v SG_SIMSCREEND3D}
+\par
+
+State Classes\line
+\tab {\uldb SimState}{\v SG_SIMSTATE}\line
+\tab {\uldb SimulatorState}{\v SG_SIMULATORSTATE}\line
+\tab Simulator UI Classes\line
+\tab\tab {\uldb SimUI}{\v SG_SIMUI}\line
+\tab\tab {\uldb SimView}{\v SG_SIMVIEW}\line
+\tab Simulator Model Classes\line
+\tab\tab {\uldb SimBase}{\v SG_SIMBASE}\line
+\tab\tab {\uldb SimObject}{\v SG_SIMOBJECT}\line
+\tab\tab {\uldb SimUnit}{\v SG_SIMUNIT}\line
+\tab\tab {\uldb SimEquip}{\v SG_SIMEQUIP}\line
+\tab\tab {\uldb SimTemp}{\v SG_SIMTEMP}\line
+\tab\tab {\uldb SimOffield}{\v SG_SIMOFFIELD}
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+SimGine Class                                                             ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote SG_SIMGINE}
+${\footnote SimGine Class}
+K{\footnote SimGine;
+SimGine, init_instance;
+SimGine, run;
+SimGine, step;
+SimGine, exit_instance;
+SimGine, exit}
++{\footnote BW_XSG_1}
+{\b\f0{\cf2\scaps SimGime Framework Guide}\line\fs32 SimGine Class}\par\pard\sb100
+
+{\cf4\scaps CHANGED}\line
+This class controls the startup, execution, and termination of the
+ application as a whole.  To use the {\i SimGine} library, an instance
+ of a class derived from this base class must be created in global data
+ space.  The WinMain routine provided by {\i SimGine} will then call that
+ instance.
+\par
+
+The derived application class should overload init_instance() and call the
+ base version of the routine.  The operation of the init_instance() base
+ routine can be controlled by changing flags in the 'startup' variables
+ before calling the base routine.  If the base routine succeeds (by
+ returning TRUE), then perform whatever other initialization is needed
+ for the application, and set the global {\b Mode} to point to your
+ starting {\uldb SimState}{\v SG_SIMSTATE}-derived class instance before
+ returning success.
+\par
+
+{\cf2
+Note:  Only one instance of a SimGine-derived class can be created for
+ an application.
+}\par
+
+\line{\b\fs28 Name}\par
+
+SimGine - Application Class
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "simgine.hpp"
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b SimGine();}\par
+
+Setups up an internal pointer to this instance so that WinMain can find
+ the application class instance in global data space.
+\par
+
+\line{\b\fs28 Member Data}\par
+
+{\b HINSTANCE hInstance;}\par
+
+This is the instance handle for the application, set by the base
+ init_instance() routine.
+\par
+
+{\b HWND hWndClient;}\par
+
+This is the window handle for the client window created by the base
+ init_instance() routine.
+\par
+
+{\b char appName[SIM_MAX_APPNAME];}\par
+
+This is the application name used as the title of the client window and
+ the name of the application instance.  It is loaded from the resource
+ string table using id {\i IDS_SIM_APPNAME}.
+\par
+
+{\b LPSTR cmdLine;\line
+int cmdShow}\par
+
+These are the command line and command show bits passed in from WinMain.
+\par
+
+{\b dword startup;}\par
+
+The base version of the init_instance() routine checks flags in this variable
+ to control setup options (see {\b Startup Flags} below).
+\par
+
+{\b ushort startup_width;\line
+ushort startup_height;}\par
+
+This controls the starting Screen and client window size and defaults to
+ {\i SIM_DEFAULT_WIDTH}, and {\i SIM_DEFAULT_HEIGHT}.  It is used by
+ the base version of init_instance().
+\par
+
+{\b ushort startup_bitdepth;}\par
+
+This controls the starting Screen's bitdepth and defaults to
+ {\i SIM_DEFAULT_BITDEPTH}.  It can be set to 8, 15, or 16, although some
+ screen implementations impose additional constraints.
+\par
+
+{\cf4\scaps NEW}\line
+{\b ushort startup_nchannels;\line
+ushort startup_nreserved;\line
+ushort startup_nchannels3d;\line
+ulong startup_drate;\line
+bach_digi_fmt startup_dformat}\par
+
+These values are passed to the SimAudio::init() routine if {\i STARTUP_AUDIO}
+ is set.
+\par
+
+{\b dword startup_memsize;}\par
+
+This controls the size of the {\i Ivory} static memory pool and defaults to
+ {\i SIM_MYTHOS_MEM_SIZE}.  It is used by the base version of init_instance().
+\par
+
+{\b dword startup_arenasize;}\par
+
+This controls the size of the {\i Escher} arena memory pool and defaults to
+ {\i SIM_MYTHOS_ESCHER_ARENA_SIZE}.  It is used by the base version of
+ init_instance().
+\par
+
+{\b dword startup_sortsize;}\par
+
+This controls the size of the {\i Escher} sort memory pool and defaults to
+ {\i SIM_MYTHOS_ESCHER_SORT_SIZE}.  It is used by the base version of
+ init_instance().
+\par
+
+{\cf4\scaps NEW}\line
+{\b char startup_target[SIM_MAX_TARGET];}\par
+
+This string is passed to the Direct3D screen manager if a Direct3D screen
+ is created.  It specifies the target device to use for multiple devices
+ management.  Set to "" (which is the default) to use the primary device
+ present in the system, if any.
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+{\b virtual BOOL init_instance();}\par
+
+This member is called by the WinMain routine to initialize the application.
+ The base version should be called to check for other application instances,
+ create the window class and client window, initialize {\b MythOS}, and
+ initialize the {\b Screen} and {\b Audio} globals.
+\par
+
+{\cf2
+Note: Because of issues with allocating {\i Bozo} task stack space, the
+ size of the stack space set aside for BozoTasks is the compile-time value
+ {\i SIM_MYTHOS_TASK_STACK_SIZE}.
+}\par
+
+{\b virtual int run();}\par
+
+This routine processes the current {\uldb SimState}{\v SG_SIMSTATE}
+ pointed to by the {\b Mode} global variable.  It calls activate(), then
+ loops on pump_windows(), process_events(), render(), and display().  On
+ return of a FALSE from pump_windows(), it calls deactivate() and calls
+ exit_instance(), returning the return value from that routine.
+\par
+
+{\b virtual void step();}\par
+
+This routine is called during the {\b run} member, and can be used by
+ derived classes to insert special processing in the message loop.
+ The primary use for this member is to step global items, like
+ Network support, that do not logically live within a {\b SimState}.
+ The default implementation does nothing.
+\par
+
+{\b virtual int exit_instance();}\par
+
+This member deletes {\b Audio}, {\b Screen}, {\b Devs}, and {\b MythOS}.
+ The return value of this routine is the exit code for WinMain.
+\par
+
+{\b void exit();}\par
+
+This utility routine will cause the application to exit on a future call to
+ the base version of SimState::pump_windows().  This routine should be
+ called to exit the application, but control will be returned to the
+ caller (unlike ExitProcess or ::exit()).
+\par
+
+\line{\b\fs28 Startup Flags}\par
+
+These defines are local to the SimGine class and control the operation of
+ the base init_instance() routine:
+\par
+
+{\i STARTUP_DDRAW}\tab If this bit is set, then an instance of
+ {\uldb SimScreenDD}{\v SG_SIMSCREENDD} is created for the
+ {\b Screen} variable.
+\par
+
+{\i STARTUP_D3D}\tab\tab If this bit is set, then an instance of
+ {\uldb SimScreenD3D}{\v SG_SIMSCREEND3D} is created for the
+ {\b Screen} variable.
+\par
+
+If none of these is set, an instance of
+ {\uldb SimScreenDIB}{\v SG_SIMSCREENDIB} is created.
+\par
+
+{\i STARTUP_FULLSCREEN}\tab If this bit is set, then the Screen class
+ is allowed to switch video modes for full-screen (should only be cleared
+ for debugging).  This is set by default.
+\par
+
+{\i STARTUP_TRUEFLIP}\tab If this bit is set, then the Screen class
+ forces the video mode to use true page-flipping.
+\par
+
+{\i STARTUP_AUDIO}\tab If this bit is set, then an instance of the
+ {\uldb SimAudio}{\v SG_SIMAUDIO} class is created for the {\b Audio}
+ variable.  This is set by default.
+\par
+
+{\i STARTUP_DX5}\tab If this bit is set, then the DirectX version of
+ the {\i Max} device class is created for {\b Devs}, otherwise the
+ Win32 version is created.  This is set by default.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+SimAudio Class                                                            ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote SG_SIMAUDIO}
+${\footnote SimAudio Class}
+K{\footnote SimAudio;
+SimAudio, init}
++{\footnote BW_XSG_1}
+{\b\f0{\cf2\scaps SimGime Framework Guide}\line\fs32 SimAudio Class}\par\pard\sb100
+
+{\cf4 UNDER DEVELOPMENT}
+\par
+
+This class provides a management class for sound which encapsulates sound
+ sample playback, management, and control using the {\i Bach} sound library.
+\par
+
+An instance of SimAudio is created by SimGine::init_instance() and is pointed
+ to by the global {\b Audio}.  If the global is zero, then audio is considered
+ disabled.  Therefore all calls to Audio to should guarded by a test
+ (i.e. if (Audio) Audio->xxx).
+\par
+
+\line{\b\fs28 Name}\par
+
+SimAudio - Audio management class
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "simaudio.hpp"
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b SimAudio();}\par
+
+Initializes internal data pointers.
+\par
+
+\line{\b\fs28 Member Data}\par
+
+{\b BachDigital *digi}\par
+
+Pointer to a {\i Bach} digital instance created by init().  If 3D channels
+ are created, this will be a pointer to a {\b BachDigital3D} instance.
+\par
+
+{\b ulong nchannels3d;\line
+BachSample3D **channels3d;}\par
+
+For each 3D channel created (set by init()), there is an instance to a
+ {\b BachSample3D} instance.
+\par
+
+{\b ulong nchannels;\line
+ulong nreserved;\line
+BachStaticSample **channels;}\par
+
+For each channel created (set by init()), there is an instance to a
+ {\b BachStaticSample} instance.  The 'nreserved' value is used when
+ allocating a channel to indicate the number of channels that should never
+ be assigned when a '-1' channel number is passed to prepare_()--therefore
+ leaving channel 0 to nreserved-1 for allocation by explicit reference.
+\par
+
+{\b BachFileSample *stream;}\par
+
+This is an instance of the streaming file class for playing digital background
+ music and the like.
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+{\b virtual error_codes init (ulong drate=BACH_DIGI_DRIVERRATE,
+ bach_digi_fmt dfmt=BACH_DIGI_STEREO_16, ulong nchannels=SIM_AUDIO_NCHANNELS,
+ ulong nreserved=SIM_AUDIO_NRESERVED, ulong n3d=SIM_AUDIO_NCHANNELS3D);}\par
+
+Initializes the audio object, returning an error code (see {\b Error Codes}
+ below).
+\par
+
+{\b virtual void release();}\par
+
+Releases all memory and resources associated with the Audio object.  You must
+ call init() before attempting to use the object after a release().
+\par
+
+{\b virtual void clear_all_sounds();}\par
+
+Stops and releases all channels while leaving the Audio object initialized.
+\par
+
+{\b virtual int prepare_wav(const char *fname, int channel = -1);}\par
+
+Prepares a channel by loading data from a .WAV file.  If channel is given,
+ anything playing on the channel currently is stopped and released.
+\par
+
+{\b virtual void play(ulong channel, int loop=0);}\par
+
+Starts the given channel playing with optional looping.
+\par
+
+{\b virtual void stop(ulong channel);}\par
+
+Stops the given channel.
+\par
+
+{\b virtual int prepare_wav_stream(const char *fname);}\par
+
+Readies a .WAV for digital streaming.
+\par
+
+{\b virtual void play_stream(int loop=0);}\par
+
+Starts a streaming digital playback with optional looping.
+\par
+
+{\b virtual void next_stream();}\par
+
+Moves to the next queued file for digital streaming.
+\par
+
+{\b virtual void stop_stream();}\par
+
+Stops a streaming digital playback.
+\par
+
+{\b BachStaticSample *get_channel(ulong channel);}\par
+
+Returns a pointer to the given channel's {\i Bach} sample.
+\par
+
+BachSample3D *get_channel3d(ulong channel)
+
+Returns a pointer to the given 3D channel's {\i Bach} sample.
+\par
+
+\line{\b\fs28 Error Codes}\par
+
+These defines are local to the SimAudio class:
+\par
+
+{\i ERROR_NONE}\tab No error.
+\par
+
+{\i ERROR_INIT}\tab {\i Bach} init failed.
+\par
+
+{\i ERROR_NOMEMORY}\tab A memory allocation failed.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+SimText Class                                                             ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote SG_SIMTEXT}
+${\footnote SimText Class}
+K{\footnote SimText;
+SimText, outr;
+SimText, outrf;
+SimText, color}
++{\footnote BW_XSG_1}
+{\b\f0{\cf2\scaps SimGime Framework Guide}\line\fs32 SimText Class}\par\pard\sb100
+
+This class adds resource ID support to {\i Gutenberg's} GBergText class.
+\par
+
+\line{\b\fs28 Name}\par
+
+SimText - Text Output Class
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "simmisc.hpp"
+\par
+
+\line{\b\fs28 Base Classes}\par
+
+{\uldb GBergText}{\v PG_GBERG_TEXTCLASS}
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b SimText(VngoVport *vp);}\par
+
+Constructs the text class to output to the given viewport.
+\par
+
+{\b SimText(SimScreen *scrn);}\par
+
+Constructs the text class to output to the viewport belonging to the
+ given {\uldb SimScreen}{\v SG_SIMSCREEN} class instance.
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+Same as {\uldb GBergText}{\v PG_GBERG_TEXTCLASS}, plus :-
+\par
+
+{\b void outr(ulong id);\line
+void outr(long x, long y, ulong id);\line
+void outrf(ulong id, ...);}\par
+
+These are output routines which output a string found in the string table
+ of the resource for the application.
+\par
+
+{\b gberg_error_codes color(dword fc, dword bc=VNGO_TRANSPARENT);}\par
+
+Helper routine to set text output color for {\i Gutenberg}.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+SimTimeTable Class                                                        ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote SG_SIMTIMETABLE}
+${\footnote SimTimeTable Class}
+K{\footnote SimTimeTable;
+SimTimeTable, add_event;
+SimTimeTable, add_event_rel;
+SimTimeTable, rem_event;
+SimTimeTable, step;
+SimTimeTable, more_events;
+SimTimeTable, size_alloc;
+SimTimeTable, cleanup}
++{\footnote BW_XSG_1}
+{\b\f0{\cf2\scaps SimGine Framework Guide}\line\fs32 SimTimeTable Class}\par\pard\sb100
+
+This class provides a handy method of delaying actions until a future time.
+ Conceptually similar to a timer callback, the {\b SimTimeTable} registers
+ callback functions to be called at a later time.  Unlike a timer callback,
+ the {\b SimTimeTable} does not interrupt processing, but must be stepped
+ by the application at an appropriate time.
+\par
+
+Some trouble has been taken to ensure that adding and dispatching elements
+ in the event queue is fast and efficient.  The event queue is pre-allocated,
+ and threaded into a free list.  New event records are taken from the head
+ of the free list, and added to the event list.  Likewise, freeing elements
+ is as simple as linking them back onto the free list.  The event queue keeps
+ both a head and tail pointer, so adding events that occur "next" in the
+ sequence is very efficient.  The worst case is to add an event that occurs
+ right before the last event in a long event list, but even this is merely
+ O(n) on the length of the list.  If profiling determines this to be a problem,
+ then the whole queue can be reimplimented as a heap-based priority queue, but
+ that will cause all insertions/removals to incur a O(log n) overhead.
+\par
+
+\line{\b\fs28 Name}\par
+
+SimTimeTable - Action Scheduling Class
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "simgine.hpp"
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b SimTimeTable(int size = 1024);}\par
+
+Constructs the time table with the specified number of entries.  If this
+ number is exceeded, the table will resize itself to twice its current
+ size.
+\par
+
+{\b ~SimTimeTable();}\par
+
+Destructs the time table, freeing any resources used.  Any events still
+ pending will {\i not} be executed.  Use {\b SimTimeTable::more_events()} to
+ determine if any events remain in the queue.
+\par
+
+\line{\b\fs28 Member Types}\par
+
+{\b typedef void (*callback_t) (void *);}\par
+
+This is the type of the callback functions registered in the time table.
+ All user functions must match this signature.  The parameter is specified
+ in the {\b add_event} call, and should be used to pass state information
+ into the callback.
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+{\b void add_event(clock_t, callback_t, void *);}\par
+
+Adds a function to be called at the given time.  The parameter is passed
+ to the callback function when the time specified has passed.  Time is
+ specified in milliseconds, and mirrors the time values in {\b Chronos}.
+ If there aren't any spaces in the queue, this function will resize the
+ queue to accommodate the new allocations.  The queue's size is doubled,
+ and all existing elements are copied over (generation scavenging).  This
+ can take a noticeable ammount of time for large queues, so it is wiser to
+ create a queue that is large enough to begin with.  Note also that the
+ queue will never shrink.
+\par
+
+{\b void add_event_rel(clock_t, callback_t, void *);}\par
+
+The same as {\b add_event}, except that the specified time is relative
+ to the current time.  For example, to schedule an event one second in
+ the future, call {\b table.add_event (1000, f, p);}.
+\par
+
+{\b void rem_event(callback_t, void *, bool = true);}\par
+
+Removes a specified event from the queue.  Either or both of the pointers
+ may be NULL, indicating a "don't care" condition.  The bool parameter controls
+ whether all matching elements are removed (true), or only the first (false).
+ This function is useful for removing events relating to a particular object
+ ({\b table.rem_event (0, obj_ptr);}) or a particular action
+ ({\b table.rem_event (explode, 0);}).
+\par
+
+{\b void step();}\par
+
+This member causes the events in the queue to be checked for elegibility
+ and executed when appropriate.  All events that should occur before or
+ on {\b chronos_time_now()} are called with the parameters specified, and
+ then they are removed from the queue.  For a recurring event, have the
+ callback function re-register itself for a future time.  Note that actions
+ entered with a time of 0 will execute on the next {\b step()}.  This fact
+ may be useful for delaying actions for only one frame.
+\par
+
+{\b bool more_events() const;}\par
+
+Returns whether or not there are any events pending in the queue.  This is
+ a very fast operation.
+\par
+
+{\b void size_alloc (int);}\par
+
+Sets the size of the time table queue.  This number is just the initial
+ size, as {\b add_event()} will resize the queue if needed.  Calling this
+ function with a number smaller than the current queue size has no effect.
+ There is currently no way to shrink the queue without destroying the time
+ table, because that would open the possibility of resizing the queue too
+ small for the current set of events.
+\par
+
+{\b void cleanup();}\par
+
+Destroys the queue, freeing all resources associated with it.  This member is
+ usually only called by the destructor, but can be used to manually clear
+ and resize the queue.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+SimScreen Class                                                           ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote SG_SIMSCREEN}
+${\footnote SimScreen Class}
+K{\footnote SimScreen;
+SimScreen, init;
+SimScreen, release;
+SimScreen, create_subviewport;
+SimScreen, lock;
+SimScreen, unlock;
+SimScreen, clear;
+SimScreen, flip;
+SimScreen, reinit;
+SimScreen, load_palette;
+SimScreen, set_palette;
+SimScreen, set_brightness;
+SimScreen, get_brightness;
+SimScreen, invalidate;
+SimScreen, capture}
++{\footnote BW_XSG_1}
+{\b\f0{\cf2\scaps SimGime Framework Guide}\line\fs32 SimScreen Class}\par\pard\sb100
+
+This class provides a management class for video by encapsulating a
+ {\i Van Gogh} viewport, palette, and other control code.  The viewport
+ contained within a instance of SimScreen is the full-screen area onto
+ which the application is displaying.
+\par
+
+An instance of SimScreen is created by SimGine::init_instance() and is
+ pointed to by the global variable {\b Screen}.  It should be non-zero
+ in all cases except before init_instance() and after exit_instance().
+ Failure to create a SimScreen class will result in a failure code from
+ init_instance().
+\par
+
+\line{\b\fs28 Name}\par
+
+SimScreen - Abstract Video Management Class
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "simscrn.hpp"
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b SimScreen();}\par
+
+Clears pointers.
+\par
+
+\line{\b\fs28 Member Data}\par
+
+{\b ushort width;\line
+ushort height;}\par
+
+Width and height of the screen instance (and associated viewport).
+\par
+
+{\b ushort bit_depth}\par
+
+Bit-depth of the screen instance (and associated viewport).
+\par
+
+{\b ushort na;}\par
+
+Padding.
+\par
+
+{\b float brightness;}\par
+
+Palette brightness boost factor (0.0 means no boost, while a negative value
+ dims the colors and a positive value brightens the colors).
+\par
+
+{\b VngoVport *gvport;}\par
+
+Points to the viewport for the screen.  This pointer can be used to draw
+directly onto the screen
+\par
+
+{\cf2
+Note:  Changes to this viewport will not be visible until flip() has been
+ called. And lock() should be called before drawing operations and unlock()
+ should be called if lock() returns a non-locked result afterwards.
+}\par
+
+{\b VngoPal *pal;}\par
+
+Points to the palette for the screen.
+\par
+
+{\b VngoScreenManager *vgs;}\par
+
+Points to the screen manager instance.
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+{\b virtual error_codes init (ushort w, ushort h,
+ ushort bd = 16, dword flags=FULLSCREEN);}\par
+
+Initializes the screen instance with the given width, height, bit-depth,
+ and control flags (see {\b Control Flags} below).  This routine is
+ overloaded by the derived SimScreen classes, but this base routine
+ is still called.  An error code is returned (see {\b Error Codes} below).
+\par
+
+{\cf2
+Note:  Some devices (notiably DirectDraw and Direct3D) can support both
+ 15- and 16-bit modes interchangably, depending upon the hardware.
+ Therefore, the init() routines for these try the bit-depth supplied
+ and if the screen manager responds with an appopriate error, the other
+ bit-depth is tried.  If successful, the bit_depth member will reflect
+ the changed bit-depth and should therefore be used to trigger any
+ bit-depth specific code (alternatively, the {\i VNGO_8BIT}, {\i VNGO_15BIT},
+ and {\i VNGO_16BIT} flags can be checked for in the VngoPal palette
+ instance created by init()).
+}\par
+
+{\b virtual void release();}\par
+
+Releases any associated viewport, palette, and screen manager instance,
+ effectively closing the device.  This is called by the destructor.
+\par
+
+{\b virtual VngoVport *create_subviewport(VngoRect &screen_rect, dword flags) = 0;}\par
+
+Creates a viewport that shares the physical memory of the main viewport at
+ the location given in screen coordinates in 'screen_rect'.  This is useful
+ since clipping is performed against viewport boundaries and to create
+ render viewports that are lcoated on the screen without the need to copy
+ the data onto the main viewport before displaying. The 'flags' variable is
+ passed to the viewport constructor being created.
+\par
+
+{\b virtual long lock ();}\par
+
+This locks the viewport's memory.  The memory must be locked before performing
+ draw operations.  It returns 1 if the surface was already locked, 0 if not
+ locked before this call, or -1 if an error occurred.
+\par
+
+{\b virtual int unlock ();}\par
+
+This unlocks the viewport's memory.
+\par
+
+{\b void clear ();}\par
+
+Clears the screen to the background color (RGB: 0,0,0).
+\par
+
+{\b void reinit ();}\par
+
+Reinitializes the screen device.
+\par
+
+{\b void flip ();}\par
+
+This 'flips' the screen surface so that changes to the viewport are made
+ visible to the user.  This prevents the user from seeing drawing in
+ progress for the next frame.
+\par
+
+{\b BOOL load_palette (const char *fname, const char *name, BOOL freeold=TRUE);}\par
+
+This loads a new palette from the IFF format file called 'fname'.  If
+ 'name' is non-zero, the palette name is searched for in the IFF file.
+ If freeold is TRUE, then any old palette data is freed before loading
+ the new palette.
+\par
+
+{\b BOOL set_palette (VngoPal *p, BOOL clr=TRUE);}\par
+
+This puts a new palette instance into the screen class.  If clr is true,
+ then the screen is cleared before and after the hardware palette change.
+\par
+
+{\b void set_brightness(float b);}\par
+
+Sets the brightness factor (see 'brightness' above).
+\par
+
+{\b float get_brightness() const { return brightness; }}\par
+
+Returns the brightness factor.
+\par
+
+{\b void invalidate (const VngoRect &);\line
+void invalidate ();}\par
+
+Invalidates a rectangle or the entire screen for damaged-rectangle tracking
+ used during flip().
+\par
+
+{\b BOOL capture();}\par
+
+Captures the current screen viewport contents to a SNAPxxxx.BMP file in
+ the current directory.  It automatically finds the first non-existent
+ file starting with SNAP0000.BMP and ending with SNAP9999.BMP.  Returns
+ TRUE if successful, FALSE otherwise.
+\par
+
+\line{\b\fs28 Control Flags}\par
+
+{\i FULLSCREEN}\tab Allow screen to switch into target video mode.
+\par
+
+{\i TRUEFLIP}\tab Use true page-flipping.
+\par
+
+\line{\b\fs28 Error Codes}\par
+
+These defines are local to the SimScreen class:
+\par
+
+{\i ERROR_NONE}\tab No Error.
+\par
+
+{\i ERROR_NOMEMORY}\tab Memory allocation failed.
+\par
+
+{\i ERROR_INVALIDPARMS}\tab Invalid input parameters (usually bit-depth).
+\par
+
+{\i ERROR_SCNRMNGRINIT}\tab Screen manager failed to initialize.
+\par
+
+{\i ERROR_PALINIT}\tab Initialization of palette failed.
+\par
+
+{\i ERROR_MODEFAIL}\tab Initialization of video mode failed.
+\par
+
+{\i ERROR_MODENOTSUPP}\tab Cannot support the requested mode on this
+ hardware (basically this means 320x240 doesn't work with the driver on
+ this machine, but 640x480 will work).
+\par
+
+{\i ERROR_VPORTINIT}\tab Initialization of viewport failed.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+SimScreenDD Class                                                         ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote SG_SIMSCREENDD}
+${\footnote SimScreenDD Class}
+K{\footnote SimScreenDD;
+SimScreenDD, init;
+SimScreenDD, create_subviewport}
++{\footnote BW_XSG_1}
+{\b\f0{\cf2\scaps SimGime Framework Guide}\line\fs32 SimScreenDD Class}\par\pard\sb100
+
+This class implements the SimScreen interface for a DirectDraw surface.  This
+ is the fastest method for displaying graphics, but is extremely sensitive to
+ the proper use of lock()/unlock() and is difficult to use while
+ debugging.
+\par
+
+\line{\b\fs28 Name}\par
+
+SimScreenDD - DirectDraw Screen class
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "simscrn.hpp"
+\par
+
+\line{\b\fs28 Base Classes}\par
+
+{\uldb SimScreen}{\v SG_SIMSCREEN}
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b SimScreenDD();}\par
+
+Initializes internal pointers.
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+Same as {\uldb SimScreen}{\v SG_SIMSCREEN}, plus :-
+\par
+
+{\b virtual error_codes init (ushort w, ushort h,
+ ushort bd = 16, dword flags=FULLSCREEN);}\par
+
+Initializes the DirectDraw screen class.
+\par
+
+{\b virtual VngoVport *create_subviewport(VngoRect &srect, dword flags);}\par
+
+Creates a sub-viewport which shares the main DirectDraw surface.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+SimScreenDIB Class                                                        ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote SG_SIMSCREENDIB}
+${\footnote SimScreenDIB Class}
+K{\footnote SimScreenDIB;
+SimScreenDIB, init;
+SimScreenDIB, create_subviewport}
++{\footnote BW_XSG_1}
+{\b\f0{\cf2\scaps SimGime Framework Guide}\line\fs32 SimScreenDIB Class}\par\pard\sb100
+
+This class implements the SimScreen interface using the Windows DIB and
+ WinG interface for displaying the graphics and setting the palette, but uses
+ the DirectDraw interface to change the video mode.  This is slower, but works
+ in many cases where poor DirectDraw drivers might fail to operate.  It is
+ easier to debug while using the DIB SimScreen interface when combined with
+ not allowing the video mode switch.
+\par
+
+{\cf2
+Note: Since this class uses the Windows palette system, the palette will be
+ adjusted by Windows to include the 32 system colors.  Therefore, some colors
+ may not be dispalyed exactly correct while using the DIB screen class.
+}\par
+
+\line{\b\fs28 Name}\par
+
+SimScreenDIB - DIB Screen Class
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "simscrn.hpp"
+\par
+
+\line{\b\fs28 Base Classes}\par
+
+{\uldb SimScreen}{\v SG_SIMSCREEN}
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b SimScreenDIB();}\par
+
+Initializes internal pointers.
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+Same as {\uldb SimScreen}{\v SG_SIMSCREEN}, plus :-
+\par
+
+{\b virtual error_codes init (ushort w, ushort h,
+ ushort bd = 16, dword flags=FULLSCREEN);}\par
+
+Initializes the DIB screen class.
+\par
+
+{\b virtual VngoVport *create_subviewport(VngoRect &srect, dword flags);}\par
+
+Creates a sub-viewport which shares the main DIB.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+SimScreenD3D Class                                                        ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote SG_SIMSCREEND3D}
+${\footnote SimScreenD3D Class}
+K{\footnote SimScreenD3D;
+SimScreenD3D, init;
+SimScreenD3D, create_subviewport}
++{\footnote BW_XSG_1}
+{\b\f0{\cf2\scaps SimGime Framework Guide}\line\fs32 SimScreenD3D Class}\par\pard\sb100
+
+This class implements the SimScreen interface using {\i Van Gogh's}
+ Microsoft Direct3D chipset implementation, which requires DirectX V5.
+\par
+
+\line{\b\fs28 Name}\par
+
+SimScreenD3D - Microsoft Direct3D Screen Class
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "simscrn.hpp"
+\par
+
+\line{\b\fs28 Base Classes}\par
+
+{\uldb SimScreen}{\v SG_SIMSCREEN}
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b SimScreenD3D();}\par
+
+Initializes internal pointers.
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+Same as {\uldb SimScreen}{\v SG_SIMSCREEN}, plus :-
+\par
+
+{\b virtual error_codes init (ushort w, ushort h,
+ ushort bd = 16, dword flags=FULLSCREEN);}\par
+
+Initializes the Direct3D screen class.
+\par
+
+{\b virtual VngoVport *create_subviewport(VngoRect &srect, dword flags);}\par
+
+Creates a sub-viewport which shares the video buffer.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+SimState Class                                                            ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote SG_SIMSTATE}
+${\footnote SimState Class}
+K{\footnote SimState;
+SimState, pump_windows;
+SimState, display;
+SimState, activiate;
+SimState, deactivate;
+SimState, process_events;
+SimState, render;
+SimState, panic;
+SimState, process_msg;
+SimState, process_sys;
+SimState, process_chat;
+SimState, switch_to;
+SimState, load_string;
+SimState, message_box}
++{\footnote BW_XSG_1}
+{\b\f0{\cf2\scaps SimGime Framework Guide}\line\fs32 SimState Class}\par\pard\sb100
+
+{\cf4\scaps CHANGED}\line
+This class forms the basic interface for a 'state' or 'mode' of the
+ application.  Only a single state is active at a time and is called by
+ SimGine::run() within the main application loop.  Control can be passed
+ from state to state by using switch_to(), which deactivates the current
+ state and activates a new state.  The currently running state is pointed
+ to by the global {\b Mode}.
+\par
+
+\line{\b\fs28 Name}\par
+
+SimState - Abstract State Interface Class
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "simstate.hpp"
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b SimState();}\par
+
+Performs no initialization.
+\par
+
+\line{\b\fs28 Member Function}\par
+
+{\b virtual BOOL pump_windows ();}\par
+
+This routine performs the basic Windows pump which gets messages,
+ translates them, and then dispatches them.  The base implementation
+ processes all pending messages before returning.  If a quit message
+ is encountered, FALSE is returned which causes SimGine::run() to
+ terminate the main loop.  Otherwise, TRUE is returned.
+\par
+
+{\b virtual void display();}\par
+
+This routine performs a flip() call on the SimScreen instance pointed
+ to by {\b Screen}.  This is called at the end of the application loop
+ before starting again with a pump_windows() call.
+\par
+
+{\b virtual void activate ();}\par
+
+This member is called when the state is becoming the new active and current
+ {\b Mode}.  This is where memory allocations, event setup, and other
+ operations should be performed in order to make the new state the
+ current state--the old state has already been deactivated by the time
+ this routine is called.
+\par
+
+{\b virtual void deactivate ();}\par
+
+This member is called when the state is no longer the current and active
+ {\b Mode}.  This code should be guarded against multiple calls and
+ called from the virtual destructor for the class.  It should free all
+ memory allocated by the activate() call.
+\par
+
+{\b virtual void process_events() = 0;}\par
+
+This member is called each time through the application loop to perform
+ event/input and time-based processing.
+\par
+
+{\b virtual void render() = 0;}\par
+
+This member is called each time through the application loop to perform
+ the drawing of the video portions of the state.
+\par
+
+{\cf4\scaps CHANGED}\line
+{\b virtual void panic (ulong id, const char *str=0);\line
+virtual void panic (const char *msg);}\par
+
+These routines should be called when a fatal error is encountered.  This
+ routine displays the error (either the string from the resource string
+ table or the given string), calls exit_instance() on the app, and then
+ exits the process immediately.
+\par
+
+{\b virtual void process_msg  (void *ptr, ulong len, ulong pid, ulong time);}\line
+{\b virtual void process_sys  (void *ptr, ulong len, ulong pid, ulong time);}\line
+{\b virtual void process_chat (void *ptr, ulong len, ulong pid, ulong time);}\par
+
+These routines are for overloading by derived classes.  They provide
+ a central point for dispatching network messages.  Ordinarily, Networking
+ issues are left as the domain of the application, but these members have
+ been added to facilitate message dispatch in a clean, object-oriented way.
+ The default implementations do nothing.
+\par
+
+{\b void switch_to (SimState *next);}\par
+
+This routine switches the current and active {\b Mode} to the state pointer
+ given as 'next', which must be non-null.
+\par
+
+{\b static char *load_string(ulong id);\line
+static char *load_string(ulong id, char *buff, ulong len);}\par
+
+These routines load strings from the resource string table.  The first
+ version allocates the memory needed for the string from {\i Ivory} static
+ memory space, while the second returns the data in a passed buffer.
+\par
+
+{\b static int message_box(const char *str, UINT type);\line
+static int message_box(ulong id, UINT type);}\par
+
+These routines display a Windows Message Box using either the given string
+ or a string from the resource string table.
+\par
+
+{\cf2
+Note:  MessageBox will not operate if SimScreenDD is active since this is
+ not compatable with DirectDraw.
+}\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+SimulatorState Class                                                      ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote SG_SIMULATORSTATE}
+${\footnote SimulatorState Class}
+K{\footnote SimulatorState;
+SimulatorState, activate;
+SimulatorState, deactivate;
+SimulatorState, process_events;
+SimulatorState, render}
++{\footnote BW_XSG_1}
+{\b\f0{\cf2\scaps SimGime Framework Guide}\line\fs32 SimulatorState Class}\par\pard\sb100
+
+This class is a SimState-derived class which represents the simulator
+ itself.  While this state is active, all real-time processing of the
+ simulation takes place and all user-interface is controlled via a
+ {\uldb SimUI}{\v SG_SIMUI} class instance.  All other SimStates in the
+ application are considered 'wrappers' which provide gameflow into and
+ out of the simulation, plus whatever configuration/setup features are
+ needed by the specific title.
+\par
+
+The SimulatorState class contains a number of data fields used by other
+ supporting classes to provide the basic structure for the real-time
+ environment.  In addition, the user-interface elements have been further
+ broken down into {\uldb SimUI}{\v SG_SIMUI} classes which in turn break
+ down the interface into {\uldb SimView}{\v SG_SIMVIEW} classes.  These
+ are analogous to the way {\uldb SimState}{\v SG_SIMSTATE} classes operate,
+ but are limited to within the context of a SimulatorState-derived
+ class.
+\par
+
+In a SimulatorState-derived class, one or more {\uldb SimUI}{\v SG_SIMUI}
+ class instances should be created and the 'ui' member variable should
+ point to the starting instance before calling the base activate() routine.
+\par
+
+{\cf2
+Note: Use of this class imposes a fairly stringent architectural structure
+ on the appliction and is therefore not suitable to all titles.  The general
+ structure of SimStates, SimGine, SimScreen, and SimAudio provide the most
+ generic support for applications development, while SimulatorState and its
+ related classes are somewhat more specialized.
+}\par
+
+\line{\b\fs28 Name}\par
+
+SimulatorState - Simulator-specific State Class
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "simstate.hpp"
+\par
+
+\line{\b\fs28 Base Classes}\par
+
+{\uldb SimState}{\v SG_SIMSTATE}
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b SimulatorState();}\par
+
+Clears internal pointers.
+\par
+
+\line{\b\fs28 Member Data}\par
+
+{\b dword flags;}\par
+
+This contains control flags for the SimulatorState (see {\b Model Flags}
+ below).
+\par
+
+{\b SimUI *ui;}\par
+
+This points to the current {\uldb SimUI}{\v SG_SIMUI} instance which recieves
+ all the process_events() and render() calls while the simulator state is
+ active.  This should be changed with SimUI::switch_to() after it is
+ first set in activate().
+\par
+
+{\b float timebase;\line
+ulong timeshift;\line
+ulong time_now;}\par
+
+These variables are used for tracking time within the simulator model.  The
+ timebase is the last processed time in seconds and time_now is the last
+ processed time in milliseconds.  The timeshift value is used to increase
+ the flow of time from 1:1 to 2:1 or higher.
+\par
+
+{\b Chronometer clock;}\par
+
+This is the real-time clock used to update the simluator model time.
+\par
+
+{\b ushort obj_hi;\line
+ushort obj_max;\line
+SimObject **objects;}\par
+
+These variables represent the dynamic array of
+ {\uldb SimObject}{\v SG_SIMOBJECT} class instances.
+\par
+
+{\b ushort temp_hi;\line
+ushort temp_max;\line
+SimTemp **temps;}\par
+
+These variables represent the dynamic array of
+ {\uldb SimTemp}{\v SG_SIMTEMP} class instances.
+\par
+
+{\b sim_team_t teams[SIM_MAX_TEAMS];}\par
+
+This variable contains a structre for each team of the form:
+\par
+
+\tab {\b ushort unit_hi;\line
+\tab ushort unit_max;\line
+\tab SimUnit **units;}\line
+\tab {\b ushort ofld_hi;\line
+\tab ushort ofld_max;\line
+\tab SimOffield **offields;}\par
+
+These variables represent the dynamic arrays of
+ {\uldb SimUnit}{\v SG_SIMUNIT} and {\uldb SimOffield}{\v SG_SIMOFFIELD}
+ class instances for each team.  The teams are currently defined as
+ {\i SIM_TEAM_GRAY}, {\i SIM_TEAM_BLUE}, {\i SIM_TEAM_RED},
+ {\i SIM_TEAM_GOLD}, and {\i SIM_TEAM_GREEN}.
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+Same as {\uldb SimState}{\v SG_SIMSTATE}, plus :-
+\par
+
+{\b virtual void activate ();}\par
+
+The base routine creates the empty dynamic arrays and calls activate for the
+ starting ui.
+\par
+
+{\b virtual void deactivate ();}\par
+
+The base routine calls deactivate for the current ui and destroys the
+ dynamic arrays and their conents.
+\par
+
+{\b virtual void process_events();}\par
+
+The base routine performs the model timing and step() loop and then calls
+ the current ui's process_events() member.
+\par
+
+{\b virtual void render();}\par
+
+The base routine calls the current ui's render() member.
+\par
+
+\line{\b\fs28 Model Flags}\par
+
+{\i MODEL_FROZEN}\tab This indicates that none of the data objects should
+ be stepped since time is frozen (paused or pre/post-simulator).
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+SimUI Class                                                               ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote SG_SIMUI}
+${\footnote SimUI Class}
+K{\footnote SimUI;
+SimUI, activate;
+SimUI, deactivate;
+SimUI, process_events;
+SimUI, render;
+SimUI, switch_to}
++{\footnote BW_XSG_1}
+{\b\f0{\cf2\scaps SimGime Framework Guide}\line\fs32 SimUI Class}\par\pard\sb100
+
+This class encapsulates the user-interface associated with the
+ {\uldb SimulatorState}{\v SG_SIMULATORSTATE} and contains one or more
+ instances of {\uldb SimView}{\v SG_SIMVIEW}-derived classes.  View
+ management and shared user-interface elements should be handled by
+ SimUI-derived classes.  A SimUI is generally used to control a unit
+ within a simulation, and therefore includes a pointer to a
+ {\uldb SimUnit}{\v SG_SIMUNIT} class instance.   Only a single ui
+ instance is active at any given time.
+\par
+
+Because the simulator model variables are only valid while within the
+ {\uldb SimulatorState}{\v SG_SIMULATORSTATE} state, multiple SimUI classes
+ can be used to handle various stages of user-interface within the simulation.
+ For example, one SimUI could handle pre-battle setup and then switch to
+ a SimUI for the cockpit/stragetic views, and another SimUI for the
+ post-battle displays.  Distinct units may have extremely different
+ interfaces which cannot be handled by a simple change of
+ {\uldb SimView}{\v SG_SIMVIEW} classes, and therefore may need different
+ SimUI classes to manage the appropriate views.
+\par
+
+In a SimUI-derived class, one or more {\uldb SimView}{\v SG_SIMVIEW}
+ class instances should be created and the 'view' member variable should
+ point to the starting instance before calling the base activate() routine.
+\par
+
+{\cf2
+Note:  For some cases (such as pre-/post-battle screens), it may not be
+ necessary to create SimView class instances as only one screen is ever
+ used by the SimUI instance.  In this case, simply overload the
+ activate(), deactivate(), process_events(), and render() members do
+ not call the base routines.
+}\par
+
+\line{\b\fs28 Name}\par
+
+SimUI - Simulator-specific user-interface class
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "simstate.hpp"
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b SimUI(SimulatorState *_parent);}\par
+
+Sets the parent pointer and clears the view and unit pointers.
+\par
+
+\line{\b\fs28 Member Data}\par
+
+{\b SimulatorState *parent;}\par
+
+Points to the {\uldb SimulatorState}{\v SG_SIMULATORSTATE} that contains
+ this instance of the class.  This pointer is used by the switch_to()
+ routine.
+\par
+
+{\b SimView *view;}\par
+
+Points to the currently active {\uldb SimView}{\v SG_SIMVIEW} class instance
+ which recieves the process_events() and render() calls.  Should be changed
+ with SimView::switch_to() after it is first set in activate().
+\par
+
+{\b SimUnit *unit;}\par
+
+Points to the currently controlled {\uldb SimUnit}{\v SG_SIMUNIT}
+ class instance, if any.
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+{\b virtual void activate ();}\par
+
+The base routine calls the activate() member of the current view.
+\par
+
+{\b virtual void deactivate ();}\par
+
+The base routine calls the deactivate() member of the current view, if any.
+\par
+
+{\b virtual void process_events();}\par
+
+The base routine calls the process_events() member of the current view.
+\par
+
+{\b virtual void render();}\par
+
+The base routine calls the render() member of the current view.
+\par
+
+{\b void switch_to (SimUI *next);}\par
+
+This routine switches the current and active 'ui' to the ui pointer
+ given as next, which must be non-null.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+SimView Class                                                             ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote SG_SIMVIEW}
+${\footnote SimView Class}
+K{\footnote SimView;
+SimView, activate;
+SimView, deactivate;
+SimView, process_events;
+SimView, render;
+SimView, switch_to}
++{\footnote BW_XSG_1}
+{\b\f0{\cf2\scaps SimGime Framework Guide}\line\fs32 SimView Class}\par\pard\sb100
+
+This class encapuslates a given view or screen within a
+ {\uldb SimUI}{\v SG_SIMUI} instance.  It should handle the view specific
+ drawing and input processing and is generally associated with the
+ ui's unit pointer.  Only a single view is active at any given time.
+\par
+
+In general, a SimView should be created for each 'position' or
+ 'point-of-view' within the simulation which requires an explicit switch
+ by the player.  For example, in a flight-simulation of a two pilot
+ helicopter, one SimView would represent the pilot's seat, while another
+ represents the gunner's seat, a third SimView-derived class
+ would be used for the external view and yet another for an in-simulation
+ configuration screen.  If multiple {\uldb SimUI}{\v SG_SIMUI} classes
+ are required for the application, they may share one or more SimView-derived
+ classes (an external view would probably work the same for all vehicles,
+ for example, and could be implemented in a single SimView-derived class
+ which is instanced by all {\uldb SimUI}{\v SG_SIMUI}-derived vehicle
+ control classes).
+\par
+
+\line{\b\fs28 Name}\par
+
+SimView - Simulator-specific user-interface view.
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "simstate.hpp"
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b SimView(SimUI *_parent);}\par
+
+Sets the parent pointer.
+\par
+
+\line{\b\fs28 Member Data}\par
+
+{\b SimUI *parent;}\par
+
+Points to the SimUI class that contains this instance.  It is used by the
+ switch_to() routine.
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+{\b virtual void activate ();}\par
+
+This member is called when the instance is made the current and active view.
+\par
+
+{\b virtual void deactivate ();}\par
+
+This member is called when the instance is no longer the active view.
+\par
+
+{\b virtual void process_events() = 0;}\par
+
+This member is called each time through the application loop to perform
+ event/input and time-based processing.
+\par
+
+{\b virtual void render() = 0;}\par
+
+This member is called each time through the application loop to perform
+ the drawing of the video portions of the state.
+\par
+
+{\b void switch_to (SimView *next);}\par
+
+This routine switches the current and active 'view' to the view pointer
+ given as next, which must be non-null.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+SimBase Class                                                             ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote SG_SIMBASE}
+${\footnote SimBase Class}
+K{\footnote SimBase;
+SimBase, release;
+SimBase, get_position;
+SimBase, set_position;
+SimBase, insert;
+SimBase, remove;
+SimBase, set_name}
++{\footnote BW_XSG_1}
+{\b\f0{\cf2\scaps SimGime Framework Guide}\line\fs32 SimBase Class}\par\pard\sb100
+
+Within the {\uldb SimulatorState}{\v SG_SIMULATORSTATE}, things in the
+ simulation are modeled by classes derived from this base class.  The exact
+ dynamic array they are placed into is based on the class and team identifier.
+ This base class defines an abstract interface for the management of
+ items within the simulation.
+\par
+
+Items in the simulation are 'stepped' each frame for time-based updating by
+ SimulatorState::process_events() unless {\i SimulatorState::MODEL_FROZEN}
+ is set.
+\par
+
+\line{\b\fs28 Name}\par
+
+SimBase - Base simulator representation class
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "simmodel.hpp"
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b SimBase(SimulatorState *_parent);}\par
+
+Sets the parent pointer.
+\par
+
+\line{\b\fs28 Member Data}\par
+
+{\b dword base_flags;}\par
+
+Base-class control flags (see {\b Base Flags} below).
+\par
+
+{\b SimulatorState *parent;}\par
+
+Points to parent {\uldb SimulatorState}{\v SG_SIMULATORSTATE}.
+\par
+
+{\b ushort index;}\par
+
+Index within dynamic array.
+\par
+
+{\b ushort team;}\par
+
+Team identifier (see {\i SIM_TEAM_} constants in
+ {\uldb SimulatorState}{\v SG_SIMULATORSTATE}.
+\par
+
+{\b char name[SIM_MAX_NAME];}\par
+
+Name of instance.  Should be set with set_name().
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+{\b virtual void release();}\par
+
+Releases all data associated with the representation instance.
+\par
+
+{\b virtual void step(float interval);}\par
+
+Indicates that the item should update itself for the passing of 'interval'
+ time, which is given in seconds.
+\par
+
+{\b virtual void get_position(EschPoint &pos) const;\line
+virtual void set_position(EschPoint &pos);}\par
+
+Gets/sets the position of the item in 3-space, if relavent.
+\par
+
+{\b virtual BOOL insert(ushort t) = 0;}\par
+
+Sets the team identifer to team 't' and inserts the item into the
+correct dynamic array.
+\par
+
+{\b virtual void remove() = 0;}\par
+
+Removes the item from the dynamic array it may be inserted within.
+\par
+
+{\b void set_name(const char *_name); }\par
+
+Sets the 'name' member for the instance name.
+\par
+
+\line{\b\fs28 Base Flags}\par
+
+{\i BASE_INACTIVE}\tab Indicates that the item should be skipped during the
+ 'step' processing.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+SimObject Class                                                           ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote SG_SIMOBJECT}
+${\footnote SimObject Class}
+K{\footnote SimObject;
+SimObject, insert;
+SimObject, remove}
++{\footnote BW_XSG_1}
+{\b\f0{\cf2\scaps SimGime Framework Guide}\line\fs32 SimObject Class}\par\pard\sb100
+
+This class represents non-player/AI controlled permanent objects within the
+ simulation (planets, asteriods, trees, windmills, power stations, barracks,
+ etc.).
+\par
+
+\line{\b\fs28 Name}\par
+
+SimObject - Object simulation representation class
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "simmodel.hpp"
+\par
+
+\line{\b\fs28 Base Classes}\par
+
+{\uldb SimBase}{\v SG_SIMBASE}
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b SimObject(SimulatorState *_parent);}\par
+
+Sets the parent pointer.
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+Same as {\uldb SimBase}{\v SG_SIMBASE}, plus :-
+\par
+
+{\b virtual BOOL insert(ushort t);\line
+virtual void remove();}\par
+
+Inserts/removes the item into/from the 'objects' dynamic array.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+SimUnit Class                                                             ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote SG_SIMUNIT}
+${\footnote SimUnit Class}
+K{\footnote SimUnit;
+SimUnit, release;
+SimUnit, step;
+SimUnit, insert;
+SimUnit, remove}
++{\footnote BW_XSG_1}
+{\b\f0{\cf2\scaps SimGime Framework Guide}\line\fs32 SimUnit Class}\par\pard\sb100
+
+This class represents player/AI controlled permanent objects within the
+ simulation (vehicles, gun-turrets, etc.)  Units are defined with a
+ collection of {\uldb SimEquip}{\v SG_SIMEQUIP} class instances which
+ indicate the equipment and functional systems of the unit.  This design
+ allows dynamic adjustment of equipment as well as an object-oriented
+ breakdown for the implementation of the units within the simulation.
+\par
+
+\line{\b\fs28 Name}\par
+
+SimUnit - Unit simulation representation class
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "simmodel.hpp"
+\par
+
+\line{\b\fs28 Base Classes}\par
+
+{\uldb SimBase}{\v SG_SIMBASE}
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b SimObject(SimulatorState *_parent);}\par
+
+Sets the parent pointer.
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+Same as {\uldb SimBase}{\v SG_SIMBASE}, plus :-
+\par
+
+{\b virtual void release();}\par
+
+Releases any equipment instances.
+\par
+
+{\b virtual void step(float interval);}\par
+
+Steps equipment instances for time-based processing.
+\par
+
+{\b virtual BOOL insert(ushort t);\line
+virtual void remove();}\par
+
+Inserts/removes the item into/from the team[].units dynamic array.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+SimEquip Class                                                            ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote SG_SIMEQUIP}
+${\footnote SimEquip Class}
+K{\footnote SimEquip;
+SimEquip, release;
+SimEquip, step}
++{\footnote BW_XSG_1}
+{\b\f0{\cf2\scaps SimGime Framework Guide}\line\fs32 SimEquip Class}\par\pard\sb100
+
+Instances of this class implement specific equipment and functional systems
+ used as part of a {\uldb SimUnit}{\v SG_SIMUNIT} (weapons, engines, computers,
+ sensors, etc.).  SimEquip instances can be mixed and matched to create
+ new kinds of units or to customize current ones.
+\par
+
+\line{\b\fs28 Name}\par
+
+SimEquip - Equipment in units simulation representation class
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "simmodel.hpp"
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b SimEquip(SimUnit *_parent);}\par
+
+Sets parent pointer.
+\par
+
+\line{\b\fs28 Member Data}\par
+
+{\b SimUnit *parent;}\par
+
+Points to parent {\uldb SimUnit}{\v SG_SIMUNIT}.
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+{\b virtual void release();}\par
+
+Releases all data associated with the representation instance.
+\par
+
+{\b virtual void step(float interval);}\par
+
+Indicates that the equipment/system should update itself for the passing
+ of 'interval' time, which is given in seconds.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+SimTemp Class                                                             ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote SG_SIMTEMP}
+${\footnote SimTemp Class}
+K{\footnote SimTemp;
+SimTemp, insert;
+SimTemp, remove}
++{\footnote BW_XSG_1}
+{\b\f0{\cf2\scaps SimGime Framework Guide}\line\fs32 SimTemp Class}\par\pard\sb100
+
+This class represents temporarily created objects within the simulation
+ (bullets, rockets, laser beams, explosions, smoke, grenades etc.).
+\par
+
+\line{\b\fs28 Name}\par
+
+SimTemp - Temporary simulation representation class
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "simmodel.hpp"
+\par
+
+\line{\b\fs28 Base Classes}\par
+
+{\uldb SimBase}{\v SG_SIMBASE}
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b SimObject(SimulatorState *_parent);}\par
+
+Sets the parent pointer.
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+Same as {\uldb SimBase}{\v SG_SIMBASE}, plus :-
+\par
+
+{\b virtual BOOL insert(ushort t);\line
+virtual void remove();}\par
+
+Inserts/removes the item into/from the 'temps' dynamic array.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+SimOffield Class                                                          ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote SG_SIMOFFIELD}
+${\footnote SimOffield Class}
+K{\footnote SimOffield;
+SimOffield, insert;
+SimOffield, remove}
++{\footnote BW_XSG_1}
+{\b\f0{\cf2\scaps SimGime Framework Guide}\line\fs32 SimOffield Class}\par\pard\sb100
+
+This class represents items outside of the scope of the simulation, which
+ can influence it or create {\uldb SimTemp}{\v SG_SIMTEMP} objects
+ (artillery, offield mortars, etc.)
+\par
+
+\line{\b\fs28 Name}\par
+
+SimOffield - Offield simulation representation class
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "simmodel.hpp"
+\par
+
+\line{\b\fs28 Base Classes}\par
+
+{\uldb SimBase}{\v SG_SIMBASE}
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b SimObject(SimulatorState *_parent);}\par
+
+Sets the parent pointer.
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+Same as {\uldb SimBase}{\v SG_SIMBASE}, plus :-
+\par
+
+{\b virtual BOOL insert(ushort t);\line
+virtual void remove();}\par
+
+Inserts/removes the item into/from the team[].offields dynamic array.
+\par
+
+\pard\page
+
+{\comment °±² eof - simgine.rtf ²±° }
+}

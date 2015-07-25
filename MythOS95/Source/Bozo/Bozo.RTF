@@ -1,0 +1,902 @@
+{\rtf1
+{\comment
+ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
+
+                                  Bozo Help
+
+                     Microsoft Windows 95/98/NT Version
+
+   Copyright (c) 1994-1999 by Dan Higdon, Tim Little, and Chuck Walbourn
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ This file and all associated files are subject to the terms of the
+ GNU Lesser General Public License version 2 as published by the
+ Free Software Foundation (http://www.gnu.org).   They remain the
+ property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+ See LICENSE.TXT in the distribution for a copy of this license.
+
+ THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+ OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+ PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+ LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+ OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+                        http://www.mythos-engine.org/
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ Bozo is a component of the MythOS(tm) collection.
+
+ MythOS is a trademark of Charybdis Enterprises, Inc.
+
+ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
+}
+
+{\fonttbl
+\f0\fswiss Arial;
+\f1\froman Times New Roman;
+\f2\fmodern Courier New;
+\f3\fswiss MS Sans Serif;
+\f4\froman MS Serif;
+}
+\deff1
+\fs21
+
+{\colortbl;
+\red128\green128\blue128;
+\red0\green0\blue128;
+\red0\green128\blue0;
+\red128\green0\blue0;
+}
+
+{\comment
+°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+                            Programmer's Guide
+
+°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+}
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+Overview                                                                  ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_BOZO_OVERVIEW}
+${\footnote Overview}
++{\footnote BW_PG_6}
+{\b\f0{\cf2\scaps Programmer's Guide: Bozo}\line\fs32 Overview}\par\pard\sb100
+
+{\i Bozo} is a library of routines that support non-preemptive
+ tasking for Win32 applications (he's also a famous entertainer,
+ but that's another story!).
+\par
+
+{\cf4
+These routines were developed for the Visual C++ 2.X compiler, and are
+ not guaranteed to work on any other system.  The application must be built
+ as a Win32 application, and must not use C++ exception handling.}\par
+
+Since Win32 provides a preemptive thread-based tasking model,
+ another tasking library may seem unnecessary.  However, {\i Bozo's}
+ model is non-preemptive, and can be used to simulate coroutines
+ and other complex control structures.  Additionally, the context
+ switch time for a {\i Bozo} task is very small (hardly more than a
+ function call), and {\i Bozo} tasks do not require inter-task
+ coordination primitives like critical sections.  For these
+ reasons, {\i Bozo} is still a useful library, even given the Win32
+ threading ability.
+\par
+
+{\i Bozo} provides two distinct interfaces.  One is a C-callable
+ interface that provides the basic tasking and queuing
+ functionality, as well as support for semaphores.  The other is
+ a C++ class library, which provides a slightly more useable
+ model.
+\par
+
+Bozo's tasking model consists of two parts: the task object, and
+ the task queue.
+\par
+
+A task object encapsulates an execution path and a stack for
+ execution.  The execution path of a task is defined by a passed
+ function pointer.  All tasks share the same address space, but
+ since stacks are not shared, any automatic variables declared in
+ the task's function are unique to that task.  Additionally, each
+ task has "task-local storage", which is a user-defined pointer
+ stored in the task context, and accessible through API calls.
+ This simple model corresponds to the notion of threads in Win32.
+ However, since {\i Bozo} is non-preemptive, tasks must explicitly
+ yield to the system when they are done.  When a task wishes to
+ be destroyed, it may either return from its task function, or
+ call one of the termination routines.
+\par
+
+Task queues are containers for tasks.  A task may only be in one
+ queue at a time.  There is one special task queue, called the
+ 'ReadyQ', from which {\i Bozo's} library functions draws tasks to
+ execute.  When the ReadyQ is empty, {\i Bozo} terminates the
+ application.  Other task queues may be created by the
+ application for more sophisticated task management.  One example
+ of such a use is the BozoSemaphore type.  Semaphores are a
+ synchronization concept, in which tasks queue up behind a
+ semaphore, and wait for it to be released.  The first task in
+ the queue acquires the semaphore and is added to the ReadyQ, and
+ all other tasks wait until the semaphore is released.  In this
+ way, access to a resource can be serialized.  (See a book on
+ multitasking primitives for a more complete discussion.)  The
+ BozoGate provides another example.  The gate queues up waiting
+ tasks until it is opened.  At that point, all waiting tasks are
+ entered into the ReadyQ.  All subsequent waits return
+ immediately, until the gate is closed.
+\par
+
+It is worth noting that since {\i Bozo} is non-preemptive, the use of
+ synchronization primitives might seem unnecessary.  This is not
+ the case.  The synchronization primitives can actually be used
+ to drive the tasking.  Since a task may only be in one queue at
+ a time, any task that enters a semaphore or gate automatically
+ yields to the next task in the ReadyQ.  In fact, the yield
+ primitive simply adds the current task to the end of the ReadyQ,
+ and yields to the next task.
+\par
+
+Upon initialization, the "task" defined by the currently
+ executing program is entered into the ReadyQ as the only task.
+ This allows the main task to participate in the multitasking
+ directly, rather than having to "drive" some sort of task pump.
+ The main task is identical to a created task, but with one
+ important difference:  The main task may not terminate by
+ returning, it must call the task termination API.  The reason
+ for this is simple; since {\i Bozo} was not initialized before main()
+ was called, it had no way to arrange for this behavior.  For
+ this reason, the main task is often used as a "null task", which
+ never leaves the ReadyQ.  Since {\i Bozo} terminates the application
+ when the ReadyQ becomes empty, a null task allows the user to
+ explicitly control the termination of their application.
+\par
+
+\line{\b\fs28 Definitions}\par
+
+{\b Task}\par
+
+The single unit of execution.  A task encapsulates an execution
+ stream and stack.  The tasks do not have distinct address spaces.
+\par
+
+{\b Queue}\par
+
+A first in, first out list of items.  In Bozo, queues hold
+ tasks, and a task may only be in one queue at a time.
+\par
+
+{\b Task-Local Storage}\par
+Each task context has unique storage of a single pointer.  In
+ the case of the C-callable subsystem, this pointer may be used
+ to distinguish between task instances that are executing the
+ same code.  The C++ subsystem will normally not need to use this
+ storage.
+\par
+
+{\b ReadyQ}\par
+Actually a global data item found in the task queue subsystem,
+ this "ready queue" is the task queue from which the processor
+ draws tasks to execute, and all subsystems use to schedule
+ tasks.  When this queue is empty, the system terminates the
+ application.  In this way, it is "magic", and deserves to be
+ mentioned independently of its class definition.
+\par
+
+\line{\b\fs28 Features}\par
+
+Creation of non-preemptive tasks which share an address space.
+\par
+
+A simple model of yielding execution, in which the current task
+ may enter any task queue desired before yielding to any other
+ task queue desired.  Usually, both of these tasks will be the
+ ReadyQ.
+\par
+
+A private storage of task-local data, unique to each task.
+\par
+
+Task queue primitives for creating complex task scheduling models.
+\par
+
+Semaphore task synchronization primitives. (Based on task queues)
+\par
+
+A C++ class library that not only simplifies access to the Bozo
+ system, but provides for parent-child class relationships in
+ which the child tasks are terminated when the parent dies.
+\par
+
+A C++ task class, from which user tasks may be derived.
+ Destruction of the task object automatically removes the
+ underlying task from any task queues.
+\par
+
+A task gate class in the C++ library for blocking a number of
+ tasks until an event occurs.  (Based on task queues)
+\par
+
+\line{\b\fs28 Future Work}\par
+
+The {\i Bozo} library is complete.  All additional functionality
+ required should be implemented as application-specific classes
+ and extensions.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+Bozo C Interface: Tasking                                                 ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_BOZO_CTASKING}
+${\footnote C Tasking}
+K{\footnote
+ bz_task_func;
+ bz_init_task;
+ bz_create;
+ bz_spawn;
+ bz_term;
+ bz_return;
+ bz_get_tls;
+ bz_set_tls}
++{\footnote BW_PG_6}
+{\b\f0{\cf2\scaps Programmer's Guide: Bozo}\line\fs32 Bozo C Tasking Interface}\par\pard\sb100
+
+{\i Bozo}'s C interface for tasking provides the routines needed to
+ create and destroy tasks, as well as initialize the tasking
+ system and get task-specific data.  During {\b bz_init_task()}, the
+ currently executing program is set up as the first task in the
+ system.  At any time, this routine may choose to {\b bz_return()},
+ which removes it from the {\b ReadyQ}.  When all threads have been
+ removed from the {\b ReadyQ}, the system calls {\b exit()}.  Note that
+ this helps to eliminate deadlocks.  All {\b bz_create()}'d tasks may
+ destroy themselves by returning normally.  This is the same as
+ calling {\b bz_return()}, except that {\b bz_return()} can work deep
+ inside of a nested task.
+\par
+
+{\cf2 Note:  If {\i Bozo} is used in a Windowed application, care
+ should be taken to use the normal termination procedures for Windows
+ apps, rather than allowing {\i Bozo} to terminate the program.}\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "bztask.h"
+\par
+
+\line{\b\fs28 Functions}\par
+
+
+{\b void (*bz_task_func) (void *)}
+\par
+This function is supplied by the user.  It is called when the
+ task begins execution.  Once this function returns, the task has
+ ended, and the context is destroyed.  This function may also
+ terminate itself by calling bz_return().
+\par
+
+{\b void bz_init_task (IvorySubAlloc *)}
+\par
+
+Initializes the {\i Bozo} system, and establishes the current thread
+ of execution as the current "task", so that it may be safely
+ suspended.  The parameter specifies an Ivory suballocator to use
+ when allocating stacks for bozo tasks.  This parameter may be
+ NULL to force the use of the standard allocators.
+\par
+
+{\b void bz_create (bz_task_func, int stack, void *params)}
+\line
+{\b void bz_spawn (bz_task_func, int stack, void *params)}
+\par
+
+These two functions create a basic task with a stack of the
+ given size.  Execution begins at the function supplied.  The
+ difference between these two is that bz_spawn() automatically
+ enters the task into the ReadyQ, whereas bz_create() does not.
+\par
+
+
+{\b void bz_term (bz_task *)}
+\par
+
+Terminate the supplied task.  Assumes that the supplied task is
+ not the current task.  To terminate the current task, use
+ bz_return().  This routine also removes the task from any queue
+ it happens to be in.
+\par
+
+{\b void bz_return ()}
+\par
+Terminates the current task, and switches to the next task in
+ the ReadyQ.  If there is no task to switch to, exit() is called.
+\par
+
+{\b void bz_get_tls ()}
+\line
+{\b void bz_set_tls (void*)}
+\par
+
+Get and set the task local storage pointer.  This pointer is
+ stored with the task context, so a task function can use this
+ value as instance data.
+
+\par
+
+\line{\b\fs28 Example}\par
+
+This fragment creates a task which prints "Hello, Bozo!" and returns.
+\par
+
+{\f2
+void my_task (void *param)\line
+\{\line
+\tab printf ("Hello, %s!\n", param);\line
+\}\par
+main ()\line
+\{\line
+\tab bz_init_task();\line
+\tab bz_spawn (my_task, stack_size, "Bozo");\line
+\tab bz_suspend();      // Let the task run\line
+\tab printf ("Goodbye\n");\line
+\}
+}
+\par
+
+\pard\page
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+Bozo C Interface: Queue Management                                        ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_BOZO_CQUEUEING}
+${\footnote C Queueing}
+K{\footnote
+ bzqueue_init;
+ bzqueue_empty;
+ bzqueue_enter;
+ bzqueue_push;
+ bzqueue_leave;
+ bzqueue_remove}
++{\footnote BW_PG_6}
+{\b\f0{\cf2\scaps Programmer's Guide: Bozo}\line\fs32 Bozo Queue Management}\par\pard\sb100
+
+{\i Bozo} provides queues for tasks to live within.  These queues
+ operate as you would expect, and are the basis for all task
+ manipulation primitives.  One global variable is supplied:
+ {\i ReadyQ}, which is the queue from which tasks are scheduled to
+ run.  These queues are FIFO, so no priorities may be assigned to
+ queue entries.
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "bzqueue.h"
+\par
+
+\line{\b\fs28 Global Data}\par
+
+{\b bz_task *Task;}\par
+
+A pointer to the currently running task.  This variable is
+ usually only used by the library, but is provided for external
+ use, since it will likely be required by any custom task
+ switching models that cannot simply use {\b bz_yield()}.
+\par
+
+{\b bz_task_queue ReadyQ;}\par
+
+The ReadyQ (ready queue) is the queue from which processes are
+ taken to execute.  All {\i Bozo} routines are aware of this variable,
+ and use it whenever necessary.  {\b ReadyQ} is initialized by
+ {\b bozo_init_task()};
+\par
+
+\line{\b\fs28 Functions}\par
+
+{\b void bzqueue_init (bz_task_queue *)}\par
+Initialize a task queue to empty.  All queues must be
+ initialized before they are by any of the {\i Bozo} routines.
+\par
+
+{\b int bzqueue_empty (bz_task_queue*)}\par
+Returns the empty status of the queue.
+\par
+
+{\b void bzqueue_enter (bz_task_queue*, bz_task*)}\par
+Cause the task to enter the queue.
+\par
+
+{\b void bzqueue_push (bz_task_queue*, bz_task*)}\par
+Adds the specified task to the beginning of the task queue.  Use
+ of this call is not recommended, but is provided for the rare
+ occasion in which it might be necessary.
+\par
+
+{\b bz_task *bzqueue_leave (bz_task_queue*)}\par
+Cause the next {\b bz_task} to leave the queue.  It is an error to
+ remove tasks from an empty queue.
+\par
+
+{\b void bzqueue_remove (bz_task_queue*, bz_task*)}\par
+Remove the task from the queue, regardless of its position.
+ This is a somewhat expensive operation.
+
+\par
+
+\line{\b\fs28 Example}\par
+
+This fragment shows how to move a task from one queue to another.
+\par
+
+{\f2
+void dispatch_event (bz_task_queue *evt_queue)\line
+\{\line
+\tab if (!bzqueue_empty (evt_queue))\line
+\tab \{\line
+\tab \tab bz_task *t = bzqueue_leave (evt_queue);\line
+\tab \tab bzqueue_enter (&ReadyQ, t);\line
+\tab \}\line
+\}\line
+}
+\par
+
+\pard\page
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+Bozo C Interface: Semaphores                                              ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_BOZO_CSEMAPHORE}
+${\footnote C Semaphores}
+K{\footnote
+ bzsem_init;
+ bzsem_wait;
+ bzsem_signal}
++{\footnote BW_PG_6}
+{\b\f0{\cf2\scaps Programmer's Guide: Bozo}\line\fs32 Bozo C Interface: Semaphores}\par\pard\sb100
+
+{\i Bozo} provides for counting semaphores to ease inter-task
+ communications.  A semaphore is a method of serializing access
+ to some resource.  The semaphore is initialized with a certain
+ number of "tokens".  As tasks wait on the semaphore, tokens are
+ consumed.  If no tokens remain, the task must wait in the
+ semaphore's task queue until one of the other tasks signals that
+ it is done with its token.
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "bzsemap.h"
+\par
+
+\line{\b\fs28 Functions}\par
+
+{\b void bzsem_init (bz_semaphore *, int count)}\par
+Initialize a semaphore to contain 'count' tokens.
+\par
+
+{\b void bzsem_wait (bz_semaphore *)}\par
+Take a token.  If none is available, enter the semaphore's queue.
+\par
+
+{\b void bzsem_signal (bz_semaphore *)}\par
+If a task is in the queue, move it to the ReadyQ.  Otherwise, increment the token count.
+\par
+
+\line{\b\fs28 Example}\par
+
+This example shows two tasks that can act in a producer/consumer
+ relationship.  The calls to wait and signal will permit the
+ tasks to execute in the correct sequence.
+\par
+
+{\f2
+bz_semaphore sem;\line
+int val;\par
+void task1 (void *param)\line
+\{\line
+\tab for (;;)\line
+\tab \{\line
+\tab \tab bzsem_wait (&sem);\line
+\tab \tab val++;\line
+\tab \tab bzsem_signal (&sem);\line
+\tab \}\line
+\}\par
+
+void task2 (void *param)\line
+\{\line
+\tab for (;;)\line
+\tab \{\line
+\tab \tab bzsem_wait (&sem);\line
+\tab \tab printf ("Value = %d\n", val);\line
+\tab \tab bzsem_signal (&sem);\line
+\tab \}\line
+\}\par
+
+main ()\line
+\{\line
+\tab bz_init_task();\line
+\tab bzsem_init (&sem, 0);\line
+\tab bz_spawn (task1, 0x1000, 0);\line
+\tab bz_spawn (task2, 0x1000, 0);\line
+\tab bz_suspend();      // Let the tasks bzsem_wait()\line
+\tab bzsem_signal (&sem);\line
+\tab bz_return();       // Get out of the way\line
+\}
+}
+\par
+
+\pard\page
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+Bozo C Interface: Miscellaneous Routines                                  ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_BOZO_CMISC}
+${\footnote C Miscellaneous}
+K{\footnote
+ bz_yield;
+ bz_suspend}
++{\footnote BW_PG_6}
+{\b\f0{\cf2\scaps Programmer's Guide: Bozo}\line\fs32 Bozo C Interface: Miscellaneous Routines}\par\pard\sb100
+
+These routines do not logically belong to any of the above
+ groups, but are provided as convenience routines to help hide
+ some of the complexity of task management.
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "bzsemap.h"
+\par
+
+\line{\b\fs28 Functions}\par
+
+{\b void bz_yield (bz_task_queue*save, bz_task_queue*restore)}\par
+Place the current task on the specified queue (save) and
+ activate the next task in the specified queue (restore).
+\par
+
+{\b void bz_suspend ()}\par
+The same as {\b bz_yield (&ReadyQ, &ReadyQ)}.  Provided for a simple
+ interface that uses the "Standard" run_queue to be compatible
+ with the other {\i Bozo} high-level tasking APIs.
+\par
+
+\pard\page
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+Bozo C++ Interface: Tasking                                               ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_BOZO_TASK}
+${\footnote BozoTask}
+K{\footnote
+ BozoTask;
+ BozoTask, init;
+ BozoTask, run;
+ BozoTask, yield}
++{\footnote BW_PG_6}
+{\b\f0{\cf2\scaps Programmer's Guide: Bozo}\line\fs32 BozoTask Class}\par\pard\sb100
+
+{\i Bozo} provides a base task class from which new task classes may
+ be derived.  Like the C interface, a C++ program must call the
+ {\b bz_init_task()} function.  Child tasks may be emulated by making
+ task members to a "parent" task object.  The ordinary
+ construction/destruction rules will ensure proper behavior.
+\par
+
+\line{\b\fs28 Name}\par
+
+{\b BozoTask}\par
+This class encapsulates the concept of the task.  A user application derives a new class publicly from this one.
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "bzwrap.hpp"
+\par
+
+\line{\b\fs28 Base Classes}\par
+
+None
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b BozoTask (int stack_size = 0x1000)}\par
+Initializes the task to run with a stack of the given size.  By
+ default, the task is not placed into any queues.  This must be
+ done by calling the {\b init()} member.  The destructor removes the
+ task from any queues that it is in, so it is safe to destroy the
+ task at any time.  (Although it is more efficient to destroy the
+ task when it is not in any queues).
+\par
+
+\line{\b\fs28 Member Data}\par
+
+None
+\par
+
+\line{\b\fs28 Member Function}\par
+
+{\b bozo_task *init (bz_task_queue *q = ReadyQ)}\par
+Initialize the task and place it into the specified queue.  Any
+ task may be initialized at any point.  This has the effect of
+ killing the task and making a new one.  The return value is
+ the bozo_task pointer.  As this value is encapsulated in the
+ BozoTask object, this pointer is actually returned as a
+ success code, NULL for failure and non-null for success.
+\par
+
+{\b virtual void run ()}\par
+This is the member that is executed as the "task".  Once {\b init()}
+ is called and the task comes up in the ReadyQ for the first
+ time, this member is executed.  Once this member returns, the
+ task is destroyed.  Consequently, the {\b run()} member is really the
+ task's "main" routine.  Note that unlike the C interface, this
+ member takes no parameters.  It is assumed that the object
+ itself contains sufficient state data.
+\par
+
+{\b void yield (bz_task_queue *dest_q = &ReadyQ, bz_task_queue *src_q = &ReadyQ)}\par
+ Yields the task onto the specified destination queue, and
+ switches to the next process in the src_q.  By default, the
+ {\b ReadyQ} is specified for both queues, to maintain compatibility
+ with the standard {\i Bozo} high-level tasking routines, which all
+ use {\b ReadyQ} as their "ready to run" queue.
+\par
+
+{\b void bz_return ()}\par
+ Returns from the task.  This has the same effect as exiting the task
+ member, but can be called from any task member.  Note that it may
+ only be called by the task that owns the 'this' pointer.  For this
+ reason, it is a protected member.
+\par
+
+{\b void bz_term ()}\par
+ Terminates the task.  This has the same effect as exiting the task
+ member, but can be called from any task except for the task
+ being terminated.  This member is used to kill another task.
+\par
+
+\line{\b\fs28 Example}\par
+
+Create a task that prints a message and then dies.
+\par
+
+{\f2
+class MyTask: public BozoTask\line
+\{\line
+\tab char *message;\line
+\line
+public:\line
+\tab MyTask (char *msg): BozoTask(), message(msg) \{ \}\line
+\tab ~MyTask() \{ \}\line
+\tab void run ()\line
+\tab \{\line
+\tab \tab cout << message << endl;\line
+\tab \}\line
+\};\par
+main ()\line
+\{\line
+\tab bz_init_task();\line
+\tab MyTask t ("Hello, Bozo!");\line
+\tab t.init();\line
+\tab bz_suspend();\line
+\tab cout << "The End\n";\line
+\}\line
+}
+\par
+
+\pard\page
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+Bozo C++ Interface: Semaphores                                            ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_BOZO_SEMAPHORE}
+${\footnote BozoSemaphore}
+K{\footnote
+ BozoSemaphore;
+ BozoSemaphore, wait;
+ BozoSemaphore, signal}
++{\footnote BW_PG_6}
+{\b\f0{\cf2\scaps Programmer's Guide: Bozo}\line\fs32 BozoSemaphore Class}\par\pard\sb100
+
+{\i Bozo}'s C++ semaphore class provides a more convenient, C++-ish
+ way to access the {\b bz_semaphore} types.
+\par
+
+\line{\b\fs28 Name}\par
+
+{\b BozoSemaphore}\par
+This class is a wrapper for the {\b bz_semaphore} object.  This class is not intended to be derived from.
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "bzwrap.hpp"
+\par
+
+\line{\b\fs28 Base Classes}\par
+
+public bz_semaphore
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b BozoSemaphore (int count = 1)}\par
+Initialize the semaphore with the specified count.
+\par
+{\b ~BozoSemaphore ()}\par
+Frees the semaphore.  Any tasks waiting on the semaphore are put into an indeterminate state.
+\par
+
+\line{\b\fs28 Member Data}\par
+
+None
+\par
+
+\line{\b\fs28 Member Function}\par
+
+{\b void wait ()}\par
+Wait on the semaphore.  If any counts are left, return
+ immediately.  Otherwise, enter the semaphore's queue and wait
+ for a Signal().
+\par
+
+{\b void signal ()}\par
+Remove one task from the semaphore's queue and put it into the
+ {\b ReadyQ}.  If no tasks are available, increment the count.
+\par
+
+\line{\b\fs28 Example}\par
+
+Here is a code fragment showing the proper usage of the {\b BozoSemaphore}.
+\par
+
+{\f2
+extern BozoSemaphore sem;\par
+...\par
+\{\line
+\tab sem.wait();\line
+\tab cout << "Got it!\n";\line
+\tab sem.signal();\line
+\}
+}
+\par
+
+\pard\page
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+Bozo C++ Interface: Gates                                                 ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_BOZO_GATE}
+${\footnote BozoGate}
+K{\footnote
+ BozoGate;
+ BozoGate, wait;
+ BozoGate, open;
+ BozoGate, close}
++{\footnote BW_PG_6}
+{\b\f0{\cf2\scaps Programmer's Guide: Bozo}\line\fs32 BozoGate Class}\par\pard\sb100
+
+A gate is similar to a semaphore.  However, instead of having a
+ number of tokens, the gate allows any number of tasks to wait on
+ it until the gate is opened.  At that time, all waiting tasks
+ are returned to the {\b ReadyQ}, and the gate is empty.  Any
+ subsequent tasks that wait on the gate are passed through, until
+ the gate is manually closed again.
+\par
+
+\line{\b\fs28 Name}\par
+
+{\b BozoGate}\par
+
+This task queue-derived class allows for a unique method of synchronizing task execution.
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "bzwrap.hpp"
+\par
+
+\line{\b\fs28 Base Classes}\par
+
+public bz_task_queue
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b BozoGate ()}\par
+Create and initialize the gate task queue.  The gate is created closed.
+\par
+
+{\b ~BozoGate()}\par
+Destroy the task gate.  Open the gate to release any tasks.
+\par
+
+\line{\b\fs28 Member Data}\par
+
+None
+\par
+
+\line{\b\fs28 Member Function}\par
+
+{\b void wait ()}\par
+If the gate is closed, enter the current task into the gate
+ queue.  Switch to the next task in the ReadyQ.  If the gate is
+ opened, return immediately.
+\par
+
+
+{\b void open ()}\par
+Remove all tasks from the gate queue and enter them (in order)
+into the ReadyQ.  Mark the gate as opened.
+\par
+
+{\b void close ()}\par
+Mark the gate as closed.
+\par
+
+\line{\b\fs28 Example}\par
+
+Here is a code fragment that demonstrates tasks entering a gate.
+\par
+
+{\f2
+BozoGate gate;\par
+class MyTask: public BozoTask\line
+\{\line
+\tab char *msg;\line
+\line
+public:\line
+\line
+\tab MyTask (char *_msg): BozoTask(), msg(_msg) \{ \}\line
+\tab ~MyTask () \{ \}\line
+\line
+\tab void run()\line
+\tab \{\line
+\tab gate.wait();\line
+\tab cout << msg << endl;\line
+\tab \}\line
+\};\par
+void main ()\line
+\{\line
+\tab bz_init_task();\line
+\tab MyTask a ("a"), b("b"), c ("c");\line
+\tab bz_suspend();      // Let the tasks enter the gate\line
+\tab gate.open();\line
+\tab bz_return();       // Let the tasks run!\line
+\}
+}
+\par
+
+\pard\page
+
+{\comment °±² eof - template.rtf ²±° }
+}

@@ -1,0 +1,3428 @@
+{\rtf1
+{\comment
+ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
+
+                                  XFile Help
+
+                    Microsoft Windows 95/98/NT Version
+
+   Copyright (c) 1994-1999 by Dan Higdon, Tim Little, and Chuck Walbourn
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ This file and all associated files are subject to the terms of the
+ GNU Lesser General Public License version 2 as published by the
+ Free Software Foundation (http://www.gnu.org).   They remain the
+ property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+ See LICENSE.TXT in the distribution for a copy of this license.
+
+ THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+ OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+ PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+ LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+ OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+                        http://www.mythos-engine.org/
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ XFile is a component of the MythOS(tm) collection.
+
+ MythOS is a trademark of Charybdis Enterprises, Inc.
+
+ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
+}
+
+{\fonttbl
+\f0\fswiss Arial;
+\f1\froman Times New Roman;
+\f2\fmodern Courier New;
+\f3\fswiss MS Sans Serif;
+\f4\froman MS Serif;
+}
+\deff1
+\fs21
+
+{\colortbl;
+\red128\green128\blue128;
+\red0\green0\blue128;
+\red0\green128\blue0;
+\red128\green0\blue0;
+}
+
+{\comment
+°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+                            Programmer's Guide
+
+°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+}
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+Overview                                                                  ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_XFILE_OVERVIEW}
+${\footnote Overview}
++{\footnote BW_PG_4}
+{\b\f0{\cf2\scaps Programmer's Guide: XFile}\line\fs32 Overview}\par\pard\sb100
+
+The {\i XFile} library is designed to provide a standard interface to
+ various file operations and formats via both C/Assembly callable
+ routines and C++ class objects.  The C/Assembly callable
+ routines are primarily for low-level block-oriented file i/o and
+ miscellaneous operations on files and directory structures.  The
+ C++ objects provide both a low-level functionality and a series
+ of advanced objects for working with complex file formats such
+ as .INI or .IFF files.
+\par
+
+{\cf2 Note:  All of the low-level routines use the Windows' HANDLE type,
+ so standard Win32 API calls may be used.  This was done to maintain
+ compatibility between the DOS and Win32 versions, although a few
+ low-level routines were dropped since they are not supported
+ under Win32 (setfdate/time and getdrive).}\par
+
+\line{\b\fs28 Features}\par
+
+DOS-like file i/o interface.
+\par
+
+Abstraction of block-oriented file objects for standard
+ interfacing to a variety of block-oriented devices.
+\par
+
+Simple to use access to complex file formats.
+\par
+
+Extendible object design for adding or modifying file devices
+ and format support.
+\par
+
+\line{\b\fs28 Organization}\par
+
+The {\i XFile} library consists of several distinct components:
+\par
+
+C-style\line
+\tab {\uldb File I/O Routines}{\v PG_XFILE_CSTYFIO}\line
+\tab {\uldb File Routines}{\v PG_XFILE_CSTYFILE}\line
+\tab {\uldb Directory and Drive Routines}{\v PG_XFILE_CSTYDIRDRV}\line
+\tab {\uldb Environment Routines}{\v PG_XFILE_CSTYENV}\line
+\tab {\uldb Misc. Routines}{\v PG_XFILE_CSTYMISC}\line
+\tab {\uldb Routine Errors}{\v PG_XFILE_CSTYERR}
+\par
+
+XFile Classes\line
+\tab {\uldb XFile}{\v PG_XFILE_XFILE}\line
+\tab {\uldb XFileRAM}{\v PG_XFILE_XFILERAM}\line
+\tab {\uldb XFileDisk}{\v PG_XFILE_XFILEDISK}\line
+\tab {\uldb XFileDiskBuf}{\v PG_XFILE_XFILEDISKBUF}
+\par
+
+Parse Support Classes\line
+\tab {\uldb XFBitmap}{\v PG_XFILE_XFBITMAP}
+\par
+
+XFParse Classes\line
+\tab {\uldb XFParseBitmap}{\v PG_XFILE_XFPARSEBITMAP}\line
+\tab {\uldb XFParseBMP}{\v PG_XFILE_XFPARSEBMP}\line
+\tab {\uldb XFParseCEL}{\v PG_XFILE_XFPARSECEL}\line
+\tab {\uldb XFParseLBM}{\v PG_XFILE_XFPARSELBM}\line
+\tab {\uldb XFParsePCX}{\v PG_XFILE_XFPARSEPCX}\line
+\tab {\uldb XFParseTGA}{\v PG_XFILE_XFPARSETGA}\line
+\tab {\uldb XFParseXEB}{\v PG_XFILE_XFPARSEXEB}\line
+\tab {\uldb XFParseINI}{\v PG_XFILE_XFPARSEINI}\line
+\tab {\uldb XFParseIFF}{\v PG_XFILE_XFPARSEIFF}
+\par
+
+\line{\b\fs28 Future Work}\par
+
+The XFileX object, which will provide a file-system-in-a-file
+ support, will be included in future release.  This object will
+ be usable as a replacement for the XFileDisk objects.
+\par
+
+Compression support for the file objects is under consideration,
+ as is some direct CD interfacing and caching support.
+\par
+
+The {\i XFile} library will be expanded to support additional bitmap
+ formats via the XFParseBitmap hierarchy, and the current objects
+ may be extended to support additional variants.  Support for
+ compressed output of bitmaps may be added.  Other XFParse
+ objects may be added as the need arises.
+\par
+
+\line{\b\fs28 Reference}\par
+
+For more information on the IFF format:
+\par
+
+Jerry Morrison (Electronic Arts), {\i EA IFF 85 Standard for
+ Interchange Format Files}, January 14, 1985
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+C-style File I/O Routines                                                 ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_XFILE_CSTYFIO}
+${\footnote C-style File I/O Routines}
+K{\footnote xf_open;
+xf_opentmp;
+xf_close;
+xf_flush;
+xf_read;
+xf_write;
+xf_seek;
+xf_lock;
+xf_unlock;
+xf_getsize;
+xf_setsize;
+xf_getfdate;
+xf_getftime}
++{\footnote BW_PG_4}
+{\b\f0{\cf2\scaps Programmer's Guide: XFile}\line\fs32 C-style File I/O Routines}\par\pard\sb100
+
+These calls are low-level C/Assembly callable routines for
+ block-oriented file input/output via DOS-like services.  These
+ calls are used extensively by the {\i XFile} library to implement the
+ various objects.  These calls mirror standard block-oriented
+ file operations available under DOS, but use standard Win32 API
+ routines.
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "xfio.h"
+\par
+
+\line{\b\fs28 Routines}\par
+
+{\b HANDLE xf_open(const char *name, dword flags);}\par
+
+Opens/creates a file for other handled-based calls.  The flags
+ consists of  {\i XF_OPEN_} defines (see Open/Create Flags).  Returns
+ a handle or -1 if an error occurs (see
+ {\uldb xf_error}{\v PG_XFILE_CSTYERR}).
+\par
+
+{\b HANDLE xf_opentmp(const char *name, dword flags);}\par
+
+Creates a file with a temporary filename for {\i CREATE} and {\i WRITE}.
+ Otherwise the same as xf_open.
+\par
+
+{\cf2 Note:  Unlike the DOS version, the temporary name is not returned
+ to the caller.}
+\par
+
+{\b xf_error_codes xf_close(HANDLE hFile);}\par
+
+Closes a file.  Returns 0 if ok, error number otherwise.
+\par
+
+{\b xf_error_codes xf_flush(HANDLE hFile);}\par
+
+Flushes all pending writes to the file.  Returns 0 if ok, error
+ number otherwise.
+\par
+
+{\b ulong xf_read(HANDLE hFile, void *ptr, ulong size);}\par
+
+Reads at most size bytes of a file.  Returns the number of bytes
+ actually read, 0 on end of file, or -1 for an error (see
+ {\uldb xf_error}{\v PG_XFILE_CSTYERR}).
+\par
+
+{\b ulong xf_write(HANDLE hFile, const void *ptr, ulong size);}\par
+
+Writes size bytes of a file.  Returns the actual number of bytes
+ written, or -1 for an error (see {\uldb xf_error}{\v PG_XFILE_CSTYERR}).
+\par
+
+{\b ulong xf_seek(HANDLE hFile, int mode, long offset);}\par
+
+Seeks to a position within a file.  Movement is relative to
+ start if mode is 0, current position if mode is 1, or end of
+ file if mode is 2.  Returns new position relative to start on
+ success, -1 on error (see {\uldb xf_error}{\v PG_XFILE_CSTYERR}).
+\par
+
+{\b xf_error_codes xf_lock(HANDLE hFile, ulong offset, ulong nbytes);}\par
+
+Locks a section of the file starting at offset and continuing
+ for nbytes bytes.  Returns 0 if ok, error otherwise.
+\par
+
+{\b xf_error_codes xf_unlock(HANDLE hFile, ulong offset, ulong nbytes);}\par
+
+Unlocks a section of the file starting at offset and continuing
+ for nbytes bytes.  Should only be called on sections locked with
+ xf_lock. Returns 0 if ok, error otherwise.
+\par
+
+{\b ulong xf_getsize(HANDLE hFile);}\par
+
+Returns the size of the file or -1 on error (see
+ {\uldb xf_error}{\v PG_XFILE_CSTYERR}).
+\par
+
+{\b ulong xf_setsize(HANDLE hFile, ulong size);}\par
+
+Extends or truncates the file to the given size.  Returns set
+ size on success, or -1 on error.
+\par
+
+{\b word xf_getfdate(HANDLE hFile);}\par
+
+Returns the file date with bits 0-4 as day, 5-8 as month, 9-16
+ as year relative to 1980 or 0 on error (see
+ {\uldb xf_error}{\v PG_XFILE_CSTYERR}).
+\par
+
+{\b word xf_getftime(HANDLE hFile);}\par
+
+Returns the file time with bits 0-4 having 2 second increments,
+ 5-10 with minutes, and 11-16 with hours or 0 on error (see
+ {\uldb xf_error}{\v PG_XFILE_CSTYERR}).
+\par
+
+\line{\b\fs28 Open/create Flags}\par
+
+{\i XF_OPEN_READ}\tab Read-mode.
+\par
+
+{\i XF_OPEN_WRITE}\tab Write-mode.
+\par
+
+{\i XF_OPEN_APPEND}\tab Append to current file, if any.
+\par
+
+{\i XF_OPEN_CREATE}\tab Create new file and set to 0 length.
+\par
+
+{\i XF_OPEN_EXCLUSIVE}\tab Fails if creating file that already exists.
+\par
+
+{\i XF_OPEN_READONLY}\tab\tab On create, give file the read-only attribute.
+\par
+
+{\i XF_OPEN_HIDDEN}\tab\tab On create, give file the hidden attribute.
+\par
+
+{\i XF_OPEN_SYSTEM}\tab\tab On create, give file the system attribute.
+\par
+
+{\i XF_OPEN_ARCHIVE}\tab\tab On create, give file the archive attribute.
+\par
+
+{\i XF_OPEN_SHAREABLE}\tab On create, give file the sharable attribute.
+\par
+
+{\i XF_OPEN_DENYALL}\tab\tab Deny all share mode.
+\par
+
+{\i XF_OPEN_DENYWRITE}\tab Deny write share mode.
+\par
+
+{\i XF_OPEN_DENYREAD}\tab\tab Deny read share mode.
+\par
+
+{\i XF_OPEN_DENYNONE}\tab\tab Do not deny write or read share mode.
+\par
+
+{\i XF_OPEN_PRIVATE}\tab\tab Prevent inheritance of handle by children
+ process.
+\par
+
+{\i XF_OPEN_RANDOM_ACCESS}\tab Indicates that the file is generally
+ accessed randomly and should be optimized for such {\cf2 (Win32 only)}.
+\par
+
+{\i XF_OPEN_SEQUENTIAL_ACCESS}\tab Indicates that the file is generally
+ accessed sequentially and should be optimized for such {\cf2 (Win32
+only)}.
+\par
+
+\line{\b\fs28 Example}\par
+
+This example reads the first 1Kbyes from a file 'TEST.DAT' into
+ a local buffer:
+\par
+
+{\f2
+HANDLE handle;\line
+xf_error_codes err;\line
+char buff[1024];
+\par
+
+handle=xf_open("TEST.DAT",XF_OPEN_READ);\line
+if (handle == -1)\line
+\{\line
+    err=xf_error();\par
+    // Error with message for error code 'err'\par
+\}\line
+else\line
+\{\line
+    if (xf_read(handle,buff,1024) != 1024)\line
+    \{\line
+        err=xf_error();\par
+        // Error with message for error code 'err'\par
+    \}\line
+    xf_close(handle);\line
+\}\line
+\par
+
+}
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+C-style File Routines                                                     ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_XFILE_CSTYFILE}
+${\footnote C-style File Routines}
+K{\footnote xf_remove;
+xf_rename;
+xf_exist;
+xf_getattr;
+xf_setattr;
+xf_findfirst;
+xf_findnext;
+xf_findclose}
++{\footnote BW_PG_4}
+{\b\f0{\cf2\scaps Programmer's Guide: XFile}\line\fs32 C-style File Routines}\par\pard\sb100
+
+These routines operate on files as collections, allowing for
+ useful DOS-like operations.
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "xfio.h"
+\par
+
+\line{\b\fs28 Routines}\par
+
+{\b xf_error_codes xf_remove(const char *name);}\par
+
+Removes the path/filename specified.  Returns 0 on success,
+ otherwise an error.
+\par
+
+{\b xf_error_codes xf_rename(const char *oldname, const char *newname);}\par
+
+Renames the path/filename specified.  Will also move if on the
+ same logical volume.  Returns 0 on success, otherwise an error.
+\par
+
+{\b int xf_exist(const char *name);}\par
+
+Returns 1 if the file exists, 0 otherwise.
+\par
+
+{\b word xf_getattr(const char *name);}\par
+
+Returns the attribute flags for the file, or -1 on error (see
+ {\uldb xf_error}{\v PG_XFILE_CSTYERR}).
+\par
+
+{\b word xf_setattr(const char *name, word attr);}\par
+
+Sets the attribute flags for the file.  Returns the set
+ attributes or -1 on error (see {\uldb xf_error}{\v PG_XFILE_CSTYERR}).
+\par
+
+{\b xf_error_codes xf_findfirst(const char *fname, int attr, struct
+xf_find_type *fileinfo);}\par
+
+Sets up a file find using the given fname as the mask and attr
+ as the attribute mask.  Returns 0 on success, an error otherwise.
+\par
+
+{\b xf_error_codes xf_findnext(struct xf_find_type *fileinfo);}\par
+
+Finds the next file in a series setup by xf_findfirst.  Returns
+ 0 on success, an error otherwise.
+\par
+
+{\b xf_error_codes xf_findclose(struct xf_find_type *fileinfo);}\par
+
+Completes a find operation setup by xf_findfirst.  Returns 0 on
+ success, an error otherwise.  {\cf2 (Win32 only)}.
+\par
+
+\line{\b\fs28 Attribute Flags}\par
+
+{\i XF_ATTRIB_NORMAL}\tab\tab Normal file (no attributes)
+\par
+
+{\i XF_ATTRIB_READONLY}\tab Read-only
+\par
+
+{\i XF_ATTRIB_HIDDEN}\tab\tab Hidden file
+\par
+
+{\i XF_ATTRIB_SYSTEM}\tab\tab System file
+\par
+
+{\i XF_ATTRIB_LABEL}\tab\tab Label entry
+\par
+
+{\i XF_ATTRIB_DIRECTORY}\tab Directory entry
+\par
+
+{\i XF_ATTRIB_ARCHIVE}\tab\tab Archive for backup
+\par
+
+{\i XF_ATTRIB_SHAREABLE}\tab Shareable file
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+C-style Directory and Drive Routines                                      ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_XFILE_CSTYDIRDRV}
+${\footnote C-style Directory and Drive Routines}
+K{\footnote xf_getfreebytes;
+xf_getdir;
+xf_chdir;
+xf_mkdir;
+xf_rmdir}
++{\footnote BW_PG_4}
+{\b\f0{\cf2\scaps Programmer's Guide: XFile}\line\fs32 C-style Directory and Drive Routines}\par\pard\sb100
+
+These routines provide directory and drive services and information.
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "xfio.h"
+\par
+
+\line{\b\fs28 Routines}\par
+
+{\b ulong xf_getfreebytes(char drive);}\par
+
+Returns the number of bytes free on the drive with drive letter
+ drive, -1 on error (see {\uldb xf_error}{\v PG_XFILE_CSTYERR}).
+\par
+
+{\b char *xf_getdir(char *path);}\par
+
+Gets the current working directory for the current drive.
+ Returns a pointer to path.  path[0] is 0 on error.
+\par
+
+{\b xf_error_codes xf_chdir(const char *path);}\par
+
+Changes the current working directory.  Returns 0 on success,
+ error otherwise.
+\par
+
+{\b xf_error_codes xf_mkdir(const char *path);}\par
+
+Makes a new directory.  Returns 0 on success, error otherwise.
+\par
+
+{\b xf_error_codes xf_rmdir(const char *path);}\par
+
+Removes a directory.  Returns 0 on success, error otherwise.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+C-style Environment Routines                                              ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_XFILE_CSTYENV}
+${\footnote C-style Environment Routines}
+K{\footnote xf_getenv;
+xf_searchenv}
++{\footnote BW_PG_4}
+{\b\f0{\cf2\scaps Programmer's Guide: XFile}\line\fs32 C-style Environment Routines}\par\pard\sb100
+
+These routines are for accessing the environment space
+ associated with the program.
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "xfio.h"
+\par
+
+\line{\b\fs28 Routines}\par
+
+{\b char *xf_getenv(const char *varname);}\par
+
+Returns a pointer to the environment string for the variable
+ varname or NULL if not found.
+\par
+
+\tab {\cf2 CALLS _getenv IN RUNTIME LIBRARY}\par
+
+{\b char *xf_searchenv(const char *filename,  const char *env_var, char *path);}\par
+
+Searches for the file filename using the current working
+ directory and all paths specified in the environment variable
+ env_var.  The result is placed into path.  path[0] is 0 if not
+ found.  Returns a pointer to the path variable.
+\par
+
+\tab {\cf2 CALLS _searchenv IN RUNTIME LIBRARY}\par
+
+\line{\b\fs28 Example}\par
+
+The following example reads the currently value, if any, of the
+ variable PATH and makes string containing "PATH=<value of path>":
+\par
+
+{\f2
+char buff[256];
+\par
+
+strcpy(buff,"PATH=");\line
+strcpy(&buff[6],xf_getenv("PATH"));
+}
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+C-style Misc. Routines                                                    ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_XFILE_CSTYMISC}
+${\footnote C-style Misc. Routines}
+K{\footnote xf_makepath;
+xf_splitpath}
++{\footnote BW_PG_4}
+{\b\f0{\cf2\scaps Programmer's Guide: XFile}\line\fs32 C-style Misc. Routines}\par\pard\sb100
+
+These routines provide miscellaneous functions useful when
+ working with other {\i XFile} routines.
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "xfio.h"
+\par
+
+\line{\b\fs28 Routines}\par
+
+{\b char *xf_makepath(char *path, const char *drive, const char *dir,
+ const char *fname, const char *ext);}\par
+
+Creates a path in path from the drive, dir, fname, and ext
+ portions of the path/filename.  Returns a pointer to the path
+ variable.
+\par
+
+\tab {\cf2 CALLS _makepath IN RUNTIME LIBRARY}\par
+
+{\b void xf_splitpath(const char *path, char *drive, char *dir,
+ char *fname, char*ext);}\par
+
+Separates a path in path into it's drive, dir, fname, and ext
+ portions.
+\par
+
+\tab {\cf2 CALLS _splitpath IN RUNTIME LIBRARY}\par
+
+\line{\b\fs28 Misc. Constants}\par
+
+{\i XF_MAX_PATH}\tab Size of maximum pathname
+\par
+
+{\i XF_MAX_DRIVE}\tab Size of maximum drive
+\par
+
+{\i XF_MAX_DIR}\tab\tab Size of maximum directory
+\par
+
+{\i XF_MAX_FNAME}\tab Size of maximum filename plus extentsion.
+\par
+
+{\i XF_MAX_EXT}\tab\tab Size of maximum extension
+\par
+
+{\i XF_MAX_NAME}\tab Size of maximum filename
+\par
+
+{\cf2 Note:  Under Win32, the {\i XF_MAX_DIR}, {\i XF_MAX_EXT},
+ {\i XF_MAX_FNAME}, and {\i XF_MAX_NAME} are all set to 256 since
+ long file names can  result in any of these areas being up to 256
+ bytes long.}\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+C-style Routine Errors                                                    ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_XFILE_CSTYERR}
+${\footnote C-style Routine Errors}
+K{\footnote xf_error}
++{\footnote BW_PG_4}
+{\b\f0{\cf2\scaps Programmer's Guide: XFile}\line\fs32 C-style Routine Errors}\par\pard\sb100
+
+Many of the C/Assembly callable routines return error conditions
+ or an indication that an error occurred.  The majority of these
+ errors are caused by an error result from a failed Win32
+ service.  The last error that occurred is also stored in a
+ global which can be read by the xf_error(); routine, which is
+ useful for routines which cannot return an error value directly
+ or to provide error information for a standard error handler.
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "xfio.h"
+\par
+
+\line{\b\fs28 Routines}\par
+
+{\b xf_error_codes xf_error();}\par
+
+Returns the last error code.
+\par
+
+\line{\b\fs28 Error Values}\par
+
+{\i XF_ERR_NONE}\tab\tab No error, defined as 0.
+\par
+
+{\i XF_ERR_FUNCINVALID}\tab Invalid function.
+\par
+
+{\i XF_ERR_FILENOTFOUND}\tab File not found.
+\par
+
+{\i XF_ERR_PATHNOTFOUND}\tab Path not found.
+\par
+
+{\i XF_ERR_NOHANDLES}\tab\tab No free handles.
+\par
+
+{\i XF_ERR_ACCESSDENIED}\tab Access to file denied.
+\par
+
+{\i XF_ERR_INVALIDHANDLE}\tab Invalid file handle.
+\par
+
+{\i XF_ERR_MCBDESTROYED}\tab Memory control blocks destroyed.
+\par
+
+{\i XF_ERR_NOMEMORY}\tab\tab Could not allocate memory.
+\par
+
+{\i XF_ERR_MCBINVALID}\tab Memory block address invalid.
+\par
+
+{\i XF_ERR_ENVINVALID}\tab\tab Environment invalid.
+\par
+
+{\i XF_ERR_FORMATINVALID}\tab Format invalid.
+\par
+
+{\i XF_ERR_ACCESSCODEINVALID}\tab Access code invalid.
+\par
+
+{\i XF_ERR_DATAINVALID}\tab\tab Data invalid.
+\par
+
+{\i XF_ERR_INVALIDDRIVE}\tab\tab Disk drive invalid.
+\par
+
+{\i XF_ERR_CANTREMOVECHDIR}\tab Attempted to remove current directory.
+\par
+
+{\i XF_ERR_NOTSAMEDEVICE}\tab Not same device.
+\par
+
+{\i XF_ERR_NOMOREFILES}\tab No more files.
+\par
+
+{\i XF_ERR_WRITEPROTECTED}\tab Write-protected disk.
+\par
+
+{\i XF_ERR_UNKNOWNUNIT}\tab Unknown unit.
+\par
+
+{\i XF_ERR_DRIVENOTREADY}\tab Drive not ready.
+\par
+
+{\i XF_ERR_UNKCOMMAND}\tab Unknown command.
+\par
+
+{\i XF_ERR_CRCERROR}\tab\tab Data error (CRC).
+\par
+
+{\i XF_ERR_BADREQLEN}\tab\tab Bad request-structure length.
+\par
+
+{\i XF_ERR_SEEKERROR}\tab\tab Seek error.
+\par
+
+{\i XF_ERR_NONDOSDISK}\tab Unknown media type.
+\par
+
+{\i XF_ERR_SECTORNOTFOUND}\tab Sector not found.
+\par
+
+{\i XF_ERR_OUTOFPAPER}\tab Printer out of paper.
+\par
+
+{\i XF_ERR_WRITEFAULT}\tab Write fault.
+\par
+
+{\i XF_ERR_READFAULT}\tab\tab Read fault.
+\par
+
+{\i XF_ERR_GENERALFAILURE}\tab General failure.
+\par
+
+{\i XF_ERR_SHAREVIOLATION}\tab Sharing violation
+\par
+
+{\i XF_ERR_LOCKVIOLATION}\tab File-lock violation.
+\par
+
+{\i XF_ERR_DISKCHANGEINVALID}\tab Disk change invalid.
+\par
+
+{\i XF_ERR_FCBUNAVAIL}\tab\tab File-control block unavailable.
+\par
+
+{\i XF_ERR_SHAREBUFFEROVERFLOW}\tab Sharing buffer exceeded.
+\par
+
+{\i XF_ERR_CPMISMATCH}\tab Code page mismatch.
+\par
+
+{\i XF_ERR_OUTOFINPUT}\tab Cannot complete file operation.
+\par
+
+{\i XF_ERR_OUTOFDISKSPACE}\tab Insufficient disk space.
+\par
+
+{\i XF_ERR_NETREQNOTSUPPORTED}\tab Unsupported network request.
+\par
+
+{\i XF_ERR_REMOTENOTLISTENING}\tab Remote machine not listening.
+\par
+
+{\i XF_ERR_DUPNAMEONNET}\tab\tab Duplicate name on network.
+\par
+
+{\i XF_ERR_NETNAMENOTFOUND}\tab Network name not found.
+\par
+
+{\i XF_ERR_NETBUSY}\tab\tab\tab Network busy.
+\par
+
+{\i XF_ERR_NETDEVNOLONGEREXIST}\tab Device no longer exists on network.
+\par
+
+{\i XF_ERR_NETCOMLIMITEXCEEDED}\tab NetBIOS command limit exceeded.
+\par
+
+{\i XF_ERR_NETHWERROR}\tab\tab Error in network adapter hardware.
+\par
+
+{\i XF_ERR_INVALIDNETRESPONSE}\tab Incorrect response from network.
+\par
+
+{\i XF_ERR_UNEXPECTEDNETERROR}\tab Unexpected network error.
+\par
+
+{\i XF_ERR_INCOMPATREMOTEHW}\tab Remote adapter incompatible.
+\par
+
+{\i XF_ERR_PRINTQUEUEFULL}\tab\tab Print queue full.
+\par
+
+{\i XF_ERR_NOSPACEFORPRINT}\tab\tab Not enough room for print file.
+\par
+
+{\i XF_ERR_PRINTDELETED}\tab\tab Print file was deleted.
+\par
+
+{\i XF_ERR_NETNAMEDELETED}\tab\tab Network name deleted.
+\par
+
+{\i XF_ERR_NETACCESSDENIED}\tab\tab Network access denied.
+\par
+
+{\i XF_ERR_NETDEVTYPEINCORRECT}\tab Incorrect network device type.
+\par
+
+{\i XF_ERR_NETNAMENOTFOUND2}\tab Network name not found.
+\par
+
+{\i XF_ERR_NETNAMELIMITEXCEEDED}\tab\tab NetBIOS name limit exceeded.
+\par
+
+{\i XF_ERR_NETSESSIONLIMITEXCEEDED}\tab NetBIOS session limit exceeded.
+\par
+
+{\i XF_ERR_TEMPORARYPAUSE}\tab\tab Temporary pause.
+\par
+
+{\i XF_ERR_NETREQNOTACCEPTED}\tab Network request not accepted.
+\par
+
+{\i XF_ERR_NETREDIRECTIONPAUSED}\tab Print or disk redirection paused.
+\par
+
+{\i XF_ERR_FILEEXISTS}\tab\tab\tab File already exists.
+\par
+
+{\i XF_ERR_CANTMAKEDIRECTORY}\tab Cannot make directory.
+\par
+
+{\i XF_ERR_FAILONINT24}\tab\tab Fail on Int 24h (critical error).
+\par
+
+{\i XF_ERR_TOOMANYREDIRECTIONS}\tab Too many redirections.
+\par
+
+{\i XF_ERR_DUPLICATEREDIRECTION}\tab Duplicate redirection.
+\par
+
+{\i XF_ERR_INVALIDPASSWORD}\tab\tab Invalid password.
+\par
+
+{\i XF_ERR_INVALIDPARAMETER}\tab Invalid parameter.
+\par
+
+{\i XF_ERR_NETWRITEFAULT}\tab\tab Net write fault.
+\par
+
+{\i XF_ERR_NETFUNCNOTSUPPORTED}\tab Function not supported on network.
+\par
+
+{\i XF_ERR_REQHWNOTFOUND}\tab\tab Required system component not installed.
+\par
+
+{\i XF_ERR_EOF}\tab\tab\tab\tab End of file occurred.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+XFile Class                                                               ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_XFILE_XFILE}
+${\footnote XFile Class}
+K{\footnote XFile;
+XFile,  status;
+XFile,  error;
+XFile,  getname;
+XFile,  tell;
+XFile,  create;
+XFile,  open;
+XFile,  close;
+XFile,  flush;
+XFile,  read;
+XFile,  write;
+XFile,  seek_set;
+XFile,  seek_cur;
+XFile,  seek_end;
+XFile,  seek;
+XFile,  getsize;
+XFile,  setsize;
+XFile,  lock;
+XFile,  unlock;
+XFile,  copyto;
+XFile,  copyfrom}
++{\footnote BW_PG_4}
+{\b\f0{\cf2\scaps Programmer's Guide: XFile}\line\fs32 XFile Class}\par\pard\sb100
+
+The XFile object provides a C++ object for access to
+ block-oriented devices.  The XFParse objects can be attached to
+ any XFile object, allowing for processing from a variety of data
+ objects, include standard files.
+\par
+
+\line{\b\fs28 Name}\par
+
+XFile - Abstract base file object for block-oriented file i/o.
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "xfbase.hpp"
+\par
+
+\line{\b\fs28 Base Classes}\par
+
+None
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b XFile();}\par
+
+Initializes the status and error values.
+\par
+
+\line{\b\fs28 Member Data}\par
+
+{\b protected xf_error_codes  errorn;}\par
+
+Last error that occurred using object.
+\par
+
+{\b protected dword sFlags;}\par
+
+Status bits for object.
+\par
+
+{\b char fName[XF_MAX_PATH];}\par
+
+Filename used when file was opened.
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+{\b dword status() const;}\par
+
+Returns the current status bits for the object (see Status Flags).
+\par
+
+{\b xf_error_codes error() const;}\par
+
+Returns the last error the occurred using the object's handle.
+\par
+
+{\b const char *getname() const;}\par
+
+Returns a pointer to the fName member.
+\par
+
+{\b ulong tell();}\par
+
+Returns the current file position or -1 on error.
+\par
+
+{\b xf_error_codes create(const char *fname, dword flags);}\par
+
+Performs a open forcing the {\i XF_OPEN_CREATE} and {\i XF_OPEN_WRITE}
+ flags on.  Returns 0 on success, error otherwise.
+\par
+
+{\b virtual xf_error_codes open(const char *name, dword flags);}\par
+
+Opens the file using the provided flags (see Open/Create Flags).
+ Returns 0 on success, error otherwise.
+\par
+
+{\b virtual xf_error_codes close();}\par
+
+Closes the file.  Returns 0 on success, error otherwise.
+\par
+
+{\b virtual xf_error_codes flush();}\par
+
+Commits all changes to the file.  Returns 0 on success, error
+ otherwise.
+\par
+
+{\b virtual ulong read(void *ptr, ulong size);}\par
+
+Reads bytes from the file, returning size on success, any other
+ on error.
+\par
+
+{\b virtual ulong write(const void *ptr, ulong size);}\par
+
+Writes bytes to the file, returning size on success, any other
+ on error.
+\par
+
+{\b ulong seek_set(long offset);}\line
+{\b ulong seek_cur(long offset);}\line
+{\b ulong seek_end(long offset);}\line
+{\b virtual ulong seek(long offset, int mode);}\par
+
+Performs the various versions of seek.  The virtual seek is
+ called with the appropriate mode when using the seek_set,
+ seek_cur, or seek_end functions (see xf_seek in the {\uldb C-style File
+ I/O Routines}{\v PG_XFILE_CSTYFIO} section for more information).  Returns
+ the current file position on success, -1 on error.
+\par
+
+{\b virtual ulong getsize();}\par
+
+Returns the size of the file, or -1 on error.
+\par
+
+{\b virtual ulong setsize(ulong size);}\par
+
+Extends or truncates the file.  Returns set size or -1 on error.
+\par
+
+{\b virtual xf_error_codes lock(ulong offset, ulong nbytes);}\par
+
+Locks a section of the file.  Returns 0 on success, error otherwise.
+\par
+
+{\b virtual xf_error_codes unlock(ulong offset, ulong nbytes);}\par
+
+Unlocks a section of the file.  Should only be called for sections
+ previously locked.  Returns 0 on success, error otherwise.
+\par
+
+{\b xf_error_codes copyto(XFile *to);}\par
+
+Copies the contents of the XFile's file object to another XFile
+ object, using the current position information for each.
+ Returns 0 on success, or error code on failure.
+\par
+
+{\b xf_error_codes copyfrom(XFile *from);}\par
+
+Copies the contents of another XFile object to the XFile's file
+ object, using the current position information for each.
+ Returns 0 on success or error code on failure.
+\par
+
+\line{\b\fs28 Open/create Flags}\par
+
+As for {\uldb C-style}{\v PG_XFILE_CSTYFIO}, plus :-
+\par
+
+{\i XF_OPEN_KILL}\par Deletes the file on close.
+\par
+
+\line{\b\fs28 Error Values}\par
+
+As for {\uldb C-style}{\v PG_XFILE_CSTYERR}, plus :-
+\par
+
+{\i XF_ERR_NOTOPEN}\tab\tab The file handle is not open.
+\par
+
+{\i XF_ERR_ALREADYOPEN}\tab The file handle is already open.
+\par
+
+\line{\b\fs28 Status Flags}\par
+
+{\i XF_STATUS_READ}\tab The file has been opened for reading.
+\par
+
+{\i XF_STATUS_WRITE}\tab The file has been opened for writing.
+\par
+
+{\i XF_STATUS_OPEN}\tab The file handle is open.
+\par
+
+{\i XF_STATUS_ISTMP}\tab The file was opened as a temporary file.
+\par
+
+{\i XF_STATUS_KILL}\tab The file will be killed on exit.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+XFileRAM Class                                                            ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_XFILE_XFILERAM}
+${\footnote XFileRAM Class}
+K{\footnote XFileRAM}
++{\footnote BW_PG_4}
+{\b\f0{\cf2\scaps Programmer's Guide: XFile}\line\fs32 XFileRAM Class}\par\pard\sb100
+
+The XFileRAM object is an XFile class for treating a memory
+ buffer as a file object.  The buffer is created on the
+ open/create call and is destroyed on close and is allocated from
+ the Ivory handle memory pool.  It implements the standard XFile class
+ calls.
+\par
+
+{\cf2 Note: The data written to this object is lost once the object is
+ closed or deleted.  This object is intended for use as a
+ temporary data buffer.}\par
+
+\line{\b\fs28 Name}\par
+
+XFileRAM - Memory based block-oriented file i/o.
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "xfbase.hpp"
+\par
+
+\line{\b\fs28 Base Classes}\par
+
+{\uldb XFile}{\v PG_XFILE_XFILE}
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b XFileRAM();}\par
+
+Initializes the data members.
+\par
+
+\line{\b\fs28 Member Data}\par
+
+Same as {\uldb XFile}{\v PG_XFILE_XFILE}, plus :-
+\par
+
+{\b protected ulong position;}\line
+{\b protected ulong fileSize;}\line
+{\b protected ulong buffSize;}\line
+{\b protected IvoryHandle handle;}\par
+
+Internal data for file buffer management.
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+Same as {\uldb XFile}{\v PG_XFILE_XFILE}, plus :-
+\par
+
+{\b protected xf_error_codes expand (ulong nsize);}\par
+
+Internal routine for expanding the file buffer.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+XFileDisk Class                                                           ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_XFILE_XFILEDISK}
+${\footnote XFileDisk Class}
+K{\footnote XFileDisk;
+XFileDisk, opentmp;
+XFileDisk, getfdate;
+XFileDisk, getftime}
++{\footnote BW_PG_4}
+{\b\f0{\cf2\scaps Programmer's Guide: XFile}\line\fs32 XFileDisk Class}\par\pard\sb100
+
+The XFileDisk object is an XFile implemented using the low-level
+ DOS-like calls in {\i XFile}.  The standard XFile calls are
+ implemented.  In addition, specific calls for this object are
+ available.
+\par
+
+{\cf2 Note: This was formerly the XFileDOS class.  A define will allow
+ code to continue to refer to XFileDOS classes, but XFileDisk is the
+ correct class for newer code.}\par
+
+\line{\b\fs28 Name}\par
+
+XFileDisk - Disk based block-oriented file i/o object.
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "xfbase.hpp"
+\par
+
+\line{\b\fs28 Base Classes}\par
+
+{\uldb XFile}{\v PG_XFILE_XFILE}
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b XFileDisk();}\par
+
+Initializes the internal file handle to be invalid.
+\par
+
+\line{\b\fs28 Member Data}\par
+
+Same as {\uldb XFile}{\v PG_XFILE_XFILE}, plus :-
+\par
+
+{\b private HANDLE fHandle;}\par
+
+Win32 file handle associated with object.
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+Same as {\uldb XFile}{\v PG_XFILE_XFILE}, plus :-
+\par
+
+{\b virtual xf_error_codes opentmp(const char *name, dword flags);}\par
+
+Operates similarly to open, but creates a temporary file
+ appended to the name.
+\par
+
+{\b word getfdate();}\par
+
+Returns the file date with bits 0-4 as day, 5-8 as month, 9-16
+ as year relative to 1980 or 0 on error (see error).
+\par
+
+{\b word getftime();}\par
+
+Returns the file time with bits 0-4 having 2 second increments,
+ 5-10 with minutes, and 11-16 with hours or 0 on error (see error).
+\par
+
+\line{\b\fs28 Example}\par
+
+This example reads the first 1Kbyes from a file 'TEST.DAT' into
+ a local buffer:
+\par
+
+{\f2
+XFileDisk       xf;\line
+char            buff[1024];\par
+if (xf.open("TEST.DAT",XF_OPEN_READ))\line
+\{\par
+    // Error with message for error code 'xf.error()'
+\par
+\}\line
+else\line
+\{\line
+    if (xf.read(buff,1024) != 1024)\line
+    \{\par
+        // Error with message for error codes\line
+        // 'xf.error()'
+\par
+    \}\line
+    xf.close();\line
+\}\line
+}
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+XFileDiskBuf Class                                                        ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_XFILE_XFILEDISKBUF}
+${\footnote XFileDiskBuf Class}
+K{\footnote XFileDiskBuf;
+XFileDiskBuf, getbuffersize;
+XFileDiskBuf, setbuffersize}
++{\footnote BW_PG_4}
+{\b\f0{\cf2\scaps Programmer's Guide: XFile}\line\fs32 XFileDiskBuf Class}\par\pard\sb100
+
+This object is a buffered version of XFileDisk.  This provides
+ significant performance improvements when reading/writing small
+ blocks per call.  This object allocates an internal buffer of 1
+ Kbytes by default.
+\par
+
+{\cf2 Note: This was formerly the XFileDOSBuff class.  A define will allow
+ code to continue to refer to XFileDOSBuff classes, but XFileDiskBuf is the
+ correct class for newer code.}\par
+
+\line{\b\fs28 Name}\par
+
+XFileDiskBuf - Disk based block-oriented buffered file i/o object.
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "xfbase.hpp"
+\par
+
+\line{\b\fs28 Base Classes}\par
+
+{\uldb XFileDiskBuf}{\v PG_XFILE_XFILEDISK}
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b XFileDiskBufBuff();}\par
+
+Initializes the interal buffer values to empty.
+\par
+
+\line{\b\fs28 Member Data}\par
+
+Same as {\uldb XFileDisk}{\v PG_XFILE_XFILEDISK}, plus :-
+\par
+
+{\b protected  byte *end;}\line
+{\b protected byte *next;}\par
+
+Used to track current read/write current and end positions
+ within the internal buffer.
+\par
+
+{\b protected ulong buffSize;}\par
+
+Current internal buffer size.
+\par
+
+{\b protected byte *data;}\par
+
+Pointer to allocated internal buffer block.  This is allocated
+ with the new operator.
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+Same as {\uldb XFileDisk}{\v PG_XFILE_XFILEDISK}, plus :-
+\par
+
+{\b ulong getbuffersize();}\par
+
+Returns the current size of the internal buffer.
+\par
+
+{\b ulong setbuffersize(ulong size);}\par
+
+Sets the internal buffer size to a new value, after it has been
+ aligned on a 1Kbyte boundary.  The actual size is returned by
+ this routine.  This forces a flush operation.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+XFBitmap Class                                                            ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_XFILE_XFBITMAP}
+${\footnote XFBitmap Class}
+K{\footnote XFBitmap;
+XFBitmap, release;
+XFBitmap, lock;
+XFBitmap, unlock;
+XFBitmap, create}
++{\footnote BW_PG_4}
+{\b\f0{\cf2\scaps Programmer's Guide: XFile}\line\fs32 XFBitmap Class}\par\pard\sb100
+
+The XFBitmap object is an encapsulation of bitmap data for use
+ by the XFParseBitmap object.  The bitmap class can contain monochrome,
+ 8-bit paletted, 15-bit, 24-bit, and 32-bit formats.  Most of the
+ {\uldb XFParseBitmap}{\v PG_XFILE_XFPARSEBITMAP} classes only support
+ a subset of these formats.
+\par
+
+{\cf3
+ generate_mono() may be extended to convert from a 2, 3 or 4 bpp image.
+}\par
+
+\line{\b\fs28 Name}\par
+
+XFBitmap - Container class for bitmap objects read by {\i XFile}.
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "xfbitmap.hpp"
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b XFBitmap();}\par
+
+Initializes the internal data members to empty values.
+\par
+
+\line{\b\fs28 Member Data}\par
+
+{\b word flags}\par
+
+Bitmap flags.
+\par
+
+{\b ushort width, ushort height}\par
+
+Size of bitmap in pixels.
+\par
+
+{\b byte bpp}\par
+
+Number of bytes per pixel (see {\b Bitdepths} below).
+\par
+
+{\b byte clrinuse}\par
+
+Highest palette index in use in bitmap (i.e., number of colors in use
+ minus 1).  This is an obsolete value.
+\par
+
+{\b byte *pal}\par
+
+If the palette exists and is locked, this will point to the
+ locked memory address of the palette data.
+\par
+
+{\b byte *data}\par
+
+If the image data exists and is locked, this will point to the
+ locked memory address of the bitmap.
+\par
+
+{\b IvoryHandle palhandle}\par
+
+Handle to palette of 256*4 byte entries (R,G,B,X entries) or 0
+ if no palette exists for the bitmap.  'X' is reserved and should
+ be 0.  This color format matches that used by {\i Van Gogh}.
+\par
+
+{\b IvoryHandle handle}\par
+
+Handle to the image data.  It will be one byte/pixel if the
+ palette exists, otherwise three byte/pixel R,G,B data.
+\par
+
+The two data blocks should be allocated with {\uldb\i Ivory's}
+ {\v PG_IVORY_HALLOC} ivory_halloc function.  They are freed by
+ release() using ivory_hfree.
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+{\b void release();}\par
+
+Function which frees any allocated palette & data associated
+ with the object.
+\par
+
+{\b xf_error_codes lock();}\par
+
+Locks the bitmap and palette, making the pal and data members
+valid pointers.  Returns an error code (see Error values).
+\par
+
+{\b void unlock();}\par
+
+Unlocks the bitmap and palette, setting pal and data to zero.
+\par
+
+{\b xf_error_codes create(ushort w, ushort h, byte _bpp=XFBM_BPP_8BIT,
+ int clear=1);}\par
+
+This routine will release any current data, and then allocate memory for
+ a bitmap with the given parameters.  If clear is set, then the data
+ area is set to all zero.
+\par
+
+{\b byte *generate_mono(dword bgcolor);}\par
+
+This routine will create a {\i Van Gogh} compatable monochrome data image
+ from an 8-bit bitmap.  All pixels that equal the background color (taken
+ as an index) are off and all others are on.
+\par
+
+\line{\b\fs28 Misc. constants}\par
+
+{\i XF_MAX_WIDTH}\tab Maximum width of an XFBitmap object in pixels.
+\par
+
+{\i XF_MAX_HEIGHT}\tab Maximum height of an XFBitmap object in pixels.
+\par
+
+\line{\b\fs28 Error values}\par
+
+As for {\uldb XFile}{\v PG_XFILE_CSTYERR}, plus:-
+\par
+
+{\i XF_ERR_LOCKFAILED}  A call to {\i Ivory's} ivory_hlock failed to
+return a valid pointer.
+\par
+
+\line{\b\fs28 Bitdepths}\par
+
+The bpp value indicates the format for the bitmap:
+\par
+
+{\i XFBM_BPP_MONO}\tab Indicates the bitmap data is a monochrome 1-bit image
+ which is byte-aligned packed 8 pixels to a byte with the highest bit being
+ the leftmost pixel.  This is compatable with {\i Van Gogh's}
+ image_trans_mono() routine.
+\par
+
+{\i XFBM_BPP_8BIT}\tab Indicates the bitmap data is an 8-bit paletted image.
+\par
+
+{\i XFBM_BPP_15BIT}\tab Indicates the bitmap data is a 15-bit image in
+ 5/5/5 RGB format.
+\par
+
+{\i XFBM_BPP_24BIT}\tab Indicates the bitmap data is a 24-bit image in
+ 8/8/8 RGB format.
+\par
+
+{\i XFBM_BPP_32BIT}\tab Indicates the bitmap data is a 32-bit image in
+ 8/8/8/8 RGBA format.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+XFParseBitmap Class                                                       ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_XFILE_XFPARSEBITMAP}
+${\footnote XFParseBitmap Class}
+K{\footnote XFParseBitmap;
+XFParseBitmap, attach;
+XFParseBitmap, error;
+XFParseBitmap, nameread;
+XFParseBitmap, read;
+XFParseBitmap, namewrite;
+XFParseBitmap, write}
++{\footnote BW_PG_4}
+{\b\f0{\cf2\scaps Programmer's Guide: XFile}\line\fs32 XFParseBitmap Class}\par\pard\sb100
+
+The XFParseBitmap object is the abstract base class for reading
+ and writing raster file formats.  An {\uldb XFBitmap}{\v PG_XFILE_XFBITMAP}
+ object is associated with this parser as the container for the data to be
+ read or written.
+\par
+
+\line{\b\fs28 Name}\par
+
+XFParseBitmap - Abstract base class for file i/o on bitmap file formats.
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "xfbitmap.hpp"
+\par
+
+\line{\b\fs28 Base Classes}\par
+
+None
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b XFParseBitmap();}\par
+
+Initializes the object assuming an XFileDisk object as an internal
+ instance of the XFBitmap object to operate upon.
+\par
+
+{\b XFParseBitmap(XFile *xf);}\par
+
+Initializes the object using the xf object and an internal
+ XFBitmap instance.
+\par
+
+{\b XFParseBitmap(XFBitmap *bm);}\par
+
+Initializes the object using the bm object and an internal
+ XFileDisk object.
+\par
+
+{\b XFParseBitmap(XFile *xf, XFBitmap *bm);}\par
+
+Initializes the object using the given xf and bm objects.
+\par
+
+\line{\b\fs28 Member Data}\par
+
+{\b private XFileDiskBuf xfile;\line
+private XFBitmap bitmap;}\par
+
+Default instances for bm and xf.  The buffered i/o object is
+ used to boost the performance of the compressed I/O parse
+ objects.  The XFileDiskBuf xfile will be changed to XFileX when
+ that object is implemented.
+\par
+
+{\b protected XFile *xf;}\par
+
+Pointer to XFile object associated with parser.
+\par
+
+{\b protected xf_error_codes errorn;}\par
+
+Last error that occurred using object.
+\par
+
+{\b XFBitmap *bm}\par
+
+Pointer to bitmap to use as default to read/write operators.
+ Setup by constructor to point to a valid bitmap instance.
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+{\b void attach(XFile *xf);}\par
+
+Attaches an XFile instance to the object.  If none is given in
+ constructor, an XFileDisk instance is pointed to until this call
+ is made.
+\par
+
+{\b xf_error_codes error();}\par
+
+Returns last error that occurred using the object.
+\par
+
+{\b xf_error_codes nameread(const char *name, XFBitmap *b=0);}\par
+
+Opens name with the current file object for reading and calls
+ read();  If b is 0, then the default member bm is used.
+\par
+
+{\b virtual xf_error_codes read(XFBitmap *b=0);}\par
+
+This function is the abstract member defined by derived classes.
+ This reads a bitmap into the associated XFBitmap, releasing any
+ current data.  If b is 0, then the default member bm is used.
+ Release will be called at the beginning of this function for the
+ bitmap to ensure that previously loaded data is properly freed.
+ The associated bitmap data is locked on exit successful exit
+ from this routine.
+\par
+
+{\b xf_error_codes namewrite(const char *name, XFBitmap *b=0);}\par
+
+Opens name with the current file object for writing and calls
+ write();  If b is 0, then the default member bm is used.
+\par
+
+{\b virtual xf_error_codes write(XFBitmap *b=0);}\par
+
+This function is the abstract member defined by derived classes.
+ This writes the associated XFBitmap data into the file.  If b
+ is 0, then the default member bm is used.  The lock state of the
+ associated bitmap will be unchanged on exit from this routine,
+ although the data will be locked during the operation.
+\par
+
+\line{\b\fs28 Error values}\par
+
+As for {\uldb XFile}{\v PG_XFILE_CSTYERR}, plus :-
+\par
+
+{\i XF_ERR_LOCKFAILED}\tab A call to Ivory's ivory_hlock failed to
+ return a valid pointer.
+\par
+
+{\i XF_ERR_NOTSUPPORTED}\tab Function or file specifics not supported.
+\par
+
+{\i XF_ERR_INVALIDHEADER}\tab Header not valid, probably invalid file.
+\par
+
+{\i XF_ERR_INVALIDPALETTE}\tab Error working with palette, probably EOF
+ on read or out of space on write.
+\par
+
+{\i XF_ERR_INVALIDIMAGE}\tab Error working with image data, probably EOF
+ on read or out of space on write.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+XFParseBMP Class                                                          ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_XFILE_XFPARSEBMP}
+${\footnote XFParseBMP Class}
+K{\footnote XFParseBMP}
++{\footnote BW_PG_4}
+{\b\f0{\cf2\scaps Programmer's Guide: XFile}\line\fs32 XFParseBMP Class}\par\pard\sb100
+
+The XFParseBMP object provides support for the Windows 3 BMP
+ file format.  The reader will expand 4-bit images to 8-bits,
+ although the palette entries beyond 16 will be 0,0,0.  The writer
+ will generate uncompressed monochrome, 8-bit, or 24-bit image files.
+\par
+
+{\cf2
+Note: This object does not support OS/2 v1 images.
+}\par
+
+\line{\b\fs28 Name}\par
+
+XFParseBMP - Windows 3 BMP file format reader/writer.
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "xfbitmap.hpp"
+\par
+
+\line{\b\fs28 Base Classes}\par
+
+{\uldb XFParseBitmap}{\v PG_XFILE_XFPARSEBITMAP}
+\par
+
+\line{\b\fs28 Constructors}\par
+
+Same as {\uldb XFParseBitmap}{\v PG_XFILE_XFPARSEBITMAP}
+\par
+
+\line{\b\fs28 Member Data}\par
+
+Same as {\uldb XFParseBitmap}{\v PG_XFILE_XFPARSEBITMAP}
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+Same as {\uldb XFParseBitmap}{\v PG_XFILE_XFPARSEBITMAP}
+\par
+
+\line{\b\fs28 Example}\par
+
+This example extracts the size of the image contained within
+ the 'TEST.BMP' file:
+\par
+
+{\f2
+int  xsize, ysize;\line
+XFParseBMP  bmp;\line
+xf_error_codes  err;
+\par
+if (bmp.nameread("TEST.BMP"))\line
+\{\par
+        // Error reading bitmap\par
+        err=bmp.error();\line
+\}\line
+else\line
+\{\line
+        xsize = bmp.bm->width;\line
+        ysize = bmp.bm->height;\line
+\}\line
+}
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+XFParseCEL Class                                                          ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_XFILE_XFPARSECEL}
+${\footnote XFParseCEL Class}
+K{\footnote XFParseCEL}
++{\footnote BW_PG_4}
+{\b\f0{\cf2\scaps Programmer's Guide: XFile}\line\fs32 XFParseCEL Class}\par\pard\sb100
+
+CEL files are simple fixed-format bitmaps containing 8-bit
+ paletted images.  CEL files are used by Autodesk Animator for
+ simple images and by 3D Studio as maps for texture-mapping.
+ This object will read and write these files.
+\par
+
+{\cf2
+Note: Autodesk Animator PIC files are a special-case of CEL files and
+ may be read using this object.  Autodesk Animator Pro uses
+ different .CEL and .PIC formats which are not supported by this object.
+}\par
+
+\line{\b\fs28 Name}\par
+
+XFParseCEL - CEL file format reader/writer.
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "xfbitmap.hpp"
+\par
+
+\line{\b\fs28 Base Classes}\par
+
+{\uldb XFParseBitmap}{\v PG_XFILE_XFPARSEBITMAP}
+\par
+
+\line{\b\fs28 Constructors}\par
+
+Same as {\uldb XFParseBitmap}{\v PG_XFILE_XFPARSEBITMAP}
+\par
+
+\line{\b\fs28 Member Data}\par
+
+Same as {\uldb XFParseBitmap}{\v PG_XFILE_XFPARSEBITMAP}
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+Same as {\uldb XFParseBitmap}{\v PG_XFILE_XFPARSEBITMAP}
+\par
+
+{\b xf_error_codes read(ushort &xcoord, ushort &ycoord, XFBitmap *b=0);\line
+xf_error_codes write(ushort xcoord, yshort ycoord, XFBitmap *b=0);}\par
+
+These routines allow the x- and y-coordinate information within a .CEL
+ file header to be read/written.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+XFParseLBM Class                                                          ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_XFILE_XFPARSELBM}
+${\footnote XFParseLBM Class}
+K{\footnote XFParseLBM;
+XFParseLBM, read;
+XFParseLBM, write}
++{\footnote BW_PG_4}
+{\b\f0{\cf2\scaps Programmer's Guide: XFile}\line\fs32 XFParseLBM Class}\par\pard\sb100
+
+The LBM format is actually an IFF file containing an ILBM form.
+ This object supports reading of 2, 16, and 256 color
+ uncompressed or compressed images, and outputs uncompressed
+ monochrome or 8-bit images.
+\par
+
+{\cf2 Note: The reader does not support the new 'PBM ' form
+ used by the latest versions of DPaint, images with an explicit
+ transparent mask, or 24-bit color variants.
+}\par
+
+\line{\b\fs28 Name}\par
+
+XFParseLBM - Electronic Art's LBM file format reader/writer.
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "xfbitmap.hpp"
+\par
+
+\line{\b\fs28 Base Classes}\par
+
+{\uldb XFParseBitmap}{\v PG_XFILE_XFPARSEBITMAP}
+\par
+
+\line{\b\fs28 Constructors}\par
+
+Same as {\uldb XFParseBitmap}{\v PG_XFILE_XFPARSEBITMAP}
+\par
+
+\line{\b\fs28 Member Data}\par
+
+Same as {\uldb XFParseBitmap}{\v PG_XFILE_XFPARSEBITMAP}
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+Same as {\uldb XFParseBitmap}{\v PG_XFILE_XFPARSEBITMAP}, plus :-
+\par
+
+{\b xf_error_codes read(XFParseIFF *iff, XFBitmap *b=0);}\par
+
+This routine assumes that the IFF object is currently pointing
+ to an ILBM form which will be read by this routine.
+\par
+
+{\b xf_error_codes write(XFParseIFF *iff, XFBitmap *b=0);}\par
+
+This routine assumes that the IFF object is ready for a write.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+XFParsePCX Class                                                          ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_XFILE_XFPARSEPCX}
+${\footnote XFParsePCX Class}
+K{\footnote XFParsePCX}
++{\footnote BW_PG_4}
+{\b\f0{\cf2\scaps Programmer's Guide: XFile}\line\fs32 XFParsePCX Class}\par\pard\sb100
+
+The PCX file format, created by the Zsoft Coproration, has
+ become a defacto standard for many PC paint programs.
+\par
+
+{\cf2
+Note: This object only supports 256 color images.
+}\par
+
+\line{\b\fs28 Name}\par
+
+XFParsePCX - Zsoft PCX file format reader/writer.
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "xfbitmap.hpp"
+\par
+
+\line{\b\fs28 Base Classes}\par
+
+{\uldb XFParseBitmap}{\v PG_XFILE_XFPARSEBITMAP}
+\par
+
+\line{\b\fs28 Constructors}\par
+
+Same as {\uldb XFParseBitmap}{\v PG_XFILE_XFPARSEBITMAP}
+\par
+
+\line{\b\fs28 Member Data}\par
+
+Same as {\uldb XFParseBitmap}{\v PG_XFILE_XFPARSEBITMAP}
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+Same as {\uldb XFParseBitmap}{\v PG_XFILE_XFPARSEBITMAP}
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+XFParseTGA Class                                                          ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_XFILE_XFPARSETGA}
+${\footnote XFParseTGA Class}
+K{\footnote XFParseTGA}
++{\footnote BW_PG_4}
+{\b\f0{\cf2\scaps Programmer's Guide: XFile}\line\fs32 XFParseTGA Class}\par\pard\sb100
+
+The TGA file format from TrueVision is used as a standard
+ true-color format by many PC image processing programs.  This class can
+ read 15-, 16-, 24-, or 32-bit compressed or uncompressed images.  The
+ writer outputs 15-, 24-, or 32-bit uncompressed image files.
+\par
+
+{\cf2
+Note: This object does not support 8-bit (color-mapped) images.  The color
+ ordering in the Targa TGA file is assumed to be BGR or BGRA.
+}\par
+
+\line{\b\fs28 Name}\par
+
+XFParseTGA - Truevision Targa TGA file format reader/writer.
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "xfbitmap.hpp"
+\par
+
+\line{\b\fs28 Base Classes}\par
+
+{\uldb XFParseBitmap}{\v PG_XFILE_XFPARSEBITMAP}
+\par
+
+\line{\b\fs28 Constructors}\par
+
+Same as {\uldb XFParseBitmap}{\v PG_XFILE_XFPARSEBITMAP}
+\par
+
+\line{\b\fs28 Member Data}\par
+
+Same as {\uldb XFParseBitmap}{\v PG_XFILE_XFPARSEBITMAP}
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+Same as {\uldb XFParseBitmap}{\v PG_XFILE_XFPARSEBITMAP}
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+XFParseXEB Class                                                          ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_XFILE_XFPARSEXEB}
+${\footnote XFParseXEB Class}
+K{\footnote XFParseXEB;
+XFParseXEB, read;
+XFParseXEB, write;
+XFParseXEB, compress_rle_mono;
+XFParseXEB, uncompress_rle_mono;
+XFParseXEB, compress_rle_8bpp;
+XFParseXEB, uncompress_rle_8bpp;
+XFParseXEB, compress_rle_16bpp;
+XFParseXEB, uncompress_rle_16bpp;
+XFParseXEB, compress_rle_24bpp;
+XFParseXEB, uncompress_rle_24bpp;
+XFParseXEB, compress_rle_32bpp;
+XFParseXEB, uncompress_rle_32bpp}
++{\footnote BW_PG_4}
+{\b\f0{\cf2\scaps Programmer's Guide: XFile}\line\fs32 XFParseXEB Class}\par\pard\sb100
+
+{\cf4\scaps CHANGED}\line
+The XEB format is actually an IFF file containing an 'XFEB' form, which
+ is Charybdis' custom RLE image format.  This object supports reading and
+ writing of monochrome, 8-bit, 15/16-bit, 24-bit, and 32-bit
+ compressed images.
+\par
+
+An 'XFEB' form consists of a header chunk, palette chunk, and a
+ body chunk.  The header chunk  ('HDR ') contains an XFXEBHeader
+ structure.  The palette chunk ('PAL ') contains a 256 dword palette
+ in the XFBitmap format if the bpp is {\i XFBM_BPP_8BIT}.  The body
+ chunk contains the image data either in uncompressed form or compressed
+ using the 'packbits' algorithm.
+\par
+
+The 'packbits' algorithm uses a 1-byte control code.  A value of 0 to
+ 127 indicates that a literal string follows of size n+1 pixels.  A value
+ of -127 to -1 indicates that the following pixel value should be repeated
+ -n+1 times.  For monochrome bitmaps, each byte of 8 packed pixels is
+ compressed together.  Runs do not span scanlines and no padding is used.
+\par
+
+\line{\b\fs28 Name}\par
+
+XFParseXEB -  Charybdis' XFile Encoded Bitmap reader/writer.
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "xfbitmap.hpp"
+\par
+
+\line{\b\fs28 Base Classes}\par
+
+{\uldb XFParseBitmap}{\v PG_XFILE_XFPARSEBITMAP}
+\par
+
+\line{\b\fs28 Constructors}\par
+
+Same as {\uldb XFParseBitmap}{\v PG_XFILE_XFPARSEBITMAP}
+\par
+
+\line{\b\fs28 Member Data}\par
+
+Same as {\uldb XFParseBitmap}{\v PG_XFILE_XFPARSEBITMAP}
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+Same as {\uldb XFParseBitmap}{\v PG_XFILE_XFPARSEBITMAP}, plus :-
+\par
+
+{\b xf_error_codes read(XFParseIFF *iff, XFBitmap *b=0);}\par
+
+This routine assumes that the IFF object is currently pointing
+ to an 'XFEB' form which will be read by this routine.
+\par
+
+{\b xf_error_codes write(XFParseIFF *iff, XFBitmap *b=0);}\par
+
+This routine assumes that the IFF object is ready for a write.
+\par
+
+{\cf4\scaps NEW}\line
+{\b
+static ulong compress_rle_mono(ushort w, ushort h,
+ byte *data, byte *cdata);\line
+static ulong compress_rle_8bpp(ushort w, ushort h,
+ byte *data, byte *cdata);\line
+static ulong compress_rle_16bpp(ushort w, ushort h,
+ byte *data, byte *cdata);\line
+static ulong compress_rle_24bpp(ushort w, ushort h,
+ byte *data, byte *cdata);\line
+static ulong compress_rle_32bpp(ushort w, ushort h,
+ byte *data, byte *cdata);}\par
+
+These are helper routines used by the writer to compress the image data
+ in memory.  The cdata buffer is assumed to be as large as the original
+ image and the routines return the number of bytes used by the compressed
+ image or 0 if the compressed image is just as large (or larger than) the
+ original.
+\par
+
+{\cf4\scaps NEW}\line
+{\b
+static int uncompress_rle_mono(ushort w, ushort h, ulong csize,
+ byte *cdata, byte *data);\line
+static int uncompress_rle_8bpp(ushort w, ushort h, ulong csize,
+ byte *cdata, byte *data);\line
+static int uncompress_rle_16bpp(ushort w, ushort h, ulong csize,
+ byte *cdata, byte *data);\line
+static int uncompress_rle_24bpp(ushort w, ushort h, ulong csize,
+ byte *cdata, byte *data);\line
+static int uncompress_rle_32bpp(ushort w, ushort h, ulong csize,
+ byte *cdata, byte *data);}\par
+
+These are helper routines used by the reader to uncompress image data
+ in memory.  The data buffer is assumed to be the size of the original
+ image (as computed from width, height, and bytes-per-pixel) and
+ the routines return 0 if successful, or non-zero if an error occured.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+XFParseINI Class                                                          ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_XFILE_XFPARSEINI}
+${\footnote XFParseINI Class}
+K{\footnote XFParseINI;
+XFParseINI, error;
+XFParseINI, attach;
+XFParseINI, open;
+XFParseINI, create;
+XFParseINI, close;
+XFParseINI, begin;
+XFParseINI, end;
+XFParseINI, section;
+XFParseINI, read;
+XFParseINI, write}
++{\footnote BW_PG_4}
+{\b\f0{\cf2\scaps Programmer's Guide: XFile}\line\fs32 XFParseINI Class}\par\pard\sb100
+
+The XFParseINI object provides reading and writing of .INI-style
+ configuration files, both with and without sections for sharing
+ of variables within a single .INI file.  The .INI files may also
+ contain assembly-style comments beginning with ';' and ending at
+ the end of the line.
+\par
+
+The .INI file format is line delimited.  Comments may be added
+ with the ; character to indicate the beginning of a comment,
+ ending with a new-line.  The .INI file may have multiple
+ 'sections', each with a unique set of variable names.  If no
+ section is specified, then the top of the file is used as start
+ point and scanning continues to the first section or
+ end-of-file.  The symbols {\b ;}, {\b [}, and {\b ]} are reserved.  If a
+ section is specified, then scanning for variables only occurs
+ within the section.
+\par
+
+{\cf2 Note:  It is suggested that under Win32, the registry functions are
+ used to maintain configuration information since INI files are
+ only supported under Win32 for backwards compatibility.  If you
+ generate an INI file using the 'global' section (i.e., values that are not
+ within a section), the Win32 INI routines will not be able to read the
+ values, although they are supported by XFParseINI.
+}\par
+
+\line{\b\fs28 Name}\par
+
+XFParseINI - .INI file reader/writer object.
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "xfini.hpp"
+\par
+
+\line{\b\fs28 Base Classes}\par
+
+None
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b XFParseINI();}\par
+
+Initializes the object.
+\par
+
+\line{\b\fs28 Member Data}\par
+
+{\b private XFileDisk xfile;}\par
+
+Default instance for xf.
+\par
+
+{\b protected XFile *xf;}\par
+
+Pointer to XFile object associated with parser.
+\par
+
+{\b protected xf_error_codes errorn;}\par
+
+Last error that occurred using object.
+\par
+
+{\b protected ulong buffsize;\line
+protected char *buff;}\par
+
+Memory buffer and size containing copy of .INI file.
+\par
+
+{\b protected char sectname[XF_MAX_ININAME];}\par
+
+Currently active section name with '[' and ']' added.
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+{\b protected xf_error_codes load();}\par
+
+Loads memory image of .INI, freeing any previous copy.
+\par
+
+{\b protected char *start();}\par
+
+Returns starting position in buffer for searches given the
+ currently active section name.  Returns 0 if section not found.
+\par
+
+{\b protected char *find(char *ptr, const char *item);}\par
+
+Returns a pointer to the item in the memory buffer with search
+ starting at ptr.  Returns 0 if not found.
+\par
+
+{\b xf_error_codes error() const;}\par
+
+Returns the last error that occurred using the object.
+\par
+
+{\b void attach(XFile *xf);}\par
+
+Attaches an XFile object to the parse object for use as the i/o
+ object.  Will reset the default if NULL is passed.
+\par
+
+{\b xf_error_codes open(const char *name, dword flags);}\par
+
+Opens the .INI file named in name.  Expects that either
+ {\i XF_OPEN_READ} or {\i XF_OPEN_WRITE} is set in flags.
+\par
+
+{\b xf_error_codes create(const char *name, dword flags);}\par
+
+Creates the .INI file named in name.  Forces {\i XF_OPEN_WRITE} into
+ flags.
+\par
+
+{\b xf_error_codes close();}\par
+
+Closes the .INI file handle, flushing any changes to disk.
+\par
+
+{\b xf_error_codes begin();}\par
+
+Starts file processing, called by open.
+\par
+
+{\b xf_error_codes end();}\par
+
+Ends file processing, called by close.
+\par
+
+{\b xf_error_codes section(const char *name);}\par
+
+Sets the active 'section' name.  If NULL or an empty string is
+ passed, then the active section is the top of the file and no
+ section header is used.  The section name appears in the file as
+ [name].  If the section does not exist, then when the first
+ value is written, the section will be added at the end of the
+ file.
+\par
+
+{\b xf_error_codes read(const char *item, char *value);}\par
+
+Reads the value of the variable in item.  If the item does not
+ exist in the current section, then {\i XF_ERR_ITEM_NOT_FOUND} will be
+ returned.
+\par
+
+{\b int read(const char *item);}\par
+
+Reads the value assuming the string is a valid integer.
+\par
+
+{\b xf_error_codes read(const char **item, char **value);}\par
+
+Reads a series of variables from the current section.
+\par
+
+{\b xf_error_codes write(const char *item, const char *value);}\par
+
+Writes an item into the currently active section, replacing any
+ previous entry for this item in this section.
+\par
+
+{\b xf_error_codes write(const char *item, int value);}\par
+
+Writes an item with an integer value into the current section.
+\par
+
+{\b xf_error_codes write(const char **item, const char **value);}\par
+
+Writes a series of variables into the current section.
+\par
+
+\line{\b\fs28 Error values}\par
+
+As for {\uldb C-style}{\v PG_XFILE_CSTYERR}, plus :-
+\par
+
+{\i XF_ERR_ITEM_NOT_FOUND}\tab Item specified wasn't found in file.
+\par
+
+{\i XF_ERR_SECTION_NOT_FOUND}\tab Section specified wasn't found in file.
+\par
+
+{\i XF_ERR_NEEDREADORWRITE}\tab Must specify {\i OPEN_READ} or {\i _WRITE}.
+\par
+
+{\i XF_ERR_NAME_TOO_LONG}\tab The name given is too long for internal
+ buffers.
+\par
+
+\line{\b\fs28 Misc. Constants}\par
+
+{\i XF_MAX_ININAME}\tab Maximum size of a section or item name.
+\par
+
+{\i XF_MAX_INIVALUE}\tab Maximum size of an item's value string.
+\par
+
+\line{\b\fs28 Example}\par
+
+This example reads two numbers associated with a '[System]'
+ block from the 'TEST.INI' file:
+\par
+
+{\f2
+int v1,v2;\line
+XFParseINI  ini;\line
+xf_error_codes  err;\par
+if (ini.open("TEST.INI",XF_OPEN_READ))\line
+\{\par
+    // Error on open
+\par
+    err=ini.error();\line
+\}\line
+else\line
+\{\line
+    if (ini.section("System"))\line
+    \{\par
+                // System section doesn't exist.
+\par
+    \}\line
+    else\line
+    \{\line
+        v1 = ini.read("Variable1");\line
+        v2 = ini.read("Variable2");
+\par
+        // v1 and v2 now either contain 0 or value\line
+        // from .INI.
+\par
+    \}\line
+\}
+}
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+XFParseIFF Class                                                          ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_XFILE_XFPARSEIFF}
+${\footnote XFParseIFF Class}
+K{\footnote XFParseIFF;
+XFParseIFF, initvars;
+XFParseIFF, attach;
+XFParseIFF, error;
+XFParseIFF, open;
+XFParseIFF, create;
+XFParseIFF, close;
+XFParseIFF, begin;
+XFParseIFF, end;
+XFParseIFF, seekform;
+XFParseIFF, newform;
+XFParseIFF, enterform;
+XFParseIFF, leaveform;
+XFParseIFF, seekchunk;
+XFParseIFF, next;
+XFParseIFF, topofcontext;
+XFParseIFF, read;
+XFParseIFF, write;
+XFParseIFF, swapendian;
+XFParseIFF, makeid;
+XFParseIFF, strid}
++{\footnote BW_PG_4}
+{\b\f0{\cf2\scaps Programmer's Guide: XFile}\line\fs32 XFParseIFF Class}\par\pard\sb100
+
+The XFParseIFF object provides chunk-based .IFF file reading and
+ writing, supporting multi-level forms based on the Electronic
+ Arts EA-IFF-85 Standard for Interchange Format Files.  It can also
+ read a number of variations of this format, including Microsoft's RIFF
+ format and MIDI SMF files.
+\par
+
+IFF files are a self-describing format, containing a number of individual
+ data blocks, or 'chunks'.  Each chunk is prefixed by a 4 byte identifier
+ and a 4 byte size (which does not include the chunk header or possible
+ padding byte).  Identifiers are alphanumeric, mixed-cased ascii.
+ Chunks must be read/written as a single unit, and are therefore generally
+ kept small.  In addition to standard chunks, a number of special chunks
+ exist, including forms.  A form contains a 4 byte form identifier and zero
+ or more chunks (which may also be embedded forms).
+\par
+
+In general, an application writing IFF output will begin a propritary form
+ and output a number of sub-chunks and/or forms.  Usually, the first chunk
+ in a form is a header structure which provides information about the
+ structure and/or size of the following chunks within the form.  When
+ reading, unrecognized chunks and forms should be skipped.
+\par
+
+Microsoft's RIFF format is simliar to the EA IFF format except that the
+ 4 byte chunk size is stored in Intel format (EA uses Motorola format)
+ and the chunk identifier for a form is 'RIFF' (EA uses 'FORM').
+\par
+
+MIDI SMF files are also simliar to the EA IFF format, except that it does
+ use a padding byte (EA and RIFF both assume that an odd-sized chunk is
+ followed by a 0 pad byte).
+\par
+
+{\cf2 Note: There is no direct support for CATs, PROPs, or LISTs in this
+ implementation.}\par
+
+{\cf3 Since LISTs are used extensively in Microsoft's RIFF AVI format,
+ direct support for their processing may be added in the future.}\par
+
+\line{\b\fs28 Name}\par
+
+XFParseIFF - .IFF file format reader/writer.
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "xfiff.hpp"
+\par
+
+\line{\b\fs28 Base Classes}\par
+
+None
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b XFParseIFF(dword cf = 0);}\par
+
+Initializes the object assuming an XFileDisk internal instance.  It sets
+ the control flags assuming the reader/writer will be used on EA IFF
+ format files by default (see Control flags).
+\par
+
+{\b XFParseIFF(XFile *xf, dword cf = 0);}\par
+
+Initializes the object using the xf object, setting the control flags.
+\par
+
+\line{\b\fs28 Member Data}\par
+
+{\b private dword cflags;}\par
+
+Internal control flags, set on construction.  These flags are described
+ in Control flags below.
+\par
+
+{\b private ulong idepth;}\par
+
+Internal depth level.
+\par
+
+{\b private ulong  icurPos;}\par
+
+Current position in file.
+\par
+
+{\b private ulong  ilength;}\par
+
+Length of file.
+\par
+
+{\b private ulong  ichunkSize;}\par
+
+Internal chunk size, with 0 indicating already skipped past
+ chunk in file.
+\par
+
+{\b private struct XFForm iforms[XF_MAX_IFFDEPTH];}\par
+
+Form depth record array.
+\par
+
+{\b private XFileDisk xfile;}\par
+
+Default instance for xf.
+\par
+
+{\b protected XFile *xf;}\par
+
+Pointer to XFile object associated with parser.
+\par
+
+{\b protected xf_error_codes errorn;}\par
+
+Last error that occurred using object.
+\par
+
+{\b dword formid;}\par
+
+This is set to the ID of the form if the current chunkid is
+ equal to FORM (or RIFF).
+\par
+
+{\b dword chunkid;}\par
+
+This is set to the ID of the current chunk or 0 if none.
+\par
+
+{\b dword chunkSize;}\par
+
+This is set to the current chunk .
+\par
+
+{\b dword depth;}\par
+
+This reflects the current file depth, with 0 being the top-most
+ level.
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+{\b private void initvars();}\par
+
+Initializes the internal variables to their startup state.
+\par
+
+{\b void attach(XFile *xf);}\par
+
+Attaches an XFile instance to the object.  If none is given in
+ constructor, an XFileDisk instance is pointed to until this call
+ is made.
+\par
+
+{\b xf_error_codes error() const;}\par
+
+Returns last error that occurred using the object.
+\par
+
+{\b xf_error_codes open(const char *name, dword flags);}\par
+
+Opens the IFF file in name.
+\par
+
+{\b xf_error_codes create(const char *name, dword flags);}\par
+
+Creates the IFF file named in name.
+\par
+
+{\b xf_error_codes close();}\par
+
+Closes the IFF file handle, flushing any changes to disk.
+\par
+
+{\b xf_error_codes begin();}\par
+
+Starts file processing, called by open.
+\par
+
+{\b xf_error_codes end();}\par
+
+Ends file processing, called by close.
+\par
+
+{\b xf_error_codes seekform(dword id);}\par
+
+This calls next until a FORM chunk with the given id is found or
+ the end of the current form level is reached.
+\par
+
+{\b xf_error_codes newform(dword id);}\par
+
+This creates a new FORM chunk with the given id and enters the
+ form.  This increases the depth.
+\par
+
+{\b xf_error_codes enterform();}\par
+
+Enters the current form if it is a FORM chunk.  This increases
+ the depth.
+\par
+
+{\b xf_error_codes leaveform();}\par
+
+Leaves the current form, decreasing the depth.
+\par
+
+{\b xf_error_codes seekchunk(dword id);}\par
+
+This calls next until a chunk with the given id is found or the
+ end of the current form level is reached.
+\par
+
+{\b xf_error_codes next();}\par
+
+This moves to the next chunk in the file at the current level or
+ returns XF_ERR_EOF if the end of the current form is reached.
+ chunkSize, chunkid, and if a FORM chunk formid are all set by
+ the function.
+\par
+
+{\b xf_error_codes topofcontext(int donext=1);}\par
+
+This moves the pointer to the top the current context (either
+ the top of the current form or the file) and performs a next() if
+ donext is true.
+\par
+
+{\b xf_error_codes read(void *ptr);}\par
+
+Reads the current chunk into the buffer provided.  chunkSize
+ characters are read if the chunk is not truncated.
+\par
+
+{\b xf_error_codes write(dword id, const void *ptr, ulong size);}\par
+
+Writes a chunk over the current chunk if the current chunk id
+ and size match or at the end of the file.
+\par
+
+{\b static word swapendian(word c);\line
+static dword swapendian(dword c);}\par
+
+This will swap a big-/little-endian value to a little-/big-endian value.
+\par
+
+{\b static dword makeid(char c1, char c2, char c3, char c4);}\par
+
+Creates an id from the four characters making up the id.
+\par
+
+{\b static dword strid(dword id, char *buff);}\par
+
+Fills in the buffer with the ASCII version of the id.  The
+ buffer must be at least 5 characters long.
+\par
+
+\line{\b\fs28 Error values}\par
+
+As for {\uldb XFileDisk}{\v PG_XFILE_XFILEDISK}, plus :-
+\par
+
+{\i XF_ERR_NOTIFF}\tab\tab\tab File is not an .IFF format file.
+\par
+
+{\i XF_ERR_CHUNKNOTFOUND}\tab\tab Chunk request was not found.
+\par
+
+{\i XF_ERR_FORMNOTFOUND}\tab\tab Form requested was not found.
+\par
+
+{\i XF_ERR_UNEXPECTEDEOF}\tab\tab Unexpected end-of-file found.
+\par
+
+{\i XF_ERR_INVALIDFORFORM}\tab\tab Invalid operation for FORM chunk.
+\par
+
+{\i XF_ERR_INVALIDFORCHUNK}\tab\tab Invalid operation for chunk.
+\par
+
+{\i XF_ERR_INVALIDID}\tab\tab\tab Invalid ID.
+\par
+
+{\i XF_ERR_TRUNCATEDCHUNK}\tab\tab Chunk size is greater than context EOF.
+\par
+
+{\i XF_ERR_WRITENOTALLOWED}\tab Write not allowed at current position.
+\par
+
+{\i XF_ERR_MAXDEPTHREACHED}\tab Maximum depth reached.
+\par
+
+\line{\b\fs28 Control flags}\par
+
+{\i XF_IFF_NOPAD}\tab This prevents the reader/writer from assuming a
+ 0 pad byte at the end of chunks and forms if the size is odd (the padding
+ is present in all files that conform to EA IFF and Microsoft RIFF
+ specifications, but is not present in variations such as MIDI SMF files).
+\par
+
+{\i XF_IFF_RIFF}\tab This causes the reader/writer to conform to the
+ Microsoft RIFF specification rather than the EA IFF format.  RIFF uses
+ Intel ordering for the chunk sizes (EA IFF uses Motorola) and the
+ identifier 'RIFF' for forms (EA IFF uses 'FORM').
+\par
+
+\line{\b\fs28 Misc. constants}\par
+
+{\i XF_MAXIFF_DEPTH}\tab Maximum form nesting depth supported.
+\par
+
+\line{\b\fs28 Examples}\par
+
+{\b Example One}\par
+
+This example walks through all chunks in the 'TEST.IFF' file,
+ displaying the name of each chunk and it's size (FORMs are not
+ entered).
+\par
+
+{\f2
+XFParseIFF  iff;\line
+xf_error_codes  err;\line
+char  buff[5] = {0,0,0,0,0};\par
+
+if (iff.open("TEST.IFF",XF_OPEN_READ))\line
+\{\par
+        // Error on open of file
+\par
+        err=iff.error();\line
+\}\line
+else\line
+\{\line
+    while (iff.next() == XF_ERR_NONE)\line
+    \{\line
+        if (iff.makeid('F','O','R','M') ==\line
+            iff.chunkid)\line
+        \{\line
+                cout << "Form " <<\line
+                     iff.strid(iff.formid,buff);\line
+        \}\line
+        else\line
+        \{\line
+                cout << "Chunk " <<\line
+                     iff.strid(iff.chunkid,buff);\line
+        \}\line
+        cout << " size=" << iff.chunkSize << "\n";\line
+    \}\line
+    iff.close();\line
+\}
+}
+\par
+
+\line {\b Example Two}\par
+
+This example will write out a simple form, with identifier 'TEST', containing
+ a header chunk ('HDR ') and a number of data chunks ('DATA'):
+\par
+
+{\f2
+XFParseIFF  iff;\line
+struct header_type \{\line
+    dword   count;\line
+\} header;\line
+data_type   data[NUMBER_OF_DATA_CHUNKS];\line
+\par
+if (iff.open("DATA.IFF",XF_OPEN_WRITE))\line
+    // Error on open
+\par
+if (iff.newform(iff.makeid('T','E','S','T')))\line
+    // Error on new form
+\par
+header.count = NUMBER_OF_DATA_CHUNKS;\line
+if (iff.write(iff.makeid('H','D','R',' '),\line
+\tab &header,sizeof(header_type)))\line
+    // Error on write
+\par
+for(int i=0; i < NUMBER_OF_DATA_CHUNKS; i++)\line
+\{\line
+    if (iff.write(iff.makeid('D','A','T','A'),\line
+    \tab &data[i],\line
+    \tab sizeof(data_type)))\line
+        // Error on write
+\par
+\}
+\par
+iff.leaveform();
+}\par
+
+\line {\b Example Three}\par
+
+Finally, this example will read the data generated by example two:
+\par
+
+{\f2
+XFParseIFF  iff;\line
+struct header_type \{\line
+    dword   count;\line
+\} header;\line
+data_type   *data;\line
+\par
+if (iff.open("DATA.IFF",XF_OPEN_READ))\line
+    // Error on open
+\par
+if (iff.seekform(iff.makeid('T','E','S','T')))\line
+    // Error on seek
+\par
+if (iff.enterform()))\line
+    // Error on enter
+\par
+if (iff.seekchunk(iff.makeid('H','D','R',' '))\line
+    // Invalid 'TEST' form
+\par
+if (iff.chunkSize != sizeof(header_type)\line
+\tab || iff.read(&header)\line
+\tab || header.count == 0)\line
+    // Header corrupt
+\par
+data = new data_type[header.count];\line
+if (!data)\line
+    // No memory
+\par
+for(int i=0; i < header.count; i++)\line
+\{\line
+    if (iff.seekchunk(iff.makeid('D','A','T','A'))\line
+        // Not enough DATA chunks
+\par
+    if (iff.chunkSize != sizeof(data_type)\line
+    \tab || iff.read(&data[i]))\line
+        // Error reading DATA chunk i
+\par
+\}
+\par
+iff.leaveform();
+}\par
+
+\pard\page
+
+
+{\comment
+°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+                               User's Guide
+
+°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+}
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+Overview                                                                  ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote UG_XFILE_OVERVIEW}
+${\footnote Overview}
++{\footnote BW_UG_2}
+{\b\f0{\cf2\scaps User's Guide: XFile}\line\fs32 Overview}\par\pard\sb100
+
+{\i XFile} includes utilities for working with the file formats
+ supported by the {\i XFile} library.
+\par
+
+The IFF file format is described in Electronic Arts EA-IFF-85
+ Standard for Interchange Format Files.  Charybdis'
+ implementation does not directly support CAT, PROP, or LIST
+ chunks.
+\par
+
+{\cf3 When LISTs are implemented for the XFParseIFF object, this
+ support will be added to these utilities.}\par
+
+\line{\b\fs28 Features}\par
+
+Tool for examining the contents of an IFF file.
+\par
+
+Compiler for creating IFF files from text description.
+\par
+
+\line{\b\fs28 Future Work}\par
+
+The IFF compiler may require some additional data types and
+ features as needed.   The {\i XFile} library's .X file format will
+ require several tools for the creation and maintenance of .X
+ files.  As the need arises, other tools will be included in the
+ {\i XFile} tools set.
+\par
+
+\line{\b\fs28 Reference}\par
+
+For more information on the IFF format:
+\par
+
+Jerry Morrison (Electronic Arts), {\i EA IFF 85 Standard for
+ Interchange Format Files}, January 14, 1985
+\par
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+IFF Directory                                                             ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote UG_XFILE_IFFDIR}
+${\footnote IFF Directory}
+K{\footnote IFFDIR}
++{\footnote BW_UG_2}
+{\b\f0{\cf2\scaps User's Guide: XFile}\line\fs32 IFF Directory}\par\pard\sb100
+
+IFF files may consist of multiple levels of forms and chunks,
+ making it difficult to garner useful information from a hex dump
+ of  the file contents.  This utility displays a list of all
+ forms and chunks, along with their sizes, contained within the
+ file.
+\par
+
+{\cf2 Note: This utility only displays the 'generic' information about the
+ IFF file's contents, such as identifiers, embedding, and size.  Actual
+ application or format specific information cannot be displayed by this
+ utility, and specialized directory utilities should be created for this
+ purpose (See {\uldb {\i Escher}'s Directory Utility}{\v UG_ESCH_DIR} for
+ an example).}\par
+
+{\cf3 When LISTs are implemented for the XFParseIFF object, this
+ support will be added to this utility.}\par
+
+\line{\b\fs28 Usage}\par
+
+iffdir [ -p ] [ -r ] [ -z ] <filename.iff>
+\par
+
+\line{\b\fs28 Options}\par
+
+{\b -p}\par
+
+By default, the display scrolls without pausing.  Using this
+ option causes the display to pause at the end of each screen.
+\par
+
+{\b -r}\par
+By default, the EA's IFF format is assumed.  This option directs
+ the utility to use Microsoft's RIFF format instead.
+\par
+
+{\b -z}\par
+By default, a 0 byte pad value for odd sized chunks is assumed,
+ as required by the EA IFF and Microsoft RIFF specifications.  Some
+ variations, such as the MIDI SMF file, don't use padding.
+\par
+
+\line{\b\fs28 Example}\par
+
+To display the contents of the file TEST.IFF while pausing after
+ each screen, type the following:
+\par
+
+{\f2
+iffdir -p test.iff
+\par
+}
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+IFF Compiler                                                              ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote UG_XFILE_IFFC}
+${\footnote IFF Compiler}
+K{\footnote IFFC}
++{\footnote BW_UG_2}
+{\b\f0{\cf2\scaps User's Guide: XFile}\line\fs32 IFF Compiler}\par\pard\sb100
+
+IFF files may be created by any number of editors or
+ applications, but it is often useful to generate data directly
+ from a source file description for control files and other
+ static data.  This utility creates IFF files directly from a
+ content description language.
+\par
+
+{\cf3 When LISTs are implemented for the XFParseIFF object, this
+ support will be added to this utility.}\par
+
+\line{\b\fs28 Usage}\par
+
+iffc [ -q | -e | -r | -z | -x ] <filename.cif> [ <filename.iff> ]
+\par
+
+\line{\b\fs28 Options}\par
+
+{\b -q}\par
+
+By default, the compiler displays information about the forms
+ and chunks being included in the new IFF file.  This option
+ directs the compiler to operate quietly.
+\par
+
+{\b -e}\par
+
+By default, the compiler generates a warning if a chunk is defined
+ without any data.  This option directs the compiler to disabled
+ this check.
+\par
+
+{\b -r}\par
+By default, the compiler uses EA's IFF format.  This option directs
+ the compiler to use Microsoft's RIFF format instead.
+\par
+
+{\b -z}\par
+By default, the compiler adds a 0 byte pad value to odd sized chunks
+ as required by the EA IFF and Microsoft RIFF specifications.  Some
+ variations, such as the MIDI SMF file, don't use padding.
+\par
+
+{\b -x}\par
+
+By default, the compiler will write any bitmaps as 'ILBM' forms.  This
+ option directs the compiler to use the 'XFEB' form instead.
+\par
+
+\line{\b\fs28 Language}\par
+
+The Charybdis IFF source language is a simple grammar for
+ describing the data contained in an IFF file.  The language
+ provides both direct support for various data types (bytes,
+ word, text strings, etc.) as well as merging and inclusion of
+ other IFF and binary files.
+\par
+
+
+Charybdis IFF source files are free-form text files which may
+ contain assembly-style ';' to end-of-line comments.  Any number
+ of forms, chunks, merges, bitmaps, and includes may be defined, with
+ forms being capable of containing another level of merges, chunks
+ containing data descriptions, forms, bitmaps, and includes.
+\par
+
+\line {\b merge}\par
+
+The simplest section is the 'merge' section.  The syntax of a
+ 'merge' is:
+\par
+
+{\f2 merge "<filename.iff>"}\par
+
+The merge operation copies all chunks in the IFF file given into
+ the target IFF file at the current form level.  This allows the
+ compiler to add data objects created by other applications and
+ editors.
+\par
+
+\line {\b chunk}\par
+
+The most common section is the 'chunk' section.  This defines a
+ chunk of data to be put into the file.  All of the data defined
+ in the chunk section is appended into RAM and written out as a
+ single block.  The syntax of a 'chunk' is:
+\par
+
+{\f2
+chunk "<identifier>" [ <options> ]\line
+\{\line
+    <data items>\line
+\}
+}\par
+
+The chunk identifier must be 4 characters including space,
+ punctuation, and mixed-case.  According to the IFF standard, the
+ following identifiers are reserved:  FORM, FOR0-9, PROP,
+ PRO0-PRO9, CAT, CAT0-9, LIST, LIS0-9, all spaces, and JJJJ.
+\par
+
+\par
+The chunk options control the interpretation of the data items.
+ The following options can be added to a chunk section:
+\par
+
+\line{\f2 intel <or> bigendian}\par
+
+This indicates that the data items should be put into memory in
+ Intel or Big-endian format.  This is the default.
+\par
+
+\line{\f2 motorola <or> littleendian}\par
+
+This indicates that the data items should be put into memory in
+ Motorola or Little-endian format.
+\par
+
+{\cf2
+Note:  The chunk sizes and identifiers in IFF are in Motorola format
+ to meet the standard, but the data contained within may be of any
+ format defined by the application.  If you are attempting to enter
+ data for a standard chunk or a chunk used by another application, pay
+ close attention to the byte-ordering format or an invalid chunk may be
+ generated.
+}\par
+
+\line{\f2 size <unsigned expression>}\par
+
+This informs the compiler that the size of the data items must equal the
+ number of bytes specified to be correct, otherwise an error is generated.
+\par
+
+{\f2 maxsize <unsigned expression>}\par
+
+This informs the compiler that the size of the data items must be less than
+ or equal to the number of bytes specified to be correct, otherwise
+ an error is generated.
+\par
+
+\par
+The data items in a chunk specify the actual values to be placed
+ into the chunk.  The following standard types are allowed:
+\par
+
+\line{\f2 byte [\{] <integer expr> [ '[' <repcount expr> ']' ] [, ... \}]}\line
+{\i Alias: 'char'}\par
+
+Byte(s) in the range -128 to 127.  If a repcount is
+ included, the value is put into the chunk multiple times.
+\par
+
+\line{\f2 ubyte [\{] <unsigned expr> [ '[' <repcount expr> ']' ] [, ... \}]}\par
+
+Byte(s) in the range 0 to 255.  If a repcount is included,
+ the value is put into the chunk multiple times.
+\par
+
+\line{\f2 word [\{] <integer expr> [ '[' <repcount expr> ']' ] [, ... \}]}\line
+{\i Alias: 'short'}\par
+
+Two bytes forming a word in the range -32768 top 32767.  This is
+ affected by the byte-ordering options.  If a repcount is
+ included, the value is put multiple times into the chunk.
+\par
+
+\line{\f2 uword [\{] <unsigned expr> [ '[' <repcount expr> ']' ] [, ... \}]}\line
+{\i Alias: 'ushort'}\par
+
+Two bytes forming a word in the range 0 to 65535.  This is
+ affected by the byte-ordering options.  If a repcount is
+ included, the value is put into the chunk multiple times.
+\par
+
+\line{\f2 dword [\{] <integer expr> [ '[' <repcount expr> ']' ] [, ... \}]}\line
+{\i Alias: 'long'}\par
+
+Four bytes forming a double-word in the range -2147483646 to
+ 21474833647.  This is affected by the byte-ordering options.  If
+ a repcount is included, the value is put into the chunk multiple
+ times.
+\par
+
+\line{\f2 udword [\{] <unsigned expr> [ '[' <repcount expr> ']' ] [, ... \}]}\line
+{\i Alias: 'ulong'}\par
+
+Four bytes forming a double-word in the range 0 to 4294967295.
+ This is affected by the byte-ordering options.  If a repcount is
+ included, the value is put into the chunk multiple times.
+\par
+
+\line{\f2 text [\{] "<string>" [, ... \}]}\par
+
+Puts the string into the chunk with NUL character at the end.
+\par
+
+{\f2 ntext [\{] <unsigned expr> "<string>" [, ... \}]}\par
+
+Puts the string into the chunk with a maximum length, padding any remaining
+ space with NUL.
+\par
+
+\line{\f2 binary "<filename.???>"}\par
+
+Loads the entire file as a data block into the chunk's data
+ block, thereby including all data contained within the file
+ regardless of the format.
+\par
+
+\line{\f2 float [\{] <floating-point expr> [ '[' <repcount expr> ']' ] [, ... \}]}\par
+
+Four bytes forming a single precision floating-point value.
+ This is affected by the byte-ordering options.  If a repcount is
+ included, the value is put into the chunk muliple times.
+\par
+
+\line{\f2 double [\{] <floating-point expr> [ '[' <repcount expr> ']' ] [, ... \}]}\par
+
+Eight bytes forming a double precision floating-point value.
+ This is affected by the byte-ordering options.  If a repcount is
+ included, the value is put into the chunk multiple times.
+\par
+
+\line{\f2 fixed16 [\{] <floating-point expr> [ '[' <repcount expr> ']' ] [, ... \}]}\par
+
+Puts a 16.16 fixed point value into the chunk.  This is affected
+ by the byte-ordering options.  If a repcount is included, the
+ value is put into the chunk multiple times.
+\par
+
+\line {\b form}\par
+
+A form section is used to define a subsection of the data to be
+ contained within a special chunk.  The syntax of a 'form'
+ section is:
+\par
+
+{\f2
+form "<identifier>"\line
+\{\line
+    <any section type>\line
+\}
+}\par
+
+The form identifier must be 4 characters including space and
+ upper-cased (FORMs are not allowed to use lower-case or
+ punctuation in their identifiers).  According to the IFF
+ standard, the following identifiers are reserved:  FORM, FOR0-9,
+ PROP, PRO0-PRO9, CAT, CAT0-9, LIST, LIS0-9, all spaces, and JJJJ.
+\par
+
+{\cf2 Note: Since the compiler can also generate Microsoft RIFF files, the
+ keyword {\b riff} may be used in place of {\b form}.}\par
+
+\line {\b include}\par
+
+An include section inserts another Charybdis IFF source file
+ into the current file and continues to generate the IFF file
+ from the data contained in it followed by the rest of the
+ current Charybdis IFF source file.  The syntax of an include
+ section is:
+\par
+
+{\f2 include "<filename.cif>"}
+\par
+
+\line {\b bitmap}\par
+
+A bitmap section inserts an image into the IFF file as an ILBM or XFEB
+ form, which may be read using the
+ {\uldb XFParseLBM}{\v PG_XFILE_XFPARSELBM} or
+ {\uldb XFParseXEB}{\v PG_XFILE_XFPARSEXEB} class.  The syntax
+ of a bitmap section is:
+\par
+
+{\f2 bitmap "<filename.xxx>" [bpp x]}
+\par
+
+The image file specified is read using the XFParseBitmap class
+ corresponding to the file extender, then written into the IFF file.
+ If the bitmap keyword is used within nested forms, the ILBM/XFEB form is
+ inserted into the current level.  If 'bpp x' is provided, the read
+ image is converted to 'x' bytes/pixel before writing.
+\par
+
+{\cf2 Note: The limitations of the XFParseBitmap objects, of course,
+ apply to the compiler.  Also, if the ILBM/XFEB form is nested, the
+ XFParseLBM/XEB class can only read it if the read(XFParseIFF *iff, ...)
+ member is used with the current form set to the desired ILBM/XFEB form since
+ the standard read only scans the first level of forms.
+}\par
+
+\line{\b\fs28 Example}\par
+
+The following is an example Charybdis IFF source file (.cif)
+ 'TEST.CIF':
+\par
+
+{\f2
+;--------------------------------------------------\line
+;\line
+; TEST.CIF\line
+;\line
+; Example for IFF compiler\line
+;\line
+;--------------------------------------------------\line
+\line
+form "EXAM"\line
+\{\line
+    chunk "CHNK"\line
+    \{\line
+        byte    'A'\line
+        byte    9\line
+        dword   8*1024\line
+    \}\line
+\}
+}\par
+
+Type the following to compile 'TEST.CIF' into 'TEST.IFF':
+\par
+
+{\f2 iffc test.cif}
+\par
+
+The resulting 'TEST.IFF' file will contain the FORM 'EXAM' with
+ a single chunk of 6 bytes.
+\par
+
+\pard\page
+
+{\comment °±² eof - xfile.rtf ²±° }
+}

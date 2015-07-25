@@ -1,0 +1,747 @@
+{\rtf1
+{\comment
+ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
+
+                             MythOS Master Help
+
+                      Microsoft Windows 95/98/NT Version
+
+   Copyright (c) 1994-1999 by Dan Higdon, Tim Little, and Chuck Walbourn
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ This file and all associated files are subject to the terms of the
+ GNU Lesser General Public License version 2 as published by the
+ Free Software Foundation (http://www.gnu.org).   They remain the
+ property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+ See LICENSE.TXT in the distribution for a copy of this license.
+
+ THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+ OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+ PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIM ANY
+ LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+ OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+                        http://www.mythos-engine.org/
+
+ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
+}
+
+{\fonttbl
+\f0\fswiss Arial;
+\f1\froman Times New Roman;
+\f2\fmodern Courier New;
+\f3\fswiss MS Sans Serif;
+\f4\froman MS Serif;
+}
+\deff1
+\fs21
+
+{\colortbl;
+\red128\green128\blue128;
+\red0\green0\blue128;
+\red0\green128\blue0;
+\red128\green0\blue0;
+}
+
+{\comment
+°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+                                   Misc.
+
+°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+}
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+Notice                                                                    ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote NOTICE}
+${\footnote Notice}
++{\footnote BW_0}
+{\b\fs32\f0 MythOS\'99 Guides}\par\pard\sb100
+
+Original issue:  September 1995
+\par
+
+Based on the DOS version originally issued:  December 1994
+\par
+
+Copyright (c) 1994-1999 by Charybdis Enterprises, Inc.
+\par
+
+{\i
+ This file and all associated files are subject to the terms of the
+ GNU Lesser General Public License version 2 as published by the
+ Free Software Foundation (http://www.gnu.org).   They remain the
+ property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+ See LICENSE.TXT in the distribution for a copy of this license.
+\par
+
+ THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+ OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+ PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIM ANY
+ LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+ OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+}
+\par
+
+http://www.mythos-engine.org/
+\par
+
+Bug reports, comments, and suggestions should be e-mailed to
+ mythos@mythos-engine.org.
+\par
+
+MythOS is a trademark of Charybdis Enterprises, Inc.
+\par
+
+Microsoft Windows, Windows 95, Windows 98, and Windows NT are
+ Copyright (c) 1985-1999 by Microsoft Corp.
+\par
+
+DirectX, DirectDraw, Direct3D, DirectSound, DirectPlay, DirectInput,
+ DirectShow, and DirectMusic are registered trademarks of Microsoft Corp.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+NOT YET DOCUMENTED                                                        ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+#{\footnote NYD}
+${\footnote !!!}
+\par
+{\b\fs32\cf4 Not Yet Documented}
+
+\pard\page
+
+
+
+{\comment
+°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+                            Programmer's Guide
+
+°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+}
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+About this guide                                                          ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_ABOUT}
+${\footnote About the Programmer's Guide}
++{\footnote BW_PG_1}
+{\b\f0{\cf2\scaps Programmer's Guide}\line\fs32 About this guide}\par\pard\sb100
+
+This document is intended to describe the libraries of routines
+ and objects available in the MythOS\'99 collection of software for
+ Windows 95/98/NT.  MythOS is intended to provide a robust set of
+ tools for the rapid development of high-performance,
+ high-quality entertainment/multi-media software on the PC.  This
+ manual assumes knowledge of C, C++, and some x86 Assembly as
+ well as basic knowledge of Windows 32-bit application
+ programming and the Win32 API.
+\par
+
+\line{\b\fs28 Organization}\par
+
+This guide is divided into the following sections:
+\par
+
+{\uldb Overview}{\v PG_OVERVIEW} of MythOS -- Contains the introduction
+ to the guide, the components available, and the intended uses of the
+ libraries in the MythOS collection.
+\par
+
+{\i\uldb System}{\v PG_SYSTEM_OVERVIEW} -- Describes the MythOS
+ system and library management class.
+\par
+
+{\i\uldb Ivory}{\v PG_IVORY_OVERVIEW} -- Describes the Charybdis
+ memory-management system.
+\par
+
+{\i\uldb XFile}{\v PG_XFILE_OVERVIEW} -- Describes the Charybdis file
+ system.
+\par
+
+{\i\uldb Chronos}{\v PG_CHRONOS_OVERVIEW} -- Describes the Charybdis timer
+ system.
+\par
+
+{\i\uldb Bozo}{\v PG_BOZO_OVERVIEW} -- Describes the multi-threading kernel
+ library.
+\par
+
+{\i\uldb Max}{\v PG_MAX_OVERVIEW} -- Describes the arbitrary event
+ processing system.
+\par
+
+{\i\uldb Felix}{\v PG_FELIX_OVERVIEW} -- Describes the fixed-point
+ support library.
+\par
+
+{\i\uldb Van Gogh}{\v PG_VNGO_OVERVIEW} -- Describes the 2D graphics
+ output library.
+\par
+
+{\i\uldb Escher}{\v PG_ESCH_OVERVIEW} -- Describes the 3D graphics
+ library
+\par
+
+{\i\uldb Gutenberg}{\v PG_GBERG_OVERVIEW} -- Describes the font system.
+\par
+
+{\i\uldb Turner}{\v PG_TURNER_OVERVIEW} -- Describes the network interface.
+\par
+
+{\i\uldb Newton}{\v PG_NEWTON_OVERVIEW} -- Describes the physics system.
+\par
+
+{\i\uldb Bach}{\v PG_BACH_OVERVIEW} -- Describes the sound system.
+\par
+
+{\i\uldb Spielberg}{\v PG_SBERG_OVERVIEW} -- Describes the animation/movie player.
+\par
+
+{\i\uldb Pane}{\v PG_PANE_OVERVIEW} -- Describes the GUI helper library.
+\par
+
+\line{\b\fs28 Conventions}\par
+
+Certain conventions are used through-out the manual for easy identification
+ of the material discussed:
+\par
+
+{\b Bold} is used for class names, data declaration, routine
+ declaration, and keywords.
+\par
+
+{\i Italics} is used to denote constants and component names.
+\par
+
+{\f2 Monowidth font} denotes sample source code.
+\par
+
+Each library is described in detail by a dedicated section which
+ includes a feature list and description of all routines and
+ objects contained within the library.
+\par
+
+For C-style interfaces, the following information is provided:
+\par
+
+\tab Synopsis\line
+\tab Functions\line
+\tab Example (optional)\line
+\tab Constants (optional)\line
+\par
+
+For C++-style interfaces, the following information is provided
+ for each object:
+\par
+
+\tab Name\line
+\tab Synopsis\line
+\tab Base Classes\line
+\tab Constructors\line
+\tab Member Data\line
+\tab Member Function\line
+\tab Constants (optional)\line
+\tab Example (optional)\line
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+Overview                                                                  ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_OVERVIEW}
+${\footnote Overview}
++{\footnote BW_PG_1}
+{\b\f0{\cf2\scaps Programmer's Guide}\line\fs32 Overview}\par\pard\sb100
+
+The MythOS\'99 collection provides programmers of
+ entertainment/multi-media software with a wide array of useful
+ tools which can be used in relative isolation or combined with
+ other components to form a base technology for engine
+ development.
+\par
+
+This collection of tools is designed for use with Microsoft
+ Visual C/C++ v6.x and the Windows 95/98/NT environment.  The libraries
+ were developed using Microsoft Visual C/C++ version 6.0 and
+ Microsoft's MASM Assembler version 6.14. Microsoft's Program
+ Maintenance Utility Version 1.20 was used for the makefiles.  Some
+ of the components may require the DirectX SDK V6.1 and the DirectX
+ Media V6 SDK.
+\par
+
+Because of the nature of the Windows environment, a number of
+ application-side initialization steps are required.  Therefore,
+ the Win32 version of MythOS includes an application framework
+ called {\i SimGine}  This framework includes all needed
+ initialization code and demonstrates the intended use of the
+ library components.  Example code in the MythOS distribution
+ demonstrates both the use of {\i SimGine} and direct initialization
+ of the MythOS components.
+\par
+
+\line{\b\fs28 Audience}\par
+
+This guide is intended for use by programmers who have a working
+ understanding of C and C++ programming, Windows 32-bit
+ programming and the Win32 API, and some x86 Assembly.  Certain
+ libraries may assume more specialized knowledge.
+\par
+
+\line{\b\fs28 Features}\par
+
+The major features of the MythOS collection are:
+\par
+
+High-performance, high-quality 2D and 3D graphics engine, including font
+ support.
+\par
+
+Supports high-resolution 8- and 15/16-bit devices using Windows WinG DIB,
+ DirectDraw\'ae, and Direct3D\'ae as well as selected proprietary 3D APIs for
+ direct 3D hardware support.
+\par
+
+Provides support for Gouraud-shaded, perspectively texture-mapped output,
+ including specular effects at real-time speeds.
+\par
+
+Supports hierarchical polygonal models, as well as specialized draw entities
+ for sprites, polygonal terrain, particle systems, and others.
+\par
+
+Easily extendible design.
+\par
+
+Custom memory-management functions for high-performance malloc-style, arena,
+ and handle-based memory allocation.
+\par
+
+Non-preemptive, multi-threaded, real-time kernel.
+\par
+
+Abstract event processing system, including support for keyboard, mouse, and
+ joysticks using the Win32 or DirectInput\'ae interfaces.
+\par
+
+Precision timer services.
+\par
+
+File system for quick development of data control and processing routines
+ including support for IFF and a variety of bitmap formats.
+\par
+
+Network interface wrapper for DirectPlay\'ae.
+\par
+
+Sound library wrapper for DirectSound\'ae including support for various
+ sample file formats and direct-from-disk file streaming.
+\par
+
+Animation/movie player library including support for
+ ActiveMovie/DirectShow\'ae.
+\par
+
+A Newtonian-physics simulation system for velocity and acceleration effects.
+\par
+
+Convenient and powerful supporting utilities and tools (see
+ {\uldb User's Guide}{\v UG_ABOUT} for more information on these utilities).
+\par
+
+\line{\b\fs28 Components}\par
+
+Each of the components of the MythOS system were designed to
+ be self-contained.  They rely on other components for specific
+ functions, but do not utilize special knowledge beyond that
+ documented for the supporting component.  This section describes
+ the libraries, required supporting components, and intended uses:
+\par
+
+{\i\uldb System}{\v PG_SYSTEM_OVERVIEW}\par
+
+The MythOS system class provides system and library controls
+ for integration of the components of the MythOS collection.
+ Initialization and termination of the components is provided, as
+ well as environment controls and diagnostics.
+\par
+
+{\i\uldb Ivory}{\v PG_IVORY_OVERVIEW}\par
+
+{\i Ivory} is a custom memory management system which provides
+ standard memory allocation, handle-based caching, and 'arena'
+ allocation to provide for the kinds of memory needed by
+ entertainment software.  This library uses Win32 allocation services to
+ allocate the kinds of memory needed for the memory system.  This
+ library includes both a standard C-style interface and C++
+ new/delete operators.
+\par
+
+{\i\uldb XFile}{\v PG_XFILE_OVERVIEW}\par
+
+A C and C++ file system is implemented in {\i XFile} to provide
+ minimal overhead block-i/o routines, as well as processing of
+ complex file formats.  This library uses standard Windows file
+ services to implement the file i/o operations and uses the
+ new/delete operators for memory allocation to allow use with and
+ without the {\i Ivory} memory manager.
+\par
+
+{\i\uldb Chronos}{\v PG_CHRONOS_OVERVIEW}\par
+
+Real-time software requires high-resolution timer services as
+ well as call-back functionality for real-time processing.
+ Support for both are provided by this library.
+\par
+
+{\i\uldb Bozo}{\v PG_BOZO_OVERVIEW}\par
+
+Multi-threading execution is a powerful technique for real-time
+ applications and this library provides non-preemptive
+ task-switching with a single memory image.  Support for
+ semaphores and other inter-thread synchronization is provided
+ for multi-tasking development.
+\par
+
+{\i\uldb Max}{\v PG_MAX_OVERVIEW}\par
+
+Events encapsulate data into discrete packages for processing by
+ applications.  {\i Max} provides an abstract event processing system
+ for user-input from keyboards or other input devices.
+\par
+
+{\i\uldb Felix}{\v PG_FELIX_OVERVIEW}\par
+
+Floating-point processing is not well supported across all
+ platforms, so support for fixed-point processing is required.
+ {\i Felix} provides high-performance fixed-point math operations
+ including advanced functions like square-root and cosine/sine.
+\par
+
+{\i\uldb Van Gogh}{\v PG_VNGO_OVERVIEW}\par
+
+Graphics device support is provided by the {\i Van Gogh} library for
+ output of lines and images, as well as more complicated 2D
+ primitives to PC video devices.  Output to virtual screens as
+ well as Windows DIB and DirectDraw surfaces at various resolutions
+ and color depths is included.  Extensive support for 3D is included
+ for color models, shaded polygonal primitives, Z-buffering, and
+ texture-mapping.  {\i XFile} is used to provide file i/o for palette
+ data.
+\par
+
+{\i\uldb Escher}{\v PG_ESCH_OVERVIEW}\par
+
+Display of 3D models and other 3D objects is performed by
+ {\i Escher}, utilizing the output capabilities of {\i Van Gogh}, the math
+ functions of {\i Felix}, and much of the memory-management provided
+ by {\i Ivory}.  Support for triangular meshes and terrain is
+ provided, along with other drawable implementations.  {\i XFile} is
+ used to provide file i/o for object and model data.
+\par
+
+{\i\uldb Gutenberg}{\v PG_GBERG_OVERVIEW}\par
+
+Text output with fonts is provided by the {\i Gutenberg} library for
+ use with {\i Van Gogh} for final output.  Support for external text
+ resources is also provided for easy alteration and/or
+ translation of displayed strings.  {\i XFile} is used to provide
+ file i/o for font and text data.
+\par
+
+{\i\uldb Turner}{\v PG_TURNER_OVERVIEW}\par
+
+A standard interface to the network is provided by the {\i Turner}
+ library which makes use of the Microsoft DirectPlay API.
+\par
+
+{\i\uldb Newton}{\v PG_NEWTON_OVERVIEW}\par
+
+A standard Newtonian physics simulation library is provided by the
+ {\i Newton} library.
+\par
+
+{\i\uldb Bach}{\v PG_BACH_OVERVIEW}\par
+
+C++ sound library to provide a high-level inteface for the Microsoft
+ DirectSound API.
+\par
+
+{\i\uldb Spielberg}{\v PG_SBERG_OVERVIEW}\par
+
+Mulitimedia animation/movie player library with support for the Microsoft
+ ActiveMovie/DirectShow API.
+\par
+
+{\i\uldb Pane}{\v PG_PANE_OVERVIEW}\par
+
+Graphical user interface helper library with components for use with
+ {\i Van Gogh} and {\i Max}.
+\par
+
+\line{\b\fs28 Future Work}\par
+
+The MythOS 95 library set represents a technology base started in 1994
+ for use in Charybdis' first title.  We had plans for the development
+ of a new 2.0 version of the library to provide a major rewrite of the
+ graphics libraries (Van Gogh and Escher) to update for the shift
+ to 3D graphics consumer hardware from software-based rendering
+ on 486 class computers.  This version was to be called "MythOS 98".
+\par
+
+We are not making any commitments for a future version, but there are
+ a number of plans which may or may not materialize.  Any such work
+ will take place on a part-time basis and would hopefully be released
+ using the same Open Source license.  The new version would be a major
+ rewrite and would not be compatable with MythOS 95.
+\par
+
+\par
+
+\pard\page
+
+
+
+{\comment
+°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+                               User's Guide
+
+°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+}
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+About this guide                                                          ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote UG_ABOUT}
+${\footnote About the User's Guide}
++{\footnote BW_UG_1}
+{\b\f0{\cf2\scaps User's Guide}\line\fs32 About this guide}\par\pard\sb100
+
+This guide is intended to describe the utilities supplied for use with the
+ MythOS\'99 collection of software tools.  MythOS is intended to provide
+ a robust set of tools for the rapid development of high-performance,
+ high-quality entertainment/multi-media software on the PC.  This manual
+ assumes knowledge of command-line execution and some sections assume
+ knowledge of specific applications.
+\par
+
+\line{\b\fs28 Organization}\par
+
+This guide is divided into the following sections:
+\par
+
+{\uldb Overview}{\v UG_OVERVIEW} of MythOS -- Contains the introduction
+ to the guide, the components available, and the intended uses of the
+ utilities in the MythOS collection.
+\par
+
+{\i\uldb XFile}{\v UG_XFILE_OVERVIEW} -- Describes the Charybdis file
+ system utilities.
+\par
+
+{\i\uldb Max}{\v UG_MAX_OVERVIEW} -- Describes the event utilities.
+\par
+
+{\i\uldb Van Gogh}{\v UG_VNGO_OVERVIEW} -- Describes the 2D graphic
+ system utilities.
+\par
+
+{\i\uldb Escher}{\v UG_ESCH_OVERVIEW} -- Describes the 3D graphics
+ system utilities and exporter.
+\par
+
+{\i\uldb Gutenberg}{\v UG_GBERG_OVERVIEW} -- Describes the font system
+ conversion utilities.
+\par
+
+{\uldb Utilities}{\v UG_UTIL_OVERVIEW} -- Describes the additional utility
+ programs provided.
+\par
+
+\line{\b\fs28 Conventions}\par
+
+Certain conventions are used through-out the manual for easy identification
+ of the material discussed:
+\par
+
+{\b Bold} is used for command descriptions and program names.
+\par
+
+{\i Italics} is used to denote component names.
+\par
+
+{\f2 Monowidth font} denotes keyboard input.
+\par
+
+Each section includes a feature list and information about future directions.
+\par
+
+The majority of the utilities are designed for use from the command line
+ and include the following standard sections:
+\par
+
+\tab Usage\line
+\tab Options\line
+\tab Example\line
+\tab Other information needed to utilize the tool
+\line
+\par
+
+Some of the utilities supplied are add-on modules or stand-alone applications
+ and are documented as needed.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+Overview                                                                  ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote UG_OVERVIEW}
+${\footnote Overview}
++{\footnote BW_UG_1}
+{\b\f0{\cf2\scaps User's Guide}\line\fs32 Overview}\par\pard\sb100
+
+The MythOS\'99 collection provides developers of entertainment
+ and multi-media software with a wide array of useful tools which can be
+ used to augment software development.
+\par
+
+This collection of tools is designed for use from the an MS-DOS Box under
+ Windows 9x/NT, as a native Win32 application, or from within specific
+ applications.
+\par
+
+\line{\b\fs28 Audience}\par
+
+This guide is intended for developers who have a working
+ understanding of Windows 95/98/NT and the intended application of the
+ MythOS software.  Some components require application specific
+ knowledge.  No knowledge of C/C++/Assembly programming is
+ assumed for this guide.
+\par
+
+\line{\b\fs28 Features}\par
+
+The major tools of the MythOS collection are:
+\par
+
+3D data exporter for 3D Studio\'ae Release 4 and 3D viewer for polygonal
+ models and associated materials, cameras, and lights.
+\par
+
+Terrain data editor for polygonal-based terrain system.
+\par
+
+Format converters for bitmaps and other data sets.
+\par
+
+Texture librarian for manipulating exported texture data.
+\par
+
+Interactive palette generation tool for creation of high-quality shading
+ palettes for application-specific needs.
+\par
+
+Data compilers for file and font systems (including TrueType font capture
+ utility).
+\par
+
+Event compiler for easy redefinition of user inputs for easier product
+ development and tuning.
+\par
+
+\line{\b\fs28 Components}\par
+
+Each of the components of the MythOS system require different
+ utilities and tools.  This section describes the tools
+ associated with each library:
+\par
+
+{\i\uldb XFile}{\v UG_XFILE_OVERVIEW}\par
+
+The tools associated with the {\i XFile} library are for the
+ creation, examination, and maintenance of data file formats. The
+ Interchange File Format from Electronic Arts is used as the
+ basic file format in MythOS and a compiler and directory
+ utility is included for working with these files.
+\par
+
+{\i\uldb Max}{\v UG_MAX_OVERVIEW}\par
+
+Application defined events in {\i Max} may have any number of
+ associated definitions or triggers.  These are defined via a
+ standard file format created by an event compiler.
+\par
+
+{\i\uldb Van Gogh}{\v UG_VNGO_OVERVIEW}\par
+
+The quality of the color palette plays an extremely important
+ role for the display of 2D primitives, particularly shaded
+ primitives.  Palette conversion and creation utilities are
+ included for this purpose.
+\par
+
+{\i\uldb Escher}{\v UG_ESCH_OVERVIEW}\par
+
+3D datasets may be created in any number of applications, and
+ providing a completely full-featured editor would be a
+ significant investment.  {\i Escher} includes a data exporter for 3D
+ Studio and other data conversion and examining utilities.
+\par
+
+{\i\uldb Gutenberg}{\v UG_GBERG_OVERVIEW}\par
+
+Character font data and text strings are converted via tools
+ supplied with {\i Gutenberg} into a format suitable for display or
+ manipulation.
+\par
+
+{\i\uldb Utilities}{\v UG_UTIL_OVERVIEW}\par
+
+Bitmap image recoloring tool for using bitmaps with specific {\i Van
+ Gogh} palettes.
+\par
+
+\line{\b\fs28 Future Work}\par
+
+The collection of tools will expand as the need arises, and the
+ current tools will be refined as well.  Additional components
+ may require other utilities and tools.  A number of the command
+ line tools will be converted to true Win32 applications for
+ interactive use.
+\par
+
+\pard\page
+
+{\comment °±² eof - mythos.rtf ²±° }
+}

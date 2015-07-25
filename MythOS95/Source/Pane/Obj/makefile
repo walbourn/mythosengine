@@ -1,0 +1,130 @@
+#ֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽ
+#ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
+#שששששששששששששששששש°°°°°°ששששש°°°°°°°שששש°°ששששש°°°ש°°°°°°°°°°שששששששששששששש
+#ששששששששששששששששש°±°שששש°שש°±°שששש°±ששש°±°שששש°±°ש°±°שששששששששששששששששששששש
+#שששששששששששששששש±°±שששש±שש±°±ששששש±±שש±°±°ששש±°±ש±°±ששששששששששששששששששששששש
+#ששששששששששששששש±²±±°±±²שש±²±±°±±²±±שש±²±±°שש²±±ש±²±±°±±²ששששששששששששששששששש
+#שששששששששששששש±²±ששששששש²±ששששש±²±שש±²±שש²ש±²±ש±²±ששששששששששששששששששששששששש
+#ששששששששששששש²±²ששששששש²±²שששש²±²שש²±²ששש²²±²ש²±²שששששששששששששששששששששששששש
+#שששששששששששש²²²ששששששש²²²שששש²²²שש²²²שששש²²²ש²²²²²²²²²²שששששששששששששששששששש
+#ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
+#ששששששששששששששששש Microsoft Windows 95/98/NT Version שששששששששששששששששששששש
+#ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
+#שששCopyright (c) 1996-1999 by Dan Higdon, Tim Little, and Chuck Walbournששש
+#ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
+#ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
+#ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
+#
+# This file and all associated files are subject to the terms of the
+# GNU Lesser General Public License version 2 as published by the
+# Free Software Foundation (http://www.gnu.org).   They remain the
+# property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+# See LICENSE.TXT in the distribution for a copy of this license.
+#
+# THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+# OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+# PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+# LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+# OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+#
+#ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
+#
+#                        http://www.mythos-engine.org/
+#
+#ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
+#
+# Created by Sean Gallagher
+#
+# makefile
+#
+#ֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽ
+
+#°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+#
+#                               Variables
+#
+#°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+!if "$(DEBUG)" == ""
+DEBUG = NO
+!endif
+
+!if "$(THREAD)" == ""
+THREAD = YES
+!endif
+
+!if "$(MYTH95ROOT)" == ""
+MYTH95ROOT = \MythOS95
+!endif
+
+INCPATH = ;..\inc;$(MYTH95ROOT)\inc;
+
+#ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ¿
+# File specific variables                                                  ³
+#ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִÙ
+
+LIB = pane
+OBJS=\
+pnimgscr.obj\
+pninput.obj\
+pnlbox.obj\
+pntxtscr.obj
+
+LIBPATH = $(MYTH95ROOT)\lib;
+
+#ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ¿
+# First target                                                             ³
+#ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִÙ
+
+all: setstden $(LIB).lib
+
+#ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ¿
+# Standard make include                                                    ³
+#ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִÙ
+
+!include $(MYTH95ROOT)\inc\make.inc
+
+#°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+#
+#                                 Rules
+#
+#°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+#--- .c, .cpp, .asm setup in standard include ---
+
+#±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+#
+#                              Dependencies
+#
+#±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+
+imgscrol.obj:  ..\imgscrol.cpp  ..\inc\imgscrol.hpp
+input.obj: ..\input.cpp ..\inc\input.hpp
+listbox.obj: ..\listbox.cpp ..\inc\listbox.hpp
+txtscrol.obj: ..\txtscrol.cpp ..\inc\txtscrol.hpp
+
+#ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ¿
+# Library                                                                  ³
+#ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִÙ
+
+$(LIB).lib:   $(OBJS)
+    -del $(LIB).lib
+    $(LB) $(LBOPTS) /out:$(LIB).lib @<<
+    $(OBJS: =
+)
+<<
+
+release: all
+    copy ..\inc\*.* $(MYTH95ROOT)\inc
+    copy $(LIB).lib $(MYTH95ROOT)\lib
+
+clean:
+    del *.obj
+    del *.res
+    del *.err
+    del *.lst
+    del *.ilk
+    del *.pdb
+
+#°±² End of makefile ²±°
+

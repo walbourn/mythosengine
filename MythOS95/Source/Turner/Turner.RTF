@@ -1,0 +1,885 @@
+{\rtf1
+{\comment
+ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
+
+                                 Turner Help
+
+                      Microsoft Windows 95/98/NT Version
+
+   Copyright (c) 1995-1999 by Dan Higdon, Tim Little, and Chuck Walbourn
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ This file and all associated files are subject to the terms of the
+ GNU Lesser General Public License version 2 as published by the
+ Free Software Foundation (http://www.gnu.org).   They remain the
+ property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+ See LICENSE.TXT in the distribution for a copy of this license.
+
+ THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+ OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+ PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+ LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+ OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+                        http://www.mythos-engine.org/
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ Turner is a component of the MythOS(tm) collection.
+
+ MythOS is a trademark of Charybdis Enterprises, Inc.
+
+ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
+}
+
+{\fonttbl
+\f0\fswiss Arial;
+\f1\froman Times New Roman;
+\f2\fmodern Courier New;
+\f3\fswiss MS Sans Serif;
+\f4\froman MS Serif;
+}
+\deff1
+\fs21
+
+{\colortbl;
+\red128\green128\blue128;
+\red0\green0\blue128;
+\red0\green128\blue0;
+\red128\green0\blue0;
+}
+
+{\comment
+°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+                            Programmer's Guide
+
+°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+}
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+Overview                                                                  ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_TURNER_OVERVIEW}
+${\footnote Overview}
++{\footnote BW_PG_C}
+{\b\f0{\cf2\scaps Programmer's Guide: Turner}\line\fs32 Overview}\par\pard\sb100
+
+{\i Turner} is a library written to help the programmer make and
+ manage network connections.  {\i Turner} encapsulates the Microsoft
+ DirectPlay interface, described in the Microsoft DirectX SDK.
+ This library will manage the establishment of network connections
+ and the sending and receiving of data amongst players.  It will not
+ manage the  synchronization of different machines, nor will it impose
+ a framework on the program in which it is used.  For an example of a
+ network play game implemented with {\i Turner}, see the Charybdis
+ {\b LLander} example included with the MythOS SDK.
+\par
+
+\line{\b\fs28 Features}\par
+
+Easy to use interface which virtualizes the DirectPlay system message
+ structure.\par
+
+Separate, optional UI for establishing connections.\par
+
+\line{\b\fs28 Organization}\par
+
+{\i Turner} is comprised of two primary classes,
+ {\uldb\b TurnerNetwork}{\v PG_TURNER_NETWORK}, and
+ {\uldb\b TurnerNetworkUI}{\v PG_TURNER_NETWORKUI}.
+ An application derives a new network management
+ class from {\b TurnerNetwork}, overloading any member functions
+ necessary.  A simplier interface is provided by the
+ {\uldb\b TurnerClassic}{\v PG_TURNER_CLASSIC}.
+ A {\b TurnerNetworkUI} object may then be instantiated
+ to allow a user to establish a connection.  {\b TurnerNetworkUI}
+ is in no way "magic", and performs its work by calling {\b TurnerNetwork}
+ members.  If a different initialization procedure is desired, merely
+ replace {\b TurnerNetworkUI} with a different initialization technique.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+TurnerClassic                                                             ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_TURNER_CLASSIC}
+${\footnote TurnerClassic Class}
+K{\footnote
+ TurnerClassic;
+ TurnerClassic, select_provider;
+ TurnerClassic, close;
+ TurnerClassic, create_game;
+ TurnerClassic, connect_game;
+ TurnerClassic, set_session_desc;
+ TurnerClassic, create_player;
+ TurnerClassic, destroy_player;
+ TurnerClassic, set_player_name;
+ TurnerClassic, set_player_data;
+ TurnerClassic, receive;
+ TurnerClassic, receive_all;
+ TurnerClassic, send;
+ TurnerClassic, send_guaranteed;
+ TurnerClassic, broadcast;
+ TurnerClassic, broadcast_guaranteed;
+ TurnerClassic, send_chat;
+ TurnerClassic, broadcast_chat;
+ TurnerClassic, handle_msg;
+ TurnerClassic, handle_chat;
+ TurnerClassic, handle_sysmsg;
+ TurnerClassic, sys_set_session_desc;
+ TurnerClassic, sys_host;
+ TurnerClassic, sys_no_session;
+ TurnerClassic, sys_newplayer;
+ TurnerClassic, sys_delplayer;
+ TurnerClassic, sys_set_player_name;
+ TurnerClassic, sys_set_player_data;
+ TurnerClassic, enum_providers;
+ TurnerClassic, enum_sessions;
+ TurnerClassic, handle_enum_provider;
+ TurnerClassic, handle_enum_session;
+ TurnerClassic, is_host;
+ TurnerClassic, is_active;
+ TurnerClassic, is_valid;
+ TurnerClassic, set_flags;
+ TurnerClassic, set_async;
+ TurnerClassic, set_sendcomplete;
+ TurnerClassic, set_player_id;
+ TurnerClassic, set_max_players;
+ TurnerClassic, set_user;
+ TurnerClassic, set_session_name;
+ TurnerClassic, set_password;
+ TurnerClassic, get_caps;
+ TurnerClassic, get_player_caps;
+ TurnerClassic, get_send_message_queue;
+ TurnerClassic, get_receive_message_queue}
++{\footnote BW_PG_C}
+{\b\f0{\cf2\scaps Programmer's Guide: Turner}\line\fs32 TurnerClassic Class}\par\pard\sb100
+
+{\scaps\cf4 NEW}\line
+This class encapsulates the basic DirectPlay interface including creation,
+ joining, and message sending and processing.  All functionality required
+ for creating a multiplayer application is included as well as initialization
+ routines for creating sessions.  The class is abstract so the application
+ must derive a new class and override handle_msg() and handle_chat() at a
+ minimum.
+\par
+
+Advanced features such as 'group' usage and advanced send options are
+ encapuslated by {\uldb\b TurnerNetwork}{\v PG_TURNER_NETWORK}.
+\par
+
+\line{\b\fs28 Name}\par
+
+{\b TurnerClassic}\par
+A network connection/management class.
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include <turner.hpp>
+\par
+
+\line{\b\fs28 Base Classes}\par
+
+None.
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b TurnerClassic (GUID _guid, const char *_name, int _players,
+ DWORD sflags=TURNER_DPSESSION_FLAGS);}\par
+
+Initializes the network object with the provided GUID, session name,
+ maximum number of players, and session flags ({\i DPSESSION_}).
+\par
+
+{\b TurnerClassic (GUID _guid, const char *_name, int _players,
+ const char *_passwd, DWORD sflags=TURNER_DPSESSION_FLAGS);}\par
+
+Initializes the network object with the provided GUID, session name,
+ maximum number of players, session password, and session
+ flags ({\i DPSESSION_}).
+\par
+
+The 'guid' used by the constructor is an application GUID which
+ must be unique to each different product.  If multiple products
+ are to interact via multiplayer, they would have to share the
+ same guid but must process all the same messages and share the
+ same interpretation of the player and session structures.  To
+ prevent previous revisions of a product from being visible to
+ a new version, update the GUID (incrementing the last byte will
+ usually work).
+\par
+
+\line{\b\fs28 Member Data}\par
+
+{\b dword flags;}\par
+
+State flags for the network object.  The curently defined flags
+ used by the object are: {\i TURNER_FLAGS_OPEN} and {\i TURNER_FLAGS_HOST}.
+ Application bits have been defined for your use: {\i TURNER_FLAGS_APP0}
+ - {\i TURNER_FLAGS_APP7}.  Use set_flags().
+\par
+
+{\b DWORD sendfl;}\par
+
+Base send flags used for all send functions.  Use set_async() and
+ set_sendcomplete().
+\par
+
+{\b IDirectPlay4A *pIDP}\par
+
+This is the DirectPlay interface object used by {\b TurnerNetwork}.
+ If for some reason direct access to the DirectPlay object is required,
+ this member exposes it.
+\par
+
+{\b DPID playerid;}\par
+
+This is the last locally created player id set by create_player().
+ This value is used when a 0 is passed as a 'from' parameter to
+ one of the send methods.  This can be manually set to another
+ locally created player id with set_player_id() although
+ future calls to create_player() will overwrite the current value.
+\par
+
+{\b DPSESSIONDESC2 session}\par
+
+This structure contains the information used to initialize DirectPlay.
+ Some of the fields in this structure may be of interest to the programmer,
+ so please refer to Microsoft's DirectPlay documentation for more details.
+ Use set_session_desc() to change.
+\par
+
+{\b char sessionName[TURNER_MAX_NAME];}\par
+
+This is the session name as set by the contructor.
+\par
+
+{\b char password[TURNER_MAX_PASSWD];}\par
+
+This is the password for either creating or joining a {\i DPSESSION_PRIVATE}
+ or {\i DPSESSION_PASSWORDREQUIRED} session.
+\par
+
+\line{\b\fs28 Member Function}\par
+
+{\b virtual int select_provider (LPGUID guid);\line
+virtual int select_provider (LPVOID address);\line
+virtual int select_provider (turner_provider provider, LPVOID data=0);}\par
+
+Selects a service provider which creates the DirectPlay interface.  The
+ routines return the DP result code.  Service providers are the method
+ of communication such as IPX, TCP/IP, Modem, or perhaps an on-line service.
+\par
+
+The first version which takes GUID is meant to take the provider GUID from
+ the enum_providers() routine.
+\par
+
+The second version takes a DirectPlayLobby address.  The third version
+ constructs such an address based on enumeration and optional data:
+\par
+
+{\i TURNER_PROVIDER_IPX}\tab\tab Selects IPX networking.\par
+
+{\i TURNER_PROVIDER_TCPIP}\tab\tab Selects TCP/IP networking,
+ specifying a network address as a nul-terminated string.\par
+
+{\i TURNER_PROVIDER_MODEM}\tab\tab Selects Modem networking,
+ specifying a modem description string as a nul-terminated string.\par
+
+{\i TURNER_PROVIDER_SERIAL}\tab\tab Selects Serial networking,
+ specifying a DPCOMPORTADDRESS structure.\par
+
+{\b virtual void close ();}\par
+
+Closes the session, breaking all contact with other players.
+\par
+
+{\b virtual int create_game ();}\par
+
+Creates a new game session on the currently select provider service.
+ Returns an error if no provider has been selected, or if the game
+ cannot be created.  Returns the DP result code.
+\par
+
+{\b virtual int connect_game (GUID, BOOL create_event = FALSE)}\par
+
+Connects to an existing game on the selected service provider.
+ The GUID parameter identifies the game, and must come from the
+ list of available sessions on the selected provider.  This list
+ can be obtained through the enum_sessions() routine.  During the
+ connection, existing players are enumerated to the sys_newplayer()
+ method.  Returns the DP result code.
+\par
+
+{\b virtual int set_session_desc(DPSESSIONDESC2 &desc);}\par
+
+Updates the session description structure.  Only the host of the session
+ can change the session description.  Returns the DP result code.
+\par
+
+{\b virtual DPID create_player (const char *short_name, const char *long_name,
+ LPVOID data=0, DWORD size=0, DWORD _flags=0)}\par
+
+Creates a player in the current session.  The first string
+ is a short name, often a handle.  The second string is a full
+ name, used to identify the player in a more "formal" way. Optional
+ player data can also be specified.  The _flags parameter is 0 for
+ a normal player, {\i DPPLAYER_SERVERPLAYER} for a server player
+ only creatable on the host machine, or as a {\i DPPLAYER_SPECTATOR}.
+ Returns the created player id.
+\par
+
+The playerid member variable is set with the return value automatically.
+\par
+
+Note that only one player needs to be created locally.  Other
+ players are detected during a connect_game() call, and reported
+ by way of sys_newplayer().  See Microsoft's DirectPlay documentation
+ for more details.
+\par
+
+{\b virtual void destroy_player (DPID player);}\par
+
+Removes the player from the session.  All other systems are
+ notified of the player's departure.  If the departing player
+ initiated the session, no other players will be able to join
+ the session, but existing players may continue on unmolested
+ unless DPSESSION_MIGRATEHOST was specified in the session
+ creation, in which case a sys_host() message is sent to the
+ new host machine.
+\par
+
+{\b virtual int set_player_name(DPID player,
+ const char *short_name, const char *long_name, DWORD _flags=0);}\par
+
+This updates a player's handle and full name.  The _flags parameter
+ controls how the name will be propogated: {\i DPSET_GUARANTEED},
+ {\i DPSET_LOCAL}, or {\i DPSET_REMOTE} which is the default.
+ Returns the DP result code.
+\par
+
+{\b virtual int set_player_data(DPID player, LPVOID data,
+ DWORD size, DWORD _flags=0);}\par
+
+This updates a player's data.  The _flags parameter
+ controls how the name will be propogated: {\i DPSET_GUARANTEED},
+ {\i DPSET_LOCAL}, or {\i DPSET_REMOTE} which is the default.
+ Returns the DP result code.
+\par
+
+{\b virtual int receive ();};\par
+
+Checks for a pending message and calls handle_msg() or handle_sysmsg()
+ as required.  The receive buffer is maintained internally and
+ if the size of a message exceeds the current buffer, a larger
+ one is allocated and use for future receive calls.
+ Returns the DP result code.
+\par
+
+{\b virtual int receive_all (DWORD timeout=0);}\par
+
+Recieves all pending messages if timeout is 0 or processes pending messages
+ until the timeout is exceeded by the handler.
+ Returns the DP result code.
+\par
+
+{\b virtual int send (DPID from, DPID to, LPVOID data, DWORD size);\line
+virtual int send_guaranteed (DPID from, DPID to, LPVOID data, DWORD size);}\par
+
+Sends a message to a player, group, or DPID_SERVERPLAYER.  The 'from'
+ id must be a local player or 0 which indicates the last locally created
+ player id ('playerid' member).  If the second version is used, the
+ message is sent guaranteed.  Returns the DP result code.
+\par
+
+{\b virtual int broadcast (DPID from, LPVOID data, DWORD size);\line
+virtual int broadcast_guaranteed (DPID from, LPVOID data, DWORD size);}\par
+
+Broadcasts a message to all players.  The 'from' id must be a local
+ player or 0 which indicates the last locally created player id
+ ('playerid' member).  If the second version is used, the message
+ is sent guaranteed.  Returns the DP result code.
+\par
+
+{\b virtual int send_chat (DPID from, DPID to, char *msg, DWORD _flags=0);\line
+virtual int broadcast_chat (DPID from, char *msg, DWORD _flags=0);}\par
+
+Sends or broadcasts a chat message.  The 'from' id must be a local
+ player or 0 which indiciates the last locally created player id
+ ('playerid' member).  Returns the DP result code.
+\par
+
+\line{\b Application message processing methods}\par
+
+{\b virtual void handle_msg (DPID from, DPID to, LPVOID ptr, DWORD size)=0;}\par
+
+This method must be overridden and is called whenever a non-system
+ message is pending and the receive() method is invoked.
+\par
+
+{\b virtual void handle_chat (DPID fromplayer, DPID toplayer, DPID togroup,
+ LPSTR msg)=0;}\par
+
+This method must be overridden and is called whenever a chat system
+ message is pending and the receive() method is invoked.  This method
+ is called by the default implementation of handle_sysmsg().
+\par
+
+\line{\b System message processing methods}\par
+
+{\b virtual void handle_sysmsg (DPID to, DPMSG_GENERIC *msg, DWORD size);}\par
+
+This method is called whenever a system message is pending and
+ the receive() method is invoked.  The default implementation dispatches
+ to the handle_chat() and sys_() methods.
+\par
+
+{\b virtual void sys_set_session_desc(DPSESSIONDESC2 &desc);\line
+virtual void sys_host ();\line
+virtual void sys_no_session ();\line
+virtual void sys_newplayer (DPID player, LPCSTR short_name, LPCSTR long_name,
+ LPVOID data, DWORD size, DPID pgroup, DWORD _flags);\line
+virtual void sys_delplayer (DPID player, DWORD _flags);\line
+virtual void sys_set_player_name (DPID player, LPCSTR short_name, LPCSTR long_name);\line
+virtual void sys_set_player_data (DPID player, LPVOID data, DWORD size);}\par
+
+These methods are invoked by the default implementation of handle_sysmsg().
+\par
+
+\line{\b Enumeration methods}\par
+
+{\b virtual void enum_providers();}\par
+
+This method enumerates all service providers on the system, invoking
+ the handle_enum_provider() method for each.
+\par
+
+{\b virtual void enum_sessions(DWORD timeout=5000);}\par
+
+This method enumerates all sessions on the current service provider
+ with the application guid, invoking the handle_enum_session()
+ method for each.
+\par
+
+{\b virtual int handle_enum_provider(LPGUID _guid, LPSTR _desc,
+ DWORD _majver, DWORD _minver);\line
+virtual int handle_enum_session(LPCDPSESSIONDESC2 _session,
+ LPDWORD _timeout, DWORD _flags);}\par
+
+These methods are invoked by enum_sessions()/enum_providers() and
+ should be overridden by the application to receive enumeration callbacks.
+ Return 1 to continue the enumeration, 0 to stop.
+\par
+
+\line{\b Utility methods}\par
+
+{\b int is_host() const;}\par
+
+Tests the {\i TURNER_FLAGS_HOST} bit of the flags member variable.
+\par
+
+{\b int is_active () const;}\par
+
+Tests the {\i TURNER_FLAGS_OPEN} bit of the flags member variables.
+\par
+
+{\b int is_valid () const;}\par
+
+Tests if the pIDP is allocated.
+\par
+
+{\b void set_flags(dword f);}\par
+
+Sets the flags member.  Should be or'd or and'd with the
+ current flags member.
+\par
+
+{\b void set_async(BOOL on);\line
+void set_sendcomplete(BOOL on);}\par
+
+Turns on or off the send flags in sendfl.
+\par
+
+{\b void set_player_id(DPID id);}\par
+
+Overrides the playerid value for use when a 0 is passed to
+ the 'from' parameter of the send methods.
+\par
+
+{\b int set_max_players(int _players);\line
+int set_user(DWORD user1, DWORD user2, DWORD user3, DWORD user4);\line
+int set_session_name(char *_name);\line
+int set_password(char *_passwd);}\par
+
+Sets the given value into the session description.  Returns the
+ DP result code.
+\par
+
+{\b int get_caps(LPDPCAPS caps, DWORD _flags=0);}\par
+
+Returns capabilities for either non-guaranteed messaging if _flags is 0
+ or guaranteed message if _flags is set to {\i DPGETCAPS_GUARANTEED}.
+ Returns the DP result code.
+\par
+
+{\b int get_player_caps(DPID player, LPDPCAPS caps, DWORD _flags=0);}\par
+
+Gets caps for a specific player for either non-guaranteed or guaranteed
+ messaging.  Returns the DP result code.
+\par
+
+{\b int get_send_message_queue(DPID from, DPID to, LPDWORD nmsgs, LPDWORD nbytes);\line
+int get_receive_message_queue(DPID from, DPID to, LPDWORD nmsgs, LPDWORD nbytes);}\par
+
+Returns information about the current sent or receieve queue.  If 'from'
+ and/or 'to' is 0, then all such ids are used to determine the result.
+ Returns the DP result code.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+TurnerNetwork                                                             ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_TURNER_NETWORK}
+${\footnote TurnerNetwork Class}
+K{\footnote
+ TurnerNetwork;
+ TurnerNetwork, connect_game;
+ TurnerNetwork, create_group;
+ TurnerNetwork, destroy_group;
+ TurnerNetwork, set_group_name;
+ TurnerNetwork, set_group_data;
+ TurnerNetwork, set_group_owner;
+ TurnerNetwork, join_group;
+ TurnerNetwork, leave_group;
+ TurnerNetwork, add_group;
+ TurnerNetwork, remove_group;
+ TurnerNetwork, send_ex;
+ TurnerNetwork, send_guaranteed_ex;
+ TurnerNetwork, broadcast_ex;
+ TurnerNetwork, broadcast_guaranteed_ex;
+ TurnerNetwork, handle_sysmsg;
+ TurnerNetwork, sys_newgroup;
+ TurnerNetwork, sys_delgroup;
+ TurnerNetwork, sys_set_group_name;
+ TurnerNetwork, sys_set_group_data;
+ TurnerNetwork, sys_set_group_owner;
+ TurnerNetwork, sys_add_player_to_group;
+ TurnerNetwork, sys_remove_player_from_group;
+ TurnerNetwork, sys_add_group_to_group;
+ TurnerNetwork, sys_remove_group_from_group;
+ TurnerNetwork, sys_send_complete}
++{\footnote BW_PG_C}
+{\b\f0{\cf2\scaps Programmer's Guide: Turner}\line\fs32 TurnerNetwork Class}\par\pard\sb100
+
+{\scaps\cf4 CHANGED}\line
+This adds group functionality and advanced sending options to the
+ TurnerClassic interface.
+\par
+
+\line{\b\fs28 Name}\par
+
+{\b TurnerNetwork}\par
+A advanced network connection/management class.
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include <turner.hpp>
+\par
+
+\line{\b\fs28 Base Classes}\par
+
+{\uldb\b TurnerClassic}{\v PG_TURNER_CLASSIC}
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b TurnerNetwork (GUID _guid, const char *_name, int _players,
+ DWORD sflags=TURNER_DPSESSION_FLAGS);}\par
+
+Initializes the network object with the provided GUID, session name,
+ maximum number of players, and session flags ({\i DPSESSION_}).
+\par
+
+{\b TurnerNetwork (GUID _guid, const char *_name, int _players,
+ const char *_passwd, DWORD sflags=TURNER_DPSESSION_FLAGS);}\par
+
+Initializes the network object with the provided GUID, session name,
+ maximum number of players, session password, and session
+ flags ({\i DPSESSION_}).
+\par
+
+The 'guid' used by the constructor is an application GUID which
+ must be unique to each different product.  If multiple products
+ are to interact via multiplayer, they would have to share the
+ same guid but must process all the same messages and share the
+ same interpretation of the player and session structures.  To
+ prevent previous revisions of a product from being visible to
+ a new version, update the GUID (increment the last byte will
+ usually work).
+\par
+
+\line{\b\fs28 Member Data}\par
+
+Same as {\uldb\b TurnerClassic}{\v PG_TURNER_CLASSIC}.
+\par
+
+\line{\b\fs28 Member Function}\par
+
+Same as {\uldb\b TurnerClassic}{\v PG_TURNER_CLASSIC}, plus :-
+\par
+
+{\b virtual int connect_game (GUID guid);}\par
+
+Connects to an existing game on the selected service provider.
+ The GUID parameter identifies the game, and must come from the
+ list of available sessions on the selected provider.  This list
+ can be obtained through the enum_sessions() routine.  During the
+ connection, existing players are enumerated to the sys_newplayer()
+ method and existing groups are enumberated to the sys_newgroup() method.
+ Returns the DP result code.
+\par
+
+{\b virtual DPID create_group (const char *short_name, const char *long_name,
+ LPVOID data=0, DWORD size=0, DWORD _flags=0);}\par
+
+Creates a new group with the given handle, full name, and optional data.
+ The _flags member can be set to 0 for a normal group, {\i DPGROUP_HIDDEN}
+ for hidden groups, and {\i DPGROUP_STAGINGAREA} for a staging area.
+ Returns the group id.
+\par
+
+{\b virtual void destroy_group (DPID group);}\par
+
+Destroys a group.
+\par
+
+{\b virtual int set_group_name(DPID group,
+ const char *short_name, const char *long_name, DWORD _flags=0);}\par
+
+Sets an existing's group handle and full name.  Returns the DP result code.
+\par
+
+{\b virtual int set_group_data(DPID group, LPVOID data,
+ DWORD size, DWORD _flags=0);}\par
+
+Sets an existing's group data.  Returns the DP result code.
+\par
+
+{\b virtual int set_group_owner(DPID group, DPID owner);}\par
+
+Changes a group's owner.  Returns the DP result code.
+\par
+
+{\b virtual int join_group  (DPID group, DPID player);}\par
+
+Adds a player to a group.  If player is 0, then the value
+ of the playerid variable is used.  Returns the DP result code.
+\par
+
+{\b virtual int leave_group (DPID group, DPID player);}\par
+
+Removes a player from a group.  If player is 0, then the value
+ of the playerid variable is used.  Returns the DP result code.
+\par
+
+{\b virtual int add_group (DPID pgroup, DPID group);}\par
+
+Adds a group to a parent group.  Returns the DP result code.
+\par
+
+{\b virtual int remove_group (DPID pgroup, DPID group);}\par
+
+Removes a group from a parent group.  Returns the DP result code.
+\par
+
+{\b virtual int send_ex (DPID from, DPID to, LPVOID data, DWORD size,
+ DWORD priority, DWORD timeout, LPVOID context=0, LPDWORD msgid=0);\line
+virtual int send_guaranteed_ex (DPID from, DPID to, LPVOID data, DWORD size,
+ DWORD priority, DWORD timeout, LPVOID context=0, LPDWORD msgid=0);}\par
+
+Sends a message to a player, group, or DPID_SERVERPLAYER.  The 'from'
+ id must be a local player or 0 which indicates the last locally created
+ player id ('playerid' member).  If the second version is used, the
+ message is sent guaranteed.  Returns the DP result code.
+\par
+
+{\b virtual int broadcast_ex (DPID from, LPVOID data, DWORD size,
+ DWORD priority, DWORD timeout, LPVOID context=0, LPDWORD msgid=0);\line
+virtual int broadcast_guaranteed_ex (DPID from, LPVOID data, DWORD size,
+ DWORD priority, DWORD timeout, LPVOID context=0, LPDWORD msgid=0);}\par
+
+Broadcasts a message to all players.  The 'from' id must be a local
+ player or 0 which indicates the last locally created player id
+ ('playerid' member).  If the second version is used, the message
+ is sent guaranteed.  Returns the DP result code.
+\par
+
+{\b virtual void handle_sysmsg (DPID to, DPMSG_GENERIC *msg, DWORD size);}\par
+
+This method is called whenever a system message is pending and
+ the receive() method is invoked.  The default implementation dispatches
+ to the handle_chat() and sys_() methods including the new
+ group messages.
+\par
+
+{\b virtual void sys_newgroup  (DPID group, LPCSTR short_name, LPCSTR long_name,
+ LPVOID data, DWORD size,  DPID pgroup, DWORD _flags);\line
+virtual void sys_delgroup  (DPID group, DWORD _flags);\line
+virtual void sys_set_group_name (DPID group, LPCSTR short_name, LPCSTR long_name);\line
+virtual void sys_set_group_data (DPID group, LPVOID data, DWORD size);\line
+virtual void sys_set_group_owner (DPID group, DPID newowner, DPID oldowner);\line
+virtual void sys_add_player_to_group (DPID group, DPID player);\line
+virtual void sys_remove_player_from_group (DPID group, DPID player);\line
+virtual void sys_add_group_to_group (DPID parent, DPID group);\line
+virtual void sys_remove_group_from_group (DPID parent, DPID group);\line
+virtual void sys_send_complete (DPID from, DPID to,
+ LPVOID context, DWORD msgid, DWORD sendtime);}\par
+
+These methods are invoked by the default implementation of handle_sysmsg().
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+TurnerNetworkUI Class                                                     ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_TURNER_NETWORKUI}
+${\footnote TurnerNetworkUI Class}
+K{\footnote
+ TurnerNetworkUI;
+ TurnerNetworkUI, connect;
+ TurnerNetworkUI, get_provider;
+ TurnerNetworkUI, create_or_join;
+ TurnerNetworkUI, select_session}
++{\footnote BW_PG_C}
+{\b\f0{\cf2\scaps Programmer's Guide: Turner}\line\fs32 TurnerNetworkUI Class}\par\pard\sb100
+
+{\scaps\cf4 CHANGED}\line
+The {\b TurnerNetworkUI} class provides a simple method of initializing
+ a {\b TurnerClassic} object.  This class uses a series of dialogs
+ and DirectPlay calls to allow a user to connect to any existing
+ session, or create a new session on any available service providers.
+\par
+
+Example dialogs are specified in the Tester's resource.rc resource script.
+ The {\i IDD_MAXNETWORK_Q_CREATE} dialog is the creation or join
+ dialog with controls identified by {\i IDC_MAXNETWORK_CREATE}
+ and {\i IDC_MAXNETWORK_CONNECT}.  The {\i IDD_MAXNETWORK_CHOOSEPROVIDER}
+ and {\i IDD_MAXNETWORK_SELSESSION} dialogs are the service provider
+ and select sessions dialogs with the listbox are set to
+ the {\i IDC_MAXNETWORK_LIST1} id.
+\par
+
+\line{\b\fs28 Name}\par
+
+{\b TurnerNetworkUI}\par
+A simple interface to initialize a TurnerClassic object.
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include <turner.hpp>
+\par
+
+\line{\b\fs28 Base Classes}\par
+
+None
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b TurnerNetworkUI  (HWND hwnd, TurnerClassic *net, int _max_sessions = 32,
+ dword _timeout = 5000);}\par
+
+Initialize the specified TurnerNetworkUI object.  The HWND
+ of the application window must be specified, maximum number of
+ sessions, and the session enumerate timeout.
+\par
+
+\line{\b\fs28 Member Data}\par
+
+None
+\par
+
+\line{\b\fs28 Member Function}\par
+
+{\b int connect ()}\par
+
+Establish the connection, walking through all neccessary steps.
+ If desired, each step may be performed separately through the
+ other member functions.  This member returns whether or not
+ a network connection was established.  Returns non-zero if
+ successful.
+\par
+
+{\b int get_provider ()}\par
+
+Get the user's preference for service providers, and initialize the
+ {\b TurnerClassic} object to use the selected provider.  If no
+ provider is selected, return FALSE.
+\par
+
+{\b int create_or_join ()}\par
+
+Ask whether to create a new session or join an existing one.
+ Returns 1 for connect, 2 for create, and -1 for abort.
+
+\par
+{\b int select_session ()}\par
+
+Select a session on the currently chosen provider.  A list is presented
+ to the user.  If an item is chosen from the list, the session is
+ connected to.  Otherwise, FALSE is returned.
+\par
+
+\line{\b\fs28 Example}\par
+
+This simple code fragment shows how to use a {\b TurnerNetworkUI}
+ object to initialize a {\b TurnerClassic} object.
+\par
+
+{\f2
+extern TurnerClassic net;\line
+extern HWND hWnd;\line
+TurnerNetworkUI ui (hWnd, &net);\par
+if (ui.connect())\line
+\{\line
+\tab // Connection established\line
+\}\line
+else\line
+\{\line
+\tab // Solo play\line
+\}\line
+}
+\par
+
+\pard\page
+
+{\comment °±² eof - turner.rtf ²±° }
+}

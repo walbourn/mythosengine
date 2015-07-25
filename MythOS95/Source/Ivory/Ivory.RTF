@@ -1,0 +1,783 @@
+{\rtf1
+{\comment
+ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
+
+                                  Ivory Help
+
+                        Microsoft Windows 95/98/NT Version
+
+   Copyright (c) 1994-1999 by Dan Higdon, Tim Little, and Chuck Walbourn
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ This file and all associated files are subject to the terms of the
+ GNU Lesser General Public License version 2 as published by the
+ Free Software Foundation (http://www.gnu.org).   They remain the
+ property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+ See LICENSE.TXT in the distribution for a copy of this license.
+
+ THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+ OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+ PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+ LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+ OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+                        http://www.mythos-engine.org/
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ Ivory is a component of the MythOS(tm) collection.
+
+ MythOS is a trademark of Charybdis Enterprises, Inc.
+
+ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
+}
+
+{\fonttbl
+\f0\fswiss Arial;
+\f1\froman Times New Roman;
+\f2\fmodern Courier New;
+\f3\fswiss MS Sans Serif;
+\f4\froman MS Serif;
+}
+\deff1
+\fs21
+
+{\colortbl;
+\red128\green128\blue128;
+\red0\green0\blue128;
+\red0\green128\blue0;
+\red128\green0\blue0;
+}
+
+{\comment
+°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+                            Programmer's Guide
+
+°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+}
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+Overview                                                                  ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_IVORY_OVERVIEW}
+${\footnote Overview}
++{\footnote BW_PG_3}
+{\b\f0{\cf2\scaps Programmer's Guide: Ivory}\line\fs32 Overview}\par\pard\sb100
+
+{\i Ivory} is a memory management library designed for use in a
+flat-model Win32 environment.  It provides standard "malloc"
+style allocation and free, as well as a handle-based allocator,
+a real-mode allocator, and an allocation "arena" subsystem,
+which allows efficient allocation and freeing of small temporary
+items.  These tools provide maximum flexibility in allocation
+strategies.
+\par
+
+When {\i Ivory} is initialized, the caller must specify how much
+memory to reserve for virtual handle allocations.  Optionally,
+the caller can specify a minimum amount of static memory to
+allocate.  All standard allocations come out of the static
+memory, and can never be swapped by the virtual memory system.
+For this reason, all large data blocks (such as texture and mesh
+information, in a 3d application) should be allocated as
+handles.  In this version of {\i Ivory}, the RAM for static
+allocations is only committed from the system as needed, but is
+page-locked, so that it cannot be swapped.
+\par
+
+Handle allocations allow the programmer to exactly control the
+paging of data.  The handle allocation routine does not return a
+pointer.  Instead, it returns a handle.  This handle may be
+locked to yield a pointer.  When a handle is locked, it is
+guaranteed to be present in memory.  Once the program has
+finished using the pointer, the handle should be unlocked.  An
+unlocked handle may be removed from memory by the system.  It is
+unwise to keep an handle locked for longer than necessary, since
+this may put an unnecessary burden on the system.  In the
+current version of {\i Ivory}, each handle is managed by Windows as a
+"LocalHeap object".
+\par
+
+\line{\b\fs28 Definitions}\par
+
+{\b Wildspace}\par
+
+The unallocated portion of the static memory block.  This RAM
+may or may not be committed, and therefore cannot be used for
+any purpose.
+\par
+
+{\b Arena}\par
+
+An area set aside for the arena allocation subsystem.  Arenas
+are generally allocated with standard allocation routines.
+Objects allocated out of an arena may not be individually freed,
+but are all implicitly freed when the arena is cleared.
+\par
+
+\line{\b\fs28 Features}\par
+
+General high-performance memory allocation routines.
+\par
+
+Time and space efficient memory allocation through arenas
+\par
+
+Virtual memory control through the handle allocation routines.
+\par
+
+\line{\b\fs28 Future Work}\par
+
+The current implementation is relatively smart about its usage
+of memory, but there may be room for improvement.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+IvorySystem Class                                                         ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_IVORY_SYSCLASS}
+${\footnote IvorySystem Class}
+K{\footnote IvorySystem;
+IvorySystem, halloc;
+IvorySystem, zhalloc;
+IvorySystem, hfree;
+IvorySystem, hlock;
+IvorySystem, hunlock;
+IvorySystem, arena_initialize;
+IvorySystem, arena_clear;
+IvorySystem, arena_chainlength}
++{\footnote BW_PG_3}
+{\b\f0{\cf2\scaps Programmer's Guide: Ivory}\line\fs32 IvorySystem Class}\par\pard\sb100
+
+The {\i Ivory} System class provides a C++ initialization interface.
+The IvorySystem class encapsulates the {\i Ivory} C interface, and
+controls initialization and termination of the Ivory system.
+\par
+
+\line{\b\fs28 Name}\par
+
+IvorySystem -- C++ wrapper class
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "ivory.hpp"
+\par
+
+\line{\b\fs28 Base Classes}\par
+
+None
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b IvorySystem (size_t, ivory_init_codes)}\par
+
+Allows {\i Ivory} to establish its internal structures and allocate
+the DPMI memory.  This must be called before any other {\i Ivory}
+functions.  See the {\uldb ivory_initialize()}{\v PG_IVORY_LIBINIT}
+function for valid parameter values.
+\par
+
+NOTE: This object must be destroyed after all {\i Ivory} calls are complete.
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+{\b IvoryHandle halloc (size_t)}\line
+{\b IvoryHandle zhalloc (size_t)}\line
+{\b void hfree (IvoryHandle *)}\line
+{\b void *hlock (IvoryHandle)}\line
+{\b void hunlock (IvoryHandle)}
+\par
+
+Identical to their {\uldb ivory_*}{\v PG_IVORY_HALLOC} equivalents.
+\par
+
+{\b IvoryArena *arena_initialize (IvoryArena *, size_t)}\line
+{\b void arena_clear (IvoryArena *)}\line
+{\b int arena_chainlength (const IvoryArena *)}
+\par
+
+Identical to their {\uldb ivory_*}{\v PG_IVORY_ARENAALLOC} equivalents.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+Library Initialization Routines                                           ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_IVORY_LIBINIT}
+${\footnote Library Initialization Routines}
+K{\footnote ivory_initialize;ivory_terminate}
++{\footnote BW_PG_3}
+{\b\f0{\cf2\scaps Programmer's Guide: Ivory}\line\fs32 Library Initialization Routines}\par\pard\sb100
+
+These functions are required by the entire {\i Ivory} library,
+regardless of which allocation subsystem is being used.  Note
+that in C++, operators new() and delete() cannot be called
+before the library is initialized.  For some classes, this may
+prove problematic, so care should be taken in allocating global
+objects.
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "ivory.h"\tab for C interface
+\par
+
+#include "ivory.hpp"\tab for C++ interface
+\par
+
+\line{\b\fs28 Routines}\par
+
+{\b void ivory_initialize(size_t, ivory_init_codes)}\par
+
+Allows {\i Ivory} to establish its internal structures and allocate
+the DPMI memory.  This must be called before any other {\i Ivory}
+functions.  The first parameter is a memory size, interpreted
+based on the second parameter.
+\par
+
+{\b ivory_reserve_handle} - reserve size_t bytes for handle allocations.
+\par
+
+{\b ivory_reserve_static} - reserve size_t bytes for static allocation.
+\par
+
+{\b void ivory_terminate()}\par
+
+Allows {\i Ivory} to clean up the resources it has allocated.  This
+should be called before the application terminates, and must not
+be called before all Ivory calls are complete.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+Standard Allocation Routines                                              ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_IVORY_STDALLOC}
+${\footnote Standard Allocation Routines}
+K{\footnote ivory_alloc;
+ivory_zalloc;
+ivory_free;
+operator new;
+operator delete}
++{\footnote BW_PG_3}
+{\b\f0{\cf2\scaps Programmer's Guide: Ivory}\line\fs32 Standard Allocation Routines}\par\pard\sb100
+
+{\i Ivory} provides a malloc-style memory allocation library.  These
+routines provide the coarse-granularity memory allocation
+routines.  They allow the user to allocate and free individual
+blocks of memory.
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "ivory.h"\tab for C interface
+\par
+
+#include "ivory.hpp"\tab for C++ interface
+\par
+
+\line{\b\fs28 Routines}\par
+
+{\b void *ivory_alloc (size_t)}\par
+
+Allocates a block of memory from wildspace of the requested
+size.  The actual allocation is slightly larger than specified,
+as {\i Ivory} must keep some housekeeping information with every
+block.
+\par
+
+{\b void *ivory_zalloc (size_t)}\par
+
+Allocates and clears a block of memory in the same manner that
+ivory_alloc() does.  In fact, it calls ivory_alloc(), and then
+memset().
+\par
+
+{\b void ivory_free (void **)}\par
+
+Frees a block of memory allocated by the standard allocation
+routines and zeros out the pointer passed.  This call requires a
+pointer to the pointer to be freed so that it may ensure that at
+least this pointer won't dangle!
+\par
+
+{\b operator new (size_t)}\par
+
+Allows C++ programs to use the Ivory standard allocation
+routines.  These routines are merely pass-throughs for the
+standard allocation routines.
+\par
+
+{\b operator delete (size_t)}\par
+
+Allows C++ programs to dispose of memory allocated with the new
+operators.
+\par
+
+\line{\b\fs28 Example}\par
+
+{\f2
+my_struct *ptr = ivory_malloc (sizeof (my_struct));
+\par
+// Use ptr
+\par
+ivory_free ((void **)&ptr);
+\par
+ptr = new my_struct[100];
+\par
+// Use ptr
+\par
+delete[] ptr;\line
+}
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+Block Sub-allocation Routines                                             ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_IVORY_SUBALLOC}
+${\footnote Block suballocation Routines}
+K{\footnote ivory_sub_alloc;
+ivory_sub_zalloc;
+ivory_sub_free;
+operator new;
+operator delete}
++{\footnote BW_PG_3}
+{\b\f0{\cf2\scaps Programmer's Guide: Ivory}\line\fs32 Block Sub-allocation Routines}\par\pard\sb100
+
+{\i Ivory} provides routines for sub-allocating the space within
+a specified memory block.  These routines are directly analogous to
+the standard allocation routines, but require a pointer to the memory
+block from which to allocate the requested memory.  Unlike the Arena
+allocation routines, memory allocated from suballocation can be
+returned to the pool.  Note that care must be taken to only return
+allocated blocks to the pool from which they were allocated.
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "ivory.h"\tab for C interface
+\par
+
+#include "ivory.hpp"\tab for C++ interface
+\par
+
+\line{\b\fs28 Routines}\par
+
+{\b void *ivory_sub_alloc (IvorySubAlloc *, size_t)}\par
+
+Allocates a block of memory of the requested size from the suballocation pool.
+The actual allocation is slightly larger than specified,
+as {\i Ivory} must keep some housekeeping information with every
+block.
+\par
+
+{\b void *ivory_sub_zalloc (IvorySubAlloc *, size_t)}\par
+
+Allocates and clears a block of memory in the same manner that
+ivory_sub_alloc() does.  In fact, it calls ivory_sub_alloc(), and then
+memset().
+\par
+
+{\b void ivory_sub_free (IvorySubAlloc *, void **)}\par
+
+Returns a block of memory allocated by the standard allocation
+routines to the suballocation pool, and zeros out the pointer passed.
+This call requires a pointer to the pointer to be freed so that it may ensure that at
+least this pointer won't dangle!
+\par
+
+{\b operator new (size_t, IvorySubAlloc *)}\par
+
+Allows C++ programs to use the Ivory suballocation
+routines.  The memory allocated will be properly constructed.
+However, due to a limitation of C++, there is no corresponding delete
+operator for suballocated memory.  Therefore, the program must
+explicitly call the destructor of the allocated object, and then
+free the object with a call to ivory_sub_free().
+\par
+
+\line{\b\fs28 Example}\par
+
+{\f2
+// Allocate and initialize a suballocation pool\line
+IvorySubAlloc *sub = ivory_alloc (SUBALLOC_SIZE);\line
+ivory_sub_initialize (sub, SUBALLOC_SIZE);
+\par
+my_struct *ptr = ivory_sub_malloc (sub, sizeof (my_struct));
+\par
+// Use ptr
+\par
+// Free the memory\line
+ivory_sub_free (sub, (void **)&ptr);
+\par
+Test *t = new (sub) Test;
+\par
+// Use the object\line
+...
+\par
+// Destroy and free the object.\line
+t->~Test();\line
+ivory_sub_free (sub, &t);
+}
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+Handle Allocation                                                         ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_IVORY_HALLOC}
+${\footnote Handle Allocation}
+K{\footnote ivory_halloc;
+ivory_zhalloc;
+ivory_hfree;
+ivory_hlock;
+ivory_hunlock;
+template ivory_hdup;
+template *IvoryLock
+}
+
++{\footnote BW_PG_3}
+{\b\f0{\cf2\scaps Programmer's Guide: Ivory}\line\fs32 Handle Allocation}\par\pard\sb100
+
+The {\i Ivory} handle allocation routines provide a simple method for
+virtual memory allocation.  Instead of using a demand-paged
+system, this allocation system allows the user to have fine
+control over which blocks of memory need to be resident at any
+one time.  The allocators return a handle (32 bit integer) that
+refers to a physical block of memory.  When the programmer needs
+to access this memory, the handle is locked, yielding a pointer.
+While locked, the memory is guaranteed to be resident in local
+memory.  Unlocked memory may be paged to a non-resident location
+(such as a swapfile).  If insufficient memory exists to satisfy
+an allocation, unlocked memory is swapped.
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "ivory.h"\tab for C interface
+\par
+
+#include "ivory.hpp"\tab for C++ interface
+\par
+
+\line{\b\fs28 Routines}\par
+
+{\b IvoryHandle ivory_halloc (size_t)}\par
+
+Allocates a block of memory from wildspace and returns a handle
+to it.  The handle has no intrinsic meaning, and no assumptions
+should be made about it.  The memory requested is not committed
+until the handle is locked, so it is possible to allocate a
+considerable amount of memory.
+\par
+
+{\b IvoryHandle ivory_zhalloc (size_t)}\par
+
+Just like ivory_halloc, but guarantees that the memory pointed
+to will be filled with zeroes.
+\par
+
+{\b void ivory_hfree (IvoryHandle *)}\par
+
+Frees an allocated memory handle, and invalidates the handle
+variable.
+\par
+
+{\b void *ivory_hlock (IvoryHandle)}\par
+
+Converts a handle into a pointer.  This guarantees that the
+memory referred to by the handle will not move until it is
+unlocked, thus making the memory save to use.  This function can
+return NULL if there is insufficient memory to bring the
+handle's contents back in to RAM.
+\par
+
+{\b void ivory_hunlock (IvoryHandle)}\par
+
+Tells {\i Ivory} that the handle may be moved or paged if needed.
+Any pointers to the block become invalid.
+\par
+
+\line{\b\fs28 Templates}\par
+
+{\b template <class T> IvoryHandle ivory_hdup (const T&, int repeat = 1)}\par
+
+This template function creates a handle duplicate of the
+supplied object.  If the repeat count is greater than 1, an
+array of identical objects is allocated.  The created handle may
+be used like any other handle.  Since there is no operator new()
+for handle allocation, this template is the only supplied way to
+ensure proper initialization of a handle-allocated object.
+\par
+
+{\b template <class T> T *IvoryLock(IvoryHandle)}\par
+
+This template class allows a C++ program to create a lock on a
+handle, returning a pointer of the given type.  The type created
+by this template may be used as a pointer to the instantiation
+type.  The handle will become unlocked when the pointer goes out
+of scope.  This template expands into the ivory_hlock() and
+ivory_hunlock() calls.
+\par
+
+\line{\b\fs28 Example}\par
+
+{\f2
+IvoryHandle h = ivory_halloc (sizeof (my_struct));
+\par
+mys_struct *ptr = ivory_hlock (h);
+\par
+// Or, alternately
+\par
+IvoryLock<my_struct> *ptr2 (h);
+\par
+// Use ptr
+\par
+ivory_hunlock (h);
+\par
+ivory_hfree (&h);
+}
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+Arena Allocation                                                          ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_IVORY_ARENAALLOC}
+${\footnote Arena Allocation}
+K{\footnote ivory_arena_initialize;
+ivory_arena_alloc;
+ivory_arena_alloc_internal;
+ivory_arena_zalloc;
+ivory_arena_clear;
+ivory_arena_chainlength;
+operator new (IvoryArena);
+operator delete (IvoryArena);
+}
++{\footnote BW_PG_3}
+{\b\f0{\cf2\scaps Programmer's Guide: Ivory}\line\fs32 Arena Allocation}\par\pard\sb100
+
+The arena allocation system allows for efficient allocation of
+short-lived objects.  An arena is a large buffer of memory,
+initialized with the ivory arena initialization function.
+Allocations always come from the next free location within the
+arena, and individual items may not be freed.  When the contents
+of an arena are no longer needed, the arena may be cleared.
+This implicitly invalidates any pointers to data allocated from
+the arena.  If an arena overflows, it extends itself by calling
+the standard allocation routines.  These extra chain blocks are
+freed when the arena is cleared.  Note that although the arena
+will grow to accommodate additional data, this practice is
+discouraged, and leads to inefficient performance.  A well-tuned
+application will allocate an arena sufficiently large for the
+majority of its use.  Objects allocated from the arena do not
+have any size overhead.  In fact, to keep the objects aligned,
+allocation sizes should always be multiples of two or four.
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "ivory.h"\tab for C interface
+\par
+
+#include "ivory.hpp"\tab for C++ interface
+\par
+
+\line{\b\fs28 Routines}\par
+
+{\b IvoryArena *ivory_arena_initialize (IvoryArena *, size_t)}\par
+
+Creates an arena in the provided block of the given size.  This
+must be called on any arena before it is used.
+\par
+
+{\b void *ivory_arena_alloc (IvoryArena *, size_t)}\par
+
+Allocates the given number of bytes out of the arena.  In C++,
+this is an inline function, which spills over into the internal
+function if there is not enough room in the current arena.  The
+C version of this function calls the internal alloc directly.
+\par
+
+{\b void *ivory_arena_alloc_internal (IvoryArena *, size_t)}\par
+
+Walks the arena chain (including the first block) until a
+sufficiently large block is found to allocate the requested
+bytes.  If none is found, a new block is allocated with the
+standard allocation routines and added to the chain.  This
+routine assumes that no single allocation will be larger than
+the arena size.
+\par
+
+{\b void *ivory_arena_zalloc (IvoryArena *, size_t)}\par
+
+Allocates and clears the requested number of bytes.
+\par
+
+{\b void ivory_arena_clear (IvoryArena *)}\par
+
+Empties the given arena, and frees any chain blocks.  This
+invalidates any pointers to previously allocated data.
+\par
+
+{\b int ivory_arena_chainlength (IvoryArena *)}\par
+
+Returns the number of chain blocks on the current arena.  This
+function is for diagnostics and memory usage tuning.
+\par
+
+{\b operator new (size_t, IvoryArena *)}\par
+
+Allows C++ programs to participate in the arena allocation
+scheme.  To use this form, call ptr = new (arena) type;.  This
+will cause the allocator to allocate the needed space from the
+indicated arena.  Note that objects allocated in this way may
+not be freed with the standard delete operator.  Rather, they
+are implicitly freed when the arena is cleared.  This means that
+they are never destroyed.  If destruction is required, call the
+destructor explicitly.
+\par
+
+\line{\b\fs28 Example}\par
+
+{\f2
+AllocationArena *a = ivory_alloc (0x10000);
+\par
+ivory_arena_initialize (a, 0x10000);
+\par
+my_struct *p = ivory_arena_alloc (a, sizeof (*p));
+\par
+// Use p, but don't attempt to free it!
+\par
+ivory_arena_clear (a);
+\par
+// Now, p is invalid (but can be allocated again)
+\par
+p = new (a) my_struct;  // For a C++ example
+\par
+ivory_arena_clear (a);
+\par
+ivory_free (&a);
+}
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+Arena Allocation Template                                                 ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_IVORY_ARENAALLOCTEMP}
+${\footnote Arena Allocation Template}
+K{\footnote IvoryNewArena}
++{\footnote BW_PG_3}
+{\b\f0{\cf2\scaps Programmer's Guide: Ivory}\line\fs32 Arena Allocation Template}\par\pard\sb100
+
+This template provides a simple method for C++ programs to
+create arenas in a typesafe manner.  While the standard C
+interface for arenas may be used, some programs may require a
+more strictly controlled allocation type.
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "ivory.hpp"
+\par
+
+\line{\b\fs28 Template}\par
+
+{\b template <size_t arena_size> class IvoryNewArena: public IvoryArena}\par
+
+This template creates a new allocation arena of the specified
+size.  This template may then be used in place of a standard
+IvoryArena type.  Common usage would be to typedef a specific
+arena size, and use operator new to allocate it.
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+{\b clear ()}\par
+
+Clear the arena, resetting the end of memory, and freeing any
+chain buffers.  See the {\uldb Arena Allocation}{\v PG_IVORY_ARENAALLOC}
+section for more details.
+\par
+
+{\b chainlength () const}\par
+
+Return the number of chain buffers currently allocated to the
+arena.
+\par
+
+See the Arena {\uldb Allocation}{\v PG_IVORY_ARENAALLOC} section
+for more details.
+\par
+
+\line{\b\fs28 Example}\par
+
+{\f2
+typedef IvoryNewArena <1000> VertexArena;
+\par
+...
+\par
+VertexArena *a = new VertexArena;
+\par
+MyClass *c = new (a) MyClass[10];
+\par
+// Use c
+\par
+a.clear();
+\par
+delete a;
+}
+\par
+
+\pard\page
+
+{\comment °±² eof - ivory.rtf ²±° }
+}

@@ -1,0 +1,804 @@
+{\rtf1
+{\comment
+ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
+
+                                  Pane Help
+
+                      Microsoft Windows 95/98/NT Version
+
+    Copyright (c) 1996-1999 by Dan Higdon, Tim Little, and Chuck Walbourn
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ This file and all associated files are subject to the terms of the
+ GNU Lesser General Public License version 2 as published by the
+ Free Software Foundation (http://www.gnu.org).   They remain the
+ property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+ See LICENSE.TXT in the distribution for a copy of this license.
+
+ THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+ OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+ PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+ LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+ OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+                        http://www.mythos-engine.org/
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ Pane is a component of the MythOS(tm) collection.
+
+ MythOS is a trademark of Charybdis Enterprises, Inc.
+
+ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
+}
+
+{\fonttbl
+\f0\fswiss Arial;
+\f1\froman Times New Roman;
+\f2\fmodern Courier New;
+\f3\fswiss MS Sans Serif;
+\f4\froman MS Serif;
+}
+\deff1
+\fs21
+
+{\colortbl;
+\red128\green128\blue128;
+\red0\green0\blue128;
+\red0\green128\blue0;
+\red128\green0\blue0;
+}
+
+{\comment
+°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+                            Programmer's Guide
+
+°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+}
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+Overview                                                                  ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_PANE_OVERVIEW}
+${\footnote Overview}
++{\footnote BW_PG_F}
+{\b\f0{\cf2\scaps Programmer's Guide: Pane}\line\fs32 Overview}\par\pard\sb100
+
+{\scaps\cf4 NEW}\line
+This library provides a number of helper classes for the development of
+ full-screen GUIs using {\i Van Gogh} and {\i Max}.  The programmer is
+ required to make render calls and event-input calls to interact with
+ the GUI controls.
+\par
+
+This library was never offically completed or offically released.
+ It was used for internal projects at Charybdis Enterprises, Inc.
+\par
+
+\line{\b\fs28 Features}\par
+
+A few basic controls for GUI development.
+\par
+
+Includes a 'random roller' class for simulating a 'die roll'.
+\par
+
+\line{\b\fs28 Organization}\par
+
+The {\i Pane} library consists of a few helper classes and one template:
+\par
+
+\tab {\uldb PaneImageScroll}{\v PG_PANE_IMAGESCROLL}\line
+\tab {\uldb PaneInputText}{\v PG_PANE_INPUTTEXT}\line
+\tab {\uldb PaneListBox}{\v PG_PANE_LISTBOX}\line
+\tab {\uldb PaneTextScroll}{\v PG_PANE_TEXTSCROLL}\line
+\tab {\uldb PaneDie}{\v PG_PANE_DIE}\line
+\tab {\uldb PaneDieT}{\v PG_PANE_DIET}
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+PaneImageScroll Class                                                     ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_PANE_IMAGESCROLL}
+${\footnote PaneImageScroll Class}
+K{\footnote PaneImageScroll;
+PaneImageScroll, render;
+PaneImageScroll, scroll;
+PaneImageScroll, scroll_up;
+PaneImageScroll, scroll_down;
+PaneImageScroll, scroll_left;
+PaneImageScroll, scroll_right;
+PaneImageScroll, center_image;
+PaneImageScroll, drag_image;
+PaneImageScroll, get_scroll_x;
+PaneImageScroll, get_scroll_y;
+PaneImageScroll, reset_image;
+PaneImageScroll, set_scroll_delta;
+PaneImageScroll, set_image_pos;
+PaneImageScroll, screen_to_image}
++{\footnote BW_PG_F}
+{\b\f0{\cf2\scaps Programmer's Guide: Pane}\line\fs32 PaneImageScroll Class}\par\pard\sb100
+
+{\scaps\cf4 NEW}\line
+A scrolling image control.  This is for viewing a large bitmap and
+ selection of a point on the image.
+\par
+
+\line{\b\fs28 Name}\par
+
+PaneImageScroll - Scrolling image control
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "pane.hpp"
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b PaneImageScroll(VngoVport *gvp, VngoTexture *img,
+ int vp_x, int vp_y, int delta);}\par
+
+Constructs with the given subviewport, display image, anchor point for
+ sub-viewport, and delta for scrolling.
+\par
+
+\line{\b\fs28 Member Data}\par
+
+{\b VngoVport   *gvport;}\par
+
+Sub-viewport for drawing of control.
+\par
+
+{\b VngoTexture *image;}\par
+
+Scrolling image.
+\par
+
+{\b int map_x;\line
+int map_y;}\par
+
+Last selected point in image.
+\par
+
+{\b int vp_anchor_x;\line
+int vp_anchor_y;}\par
+
+Anchor point (offset of sub-viewport within main viewport).
+\par
+
+\line{\b\fs28 Member Function}\par
+
+{\b void render();}\par
+
+Draws the image into the sub-viewport.  Should be called each frame.
+\par
+
+{\b void scroll(int direction);}\par
+
+Scroll image by delta amount.  Direction based on input:
+{\i IMAGE_SCROLL_UP}, {\i IMAGE_SCROLL_DOWN}, {\i IMAGE_SCROLL_LEFT},
+or {\i IMAGE_SCROLL_RIGHT}.
+\par
+
+{\b void scroll_up();\line
+void scroll_down();\line
+void scroll_left();\line
+void scroll_right();}\par
+
+Helper routines for calling scroll() function above.
+\par
+
+{\b void center_image(int x = -1, int y = -1);}\par
+
+Centers the image around the given point (x,y).
+\par
+
+{\b void drag_image(int ax, int ay, int x, int y);}\par
+
+Perform a drag of the image from (ax,ay) to (x,y).
+\par
+
+{\b int get_scroll_x();\line
+int get_scroll_y();}\par
+
+Returns image offset.
+\par
+
+{\b void reset_image();}\par
+
+Resets image offset to upper-left and redraws.
+\par
+
+{\b void set_scroll_delta(int delta);}\par
+
+Sets the scroll() delta.
+\par
+
+{\b void set_image_pos(int newx,int newy);}\par
+
+Set a specific image offset.
+\par
+
+{\b void screen_to_image(short &x, short &y);}\par
+
+Converts a the value in (x,y) in screen coordinates to offset within the
+ image.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+PaneInputText Class                                                       ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_PANE_INPUTTEXT}
+${\footnote PaneInputText Class}
+K{\footnote PaneInputText;
+PaneInputText, init;
+PaneInputText, process_events;
+PaneInputText, set_colors;
+PaneInputText, set_cursor;
+PaneInputText, set_mode;
+PaneInputText, draw_cursor;
+PaneInputText, draw_outline_box;
+PaneInputText, render;
+PaneInputText, clear_input;
+PaneInputText, back_space;
+PaneInputText, ins_char;
+PaneInputText, del_char;
+PaneInputText, get_str;
+PaneInputText, put_str;
+PaneInputText, query_mode;
+PaneInputText, set_flags;
+PaneInputText, set_vport}
++{\footnote BW_PG_F}
+{\b\f0{\cf2\scaps Programmer's Guide: Pane}\line\fs32 PaneInputText Class}\par\pard\sb100
+
+{\scaps\cf4 NEW}\line
+A edit field control.  This is for allowing user editing of a string.
+\par
+
+\line{\b\fs28 Name}\par
+
+PaneInputText - Edit field control
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "pane.hpp"
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b PaneInputText(VngoVport *gvp, VngoRect *rct, char *fname);}\par
+
+Constructs with the given sub-viewport, input rectangle (not used),
+ and the Gutenberg font name (must be installed).
+\par
+
+\line{\b\fs28 Member Function}\par
+
+{\b BOOL init(int sz, char *def_str, MaxKeyboard *kbd);}\par
+
+Initalizes the input device with maximum size 'sz', default string,
+ and the Max keyboard object for creating a MaxKbBuffer using during
+ process_events().
+\par
+
+{\b BOOL process_events();}\par
+
+Processes keyboard input.
+\par
+
+{\b void set_colors(dword _f, dword _b);}\par
+
+Set foreground and background colors.
+\par
+
+{\b void set_cursor(int c);}\par
+
+Set cursor type: {\i CURSOR_UNDERLINE}, {\i CURSOR_VERTICAL}, or
+ {\i CURSOR_BLOCK}.
+\par
+
+{\b void set_mode(int m);}\par
+
+Sets the rendering mode where {\i INPUT} draws an outline around the
+ field box, {\i INACTIVE} to not draw at all, and {\i RENDER}, which
+ is the default, which draws the string.
+\par
+
+{\b void draw_cursor();}\par
+
+Interal routine for drawing cursor shape.
+\par
+
+{\b void draw_outline_box();}\par
+
+Interal routine for drawing outline around box.
+\par
+
+{\b void render();}\par
+
+Performs render of input field into sub-viewport.  Should be called
+ each frame.
+\par
+
+{\b void clear_input();}\par
+
+Clears the input field.
+\par
+
+{\b char back_space();}\par
+
+Performs a 'back-space' operation.
+\par
+
+{\b int ins_char(char c);}\par
+
+Inserts a character into the field at the cursor position.
+\par
+
+{\b char del_char();}\par
+
+Call for delete key.
+\par
+
+{\b char *get_str(char *buff);}\par
+
+Gets the current string.
+\par
+
+{\b void put_str(char *new_str);}\par
+
+Sets the input field string.
+\par
+
+{\b int query_mode();}\par
+
+Returns current mode.
+\par
+
+{\b void set_flags(dword _f);}\par
+
+Sets state flags ({\i INPUT_DRAW_OUTLINE}, {\i INPUT_SPEC_CHARS},
+ {\i INPUT_CLEAR_VPORT}).
+\par
+
+{\b void set_vport(VngoVport *vp);}\par
+
+Sets sub-viewport for rendering.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+PaneListBox Class                                                         ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_PANE_LISTBOX}
+${\footnote PaneListBox Class}
+K{\footnote PaneListBox;
+PaneListBox, init;
+PaneListBox, release;
+PaneListBox, render;
+PaneListBox, scroll;
+PaneListBox, scroll_up;
+PaneListBox, scroll_down;
+PaneListBox, set_colors;
+PaneListBox, get_pick_index;
+PaneListBox, get_item_data;
+PaneListBox, get_selected_item;
+PaneListBox, set_cur_sel;
+PaneListBox, set_font;
+PaneListBox, set_hilite;
+PaneListBox, set_top_index;
+PaneListBox, add_string;
+PaneListBox, delete_string;
+PaneListBox, insert_string;
+PaneListBox, reset_content;
+PaneListBox, set_selected_item;
+PaneListBox, get_bottom_index;
+PaneListBox, get_count;
+PaneListBox, get_cur_sel;
+PaneListBox, get_num_visible;
+PaneListBox, get_top_index}
++{\footnote BW_PG_F}
+{\b\f0{\cf2\scaps Programmer's Guide: Pane}\line\fs32 PaneListBox Class}\par\pard\sb100
+
+{\scaps\cf4 NEW}\line
+A list box control.  This allows selection of an item in a list of items.
+\par
+
+\line{\b\fs28 Name}\par
+
+PaneListBox - A list box control
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "pane.hpp"
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b PaneListBox(VngoVport *gvp, const char *f_type);}\par
+
+Constructs with the given sub-viewport and the installed Gutenberg font
+ name.
+\par
+
+\line{\b\fs28 Member Data}\par
+
+{\b VngoVport *gvport;}\par
+
+Sub-viewport for control.
+\par
+
+{\b void  *edata_ptr;\line
+ulong sizeof_edata;}\par
+
+Extra data array.
+\par
+
+{\b char font_type[GBERG_MAX_NAME];}\par
+
+Gutenberg font to use for display.
+\par
+
+\line{\b\fs28 Member Function}\par
+
+{\b BOOL init(short sx, short sy, ushort maxlen,
+ ushort maxentries, ulong sedata=0, ushort _spc = 0);}\par
+
+Initializes the control with the the given (sx,sy) position on the
+ main viewport, maximum string length, maximum number of entries, size
+ of extra data entries, and spacing between entries.
+\par
+
+{\b void release();}\par
+
+Releases data associated with the control.  Called by the destructor.
+\par
+
+{\b void render();}\par
+
+Draws the control into the sub-viewport.  Call each frame.
+\par
+
+{\b void scroll(direction_t);}\par
+
+Scrolls the listbox {\i UP} or {\i DOWN}.
+\par
+
+{\b void scroll_up();\line
+void scroll_down();}\par
+
+Helper routines for using scroll().
+\par
+
+{\b void set_colors(dword _f, dword _b);}\par
+
+Sets foreground and background colors.
+\par
+
+{\b int get_pick_index(int x, int y);}\par
+
+Returns index associated with (x,y) mouse position.  Returns -1 if no
+ item selected.
+\par
+
+{\b void *get_item_data(ulong index);}\par
+
+Returns pointer to extra item data given index.
+\par
+
+{\b void get_selected_item(ulong index, char *dest);}\par
+
+Returns copy of string based on index.
+\par
+
+{\b ushort set_cur_sel(ulong index);}\par
+
+Sets current selection.
+\par
+
+{\b ushort set_font(const char *f_type);}\par
+
+Sets Gutenberg font name.
+\par
+
+{\b void set_hilite(BOOL f);}\par
+
+Turns on or off current-item selection highlight.
+\par
+
+{\b ulong set_top_index(ulong index);}\par
+
+Set index for display at top of the listbox.
+\par
+
+{\b ushort add_string(const char *new_str, void *extra = 0);}\par
+
+Adds a string with optional data.
+\par
+
+{\b ushort delete_string(ulong index);}\par
+
+Deletes a string given the index.
+\par
+
+{\b ushort insert_string(ulong index, const char *ins_str,
+ void *extra=0);}\par
+
+Inserts a string with optional data at the given index.
+\par
+
+{\b void reset_content();}\par
+
+Clears the content of the list box.
+\par
+
+{\b void set_selected_item(ulong index, char *src);}\par
+
+Sets string value for specific index.
+\par
+
+{\b ushort get_bottom_index();}\par
+
+Returns currently visible bottom index.
+\par
+
+{\b ushort get_count();}\par
+
+Returns number of items in list box.
+\par
+
+{\b ushort get_cur_sel();}\par
+
+Returns current selected item index.
+\par
+
+{\b ushort get_num_visible();}\par
+
+Returns number of visible items in list.
+\par
+
+{\b ushort get_top_index();}\par
+
+Returns index of item displayed at top of list box.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+PaneTextScroll Class                                                      ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_PANE_TEXTSCROLL}
+${\footnote PaneTextScroll Class}
+K{\footnote PaneTextScroll;
+PaneTextScroll, init;
+PaneTextScroll, release;
+PaneTextScroll, render;
+PaneTextScroll, set_colors;
+PaneTextScroll, scroll;
+PaneTextScroll, scroll_up;
+PaneTextScroll, scroll_down;
+PaneTextScroll, page_up;
+PaneTextScroll, page_down}
++{\footnote BW_PG_F}
+{\b\f0{\cf2\scaps Programmer's Guide: Pane}\line\fs32 PaneTextScroll Class}\par\pard\sb100
+
+{\scaps\cf4 NEW}\line
+A text viewing control.  This displays a word-wrapped block of text with
+ scrolling.
+\par
+
+\line{\b\fs28 Name}\par
+
+PaneTextScroll - Text scrolling control
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "pane.hpp"
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b PaneTextScroll(VngoVport *gvp, const char *f_type);}\par
+
+Constructs with the given sub-viewport and the installed Gutenberg font
+ name.
+\par
+
+\line{\b\fs28 Member Data}\par
+
+{\b VngoVport *gvport;}\par
+
+Sub-viewport for control.
+\par
+
+{\b char font_type[GBERG_MAX_NAME];}\par
+
+Gutenberg font to use for display.
+\par
+
+\line{\b\fs28 Member Function}\par
+
+{\b BOOL init(char *txt);}\par
+
+Initializes the text scroll control with a string value.  The data is
+ copied by the control and the input string is not required after
+ calling the init().
+\par
+
+{\b void release();}\par
+
+Releases data associated with control.
+\par
+
+{\b void render();}\par
+
+Draws the control.  Call every frame.
+\par
+
+{\b void set_colors(dword _f, dword _b);}\par
+
+Sets the foreground and background color.
+\par
+
+{\b void scroll(direction_t);}\par
+
+Scrolls the control {\i UP} a line, {\i DOWN} a line, {\i PAGEUP} for
+ a page up, and a {\i PAGEDN} for a page down scrolling.
+\par
+
+{\b void scroll_up();\line
+void scroll_down();\line
+void page_up();\line
+void page_down();}\par
+
+Helper routines for using scroll() routine.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+PaneDie Class                                                             ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_PANE_DIE}
+${\footnote PaneDie Class}
+K{\footnote PaneDie;
+PaneDie, roll}
++{\footnote BW_PG_F}
+{\b\f0{\cf2\scaps Programmer's Guide: Pane}\line\fs32 PaneDie Class}\par\pard\sb100
+
+{\scaps\cf4 NEW}\line
+This is a class for simulating the roll of an N-sided die.
+\par
+
+{\cf2
+Note:  This is in the {\i Pane} library for obscure historical reasons.
+}\par
+
+\line{\b\fs28 Name}\par
+
+PaneDie - Die-roller Class
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "pane.hpp"
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b PaneDie(int _sides=2);}\par
+
+Contructs the class and sets the number of sides for the simulated die.
+\par
+
+\line{\b\fs28 Member Function}\par
+
+{\b int roll();\line
+operator int ();}\par
+
+Rolls the die with the constructed number of sides, returning a value
+ between 1 and N.
+\par
+
+{\b int roll(int _sides);}\par
+
+Rolls the die with a specified number of sides, returning a value between
+ 1 and _sides.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+PaneDieT Template                                                         ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_PANE_DIET}
+${\footnote PaneDieT Template}
+K{\footnote PaneDieT;
+PaneDieT, roll}
++{\footnote BW_PG_F}
+{\b\f0{\cf2\scaps Programmer's Guide: Pane}\line\fs32 PaneDieT Template}\par\pard\sb100
+
+{\scaps\cf4 NEW}\line
+This is a template class for simulating the roll of an N-sided die.
+\par
+
+{\cf2
+Note:  This is in the {\i Pane} library for obscure historical reasons.
+}\par
+
+\line{\b\fs28 Name}\par
+
+PaneDieT - Die-roller Template
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "pane.hpp"
+\par
+
+\line{\b\fs28 Template Parameters}\par
+
+{\b template<int sides>}\par
+
+Specifies the number of sides for the 'die'.
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b PaneDieT();}\par
+
+Seeds the C-library random-number generator.
+\par
+
+\line{\b\fs28 Member Function}\par
+
+{\b int roll();\line
+operator int();}\par
+
+Returns a roll between 1 and <sides>.
+\par
+
+\pard\page
+
+{\comment °±² eof - pane.rtf ²±° }
+}

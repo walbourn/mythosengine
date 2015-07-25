@@ -1,0 +1,40 @@
+--------------------Configuration: eshtedit - Win32 Debug--------------------
+Begining build with project "E:\CHARYBDS\MythOS95\Escher\Edit\eshtedit.dsp", at root.
+Active configuration is Win32 (x86) Application (based on Win32 (x86) Application)
+
+Project's tools are:
+			"32-bit C/C++ Compiler for 80x86" with flags "/nologo /G5 /MD /W3 /Gm /GX /Zi /Od /I "..\..\inc" /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /Fr".\WinDebug/" /Fp".\WinDebug/eshtedit.pch" /Yu"stdafx.h" /Fo".\WinDebug/" /Fd".\WinDebug/" /FD /c "
+			"OLE Type Library Maker" with flags "/mktyplib203 "
+			"Win32 Resource Compiler" with flags "/l 0x409 /fo".\WinDebug/eshtedit.res" /d "_DEBUG" /d "_AFXDLL" "
+			"Browser Database Maker" with flags "/nologo /o".\WinDebug/eshtedit.bsc" "
+			"COFF Linker for 80x86" with flags "winmm.lib ..\..\lib\mythos.lib ..\..\lib\ivorymfc.lib ..\..\lib\bozo.lib ..\..\lib\xfile.lib ..\..\lib\chronos.lib ..\..\lib\escher.lib ..\..\lib\gutenbrg.lib ..\..\lib\felix.lib ..\..\lib\vangogh.lib /nologo /version:4 /subsystem:windows /incremental:yes /pdb:".\WinDebug/eshtedit.pdb" /debug /machine:I386 /nodefaultlib:"LIBC" /nodefaultlib:"LIBCMT" /out:".\WinDebug/eshtedit.exe" "
+			"Custom Build" with flags ""
+			"<Component 0xa>" with flags ""
+
+Creating temp file "C:\WINDOWS\TEMP\RSP73A2.TMP" with contents </nologo /G5 /MD /W3 /Gm /GX /Zi /Od /I "..\..\inc" /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /Fr".\WinDebug/" /Fp".\WinDebug/eshtedit.pch" /Yu"stdafx.h" /Fo".\WinDebug/" /Fd".\WinDebug/" /FD /c 
+"E:\CHARYBDS\MythOS95\Escher\Edit\eshtdlgt.cpp"
+>
+Creating command line "cl.exe @C:\WINDOWS\TEMP\RSP73A2.TMP" 
+Creating temp file "C:\WINDOWS\TEMP\RSP73A3.TMP" with contents <winmm.lib ..\..\lib\mythos.lib ..\..\lib\ivorymfc.lib ..\..\lib\bozo.lib ..\..\lib\xfile.lib ..\..\lib\chronos.lib ..\..\lib\escher.lib ..\..\lib\gutenbrg.lib ..\..\lib\felix.lib ..\..\lib\vangogh.lib /nologo /version:4 /subsystem:windows /incremental:yes /pdb:".\WinDebug/eshtedit.pdb" /debug /machine:I386 /nodefaultlib:"LIBC" /nodefaultlib:"LIBCMT" /out:".\WinDebug/eshtedit.exe" 
+.\WinDebug\eshtdlg.obj
+.\WinDebug\eshtdlgt.obj
+.\WinDebug\eshtdlgx.obj
+.\WinDebug\eshtdoc.obj
+.\WinDebug\eshtdoci.obj
+.\WinDebug\eshtedit.obj
+.\WinDebug\Eshtgrid.obj
+.\WinDebug\Eshtlist.obj
+.\WinDebug\eshtmfrm.obj
+.\WinDebug\Eshtrend.obj
+.\WinDebug\Eshtusgs.obj
+.\WinDebug\eshtview.obj
+.\WinDebug\stdafx.obj
+.\WinDebug\eshtedit.res>
+Creating command line "link.exe @C:\WINDOWS\TEMP\RSP73A3.TMP" 
+Compiling...
+eshtdlgt.cpp
+Linking...
+
+
+
+eshtedit.exe - 0 error(s), 0 warning(s)

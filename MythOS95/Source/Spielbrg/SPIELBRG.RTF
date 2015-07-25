@@ -1,0 +1,534 @@
+{\rtf1
+{\comment
+ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
+
+                              Spielberg Help
+
+                      Microsoft Windows 95/98/NT Version
+
+   Copyright (c) 1995-1999 by Dan Higdon, Tim Little, and Chuck Walbourn
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ This file and all associated files are subject to the terms of the
+ GNU Lesser General Public License version 2 as published by the
+ Free Software Foundation (http://www.gnu.org).   They remain the
+ property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+ See LICENSE.TXT in the distribution for a copy of this license.
+
+ THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+ OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+ PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+ LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+ OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+                        http://www.mythos-engine.org/
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ Spielberg is a component of the MythOS(tm) collection.
+
+ MythOS is a trademark of Charybdis Enterprises, Inc.
+
+ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
+}
+
+{\fonttbl
+\f0\fswiss Arial;
+\f1\froman Times New Roman;
+\f2\fmodern Courier New;
+\f3\fswiss MS Sans Serif;
+\f4\froman MS Serif;
+}
+\deff1
+\fs21
+
+{\colortbl;
+\red128\green128\blue128;
+\red0\green0\blue128;
+\red0\green128\blue0;
+\red128\green0\blue0;
+}
+
+{\comment
+°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+                            Programmer's Guide
+
+°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+}
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+Overview                                                                  ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_SBERG_OVERVIEW}
+${\footnote Overview}
++{\footnote BW_PG_E}
+{\b\f0{\cf2\scaps Programmer's Guide: Spielberg}\line\fs32 Overview}\par\pard\sb100
+
+The {\i Spielberg} library provides an interface for playing animations
+ (movies, cutscenes, etc.) in full-screen or windowed environments.
+\par
+
+{\cf2
+Note: Playback of multimedia sequences consumes a significant amount of
+ resources (CPU, disk bandwidth, etc.) and performance problems are obvious
+ to the user in the form of stop-frame video, audio clicks and pops, and
+ other artifacts.
+}\par
+
+{\cf2
+Note:  When using the ActiveMovie/DirectShow classes, remember that you
+ will have to install the DirectX Media run-time before these routines
+ will succeed.
+}\par
+
+\line{\b\fs28 Features}\par
+
+Generic interface for multimedia animation/movie players.
+\par
+
+Support for Microsoft's ActiveMovie/DirectShow APIs for high-performance
+ playback of AVIs, MPEGs, and QuickTime movies.
+\par
+
+Allows playback to a window or a DirectDraw surface.
+\par
+
+\line{\b\fs28 Future Work}\par
+
+Plans to add some method for capturing a movie (video only) are being
+ considered as well as support for Autodesk's FLI/FLC format.
+\par
+
+\line{\b\fs28 Organization}\par
+
+The {\i Spielberg} library consits of a few classes which are specific
+ implementations of the generic player interface.  The following is a
+ list of classes:
+\par
+
+{\uldb SpielbergPlayer}{\v PG_SBERG_PLAYER}\line
+{\uldb SpielbergAMPlayer}{\v PG_SBERG_AMPLAYER}\line
+{\uldb SpielbergAMStreamPlayer}{\v PG_SBERG_AMSTREAMPLAYER}
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+SpielbergPlayer Class                                                     ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_SBERG_PLAYER}
+${\footnote SpeilbergPlayer Class}
+K{\footnote SpielbergPlayer;
+SpielbergPlayer, open;
+SpielbergPlayer, close;
+SpielbergPlayer, play;
+SpielbergPlayer, stop;
+SpielbergPlayer, pause;
+SpielbergPlayer, resume;
+SpielbergPlayer, set_position;
+SpielbergPlayer, get_position;
+SpielbergPlayer, get_info;
+SpielbergPlayer, get_flags;
+SpielbergPlayer, display}
++{\footnote BW_PG_E}
+{\b\f0{\cf2\scaps Programmer's Guide: Spielberg}\line\fs32 SpeilbergPlayer Class}\par\pard\sb100
+
+This abstract class defines the interface for a movie player which is
+ associated with a file on disk.  The player interface supports play,
+ stop, resume, and pause VCR-like functionality as well as some
+ informational and positional controls.
+\par
+
+\line{\b\fs28 Name}\par
+
+SpielbergPlayer - Abstract player interface class.
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "sbrgbase.hpp"
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b SpielbergPlayer();}\par
+
+Clears internal state data.
+\par
+
+\line{\b\fs28 Member Data}\par
+
+{\b dword flags;}\par
+
+State flags for the player (should be read by get_flags() below).
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+{\b virtual sberg_err_codes open(const char *name, dword ctrlfl=0)=0;}\par
+
+Opens a disk file with the given path and filename, preparing for
+ playback.  No other operation except close() is valid until a successful
+ open() is performed.  For some players, the ctrlfl's are used (see
+ {\b Control Flags} below).
+\par
+
+{\b virtual sberg_err_codes close()=0;)}\par
+
+This closes the disk file and releases all resources associated with
+ the player.  This is called by the destructor.
+\par
+
+{\b virtual sberg_err_codes play()=0;}\par
+
+Starts playback of the multimedia sequence from the current position.
+\par
+
+{\b virtual sberg_err_codes stop()=0;}\par
+
+This stops playback of the multimedia sequence and resets the position
+ to the beginning.
+\par
+
+{\b virtual sberg_err_codes pause()=0;}\par
+
+This pauses the playback of the sequence for later resume().
+\par
+
+{\b virtual sberg_err_codes resume()=0;}\par
+
+This resumes the playback of the sequence from the current position.
+\par
+
+{\b virtual sberg_err_codes set_position(ulong ms)=0;}\par
+
+Sets the playback position to the number of milliseconds from the start.
+\par
+
+{\b virtual ulong get_position() const=0;}\par
+
+Returns the playback position as a number of milliseconds from the start.
+\par
+
+{\b virtual sberg_err_codes get_info(SpielbergInfo *info) const=0;}\par
+
+Returns a structure containing information about the sequence:
+\par
+
+\tab{\b ushort width, height;}\tab Width and height of the sequence in pixels.
+\par
+\tab{\b ulong duration;}\tab\tab Duration of the sequence in milliseconds.
+\par
+
+{\b virtual dword get_flags();}\par
+
+Performs any updates that are needed to the flags and returns.  If the
+ end of the sequence is detected, the sequence is stopped.
+\par
+
+{\b virtual void display()=0;}\par
+
+Some players automatically update the display while others require explicit
+ update computations.  This routine should be called from inside the
+ per-frame loop.
+\par
+
+\line{\b\fs28 Control Flags}\par
+
+{\i SBERG_CTRL_FULLSCREEN}\tab For players that can be windowed or
+ full-screen, this indicates that the playback should be full-screen if
+ possible.
+\par
+
+\line{\b\fs28 State Flags}\par
+
+{\i SBERG_PLAYER_PLAYING}\tab The sequence is currently playing (could be paused).
+\par
+
+{\i SBERG_PLAYER_PAUSED}\tab The sequence is paused, but still 'playing'.
+\par
+
+{\i SBERG_PLAYER_APP0} -\line
+{\i SBERG_PLAYER_APP7}\tab These flags are for application use.
+\par
+
+\line{\b\fs28 Error Codes}\par
+
+{\i SBERG_ERR_NONE}\tab\tab\tab No error.
+\par
+
+{\i SBERG_ERR_INVALIDPARMS}\tab\tab Invalid parameters.
+\par
+
+{\i SBERG_ERR_NOMEMORY}\tab\tab Memory allocation failed.
+\par
+
+{\i SBERG_ERR_NOTSUPPORTED}\tab Operation not supported.
+\par
+
+{\i SBERG_ERR_UNINITIALIZED}\tab\tab Instance not initialized (call open first).
+\par
+
+{\i SBERG_ERR_ALREADYOPEN}\tab\tab Already open, must close() first.
+\par
+
+{\i SBERG_ERR_FILENOTFOUND}\tab\tab File does not exist.
+\par
+
+{\i SBERG_ERR_OPENFAILED}\tab\tab General fail on open.
+\par
+
+{\i SBERG_ERR_NOTPLAYING}\tab\tab Not currently playing (pause/resume).
+\par
+
+{\i SBERG_ERR_MISSINGDATA}\tab\tab Missing needed data.
+\par
+
+{\i SBERG_ERR_VIDEOFAILED}\tab\tab Video setup/render failed.
+\par
+
+{\i SBERG_ERR_AUDIOFAILED}\tab\tab Audio setup/render failed.
+\par
+
+{\i SBERG_ERR_AMCONNECTFAILED}\tab Failed to connect to ActiveMovie.
+\par
+
+{\i SBERG_ERR_AMQUERYIFAILED}\tab Failed to get a needed COM interface.
+\par
+
+{\i SBERG_ERR_AMEVENTFAILED}\tab Failed to get event handle.
+\par
+
+{\i SBERG_ERR_AMFSFAILED}\tab\tab Failed to set full-screen mode.
+\par
+
+{\i SBERG_ERR_AMFAILED}\tab\tab General ActiveMovie failure.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+SpielbergAMPlayer Class                                                   ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_SBERG_AMPLAYER}
+${\footnote SpeilbergAMPlayer Class}
+K{\footnote SpielbergAMPlayer;
+SpielbergAMPlayer, get_window_styles;
+SpielbergAMPlayer, set_window_styles;
+SpielbergAMPlayer, get_window_pos;
+SpielbergAMPlayer, set_window_pos;
+SpielbergAMPlayer, set_source_rect;
+SpielbergAMPlayer, set_dest_rect}
++{\footnote BW_PG_E}
+{\b\f0{\cf2\scaps Programmer's Guide: Spielberg}\line\fs32 SpeilbergAMPlayer Class}\par\pard\sb100
+
+This class uses the Microsoft ActiveMovie/DirectShow COM IGraphBuilder
+ interface to implement a movie player.  The output is sent to a window
+ either via GDI or DirectDraw and updating is done automatically in a
+ seperate thread.  This implementation is useful for a simple player,
+ but does not provide adequate control for full-screen DirectDraw
+ applications.
+\par
+
+\line{\b\fs28 Name}\par
+
+SpielbergAMPlayer - ActiveMovie IGraphBuilder player
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "sbrgam.hpp"
+\par
+
+\line{\b\fs28 Base Classes}\par
+
+{\uldb SpielbergPlayer}{\v PG_SBERG_PLAYER}
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b SpielbergAMPlayer(HWND _parent);}\par
+
+Initializes the class and sets the parent window handle.
+\par
+
+\line{\b\fs28 Member Data}\par
+
+Same as {\uldb SpielbergPlayer}{\v PG_SBERG_PLAYER}, plus :-
+\par
+
+{\b HWND parent;}\par
+
+Handle to parent window given in constructor.
+\par
+
+{\b IGraphBuilder *am_graph;}\par
+
+Pointer to ActiveMovie Filter Graph instance for the given file.
+\par
+
+{\b HANDLE am_event;}\par
+
+Handle to graph event.
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+Same as {\uldb SpielbergPlayer}{\v PG_SBERG_PLAYER}, plus :-
+\par
+
+{\b sberg_err_codes get_window_styles(long *style, long *styleex);\line
+sberg_err_codes set_window_styles(long style, long styleex);}\par
+
+Gets/sets the ActiveMovie render window style and extended style.
+\par
+
+{\b sberg_err_codes get_window_pos(long *x, long *y);\line
+sberg_err_codes set_window_pos(long x, long y);}\par
+
+Gets/sets the ActiveMovie render window position.
+\par
+
+{\b sberg_err_codes set_source_rect(long x, long y, long w, long h);}\par
+
+Sets the source rectangle (which defaults to the movie size).
+\par
+
+{\b sberg_err_codes set_dest_rect(long x, long y, long w, long h);}\par
+
+Sets the destination rectangle (which defaults to the entire render
+ window).
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+SpielbergAMStreamPlayer Class                                             ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_SBERG_AMSTREAMPLAYER}
+${\footnote SpeilbergAMStreamPlayer Class}
+K{\footnote SpielbergAMStreamPlayer;
+SpielbergAMStreamPlayer, set_source_rect;
+SpielbergAMStreamPlayer, set_dest_rect}
++{\footnote BW_PG_E}
+{\b\f0{\cf2\scaps Programmer's Guide: Spielberg}\line\fs32 SpeilbergAMStreamPlayer Class}\par\pard\sb100
+
+This class uses the Microsoft ActiveMovie/DirectShow COM IMultiMediaStream
+ interface to implement a movie player.  The output is sent to a
+ DirectDraw surface and updating is done explicity by calling the 'display()'
+ member of the class.  The user must be sure to display the target
+ surface by using a Blt to the primary surface or providing the primary
+ surface as the target and performing a Flip().  This implementation
+ is perferred for full-screen DirectDraw applications.
+\par
+
+\line{\b\fs28 Name}\par
+
+SpielbergAMStreamPlayer - ActiveMovie IMultiMediaStream player
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "sbrgam.hpp"
+\par
+
+\line{\b\fs28 Base Classes}\par
+
+{\uldb SpielbergPlayer}{\v PG_SBERG_PLAYER}
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b SpielbergAMStreamPlayer(LPDIRECTDRAW _ddraw, LPDIRECTDRAWSURFACE dsurf);}\par
+
+Initializes the class and sets the DirectDraw instance and the
+ DirectDraw target surface.
+\par
+
+\line{\b\fs28 Member Data}\par
+
+Same as {\uldb SpielbergPlayer}{\v PG_SBERG_PLAYER}, plus :-
+\par
+
+{\b LPDIRECTDRAW ddraw;\line
+LPDIRECTDRAWSURFACE dsurf;}\par
+
+The DirectDraw instance and surface provided by the constructor.
+\par
+
+{\b IAMMultiMediaStream *am_stream;}\par
+
+Stream instance opened for the file.
+\par
+
+{\b IMediaStream *am_vidstream;\line
+IDirectDrawMediaStream *am_ddstream;\line
+IDirectDrawStreamSample *am_ddsample;}\par
+
+Various interfaces queried from the am_stream.
+\par
+
+{\b LPDIRECTDRAWSURFACE am_ddsurf;}\par
+
+The surface used by ActiveMovie.
+\par
+
+{\b RECT am_srect;\line
+RECT am_drect;}\par
+
+Source and destination rectangle (should be set by set_source/dest_rect).
+\par
+
+{\b ushort am_swidth;\line
+ushort am_sheight;}\par
+
+Size of source movie.
+\par
+
+{\b HANDLE am_event;}\par
+
+End-of-stream event handle.
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+Same as {\uldb SpielbergPlayer}{\v PG_SBERG_PLAYER}, plus :-
+\par
+
+{\b sberg_err_codes set_source_rect(long x, long y, long w, long h);}\par
+
+Sets the source rectangle (which defaults to the movie size).
+\par
+
+{\b sberg_err_codes set_dest_rect(long x, long y, long w, long h);}\par
+
+Sets the destination rectangle (which defaults to the movie centered
+ within the target surface or at 0,0 if the target surface is smaller
+ than the movie).
+\par
+
+\par
+
+\pard\page
+
+{\comment °±² eof - spielbrg.rtf ²±° }
+}

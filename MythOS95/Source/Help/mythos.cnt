@@ -1,0 +1,330 @@
+:Base MythOS.HLP
+:Title MythOS for Windows 9x/NT
+:Index =MythOS.HLP
+1 Notice=NOTICE@mythos.hlp
+1 MythOS Programmer's Guide
+2 About this guide=PG_ABOUT
+2 Overview=PG_OVERVIEW
+2 System
+3 Overview=PG_SYSTEM_OVERVIEW
+3 System Detection=PG_SYSTEM_DETECT
+3 At-exit Handling=PG_SYSTEM_ATEXIT
+3 System Object=PG_SYSTEM_OBJECT
+2 Ivory
+3 Overview=PG_IVORY_OVERVIEW
+3 IvorySystem Class=PG_IVORY_SYSCLASS
+3 Library Initialization Routines=PG_IVORY_LIBINIT
+3 Standard Allocation Routines=PG_IVORY_STDALLOC
+3 Block Sub-allocation Routines=PG_IVORY_SUBALLOC
+3 Handle Allocation=PG_IVORY_HALLOC
+3 Arena Allocation=PG_IVORY_ARENAALLOC
+3 Arena Allocation Template=PG_IVORY_ARENAALLOCTEMP
+2 XFile
+3 Overview=PG_XFILE_OVERVIEW
+3 C-style
+4 File I/O Routines=PG_XFILE_CSTYFIO
+4 File Routines=PG_XFILE_CSTYFILE
+4 Directory and Drive Routines=PG_XFILE_CSTYDIRDRV
+4 Environment Routines=PG_XFILE_CSTYENV
+4 Misc. Routines=PG_XFILE_CSTYMISC
+4 Routine Errors=PG_XFILE_CSTYERR
+3 XFile Classes
+4 XFile Class=PG_XFILE_XFILE
+4 XFileRAM Class=PG_XFILE_XFILERAM
+4 XFileDisk Class=PG_XFILE_XFILEDISK
+4 XFileDiskBuf Class=PG_XFILE_XFILEDISKBUF
+3 Parse Support Classes
+4 XFBitmap Class=PG_XFILE_XFBITMAP
+3 Parse Classes
+4 XFParseBitmap Class=PG_XFILE_XFPARSEBITMAP
+4 XFParseBMP Class=PG_XFILE_XFPARSEBMP
+4 XFParseCEL Class=PG_XFILE_XFPARSECEL
+4 XFParseLBM Class=PG_XFILE_XFPARSELBM
+4 XFParsePCX Class=PG_XFILE_XFPARSEPCX
+4 XFParseTGA Class=PG_XFILE_XFPARSETGA
+4 XFParseXEB Class=PG_XFILE_XFPARSEXEB
+4 XFParseINI Class=PG_XFILE_XFPARSEINI
+4 XFParseIFF Class=PG_XFILE_XFPARSEIFF
+2 Chronos
+3 Overview=PG_CHRONOS_OVERVIEW
+3 C-style Interface=PG_CHRONOS_CINTERFACE
+3 Chronos System Class=PG_CHRONOS_SYSTEM
+3 Chronometer Class=PG_CHRONOMETER
+3 AtomicChronometer Class=PG_ACHRONOMETER
+2 Bozo
+3 Overview=PG_BOZO_OVERVIEW
+3 C Tasking Interface=PG_BOZO_CTASKING
+3 C Queue Interface=PG_BOZO_CQUEUEING
+3 C Semaphore Interface=PG_BOZO_CSEMAPHORE
+3 Bozo Miscellaneous=PG_BOZO_CMISC
+3 BozoTask Class=PG_BOZO_TASK
+3 BozoSemaphore Class=PG_BOZO_SEMAPHORE
+3 BozoGate Class=PG_BOZO_GATE
+2 Max
+3 Overview=PG_MAX_OVERVIEW
+3 MaxTrigger Class=PG_MAX_TRIGGER
+3 Max Event Class=PG_MAX_EVENTCLASS
+3 MaxValueMap Class=PG_MAX_VALUEMAPCLASS
+3 MaxEventList Classes
+4 MaxEventList Class=PG_MAX_EVENTLIST
+4 MaxEventListToggle Class=PG_MAX_MAXEVENTLISTTOGGLE
+4 MaxEventListOneshot Class=PG_MAX_EVENTLISTONESHOT
+3 MaxEventSource Classes
+4 MaxEventSource Class=PG_MAX_MAXEVENTSOURCE
+4 MaxEventUser Class=PG_MAX_MAXEVENTUSER
+3 MaxDevice Classes
+4 MaxDevices Class=PG_MAX_DEVICES
+4 MaxKeyboard Class=PG_MAX_KEYBOARD
+4 MaxMouse Class=PG_MAX_MOUSE
+4 MaxJoystick Class=PG_MAX_JOYSTICK
+2 Felix
+3 Overview=PG_FELIX_OVERVIEW
+3 C-style Operations=PG_FELIX_CSTYLE
+3 Flx16 Class=PG_FELIX_FLX16
+2 Van Gogh
+3 Overview=PG_VNGO_OVERVIEW
+3 C-style Routines
+4 Low-level Output Functions=PG_VNGO_CSTYLOW
+4 Support Functions=PG_VNGO_CSTYSUPPORT
+4 Misc. Functions=PG_VNGO_CSTYMISC
+3 Control Class
+4 VngoSystem Class=PG_VNGO_SYSTEM
+3 Viewport Classes
+4 VngoVport Class=PG_VNGO_VPORT
+4 8 bpp
+5 VngoVVport8 Class=PG_VNGO_VVPORT8
+5 VngoVportDB8 Class=PG_VNGO_VPORTDB8
+5 VngoVportDD8 Class=PG_VNGO_VPORTDD8
+4 16 bpp
+5 VngoVVport16 Class=PG_VNGO_VVPORT16
+5 VngoVportDB16 Class=PG_VNGO_VPORTDB16
+5 VngoVportDD16 Class=PG_VNGO_VPORTDD16
+4 Hardware-specific
+5 VngoVportD3D Class=PG_VNGO_VPORTD3D
+3 Screen Manager Classes
+4 VngoScreenManager Class=PG_VNGO_SCRNMNGR
+4 VngoDIB Class=PG_VNGO_DIB
+4 VngoDirectDraw Class=PG_VNGO_DIRECTDRAW
+4 VngoHybrid Class=PG_VNGO_HYBRID
+4 Hardware-specific
+5 VngoDirect3D Class=PG_VNGO_DIRECT3D
+5 VngoOpenGL Class=PG_VNGO_OPENGL
+3 Color Classes
+4 VngoColorHLS Class=PG_VNGO_COLORHLS
+4 VngoColor24bit Class=PG_VNGO_COLOR24BIT
+4 VngoColor16bit Class=PG_VNGO_COLOR16BIT
+4 VngoColor15bit Class=PG_VNGO_COLOR15BIT
+4 Vngo24to8bit Class=PG_VNGO_24TO8BIT
+4 VngoClrConvert Class=PG_VNGO_CLRCONVERT
+4 VngoColorShade Class=PG_VNGO_COLORSHADE
+4 VngoColorShadeHLS Class=PG_VNGO_COLORSHADEHLS
+4 VngoColorShade8/15/16/24 Class=PG_VNGO_COLORSHADE8_15_16_24
+3 Palette Classes
+4 VngoHwPal Class=PG_VNGO_HWPAL
+4 VngoShadePal Class=PG_VNGO_SHADEPAL
+4 VngoShadePal8/15/16 Class=PG_VNGO_SHADEPAL8_15_16
+4 VngoPal Class=PG_VNGO_PAL
+4 VngoPal8/15/16 Class=PG_VNGO_PAL8_15_16
+4 VngoPalIFF Class=PG_VNGO_PALIFF
+4 VngoPalIFF8/15/16 Class=PG_VNGO_PALIFF8_15_16
+3 Texture Classes
+4 VngoTexture Class=PG_VNGO_TEXTURE
+4 VngoCTexture Class=PG_VNGO_CTEXTURE
+4 3D Texture Classes
+5 VngoTexture3D Class=PG_VNGO_TEXTURE3D
+5 VngoMemTexture3D Class=PG_VNGO_MEMTEXTURE3D
+5 VngoD3DTexture3D Class=PG_VNGO_D3DTEXTURE3D
+3 Support Structures
+4 VngoRect=PG_VNGO_RECT
+4 VngoPoint=PG_VNGO_POINT
+4 VngoPointF=PG_VNGO_POINTF
+4 VngoVbuffer=PG_VNGO_VBUFFER
+3 Support Classes
+4 VngoSurfaceManager Class=PG_VNGO_SURFMNGR
+4 VngoTextureManager Class=PG_VNGO_TXTRMNGR
+4 VngoZMap Class=PG_VNGO_ZMAP
+2 Escher
+3 Overview=PG_ESCH_OVERVIEW
+3 C-style
+4 C-style Math Functions=PG_ESCH_CSTYMATH
+4 C-style Draw Functions=PG_ESCH_CSTYDRAW
+4 C-style Clip Support Functions=PG_ESCH_CSTYCLIP
+3 Control/Collection Classes
+4 EschSystem Class=PG_ESCH_SYSTEM
+4 EschScene Class=PG_ESCH_SCENE
+3 Drawable Classes
+4 EschDrawable Class=PG_ESCH_DRAWABLE
+4 Basic Drawables
+5 EschPointDraw Class=PG_ESCH_POINTDRAW
+5 EschLineDraw Class=PG_ESCH_LINEDRAW
+5 EschPlaneDraw Class=PG_ESCH_PLANEDRAW
+5 EschSprite Class=PG_ESCH_SPRITE
+4 Particle Drawables
+5 EschParticle Class=PG_ESCH_PARTICLE
+5 EschParticleLine Class=PG_ESCH_PARTICLELINE
+5 EschParticlePyramid Class=PG_ESCH_PARTICLEPYR
+5 EschParticleGeometry Class=PG_ESCH_PARTICLEGEOM
+5 EschParticleSprite Class=PG_ESCH_PARTICLESPR
+5 EschParticleSystem Class=PG_ESCH_PARTICLESYS
+5 EschParticleGenerator Class=PG_ESCH_PARTICLEGEN
+4 Geometry Drawables
+5 EschGeometry Class=PG_ESCH_GEOMETRY
+5 EschMeshDraw Class=PG_ESCH_MESHDRAW
+4 Terrain Drawables
+5 EschTerrain Class=PG_ESCH_TERRAIN
+5 EschTerrainEx Class=PG_ESCH_TERRAINEX
+5 EschTerrainTreeTop Class=PG_ESCH_TERRAINTREETOP
+4 Partitioning Drawables
+5 EschPartition Class=PG_ESCH_PARTITION
+5 EschGridPartition Class=PG_ESCH_GRIDPARTITION
+5 EschQuadTreePartition Class=PG_ESCH_QUADTREEPARTITION
+5 EschOctTreePartition Class=PG_ESCH_OCTTREEPARTITION
+4 Misc Drawables
+5 EschStarfield Class=PG_ESCH_STARFIELD
+5 EschPlosion Class=PG_ESCH_PLOSION
+5 EschMetabox Class=PG_ESCH_METABOX
+5 EschLevelOfDetail Class=PG_ESCH_LOD
+5 EschKeyframeDraw Class=PG_ESCH_KFDRAW
+3 Drawable Support Structures
+4 EschCollision Structure=PG_ESCH_COLLISION
+4 EschPicking Structure=PG_ESCH_PICKING
+4 EschDrawList Structure=PG_ESCH_DRAWLIST
+4 EschPartitionList Structure=PG_ESCH_PARTITIONLIST
+4 EschTraverse Structure=PG_ESCH_TRAVERSE
+3 Drawable Support Classes
+4 EschSphereExtents Class=PG_ESCH_SPHERE_EXTS
+4 EschBoxExtents Class=PG_ESCH_BOX_EXTS
+4 EschFace Class=PG_ESCH_FACE
+4 EschMesh Class=PG_ESCH_MESH
+3 Camera Classes
+4 EschCamera Class=PG_ESCH_CAMERA
+4 EschCameraEx Class=PG_ESCH_CAMERAEX
+3 Light Classes
+4 EschLight Class=PG_ESCH_LIGHT
+4 EschVectorLight Class=PG_ESCH_VECTORLIGHT
+4 EschFastPointLight Class=PG_ESCH_FPOINTLIGHT
+4 EschFastAttenLight Class=PG_ESCH_FATTENLIGHT
+4 EschFastSpotLight Class=PG_ESCH_FSPOTLIGHT
+4 EschPointLight Class=PG_ESCH_POINTLIGHT
+4 EschAttenLight Class=PG_ESCH_ATTENLIGHT
+4 EschSpotLight Class=PG_ESCH_SPOTLIGHT
+3 Texture Classes
+4 EschTexture Class=PG_ESCH_TEXTURE
+4 EschStaticTexture Class=PG_ESCH_STATICTEXTURE
+4 EschMultiFrameTexture Class=PG_ESCH_MFRAMETEXTURE
+4 EschProceduralTexture Class=PG_ESCH_PROCTEXTURE
+4 EschFireTexture Class=PG_ESCH_FIRETEXTURE
+3 Motion Classes
+4 EschKeyframer Class=PG_ESCH_KEYFRAMER
+4 EschKeyframeDraw Class=PG_ESCH_KFDRAW
+4 EschLimbSegment Class=PG_ESCH_LIMBSEG
+3 Render Support Classes
+4 EschContext Class=PG_ESCH_CONTEXT
+4 EschElement Class=PG_ESCH_ELEMENT
+3 Builder Classes
+4 EschBuildTexture=PG_ESCH_BUILDTEXTURE
+4 EschBuildMesh=PG_ESCH_BUILDMESH
+3 Math Support Classes
+4 EschPoint Class=PG_ESCH_POINT
+4 EschVector Class=PG_ESCH_VECTOR
+4 EschPlane Class=PG_ESCH_PLANE
+4 EschVertex Class=PG_ESCH_VERTEX
+4 EschMatrix Class=PG_ESCH_MATRIX
+4 EschFrameRef Class=PG_ESCH_FRAMEREF
+2 Gutenberg
+3 Overview=PG_GBERG_OVERVIEW
+3 C-style Control Routines=PG_GBERG_CSTYCTRL
+3 C-style Text Output Control Routines=PG_GBERG_CSTYTEXT
+3 C-style External String Routines=PG_GBERG_CSTYSTRING
+3 Gutenberg System Class=PG_GBERG_SYSCLASS
+3 Text Output Class=PG_GBERG_TEXTCLASS
+2 Turner
+3 Overview=PG_TURNER_OVERVIEW
+3 TurnerClassic Class=PG_TURNER_CLASSIC
+3 TurnerNetwork Class=PG_TURNER_NETWORK
+3 TurnerNetworkUI Class=PG_TURNER_NETWORKUI
+2 Newton
+3 Overview=PG_NEWTON_OVERVIEW
+3 C-style Math Functions=PG_NEWT_CSTYMATH
+3 Object Class=PG_NEWT_OBJECT
+3 Force Class=PG_NEWT_FORCE
+3 Vector Class=PG_NEWT_VECTOR
+2 Bach
+3 Overview=PG_BACH_OVERVIEW
+3 Digital Sound Source Class=PG_BACH_DIGI
+3 Digital 3D Sound Source Class=PG_BACH_DIGI3D
+3 Base Sample Class=PG_BACH_SAMPLE
+3 Static Sample Class=PG_BACH_STATICSAMPLE
+3 3D Sample Class=PG_BACH_SAMPLE3D
+3 File Sample Class=PG_BACH_FILESAMPLE
+3 Sample Sequencer Class=PG_BACH_SAMPLESEQ
+3 CD Audio Class=PG_BACH_CD
+3 Music Sound Source Class=PG_BACH_MUSIC
+3 Music Sequence Class=PG_BACH_SEQUENCE
+2 Spielberg
+3 Overview=PG_SBERG_OVERVIEW
+3 SpielbergPlayer Class=PG_SBERG_PLAYER
+3 SpielbergAMPlayer Class=PG_SBERG_AMPLAYER
+3 SpielbergAMStreamPlayer Class=PG_SBERG_AMSTREAMPLAYER
+2 Pane
+3 Overview=PG_PANE_OVERVIEW
+3 PaneImageScroll Class=PG_PANE_IMAGESCROLL
+3 PaneInputText Class=PG_PANE_INPUTTEXT
+3 PaneListBox Class=PG_PANE_LISTBOX
+3 PaneTextScroll Class=PG_PANE_TEXTSCROLL
+3 PaneDie Class=PG_PANE_DIE
+3 PaneDieT Template=PG_PANE_DIET
+1 MythOS User's Guide
+2 About this guide=UG_ABOUT
+2 Overview=UG_OVERVIEW
+2 XFile
+3 Overview=UG_XFILE_OVERVIEW
+3 IFF Directory=UG_XFILE_IFFDIR
+3 IFF Compiler=UG_XFILE_IFFC
+2 Max
+3 Overview=UG_MAX_OVERVIEW
+3 Event Compiler=UG_MAX_MAXC
+2 Van Gogh
+3 Overview=UG_VNGO_OVERVIEW
+3 Palette Tool=UG_VNGO_PALTOOL
+2 Escher
+3 Overview=UG_ESCH_OVERVIEW
+3 Escher Directory=UG_ESCH_DIR
+3 Escher Exporter=UG_ESCH_EXPORT
+3 Escher Lightwave Converter=UG_ESCH_LW
+3 Escher Texture Librarian=UG_ESCH_TLIB
+3 Escher Tool=UG_ESCH_TOOL
+3 Escher Terrain Editor=UG_ESCH_TERR
+2 Gutenberg
+3 Overview=UG_GBERG_OVERVIEW
+3 Font Converter=UG_GBERG_FONT
+3 String Compiler=UG_GBERG_STRING
+2 Utilities
+3 Overview=UG_UTIL_OVERVIEW
+3 Picture Utility=UG_UTIL_PIC
+1 SimGine Framework Guide
+2 About this guide=SG_ABOUT
+2 Overview=SG_OVERVIEW
+2 SimGine Class=SG_SIMGINE
+2 SimAudio Class=SG_SIMAUDIO
+2 SimText Class=SG_SIMTEXT
+2 SimTimeTable Class=SG_SIMTIMETABLE
+2 Screen Classes
+3 SimScreen Class=SG_SIMSCREEN
+3 SimScreenDD Class=SG_SIMSCREENDD
+3 SimScreenDIB Class=SG_SIMSCREENDIB
+3 SimScreenD3D Class=SG_SIMSCREEND3D
+3 SimScreenCL3D Class=SG_SIMSCREENCL3D
+2 State Classes
+3 SimState Class=SG_SIMSTATE
+3 SimulatorState Class=SG_SIMULATORSTATE
+3 Simulator UI Classes
+4 SimUI=SG_SIMUI
+4 SimView=SG_SIMVIEW
+3 Simulator Model Classes
+4 SimBase=SG_SIMBASE
+4 SimObject=SG_SIMOBJECT
+4 SimUnit=SG_SIMUNIT
+4 SimEquip=SG_SIMEQUIP
+4 SimTemp=SG_SIMTEMP
+4 SimOffield=SG_SIMOFFIELD

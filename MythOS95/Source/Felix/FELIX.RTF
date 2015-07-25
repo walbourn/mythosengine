@@ -1,0 +1,552 @@
+{\rtf1
+{\comment
+ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
+
+                                   Felix Help
+
+                    Microsoft Windows 95/98/NT Version
+
+   Copyright (c) 1994-1999 by Dan Higdon, Tim Little, and Chuck Walbourn
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ This file and all associated files are subject to the terms of the
+ GNU Lesser General Public License version 2 as published by the
+ Free Software Foundation (http://www.gnu.org).   They remain the
+ property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+ See LICENSE.TXT in the distribution for a copy of this license.
+
+ THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+ OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+ PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+ LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+ OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+                        http://www.mythos-engine.org/
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ Felix is a component of the MythOS(tm) collection.
+
+ MythOS is a trademark of Charybdis Enterprises, Inc.
+
+ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
+}
+
+{\fonttbl
+\f0\fswiss Arial;
+\f1\froman Times New Roman;
+\f2\fmodern Courier New;
+\f3\fswiss MS Sans Serif;
+\f4\froman MS Serif;
+}
+\deff1
+\fs21
+
+{\colortbl;
+\red128\green128\blue128;
+\red0\green0\blue128;
+\red0\green128\blue0;
+\red128\green0\blue0;
+}
+
+{\comment
+°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+                            Programmer's Guide
+
+°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+}
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+Overview                                                                  ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_FELIX_OVERVIEW}
+${\footnote Overview}
++{\footnote BW_PG_8}
+{\b\f0{\cf2\scaps Programmer's Guide: Felix}\line\fs32 Overview}\par\pard\sb100
+
+The {\i Felix} library provides fixed-point math support needed for
+high-performance operations on various x86 processors.  The
+majority of the {\i Felix} library is only usable from C++, but
+several functions are available from C/Assembly to perform
+complex operations.  C and Assembly programs are responsible for
+implementing the basic arithmetic operations, although a C
+callable routine for multiply and divide are provided.
+\par
+
+\line{\b\fs28 Definitions}\par
+
+Fixed-point math involves representing a 'real' number as an
+integer with a fixed multiplier.  A 16.16 fixed-point value is
+16 bits signed integer component, and 16 bits fractional
+component.  For example, the number 0x143 would be represented
+as 0x1430000 in 16.16.
+\par
+
+\line{\b\fs28 Features}\par
+
+High-performance fixed-point operations using C++ operator
+overloading.
+\par
+
+Table-driven cos/sin for fast trigonometric operations.
+\par
+
+Extremely fast square-root function
+\par
+
+\line{\b\fs28 Future Work}\par
+
+{\i Felix} may be expanded to support other fixed-point
+representations as the need arises and possibly other
+mathematical operations.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+C-style Operations                                                        ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_FELIX_CSTYLE}
+${\footnote C-style Operations}
+K{\footnote flx_muldiv;
+flx_16mul16;
+flx_16div16;
+flx_abs;
+flx_sqrt;
+flx_rand;
+flx_srand
+}
++{\footnote BW_PG_8}
+{\b\f0{\cf2\scaps Programmer's Guide: Felix}\line\fs32 C-style Operations}\par\pard\sb100
+
+The {\i Felix} library is easiest to use from C++, but several of the
+routines are implemented in assembly, and can therefore be
+called from C or Assembly.
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+A .h file is not provided for the C callable routines, but they
+are declared in the C++ header as extern "C".
+\par
+
+#include "felix.hpp"
+\par
+
+\line{\b\fs28 Routines}\par
+
+{\b Flx16 flx_muldiv(Flx16 a,Flx16 b,Flx16 c);}\par
+
+Performs a 16.16 (a) by 16.16 multiply (b), then a divide of the
+64-bit result by a 16.16 value (c) to get a 16.16 result without
+lose of intermediate precision.
+\par
+
+{\b Flx16 flx_16mul16(Flx16 a,Flx16 b);}\par
+
+Performs a multiply of two 16.16 values to get a 16.16 result.
+\par
+
+{\b Flx16 flx_16div16(Flx16 a,Flx16 b);}\par
+
+Performs a divide of two 16.16 values to get a 16.16 result.
+\par
+
+{\b Flx16 flx_abs(Flx16 a);}\par
+
+Returns the absolute value of the 16.16 value.
+\par
+
+{\b Flx16 flx_sqrt(Flx16 a);}\par
+
+Computes the square root of the 16.16 value.
+\par
+
+{\b Flx16 flx_rand();}\par
+
+Returns a random 16.16 value based on the seed set by
+flx_srand().
+\par
+
+{\b void  flx_srand(long s1,long s2);}\par
+
+Changes the seed for the flx_rand() function.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+Flx16 Class                                                               ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_FELIX_FLX16}
+${\footnote Flx16 Class}
+K{\footnote Flx16;
+Flx16, operator int;
+Flx16, operator long;
+Flx16, operator float;
+Flx16, sin;
+Flx16, asin;
+Flx16, cos;
+Flx16, acos;
+Flx16, tan;
+Flx16, cot;
+Flx16, atan;
+Flx16, sec;
+Flx16, csc;
+Flx16, sqrt;
+Flx16, abs;
+flx_sin;
+flx_cos;
+flx_asin;
+flx_acos;
+flx_tan;
+flx_cot;
+flx_atan;
+flx_sec;
+flx_csc;
+operator + (Flx16);
+operator += (Flx16);
+operator - (Flx16);
+operator -= (Flx16);
+operator * (Flx16);
+operator *= (Flx16);
+operator / (Flx16);
+operator /= (Flx16);
+operator == (Flx16);
+operator != (Flx16);
+operator > (Flx16);
+operator >= (Flx16);
+operator < (Flx16);
+operator <= (Flx16)}
++{\footnote BW_PG_8}
+{\b\f0{\cf2\scaps Programmer's Guide: Felix}\line\fs32 Flx16 Class}\par\pard\sb100
+
+The Flx16 class provides a C++ object for working with 16.16
+fixed-point values.  Operator overload and other convenient
+inline functions are provided to simplify use of fixed-point
+from C++.
+\par
+
+\line{\b\fs28 Name}\par
+
+Flx16 - 16.16 fixed-point class
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "felix.hpp"
+\par
+
+\line{\b\fs28 Base Classes}\par
+
+None
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b Flx16();}\par
+
+Leaves the data member uninitialized.
+\par
+
+{\b Flx16(const int num);}\line
+{\b Flx16(const long num);}\line
+{\b Flx16(const short num);}\line
+{\b Flx16(const char num);}\line
+{\b Flx16(const double num);}\par
+
+Initializes the data member with the 16.16 representation of num.
+\par
+
+{\b Flx16(const long num, int dummy);}\par
+
+Initializes the data member with the value num without shifting.
+\par
+
+\line{\b\fs28 Member Data}\par
+
+{\b long flx;}\par
+
+16.16 fixed-point number.
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+{\b inline operator int() const;}\par
+
+Casts the 16.16 fixed-pointer number to a truncated integer
+value.
+\par
+
+{\b inline operator long() const;}\par
+
+Casts the 16.16 fixed-pointer number to a truncated value.
+\par
+
+{\b inline operator float() const;}\par
+
+Casts the 16.16 fixed-pointer number to a floating pointer
+number.
+\par
+
+{\b inline Flx16 sin() const;}\par
+
+Returns the result of flx_sin() for the current 16.16 value in
+flx.
+\par
+
+{\cf4\scaps NEW}\line
+{\b inline Flx16 asin() const;}\par
+
+Returns the result of flx_asin() for the current 16.16 value in
+flx.
+\par
+
+{\b inline Flx16 cos() const;}\par
+
+Returns the result of flx_cos() for the current 16.16 value in
+flx.
+\par
+
+{\cf4\scaps NEW}\line
+{\b inline Flx16 acos() const;}\par
+
+Returns the result of flx_acos() for the current 16.16 value in
+flx.
+\par
+
+{\b inline Flx16 tan() const;}\par
+
+Returns the result of a flx_tan trig function for the current 16.16
+value in flx.
+\par
+
+{\cf4\scaps NEW}\line
+{\b inline Flx16 cot() const;}\par
+
+Returns the result of a flx_cot trig function for the current 16.16
+value in flx.
+\par
+
+{\cf4\scaps NEW}\line
+{\b inline Flx16 atan() const;}\par
+
+Returns the result of a flx_atan trig function for the current 16.16
+value in flx.
+\par
+
+{\cf4\scaps NEW}\line
+{\b inline Flx16 sec() const;}\par
+
+Returns the result of a flx_sec trig function for the current 16.16
+value in flx.
+\par
+
+{\cf4\scaps NEW}\line
+{\b inline Flx16 csc() const;}\par
+
+Returns the result of a flx_csc trig function for the current 16.16
+value in flx.
+\par
+
+{\b inline Flx16 sqrt() const;}\par
+
+Returns the result of flx_sqrt() for the current 16.16 value in
+flx.
+\par
+
+{\b inline Flx16 abs() const;}\par
+
+Returns the result of flx_abs() for the current 16.16 value in
+flx.
+\par
+
+\line{\b\fs28 Friend Functions}\par
+
+{\b Flx16 flx_sin(Flx16 degrees);}\par
+
+Returns the sine for the given input degrees.  Degrees is
+accurate to an sixteenth-of-a-degree with the current implementation.
+\par
+
+{\b Flx16 flx_cos(Flx16 degrees);}\par
+
+Returns the cosine for the given input degrees.  Degrees is
+accurate to a sixteenth-of-a-degree with the current implementation.
+\par
+
+{\cf4\scaps NEW}\line
+{\b Flx16 flx_asin(Flx16 a);}\par
+
+Returns the arc-sine for the given input value.  The output
+is accurate to a sixteenth-of-a-degree with the current implementation.
+\par
+
+{\cf4\scaps NEW}\line
+{\b Flx16 flx_acos(Flx16 a);}\par
+
+Returns the arc-cosine for the given input value.  The output
+is accurate to a sixteenth-of-a-degree with the current implementation.
+\par
+
+{\b Flx16 flx_tan(Flx16 degrees);}\par
+
+Returns the tangent for the given input degrees.  All input
+is rounded to a sixteenth-of-a-degree with the current implementation.
+\par
+
+{\cf4\scaps NEW}\line
+{\b Flx16 flx_cot(Flx16 degrees);}\par
+
+Returns the cotangent for the given input degrees.  All input
+is rounded to a sixteenth-of-a-degree with the current implementation.
+\par
+
+{\cf4\scaps NEW}\line
+{\b Flx16 flx_atan(Flx16 degrees);}\par
+
+Returns the arc-tangent for the given input degrees.  All input
+is rounded to a sixteenth-of-a-degree with the current implementation.
+\par
+{\cf4\scaps NEW}\line
+{\b Flx16 flx_sec(Flx16 degrees);}\par
+
+Returns the secant for the given input degrees.  All input
+is rounded to a sixteenth-of-a-degree with the current implementation.
+\par
+
+{\cf4\scaps NEW}\line
+{\b Flx16 flx_csc(Flx16 degrees);}\par
+
+Returns the cosecant for the given input degrees.  All input
+is rounded to a sixteenth-of-a-degree with the current implementation.
+\par
+
+{\b inline Flx16 operator + (const Flx16 a, const Flx16 b) const}\par
+
+Addition operator.
+\par
+
+{\b inline Flx16 operator += (Flx16 *a, const Flx16 b)}\par
+
+Increase By operator.
+\par
+
+{\b inline Flx16 operator -  (const Flx16 a) const}\par
+
+Negation operator.
+\par
+
+{\b inline Flx16 operator - (const Flx16 a,const Flx16 b) const}\par
+
+Subtraction operator.
+\par
+
+{\b inline Flx16 operator -= (Flx16 *a, const Flx16 b)}\par
+
+Decrease By operator.
+\par
+
+{\b inline Flx16 operator * (const Flx16 a, const Flx16 b)}\par
+{\b inline Flx16 operator * (const Flx16 a, const int b)}\par
+{\b inline Flx16 operator * (const int a, const Flx16 b)}\par
+
+Multiplication operator.
+\par
+
+{\b inline Flx16 operator *= (Flx16 *a, const Flx16 b)}\par
+
+Multiply By operator.
+\par
+
+{\b inline Flx16 operator / (const Flx16 a, const Flx16 b)}\par
+
+Division operator.
+\par
+
+{\b inline Flx16 operator /= (Flx16 *a, const Flx16 b)}\par
+
+Divide By operator.
+\par
+
+{\b inline int operator == (const Flx16 a, const Flx16 b)}\par
+{\b inline int operator == (const Flx16 a, const int b)}\par
+{\b inline int operator == (const int a, const Flx16 b)}\par
+
+Equals operator.
+\par
+
+{\b inline int operator != (const Flx16 a, const Flx16 b)}\par
+{\b inline int operator != (const Flx16 a, const int b)}\par
+{\b inline int operator != (const int a, const Flx16 b)}\par
+
+Not-equals operator.
+\par
+
+{\b inline int operator > (const Flx16 a, const Flx16 b)}\par
+{\b inline int operator > (const Flx16 a, const int b)}\par
+{\b inline int operator > (const int a, const Flx16 b)}\par
+
+Greater than operator.
+\par
+
+{\b inline int operator >= (const Flx16 a, const Flx16 b)}\par
+{\b inline int operator >= (const Flx16 a, const int b)}\par
+{\b inline int operator >= (const int a, const Flx16 b)}\par
+
+Greater than or equal to operator.
+\par
+
+{\b inline int operator < (const Flx16 a, const Flx16 b)}\par
+{\b inline int operator < (const Flx16 a, const int b)}\par
+{\b inline int operator < (const int a, const Flx16 b)}\par
+
+Less than operator.
+\par
+
+{\b inline int operator <= (const Flx16 a, const Flx16 b)}\par
+{\b inline int operator <= (const Flx16 a, const int b)}\par
+{\b inline int operator <= (const int a, const Flx16 b)}\par
+
+Less than or equal to operator.
+\par
+
+\line{\b\fs28 Example}\par
+
+This example computes some simple values using Flx16:
+\par
+
+{\f2
+Flx16   a, b, c;
+\par
+a = 10;
+\par
+b = (Flx16) 0.5;
+\par
+c = a + b;
+\par
+c = b / c;
+\par
+a = c.sqrt();
+}
+\par
+
+\pard\page
+
+{\comment °±² eof - felix.rtf ²±° }
+}

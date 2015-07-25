@@ -1,0 +1,4893 @@
+{\rtf1
+{\comment
+ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
+
+                                VanGogh Help
+
+                     Microsoft Windows 95/98/NT Version
+
+   Copyright (c) 1994-1999 by Dan Higdon, Tim Little, and Chuck Walbourn
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ This file and all associated files are subject to the terms of the
+ GNU Lesser General Public License version 2 as published by the
+ Free Software Foundation (http://www.gnu.org).   They remain the
+ property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+ See LICENSE.TXT in the distribution for a copy of this license.
+
+ THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+ OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+ PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+ LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+ OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+                        http://www.mythos-engine.org/
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ VanGogh is a component of the MythOS(tm) collection.
+
+ MythOS is a trademark of Charybdis Enterprises, Inc.
+
+ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
+}
+
+{\fonttbl
+\f0\fswiss Arial;
+\f1\froman Times New Roman;
+\f2\fmodern Courier New;
+\f3\fswiss MS Sans Serif;
+\f4\froman MS Serif;
+}
+\deff1
+\fs21
+
+{\colortbl;
+\red128\green128\blue128;
+\red0\green0\blue128;
+\red0\green128\blue0;
+\red128\green0\blue0;
+}
+
+{\comment
+°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+                            Programmer's Guide
+
+°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+}
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+Overview                                                                  ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_VNGO_OVERVIEW}
+${\footnote Overview}
++{\footnote BW_PG_9}
+{\b\f0{\cf2\scaps Programmer's Guide: Van Gogh}\line\fs32 Overview}\par\pard\sb100
+
+{\i Van Gogh} is a 2D draw library providing a variety of rasterization
+ services for use by applications and 3D graphics libraries.
+ Support for standard graphic operations such as points and lines
+ is provided, as well as extensive support for 3D device output.
+ A flexible palette system is provided which can be used with 8-bit or
+ higher color depths for further device independance.
+\par
+
+The interface for {\i Van Gogh} is almost exclusively C++ virtual class
+ members, which allows for easy extension for new devices, specialized
+ hardware, or other application specific needs.
+\par
+
+This document assumes the reader is familiar with 2D bitmap graphics,
+ basic PC video hardware, 3D rasterization functions, and some color theory.
+\par
+
+\line{\b\fs28 Definitions}\par
+
+{\b Viewport}\par
+
+A viewport is an area of memory or a physical device that represents the
+ drawing surface that includes support for a number of drawing primitives,
+ including the 3D rasterization services.
+\par
+
+A viewport buffer structure is a C structure used by the C-callable
+ internal routines to get required context information.
+\par
+
+{\b Palette}\par
+
+A palette in {\i Van Gogh} is a collection of RGB triples which represents
+ the physical display colors of the device or viewport.  A palette structure
+ is also augmented with a number of tables for shading and RGB to index
+ lookup.
+\par
+
+{\cf3
+Currently, only 256 entry (i.e., 8-bit color) palettes are implemented.  The
+ palette system is designed to handle any fixed number of colors as 'base'
+ colors, which has a number of advantages for storage and performance.
+ Devices which support more colors than are in the fixed palette are free to
+ perform shading through their full color-depth to give more than the
+ initial set of colors.
+}\par
+
+\line{\b\fs28 Features}\par
+
+High performance operation for both 2D and 3D rasterization.
+\par
+
+Support for Z-Buffering as well as ordered drawing for 3D environments.
+\par
+
+Many extensions to standard 2D primitives for ease of use in 3D
+ environments.
+\par
+
+Support for 3D hardware acceleration using Microsoft Direct3D and other
+ direct OEM-specific libraries.
+\par
+
+Easily extended to support new hardware which can be utilized by all software
+ using the {\i Van Gogh} interface.
+\par
+
+\line{\b\fs28 Organization}\par
+
+C-style Routines\line
+\tab {\uldb Low-level Output Functions}{\v PG_VNGO_CSTYLOW}\line
+\tab {\uldb Support Functions}{\v PG_VNGO_CSTYSUPPORT}\line
+\tab {\uldb Misc. Functions}{\v PG_VNGO_CSTYMISC}
+\par
+
+Control Class\line
+\tab {\uldb VngoSystem}{\v PG_VNGO_SYSTEM}
+\par
+
+Viewport Classes\line
+\tab {\uldb VngoVport}{\v PG_VNGO_VPORT}\line
+\tab {\uldb VngoVVport8}{\v PG_VNGO_VVPORT8}\line
+\tab {\uldb VngoVportDB8}{\v PG_VNGO_VPORTDB8}\line
+\tab {\uldb VngoVportDD8}{\v PG_VNGO_VPORTDD8}\line
+\tab {\uldb VngoVVport16}{\v PG_VNGO_VVPORT16}\line
+\tab {\uldb VngoVportDB16}{\v PG_VNGO_VPORTDB16}\line
+\tab {\uldb VngoVportDD16}{\v PG_VNGO_VPORTDD16}\line
+\tab {\uldb VngoVportD3D}{\v PG_VNGO_VPORTD3D}
+\par
+
+Screen Manager Classes\line
+\tab {\uldb VngoScreenManager}{\v PG_VNGO_SCRNMNGR}\line
+\tab {\uldb VngoDIB}{\v PG_VNGO_DIB}\line
+\tab {\uldb VngoDirectDraw}{\v PG_VNGO_DIRECTDRAW}\line
+\tab {\uldb VngoHybrid}{\v PG_VNGO_HYBRID}\line
+\tab {\uldb VngoDirect3D}{\v PG_VNGO_DIRECT3D}\line
+\tab {\uldb VngoOpenGL}{\v PG_VNGO_OPENGL}
+\par
+
+Color Classes\line
+\tab {\uldb VngoColorHLS}{\v PG_VNGO_COLORHLS}\line
+\tab {\uldb VngoColor24bit}{\v PG_VNGO_COLOR24BIT}\line
+\tab {\uldb VngoColor16bit}{\v PG_VNGO_COLOR16BIT}\line
+\tab {\uldb VngoColor15bit}{\v PG_VNGO_COLOR15BIT}\line
+\tab {\uldb Vngo24to8bit}{\v PG_VNGO_24TO8BIT}\line
+\tab {\uldb VngoClrConvert}{\v PG_VNGO_CLRCONVERT}\line
+\tab {\uldb VngoColorShade}{\v PG_VNGO_COLORSHADE}\line
+\tab {\uldb VngoColorShadeHLS}{\v PG_VNGO_COLORSHADEHLS}\line
+\tab {\uldb VngoColorShade8/15/16/24}{\v PG_VNGO_COLORSHADE8_15_16_24}
+\par
+
+Palette Classes\line
+\tab {\uldb VngoHwPal}{\v PG_VNGO_HWPAL}\line
+\tab {\uldb VngoShadePal}{\v PG_VNGO_SHADEPAL}\line
+\tab {\uldb VngoShadePal8/15/16}{\v PG_VNGO_SHADEPAL8_15_16}\line
+\tab {\uldb VngoPal}{\v PG_VNGO_PAL}\line
+\tab {\uldb VngoPal8/15/16}{\v PG_VNGO_PAL8_15_16}\line
+\tab {\uldb VngoPalIFF}{\v PG_VNGO_PALIFF}\line
+\tab {\uldb VngoPalIFF8/15/16}{\v PG_VNGO_PALIFF8_15_16}
+\par
+
+Texture Classes\line
+\tab {\uldb VngoTexture}{\v PG_VNGO_TEXTURE}\line
+\tab {\uldb VngoCTexture}{\v PG_VNGO_CTEXTURE}\line
+\tab {\uldb VngoTexture3D}{\v PG_VNGO_TEXTURE3D}\line
+\tab {\uldb VngoMemTexture3D}{\v PG_VNGO_MEMTEXTURE3D}\line
+\tab {\uldb VngoD3DTexture3D}{\v PG_VNGO_D3DTEXTURE3D}
+\par
+
+Support Structures\line
+\tab {\uldb VngoRect}{\v PG_VNGO_RECT}\line
+\tab {\uldb VngoPoint}{\v PG_VNGO_POINT}\line
+\tab {\uldb VngoPointF}{\v PG_VNGO_POINTF}\line
+\tab {\uldb VngoVbuffer}{\v PG_VNGO_VBUFFER}
+\par
+
+Support Classes\line
+\tab {\uldb VngoSurfaceManager}{\v PG_VNGO_SURFMNGR}\line
+\tab {\uldb VngoTextureManager}{\v PG_VNGO_TXTRMNGR}\line
+\tab {\uldb VngoZMap}{\v PG_VNGO_ZMAP}
+\par
+
+\line{\b\fs28 Future Work}\par
+
+An OpenGL implementation of the VngoVport is under consideration.  Support
+ for 24-bit devices may be added in a future release.
+\par
+
+As additional 3D capabilities become available in hardware, additional
+ features may be added to this library.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+C-Style Low-level Output Functions                                        ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_VNGO_CSTYLOW}
+${\footnote C-style Low-level Output Functions}
++{\footnote BW_PG_9}
+{\b\f0{\cf2\scaps Programmer's Guide: Van Gogh}\line\fs32 C-style Low-level Output Functions}\par\pard\sb100
+
+These functions are used to implement many of the drawing operations
+ available in {\i Van Gogh}.
+\par
+
+{\cf3
+These routines are not fully documented as they are generally only needed by
+ the internal implementation.  If detailed information on using
+ these routines is required, please contact Charybdis Enterprises, Inc.
+}\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "vangogh.hpp"
+\par
+
+\line{\b\fs28 Routines}\par
+
+{\b
+void vngo_poly8 (VngoVport *vp, int count, VngoPoint2 *pts);\line
+void vngo_gpoly8 (VngoVport *vp, int count, VngoPoint2 *pts);\line
+void vngo_tpoly8 (VngoVport *vp, int count, VngoPoint2 *pts, VngoTexture3D *tex);\line
+void vngo_tgpoly8 (VngoVport *vp, int count, VngoPoint2 *pts, VngoTexture3D *tex);\line
+void vngo_tpoly_persp8 (VngoVport *vp, int count, VngoPoint2 *pts, VngoTexture3D *tex);\line
+void vngo_tgpoly_persp8 (VngoVport *vp, int count, VngoPoint2 *pts, VngoTexture3D *tex);\line
+void vngo_grpoly8 (VngoVport *vp, int count, VngoPoint2 *pts);\line
+void vngo_apoly8 (VngoVport *vp, int count, VngoPoint2 *pts, long alpha);\line
+void vngo_agpoly8 (VngoVport *vp, int count, VngoPoint2 *pts, long alpha);\line
+void vngo_atpoly8 (VngoVport *vp, int count, VngoPoint2 *pts, VngoTexture3D *tex, long alpha);\line
+void vngo_atgpoly8 (VngoVport *vp, int count, VngoPoint2 *pts, VngoTexture3D *tex, long alpha);\line
+void vngo_atpoly_persp8 (VngoVport *vp, int count, VngoPoint2 *pts, VngoTexture3D *tex, long alpha);\line
+void vngo_atgpoly_persp8 (VngoVport *vp, int count, VngoPoint2 *pts, VngoTexture3D *tex, long alpha);
+\par
+
+void vngo_poly16 (VngoVport *vp, int count, VngoPoint2 *pts);\line
+void vngo_gpoly16 (VngoVport *vp, int count, VngoPoint2 *pts);\line
+void vngo_tpoly16 (VngoVport *vp, int count, VngoPoint2 *pts, VngoTexture3D *tex);\line
+void vngo_tgpoly16 (VngoVport *vp, int count, VngoPoint2 *pts, VngoTexture3D *tex);\line
+void vngo_tpoly_persp16 (VngoVport *vp, int count, VngoPoint2 *pts, VngoTexture3D *tex);\line
+void vngo_tgpoly_persp16 (VngoVport *vp, int count, VngoPoint2 *pts, VngoTexture3D *tex);\line
+void vngo_grpoly16 (VngoVport *vp, int count, VngoPoint2 *pts);\line
+void vngo_apoly16 (VngoVport *vp, int count, VngoPoint2 *pts, long alpha);\line
+void vngo_agpoly16 (VngoVport *vp, int count, VngoPoint2 *pts, long alpha);\line
+void vngo_atpoly16 (VngoVport *vp, int count, VngoPoint2 *pts, VngoTexture3D *tex, long alpha);\line
+void vngo_atgpoly16 (VngoVport *vp, int count, VngoPoint2 *pts, VngoTexture3D *tex, long alpha);\line
+void vngo_atpoly_persp16 (VngoVport *vp, int count, VngoPoint2 *pts, VngoTexture3D *tex, long alpha);\line
+void vngo_atgpoly_persp16 (VngoVport *vp, int count, VngoPoint2 *pts, VngoTexture3D *tex, long alpha);
+\par
+
+void vngo_line8(VngoVbuffer *vbuf, VngoPoint *p1, VngoPoint *p2);\line
+void vngo_pixel8(VngoVbuffer *vbuf, VngoPoint *pt);\line
+void vngo_zpixel8(VngoVbuffer *vbuf, VngoPoint *pt);\line
+void vngo_rect8(VngoVbuffer *vbuf, VngoRect *rect, dword color);\line
+void vngo_itrans8 (VngoVbuffer *vbuf, VngoRect *dest_rect, VngoTexture *img,dword flags);\line
+void vngo_iline8(char *lptr, char *tptr, long xcount, dword flags);\line
+void vngo_ilinemono8(byte *lptr, byte *tptr, long xcount, dword tskip, dword fgcol, dword bgcol);
+\par
+
+void vngo_pixel16(VngoVbuffer *vbuf,VngoPoint *pt);\line
+void vngo_zpixel16(VngoVbuffer *vbuf,VngoPoint *pt);\line
+void vngo_pixel_rgb16(VngoVbuffer *vbuf,VngoPoint *pt,dword color);\line
+void vngo_zpixel_rgb16(VngoVbuffer *vbuf,VngoPoint *pt,dword color);\line
+void vngo_rect16(VngoVbuffer *vbuf,VngoRect *rect, dword color);\line
+void vngo_iline15(word *lptr,word *tptr,long xcount,dword flags);\line
+void vngo_iline16(word *lptr,word *tptr,long xcount,dword flags);\line
+void vngo_iline8to16(word *lptr,byte *btptr,long xcount,word *tpal,dword flags);\line
+void vngo_ilinemono16(word *lptr,byte *tptr,long xcount,dword tskip,dword fgcol,dword bgcol);
+\par
+
+void vngo_poly(VngoVport *vp, int count, dword flags, VngoPointF *pts, VngoTexture *tex, long alpha);
+\par
+
+void vngo_zlinemono16(word *lptr,byte *tptr,long xcount,dword tskip,dword fdist,dword ndist);\line
+void zbuff_reset_rect16(VngoVbuffer *vbuf,VngoRect *rect, dword depth);
+}\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+C-Style Support Functions                                                 ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_VNGO_CSTYSUPPORT}
+${\footnote C-style Support Functions}
++{\footnote BW_PG_9}
+{\b\f0{\cf2\scaps Programmer's Guide: Van Gogh}\line\fs32 C-style Support Functions}\par\pard\sb100
+
+These functions are used to implement many of the operations
+ available in {\i Van Gogh}.
+\par
+
+{\cf3
+These routines are not fully documented as they are generally only needed by
+ the internal implementation.  If detailed information on using
+ these routines is required, please contact Charybdis Enterprises, Inc.
+}\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "vangogh.hpp"
+\par
+
+\line{\b\fs28 Routines}\par
+
+{\b
+dword *vngo_get_invert();\line
+void triangle_setup(VngoPoint2 *pts, VngoTriangle *tri);
+\par
+
+void calc_order(int &high_pt,int &mid_pt, int &low_pt, VngoPoint2 *pts);\line
+\par
+
+long vngo_calc_xstep(int x1, int x2, int dy);\line
+long vngo_calc_zstep(int z1, int z2, int dy);\line
+long vngo_calc_sstep(int s1, int s2, int dy);\line
+long vngo_calc_uvstep(int uv1, int uv2, int dy);\line
+long vngo_calc_wstep(int w1, int w2, int dy);\line
+long vngo_calc_quadratic(long w1, long w2, long t1, long t2, long step,
+ long *step1,long *step2);\line
+long vngo_calc_quadratic2(long w1,long w2,long t1,long t2,long step,
+ long *step1,long *step2,long ushift);\line
+void vngo_midpt(VngoPoint2 *p1, VngoPoint2 *p2, VngoPoint2 *outpt);\line
+void vng_clip_x_line(long p, VngoPoint *s, VngoPoint *f, VngoPoint *out_put);\line
+void vng_clip_y_line(long p, VngoPoint *s, VngoPoint *f, VngoPoint *out_put);
+\par
+
+void gamma_correct_RGB(VngoColor24bit *p, int count=1);
+}\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+C-Style Misc. Functions                                                   ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_VNGO_CSTYMISC}
+${\footnote C-style Misc. Functions}
+K{\footnote vngo_circle;
+vngo_clip_circle;
+vngo_smooth_rect;
+vngo_smooth_blit;
+vngo_line;
+vngo_gline;
+vngo_stretch_blt8;
+vngo_stretch_zblt8}
++{\footnote BW_PG_9}
+{\b\f0{\cf2\scaps Programmer's Guide: Van Gogh}\line\fs32 C-style Misc. Functions}\par\pard\sb100
+
+These routines provide some miscellaneous operations for working with
+ {\i Van Gogh} classes.  These will use the base functionality of any
+ VngoVport to extend the drawing capabilities.
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "vangogh.hpp"
+\par
+
+\line{\b\fs28 Routines}\par
+
+{\b void vngo_circle(VngoVport *vp,VngoPoint *center,long r);\line
+void vngo_circle(VngoVport *vp, long xoffset, long yoffset, long r, dword color);\line
+void vngo_circle(VngoVport *vp, long xoffset, long yoffset, long r, VngoColor24bit *color);}\par
+
+This will draw a circle of the specified radius on the passed in VngoVport.
+ It does not do any clipping.
+\par
+
+{\b void vngo_circle(VngoVport *vp, long xoffset, long yoffset, long r, dword color, int width);}\par
+
+This does the same thing that the normal vngo_circle routine does, but draws
+ the circle with the specified width line.
+\par
+
+{\b void vngo_clip_circle(VngoVport *vp, VngoPoint *center, long r);\line
+void vngo_clip_circle(VngoVport *vp, long xoffset, long yoffset, long r, dword color);\line
+void vngo_clip_circle(VngoVport *vp, long xoffset, long yoffset, long r, VngoColor24bit *color);
+void vngo_clip_circle(VngoVport *vp, long xoffset, long yoffset, long r, dword color, int width);}\par
+
+Same as above only it clips against the viewport.
+\par
+
+{\b void vngo_smooth_rect(VngoVport *vp, VngoPoint *pts, VngoRect *clip = NULL);}\par
+
+This draws a rectangle specified by the four VngoPoints in the pts array.  It will
+ clip to the VngoVport unless the optional VngoRect is passed in to clip to.
+ The four points are specified as follows: \line
+\tab pts[0] = the top left corner.\line
+\tab pts[1] = the top right corner.\line
+\tab pts[2] = the bottom right corner. \line
+\tab pts[3] = the bottom left corner. \line
+This routine will shade from the RGB of the index specified at each corner.
+\par
+
+{\cf2
+Note: You can specify a 15-bit, 16-bit, or 24-bit color directly by setting
+ the {\i VNGO_COLOR_15BIT}, {\i VNGO_COLOR_16BIT}, or {\i VNGO_COLOR_24BIT}
+ flags in the point's 'clr' member or'd with the correct 'compressed'
+ RGB color value.
+}\par
+
+{\b VNGError vngo_smooth_blit(VngoVport *vp, VngoTexture *img,
+ VngoRect *target,VngoRect *clip = NULL);}\par
+
+Perform a stretch of an image using vngo_smooth_rect for output.
+\par
+
+{\b void vngo_line(VngoVport *vp, VngoPoint *p1, VngoPoint *p2, VngoColor24bit *rgb_val=NULL);}\par
+
+This draws a line specified by the two passed in points.  If the rgb_val
+ is specified, then the line is drawn in that color rather than the color
+ specified by the clr field of p1.
+\par
+
+{\b void vngo_gline(VngoVport *vp, VngoPoint *p1, VngoPoint *p2);}\par
+
+This draws a line specified by the two passed in points.  The line will
+ be Gouraud shaded between the two points shade level, and drawn in the
+ color specifed in p1.
+\par
+
+{\b void vngo_stretch_blt8 (VngoVport *vp, VngoRect *dest_rect, VngoTexture *img,
+ dword flags = VNGO_TRANSPARENT);\line
+void vngo_stretch_zblt8 (VngoVport *vp, VngoRect *dest_rect, VngoTexture *img,
+ word *zsource,dword flags = VNGO_TRANSPARENT);}\par
+
+Performs a stretch blit (with or without Z-buffer) from one 8-bit viewport
+ to another.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+VngoSystem Class                                                          ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_VNGO_SYSTEM}
+${\footnote VngoSystem Class}
+K{\footnote VngoSystem}
++{\footnote BW_PG_9}
+{\b\f0{\cf2\scaps Programmer's Guide: Van Gogh}\line\fs32 VngoSystem Class}\par\pard\sb100
+
+This is the {\i Van Gogh} system class which contains pointers to the
+ texture managers in use and the global gamma correction value.  An instance
+ of this class must be created before using any other {\i Van Gogh}
+ class.
+\par
+
+\line{\b\fs28 Name}\par
+
+VngoSystem - System class
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "vngstrct.hpp"
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b VngoSystem();}\par
+
+Performs initialization of the initial values and tables.
+\par
+
+\line{\b\fs28 Member Data}\par
+
+{\b float gamma_correct;\line
+byte gtable[256];}\par
+
+Gamma correct value and table.
+\par
+
+{\b byte alpha_table[256*32];}\par
+
+Alpha table set by init_alpha().
+\par
+
+{\b VngoVport *cur_vport;}\par
+
+Current viewport pointer used for setting hardware context.
+\par
+
+{\b VngoTextureManager *DIBTx;\line
+VngoTextureManager *DDTx;\line
+VngoTextureManager *D3DTx;\line
+VngoTextureManager *OGLTx;}\par
+
+Texture manager pointers for various types of screen managers.
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+{\b void set_gamma (float gamma);}\par
+
+This sets the gamma_correct member and recomputes the gtable for conversion
+ of RGB to gamma-corrected RGB values.  This translation is used when a
+ palette is loaded or an image is converted to a texture, so all images
+ and palettes (and therefore textures) must be reloaded when the gamma
+ value is changed.
+\par
+
+{\b void init_alpha ();}\par
+
+This initializes the alpha_table and is called by the constructor.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+VngoVport Class                                                           ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_VNGO_VPORT}
+${\footnote VngoVport Class}
+K{\footnote VngoVport;
+VngoVport, get_vbuff;
+VngoVport, get_zbuffer_precision;
+VngoVport, get_init_state;
+VngoVport, get_zmap;
+VngoVport, skips_last_pix;
+VngoVport, clear_screen_on;
+VngoVport, clear_screen_off;
+VngoVport, set_zmap;
+VngoVport, zmap_on;
+VngoVport, zmap_off;
+VngoVport, set_perspective;
+VngoVport, get_perspective;
+VngoVport, sync;
+VngoVport, zbuffer_on;
+VngoVport, zbuffer_off;
+VngoVport, texture_filter_on;
+VngoVport, texture_filter_off;
+VngoVport, true_alpha_on;
+VngoVport, true_alpha_off;
+VngoVport, haze_on;
+VngoVport, haze_off;
+VngoVport, make_current;
+VngoVport, capture;
+VngoVport, lock;
+VngoVport, unlock;
+VngoVport, reset;
+VngoVport, vpcopy;
+VngoVport, frect;
+VngoVport, clip_frect;
+VngoVport, pixel;
+VngoVport, clip_pixel;
+VngoVport, read_pixel;
+VngoVport, image_trans;
+VngoVport, image_trans_a;
+VngoVport, image_trans_mono;
+VngoVport, zblit_mono;
+VngoVport, line;
+VngoVport, gline;
+VngoVport, gline_persp;
+VngoVport, clip_line;
+VngoVport, clip_gline;
+VngoVport, clip_gline_persp;
+VngoVport, poly;
+VngoVport, gpoly;
+VngoVport, gpoly_persp;
+VngoVport, tpoly;
+VngoVport, tpoly_persp;
+VngoVport, gtpoly;
+VngoVport, gtpoly_persp;
+VngoVport, grpoly;
+VngoVport, poly_a;
+VngoVport, gpoly_a;
+VngoVport, gpoly_persp_a;
+VngoVport, tpoly_a;
+VngoVport, tpoly_persp_a;
+VngoVport, gtpoly_a;
+VngoVport, gtpoly_persp_a
+VngoVport, set_haze;
+VngoVport, haze}
++{\footnote BW_PG_9}
+{\b\f0{\cf2\scaps Programmer's Guide: Van Gogh}\line\fs32 VngoVport Class}\par\pard\sb100
+
+Viewports are devices supporting a number of drawing primitives including
+ 3D rasterization operations.  This class provides the abstract interface
+ for all viewports, which are derived for specific implementations.
+\par
+
+There are both cliped and unclipped version of some of the primitives.
+ The image transfer type functions all clip against the viewport.
+\par
+
+{\cf2
+Note: Textures for the texture-mapping primitives must have
+ dimensions that are a power of 2 in the range 16 - 256, although
+ width and height do not have to be identical.  This requirement
+ was made to provide real-time response for the texture-mapping
+ primitives.
+}\par
+
+All of the drawing primitives that take a color value also use
+ the shade member of the VngoPoint structure. The shade value
+ provides a lighting intensity for the point with the palette's
+ shading midpoint being the normal color value.  Intensities above
+ this value will overdrive the color towards white, while lower
+ intensities will dim the color.  This depends upon the instance
+ of {\uldb VngoPal}{\v PG_VNGO_PAL} given to the viewport as
+ part of it's initialization.
+\par
+
+\line{\b\fs28 Name}\par
+
+VngoVport - Abstract base viewport object.
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "vngvp.hpp"
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b VngoVport();}\par
+
+Sets the viewport's zmap member to NULL and the default perspective
+ correction value (persp_pixcount) to {\i VNGO_PERSP_PRECISION}.
+\par
+
+\line{\b\fs28 Member Data}\par
+
+{\b protected dword size_in_bytes;}\par
+
+Size of viewbuffer in bytes.
+\par
+
+{\b protected int lock_status;}\par
+
+Lock status of viewport (1=locked, 0=unlocked).
+\par
+
+{\b protected VNGError init_status;}\par
+
+Error code result from init() if called by constructor.  You can use
+ get_init_state() to get this value.
+\par
+
+{\b protectd VngoZMap *zmap;}\par
+
+Z-map for special reset() operation.  You can use get_zmap() to get this
+ value.
+\par
+
+{\b dword vflags;}\par
+
+Viewport flags (see Flags below).
+\par
+
+{\b int vzdepth_in_bits;}\par
+
+Z-buffer precision in bits.  Use get_zbuffer_precision() to read.
+\par
+
+{\b VngoVbuffer vbuff;}\par
+
+Viewport's associated C communication structure (see
+ {\uldb VngoVbuffer}{\v PG_VNGO_VBUFFER}).  You can use get_vbuff()
+ or reference this directly.
+\par
+
+{\b float persp_pixcount;\line
+float persp_pixcount2;}\par
+
+For perspectively-correct texture-mapping, this contains the number of
+ pixels to interpolate between each correction.  Defaults to
+ {\i VNGO_PERSP_PRECISION}.
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+{\b inline void clear_screen_on();\line
+inline void clear_screen_off();}\par
+
+Controls the {\i VNGO_NOCLEAR_VBUFFER} bit.
+\par
+
+{\b inline void set_zmap(VngoZMap *_zmap);}\par
+
+Sets the zmap.  If VNGO_ZMAP_DEV is not set, then this device does not
+ support Z-maps.
+\par
+
+{\b inline void zmap_on();\line
+inline void zmap_off();}\par
+
+Controls the VNGO_ZMAP_ACTIVE bit.
+\par
+
+{\b inline void set_perspective (float percent);}\par
+
+Sets the persp_pixcount and persp_pixcount2 values based on a percentage
+ of viewport width.
+\par
+
+{\b inline float get_perspective ();}\par
+
+Returns the percentage for the current perspective correction count.
+\par
+
+{\b virtual void sync();}\par
+
+Flush all drawing buffers.
+\par
+
+{\b virtual void zbuffer_on();\line
+virtual void zbuffer_off();}\par
+
+Controls the {\i VNGO_ZBUFFER_ACTIVE} bit.
+\par
+
+{\b virtual void texture_filter_on();\line
+virtual void texture_filter_off();}\par
+
+Controls the {\i VNGO_TEXTURE_FILTER} bit.
+\par
+
+{\b virtual void true_alpha_on();\line
+virtual void true_alpha_off();}\par
+
+Controls the {\i VNGO_TRUE_ALPHA} bit.
+\par
+
+{\b virtual void haze_on();\line
+virtual void haze_off();}\par
+
+Controls the {\i VNGO_HAZE_ON} bit.
+\par
+
+{\b virtual void make_current();}\par
+
+Makes the viewport the 'current' viewport.  This is needed for hardware
+ state management.
+\par
+
+{\b virtual VNGError capture(XFBitmap *bm);}\par
+
+Fills out an XFBitmap instance with data copied from the viewport's
+ screen buffer, thus capturing a 'screenshot'.
+\par
+
+{\b virtual int lock();\line
+virtual int unlock();}\par
+
+Locks/unlocks the viewport, returning the old lock status (1=locked,
+ 0=unlocked).
+\par
+
+{\b virtual void reset(dword c=0,dword farz=0xffffffff)=0;}\par
+
+Resets the viewport's buffer and Z-buffer (if active).  If
+ {\i VNGO_NOCLEAR_VBUFFER} is set, only the Z-buffer (if active) is cleared.
+\par
+
+{\b virtual VNGError vpcopy (int destx,int desty,VngoVport *dest)=0;}\par
+
+Obsolete function.
+\par
+
+{\b virtual VNGError frect (VngoRect *rect,dword color) = 0;\line
+virtual VNGError frect (VngoRect *rect,VngoColor24bit *rgb_val = NULL) = 0;}\par
+
+Performs rectangle fill without clipping against the viewport.
+\par
+
+{\cf2
+Note: You can specify a 15-bit, 16-bit, or 24-bit color directly by setting
+ the {\i VNGO_COLOR_15BIT}, {\i VNGO_COLOR_16BIT}, or {\i VNGO_COLOR_24BIT}
+ flags in the 'color' value or'd with the correct 'compressed'
+ RGB color value if using a 15/16-bpp viewport.
+}\par
+
+{\b virtual VNGError clip_frect (VngoRect *rect,dword color, VngoRect *clip=NULL) = 0;\line
+virtual VNGError clip_frect (VngoRect *rect,VngoColor24bit *rgb_val, VngoRect *clip=NULL) = 0;}\par
+
+Performs rectangle fill after performing clipping against the viewport.
+\par
+
+{\b virtual VNGError pixel (VngoPoint *pt, VngoColor24bit *rgb_val = NULL) = 0;\line
+virtual VNGError pixel (VngoPointF *pt, VngoColor24bit *rgb_val = NULL) = 0;}\par
+
+Sets pixel without performing clipping against the viewport.
+\par
+
+{\b virtual VNGError clip_pixel (VngoPoint *pt, VngoColor24bit *rgb_val = NULL, VngoRect *clip_rect=NULL) = 0;\line
+virtual VNGError clip_pixel (VngoPointF *pt, VngoColor24bit *rgb_val = NULL, VngoRect *clip_rect=NULL) = 0;}\par
+
+Sets pixel after performing clipping against the viewport.
+\par
+
+{\b virtual dword read_pixel (VngoPoint *pt, VngoPoint *dest)=0;\line
+virtual dword read_pixel (int x, int y, VngoPoint *dest)=0;}\par
+
+Reads the value of a given pixel in the viewport's view buffer.
+\par
+
+{\b virtual VNGError image_trans (VngoRect *dest_rect,VngoTexture *img,dword flags=0) = 0;\line
+virtual VNGError image_trans_a (VngoRect *dest_rect,VngoTexture *img, long alpha=127, dword flags=0) = 0;}\par
+
+Performs image transfer of a texture.  If flags is set to {\ VNGO_TRANSPARENT},
+ then transparent color entries (for example, in an 8-bit texture index 255
+ is considered transparent) in the texture are skipped.  The _a version
+ uses an Alpha-blend value.
+\par
+
+{\b virtual VNGError image_trans_mono (VngoRect *dest_rect,VngoTexture *img,dword fgcol,dword bgcol=VNGO_TRANSPARENT) = 0;}\par
+
+Performs a monochrome expansion of a byte-aligned, row-oriented mask.
+\par
+
+{\b virtual VNGError zblit_mono (VngoRect *dest_rect,VngoZMap *zmp,dword fdist,dword ndist=0) = 0;}\par
+
+Performs a reset() using a zmap.
+\par
+
+{\b virtual VNGError line (VngoPoint *p1, VngoPoint *p2, VngoColor24bit *rgb_val=NULL) = 0;\line
+virtual VNGError line (VngoPointF *p1,VngoPointF *p2, VngoColor24bit *rgb_val=NULL) = 0;}\par
+
+Draws a line in the frame buffer from (p1->x,p1->y) to
+ (p2->x,p2->y) using color p1->color and shade value p1->shade if
+ rgv_val is NULL.  Otherwise, the color closest to the RGB triple
+ in rgb_value is used.  If the Z-buffer is active, the p1->z and
+ p2->z components are used.
+\par
+
+{\b virtual VNGError gline (VngoPoint *p1, VngoPoint *p2) = 0;\line
+virtual VNGError gline (VngoPointF *p1,VngoPointF *p2) = 0;}\par
+
+Draws a Gouraud-shaded line in the frame buffer from
+ (p1->x,p1->y) to (p2->x,p2->y) using color p1->color shading
+ between p1->shade and p2->shade linearly.  If the Z-buffer is
+ active, the p1->z and p2->z components are used.
+\par
+
+{\b virtual VNGError gline_persp (VngoPoint *p1, VngoPoint *p2) =0;
+virtual VNGError gline_persp (VngoPointF *p1,VngoPointF *p2) = 0;}\par
+
+Draws a Gouraud-shaded line in the frame buffer from
+ (p1->x,p1->y,p1->z) to (p2->x,p2->y,p2->z) using p1->color and
+ shading between p1->shade and p2->shade using a perspective
+ interpolation.
+\par
+
+{\b virtual VNGError clip_line (VngoPoint *p1, VngoPoint *p2, VngoColor24bit *rgb_val=NULL,VngeRect *clip_rect=NULL) = 0;\line
+virtual VNGError clip_line (VngoPointF *p1,VngoPointF *p2, VngoColor24bit *rgb_val=NULL, VngoRect *clip_rect = NULL) = 0;\line
+virtual VNGError clip_gline (VngoPoint *p1,VngoPoint *p2, VngoRect *clip_rect = NULL) = 0;\line
+virtual VNGError clip_gline (VngoPointF *p1,VngoPointF *p2, VngoRect *clip_rect = NULL) = 0;\line
+virtual VNGError clip_gline_persp (VngoPoint *p1,VngoPoint *p2, VngoRect *clip_rect = NULL) = 0;\line
+virtual VNGError clip_gline_persp (VngoPointF *p1,VngoPointF *p2, VngoRect *clip_rect = NULL) = 0;}\par
+
+Same as above, only they clip against the viewport.
+\par
+
+{\b virtual VNGError poly (int count, VngoPoint pts[]) = 0;\line
+virtual VNGError poly (int count,VngoPointF pts[]) = 0;\line
+virtual VNGError poly_a (int count,VngoPoint pts[], long alpha=127) = 0;\line
+virtual VNGError poly_a (int count,VngoPointF pts[], long alpha=127) = 0;}\par
+
+Draws a convex polygon with count vertices with locations
+ (pts[]->x,pts[]->y) using the color in pts[0]->color and the
+ shade value in p[0]->shade.  If the Z-buffer is active, the
+ pts[]->z components are used.  The _a versions use an Alpha-blend value.
+\par
+
+{\b virtual VNGError gpoly (int count, VngoPoint pts[]) = 0;\line
+virtual VNGError gpoly (int count,VngoPointF pts[]) = 0;\line
+virtual VNGError gpoly_a (int count,VngoPoint pts[], long alpha=127) = 0;\line
+virtual VNGError gpoly_a (int count,VngoPointF pts[], long alpha=127) = 0;}\par
+
+Draws a Gouraud-shaded convex polygon with count vertices with
+ locations (pts[]->x,pts[]->y) using color pts[0]->color and
+ shading between pts[]->shade values linearly.  If the Z-buffer
+ is active, the pts[]->z components are used.  The _a versions use an
+ Alpha-blend value.
+\par
+
+{\b virtual VNGError gpoly_persp (int count, VngoPoint pts[]) = 0;\line
+virtual VNGError gpoly_persp (int count,VngoPointF pts[]) = 0;\line
+virtual VNGError gpoly_persp_a (int count,VngoPoint pts[], long alpha=127) = 0;\line
+virtual VNGError gpoly_persp_a (int count,VngoPointF pts[], long alpha=127) = 0;}\par
+
+Draws a Gouraud-shaded convex polygon with count vertices with
+ locations (pts[]->x,pts[]->y,pts[]->z) using color pts[0]->color
+ and shading between pts[]->shade values with a perspective
+ interpolation.  The _a versions use an Alpha-blend value.
+\par
+
+{\b virtual VNGError tpoly (int count, VngoPoint pts[], VngoTexture *tex) = 0;\line
+virtual VNGError tpoly (int count,VngoPointF pts[], VngoTexture *tex) = 0;\line
+virtual VNGError tpoly_a (int count,VngoPoint pts[],VngoTexture *tex, long alpha=127) = 0;\line
+virtual VNGError tpoly_a (int count,VngoPointF pts[],VngoTexture *tex, long alpha=127) = 0;}\par
+
+Draws a texture-mapped convex polygon with count vertices with
+ locations (pts[]->x,pts[]->y), mapping the 8-bit texture data in
+ tex on the polygon using the shade value in pts[0]->shade.  If
+ the Z-buffer is active, the pts[]->z components are used.  The _a
+ versions use an Alpha-blend value.
+\par
+
+{\b virtual VNGError tpoly_persp (int count, VngoPoint pts[], VngoTexture *tex) = 0;\line
+virtual VNGError tpoly_persp (int count,VngoPointF pts[], VngoTexture *tex) = 0;\line
+virtual VNGError tpoly_persp_a (int count,VngoPoint pts[],VngoTexture *tex, long alpha=127) = 0;\line
+virtual VNGError tpoly_persp_a (int count,VngoPointF pts[],VngoTexture *tex, long alpha=127) = 0;}\par
+
+Draws a texture-mapped convex polygon with count vertices with
+ locations (pts[]->x,pts[]->y,pts[]->z), mapping the 8-bit
+ texture data in tex on the polygon using a perspective
+ interpolation of the u,v parameters.  The _a versions use an Alpha-blend
+ value.
+\par
+
+{\b virtual VNGError gtpoly (int count, VngoPoint pts[], VngoTexture *tex) = 0;\line
+virtual VNGError gtpoly (int count,VngoPointF pts[], VngoTexture *tex) = 0;\line
+virtual VNGError gtpoly_a (int count,VngoPoint pts[],VngoTexture *tex, long alpha=127) = 0;\line
+virtual VNGError gtpoly_a (int count,VngoPointF pts[],VngoTexture *tex, long alpha=127) = 0;}\par
+
+Draws a Gouraud-shaded, texture-mapped convex polygon with count
+ vertices with locations (pts[]->x,pts[]->y), mapping the 8-bit
+ texture data in tex on the polygon shading between the values in
+ pts[]->shade linearly.  If the Z-buffer is active, the pts[]->z
+ components are used.  The _a versions use an Alpha-blend value.
+\par
+
+{\b virtual VNGError gtpoly_persp (int count, VngoPoint pts[], VngoTexture *tex) = 0;\line
+virtual VNGError gtpoly_persp (int count,VngoPointF pts[], VngoTexture *tex) = 0;\line
+virtual VNGError gtpoly_persp_a (int count,VngoPoint pts[],VngoTexture *tex, long alpha=127) = 0;\line
+virtual VNGError gtpoly_persp_a (int count,VngoPointF pts[], VngoTexture *tex,long alpha=127) = 0;}\par
+
+Draws a Gouraud-shaded, texture-mapped convex polygon with count
+ vertices with locations (pts[]->x,pts[]->y,pts[]->z), mapping
+ the 8-bit texture data in tex on the polygon using a perspective
+ interpolation of the u,v parameters and shading between the
+ values in pts[]->shade.  The _a versions use an Alpha-blend value.
+\par
+
+{\b virtual VNGError grpoly (int count,VngoPoint pts[])=0;\line
+virtual VNGError grpoly (int count,VngoPointF pts[])=0;}\par
+
+Draws a Gouraud-shaded convex polygon with count vertices with
+ locations (pts[]->x,pts[]->y) using colors pts[]->color and
+ shading between pts[]->shade values linearly.  If the Z-buffer
+ is active, the pts[]->z components are used.
+\par
+
+{\cf2
+Note: You can specify a 15-bit, 16-bit, or 24-bit color directly by setting
+ the {\i VNGO_COLOR_15BIT}, {\i VNGO_COLOR_16BIT}, or {\i VNGO_COLOR_24BIT}
+ flags in the point's 'clr' member or'd with the correct 'compressed'
+ RGB color value if using a 15/16-bpp viewport.  Just the {\i VNGO_COLOR_24BIT}
+ flag is valid for 8-bit viewports with grpoly.
+}\par
+
+{\b virtual VNGError set_haze(VngoHazeInfo *haze_info) = 0;}\par
+
+This sets the information the device needs to perform hazing/fogging.  The
+ members of the {\b VngoHazeInfo} structure are as follows:
+\par
+
+\tab {\b VngoColor24bit target_color;}
+\par
+
+\tab This specifies the target color to fog/haze torwards.
+\par
+
+\tab {\b float start_depth;}
+\par
+
+\tab This specifies the normalized Z value which marks the start of the haze.
+\par
+
+\tab {\b float mid_depth;}
+\par
+
+\tab This specifies the normalized Z value which marks the 50% hazed point.
+\par
+
+{\b virtual VNGError haze() = 0;}\par
+
+This function is called at the end of a frame drawing pass to perform
+ post-process hazing if this device does not perform hazing during output.
+\par
+
+{\cf2
+Note: Some devices (notiably the software renderers) cannot perform hazing
+ unless it is using an active Z-buffer.
+}\par
+
+\line{\b\fs28 Flags}\par
+
+{\i VNGO_PAL_MAPPED_DEV}\tab Palette-mapped device.
+\par
+
+{\i VNGO_ZBUFFER_DEV}\tab\tab Z-buffer device.
+\par
+
+{\i VNGO_ZBUFFER_ACTIVE}\tab Z-buffer active.
+\par
+
+{\i VNGO_INIT_NO_RESET}\tab Don't perform reset on init.
+\par
+
+{\i VNGO_NOCLEAR_VBUFFER}\tab If set, reset() doesn't clear viewbuffer.
+\par
+
+{\i VNGO_MYMEM_ZBUFF}\tab Viewport owns Z-buffer memory.
+\par
+
+{\i VNGO_MYMEM_VBUFF}\tab Viewport owns viewbuffer memory.
+\par
+
+{\i VNGO_MYMEM_ZMAP}\tab\tab Viewport owns ZMap memory.
+\par
+
+{\i VNGO_ZMAP_DEV}\tab\tab Z-map capable device.
+\par
+
+{\i VNGO_ZMAP_ACTIVE}\tab\tab Z-map active.
+\par
+
+{\i VNGO_SKIPS_LAST_PIX}\tab Viewport needs extra pixel.
+\par
+
+{\i VNGO_DITHER_OFF}\tab\tab Dithering off.
+\par
+
+{\i VNGO_DITHER_4X4}\tab\tab Use 4x4 dithering.
+\par
+
+{\i VNGO_TRUE_ALPHA}\tab\tab Use true software alpha-blending.
+\par
+
+{\i VNGO_TEXTURE_FILTER}\tab Use texture filtering.
+\par
+
+{\i VNGO_DEBUG_OUTLINE}\tab Causes the polygons to have debug lines drawn
+ around over their edges for debugging purposes.
+\par
+
+{\i VNGO_ACTIVE_HAZE_DEV}\tab Indicates that the hazing/fogging is done
+ during output of primitives.
+\par
+
+{\i VNGO_PASSIVE_HAZE_DEV}\tab Indicates that the hazing/fogging is done
+ as a post-process using the Z-buffer content (therefore must have a Z-buffer
+ active to fog/haze).
+\par
+
+{\i VNGO_HAZE_ON}\tab\tab Indicates that hazing/fogging is in use.
+\par
+
+\line{\b\fs28 Error Codes}\par
+
+{\i VNGO_NO_ERROR}\tab\tab No error.
+\par
+
+{\i VNGO_NOT_SUPPORTED}\tab Function not supported.
+\par
+
+{\i VNGO_MEMALLOC_ERROR}\tab Memory allocation failed.
+\par
+
+{\i VNGO_WRONG_BITDEPTH}\tab Bitdepth invalid.
+\par
+
+{\i VNGO_UNSUPPORTED_TEXTURE}\tab Texture format unsupported.
+\par
+
+{\i VNGO_MEMORY_ERROR}\tab Memory failure.
+\par
+
+{\i VNGO_INTERNAL_ERROR}\tab Internal error.
+\par
+
+{\i VNGO_NOSCREEN_ERROR}\tab No screen found.
+\par
+
+{\i VNGO_MISSING_HARDWARE}\tab Hardware not found.
+\par
+
+{\i VNGO_MISSING_FUNCTIONALITY}\tab Hardware lacks needed functionality.
+\par
+
+{\i VNGO_NEEDS_PAL8}\line
+{\i VNGO_NEEDS_PAL15}\line
+{\i VNGO_NEEDS_PAL16}\tab\tab Incorrect palette type.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+VngoVVport8 Class                                                         ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_VNGO_VVPORT8}
+${\footnote VngoVVport8 Class}
+K{\footnote VngoVVport8;
+VngoVVport8, init}
++{\footnote BW_PG_9}
+{\b\f0{\cf2\scaps Programmer's Guide: Van Gogh}\line\fs32 VngoVVport8 Class}\par\pard\sb100
+
+This class implements a 8-bit/pixel virtual (memory-based) viewport and
+ forms the basis for the 8bpp viewports.  This class allocates it's own
+ viewbuffer memory.
+\par
+
+\line{\b\fs28 Name}\par
+
+VngoVVport8 - Virtual 8-bit color device.
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "vngvvp8.hpp"
+\par
+
+\line{\b\fs28 Base Classes}\par
+
+{\uldb VngoVport}{\v PG_VNGO_VPORT}
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b VngoVVport8 ();}\par
+
+Performs no initialization.
+\par
+
+{\b VngoVVport8 (VngoRect &dim, VngoPal *pal, dword flags)}\par
+
+Calls the init member, placing the return status into the init_status
+ member of {\uldb VngoVport}{\v PG_VNGO_VPORT}.
+\par
+
+\line{\b\fs28 Member Data}\par
+
+Same as {\uldb VngoVport}{\v PG_VNGO_VPORT}.
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+Same as {\uldb VngoVport}{\v PG_VNGO_VPORT}, plus :-
+\par
+
+{\b virtual VNGError init (VngoRect &dim, VngoPal *pal, dword flags);}\par
+
+Initializes the viewport, returning the error status.
+\par
+
+\line{\b\fs28 Example}\par
+
+The following example creates a 200x100 virtual viewport and
+ draws an X within it.
+\par
+
+{\f2
+VngoVVport8     *vp;\line
+VngoPoint p1, p2;
+\par
+vp=new VngoVVport8(200,100,0,0,0,0);
+\par
+int mp = vp->vbuff.pal->shd_pal->mid_point;
+\par
+// Virtual buffer of 200x100 created
+\par
+p1.x = 0;  p1.y = 0;\line
+p1.color = 1;\line
+p1.shade = mp;\line
+\par
+p2.x = 199;  p2.y = 99;\line
+p2.color = 1;\line
+p2.shade = mp;\line
+vp->line(&p1,&p2);\line
+\par
+p1.x = 199;  p1.y = 0;
+\par
+p2.x = 0; p2.y = 99;\line
+vp->line(&p1,&p2);\line
+\par
+// Image now resides in virtual buffer
+\par
+delete vp;
+\par
+// Virtual buffer destroyed
+}
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+VngoVportDB8 Class                                                        ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_VNGO_VPORTDB8}
+${\footnote VngoVportDB8 Class}
+K{\footnote VngoVportDB8;
+VngoVportDB8, init}
++{\footnote BW_PG_9}
+{\b\f0{\cf2\scaps Programmer's Guide: Van Gogh}\line\fs32 VngoVportDB8 Class}\par\pard\sb100
+
+This is the viewport device for drawing into a Windows 8-bit DIB.  The DIB
+ can be created manually, but the {\uldb VngoDIB}{\v PG_VNGO_DIB} screen
+ manager class is recommended for creating the DIB for the main viewport.
+\par
+
+\line{\b\fs28 Name}\par
+
+VngoVVportDB8 - Windows 8-bit DIB viewport
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "vngvpdb8.hpp"
+\par
+
+\line{\b\fs28 Base Classes}\par
+
+{\uldb VngoVVport8}{\v PG_VNGO_VVPORT8}
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b VngoVportDB8();}\par
+
+Performs no initialization.
+\par
+
+{\b VngoVportDB8(long width, long height, void *vbptr, void *zbptr,
+ VngoPal *my_pal, dword flags, int _pitch=0, int _zpitch=0);}\par
+
+Calls the init member, placing the return status into the init_status
+ member of {\uldb VngoVport}{\v PG_VNGO_VPORT}.
+\par
+
+\line{\b\fs28 Member Data}\par
+
+Same as {\uldb VngoVVport8}{\v PG_VNGO_VVPORT8}.
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+Same as {\uldb VngoVVport8}{\v PG_VNGO_VVPORT8}, plus :-
+\par
+
+{\b VNGError init (long width, long height, void *vbptr, void *zbptr,
+ VngoPal *my_pal,dword flags, int _pitch=0, int _zpitch=0);}\par
+
+Initializes the viewport and returns the init status.
+\par
+
+\line{\b\fs28 Example}\par
+
+The following example creates a DIB and an associated viewport:
+\par
+
+{\f2
+bmi = (LPBITMAPINFO)ivory_zalloc\line
+\tab (sizeof (BITMAPINFOHEADER) + 256*sizeof (WORD));\line
+bmi->bmiHeader.biSize         = sizeof (BITMAPINFOHEADER);\line
+bmi->bmiHeader.biWidth        = WIDTH;\line
+bmi->bmiHeader.biHeight       = -HEIGHT;\line
+bmi->bmiHeader.biPlanes       = 1;\line
+bmi->bmiHeader.biBitCount     = 8;\line
+bmi->bmiHeader.biCompression  = BI_RGB;\line
+bmi->bmiHeader.biClrUsed      = 256;\line
+bmi->bmiHeader.biClrImportant = 256;
+\par
+for (int i = 0; i < 256; i++)\line
+\tab  LPWORD (bmi->bmiColors)[i]  = i;
+\par
+gmap = new BYTE [WIDTH * HEIGHT];
+\par
+// Need to setup a logical palette that matches\line
+// the colors in Palette.
+\par
+// Create Van Gogh viewport
+\par
+gvport = new VngoVportDB8 (WIDTH, HEIGHT,\line
+\tab gmap, NULL, Palette, 0);
+\par
+// Perform drawing ops to gvport
+\par
+gvport->reset();
+\par
+// To display the image...
+\par
+SetDIBitsToDevice (hDC, 0, 0, WIDTH, HEIGHT,\line
+\tab 0, 0, 0, HEIGHT,\line
+\tab gmap, bmi, DIB_PAL_COLORS);
+}\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+VngoVportDD8 Class                                                        ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_VNGO_VPORTDD8}
+${\footnote VngoVportDD8 Class}
+K{\footnote VngoVportDD8;
+VngoVportDD8, init}
++{\footnote BW_PG_9}
+{\b\f0{\cf2\scaps Programmer's Guide: Van Gogh}\line\fs32 VngoVportDD8 Class}\par\pard\sb100
+
+This is the viewport device for drawing into a Windows 8-bit DirectDraw
+ surface.  The {\uldb VngoSurfaceManager}{\v PG_VNGO_SURFMNGR} class is
+ used to encapsulate the DirectDraw surface management and can be used
+ directly, but the {\uldb VngoDirectDraw}{\v PG_VNGO_DIRECTDRAW} screen
+ manager class is recommended.
+\par
+
+{\cf2
+Note: This class requires that Microsoft DirectX V5 be installed on the
+ target system and must be linked with the appropriate DirectX SDK libraries.
+}\par
+
+\line{\b\fs28 Name}\par
+
+VngoVVportDD8 - 8-bit DirectDraw Surface viewport
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "vngvpdd8.hpp"
+\par
+
+\line{\b\fs28 Base Classes}\par
+
+{\uldb VngoVVport8}{\v PG_VNGO_VVPORT8}
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b VngoVportDD8();}\par
+
+Performs no initialization.
+\par
+
+{\b VngoVportDD8 (VngoSurfaceManager *_pddsurf, VngoSurfaceManager *zbptr,
+ VngoPal *my_pal,dword flags);\line
+VngoVportDD8 (VngoSurfaceManager *_pddsurf, VngoSurfaceManager *zbptr,
+ VngoRect &srect, VngoPal *my_pal, dword flags);}\par
+
+Calls the init member, placing the return status into the init_status
+ member of {\uldb VngoVport}{\v PG_VNGO_VPORT}.
+\par
+
+\line{\b\fs28 Member Data}\par
+
+Same as {\uldb VngoVVport8}{\v PG_VNGO_VVPORT8}.
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+Same as {\uldb VngoVVport8}{\v PG_VNGO_VVPORT8}, plus :-
+\par
+
+{\b VNGError init (VngoSurfaceManager *_pddsurf, VngoSurfaceManager *zbptr,
+ VngoPal *my_pal,dword flags);\line
+VNGError init (VngoSurfaceManager *_pddsurf, VngoSurfaceManager *zbptr,
+ VngoRect &srect, VngoPal *my_pal,dword flags);}\par
+
+Initializes the view port and returns the init status.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+VngoVVport16 Class                                                        ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_VNGO_VVPORT16}
+${\footnote VngoVVport16 Class}
+K{\footnote VngoVVport16;
+VngoVVport16, init}
++{\footnote BW_PG_9}
+{\b\f0{\cf2\scaps Programmer's Guide: Van Gogh}\line\fs32 VngoVVport16 Class}\par\pard\sb100
+
+This class implements a 15/16-bit/pixel virtual (memory-based) viewport and
+ forms the basis for the 15/16bpp viewports.  The choice of 15-bit or 16-bit
+ is determined by the instance of {\uldb VngoPal}{\v PG_VNGO_PAL} passed
+ into the init() routine.
+\par
+
+{\cf3
+Some of the routines return VNGO_NOT_SUPPORTED error codes at this time.
+}\par
+
+\line{\b\fs28 Name}\par
+
+VngoVVport16 - Virtual 16-bit color device.
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "vngvvp16.hpp"
+\par
+
+\line{\b\fs28 Base Classes}\par
+
+{\uldb VngoVport}{\v PG_VNGO_VPORT}
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b VngoVVport16 ();}\par
+
+Performs no initialization.
+\par
+
+{\b VngoVVport16 (VngoRect &dim, VngoPal *pal, dword flags)}\par
+
+Calls the init member, placing the return status into the init_status
+ member of {\uldb VngoVport}{\v PG_VNGO_VPORT}.
+\par
+
+\line{\b\fs28 Member Data}\par
+
+Same as {\uldb VngoVport}{\v PG_VNGO_VPORT}.
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+Same as {\uldb VngoVport}{\v PG_VNGO_VPORT}, plus :-
+\par
+
+{\b virtual VNGError init (VnogRect &dim, VngoPal *pal, dword flags);}\par
+
+Initializes the viewport, returning the error status.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+VngoVportDB16 Class                                                       ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_VNGO_VPORTDB16}
+${\footnote VngoVportDB16 Class}
+K{\footnote VngoVportDB16;
+VngoVportDB16, init}
++{\footnote BW_PG_9}
+{\b\f0{\cf2\scaps Programmer's Guide: Van Gogh}\line\fs32 VngoVportDB16 Class}\par\pard\sb100
+
+This is the viewport device for drawing into a Windows 15/16-bit DIB.  The
+ DIB can be created manually, but the {\uldb VngoDIB}{\v PG_VNGO_DIB} screen
+ manager class is recommended for creating the DIB for the main viewport.
+\par
+
+{\cf2 Note: Must use a VngoPal15 instance for high-color Windows DIBs.}\par
+
+\line{\b\fs28 Name}\par
+
+VngoVVportDB16 - Windows 15/16-bit DIB viewport
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "vgvpdb16.hpp"
+\par
+
+\line{\b\fs28 Base Classes}\par
+
+{\uldb VngoVVport16}{\v PG_VNGO_VVPORT16}
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b VngoVportDB16();}\par
+
+Performs no initialization.
+\par
+
+{\b VngoVportDB16(long width, long height, void *vbptr, void *zbptr,
+ VngoPal *my_pal, dword flags, int _pitch=0, int _zpitch=0);}\par
+
+Calls the init member, placing the return status into the init_status
+ member of {\uldb VngoVport}{\v PG_VNGO_VPORT}.
+\par
+
+\line{\b\fs28 Member Data}\par
+
+Same as {\uldb VngoVVport16}{\v PG_VNGO_VVPORT16}.
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+Same as {\uldb VngoVVport16}{\v PG_VNGO_VVPORT16}, plus :-
+\par
+
+{\b VNGError init (long width, long height, void *vbptr, void *zbptr,
+ VngoPal *my_pal,dword flags, int _pitch=0, int _zpitch=0);}\par
+
+Initializes the viewport and returns the init status.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+VngoVportDD16 Class                                                       ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_VNGO_VPORTDD16}
+${\footnote VngoVportDD16 Class}
+K{\footnote VngoVportDD16;
+VngoVportDD16, init}
++{\footnote BW_PG_9}
+{\b\f0{\cf2\scaps Programmer's Guide: Van Gogh}\line\fs32 VngoVportDD16 Class}\par\pard\sb100
+
+This is the viewport device for drawing into a Windows 15- or 16-bit
+ DirectDraw surface.  The {\uldb VngoSurfaceManager}{\v PG_VNGO_SURFMNGR}
+ class is to encapsulate the DirectDraw surface management and can
+ be used directly, but the {\uldb VngoDirectDraw}{\v PG_VNGO_DIRECTDRAW}
+ screen manager class is recommended.
+\par
+
+{\cf2
+Note: It is possible for the initialization to fail because the surface's
+ bit-depth doesn't match the {\uldb VngoPal}{\v PG_VNGO_PAL} instance
+ (must use {\b VngoPal15} or {\b VngoPal16}).  You must use the other
+ type of palette to operate on the given surface/device.
+}\par
+
+{\cf2
+Note: This class requires that Microsoft DirectX V5 be installed on the
+ target system and must be linked with the appropriate DirectX SDK libraries.
+}\par
+
+\line{\b\fs28 Name}\par
+
+VngoVVportDD16 - 15/16-bit DirectDraw Surface viewport
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "vgvpdd16.hpp"
+\par
+
+\line{\b\fs28 Base Classes}\par
+
+{\uldb VngoVVport16}{\v PG_VNGO_VVPORT16}
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b VngoVportDD16();}\par
+
+Performs no initialization.
+\par
+
+{\b VngoVportDD16 (VngoSurfaceManager *_pddsurf, VngoSurfaceManager *zbptr,
+ VngoPal *my_pal,dword flags);\line
+VngoVportDD16 (VngoSurfaceManager *_pddsurf, VngoSurfaceManager *zbptr,
+ VngoRect &srect, VngoPal *my_pal, dword flags);}\par
+
+Calls the init member, placing the return status into the init_status
+ member of {\uldb VngoVport}{\v PG_VNGO_VPORT}.
+\par
+
+\line{\b\fs28 Member Data}\par
+
+Same as {\uldb VngoVVport16}{\v PG_VNGO_VVPORT16}.
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+Same as {\uldb VngoVVport16}{\v PG_VNGO_VVPORT16}, plus :-
+\par
+
+{\b VNGError init (VngoSurfaceManager *_pddsurf, VngoSurfaceManager *zbptr,
+ VngoPal *my_pal,dword flags);\line
+VNGError init (VngoSurfaceManager *_pddsurf, VngoSurfaceManager *zbptr,
+ VngoRect &srect, VngoPal *my_pal,dword flags);}\par
+
+Initializes the view port and returns the init status.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+VngoVportD3D Class                                                        ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_VNGO_VPORTD3D}
+${\footnote VngoVportD3D Class}
+K{\footnote VngoVportD3D;
+VngoVportD3D, init}
++{\footnote BW_PG_9}
+{\b\f0{\cf2\scaps Programmer's Guide: Van Gogh}\line\fs32 VngoVportD3D Class}\par\pard\sb100
+
+This class implements a Microsoft Direct3D viewport, which provides 3D
+ hardware acceleration through the DrawPrimitive interface.  The
+ performance of this viewport is tied highly to the vendor-provided
+ DirectX driver, but provides a broad-base support for 3D acceleration.
+\par
+
+{\cf2
+Note: This class requires that Microsoft DirectX V5 be installed on the
+ target system and must be linked with the appropriate DirectX SDK libraries.
+}\par
+
+\line{\b\fs28 Name}\par
+
+VngoVportD3D - Microsoft Direct3D device
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "vngd3d.hpp"
+\par
+
+\line{\b\fs28 Base Classes}\par
+
+{\uldb VngoVport}{\v PG_VNGO_VPORT}
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b VngoVportD3D();}\par
+
+Performs no initialization.
+\par
+
+{\b VngoVportD3D (VngoRect &dim, VngoPal *pal, dword flags,
+ VngoScreenManager *_screen);}\par
+
+Calls the init member, placing the return status into the init_status
+ member of {\uldb VngoVport}{\v PG_VNGO_VPORT}.
+\par
+
+\line{\b\fs28 Member Data}\par
+
+Same as {\uldb VngoVport}{\v PG_VNGO_VPORT}.
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+Same as {\uldb VngoVport}{\v PG_VNGO_VPORT}, plus :-
+\par
+
+{\b VNGError init (VngoRect &dim, VngoPal *pal, dword flags,
+ VngoScreenManager *_screen);}\par
+
+Initializes the viewport and returns the init status.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+VngoScreenManager Class                                                   ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_VNGO_SCRNMNGR}
+${\footnote VngoScreenManager Class}
+K{\footnote VngoScreenManager;
+VngoScreenManager, set_startxy;
+VngoScreenManager, get_flags;
+VngoScreenManager, get_type;
+VngoScreenManager, get_initstate;
+VngoScreenManager, init;
+VngoScreenManager, reinit;
+VngoScreenManager, set_mode;
+VngoScreenManager, check_mode;
+VngoScreenManager, set_palette;
+VngoScreenManager, term;
+VngoScreenManager, flip;
+VngoScreenManager, invalidate;
+VngoScreenManager, open_frame;
+VngoScreenManager, close_frame;
+VngoScreenManager, dump_textures}
++{\footnote BW_PG_9}
+{\b\f0{\cf2\scaps Programmer's Guide: Van Gogh}\line\fs32 VngoScreenManager Class}\par\pard\sb100
+
+This class is the base interface for a {\i Van Gogh} screen manager.  The
+ screen manager handles device-specific initialization, physical mode
+ setting and reinitialization, hardware-palette programming, device flipping,
+ and other hardware specific functionality.  It also allows for easy setup
+ when creating the appropriate {\uldb VngoVport}{\v PG_VNGO_VPORT} derived
+ class for the main screen.
+\par
+
+\line{\b\fs28 Name}\par
+
+VngoScreenManager - Base screen manager interface
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "vngscrn.hpp"
+\par
+
+\line{\b\fs28 Member Data}\par
+
+{\b long startx;\line
+long starty;}\par
+
+Screen starting position.  Should be set by set_startxy().
+\par
+
+{\b long width;\line
+long height;}\par
+
+Screen width and height.  Should be set by set_mode().
+\par
+
+{\b long bit_depth;}\par
+
+Screen bit-depth.  Should be set by set_mode().
+\par
+
+{\b char hwName[12];}\par
+
+Screen device hardware description string.
+\par
+
+{\b VngoPal *pal;}\par
+
+Pointer to palette instance being used by the screen.  Should be set
+ by set_palette().
+\par
+
+{\b dword sins;}\par
+
+Indicates any missing functionality for device.  Some of these cause the
+ set_mode() to fail, some will succeed but lack some functionality (See
+ {\b Sins Flags} below).
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+{\b void set_startxy(int sx,int sy);}\par
+
+Sets the startx and starty values for the screen.
+\par
+
+{\b dword get_flags();}\par
+
+Returns the flags used for set_mode().
+\par
+
+{\b dword get_type ();}\par
+
+Returns the screen type (see Screen Types below).
+\par
+
+{\b VNGError get_initstate();}\par
+
+Returns init state when performed by constructor.
+\par
+
+{\b virtual VNGError init()=0;}\par
+
+Performs init of device, returning TRUE if OK.
+\par
+
+{\b virtual VNGError reinit(Flx16 brightness=0)=0;}\par
+
+Reinitializes the device.
+\par
+
+{\b virtual VNGError set_mode(int width, int height, int bpp,
+ VngoPal *pal, dword flags = 0)=0;}\par
+
+Performs mode initialization and creates main viewport buffer(s).
+ (see Flags).
+\par
+
+{\b virtual VNGError check_mode(int width, int height, int bpp)=0;}\par
+
+Checks to see if mode is available.
+\par
+
+{\b virtual VNGError set_palette(VngoPal *p,Flx16 brightness=0)=0;}\par
+
+Sets the palette instance, programming the 'hardware' palette.
+\par
+
+{\b virtual VNGError term()=0;}\par
+
+Terminates the video mode, restoring the old one.
+\par
+
+{\b virtual VNGError flip();}\par
+
+Flip the device so that the current frame/image is displayed.
+\par
+
+{\b virtual void invalidate(const VngoRect &rect);}\par
+
+Update damage rectangle.
+\par
+
+{\b virtual void invalidate();}\par
+
+Update damage rectangle for entire screen.
+\par
+
+{\b virtual void open_frame();\line
+virtual void close_frame();}\par
+
+Start and stop frame output as needed by some devices (notibly Direct3D).
+\par
+
+{\b virtual VNGError dump_textures()=0;}\par
+
+Clears all of the device-specific texture data from the device.
+\par
+
+\line{\b\fs28 Screen Types}\par
+
+{\i SCREENTYPE_DIB}\tab\tab Instance is of type
+ {\uldb VngoDIB}{\v PG_VNGO_DIB}.
+\par
+
+{\i SCREENTYPE_DDRAW}\tab\tab Instance is of type
+ {\uldb VngoDirectDraw}{\v PG_VNGO_DIRECTDRAW}.
+\par
+
+{\i SCREENTYPE_HYBRID}\tab Instance is of type
+ {\uldb VngoHybrid}{\v PG_VNGO_HYBRID}.
+\par
+
+{\i SCREENTYPE_D3D}\tab\tab Instance is of type
+ {\uldb VngoDirect3D}{\v PG_VNGO_DIRECT3D}.
+\par
+
+{\i SCREENTYPE_OPENGL}\tab Instance is of type
+ {\uldb VngoOpenGL}{\v PG_VNGO_OPENGL}.
+\par
+
+\line{\b\fs28 Flags}\par
+
+{\i VNGO_SET_RESOLUTION}\tab\tab Change physical resolution to target.
+\par
+
+{\i VNGO_TRUE_FLIP}\tab\tab\tab Create as true-flipping device.
+\par
+
+{\i VNGO_FORCE_SYSTEMMEMORY}\tab Force viewport buffer into system memory.
+\par
+
+{\i VNGO_ALLOC_ZBUFFER}\tab\tab Allocate Z-buffer.
+\par
+
+{\i VNGO_3DDEVICE}\tab\tab\tab Create as a 3D device.
+\par
+
+{\i VNGO_USE_PRIMARY}\tab\tab Use primary display device.
+\par
+
+\line{\b\fs28 Flags}\par
+
+{\i VNGO_NO_SINS}\tab Fully supports all capabilities (this is 0).
+\par
+
+{\i VNGO_NO_ZBUFFER}\tab Doesn't have a Z-buffer.
+\par
+
+{\i VNGO_NO_HWBLIT}\tab Doesn't support hardware blit.
+\par
+
+{\i VNGO_NO_BLIT}\tab Doesn't support blit.
+\par
+
+{\i VNGO_NO_8BIT_PAL_TEXTURES}\tab Doesn't support 8-bit paletted textures.
+\par
+
+{\i VNGO_NO_CHROMAKEY_TEXTURES}\tab ?
+\par
+
+{\i VNGO_NO_TEXTURE_MODULATION}\tab\tab ?
+\par
+
+{\i VNGO_NO_TEXTURE_TILE}\tab Doesn't support texture tiling.
+\par
+
+{\i VNGO_NO_FILTERS}\tab ?
+\par
+
+{\i VNGO_NO_PERSPECTIVE}\tab Doesn't suppport perspective correction.
+\par
+
+{\i VNGO_INVALID_TEXTURE_SIZES}\tab ?
+\par
+
+{\i VNGO_NO_CULLING_CONTROL}\tab ?
+\par
+
+{\i VNGO_NO_DITHER}\tab Doesn't support dithering.
+\par
+
+{\i VNGO_NO_SPECULAR}\tab Doesn't support specular.
+\par
+
+{\i VNGO_NO_TABLE_FOG}\tab Doesn't support table-based fog.
+\par
+
+{\i VNGO_NO_VERTEX_FOG}\tab Doesn't support vertex-based fog.
+\par
+
+{\i VNGO_NO_FOG}\tab Doesn't support fogging.
+\par
+
+{\i VNGO_NO_STIPPLE_ALPHA}\tab Doesn't support stippled alpha-blending.
+\par
+
+{\i VNGO_NO_TRUE_ALPHA}\tab Doesn't support true alpha-blending.
+\par
+
+{\i VNGO_NO_ALPHA}\tab Doesn't support alpha-blending.
+\par
+
+{\i VNGO_INVALID_RENDERDEPTH}\tab Invalid render bit-depth.
+\par
+
+{\i VNGO_INVALID_COLORMODEL}\tab Invalid color-model.
+\par
+
+{\i VNGO_INVALID_VERTEX_FORMAT}\tab Invalid vertex format.
+\par
+
+{\i VNGO_NOT_3DDEVICE}\tab Not a 3D device.
+\par
+
+{\i VNGO_NO_3D_2D_INTERLEAVE}\tab Doesn't allow interleave of 2D and 3D calls.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+VngoDIB Class                                                             ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_VNGO_DIB}
+${\footnote VngoDIB Class}
+K{\footnote VngoDIB}
++{\footnote BW_PG_9}
+{\b\f0{\cf2\scaps Programmer's Guide: Van Gogh}\line\fs32 VngoDIB Class}\par\pard\sb100
+
+Screen manager for use with {\uldb VngoVportDB8}{\v PG_VNGO_VPORTDB8} or
+ {\uldb VngoVportDB16}{\v PG_VNGO_VPORTDB16} with a WinG blit.  The
+ DirectDraw interface is used for video mode control.
+\par
+
+{\cf2
+Note: This class requires that Microsoft DirectX V5 be installed on the
+ target system and must be linked with the appropriate DirectX SDK libraries.
+}\par
+
+\line{\b\fs28 Name}\par
+
+VngoDIB - Windows DIB screen manager
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "vngscrn.hpp"
+\par
+
+\line{\b\fs28 Base Classes}\par
+
+{\uldb VngoScreenManager}{\v PG_VNGO_SCRNMNGR}
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b VngoDIB();}\par
+
+Perform no initialization.
+\par
+
+{\b VngoDIB(HWND hwndclient);}\par
+
+Calls the init() member and placing the return status into the init_state
+ member of {\uldb VngoScreenManager}{\v PG_VNGO_SCRNMNGR}.
+\par
+
+\line{\b\fs28 Member Data}\par
+
+Same as {\uldb VngoScreenManager}{\v PG_VNGO_SCRNMNGR}, plus :-
+\par
+
+{\b HRESULT err;\line
+LPDIRECTDRAW dd;}\par
+
+DirectDraw resolution control variables.
+\par
+
+{\b BITMAPINFO *bmi;\line
+HDC hdc;\line
+BYTE *gmap;}\par
+
+Windows DIB memory and control variables needed for WinG blit.  Pass the
+ 'gmap' pointer into the viewport instance as the DIB memory.
+\par
+
+{\b HPALETTE hpal;}\par
+
+Windows palette handle for 'hardware' palette control.
+\par
+
+{\b HWND hWndClient;}\par
+
+Client window passed needed for init() function.
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+Same as {\uldb VngoScreenManager}{\v PG_VNGO_SCRNMNGR}.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+VngoDirectDraw Class                                                      ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_VNGO_DIRECTDRAW}
+${\footnote VngoDirectDraw Class}
+K{\footnote VngoDirectDraw}
++{\footnote BW_PG_9}
+{\b\f0{\cf2\scaps Programmer's Guide: Van Gogh}\line\fs32 VngoDirectDraw Class}\par\pard\sb100
+
+Screen manager for use with {\uldb VngoVportDD8}{\v PG_VNGO_VPORTDD8} or
+ {\uldb VngoVportDD16}{\v PG_VNGO_VPORTDD16}.  The DirectDraw interface
+ is used for video mode control.
+\par
+
+{\cf2
+Note: This class requires that Microsoft DirectX V5 be installed on the
+ target system and must be linked with the appropriate DirectX SDK libraries.
+}\par
+
+\line{\b\fs28 Name}\par
+
+VngoDirectDraw - Windows DirectDraw screen manager
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "vngscrn.hpp"
+\par
+
+\line{\b\fs28 Base Classes}\par
+
+{\uldb VngoScreenManager}{\v PG_VNGO_SCRNMNGR}
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b VngoDirectDraw();}\par
+
+Peforms no initialization.
+\par
+
+{\b VngoDirectDraw(HWND hwndclient);}\par
+
+Calls the init() member and placing the return status into the init_state
+ member of {\uldb VngoScreenManager}{\v PG_VNGO_SCRNMNGR}.
+\par
+
+\line{\b\fs28 Member Data}\par
+
+Same as {\uldb VngoScreenManager}{\v PG_VNGO_SCRNMNGR}, plus :-
+\par
+
+{\b HRESULT err;\line
+LPDIRECTDRAW dd;}\par
+
+DirectDraw resolution control variables.
+\par
+
+{\b LPDIRECTDRAWSURFACE FrontBuffer;\line
+LPDIRECTDRAWSURFACE BackBuffer;}\par
+
+Surfaces for flipping.
+\par
+
+{\b LPDIRECTDRAWSURFACE Primary;}\par
+
+Primary surface.
+\par
+
+{\b LPDIRECTDRAWSURFACE ZBuffer;}\par
+
+Z-buffer surface.
+\par
+
+{\b VngoSurfaceManager *SurfaceManager;}\par
+
+Surface manager instance for use in creating viewport.
+\par
+
+{\b LPDIRECTDRAWPALETTE Palette;}\par
+
+DirectDraw palette control variable.
+\par
+
+{\b DDSURFACEDESC ddsd;}\par
+
+Primary surface descriptor.
+\par
+
+{\b HFONT AppFont;}\par
+
+Not in use.
+\par
+
+{\b HWND hWndClient;}\par
+
+Client window passed needed for init() function.
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+Same as {\uldb VngoScreenManager}{\v PG_VNGO_SCRNMNGR}.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+VngoHybrid Class                                                          ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_VNGO_HYBRID}
+${\footnote VngoHybrid Class}
+K{\footnote VngoHybrid}
++{\footnote BW_PG_9}
+{\b\f0{\cf2\scaps Programmer's Guide: Van Gogh}\line\fs32 VngoHybrid Class}\par\pard\sb100
+
+{\cf4 UNDER DEVELOPMENT}\line
+Screen manager for using {\uldb VngoVportDB8}{\v PG_VNGO_VPORTDB8} or
+ {\uldb VngoVportDB16}{\v PG_VNGO_VPORTDB16} with a DirectDraw blit.
+\par
+
+{\cf2
+Note: This class requires that Microsoft DirectX V5 be installed on the
+ target system and must be linked with the appropriate DirectX SDK libraries.
+}\par
+
+\line{\b\fs28 Name}\par
+
+VngoHybrid - Windows Hybrid screen manager
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "vngscrn.hpp"
+\par
+
+\line{\b\fs28 Base Classes}\par
+
+{\uldb VngoScreenManager}{\v PG_VNGO_SCRNMNGR}
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b VngoHybrid();}\par
+
+Performs no initialization.
+\par
+
+{\b VngoHybrid(HWND hwndclient);}\par
+
+Calls the init() member and placing the return status into the init_state
+ member of {\uldb VngoScreenManager}{\v PG_VNGO_SCRNMNGR}.
+\par
+
+\line{\b\fs28 Member Data}\par
+
+Same as {\uldb VngoScreenManager}{\v PG_VNGO_SCRNMNGR}, plus :-
+\par
+
+{\b HRESULT err;\line
+LPDIRECTDRAW dd;}\par
+
+DirectDraw resolution control variables.
+\par
+
+{\b LPDIRECTDRAWSURFACE FrontBuffer;\line
+LPDIRECTDRAWSURFACE BackBuffer;}\par
+
+Surfaces for flipping.
+\par
+
+{\b LPDIRECTDRAWSURFACE Primary;}\par
+
+Primary surface.
+\par
+
+{\b LPDIRECTDRAWPALETTE Palette;}\par
+
+DirectDraw palette control variable.
+\par
+
+{\b DDSURFACEDESC ddsd;}\par
+
+Primary surface descriptor.
+\par
+
+{\b HWND hWndClient;}\par
+
+Client window passed needed for init() function.
+\par
+
+{\b BYTE *gmap;\line
+int pitch;}\par
+
+Windows DIB memory.  Pass the  'gmap' pointer into the viewport instance
+ as the DIB memory.
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+Same as {\uldb VngoScreenManager}{\v PG_VNGO_SCRNMNGR}.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+VngoDirect3D Class                                                        ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_VNGO_DIRECT3D}
+${\footnote VngoDirect3D Class}
+K{\footnote VngoDirect3D;
+VngoDirect3D, init;
+VngoDirect3D, set_draw_state}
++{\footnote BW_PG_9}
+{\b\f0{\cf2\scaps Programmer's Guide: Van Gogh}\line\fs32 VngoDirect3D Class}\par\pard\sb100
+
+Screen manager for use with {\uldb VngoVportD3D}{\v PG_VNGO_VPORTD3D}.
+\par
+
+{\cf2
+Note: This class requires that Microsoft DirectX V5 be installed on the
+ target system and must be linked with the appropriate DirectX SDK libraries.
+}\par
+
+\line{\b\fs28 Name}\par
+
+VngoDirect3D - Microsoft Direct3D screen manager
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "vngscrn.hpp"
+\par
+
+\line{\b\fs28 Base Classes}\par
+
+{\uldb VngoScreenManager}{\v PG_VNGO_SCRNMNGR}
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b VngoDirect3D();}\par
+
+Peforms no initialization.
+\par
+
+{\b VngoDirect3D(HWND hwndclient, char *targetName=0);}\par
+
+Calls the init() member and placing the return status into the init_state
+ member of {\uldb VngoScreenManager}{\v PG_VNGO_SCRNMNGR}.
+\par
+
+\line{\b\fs28 Member Data}\par
+
+Same as {\uldb VngoScreenManager}{\v PG_VNGO_SCRNMNGR}, plus :-
+\par
+
+{\b HRESULT err;\line
+LPDIRECTDRAW dd;}\par
+
+DirectDraw resolution control variables.
+\par
+
+{\b LPDIRECTDRAWSURFACE FrontBuffer;\line
+LPDIRECTDRAWSURFACE BackBuffer;}\par
+
+Surfaces for flipping.
+\par
+
+{\b LPDIRECTDRAWSURFACE Primary;}\par
+
+Primary surface.
+\par
+
+{\b LPDIRECTDRAWSURFACE ZBuffer;}\par
+
+Z-buffer surface.
+\par
+
+{\b LPDIRECTDRAWSURFACE DirtyCursor;\line
+LPDIRECTDRAWSURFACE Cursor;}\par
+
+Cursor management surfaces.
+\par
+
+{\b VngoSurfaceManager *SurfaceManager;}\par
+
+Surface manager instance for use in creating viewport.
+\par
+
+{\b LPDIRECTDRAWPALETTE Palette;}\par
+
+DirectDraw palette control variable.
+\par
+
+{\b DDSURFACEDESC ddsd;}\par
+
+Primary surface descriptor.
+\par
+
+{\b HFONT AppFont;}\par
+
+Not in use.
+\par
+
+{\b HWND hWndClient;}\par
+
+Client window passed needed for init() function.
+\par
+
+{\b IDirect3D2 *d3d;\line
+IDirect3DDevice2 *d3dDevice;\line
+IDirect3DViewport2 *d3dViewport;}\par
+
+?
+\par
+
+{\b char *target;\line
+GUID targetID;}\par
+
+Used to find the correct device from those installed.
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+Same as {\uldb VngoScreenManager}{\v PG_VNGO_SCRNMNGR}, plus :-
+\par
+
+{\b virtual VNGError init(char *targetNam);}\par
+
+Performs the init() using a specific device target name.
+\par
+
+{\b void set_draw_state(dword state, D3DTEXTUREHANDLE handle=0);}\par
+
+Sets the draw-state for a texture.  State flags are
+ {\i VNGO_D3DSFLAGS_GOURAUD}, {\i VNGO_D3DSFLAGS_DITHER},
+ {\i VNGO_D3DSFLAGS_PERSPECTIVE}, {\i VNGO_D3DSFLAGS_TBLEND_MOD},
+ {\i VNGO_D3DSFLAGS_CKEY_ENABLE}, {\i VNGO_D3DSFLAGS_ALPHA},
+ and {\i VNGO_D3DFLAGS_FILTER}.
+\par
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+VngoOpenGL Class                                                          ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_VNGO_OPENGL}
+${\footnote VngoOpenGL Class}
+K{\footnote VngoOpenGL}
++{\footnote BW_PG_9}
+{\b\f0{\cf2\scaps Programmer's Guide: Van Gogh}\line\fs32 VngoOpenGL Class}\par\pard\sb100
+
+{\cf4 UNDER DEVELOPMENT}\line
+Screen manager for use with VngoVportOpenGL.
+\par
+
+{\cf2
+Note: This class requires that the OpenGL libraries be available as part
+ of your compiler installation (these are included with the latest versions
+ of Microsoft Visual C++).
+}\par
+
+\line{\b\fs28 Name}\par
+
+VngoOpenGL - OpenGL screen manager
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "vngscrn.hpp"
+\par
+
+\line{\b\fs28 Base Classes}\par
+
+{\uldb VngoScreenManager}{\v PG_VNGO_SCRNMNGR}
+\par
+
+\line{\b\fs28 Constructors}\par
+
+?
+\par
+
+\line{\b\fs28 Member Data}\par
+
+Same as {\uldb VngoScreenManager}{\v PG_VNGO_SCRNMNGR}, plus :-
+\par
+
+?
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+Same as {\uldb VngoScreenManager}{\v PG_VNGO_SCRNMNGR}.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+VngoColorHLS Class                                                        ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_VNGO_COLORHLS}
+${\footnote VngoColorHLS Class}
+K{\footnote VngoColorHLS;
+VngoColorHLS, to_RGB}
++{\footnote BW_PG_9}
+{\b\f0{\cf2\scaps Programmer's Guide: Van Gogh}\line\fs32 VngoColorHLS Class}\par\pard\sb100
+
+This class is used to represent Hue-Luminance-Saturation color-space.  The
+ conversion to RGB is performed using {\i Felix} fixed-point operations.
+\par
+
+\line{\b\fs28 Name}\par
+
+VngoColorHLS - HLS color value
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "vngcolor.hpp"
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b VngoColorHLS();}\par
+
+Performs no initialization.
+\par
+
+{\b VngoColorHLS(VngoColor24bit c);}\par
+
+Converts the RGB into an HLS value and sets the value into the
+ class instance.
+\par
+
+\line{\b\fs28 Member Data}\par
+
+{\b Flx16 h;}\par
+
+Hue component.
+\par
+
+{\b Flx16 l;}\par
+
+Luminance component.
+\par
+
+{\b Flx16 s;}\par
+
+Saturation component.
+\par
+
+{\b dword flags;}\par
+
+Color flags.
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+{\b VngoColor24bit to_RGB();}\par
+
+Converts the HLS values in the class instance to an 8-bit Red, 8-bit Green,
+  8-bit Blue value.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+VngoColor24bit Class                                                      ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_VNGO_COLOR24BIT}
+${\footnote VngoColor24bit Class}
+K{\footnote VngoColor24bit;
+VngoColor24bit, to_HLS;
+VngoColor24bit, compress;
+VngoColor24bit, compress16;
+VngoColor24bit, compress24}
++{\footnote BW_PG_9}
+{\b\f0{\cf2\scaps Programmer's Guide: Van Gogh}\line\fs32 VngoColor24bit Class}\par\pard\sb100
+
+This class is used to represent Red-Green-Blue color-space with a 8/8/8
+ format.  The conversion to HLS is performed using {\i Felix} fixed-point
+ operations.  This format is often referred to as 'true-color'.
+\par
+
+\line{\b\fs28 Name}\par
+
+VngoColor24bit - 8-bit Red, 8-bit Green, 8-bit Blue color value
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "vngcolor.hpp"
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b VngoColor24bit();}\par
+
+Performs no initialization.
+\par
+
+{\b VngoColor24bit(dword clr);}\par
+
+Converts from a dword using x:r:g:b format to a VngoColor24bit value.
+\par
+
+{\b VngoColor24bit(byte pr,byte pg,byte pb);}\par
+
+Sets the r, g, and b members.
+\par
+
+{\b VngoColor24bit(VngoColorHLS c);}\par
+
+Converts an HLS value to RGB and sets the value into the class instance.
+\par
+
+\line{\b\fs28 Member Data}\par
+
+{\b byte r;}\par
+
+Red component.
+\par
+
+{\b byte g;}\par
+
+Green component.
+\par
+
+{\b byte b;}\par
+
+Blue component.
+\par
+
+{\b byte na;}\par
+
+Reserved for padding.
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+{\b VngoColorHLS to_HLS();}\par
+
+Converts the RGB contents to an HLS value.
+\par
+
+{\b int compress();}\par
+
+Converts the RGB value to a 5/5/5 value.
+\par
+
+{\b int compress16();}\par
+
+Converts the RGB value to a 5/6/5 value.
+\par
+
+{\cf4\scaps NEW}\line
+{\b int compress24();}\par
+
+Converts the RGB value into a 8/8/8 value with correct ordering for VanGogh's
+ internal use.  This is intended for use with the {\i VNGO_COLOR_24BIT} flag
+ with certain viewport functions.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+VngoColor16bit Class                                                      ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_VNGO_COLOR16BIT}
+${\footnote VngoColor16bit Class}
+K{\footnote VngoColor16bit}
++{\footnote BW_PG_9}
+{\b\f0{\cf2\scaps Programmer's Guide: Van Gogh}\line\fs32 VngoColor16bit Class}\par\pard\sb100
+
+This class is used to represent Red-Green-Blue color-space with a 5/6/5
+ format.  This format is often referred to as 'hi-color'.
+\par
+
+\line{\b\fs28 Name}\par
+
+VngoColor16bit - 5-bit Red, 6-bit Green, 5-bit Blue color value
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "vngcolor.hpp"
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b VngoColor16bit();}\par
+
+Performs no initialization.
+\par
+
+{\b VngoColor16bit(dword clr);}\par
+
+Sets the pcolor member to the given color, assuming
+ the dword is in 5/6/5 format.
+\par
+
+{\b VngoColor16bit(byte pr,byte pg, byte pb);}\par
+
+Converts 8-bit red, green, and blue values to 5/6/5 format.
+\par
+
+{\b VngoColor16bit(VngoColor24bit clr);}\par
+
+Converts a 24-bit RGB value to a 5/6/5 format RGB.
+\par
+
+{\b VngoColor16bit(VngoColorHLS clr);}\par
+
+Converts an HLS value to a 5/6/5 format RGB.
+\par
+
+\line{\b\fs28 Member Data}\par
+
+{\b word pcolor;}\par
+
+16-bit color value in 5:6:5 format.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+VngoColor15bit Class                                                      ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_VNGO_COLOR15BIT}
+${\footnote VngoColor15bit Class}
+K{\footnote VngoColor15bit}
++{\footnote BW_PG_9}
+{\b\f0{\cf2\scaps Programmer's Guide: Van Gogh}\line\fs32 VngoColor15bit Class}\par\pard\sb100
+
+This class is used to represent Red-Green-Blue color-space with a 5/5/5
+ format.  This format is often referred to as 'hi-color'.
+\par
+
+\line{\b\fs28 Name}\par
+
+VngoColor15bit - 5-bit Red, 5-bit Green, 5-bit Blue color value
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "vngcolor.hpp"
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b VngoColor15bit();}\par
+
+Performs no initialization.
+\par
+
+{\b VngoColor15bit(dword clr);}\par
+
+Sets the pcolor member to the given color, assuming
+ the dword is in 5/5/5 format.
+\par
+
+{\b VngoColor15bit(byte pr,byte pg, byte pb);}\par
+
+Converts 8-bit red, green, and blue values to 5/5/5 format.
+\par
+
+{\b VngoColor15bit(VngoColor24bit clr);}\par
+
+Converts a 24-bit RGB value to a 5/5/5 format RGB.
+\par
+
+{\b VngoColor15bit(VngoColorHLS clr);}\par
+
+Converts an HLS value to a 5/5/5 format RGB.
+\par
+
+\line{\b\fs28 Member Data}\par
+
+{\b word pcolor;}\par
+
+15-bit color value in 5:5:5 format.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+Vngo24to8bit Class                                                        ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_VNGO_24TO8BIT}
+${\footnote Vngo24to8bit Class}
+K{\footnote Vngo24to8bit;
+Vngo24to8bit, get_index;
+Vngo24to8bit, init}
++{\footnote BW_PG_9}
+{\b\f0{\cf2\scaps Programmer's Guide: Van Gogh}\line\fs32 Vngo24to8bit Class}\par\pard\sb100
+
+This is a support class used by the
+ {\uldb VngoClrConvert}{\v PG_VNGO_CLRCONVERT} class.
+\par
+
+\line{\b\fs28 Name}\par
+
+Vngo24to8bit - Converts a 24-bit to 8-bit color value
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "vngcolor.hpp"
+\par
+
+\line{\b\fs28 Member Data}\par
+
+{\b byte colorconvert[32768];}\par
+
+Lookup table which converts a 5/5/5 RGB into a palette index.
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+{\b VngoColorIndex get_index(VngoColor24bit clr);}\par
+
+Converts a 24-bit color value to an index.
+\par
+
+{\b void init(VngoPal *my_pal);}\par
+
+Computes the colorconvert table from the given palette.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+VngoClrConvert Class                                                      ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_VNGO_CLRCONVERT}
+${\footnote VngoClrConvert Class}
+K{\footnote VngoClrConvert;
+VngoClrConvert, init;
+VngoClrConvert, get_index}
++{\footnote BW_PG_9}
+{\b\f0{\cf2\scaps Programmer's Guide: Van Gogh}\line\fs32 VngoClrConvert Class}\par\pard\sb100
+
+This class implements a 24-bit to 8-bit compression so that 8-bit palette
+ entries can be found through a single table lookup.  It is used by
+ the {\uldb VngoPal}{\v PG_VNGO_PAL} class.
+\par
+
+\line{\b\fs28 Name}\par
+
+VngoClrConvert - 24-bit to 8-bit color conversion
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "vngcolor.hpp"
+\par
+
+\line{\b\fs28 Member Data}\par
+
+{\b Vngo24to8bit cvt2_8;}\par
+
+Color conversion class which contains look-up table.
+\par
+
+{\b VngoHwPal *mypal;}\par
+
+Pointer to associated 'hardware' palette.
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+{\b void init(VngoPal *hwpal,int flags=0);}\par
+
+Sets palette.  If {\i VNGO_PAL_CALC} passed, then the color lookup table
+ is computed from the palette.
+\par
+
+{\b VngoColorIndex get_index(VngoColor24bit clr);\line
+VngoColorIndex get_index(int indx);\line
+VngoColorIndex get_index(VngoColorHLS clr);}\par
+
+Returns the index for the color as found in the cvt2_8 table.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+VngoColorShade Class                                                      ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_VNGO_COLORSHADE}
+${\footnote VngoColorShade Class}
+K{\footnote VngoColorShade}
++{\footnote BW_PG_9}
+{\b\f0{\cf2\scaps Programmer's Guide: Van Gogh}\line\fs32 VngoColorShade Class}\par\pard\sb100
+
+This is the base class for creating the bit-depth specific shading tables
+ which contains a single color with its various shaded ranges.
+\par
+
+\line{\b\fs28 Name}\par
+
+VngoColorShade - Base shaded color
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "vngcolor.hpp"
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b VngoColorShade();}\par
+
+Performs no initialization.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+VngoColorShadeHLS Class                                                   ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_VNGO_COLORSHADEHLS}
+${\footnote VngoColorShadeHLS Class}
+K{\footnote VngoColorShadeHLS}
++{\footnote BW_PG_9}
+{\b\f0{\cf2\scaps Programmer's Guide: Van Gogh}\line\fs32 VngoColorShadeHLS Class}\par\pard\sb100
+
+This is the HLS implementation of a shade-table.
+\par
+
+\line{\b\fs28 Name}\par
+
+VngoColorShadeHLS - HLS shaded color
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "vngcolor.hpp"
+\par
+
+\line{\b\fs28 Base Classes}\par
+
+{\uldb VngoColorShade}{\v PG_VNGO_COLORSHADE}
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b VngoColorShadeHLS();}\par
+
+Performs no initialization.
+\par
+
+\line{\b\fs28 Member Data}\par
+
+Same as {\uldb VngoColorShade}{\v PG_VNGO_COLORSHADE}, plus :-
+\par
+
+{\b VngoColorHLS shl[VNGO_SHADE_TABLE_SIZE];}\par
+
+Lookup-table to get shaded versions of color.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+VngoColorShade8/15/16/24 Class                                            ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_VNGO_COLORSHADE8_15_16_24}
+${\footnote VngoColorShade8/15/16/24 Class}
+K{\footnote VngoColorShade8;
+VngoColorShade15;
+VngoColorShade16;
+VngoColorShade24}
++{\footnote BW_PG_9}
+{\b\f0{\cf2\scaps Programmer's Guide: Van Gogh}\line\fs32 VngoColorShade8/15/16/24 Class}\par\pard\sb100
+
+These are the various bit-depth implementations of a shaded color.  These
+ classes are used by the {\uldb VngoShadePal}{\v PG_VNGO_SHADEPAL} derived
+ classes.
+\par
+
+\line{\b\fs28 Name}\par
+
+VngoColorShade8 - 8-bit shaded color\line
+VngoColorShade15 - 15-bit shaded color\line
+VngoColorShade16 - 16-bit shaded color\line
+VngoColorShade24 - 24-bit shaded color
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "vngcolor.hpp"
+\par
+
+\line{\b\fs28 Base Classes}\par
+
+{\uldb VngoColorShade}{\v PG_VNGO_COLORSHADE}
+\par
+
+\line{\b\fs28 Member Data}\par
+
+Same as {\uldb VngoColorShade}{\v PG_VNGO_COLORSHADE}, plus :-
+\par
+
+{\b byte shl[1];\line
+word shl[1];\line
+dword shdl[1];}\par
+
+Place-holder type for interpreting data array to get shaded versions of
+ the color.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+VngoHwPal Class                                                           ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_VNGO_HWPAL}
+${\footnote VngoHwPal Class}
+K{\footnote VngoHwPal;
+VngoHwPal, init}
++{\footnote BW_PG_9}
+{\b\f0{\cf2\scaps Programmer's Guide: Van Gogh}\line\fs32 VngoHwPal Class}\par\pard\sb100
+
+This is a support class used by the palette system for containing the
+ hardware palette (i.e., the actual palette programmed onto the device).  For
+ 15/16/24-bit devices, this is the palette of colors used for 8-bit textures,
+ images, and vertex color values which are the 'base' colors for the rendering
+ system (shaded values are linearly interpreted through all available
+ bits for smoother shading).
+\par
+
+\line{\b\fs28 Name}\par
+
+VngoHwPal - Hardware palette
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "vngpal.hpp"
+\par
+
+\line{\b\fs28 Member Data}\par
+
+{\b VngoColor24bit p[VNGO_PAL_SIZE];}\par
+
+'Hardware' palette colors.
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+{\b int init(VngoColor24bit pal[],int count);}\par
+
+Sets the first 'count' entries in the hardware palette.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+VngoShadePal Class                                                        ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_VNGO_SHADEPAL}
+${\footnote VngoShadePal Class}
+K{\footnote VngoShadePal}
++{\footnote BW_PG_9}
+{\b\f0{\cf2\scaps Programmer's Guide: Van Gogh}\line\fs32 VngoShadePal Class}\par\pard\sb100
+
+This class is the base class for creating the bit-depth specific shading
+ tables which contain shaded color entries
+ ({\uldb VngoColorShade}{\v PG_VNGO_COLORSHADE}) for each of the palette
+ entries.
+\par
+
+\line{\b\fs28 Name}\par
+
+VngoShadePal - Base shading palette
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "vngpal.hpp"
+\par
+
+\line{\b\fs28 Member Data}\par
+
+{\b void *ptr;}\par
+
+Points to an array of the appropriate
+ {\uldb VngoColorShade}{\v PG_VNGO_COLORSHADE} derived class.
+\par
+
+{\b long num_shd_lvl_bits;}\par
+
+Number of shade levels as a bit shift value.
+\par
+
+{\b long num_shd_lvl;}\par
+
+Number of shade levels.
+\par
+
+{\b long mid_point;}\par
+
+Mid-point of palette where a shade lookup returns the color without
+ shading effects.  Below this value is darker and above this value is
+ overdriven towards specular white (could be another color depending
+ on how the palette is created by the {\uldb PalTool}{\v UG_VNGO_PALTOOL}).
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+VngoShadePal8/15/16 Class                                                 ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_VNGO_SHADEPAL8_15_16}
+${\footnote VngoShadePal8/15/16 Class}
+K{\footnote VngoShadePal8;
+VngoShadePal8, get_shaded_index;
+VngoShadePal8, &operator[];
+VngoShadePal15, get_shaded_index;
+VngoShadePal15, &operator[];
+VngoShadePal16, get_shaded_index;
+VngoShadePal16, &operator[]}
++{\footnote BW_PG_9}
+{\b\f0{\cf2\scaps Programmer's Guide: Van Gogh}\line\fs32 VngoShadePal8/15/16 Class}\par\pard\sb100
+
+These are the various bit-depth implementations of the palette colors
+ shaded through their different levels.  These classes are used by the
+ {\uldb VngoPal}{\v PG_VNGO_PAL} derived classes.
+\par
+
+The base class does not use virtuals, so it is important to case the
+ pointer to the correct type before calling any function or even the
+ delete operation.  Otherwise the correct code will not be executed.
+\par
+
+\line{\b\fs28 Name}\par
+
+VngoShadePal8 - 8-bit shading palette\line
+VngoShadePal15 - 15-bit shading palette\line
+VngoShadePal16 - 16-bit shading palette
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "vngpal.hpp"
+\par
+
+\line{\b\fs28 Base Classes}\par
+
+{\uldb VngoShadePal}{\v PG_VNGO_SHADEPAL}
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b VngoShadePal8/15/16 (int shade_levels);}\par
+
+Initializes the instance with memory for the given number of shade
+ levels.  The number must be a power of 2.
+\par
+
+\line{\b\fs28 Member Data}\par
+
+Same as {\uldb VngoShadePal}{\v PG_VNGO_SHADEPAL}, plus :-
+\par
+
+{\b byte/word *p;}\par
+
+This points to the the same data as 'ptr' but is type-cast to
+ the correct length.
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+Same as {\uldb VngoShadePal}{\v PG_VNGO_SHADEPAL}, plus :-
+\par
+
+{\b int get_shaded_index(int color, int shade);}\par
+
+Returns the color value (for 8-bit an index, for 15/16-bit an encoded
+ color) given a base color index and a shade level (0 to 255).
+\par
+
+{\b VngoColorShade8/15/16 &operator[] (int i);}\par
+
+Returns a correctly-typed shade value given a base color index.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+VngoPal Class                                                             ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_VNGO_PAL}
+${\footnote VngoPal Class}
+K{\footnote VngoPal;
+VngoPal, release;
+VngoPal, get_index;
+VngoPal, set_hwpal;
+VngoPal, get_RGB;
+VngoPal, init}
++{\footnote BW_PG_9}
+{\b\f0{\cf2\scaps Programmer's Guide: Van Gogh}\line\fs32 VngoPal Class}\par\pard\sb100
+
+This class forms the base for implementing the bit-depth specific versions of
+ the palette structure, which includes the hardware palette, shading
+ data, and color-conversion information.
+\par
+
+\line{\b\fs28 Name}\par
+
+VngoPal - Base palette
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "vngpal.hpp"
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b VngoPal();}\par
+
+Sets the shd_pal and ddpal pointers to NULL.
+\par
+
+\line{\b\fs28 Member Data}\par
+
+{\b VngoShadePal *shd_pal;}\par
+
+Points to the bit-depth specific shading palette.
+\par
+
+{\b VngoHwPal hw_pal;}\par
+
+Contains the 'hardware' palette.  For an 8-bit device, these are all the
+ colors programmed into the device.
+\par
+
+{\b VngoClrConvert convert;}\par
+
+Contains the color conversion table to convert 24-bit colors into
+ 'hardware' palette entries..
+\par
+
+{\b dword flags;}\par
+
+Palette flags (see Flags).
+\par
+
+{\b dword type;}\par
+
+Not in use.
+\par
+
+{\b char name[16];}\par
+
+Palette name.
+\par
+
+{\b IDirectDrawPalette *ddpal;}\par
+
+Direct-draw palette pointer, if any.
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+{\b virtual void release();}\par
+
+Releases all data associated with the palette.
+\par
+
+{\b virtual dword get_index(VngoColorHLS c) = 0;\line
+virtual dword get_index(VngoColor24bit c) = 0;}\par
+
+Returns palette index for the input color.
+\par
+
+{\b virtual int set_hwpal(VngoColor24bit pal[],int count) = 0;}\par
+
+Fills in the 'hardware' palette.
+\par
+
+{\b virtual VngoColor24bit get_RGB(int indx) = 0;}\par
+
+Returns the 24-bit color for the given 'hardware' palette entry.
+\par
+
+{\b virtual int init(dword flags,const char *palfile) = 0;\line
+virtual int init(dword flags,XFParseIFF *palfile) = 0;}\par
+
+Initializes the palette, loading it if a 'palfile' is given using
+ the appropriate {\uldb VngoPalIFF}{\v PG_VNGO_PALIFF} class.
+\par
+
+\line{\b\fs28 Flags}\par
+
+{\i VNGO_MYMEM_SHADE}\tab Instance owns shading palette.
+\par
+
+{\i VNGO_8BIT}\tab Palette is a 8-bit instance.
+\par
+
+{\i VNGO_15BIT}\tab Palette is a 15-bit instance.
+\par
+
+{\i VNGO_16BIT}\tab Palette is a 16-bit instance.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+VngoPal8/15/16 Class                                                      ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_VNGO_PAL8_15_16}
+${\footnote VngoPal8/15/16 Class}
+K{\footnote VngoPal8;
+VngoPal15;
+VngoPal16}
++{\footnote BW_PG_9}
+{\b\f0{\cf2\scaps Programmer's Guide: Van Gogh}\line\fs32 VngoPal8/15/16 Class}\par\pard\sb100
+
+These are the various bit-depth implementations of the palette.
+ These classes are used by the {\uldb VngoVport}{\v PG_VNGO_VPORT}
+ derived classes.
+\par
+
+\line{\b\fs28 Name}\par
+
+VngoPal8 - 8-bit palette\line
+VngoPal15 - 15-bit palette\line
+VngoPal16 - 16-bit palette
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "vngpal.hpp"
+\par
+
+\line{\b\fs28 Base Classes}\par
+
+{\uldb VngoPal}{\v PG_VNGO_PAL}
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b VngoPal8/15/16();}\par
+
+Clears pointers.
+\par
+
+\line{\b\fs28 Member Data}\par
+
+Same as {\uldb VngoPal}{\v PG_VNGO_PAL}.
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+Same as {\uldb VngoPal}{\v PG_VNGO_PAL}.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+VngoPalIFF Class                                                          ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_VNGO_PALIFF}
+${\footnote VngoPalIFF Class}
+K{\footnote VngoPalIFF;
+VngoPalIFF, save;
+VngoPalIFF, load}
++{\footnote BW_PG_9}
+{\b\f0{\cf2\scaps Programmer's Guide: Van Gogh}\line\fs32 VngoPalIFF Class}\par\pard\sb100
+
+This class is the base class for implementing reading/writing of a palette
+ to an IFF file.
+\par
+
+\line{\b\fs28 Name}\par
+
+VngoPalIFF - Base palette reader/writer
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "vngpal.hpp"
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b VngoPalIFF();}\par
+
+Performs no initialization.
+\par
+
+{\b VngoPalIFF(VngoPal *p);}\par
+
+Sets pal to point to palette p.
+\par
+
+\line{\b\fs28 Member Data}\par
+
+{\b VngoPal *pal;}\par
+
+Points to palette instance to use as source/destination.
+\par
+
+{\b char name[16];}\par
+
+Name of palette to read or write.
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+{\b virtual int save(const char *filename) = 0;\line
+virtual int save(XFParseIFF *iffp) = 0;}\par
+
+Writes the palette to an IFF file.
+\par
+
+{\b virtual int load(const char *filename) = 0;\line
+virtual int load(XFParseIFF *iffp) = 0;}\par
+
+Reads the palette from an IFF file.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+VngoPalIFF8/15/16 Class                                                   ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_VNGO_PALIFF8_15_16}
+${\footnote VngoPalIFF8/15/16 Class}
+K{\footnote VngoPalIFF8;
+VngoPalIFF15;
+VngoPalIFF16}
++{\footnote BW_PG_9}
+{\b\f0{\cf2\scaps Programmer's Guide: Van Gogh}\line\fs32 VngoPalIFF8/15/16 Class}\par\pard\sb100
+
+These classes are the bit-depth specific implementations of the
+ {\uldb VngoPalIFF}{\v PG_VNGO_PALIFF} class.
+\par
+
+\line{\b\fs28 Name}\par
+
+VngoPalIFF8 - 8-bit palette reader/writer\line
+VngoPalIFF15 - 15-bit palette reader/writer\line
+VngoPalIFF16 - 16-bit palette reader/writer
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "vngpal.hpp"
+\par
+
+\line{\b\fs28 Base Classes}\par
+
+{\uldb VngoPalIFF}{\v PG_VNGO_PALIFF}
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b VngoPal8/15/16();}\par
+
+Performs no initialization.
+\par
+
+{\b VngoPalIFF8/15/16(VngoPal *p);}\par
+
+Sets pal to point to palette p.
+\par
+
+\line{\b\fs28 Member Data}\par
+
+Same as {\uldb VngoPalIFF}{\v PG_VNGO_PALIFF}.
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+Same as {\uldb VngoPalIFF}{\v PG_VNGO_PALIFF}.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+VngoTexture Class                                                         ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_VNGO_TEXTURE}
+${\footnote VngoTexture Class}
+K{\footnote VngoTexture;
+VngoTexture, release;
+VngoTexture, make_dirty;
+VngoTexture, create;
+VngoTexture, convert}
++{\footnote BW_PG_9}
+{\b\f0{\cf2\scaps Programmer's Guide: Van Gogh}\line\fs32 VngoTexture Class}\par\pard\sb100
+
+A texture is a 2D bitmap for use in image transfer and texture-mapping
+ operations.  The texture data can be represented in a number of
+ bit-depth formats, although routines which utililize the texture
+ instance may only support a sub-set of texture bit-depths.
+\par
+
+Mono-chrome textures are packed 8-pixels to a byte and byte-aligned.
+\par
+
+8-bit textures have 1 byte per pixel and are indecies into a specific
+ palette with 255 indicating the transparent color.  For viewports with
+ greater than 8-bit color depth, multiple palettes can be mixed-freely
+ within the image so the {\b pal_ptr} member must be set to point to
+ the correct palette instance.
+\par
+
+15-bit textures have 2 bytes per pixel in 5/5/5 RGB format.  For transparent
+ textures, Magenta (0x7c1f) is used to indicate transparency.
+\par
+
+16-bit textures have 2 bytes per pixel in 5/6/5 RGB format.  For transparent
+ textures, Magenta (0xf81f) is used to indicate transparency.
+\par
+
+{\cf2
+Note: Textures passed to the texture-mapping primitives must have
+ dimensions that are a power of 2 in the range 16 - 256, although
+ width and height do not have to be identical.  Those used with
+ image transfer may be of any size.
+}\par
+
+\line{\b\fs28 Name}\par
+
+VngoTexture - 2D bitmap
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "vngtxtr.hpp"
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b VngoTexture();}\par
+
+Defaults to an 8-bit texture and clears pointers.
+\par
+
+{\b VngoTexture(dword _flags);}\par
+
+Sets flags and clears pointers.
+\par
+
+{\b VngoTexture (short _width, short _height, void *_tex,
+ dword _flags=VNGO_TEXTURE_8BIT, VngoPal *pal=0);}\par
+
+Sets values and clears 3D texture pointer.
+\par
+
+\line{\b\fs28 Member Data}\par
+
+{\b short width, height;}\par
+
+Width and height of the texture.
+\par
+
+{\b byte *tex;}\par
+
+Pointer to bitmap's pixel data.
+\par
+
+{\b dword flags;}\par
+
+Texture state flags (see Flags).
+\par
+
+{\b VngoTexture3D *vtex3d;}\par
+
+Points to associated {\uldb VngoTexture3D}{\v PG_VNGO_TEXTURE3D} instance(s),
+ if any, which are owned by the VngoTexture instance.
+\par
+
+{\b VngoPal *pal_ptr;}\par
+
+Points to texture palette if it has one.  The texture instance does not
+ own the palette memory.  This is used to allow mixing of multiple 8-bit
+ palettes within a single render pass for devices with high- or true-color
+ capabilities.
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+{\b void release();}\par
+
+This releases the vtex3d instance(s), if any.  This is required to change
+ actual texture data for texture-mapping routines since the vtex3d
+ contains device-specific format versions of the data or pointers to
+ the on-board texture memory.
+\par
+
+{\b void make_dirty();}\par
+
+Marks all associated VngoTexture3D instances with the dirty bit to
+ indicate that the source texture has changed.
+\par
+
+{\b VNGError create(short w, short h, int bits = 8, int trans=1);}\par
+
+This creates an empty texture of the specified width, height, number
+ of bits (1, 8, 15, or 16 currently supported) and transparency mode,
+ setting the appropriate flags.  The memory is allocated with the 'new'
+ operation.  The memory is NOT owned by the VngoTexture instance.
+\par
+
+{\b VNGError convert(XFBitmap *bm, VngoPal *pal);}\par
+
+This copies data from the given input bitmap into the memory space for
+ the texture (which must be setup before calling convert, usually by
+ calling create()).  The bitmap is converted to the appropriate bit-depth
+ based on the current flags.  If the bitmap size does not match the current
+ texture size, it will fail.
+\par
+
+\line{\b\fs28 Flags}\par
+
+{\i VNGO_TEXTURE_MONO}\line
+or {\i VNGO_TEXTURE_1BIT}\tab Monochrome texture.
+\par
+
+{\i VNGO_TEXTURE_8BIT}\tab\tab 8-bit texture (can be used for all
+ texture-mapping routines).
+\par
+
+{\i VNGO_TEXTURE_15BIT}\tab 15-bit texture.
+\par
+
+{\i VNGO_TEXTURE_16BIT}\tab 16-bit texture.
+\par
+
+{\i VNGO_TEXTURE_ZMAP}\tab Texture is a Zmap
+ (see {\uldb VngoZmap}{\v PG_VNGO_ZMAP}).
+\par
+
+{\i VNGO_TEXTURE_COMPRESSED}\tab Texture is compressed
+ (see {\uldb VngoCTexture}{\v PG_VNGO_CTEXTURE}).
+\par
+
+{\i VNGO_TEXTURE_TRANSPARENT}\tab Texture is transparent (skip either
+ index 255 or full magenta (255/0/255) or as close as can be represented
+ in the RGB format).
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+VngoCTexture Class                                                        ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_VNGO_CTEXTURE}
+${\footnote VngoCTexture Class}
+K{\footnote VngoCTexture;
+VngoCTexture, init;
+VngoCTexture, release}
++{\footnote BW_PG_9}
+{\b\f0{\cf2\scaps Programmer's Guide: Van Gogh}\line\fs32 VngoCTexture Class}\par\pard\sb100
+
+This is an 2D bitmap with runs of transparent color RLE-compressed for
+ faster transfer to the screen.  It is designed to create a compressed
+ texture from an input texture and the new compressed version is owned
+ by the instance.
+\par
+
+Since virtuals are not used for this class, it is important to delete
+ an instance of VngoCTexture as the correct type or call release()
+ manually.
+\par
+
+{\cf3
+Note: This only supports 8-, 15-, and 16-bit textures.  It can only be used
+ for image transfer and not for texture-mapping operations.
+}\par
+
+\line{\b\fs28 Name}\par
+
+VngoCTexture - Compressed transparent 2D bitmap
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "vngtxtr.hpp"
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b VngoCTexture();}\par
+
+Clears pointers.
+\par
+
+{\b VngoCTexture(VngoTexture *_tex);}\par
+
+Calls init with the input texture pointer.
+\par
+
+\line{\b\fs28 Member Data}\par
+
+Same as {\uldb VngoTexture}{\v PG_VNGO_TEXTURE}, plus :-
+\par
+
+{\b dword *ytable;}\par
+
+Look-up table for each scanline.
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+Same as {\uldb VngoTexture}{\v PG_VNGO_TEXTURE}, plus :-
+\par
+
+{\b VNGError init(VngoTexture *_tex);}\par
+
+Creates a new compressed texture owned by the instance from a source texture,
+ which is not affected by the operation.
+\par
+
+{\cf2
+Note: It is possible for the 'compressed' texture to be larger than the
+ original if there are few runs of transparent color.
+}\par
+
+{\b void release();}\par
+
+Releases the compressed textures memory buffers.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+VngoTexture3D Class                                                       ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_VNGO_TEXTURE3D}
+${\footnote VngoTexture3D Class}
+K{\footnote VngoTexture3D}
++{\footnote BW_PG_9}
+{\b\f0{\cf2\scaps Programmer's Guide: Van Gogh}\line\fs32 VngoTexture3D Class}\par\pard\sb100
+
+This class forms the base class for 3D hardware texture managers.  Each
+ instance of {\uldb VngoTexture}{\v PG_VNGO_TEXTURE} can point to one
+ or more instances of VngoTexture3D-derived classes.  This class contains
+ device-specific versions of the textures, management information for the
+ device's on-board memory, and other information needed by the
+ texture-mappers.
+\par
+
+\line{\b\fs28 Name}\par
+
+VngoTexture3D - Base hardware texture manager
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "vngtxtr.hpp"
+\par
+
+\line{\b\fs28 Member Data}\par
+
+{\b VngoCacheHndl *chandle;}\par
+
+Used for texture cache management.
+\par
+
+{\b VngoTexture *ref;}\par
+
+Points to VngoTexture instance which owns this data.
+\par
+
+{\b VngoTexture3D *next;}\par
+
+Points to next VngoTexture3D instance owned by the VngoTexture.
+\par
+
+{\b VngoPal *palette;}\par
+
+Points to the palette instance needed for texture.
+\par
+
+{\b dword flags;}\par
+
+Control flags for 3D texture instance (see {\b Flags}).
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+{\b VngoTextureType get_type();}\par
+
+Returns device-type for the VngoTexture3D (see {\b Device Types} below).
+\par
+
+{\b VNGError get_err_status();}\par
+
+Returns error status for instance.
+\par
+
+{\b virtual VNGError init(VngoTexture *_src,VngoPal *_pal=NULL);}\par
+
+Initializes instance from a VngoTexture instance, creating any needed
+ device-dependant verisons and linking into the list of VngoTexture3D
+ instances in the source VngoTexture.
+\par
+
+{\b virtual VNGError reinit(VngoTexture *_src,VngoPal *_pal=NULL);}\par
+
+Performs reinit.
+\par
+
+{\b virtual VNGError ready_texture();}\par
+
+Readies texture for use.
+\par
+
+{\b virtual void release();}\par
+
+Releases device-specific data and removes self from list of VngoTexture3D
+ instances in the source VngoTexture.
+\par
+
+\line{\b\fs28 Device Types}\par
+
+{\i VNGO_MEM_TEX}\tab Memory texture
+ ({\uldb VngoMemTexture3D}{\v PG_VNGO_MEMTEXTURE3D}).
+\par
+
+{\i VNGO_D3D_TEX}\tab Direct3D texture
+ ({\uldb VngoD3DTexture3D}{\v PG_VNGO_D3DTEXTURE3D}).
+\par
+
+{\i VNGO_OPENGL_TEX}\tab OpenGL texture.
+\par
+
+\line{\b\fs28 Flags}\par
+
+{\i VNGO_TEXTURE3D_DIRTY}\tab Device-dependant data should be recreated
+ from source texture.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+VngoMemTexture3D Class                                                    ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_VNGO_MEMTEXTURE3D}
+${\footnote VngoMemTexture3D Class}
+K{\footnote VngoMemTexture3D}
++{\footnote BW_PG_9}
+{\b\f0{\cf2\scaps Programmer's Guide: Van Gogh}\line\fs32 VngoMemTexture3D Class}\par\pard\sb100
+
+This is the memory-only implementation of a texture manager which includes
+ shift values needed by the software texture-mappers.
+\par
+
+\line{\b\fs28 Name}\par
+
+VngoMemTexture3D - Memory-only texture manager.
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "vngtxtr.hpp"
+\par
+
+\line{\b\fs28 Base Classes}\par
+
+{\uldb VngoTexture3D}{\v PG_VNGO_TEXTURE3D}
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b VngoMemTexture3D ();}\par
+
+Clears pointers.
+\par
+
+{\b VngoMemTexture3D (VngoTexture *_src,VngoPal *_pal=NULL);}\par
+
+Clears pointers and calls init().
+\par
+
+\line{\b\fs28 Member Data}\par
+
+Same as {\uldb VngoTexture3D}{\v PG_VNGO_TEXTURE3D}, plus :-
+\part
+
+{\b VngoTexture *vtxt;}\par
+
+Points to bit-depth specific version of texture.
+\par
+
+{\b long widthshift;\line
+long heightshift;\line
+long u_upshift;\line
+long v_upshift;\line
+long u_downshift;\line
+long v_downshift;}\par
+
+Shift values needed by texture-mapper computed from input texture's width
+ and height.
+\par
+
+{\b VngoTextureSize tdimension;}\par
+
+Enumeration for the given texture dimension, ranging from {\i TEX16x16}
+ to {\i TEX256x256}.
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+Same as {\uldb VngoTexture3D}{\v PG_VNGO_TEXTURE3D}.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+VngoD3DTexture3D Class                                                    ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_VNGO_D3DTEXTURE3D}
+${\footnote VngoD3DTexture3D Class}
+K{\footnote VngoD3DTexture3D}
++{\footnote BW_PG_9}
+{\b\f0{\cf2\scaps Programmer's Guide: Van Gogh}\line\fs32 VngoD3DTexture3D Class}\par\pard\sb100
+
+This is the Microsoft Direct3D implementation of a texture manager which
+ includes D3D surface descriptors and on-board memory handles needed by
+ the D3D implementation of the texture-mappers.
+\par
+
+\line{\b\fs28 Name}\par
+
+VngoD3DTexture3D - Direct3D texture manager.
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "vngtxtr.hpp"
+\par
+
+\line{\b\fs28 Base Classes}\par
+
+{\uldb VngoTexture3D}{\v PG_VNGO_TEXTURE3D}
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b VngoD3DTexture3D ();}\par
+
+Clears pointers.
+\par
+
+{\b VngoD3DTexture3D (VngoTexture *_src,VngoPal *_pal=NULL);}\par
+
+Clears pointers and calls init().
+\par
+
+\line{\b\fs28 Member Data}\par
+
+Same as {\uldb VngoTexture3D}{\v PG_VNGO_TEXTURE3D}, plus :-
+\par
+
+{\b IDirectDrawSurface *MemorySurface;\line
+IDirectDrawSurface *DeviceSurface;}\par
+
+DirectDraw surface pointers for both memory and device versions of the
+ texture data.
+\par
+
+{\b IDirectDrawPalette *pal;}\par
+
+DirectDraw palette pointers for the texture's palette.
+\par
+
+{\b D3DTEXTUREHANDLE handle;}\par
+
+D3D handle for the texture data.
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+Same as {\uldb VngoTexture3D}{\v PG_VNGO_TEXTURE3D}.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+VngoRect Structure                                                        ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_VNGO_RECT}
+${\footnote VngoRect Structure}
+K{\footnote VngoRect;
+VngoRect, clip_to;
+VngoRect, point_in}
++{\footnote BW_PG_9}
+{\b\f0{\cf2\scaps Programmer's Guide: Van Gogh}\line\fs32 VngoRect Structure}\par\pard\sb100
+
+This structure describes a rectangle in 2D.  It is used to
+ provide the location of a screen region for image transfer,
+ filled-rectangle, and other operations.  Clipping routines are provided
+ for clipping points, lines, and rectangles against the rectangle.
+\par
+
+\line{\b\fs28 Name}\par
+
+VngoRect - Rectangle structure
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "vngstrct.hpp"
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b VngoRect ();}\par
+
+Peforms no initiailization.
+\par
+
+{\b VngoRect (long _x, long _y, long _dx, long _dy);}\par
+
+Sets values.
+\par
+
+\line{\b\fs28 Member Data}\par
+
+{\b long x;}\par
+
+Upper-left X position.
+\par
+
+{\b long y;}\par
+
+Upper-left Y position.
+\par
+
+{\b ulong dx;}\par
+
+Width in pixels.
+\par
+
+{\b ulong dy;}\par
+
+Height in pixels.
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+{\b VNGError clip_to(VngoRect &crect);}\par
+
+Adjusts rectangle so that is is contained within the 'crect' with
+ {\i VNGO_NO_ERROR} or returns {\i VNGO_FULLY_CLIPPED} if fully clipped.
+\par
+
+{\b VNGError clip_to(VngoPoint *p1,VngoPoint *p2,dword flags);\line
+VNGError clip_to(VngoPointF *p1,VngoPointF *p2,dword flags);}\par
+
+These routines clip a line specified by the end-points to the rectangle
+ adjusting the .x and .y values, if needed.  If {\i VNGO_CLIP_Z} is set
+ in flags, then the .z values are clipped.  If {\i VNGO_CLIP_SHADE} is
+ set in flags, then the .shade values are clipped.  It returns
+ {\i VNGO_NO_ERROR} after changing the two points to be clipped or
+ returns {\i VNGO_FULLY_CLIPPED} if the line is completely clipped by
+ the rectangle.  If {\i VNGO_CLIP_VERBOSE} is set in flags, then
+ {\i VNGO_FULLY_INSIDE} is returned if the points are completely
+ within the rectangle and do not need clipping.
+\par
+
+{\b int point_in(int _x,int _y);\line
+int point_in(VngoPoint &pt);\line
+int point_in(VngoPointF &pt);}\par
+
+Returns 1 if point is inside rectangle, 0 otherwise.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+VngoPoint Structure                                                       ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_VNGO_POINT}
+${\footnote VngoPoint Structure}
+K{\footnote VngoPoint}
++{\footnote BW_PG_9}
+{\b\f0{\cf2\scaps Programmer's Guide: Van Gogh}\line\fs32 VngoPoint Structure}\par\pard\sb100
+
+A point is a location in 2D which may have associated
+ information for 3D operations.  Points also have an associated
+ color and shade-level.
+\par
+
+\line{\b\fs28 Name}\par
+
+VngoPoint - Screen location structure
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "vngstrct.hpp"
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b VngoPoint ();}\par
+
+Performs no initialization.
+\par
+
+{\b VngoPoint (int _x, int _y, dword _clr);}\par
+
+Initializes: x, y, and clr members of the point.
+\par
+
+{\b VngoPoint (int _x, int _y, int _z, dword _clr, int _shade);}\par
+
+Initializes: x, y, z, clr, and shade members of the point.
+\par
+
+\line{\b\fs28 Member Data}\par
+
+{\b float wx, wy, wz;}\par
+
+World coordinate points.  This is only used by the {\i Escher}
+ clipping routines.
+\par
+
+{\b long x, y;}\par
+
+Screen location in X and Y.
+\par
+
+{\b long z;}\par
+
+Associated Z value for corresponding 3D point.  This is used for
+ Z-buffering.
+\par
+
+{\b dword clr;}\par
+
+Color of point.  This is an index into the palette.
+\par
+
+{\b dword shade;}\par
+
+Shade level for point, which combined with the clr gives the
+ actual color.
+\par
+
+{\b long u, long v;}\par
+
+Texture-mapping coordinates for point.
+\par
+
+{\b long w;}\par
+
+Perspective depth value (1/Z).  This is in 2.30 fixed-point format.
+\par
+
+{\b dword pflags;}\par
+
+Perspective flags.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+VngoPointF Structure                                                      ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_VNGO_POINTF}
+${\footnote VngoPointF Structure}
+K{\footnote VngoPointF}
++{\footnote BW_PG_9}
+{\b\f0{\cf2\scaps Programmer's Guide: Van Gogh}\line\fs32 VngoPointF Structure}\par\pard\sb100
+
+This contains the point information in floating-point format.
+\par
+
+\line{\b\fs28 Name}\par
+
+VngoPointF - Floating-point screen location structure
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "vngstrct.hpp"
+\par
+
+\line{\b\fs28 Member Data}\par
+
+{\b float x, y;}\par
+
+Screen location in X and Y.
+\par
+
+{\b float z;}\par
+
+Associated Z value for corresponding 3D point.  This is used for
+ Z-buffering.
+\par
+
+{\b dword clr;}\par
+
+Color of point.  This is an index into the palette.
+\par
+
+{\b float shade;}\par
+
+Shade level for point, which combined with the clr gives the
+ actual color.
+\par
+
+{\b float u, long v;}\par
+
+Texture-mapping coordinates for point.
+\par
+
+{\b float w;}\par
+
+Perspective depth value (1/Z).
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+VngoVbuffer Structure                                                     ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_VNGO_VBUFFER}
+${\footnote VngoVbuffer Structure}
+K{\footnote VngoVbuffer}
++{\footnote BW_PG_9}
+{\b\f0{\cf2\scaps Programmer's Guide: Van Gogh}\line\fs32 VngoVbuffer Structure}\par\pard\sb100
+
+Virtual draw buffer.  This provides the context needed for the
+ low-level drawing primitives, which may be implemented in assembly and
+ would therefore not have easy access to C++ classes data members.  An
+ instance of this class is associated with each of the base device classes
+ (and therefore inherited by the viewport classes).
+\par
+
+\line{\b\fs28 Name}\par
+
+VngoVbuffer - Virtual draw buffer structure.
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "vngstrct.hpp"
+\par
+
+\line{\b\fs28 Member Data}\par
+
+{\b long width;}\par
+
+Width of actual buffer.
+\par
+
+{\b long height;}\par
+
+Height of the actual buffer.
+\par
+
+{\b VngoPal *pal;}\par
+
+Pointer to the palette for this Vbuffer.
+\par
+
+{\b byte *scrn_ptr;}\par
+
+View buffer pointer.
+\par
+
+{\b dword pitch;}\par
+
+Pitch of view buffer (number of bytes/scanline).
+\par
+
+{\b dword *ytable;}\par
+
+Pointer to the table of pre-calculated y offsets in view buffer.
+\par
+
+{\b dword *zbuff_ptr;}\par
+
+Pointer to the ZBuffer if it exists.
+\par
+
+{\b dword zpitch;}\par
+
+Pitch of ZBuffer if any (number of bytes/scanline).
+\par
+
+{\b dword *ztable;}\par
+
+Pointer to table of pre-calulated y offsets into ZBuffer, if any.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+VngoSurfaceManager Class                                                  ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_VNGO_SURFMNGR}
+${\footnote VngoSurfaceManager Class}
+K{\footnote VngoSurfaceManager;
+VngoSurfaceManager, get_lock_status;
+VngoSurfaceManager, lock;
+VngoSurfaceManager, unlock}
++{\footnote BW_PG_9}
+{\b\f0{\cf2\scaps Programmer's Guide: Van Gogh}\line\fs32 VngoSurfaceManager Class}\par\pard\sb100
+
+This class is used to encapsulate a DirectDraw surface and is needed by the
+ {\uldb VngoVportDB8}{\v PG_VNGO_VPORTDB8} and
+ {\uldb VngoVportDB16}{\v PG_VNGO_VPORTDB16} classes.  The surfaces
+ can be managed with the {\uldb VngoDirectDraw}{\v PG_VNGO_DIRECTDRAW}
+ screen manager class.
+\par
+
+\line{\b\fs28 Name}\par
+
+VngoSurfaceManager - DirectDraw surface class
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "vngvpdd8.hpp"
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b VngoSurfaceManager():}\par
+
+Clears lock_status.
+\par
+
+{\b VngoSurfaceManager(IDirectDrawSurface *_ddsurf,IDirectDrawSurface *_zddsurf=NULL);}\par
+
+Sets values.
+\par
+
+\line{\b\fs28 Member Data}\par
+
+{\b private int lock_status;}\par
+
+Lock status retrieved by get_lock_status();
+\par
+
+{\b dword flags;}\par
+
+{\b IDirectDrawSurface *ddsurf;}\par
+
+DirectDraw surface.
+\par
+
+{\b IDirectDrawSurface *zddsurf;}\par
+
+DirectDraw Z-buffer surface.
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+{\b int get_lock_status();}\par
+
+Returns lock_status (1=locked, 0=unlocked).
+\par
+
+{\b int lock();\line
+int unlock();}\par
+
+Locks/unlocks surface, returning previous lock_status.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+VngoTextureManager Class                                                  ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_VNGO_TXTRMNGR}
+${\footnote VngoTextureManager Class}
+K{\footnote VngoTextureManager;
+VngoTextureManager, ready;
+VngoTextureManager, add;
+VngoTextureManager, remove}
++{\footnote BW_PG_9}
+{\b\f0{\cf2\scaps Programmer's Guide: Van Gogh}\line\fs32 VngoTextureManager Class}\par\pard\sb100
+
+This class implements the texture manager for controlling the 3D hardware
+ texture cache.  Since there is a limited amount of space in on-board
+ memory, this class keeps track of which textures are ready or are not
+ placed into on-board memory.
+\par
+
+\line{\b\fs28 Name}\par
+
+VngoTextureManager - 3D texture cache
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "vngtxtr.hpp"
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b VngoTextureManager ();}\par
+
+Clears internal pointers.
+\par
+
+\line{\b\fs28 Member Data}\par
+
+{\b VngoScreenManager *screen;}\par
+
+Screen manager which created the texture manager.
+\par
+
+{\b VngoCacheHndl *ready_head;\line
+VngoCacheHndl *ready_tail;\line
+VngoCacheHndl *out_head;\line
+VngoCacheHndl *out_tail;}\par
+
+Linked-lists of ready (in cache) and unready (out of cache) textures.
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+{\b VNGError ready(VngoCacheHndl *hndl);}\par
+
+Ensures the texture is in the ready state.
+\par
+
+{\b VNGError add(VngoCacheHndl *ntex,int ready=1);}\par
+
+Adds a new texture to the cache.
+\par
+
+{\b VNGError remove(VngoCacheHndl *ntex);}\par
+
+Removes a texture from the cache.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+VngoZMap Class                                                            ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_VNGO_ZMAP}
+${\footnote VngoZMap Class}
+K{\footnote VngoZMap;
+VngoZMap, set_name;
+VngoZMap, load;
+VngoZMap, save}
++{\footnote BW_PG_9}
+{\b\f0{\cf2\scaps Programmer's Guide: Van Gogh}\line\fs32 VngoZMap Class}\par\pard\sb100
+
+A Z-map is a monochrome bitmap for shaped resetting of a ZBuffer device,
+ clearing some pixels and Z-values while leaving others intact and setting
+ the Z-value such that nothing will draw over those pixels.  This effect
+ is useful for rendering around artwork.
+\par
+
+{\cf3
+This functionality will not be guaranteed on all viewports.  Compressed
+ textures drawn over a reset buffer have proven to be much faster and
+ hardware implementation of ZMaps is questionable.
+}\par
+
+\line{\b\fs28 Name}\par
+
+VngoZMap - ZBuffer monochrome map
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "vngtxtr.hpp"
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b VngoZMap();}\par
+
+Clears the flags member and sets the name to "Default".
+\par
+
+\line{\b\fs28 Member Data}\par
+
+{\b private dword flags;}\par
+
+Control flags (see Flags).
+\par
+
+{\b int color;}\par
+
+Viewbuffer color for all 0 entries in the monochrome map.
+\par
+
+{\b dword depth;}\par
+
+ZBuffer dpeth for all 0 entries in the monochrome map.
+\par
+
+{\b char name[16];}\par
+
+Name of ZMap.  Set with set_name().
+\par
+
+{\b VngoTexture zmap;}\par
+
+Monochrome map.  The destructor frees the zmap.tex member if
+ the flag {\i VNGO_MYMEM_ZMAP} is set.
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+{\b void set_name(const char *n);}\par
+
+Sets the name member.
+\par
+
+{\b virtual int load(const char *fn);\line
+virtual int load(XFParseIFF *iffp);}\par
+
+Loads a ZMap from an IFF file.
+\par
+
+{\b virtual int save(const char *fn);\line
+virtual int save(XFParseIFF *iffp);}\par
+
+Saves a ZMap to an IFF file.
+\par
+
+\line{\b\fs28 Flags}\par
+
+{\i VNGO_MYMEM_ZMAP}\tab Instance owns zmap.tex data.
+\par
+
+\pard\page
+
+
+
+{\comment
+°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+                               User's Guide
+
+°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+}
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+Overview                                                                  ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote UG_VNGO_OVERVIEW}
+${\footnote Overview}
++{\footnote BW_UG_4}
+{\b\f0{\cf2\scaps User's Guide: Van Gogh}\line\fs32 Overview}\par\pard\sb100
+
+This document describes the utilities supplied with the {\i Van Gogh}
+ library.  The library needs utilities for processing of palette
+ data as this computation is time consuming and all artwork needs
+ to be converted off-line relative to a {\i Van Gogh} palette.
+\par
+
+\line{\b\fs28 Features}\par
+
+Palette creation tool for building the various data structures
+ from algorithmic or provided palettes.
+\par
+
+\line{\b\fs28 Future Work}\par
+
+The palette creation tool will be extended with more interactive options.
+\par
+
+\pard\page
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+Palette Tool                                                              ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote UG_VNGO_PALTOOL}
+${\footnote Palette Tool}
+K{\footnote PALTOOL}
++{\footnote BW_UG_4}
+{\b\f0{\cf2\scaps User's Guide: Van Gogh}\line\fs32 Palette Tool}\par\pard\sb100
+
+The performance of {\i Van Gogh} is heavily tied to color processing
+ for the shading, hazing, and color conversion processing that
+ must occur to ensure fast operation on all devices.  Therefore, palette
+ creation is an off-line processing step supported by this
+ utility.
+\par
+
+This utility will extract a palette from a bitmap or create a number of
+ algorithmic palettes, and then generate all of the supporting data tables
+ for later loading by the {\uldb VngoPal}{\v PG_VNGO_PAL} class.  The palette
+ entries may be edited, along with the shading computation parameters and
+ other palettte attributes.
+\par
+
+\line{\b\fs28 Usage}\par
+
+The {\i Van Gogh} Palette Tool is a Windows 95 MFC application using
+ the multi-document interface and operates using standard Windows
+ user interface components.
+\par
+
+Each document window contains shading control and color display
+ regions.
+\par
+
+\line{\b Shading Control}\par
+
+The shading control region allows the midpoint of the shading
+ tables to be set, with colors below (left) of the midpoint shading to
+ black and colors above (right) of the midpoint shading to white for specular
+ highlight.
+\par
+
+Clicking and holding down the left mouse button will allow the adjustment of
+ the shading curve and midpoint.  A right mouse menu is also available for
+ controlling the curve type, and for fast access to the Palette and
+ Properties dialogs.
+\par
+
+\line{\b Color Display}\par
+
+The color display shows the colors in the palette from left
+ to right, with shades going from no light, to fully lit, to fully
+ overdriven from top to bottom.  The midpoint shade shows the palette
+ color (i.e., the actual RGB value in the palette).  All shaded colors
+ are closest-color matches to the entries in the palette.
+\par
+
+Clicking the left mouse button will bring up the Palette dialog.  A right
+ mouse menu is also available for fast access to the Palette and Properties
+ dialogs.
+\par
+
+{\cf2
+Note: Since Windows does not allow an application to replace all 256
+ entries in the palette, the last entries in the palette may not display
+ as their actual RGB values in the color display.  The data in the generated
+ palette file will, however, be correct.
+}\par
+
+\line {\b Dialogs}\par
+
+The Palette dialog allows the entries in the hardware palette to be edited.
+ Their RGB values may be adjusted via edit fields, scroll bars, or using
+ the Windows Color Picker dialog.  When exited, all of the data tables will
+ be recomputed.
+\par
+
+The Properties dialog allows the name, shading parameters, and the
+ description, author, and copyright strings to be edited.
+\par
+
+{\cf3 The Color property sheet is currently not implemented.  It will
+ contain additional controls for the shading computation sometime in
+ the near future.}\par
+
+\line{\b\fs28 Options}\par
+
+Most of the options are available from the menu bar.  Some
+ options are also available from the tool bar.  The application will display
+ a short description string in the status bar for each item.  The following
+ options are available:
+\par
+
+\line{\b File/New}\par
+
+This option starts a new document with an empty (all black) palette.
+\par
+
+\line{\b File/Open}\par
+
+This option opens a new document window from an existing {\i Van Gogh}
+ palette file.
+\par
+
+\line{\b File/Close}\par
+
+This option closes the current document.
+\par
+
+\line{\b File/Save\line
+File/Save As}\par
+
+This option saves the current document as a {\i Van Gogh} palette file.
+\par
+
+\line{\b File/Import}\par
+
+This option imports a new palette from a bitmap file (as supported by
+ {\i XFile}) or from an old-style {\i Van Gogh} palette file.
+\par
+
+{\cf3 Support for importing from Windows PAL files may be added in
+ the near future.}\par
+
+\line{\b File/Send}\par
+
+This will send the current document via electronic mail.
+\par
+
+\line{\b File/Exit}\par
+
+Allows the user to exit the utility.
+\par
+
+\line{\b Edit/Palette}\par
+
+This will bring up the Palette dialog.  See the Usage section for
+ more information.
+\par
+
+\line{\b Edit/New}\par
+
+This submenu displays the list of available algorimithically generated
+ palettes.  If selected, they will replace all entries in the palette of
+ the current document.
+\par
+
+\line{\b Edit/Properties}\par
+
+This will bring up the Properties dialog.  See the Usage section for
+ more information.
+\par
+
+\line{\b View/Toolbar}\par
+
+This will show or hide the toolbar.
+\par
+
+\line{\b View/Status Bar}\par
+
+This will show or hide the status bar.
+\par
+
+\line{\b View/Refresh}\par
+
+This will redraw the current document window.
+\par
+
+\line{\b Window}\par
+
+This menu contains standard Windows multi-document options for controlling
+ the document windows.
+\par
+
+\line{\b Options}\par
+
+This menu controls the shading curve used for determing the interpolation
+ of the shading colors.
+\par
+
+{\cf3 Currently, only Linear mode is available.  Support for Bezier and
+ Quadratic curves may be added in the near future.}\par
+
+\line{\b Help/About}\par
+
+Displays the version and copyright information for the utility.
+\par
+
+\pard\page
+
+
+{\comment °±² eof - vangogh.rtf ²±° }
+}

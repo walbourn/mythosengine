@@ -1,0 +1,2172 @@
+{\rtf1
+{\comment
+ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
+
+                                  Max Help
+
+                    Microsoft Windows 95/98/NT Version
+
+   Copyright (c) 1994-1999 by Dan Higdon, Tim Little, and Chuck Walbourn
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ This file and all associated files are subject to the terms of the
+ GNU Lesser General Public License version 2 as published by the
+ Free Software Foundation (http://www.gnu.org).   They remain the
+ property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+ See LICENSE.TXT in the distribution for a copy of this license.
+
+ THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+ OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+ PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+ LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+ OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+                        http://www.mythos-engine.org/
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ Max is a component of the MythOS(tm) collection.
+
+ MythOS is a trademark of Charybdis Enterprises, Inc.
+
+ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
+}
+
+{\fonttbl
+\f0\fswiss Arial;
+\f1\froman Times New Roman;
+\f2\fmodern Courier New;
+\f3\fswiss MS Sans Serif;
+\f4\froman MS Serif;
+}
+\deff1
+\fs21
+
+{\colortbl;
+\red128\green128\blue128;
+\red0\green0\blue128;
+\red0\green128\blue0;
+\red128\green0\blue0;
+}
+
+{\comment
+°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+                            Programmer's Guide
+
+°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+}
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+Overview                                                                  ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_MAX_OVERVIEW}
+${\footnote Overview}
++{\footnote BW_PG_7}
+{\b\f0{\cf2\scaps Programmer's Guide: Max}\line\fs32 Overview}\par\pard\sb100
+
+
+{\i Max} is an event library designed to give the programmer the
+ ability to arbitrarily assign simultaneous user actions to
+ events.  {\i Max} also defines the interface to the various hardware
+ devices, such as keyboard and mouse, that are used to trigger
+ user actions.
+\par
+
+The two basic concepts in {\i Max} are the event and the trigger.
+ The event is an arbitrary user action, abstracted away from the
+ actual interface.  Events can be such things as "Fire Lasers" or
+ "Rudder Left".  These abstract events are used to drive the
+ program.  Triggers are physical actions by the user, such as
+ "pressed the 'S' key", or "moved the joystick left".  Triggers
+ can describe any combination of actions, such as "Hold down the
+ left shift key, and press the mouse button".
+\par
+
+Triggers and Events together define the User event source.  When
+ a user event source is asked to process events, it loops through
+ the registered triggers, checking each one's conditions against
+ the physical devices.  If a condition is met, the associated
+ event is entered into the result event list.
+\par
+
+{\i Max} can use event sources other than the user source.  If desired,
+ MaxEventSystem derived classes can be used to feed events into a
+ program, possibly playing back recorded input or logging inputs to
+ a disk file before acting on them.
+\par
+\par
+
+\line{\b\fs28 Definitions}\par
+
+{\b Event}\par
+
+A unique occurrence within {\i Max}.  Events represent user actions.
+\par
+
+{\b Trigger}\par
+
+A combination of user actions meant to be interpreted as a
+ command or gesture.  Triggers may be any combination of keys
+ and/or mouse actions.
+\par
+\par
+
+\line{\b\fs28 Features}\par
+Convenient representation of user actions.
+\par
+
+Powerful specification of input triggers.
+\par
+
+An easy to use C++ interface.
+\par
+
+Access to complex keyboard states.
+\par
+
+Convenient encapsulation of devices into device classes and
+ device blocks (a collection of input devices).
+\par
+
+Support for Microsoft DirectInput devices.
+\par
+
+Joysticks expose the IDirectInputDevice2 interface so that applications
+ can use the ForceFeedback capabilities of a given device.
+
+\line{\b\fs28 Future Work}\par
+
+{\i Max} will gain more detailed ForceFeedback management in a future
+ release.  An alternate event system capable of more sophisticated
+ interactions is also under development.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+Event Class                                                               ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_MAX_EVENTCLASS}
+${\footnote Max Event Class}
+K{\footnote
+ MaxEvent;
+ MaxEvent, offset;
+ MaxEvent, mask;
+ MaxEvent, operator ==}
++{\footnote BW_PG_7}
+{\b\f0{\cf2\scaps Programmer's Guide: Max}\line\fs32 MaxEvent Class}\par\pard\sb100
+
+{\cf4\scaps CHANGED}\line
+The event management for the {\i Max} library is divided into several
+ classes for events and lists of events, with varying behaviors.
+ This is the type of the programmatic notion of an event.
+ {\b MaxEvents} are checked for by the {\b MaxEventSource}, and the client
+ program queries their presence in {\b MaxEventLists}.
+\par
+
+\line{\b\fs28 Name}\par
+
+{\b MaxEvent}\par
+A single program event.
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "maxevt.hpp"
+\par
+
+\line{\b\fs28 Base Classes}\par
+
+None
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b MaxEvent (int)}\par
+
+Create a new event with the specified value.  Valid values are
+ in the range 0..{\i EVENT_MAX_EVENT}.  No automatic constructor
+ is provided - all values must be entered "manually".
+\par
+
+\par
+
+\line{\b\fs28 Member Data}\par
+
+No public members
+\par
+
+\line{\b\fs28 Constants}\par
+
+{\i EVENT_MAX_EVENT}\par
+The maximum number of events supported by the {\i Max} event library.
+\par
+
+\line{\b\fs28 Member Function}\par
+
+{\b int operator == (MaxEvent) const}\par
+
+Allows events to be compared directly to one another.
+\par
+
+{\b int offset () const}\par
+
+Each event can be considered a bit position within a bit array
+ (implemented as an array of char).  Returns the offset within an
+ array of bytes to apply the mask.
+\par
+
+
+
+{\b int mask () const}\par
+
+Returns the byte mask to use on the byte specified by the offset() member.
+\par
+\par
+
+\line{\b\fs28 Example}\par
+
+This example creates two events.
+\par
+
+{\f2
+MaxEvent turn, fire;\line
+\line
+assert (!(turn == fire));
+}
+\par
+
+\pard\page
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+Event List Object                                                         ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_MAX_EVENTLIST}
+${\footnote MaxEventList Class}
+K{\footnote
+ MaxEventList;
+ MaxEventList, add;
+ MaxEventList, remove;
+ MaxEventList, check;
+ MaxEventList, empty;
+ MaxEventList, operator ~;
+ MaxEventList, operator ^;
+ MaxEventList, operator |;
+ MaxEventList, operator &;
+ MaxEventList, operator =;
+ MaxEventList, operator ^=;
+ MaxEventList, operator |=;
+ MaxEventList, operator &=}
++{\footnote BW_PG_7}
+{\b\f0{\cf2\scaps Programmer's Guide: Max}\line\fs32 MaxEventList Class}\par\pard\sb100
+
+This class is a container for {\b MaxEvents}.  The maximum number of
+ events allowed is always {\i EVENT_MAX_EVENT}.  This container acts
+ as a set, since the events are not stored in any particular
+ order, nor do multiple instances of the event get represented
+ separately.
+\par
+
+Note that the event lists are also analogous to bit fields, with
+ one bit per event.  Therefore, boolean operations are provided
+ for combining event lists and otherwise treating them as large
+ bitflags.
+\par
+
+\line{\b\fs28 Name}\par
+
+{\b MaxEventList}\par
+
+Collection of events
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "maxevt.hpp"
+\par
+
+\line{\b\fs28 Base Classes}\par
+
+None
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b MaxEventList (int init=0)}\par
+
+Create a new {\b MaxEventList}, either completely empty (init == 0)
+ or completely full (init == 1).
+\par
+
+\line{\b\fs28 Member Data}\par
+
+No public members
+\par
+
+\line{\b\fs28 Member Function}\par
+
+{\b void add (const MaxEvent)}\par
+Add the given MaxEvent to the list.
+\par
+
+{\b void remove (const MaxEvent)}\par
+Remove the given MaxEvent from the list.
+\par
+
+{\b int check (const MaxEvent) const}\par
+Check the list for the presence of the given MaxEvent.
+\par
+
+{\b int empty () const}\par
+Return whether or not the event list is empty.
+\par
+
+
+{\b MaxEventList operator ~ () const}\par
+Return the negated states of all of the events contained within
+ the list.
+\par
+
+{\b MaxEventList operator ^ (const MaxEventList &) const}\par
+Return an event list containing events present in either this or
+ the parameter list, but not both.
+\par
+
+{\b MaxEventList operator | (const MaxEventList &) const}\par
+Return an event list containing events present in either this or
+ the parameter list.
+\par
+
+{\b MaxEventList operator & (const MaxEventList &) const}\par
+Return an event list containing events present in both this and
+ the parameter list.
+\par
+
+{\b MaxEventList operator = (const MaxEventList &)}\par
+Set the events in the list to equal those in the parameter list.
+\par
+
+{\b MaxEventList operator ^= (const MaxEventList &)}\par
+Set the events in this list on if they are present in either
+ this list or the parameter event list, but not both.
+\par
+
+{\b MaxEventList operator |= (const MaxEventList &)}\par
+Set the events in this list on if they are present in either
+ this list or the parameter event list.
+\par
+
+{\b MaxEventList operator &= (const MaxEventList &)}\par
+Set the events in this list on if they are present in both this
+ list and the parameter event list.
+\par
+
+\line{\b\fs28 Example}\par
+
+This example creates an empty {\b MaxEventList}, fills it with a few
+ events, then asserts a few truths about the list.
+\par
+
+{\f2
+MaxEvent e1, e2, e3;\line
+MaxEventList evts;\line
+evts.add (e1);\line
+evts.add (e2);\line
+assert (evts.check (e1));\line
+assert (evts.check (e2));\line
+assert (!evts.check (e3));\line
+evts.remove (e1);\line
+assert (!evts.check (e1));\line
+}
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+MaxValueMap Class                                                         ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_MAX_VALUEMAPCLASS}
+${\footnote Max Value Map Class}
+K{\footnote
+ MaxValueMap;
+ MaxUValueMap;
+ MaxValueMap, set_map;
+ MaxValueMap, operator();
+ MaxValueMap, make_linear;
+ MaxValueMap, make_bez}
++{\footnote BW_PG_7}
+{\b\f0{\cf2\scaps Programmer's Guide: Max}\line\fs32 MaxValueMap Class}\par\pard\sb100
+
+The {\b MaxValueMap} class is a utility class for creating nonlinear
+ ramps, and mapping short integers into them.  {\b MaxUValueMap} is
+ provided for mapping unsigned integers.  The mapping is symmetrical
+ around 0.  That is, magnitudes are mapped.
+\par
+
+In order to use a {\b MaxValueMap}, the programmer creates an array of
+ values.  This array (the map) must be one greater than a power of
+ 2.  Allowable sizes are 3, 5, 9, 17, etc.  When a value is to be mapped,
+ it is first scaled to fit "between" two elements of the map.  Then,
+ the result value is interpolated between those two values.  The net
+ result of this computation is that number in the range 0..MAXSHORT are
+ mapped according to the contents of the table.  The table contents
+ can be in virtually any order, and it is possible (but of dubious value)
+ to have multiple ascending and descending regions.
+\par
+
+\line{\b\fs28 Name}\par
+{\b MaxValueMap, MaxUValueMap}\par
+Creates a mapping from short or ushort integers to a given table.
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "maxvmap.hpp"
+\par
+
+\line{\b\fs28 Base Classes}\par
+
+{\b MaxValueBase}\par
+Common base to both {\b MaxValueMap} and {\b MaxUValueMap}.
+  Contains some internal members, and static members to aid
+  in map table creation.
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b MaxValueMap (ushort table_size, short const *table)}\par
+Construct a value map with a table of the given size.
+\par
+
+{\b MaxUValueMap (ushort table_size, unsigned short const *table)}\par
+Construct a value map with a table of the given size.
+\par
+\par
+
+\line{\b\fs28 Member Data}\par
+
+No public members
+\par
+
+\line{\b\fs28 Member Function}\par
+{\b void set_map (ushort _table_size, short const *_table)}\par
+Sets the mapping table.  This member allows a map to be re-used
+ with a different table.  Note however, that you can change the
+ contents of the mapper's table without re-setting the map.
+ Only use this member function if you need to change the table
+ size, or point to a different table.
+\par
+
+{\b short operator() (short) const}\par
+Perform the map on the parameter.  With this member defined, the
+ {\b MaxValueMap} can be treated as a function call.
+\par
+
+
+{\b static void make_linear (short *table, ushort table_size, short start, short end)}
+\line
+{\b static void make_linear (ushort *table, ushort table_size, ushort start, ushort end)}
+\par
+Fills the given table with a linear progression from 'start' to 'end'.  This member
+ is provided as a convenience for building map tables.
+\par
+
+{\b static void make_bez (short *table, ushort table_size, short start, short end, ushort pointx, ushort pointy)}
+\line
+{\b static void make_bez (ushort *table, ushort table_size, ushort start, ushort end, ushort pointx, ushort pointy)}
+\par
+Fills the given table with a bezier curve from 'start' to 'end', and having the
+ control point <pointx, pointy>.  'Pointx' needs to lie between 'start' and 'end',
+ but 'pointx' may be any value.  Note however, that it is possible for the curve
+ to extend out of range, and some strange mapping behavior may result.
+ This member is provided as a convenience for building map tables.
+\par
+
+
+\line{\b\fs28 Example}\par
+
+This example outputs a series of values ranging from 0..1000.  The first
+ MAXSHORT/2 values lie between 0..100, and the rest lie between 101..1000.
+
+\par
+{\f2
+short map_values[3] = \{ 0, 100, 1000 \};\line
+MaxValueMap map (3, map_values);\par
+for (int i = 0; i < MAXSHORT; ++i)\line
+\tab cout << map (i) << endl;\line
+}
+\par
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+MaxTrigger Class                                                          ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_MAX_TRIGGER}
+${\footnote MaxTrigger Class}
+K{\footnote
+ MaxTrigger;
+ MaxTrigger, check;
+ MaxTrigger, operator ==}
++{\footnote BW_PG_7}
+{\b\f0{\cf2\scaps Programmer's Guide: Max}\line\fs32 MaxTrigger Class}\par\pard\sb100
+
+This class allows the specification of user inputs.  The trigger
+ itself is not active, and must be checked against the devices by
+ some other routine, usually the {\b MaxEventSource}.  All constraints
+ are 'and'ed together.  If no constraints are set on a particular
+ device, it always "checks", so devices irrelevant to the trigger
+ do not inhibit "firing".  While it is certainly possible to
+ create a {\b MaxTrigger} by filling in the member data manually, the
+ usual method is to load the triggers from an IFF file created by
+ the IFF event compiler.  (See {\uldb Event Compiler}{\v UG_MAX_MAXC}).
+\par
+
+\line{\b\fs28 Name}\par
+
+{\b MaxTrigger}\par
+Event trigger class.
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "maxevt.hpp"
+\par
+
+\line{\b\fs28 Base Classes}\par
+
+None
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b MaxTrigger()}\par
+
+Create a trigger that will always "fire".
+\par
+
+\line{\b\fs28 Member Data}\par
+
+{\b word Keys[max_keys]}\par
+A combination of up to max_keys keys that, when pressed together, fire the trigger.
+\par
+
+{\b word MouseButtons}\par
+The status of the mouse buttons, bit encoded.  If the status of
+ the mouse buttons matches this member, the trigger may fire.
+\par
+
+{\b word JoyButtons}\par
+The status of the joystick buttons.  If the status of the
+ joystick buttons matches this member, the trigger may fire.
+\par
+
+{\b word BegX, EndX}\par
+The X range compared against the mouse or joystick's position.
+ If the mouse/joystick falls within this range, the trigger may fire.
+\par
+
+{\b word BegY, EndY}\par
+The Y range compared against the mouse or joysticks's position.
+ If the mouse/joystick falls within this range, the trigger may fire.
+\par
+
+{\b word DeltaX, DeltaY}\par
+Minimum motion of the mouse.  If the mouse has moved more than
+ this range, the trigger may fire.
+
+\par
+
+\line{\b\fs28 Constants}\par
+{\b max_keys}\par
+The maximum number of key codes that may be checked
+ simultaneously in a single trigger.
+
+\line{\b\fs28 Member Function}\par
+
+{\b int operator == (const Maxtrigger &) const}\par
+Allows MaxTriggers to be directly compared to each other.
+\par
+
+{\b int check (const MaxKeyboard &) const}\par
+Returns whether or not the keyboard state matches the trigger's
+ keyboard requirements.  If no requirements are defined, this
+ function returns true.
+\par
+
+{\b int check (const MaxMouse &) const}\par
+Returns whether or not the mouse state matches the trigger's
+ mouse requirements.  If no requirements are defined, this
+ function returns true.
+\par
+
+{\b int check (const MaxJoystick &) const}\par
+Returns whether or not the joystick's state matches the trigger's
+ joystick button requirements.  If no requirements are defined, this
+ function returns true.
+\par
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+Max EventList Toggler Class                                               ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_MAX_MAXEVENTLISTTOGGLE}
+${\footnote MaxEventListToggle Class}
+K{\footnote
+ MaxEventListToggle;
+ MaxEventListToggle, set;
+ MaxEventListToggle, clear;
+ MaxEventListToggle, process;
+ MaxEventListToggle, reset}
++{\footnote BW_PG_7}
+{\b\f0{\cf2\scaps Programmer's Guide: Max}\line\fs32 MaxEventListToggle Class}\par\pard\sb100
+
+This class provides a method to treat events as "toggle
+ buttons".  Although {\b MaxEventLists} contain events, they only
+ understand the concept of an event being "present" or "absent".
+ The Toggle class allows an event to be "on" or "off".  To do
+ this, a toggler is fed event lists.  Each event is treated as a
+ rising edge triggered event.  If each event is viewed as an
+ electrical pulse in a circuit timing diagram, the toggle changes
+ state only on the rising edge of the pulse.  The "level" pulse
+ is ignored, as is the falling edge.  In practice, a toggler is
+ used by feeding it event lists taken from a {\b MaxEventSource}.  The
+ toggler can then be checked to see if a given event has been
+ turned "on" or "off" by the event source.
+\par
+
+\line{\b\fs28 Name}\par
+
+{\b MaxEventListToggle}\par
+Toggle event list.
+\par
+
+\line{\b\fs28 Synopsis}\par
+#include "maxevt.hpp"
+\par
+
+\line{\b\fs28 Base Classes}\par
+None
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b MaxEventListToggle ()}\par
+Create a new {\b MaxEventListToggle}, with all events turned off.
+\par
+
+\line{\b\fs28 Member Data}\par
+
+Private event lists for toggle detection.
+\par
+
+\line{\b\fs28 Member Function}\par
+
+{\b void set (MaxEvent)}\par
+Turn on the specified toggle.  This behaves as if the given
+event had been processed.
+\par
+
+{\b void clear (MaxEvent)}\par
+Turns off the specified event toggle.
+\par
+
+{\b MaxEventList &process (const MaxEventList &)}\par
+
+Process the given event list, returning a new event list of "on"
+ events.  The return value is a reference to the internal toggle
+ state, and may be manipulated safely.
+\par
+
+
+{\b void reset ()}\par
+Return the toggler to its initial state, turning off all
+ detected edges and their associated toggles.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+MaxEventListOneshot Class                                                 ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_MAX_EVENTLISTONESHOT}
+${\footnote MaxEventListOneshot Class}
+K{\footnote
+ MaxEventListOneshot;
+ MaxEventListOneshot, process;
+ MaxEventListOneshot, reset}
++{\footnote BW_PG_7}
+{\b\f0{\cf2\scaps Programmer's Guide: Max}\line\fs32 MaxEventListOneshot Class}\par\pard\sb100
+
+This class provides an analogous function to {\b MaxEventListToggle},
+ in that  it processes event lists to return a new event list.
+ The Oneshot is a rising edge detector.  It is most useful in
+ detecting singular key presses, and other such "one time" events.
+\par
+
+\line{\b\fs28 Name}\par
+
+{\b MaxEventListOneshot}\par
+One-shot event list.
+\par
+
+\line{\b\fs28 Synopsis}\par
+#include "maxevt.hpp"
+\par
+
+\line{\b\fs28 Base Classes}\par
+
+None
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b MaxEventListOneshot ()}\par
+
+Create a new {\b MaxEventListToggle}, with all events turned off.
+\par
+
+\line{\b\fs28 Member Data}\par
+
+Private event list for oneshot detection.
+\par
+
+\line{\b\fs28 Member Function}\par
+
+{\b MaxEventList &process (const MaxEventList &)}\par
+Process the given event list, returning a new event list of rising-edge events.
+\par
+
+{\b void reset ()}\par
+Return the oneshot to its initial state, turning off all detected edges.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+Max Event Source Class                                                    ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_MAX_MAXEVENTSOURCE}
+${\footnote MaxEventSource Class}
+K{\footnote
+ MaxEventSource;
+ MaxEventSource, install;
+ MaxEventSource, uninstall;
+ MaxEventSource, process;
+ MaxEventSource, process_wait;
+ MaxEventSource, get_mouse_pos;
+ MaxEventSource, set_mouse_pos;
+ MaxEventSource, get_mouse_movement;
+ MaxEventSource, get_mouse_buttons;
+ MaxEventSource, check_key;
+ MaxEventSource, get_joy_stat}
++{\footnote BW_PG_7}
+{\b\f0{\cf2\scaps Programmer's Guide: Max}\line\fs32 MaxEventSource Class}\par\pard\sb100
+
+The {\b MaxEventSource} class heirarchy provides a flexible system
+for querying {\b EventLists}.  The base class {\b MaxEventSource} provides
+the basic functionality and interface that applications should
+use to query events.
+\par
+
+\line{\b\fs28 Name}\par
+
+{\b MaxEventSource}\par
+
+This abstract base class provides the interface to query event
+ lists and the state of the "virtual physical devices".
+ Currently, a "virual mouse", a "virtual joystick", and a
+ "virtual keyboard" are supported, for which subclasses are
+ obliged to provide sensible return values.
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "maxesrc.hpp"
+\par
+
+\line{\b\fs28 Base Classes}\par
+
+None
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b MaxEventSource ()}\par
+Create an uninstalled event source.  The default constructor does nothing.
+\par
+
+{\b virtual ~MaxEventSource ()}\par
+Destroy the event source.  If the system is installed, uninstall it.
+\par
+
+\line{\b\fs28 Member Data}\par
+
+None.
+\par
+
+\line{\b\fs28 Member Function}\par
+
+{\b virtual void install (int init=MAX_KB_DEFAULT)=0}\par
+
+Install the event source.  This member should enable whatever
+ methods of acquiring events are employed by the event source.
+ If init is MAX_KB_CHAIN, then the keyboard handler should chain
+ to the BIOS.
+\par
+
+
+{\b virtual void uninstall ()=0}\par
+
+Uninstall the event source.  This member should perform any
+ cleanup neccessary to halt the acquisition of new events.
+\par
+
+
+{\b virtual MaxEventList process (const MaxEventList &)=0}\par
+
+Return a {\b MaxEventList} representing the current state of the
+ event source.  The method used to obtain this list is
+ neccessarily unique to each event source subclass.
+\par
+
+
+{\b virtual MaxEventList process_wait (const MaxEventList &)}\par
+
+Return a {\b MaxEventList} representing the current state of the
+ event source.  This method differs from {\b process()} in that it
+ does not return until an event is ready.  While sleeping, the
+ {\b bz_task} that called this method yields to other tasks.
+ See {\uldb\i Bozo}{\v PG_BOZO_OVERVIEW} for details on tasking.
+ If you do not use {\i Bozo}, you should not call this method.
+\par
+
+
+{\b virtual void get_mouse_pos (short *x, short *y) const}\par
+
+Retrieve the <x,y> location of the virtual mouse.  In this
+ class, no operation.
+\par
+
+
+{\b virtual void set_mouse_pos (short x, short y)}\par
+
+Set the <x,y> location of the virtual mouse.  In this class, no operation.
+\par
+
+
+{\b virtual void get_mouse_movement (short *dx, short *dy) const}\par
+
+Get the distance that the virtual mouse has moved (this is a
+ speed value, not a position value).  In this class, no operation.
+\par
+
+
+{\b virtual byte get_mouse_buttons () const}\par
+
+Get the pressed state of the mouse buttons.  The buttons are
+ encoded as bits, with the lowest bit being button 1, the next
+ lowest being button 2, etc.  In this class, no operation.
+\par
+
+
+{\b virtual int check_key (int scan_code) const}\par
+
+Return the up/down status of the given key.  In this class,
+ always return that a key is not down.
+\par
+
+
+
+{\b virtual void get_joy_stat (JOYINFOEX *) const}\par
+
+Retrieve the digital information of the virtual joystick. The
+ {\b JOYINFOEX} structure is defined by Windows 95, and contains
+ considerable information.  In this class, this routine is a NOP.
+\par
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+Event Source User Class                                                   ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_MAX_MAXEVENTUSER}
+${\footnote MaxEventUser Class}
+K{\footnote
+ MaxEventUser;
+ MaxEventUser, install;
+ MaxEventUser, uninstall;
+ MaxEventUser, connect;
+ MaxEventUser, disconnect;
+ MaxEventUser, load;
+ MaxEventUser, clear;
+ MaxEventUser, process}
++{\footnote BW_PG_7}
+{\b\f0{\cf2\scaps Programmer's Guide: Max}\line\fs32 EventSourceUser Class}\par\pard\sb100
+
+The class which coordinates the {\b MaxEvents}, {\b MaxTriggers},
+ {\b MaxEventLists}, and the various devices.  The {\b MaxEventUser}
+ contains a reference to a {\b MaxDevices} object.  It also contains a
+ list of {\b EventBindings} (a local class used only for
+ implementation) that associate {\b MaxEvents} with {\b MaxTriggers}.  This
+ event/trigger binding list may be loaded from an IFF file
+ compiled with the event compiler (See {\uldb Event Compiler}{\v UG_MAX_MAXC}).
+ This class is ultimately responsible for managing the input
+ devices (enable/disable/query).  Since this is a real-time event
+ source, it "runs the triggers" at the programmer's request.
+\par
+
+\line{\b\fs28 Name}\par
+
+{\b MaxEventUser}\par
+Implemented event source.
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "maxesrc.hpp"
+\par
+
+\line{\b\fs28 Base Classes}\par
+
+{\b public MaxEventSource}
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b MaxEventUser (MaxDevices &, const char *iff_file=0, const char *event_name=0)}\par
+Create a new MaxEventUser.  If both of the construction
+ parameters are specified, the constructor loads
+ {\b MaxEvent/MaxTrigger} combinations from the IFF file.  Otherwise,
+ an empty list is created, and pairs must be explicitly loaded.
+ A devices object must be specified.
+
+{\b ~MaxEventUser ()}\par
+Destroys the event source, clearing all {\b MaxEvent/MaxTrigger} bindings and uninitializing the devices.
+
+\par
+
+\line{\b\fs28 Member Classes}\par
+
+{\b MaxHeader}\par
+The structure of the IFF chunk header for trigger/event binding.
+  This type, while technically public, is only used internally
+ and by the event compiler (See {\uldb Event Compiler}{\v UG_MAX_MAXC}).
+\par
+
+\line{\b\fs28 Member Data}\par
+
+{\b MaxDevices theDevices}\par
+The input devices.  This member controls the actual mouse,
+ keyboard, and joystick of the host machine.  Each device is
+ enabled based on the requirements of the MaxTriggers in the
+ event bindings.
+\par
+
+
+{\b MaxEventUser::EventBindings *bindings}\par
+This privately typed list holds the bindings between
+ {\b MaxEvent} and {\b MaxTrigger}.
+\par
+
+\line{\b\fs28 Member Function}\par
+Same as {\uldb\b MaxEventSource}{\v PG_MAX_MAXEVENTSOURCE}, plus :\par
+
+{\b void install ()}\par
+Initializes all of the hardware devices and readies the event
+ source for processing.  Once installed, an event source will
+ provide events.  This member activates the physical devices
+ based on the needs of the triggers.  If new triggers are added,
+ the EventSystem should be uninstalled(), and then re-installed()
+ to make sure the new events can be triggered.
+\par
+
+{\b void uninstall ()}\par
+Uninitializes the hardware devices.  Once uninstalled, the event
+ source will no longer provide events, and will always return an
+ empty event list.
+\par
+
+{\b void connect (const MaxTrigger &, MaxEvent)}\par
+Adds a trigger/event mapping.  Note that the trigger is actually
+ only a reference to a trigger.  Thus, modifications to the
+ original trigger will be reflected in the {\b MaxEventUser}.
+ Consequently, all triggers registered with the event system must
+ remain valid throughout the life of the system.  Connections
+ must be made with the {\b EventSystem} uninstalled to guarantee that
+ all triggers will be able to fire.
+\par
+
+{\b void disconnect (const MaxTrigger &, MaxEvent)}\par
+Removes the trigger/event mapping.  If the mapping does not
+ exist, no action is performed.  Only the first occurence of the
+ mapping is removed.  Disconnections must be made with the
+ {\b EventSystem} uninstalled to guarantee that all triggers will be
+ able to fire.
+\par
+
+{\b void enumerate_triggers (int (*func) (MaxTrigger *))}\par
+Calls 'func' once for every MaxTrigger in the EventSystem.  The
+ function is free to modify the MaxTrigger in any way.  The
+ return value of the function controls iteration.  If the
+ function returns TRUE, iteration continues.  Otherwise, the
+ iteration halts.  The member function must not assume that
+ the MaxTrigger pointer can be operated on (i.e., do not
+ increment or decrement the pointer).
+
+{\b int load (const char *fname, const char *event_name=0)}\par
+Load trigger/event bindings from the specified IFF file.  The
+ set loaded is the one specified in the second parameter.
+ Loading must take place with the EventSystem uninstalled to
+ guarantee that all triggers will be able to fire.  If no event_name
+ is specified, the first one found will be loaded.
+\par
+
+{\b int load (XFParseIFF *iffp, const char *event_name=0)}\par
+Load trigger/event bindings from the specified IFF file.  The
+ iff file must be pointing at a MEVT form.  If the form is not
+ an MEVT, or the name of the MEVT form does not match the
+ event_name, an error is returned.  If no event_name
+ is specified, the next MEVT will be loaded.
+\par
+
+The set loaded is the one specified in the second parameter.
+ Loading must take place with the EventSystem uninstalled to
+ guarantee that all triggers will be able to fire.
+\par
+
+{\b void clear ()}\par
+Clear the event bindings, freeing any allocated resources.
+ Clearing must take place with the EventSystem uninstalled to
+ guarantee that all triggers will be able to fire.
+\par
+
+{\b MaxEventList process (const MaxEventList &)}\par
+Actually run the trigger list.  The parameter is an event list
+ of events we are interested in checking (default is all events).
+ As certain triggers may be computationally expensive to check,
+ the event list allows the caller to restrict the checking to
+ triggers for events that they are interested in.  A list of all
+ active events is returned.
+\par
+
+\line{\b\fs28 Example}\par
+
+This code fragment creates an event system and loads
+ trigger/event bindings from an IFF file.  It then proceeds to
+ process the specified events.  Note that in a real program, the
+ events would be defined in a header file created by the IFF
+ event compiler (See {\uldb Event Compiler}{\v UG_MAX_MAXC}).
+\par
+
+{\f2
+MaxDevices devs;\line
+MaxEventUser evt (devs, "MASTER.IFF", "Events");\line
+MaxEventList interesting;\par
+interesting.add (event_done);\line
+interesting.add (event_fire);\line
+evt.install();\par
+for (;;)\line
+\{\line
+\tab devs.update();     // Devices MUST be updated!!!\line
+\line
+\tab MaxEventList el = evt.process (interesting);\line
+\tab if (el.check (event_done))\line
+\tab \tab break;\line
+\tab if (el.check (event_fire))\line
+\tab lasers.fire();\line
+\}\par
+evt.uninstall();\line
+}
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+Hardware Devices                                                          ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_MAX_DEVICES}
+${\footnote MaxDevices Class}
+K{\footnote
+ MaxDevices;
+ MaxDevices, enable_keyboard;
+ MaxDevices, enable_mouse;
+ MaxDevices, enable_joystick;
+ MaxDevices, update;
+ MaxDevices, wm_clear;
+ MaxDevices, get_mouse_movement;
+ MaxDevices, get_mouse_pos;
+ MaxDevices, set_mouse_pos;
+ MaxDevices, get_mouse_buttons;
+ MaxDevices, check_keyboard_key;
+ MaxDevices, init;
+ MaxDevices, uninit;
+ MaxDevices, is_mouse_enabled;
+ MaxDevices, is_keyboard_enabled;
+ MaxDevices, is_joystick_enabled;
+ MaxDevices, is_mouse_present;
+ MaxDevices, is_keyboard_present;
+ MaxDevices, is_joystick_present}
++{\footnote BW_PG_7}
+{\b\f0{\cf2\scaps Programmer's Guide: Max}\line\fs32 MaxDevices Class}\par\pard\sb100
+
+The {\i Max} event library models the existence of physical input
+ devices with classes.  These device classes provide an interface
+ to the actual device.  Since input devices are so varied in
+ their capabilities, no effort has been made to homogenize access
+ to the devices.  Where devices are similar, however, (such as in
+ the case of mice and joysticks) similar member names will be
+ used.
+\par
+
+This class encapsulates access to the devices.  It also
+ serializes access, so that query-sensitive devices (like the
+ mouse) and expensive devices (like the joystick) can be queried
+ only once per "iteration".  The {\b MaxDevice} object must be pulsed
+ by the main application (through the update() member), so that
+ the values returned will be accurate.
+\par
+{\b MaxDevices} is really an interface specification, with two implementations
+ provided: {\b MaxDevicesWin32} and {\b MaxDevicesDirectX}.  Code requiring
+ access to a {\b MaxDevices} object should assume to take a {\i (MaxDevices *)}
+ type, so that either implementatin can be used freely.\par
+ The public variables {\b theMouse}, {\b theKeyboard}, and {\b theJoystick}
+ are also base-class pointers, and when enabled will contain pointers to
+ the appropriate subclasses (either Win32 or DirectX).  See the descriptions
+ of those classes for further details.
+\par
+
+\line{\b\fs28 Name}\par
+
+{\b MaxDevices}\par
+Hardware device container object.
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "maxdev.hpp"
+\par
+
+\line{\b\fs28 Base Classes}\par
+
+None
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b MaxDevices()}\par
+Abstract interface class.  Use this class for pointers to one of
+ the below types.
+\par
+
+{\b MaxDevicesWin32 (HWND)}\par
+Initializes the device object to use the Win32 versions of all devices.
+ This class should be very compatable, and handy for debugging, but will
+ not perform as well as the DirectX version.
+\par
+
+{\b MaxDevicesDirectX (HWND)}\par
+Initializes the device object to use DirectInput.  This is more efficient
+ and accurate than the Win32 version, but might cause strange interactions
+ with debuggers.
+\par
+
+\line{\b\fs28 Member Data}\par
+
+{\b MaxMouse *theMouse}\par
+The physical mouse device.  This is provided only so that the
+ programmer may configure the mouse; querying should always be
+ done through MaxDevices' interface.
+\par
+
+{\b MaxKeyboard *theKeyboard}\par
+The physical keyboard device.  This is provided only so that the
+ programmer may configure the keyboard; querying should always be
+ done through MaxDevices' interface.
+\par
+
+{\b MaxJoystick *theJoystick}\par
+The physical joystick device.  This is provided only so that the
+ programmer may configure and calibrate the joystick; querying
+ should always be done through MaxDevices' interface.
+\par
+
+\line{\b\fs28 Member Function}\par
+
+{\b int enable_keyboard (int enable)}\line
+{\b int enable_mouse (int enable)}\line
+{\b int enable_joystick (int enable)}\par
+
+Enable or disable the given device.  If the device is disabled,
+ the querying function will not return meaningful information.
+\par
+
+{\b void update ()}\par
+Cause the driver to query the enabled devices.  This routine
+ must be called periodically by the application to ensure that
+ events are processed.  By only querying devices once per "loop",
+ and by only querying enabled devices, Max keeps a low overhead.
+\par
+
+{\b void wm_clear ()}\par
+Cause the driver to clear the internal states of the devices.
+ This member is most useful when the application is pumping the
+ devices from a Window Procedure.  Call this member before
+ entering the application's message dispatch loop.  See
+ the description of {\b MaxKeyboard} for more details on the
+ proper usage of this member.
+\par
+ The reason that this step is not part of {\b update} is that the
+ Win32 version of {\b MaxDevices} collects data during the WindowProc
+ message processing loop, which logically comes between {\b wm_clear}
+ and {\b update}.
+\par
+{\b Note:} this method is required for DirectX versions of {\b MaxDevices}
+ as well, and should be called in the same location.  I.e., call
+ {\i wm_clear} before you call {\i update}, but not before you process
+ the input.
+\par
+
+{\b void get_mouse_movement (short *, short *) const}\line
+{\b void get_mouse_pos (short *, short *) const}\line
+{\b void set_mouse_pos (short, short)}\line
+{\b byte get_mouse_buttons () const}\par
+
+Check the values of the mouse driver at the last update.  These
+ member functions are directly analogous to the MaxMouse members
+ with similar names.  Note that these values are only as current
+ as the most recent update().
+\par
+
+{\b int check_keyboard_key (int) const}\par
+Check the state of a given key as of the last update.  (N.B. the
+ keyboard state is not actually copied, since checking is very
+ inexpensive.  So this member really returns the current key
+ state.  However, this may change in the future, so caveat
+ programmer!)
+\par
+
+{\b void init ()}\par
+
+Calls each enabled device's {\b init} member.  This function should
+ be called whenever the application regains focus or shifts to the
+ foreground.  Semantically, it signals Max to re-acquire any resources
+ required.  Note that devices are considered initialized as soon as
+ they are enabled, so this member need not be called when a device
+ has just been enabled.\line
+ Note that no input will be recieved from uninitialized devices.
+\par
+
+{\b void uninit ()}\par
+
+Calls each enabled device's {\b uninit} member.  This function should
+ be called whenever the application looses focus or shifts to the
+ background.  Semantically, it signals Max to release any resources
+ it has acquired.\line
+ Note that no input will be recieved from uninitialized devices.
+\par
+
+{\b bool is_mouse_enabled () const}\line
+{\b bool is_keyboard_enabled () const}\line
+{\b bool is_joystick_enabled () const}\par
+
+Return whether or not the specified device has been enabled for
+ use.  A true result implies is_*_present() and that the device
+ has been initialized.
+\par
+
+{\b bool is_mouse_present () const}\line
+{\b bool is_keyboard_present () const}\line
+{\b bool is_joystick_present () const}\par
+
+Return whether or not the specified device is present in the system.
+ For Win32 devices, this will always return true for mouse and keyboard,
+ and may return false for joystick.  For DirectX devices, a true result
+ means that the device is supported under DirectX.  It is still possible
+ for a present device to fail initialization if, for instance, a joystick
+ is not plugged into the joystick port.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+Hardware Device: Keyboard                                                 ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_MAX_KEYBOARD}
+${\footnote MaxKeyboard Class}
+K{\footnote
+ MaxKeyboard;
+ MaxKeyboard, init;
+ MaxKeyboard, uninit;
+ MaxKeyboard, clear;
+ MaxKeyboard, update;
+ MaxKeyboard, wm_keydown;
+ MaxKeyboard, wm_keyup;
+ MaxKeyboard, check_key;
+ MaxKeyboard, is_present;
+ MaxKeyboard, is_initialized}
++{\footnote BW_PG_7}
+{\b\f0{\cf2\scaps Programmer's Guide: Max}\line\fs32 MaxKeyboard Class}\par\pard\sb100
+
+This device treats the keyboard as a grid of keys, indexed by
+ their scan codes.  Extended scan codes are equal to their base
+ value plus 0x100.  Multiple {\b MaxKeyboard} objects may be created.
+ This implementation uses the Win32 {\b GetAsyncKeyState()} routine,
+ and therefore cannot be used by console mode applications.
+\par
+{\b MaxKeyboard} is actually an interface with two concrete implementations:
+ {\b MaxKeyboardWin32} and {\b MaxKeyboardDirectX}.  The DirectX version
+ is more reliable, but may cause strange interactions with debuggers.  The
+ Win32 version is only suggested for applications where the DirectX version
+ cannot be used.
+\par
+For better performance at low frame rates, the {\b MaxKeyboardWin32} class
+ can be "pumped" from a Window procedure.  This allows the keyboard
+ to recognize keys that were pressed and released between frames,
+ which would ordinarily be missed by the {\b GetAsyncKeyState()}
+ sampling.  An application can thus use the {\b MaxKeyboard} class
+ in one of three ways.  First, simply call {\b check_key()} as normal.
+ This will sample the keyboard at the instant of the call, but may miss
+ characters that are pressed and released too quickly.  Second, the
+ application can pass {\b WM_KEYDOWN} messages to the {\b MaxKeyboard}
+ object, making sure to either call {\b clear()} on the keyboard
+ instance, or {\b wm_clear()} on the {\b MaxDevices} block.  This method
+ allows accurate determination of whether or not a key was pressed
+ or is still being held down.  This method has the side effect that if a key
+ has been pressed and released since the last frame, it will be flagged
+ as down for the current frame.  If this effect is not desirable,
+ the application can pass {\b WM_KEYUP} messages to the {\b MaxKeyboard's}
+ {\b wm_keyup()} member.  However, this behavior is often needed in
+ simulations, so {\b wm_keyup()} will not normally be required.
+\par
+Calling {\b wm_keydown} or {\n wm_keyup} on a {\b MaxKeyboardDirectX}
+ object has no effect, so that code that may need both types of devices
+ can easily be written for the most restrictive case (Win32).
+
+\line{\b\fs28 Name}\par
+
+{\b MaxKeyboard}\par
+Keyboard interface object
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "maxdev.hpp"
+\par
+
+\line{\b\fs28 Base Classes}\par
+
+None
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b MaxKeyboard()}\par
+This abstract class cannot be instantiated, but is useful for providing
+ generic pointers for keyboard objects.
+\par
+
+{\b MaxKeyboardWin32()}\par
+Create a new keyboard object using the Win32 protocols.
+\par
+
+{\b MaxKeyboardDirectX (IDirectInput *, HWND)}\par
+Create a new keyboard object using DirectInput.  Both parameters
+ are required, and the HWND should be the application's primary window.
+\par
+
+\line{\b\fs28 Member Data}\par
+
+None
+\par
+
+\line{\b\fs28 Member Function}\par
+
+{\b void init ()}\par
+Initialize the keyboard object.
+\par
+
+{\b void uninit ()}\par
+Uninitialize the keyboard object.
+\par
+
+{\b int check_key (int scan_code)}\par
+Return the up/down status of the given key.  If the keyboard has
+ not been initialized, this function always returns 0.\line
+ When used in conjunction with {\b wm_keydown()}, this member
+ first checks to see if the given key is marked in the internal
+ map.  If it is, TRUE is returned.  If it is not, Windows is
+ asked for the state of the key.  This way, this member always
+ returns a value as correct as possible.
+\par
+
+{\b void update ()}\par
+Cause the keyboard object to update its internal keymap.
+\par
+This method is not required for Win32 operation.
+\par
+
+{\b void clear ()}\par
+Mark all keys as "up" in the internal map.  This will not effect
+ Win32's belief in the key position, and {\b check_key()} will
+ still return correctly sampled results.  This member is only
+ useful in conjunction with {\b wm_keydown()}.
+\par
+
+{\b void wm_keydown (int WM_KEYDOWN_WPARAM)}\par
+This method marks the given VKEY (taken from the WPARAM of a
+ WM_KEYDOWN message) as being depressed.  The key remains marked
+ as depressed until either {\b clear()} is called, or the
+ key is released with a call to {\b wm_keyup()}.
+\par
+This method is not required for DirectX operation.
+\par
+
+{\b void wm_keyup (int WM_KEYDOWN_WPARAM)}\par
+This method marks the given VKEY (taken from the WPARAM of a
+ WM_KEYDOWN message) as released.  If the {\b clear()} member
+ is used to clear all keys, this member is unneccesary.
+\par
+This method is not required for DirectX operation.
+\par
+
+{\b bool is_present () const}\par
+This method returns whether or not the keyboard device is present.
+ The only way this member will ever return false is if a {\b MaxKeyboardDirectX}
+ is created on a system where DirectX 5.0 or later is not installed.
+\par
+
+{\b bool is_initialized () const}\par
+This method returns whether or not the keyboard device has been initialized
+ for use.  It depends on whether the device {\i is_present()} and has been
+ {\i init()}'ed.
+\par
+
+\line{\b\fs28 Example}\par
+
+Shows how to query a key without using the event system.
+\par
+
+{\f2
+MaxKeyboardDirectX kbd (...);\line
+kbd.init();\par
+for (;;)\line
+\{\line
+\tab kbd.update();\line
+\tab if (kbd.check_key (SCAN_ESCAPE))\line
+\tab \tab break;\line
+\line
+\tab if (kbd.check_key (SCAN_ENTER))\line
+\tab \tab cout << "Enter!" << endl;\line
+\tab kbd.clear();\line
+\}\line
+}
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+Hardware Device: Mouse                                                    ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_MAX_MOUSE}
+${\footnote MaxMouse Class}
+K{\footnote
+ MaxMouse;
+ MaxMouse, init;
+ MaxMouse, uninit;
+ MaxMouse, clear;
+ MaxMouse, update;
+ MaxMouse, show_cursor;
+ MaxMouse, get_pos;
+ MaxMouse, set_pos;
+ MaxMouse, get_movement;
+ MaxMouse, get_buttons;
+ MaxMouse, is_present;
+ MaxMouse, is_initialized}
++{\footnote BW_PG_7}
+{\b\f0{\cf2\scaps Programmer's Guide: Max}\line\fs32 MaxMouse Class}\par\pard\sb100
+
+This device provides access to the mouse through the standard
+ mouse driver functions.  Information is provided about position
+ and button status.
+\par
+
+\line{\b\fs28 Name}\par
+
+{\b MaxMouse}\par
+Mouse object.
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "maxdev.hpp"
+\par
+
+\line{\b\fs28 Base Classes}\par
+
+None
+\par
+
+\line{\b\fs28 Constructors}\par
+{\b MaxMouse ()}\par
+This abstract class cannot be instantiated, but is useful for providing
+ generic pointers for mouse objects.
+\par
+
+{\b MaxMouseWin32 ()}\par
+Create a new mouse object using the Win32 protocols.
+\par
+
+{\b MaxMouseDirectX (IDirectInput *, HWND)}\par
+Create a new mouse object using DirectInput.  Both parameters
+ are required, and the HWND should be the application's primary window.
+\par
+
+\line{\b\fs28 Member Data}\par
+
+{\b int NumButtons}\par
+The number of buttons that the mouse has.  Usually either two or three.
+\par
+
+{\b int MouseSupported}\par
+A flag telling whether or not the mouse device is supported.  If
+ there is no mouse driver, this will be FALSE.  Otherwise, it
+ will be TRUE.
+\par
+
+\line{\b\fs28 Member Function}\par
+
+{\b int init ()}\par
+Initialize the mouse object by querying the presence of the mouse driver.
+ The mouse will not return data if not initialized.
+\par
+
+{\b void uninit ()}\par
+Uninitialize the mouse object.
+ The mouse will not return data if not initialized.
+\par
+
+{\b void clear ()}\par
+Clears the accumulated button information.  The MaxMouse object accumulates
+ button down information so that button clicks that are faster than the
+ event polling rate are not lost.  This member must be called before
+ {\b update}, but not before processing data from last frame.
+\par
+
+{\b void update ()}\par
+Queries the mouse device for position and button information.  This member
+ must be called before current data can be retrieved using the get_ members.
+\par
+
+{\b void show_cursor (bool)}\par
+Tells Windows to show (true) or hide (false) the cursor.  In the DirectX version,
+ this distiction has a special meaning.  When the cursor is active, the DirectX
+ implementation uses the normal Win32 method of retrieving the mouse position
+ so that it may stay consistent with the on-screen pointer.  When the cursor
+ is not shown, the position returned will be that returned by DirectInput.
+ Using this data, the application can draw the pointer as needed.\par
+Turning off the cursor is useful for "Quake" style games, in which only the
+ {\b get_movement} calls are relevant.
+\par
+
+{\b void get_pos (short *x, short *y) const}\par
+Retrieve the <x,y> location of the mouse.
+\par
+
+{\b void set_pos (short x, short y)}\par
+Set the <x,y> location of the mouse.
+\par
+
+{\b void get_movement (short *dx, short *dy) const}\par
+Get the distance that the mouse has moved (this is a speed
+ value, not a position value).
+\par
+
+{\b byte get_buttons () const}\par
+Get the pressed state of the buttons.  The buttons are encoded
+ as bits, with the lowest bit being button 1, the next lowest
+ being button 2, etc.
+\par
+
+{\b bool is_present () const}\par
+This method returns whether or not the mouse device is present.
+ The only way this member will ever return false is if a {\b MaxMouseDirectX}
+ is created on a system where DirectX 5.0 or later is not installed.
+\par
+
+{\b bool is_initialized () const}\par
+This method returns whether or not the mouse device has been initialized
+ for use.  It depends on whether the device {\i is_present()} and has been
+ {\i init()}'ed.
+\par
+
+\line{\b\fs28 Example}\par
+Here is an example fragment of the method used to access the
+ mouse in the absence of the event system.
+\par
+
+{\f2
+MaxMouse mouse;\line
+mouse.init();\par
+for (;;)\line
+\{\line
+\tab mouse.update();\line
+\tab if (mouse.get_buttons() & 0x02)\line
+\tab \tab break;\line
+\line
+\tab if (mouse.get_buttons() & 0x01)\line
+\tab \{\line
+\tab \tab short x, y;\line
+\tab \tab mouse.get_position (&x, &y);\line
+\tab \tab cout << "Mouse: " << x << ", " << y << endl;\line
+\tab \}\line
+\tab mouse.clear();\line
+\}
+}
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+Hardware Devices: Joystick                                                ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_MAX_JOYSTICK}
+${\footnote MaxJoystick Class}
+K{\footnote
+ MaxJoystick;
+ MaxJoystick, init;
+ MaxJoystick, uninit;
+ MaxJoystick, get_stat;
+ MaxJoystick, auto_poll;
+ MaxJoystick, get_di2;
+ MaxJoystick, is_present;
+ MaxJoystick, is_initialized}
++{\footnote BW_PG_7}
+{\b\f0{\cf2\scaps Programmer's Guide: Max}\line\fs32 MaxJoystick Class}\par\pard\sb100
+
+This device provides access to the IBM Joystick.  The Joystick
+ object can report its status by way of the Win32 structure
+ {\b JOYINFOEX}.
+\par
+Like the other devices, {\b MaxKeyboard} is a family of classes conforming
+ to the same interface.  The Win32 version of this interface performs
+ acceptably, but cannot support Force Feedback devices.  The DirectX
+ version can provide more accurate button information, and can return
+ an {\b IDirectInputDevice2} interface that can be used to access ForceFeedback
+ commands.  A future version of MaxJoytick will provide an API for accessing
+ ForceFeedback directly.  Please refer to the DirectX 5.0 documentation for
+ more information on the ForceFeedback API, and the IDirectInputDevice2
+ interface in general.
+
+\line{\b\fs28 Name}\par
+
+{\b MaxJoystick}\par
+Joystick object.
+\par
+
+\line{\b\fs28 Synopsis}\par
+#include "maxdev.hpp"
+\par
+
+\line{\b\fs28 Base Classes}\par
+
+None
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b MaxJoystick ()}\par
+This abstract class cannot be instantiated, but is useful for providing
+ generic pointers for joystick objects.
+\par
+
+{\b MaxJoystickWin32 ()}\par
+Create a new joystick object using the Win32 protocols.
+\par
+
+{\b MaxJoystickDirectX (IDirectInput *, HWND)}\par
+Create a new joystick object using DirectInput.  Both parameters
+ are required, and the HWND should be the application's primary window.
+\par
+
+\line{\b\fs28 Member Data}\par
+None.
+\par
+
+\line{\b\fs28 Member Types}\par
+{\b struct JOYINFOEX}\par
+This Windows-defined structure contains information about all
+ possible joystick devices that Windows can support.  See the
+ Win32 developer's guide for more information.
+\par
+
+\line{\b\fs28 Member Function}\par
+{\b short init ()}\par
+Initialize the joystick.  This acquires the device, and should be called
+ whenever the application regains control.  It is not necessary to init the
+ device after creating it.
+\par
+
+{\b void uninit ()}\par
+Uninitialize the joystick object.  This member releases the device, and
+ should be called whenever the application looses control to another
+ application.  It is not necessary to uninit the device before destroying it.
+\par
+
+{\b void clear ()}\par
+Clear accumulated button-press information.  Use this member after
+ data has been processed for the frame, but before the next {\b get_stat}.
+\par
+
+{\b byte get_stat (JOYINFOEX *) const}\par
+Returns the status of the IBM Joystick unit.  See the
+ description of the Status structure for details on what
+ information is returned.  If the joystick is in auto_poll
+ mode, this member returns the collected data.  The button
+ values returned are the buttons pressed since the last
+ call to get_stat().
+ Otherwise, the joystick is polled during this call, and the
+ button values represent the buttons pressed at the time of the call.
+\par
+
+{\b int auto_poll (BOOL = TRUE, UINT rate = 50)}\par
+Initiates or terminates auto_poll mode.  In auto_poll mode,
+ the joystick device asynchronously updates itself from
+ a timer.  During the asynchronous update, the current joystick
+ axis values are retrieved, and the current button state is
+ accumulated.  To terminate auto_poll mode, call this member
+ with FALSE.
+\par
+
+{\b IDirectInputDevice2 *get_di2() const}\par
+Retrieves the DirectInputDevice2 interface associate with this joystick,
+ or the NULL pointer if no such interface exists.  The returned interface
+ may be used to access ForceFeedback data.  Future versions of the
+ {\b MaxJoystick} interface will provide ForceFeedback support directly.
+\par
+
+{\b bool is_present () const}\par
+This method returns whether or not the joystick device is present.  This
+ could be false for a number of reasons, all indicating that the Joystick
+ cannot be accessed in the requested way.
+\par
+
+{\b bool is_initialized () const}\par
+This method returns whether or not the joystick device has been initialized
+ for use.  It depends on whether the device {\i is_present()} and has been
+ {\i init()}'ed.
+\par
+
+\pard\page
+
+
+{\comment
+°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+                               User's Guide
+
+°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+}
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+User's Guide Overview                                                     ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote UG_MAX_OVERVIEW}
+${\footnote Overview}
++{\footnote BW_UG_3}
+{\b\f0{\cf2\scaps User's Guide: Max}\line\fs32 Overview}\par\pard\sb100
+
+The {\i Max} library includes an event language compiler to ease the
+ use of the {\b MaxEvent/MaxTrigger} system.  The compiler converts a
+ source file containing event names and descriptions into an IFF
+ file and a C++ header file.  The generated IFF file contains a
+ compiled version of the event descriptions, adn the header file
+ contains the event names as C++ constants.  The basic procedure
+ for adding events to a new program is:
+\par
+
+{\f2
+Define the events and triggers in the source language
+\par
+
+Compile the source into .IFF and .HPP files
+\par
+
+Write the event processing code, using the constants in the .HPP file.
+}\par
+
+Since the events themselves are compile-time constants, once the
+ program is compiled, new events may not be added or removed from
+ the event source file.    However, since the triggers are stored
+ in the IFF file, the triggers for the events may be modified at
+ any time, including adding new triggers and removing old ones.
+
+\par
+
+\line{\b\fs28 Features}\par
+
+Tool for generating event control files and associated headers
+ for easy maintenance of events and triggers.
+\par
+
+\line{\b\fs28 Future Work}\par
+
+New key name constants may be added to the compiler language,
+ and a more comprehensive character quoting scheme may be added
+ as well.
+
+\par
+
+\pard\page
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+Event Compiler (MAXC)                                                     ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote UG_MAX_MAXC}
+${\footnote MAXC Event Compiler}
+K{\footnote MAXC}
++{\footnote BW_UG_3}
+{\b\f0{\cf2\scaps User's Guide: Max}\line\fs32 MAXC Event Compiler}\par\pard\sb100
+
+The event compiler takes a source file and produces an IFF and
+ HPP files from its description.
+\par
+
+\line{\b\fs28 Usage}\par
+
+maxc <filename.cel> [ <filename.iff> [<filename.hpp>]]
+\par
+
+\line{\b\fs28 Options}\par
+
+None.
+\par
+
+\line{\b\fs28 Language}\par
+
+The Charybdis Event Language (CEL) source language is a simple
+ grammar for describing the correlation between events and their
+ triggers.  CEL source files are free-form text files which may
+ contain assembly-style ';' to end-of-line comments.
+\par
+
+A user-specific ID is provided for each event (these are output
+ into the HPP file).  Each event contains any number of triggers,
+ which are 'or' conditions, and each trigger contains any number
+ of user action conditions, which are 'and' conditions.  There is
+ a fixed limit to the number of events which may be defined (the
+ limit is in the Max headers), but there is no limit to the
+ number of triggers or user action conditions within the triggers.
+\par
+
+The basic form of an event definition is (in BNF):
+\par
+
+
+{\f2
+event <id>\line
+'\{'\line
+\tab ('[' <trigger> ']')*\line
+'\}'\line
+}\par
+
+\line{\b\fs28 Example}\par
+
+{\f2
+event FireLasers\line
+\{\line
+\tab [mouseb 1]\line
+\tab [key #space]\line
+\}\line
+}\par
+
+This event definition indicates that the event "FireLasers" will
+ be signaled if either the first mouse button is pressed, or the
+ space bar is pressed.
+
+\par
+
+
+\line{\b\fs28 CEL Syntactic elements}\par
+
+{\b 'event' keyword}\par
+
+Each event is defined by an event clause.  The form of the event clause is:
+\par
+
+{\f2
+event <name> '\{'\line
+\tab <trigger>*\line
+'\}'
+}\par
+
+Where <name> is any valid C identifier, and <trigger> is defined
+ below.  The <name> tag becomes the symbolic name of the event in
+ the generated header file.  The compiler automatically generates
+ unique values for each event.  An event with no triggers can
+ never occur naturally.  However, it may be necessary to include
+ untriggerable events, so this is allowed.  Triggers may not be
+ shared directly between events.
+
+{\b 'include' keyword}\par
+
+Lexically include the given filename into the source stream.
+ The form of 'include' is as follows:
+\par
+{\f2
+include <quoted-string>
+}\par
+
+
+This functions like the C preprocessor's #include statement, but
+ the file must be in the current directory (or fully path
+ specified), and must be quoted.  For instance:
+\par
+
+{\f2
+include "keyboard.cel"
+}\par
+
+\line{\b joyb keyword}\par
+This keyword describes the state of the joystick buttons.  Each
+ button is represented by a bit, with bit 1 being the first
+ button, etc.  The expression can be any valid number.
+\par
+
+{\f2
+joyb <expr>
+}\par
+
+
+\line{\b key keyword}\par
+The 'key' keyword describes a particular key on the keyboard.
+ The form of the 'key' keyword is as follows:
+\par
+
+{\f2
+key <expr>|#<key-name>
+}\par
+
+Key definitions are scan code values.  Quoted character values
+ may be used as well, and will be translated to appropriate scan
+ codes.  Since they are scan-codes, symbols that share a key will
+ both translate to the same event.  For example, 'A' and 'a' are
+ the same and '7' and '&' are the same.  To distinguish these,
+ add shift conditions.
+\par
+
+
+The <key-name> clause is for specially named keys.  The list of
+ valid key names follows:
+\par
+
+
+{\b Modifier Keys:}\par
+{\f2
+#lalt, #ralt, #lctrl, #rctrl, #lshift, #rshift
+}
+\par
+
+{\b Function Keys:}\par
+{\f2
+#f1, #f2, #f3, #f4, #f5, #f6, #f7, #f8, #f9, #f10, #f11, #f12
+}
+\par
+
+{\b Special keys:}\par
+{\f2
+#prtscr, #numlock, #scroll, #pause, #sysreq, #esc, #tab, #caps,
+ #space, #enter, #backspace, #insert, #del, #end, #down, #pgdn,
+ #left, #center, #right, #home, #up, #pgup
+}
+\par
+
+{\b Keypad Keys:}\par
+{\f2
+#grayminus, #grayplus, #grayenter, #graymul, #graydiv, #grayend,
+ #graydown, #graypgdn, #grayleft, #grayright, #grayhome, #grayup,
+ #graypgup, #grayinsert, #graydel
+}
+\par
+
+\line{\b mouseb keyword}\par
+
+This keyword describes the state of the mouse buttons.  Each
+ button is represented by a bit, with bit 1 being the first
+ button, etc.  The expression can be any valid number.
+\par
+
+{\f2 mouseb <expr>}\par
+
+
+\line{\b mouserange keyword}\par
+This keyword describes a range of values which are "active" if
+ the mouse lies within them.
+\par
+
+{\f2 mouserange x1, y1, x2, y2}\par
+
+Each of the parameters is an <expr>, and will be evaluated into
+ an integer.  Additionally, the coordinate x1,y1 must be less
+ than x2,y2.
+\par
+
+
+\line{\b mousedelta keyword}\par
+
+This keyword describes a certain delta in mouse position that
+ must be achieved before the trigger may fire.
+\par
+
+
+{\f2 mousedelta dx, dy}\par
+
+The parameters are <expr>s, and will be evaluated to a signed integer.
+\par
+
+
+\line{\b not keyword}\par
+
+The 'not' keyword is used to negate the sense of a 'key'
+ statement.  For instance, it can be used to describe a trigger
+ that can only occur when a key is not pressed.  This can be
+ useful when attempting to emulate standard keyboard responses,
+ such as treating F10 as different from Shift+F10.  See the
+ description of 'key' for more details.  This is the form of the
+ statement:
+\par
+
+{\f2 key <expr>|#<key-name>}\par
+
+
+\line{\b <trigger>}\par
+
+Triggers are collections of keyword values, all of which are
+ 'and'ed together inside of the trigger definition.
+\par
+
+
+{\f2 '[' <key>|<mouseb>|<mousedelta>|<mouserange> ']'}\par
+
+Each trigger is associated with the event enclosing it.  It is
+ not possible in this compiler to associate one trigger with
+ multiple events.  To achieve this effect, the trigger must be
+ duplicated in the source file.
+\par
+
+
+\line{\b <expr>}\par
+
+This is an expression.  The expression is similar to the C
+ expression syntax.  The valid operations are: '*', '/', '+', and
+ '-'.  Constants may be signed decimal or hexadecimal constants,
+ or quoted characters (which evaluate to their scancodes, not
+ ASCII).
+
+\par
+
+
+\line{\b\fs28 Example}\par
+
+The following is an example CEL source file (.cel) 'TEST.CEL':
+\par
+
+{\f2
+;--------------------------------------------------\line
+;\line
+; TEST.CEL\line
+;\line
+; Example for CEL compiler\line
+;\line
+;--------------------------------------------------\line
+\par
+
+event Move_up\line
+\{\line
+\tab [ key 0x48  ]\line
+\tab [ key 0x48 + 0x100\line
+\tab   mouseb 1 ]\line
+\}\par
+
+event Move_down\line
+\{\line
+\tab [ key #down  mouserange 1, 2, 0x100, 0x200 ]\line
+\tab [ key #graydown mouseb 1 ]\line
+\}\par
+
+event help\line
+\{\line
+\tab [ key f1 ]\line
+\tab [ key lalt key 'h' ]\line
+\tab [ key ralt key 'H' ]\line
+\}\par
+
+Type the following to compile 'TEST.CEL' into 'TEST.IFF' and 'TEST.HPP':
+\par
+
+maxc test.cel
+\par
+}
+
+\pard\page
+
+{\comment °±² eof - template.rtf ²±° }
+}

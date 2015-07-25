@@ -1,0 +1,494 @@
+{\rtf1
+{\comment
+ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
+
+                               Chronos Help
+
+                     Microsoft Windows 95/98/NT Version
+
+   Copyright (c) 1994-1999 by Dan Higdon, Tim Little, and Chuck Walbourn
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ This file and all associated files are subject to the terms of the
+ GNU Lesser General Public License version 2 as published by the
+ Free Software Foundation (http://www.gnu.org).   They remain the
+ property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+ See LICENSE.TXT in the distribution for a copy of this license.
+
+ THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+ OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+ PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+ LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+ OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+                        http://www.mythos-engine.org/
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ Chronos is a component of the MythOS(tm) collection.
+
+ MythOS is a trademark of Charybdis Enterprises, Inc.
+
+ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
+}
+
+{\fonttbl
+\f0\fswiss Arial;
+\f1\froman Times New Roman;
+\f2\fmodern Courier New;
+\f3\fswiss MS Sans Serif;
+\f4\froman MS Serif;
+}
+\deff1
+\fs21
+
+{\colortbl;
+\red128\green128\blue128;
+\red0\green0\blue128;
+\red0\green128\blue0;
+\red128\green0\blue0;
+}
+
+{\comment
+°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+                            Programmer's Guide
+
+°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+}
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+Overview                                                                  ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+
+\keepn
+#{\footnote PG_CHRONOS_OVERVIEW}
+${\footnote Overview}
++{\footnote BW_PG_5}
+{\b\f0{\cf2\scaps Programmer's Guide: Chronos}\line\fs32 Overview}\par\pard\sb100
+
+Real-time software requires high-resolution timer services
+ and hooks for performing certain operations at a specific frequency.
+ {\i Chronos} allows the programmer to manage the Windows Multimedia
+ timer routines to provide these capabilities.  {\i Chronos} allows
+ an application program to register callback procedures to be called
+ at certain intervals.  {\i Chronos} also supplies a "Chronometer"
+ that can be used to time events to the resolution of the system timer.
+\par
+
+{\cf2
+Note:  This implementation of {\i Chronos} uses the Pentium's internal
+ clock count register to get extremely accurate and precise time
+ measurements.  For non-Pentium computers, {\i Chronos} will fall back
+ on the Windows multimedia timer services.  Consequently, the "interval"
+ functions are of limited use, for Pentium-class platforms at least.}\par
+
+\line{\b\fs28 Definitions}\par
+
+{\b System Timer}\par
+
+The PC hardware provides programmable timers tied to interrupt
+lines.  The system timer is timer 0.
+\par
+{\b Chronometer}\par
+
+Timing object which uses the system timer values to determine
+elapsed time.
+\par
+
+\line{\b\fs28 Features}\par
+
+Extremely precise and accurate time results, using the Pentium
+ real-time clock.
+\par
+
+Reprogram Windows timer in either milliherz or common "frequency
+ multiples" of 18.207 hz.
+\par
+
+Chronometer and AtomicChronometer objects that may be used to time events
+ and profile code segments.
+\par
+
+User-registered callback functions that are called at a
+ specified interval in real-time.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+Chronos                                                                   ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_CHRONOS_CINTERFACE}
+${\footnote C Interface Routines}
+K{\footnote
+ chronos_init;
+ chronos_term;
+ chronos_interval;
+ chronos_interval_hz;
+ chronos_add_callback;
+ chronos_clear_callbacks;
+ chronos_time_now}
++{\footnote BW_PG_5}
+{\b\f0{\cf2\scaps Programmer's Guide: Chronos}\line\fs32 Chronos Function Interface}\par\pard\sb100
+
+{\i Chronos} provides a procedural interface to the programmer for
+ registering functions and programming the timer.  The {\i Chronos}
+ system must be initialized before any of these functions may be
+ called.  If the {\uldb ChronosSystem}{\v PG_CHRONOS_SYSTEM}
+ class is used, it initializes {\i Chronos} as part of the constructor.
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "chronos.hpp"\tab for C++ interface
+\par
+
+\line{\b\fs28 Functions}\par
+
+{\b void chronos_init ()}\par
+
+Initializes the {\i Chronos} system by installing the timer interrupt
+ handler and programming the timer to the default frequency
+ (18.207 hz).  For Pentiums, the timer resolution is the processor's
+ clock speed.\par
+
+{\b void chronos_term ()}\par
+
+Removes the interrupt handler, uninitializing {\i Chronos}.\par
+
+{\b void chronos_interval (word)}\par
+
+Program the timer to fire ((word+1) * 18.207) times a second.
+ The highest rate possible is word == 0xffff, which corresponds
+ to roughly 1.2 mhz.  The slowest rate is word == 0, which is
+ 18.207 hz, the default.  See a reference on PC hardware for more
+ details.\par
+
+{\b void chronos_interval_hz (dword)}\par
+
+Program the timer to fire every dword milliherz (hz * 1000).
+ The default parameter would be 18207.  The timer is actually
+ programed to the nearest possible interval, rounded down.  See a
+ reference on PC hardware for details on the possible rates.\par
+
+{\b void chronos_add_callback (ChronosCallback, dword, void *)}\par
+
+Adds the specified function to the callback list, to be called
+ at the specified interval (currently specified in ticks).  The
+ supplied parameter is passed to the function on every call.\par
+
+{\b void chronos_clear_callbacks ()}\par
+
+Empty the callback list.\par
+
+{\b dword chronos_time_now ()}\par
+
+Return the current time in milliseconds.\par
+
+{\b double chronos_time_now_precise ()}\par
+
+Returns the current time in fractional milliseconds.\par
+
+\line{\b\fs28 Example}\par
+
+Here is a simple example that registers two callbacks that fire
+ at different rates.
+\par
+\line
+
+{\f2
+void call_me (void *parm)\line
+\{\line
+\tab *((int *)parm)++;\line
+\}\line
+\par
+main()\line
+\{\line
+\tab int x = 0, y = 0;\line
+\line
+\tab chronos_init();\line
+\tab chronos_add_callback (call_me, 1, &x);\line
+\tab chronos_add_callback (call_me, 10, &y);\line
+\line
+\tab while (!kbhit())\line
+\tab \tab ;\line
+\line
+\tab cout << "Times incremented: " \line
+\tab \tab << x << ", " \line
+\tab \tab << y << endl;\line
+\line
+\tab chronos_term();
+\line
+\}
+}
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+ChronosSystem                                                             ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_CHRONOS_SYSTEM}
+${\footnote System Class}
+K{\footnote
+ ChronosSystem;
+ ChronosSystem, init;
+ ChronosSystem, term;
+ ChronosSystem, interval;
+ ChronosSystem, interval_hz;
+ ChronosSystem, add_callback;
+ ChronosSystem, clear_callbacks;
+ ChronosSystem, time_now}
+{\b\f0{\cf2\scaps Programmer's Guide: Chronos}\line\fs32 Chronos System Class}\par\pard\sb100
+
+The system class provides an easy usage of the library from C++.
+ This object will initialize and terminate the {\i Chronos} library
+ and provides member functions for using the various functions in
+ Chronos.
+\par
+
+\line{\b\fs28 Name}\par
+
+{\b ChronosSystem} -- Library control object.
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "chronos.hpp"\tab for C++ interface
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b ChronosSystem ()}\par
+Initialize the {\i Chronos} class.  This does not install the interrupt handler.
+\par
+
+{\b ~ChronosSystem ()}\par
+Terminate the class.  This does not remove the interrupt handler.
+\par
+
+\line{\b\fs28 Member Function}\par
+
+{\b void init ()}\par
+
+Install the timer interrupt.\par
+\par
+
+{\b void term ()}\par
+
+Remove the timer interrupt, ending all timer tasks.\par
+\par
+
+{\b void interval_hz (dword tick_millihz)}\par
+
+Calls chronos_interval_hz (tick_millihz);\par
+
+{\b void interval (word tick_interval)}\par
+
+Calls chronos_interval (tick_interval);\par
+
+{\b void add_callback (ChronosCallback c, dword t, void *p)}\par
+
+Calls chronos_add_callback (c, t, p);\par
+
+{\b void clear_callbacks ()}\par
+
+Calls chronos_clear_callbacks();\par
+
+{\b ulong time_now () const}\par
+
+Calls chronos_time_now();\par
+
+{\b double time_now_precise () const}\par
+
+Calls chronos_time_now_precise();\par
+
+\line{\b\fs28 Example}\par
+
+This is the {\i Chronos} example, using the {\b ChronosSystem} class.\par
+
+{\f2
+void call_me (void *parm)\line
+\{\line
+\tab *((int *)parm)++;\line
+\}\par
+main()\line
+\{\line
+\tab int x = 0, y = 0;\par
+
+\tab ChronosSystem c();\par
+
+\tab c.add_callback (call_me, 1, &x);\line
+\tab c.add_callback (call_me, 10, &y);\par
+
+\tab while (!kbhit())\line
+\tab \tab ;\par
+
+\tab cout << "Times incremented: " << x << ", " << y << endl;\line
+\}\line
+}
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+Chronometer                                                               ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_CHRONOMETER}
+${\footnote Chronometer time keeper}
+K{\footnote
+ Chronometer;
+ Chronometer, clear;
+ Chronometer, check}
++{\footnote BW_PG_5}
+{\b\f0{\cf2\scaps Programmer's Guide: Chronos}\line\fs32 Chronometer}\par\pard\sb100
+
+The {\b Chronometer} is a stopwatch based on the {\i Chronos} system.  It
+ can be used to time events.  The resolution of this timer is the
+ same as the {\i Chronos} system timer.  That is, on Pentium systems,
+ it is the processor's clock speed.  For non-pentiums, it is the same
+ as the callback timer (windows multimedia system timer).
+\par
+
+\line{\b\fs28 Name}\par
+
+Chronometer -- Elapsed Timer Class
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "chronos.hpp"\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b Chronometer ()}\par
+
+Initializes the chronometer, setting the current count to zero.\par
+
+\line{\b\fs28 Member Function}\par
+
+{\b void clear ()}\par
+
+Clear the chronometer back to zero.\par
+
+{\b ulong check () const}\par
+
+Check the current elapsed time (in milliseconds) since the last clear().\par
+
+\line{\b\fs28 Example}\par
+
+This function tells the user how long a function executes.\line
+ Note that the 'cout' time is included - see AtomicChronometer for
+ a more accurate measuring method.\par
+
+{\f2
+void time (void (*func) ())\line
+\{\line
+\tab Chronometer timer;\par
+
+\tab func ();\line
+\tab cout << timer.check();\line
+\}\line
+}
+\par
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+AtomicChronometer                                                         ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_ACHRONOMETER}
+${\footnote AtomicChronometer precision time keeper}
+K{\footnote
+ AtomicChronometer;
+ AtomicChronometer, clear;
+ AtomicChronometer, start;
+ AtomicChronometer, stop;
+ AtomicChronometer, check;
+ AtomicChronometer, check_elapsed}
++{\footnote BW_PG_5}
+{\b\f0{\cf2\scaps Programmer's Guide: Chronos}\line\fs32 AtomicChronometer}\par\pard\sb100
+
+The {\b AtomicChronometer} is a stopwatch based on the {\i Chronos} system.
+ It differs from the standard {\i Chronometer} in that it returns its values
+ not in milliseconds, but in a {\b double} representing fractions of a second.
+ As the {\b AtomicChronometer} is well suited to code profiling, its members
+ are tailored to accululating time spent within marked regions.
+\par
+
+\line{\b\fs28 Name}\par
+
+AtomicChronometer -- Precision Elapsed Timer and Profiling Class
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "chronos.hpp"\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b AtomicChronometer ()}\par
+
+Initializes the chronometer, setting the current count to zero.\par
+
+\line{\b\fs28 Member Function}\par
+
+{\b void clear ()}\par
+
+Clear the chronometer elapsed time back to zero, and resets the start time.\par
+
+{\b void start ()}\par
+
+Resets the start time for the current interval without clearing the elapsed time.\par
+
+{\b void stop ()}\par
+
+Accumulates the elapsed time since the last start() call.\par
+
+{\b void check_elapsed () const}\par
+
+Returns the total accumulated elapsed time.\par
+
+{\b ulong check () const}\par
+
+Check the current elapsed time (in milliseconds) since the last clear() or start().\par
+
+\line{\b\fs28 Example}\par
+
+This function tells the user how long a function executes.\par
+
+{\f2
+void time (void (*func) ())\line
+\{\line
+\tab AtomicChronometer timer;\par
+
+\tab timer.start();\line
+\tab func ();\line
+\tab timer.stop();\line
+\tab cout << "Elapsed time = " << timer.check_elapsed();\line
+\}\line
+}
+\par
+\pard\page
+
+{\comment °±² eof - chronos.rtf ²±° }
+}

@@ -1,0 +1,79 @@
+;อออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออ
+;
+;                                  MythOS Help
+;
+;                      Microsoft Windows 95/98/NT Version
+;
+;   Copyright (c) 1994-1999 by Dan Higdon, Tim Little, and Chuck Walbourn
+;
+;ฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤ
+;
+; This file and all associated files are subject to the terms of the
+; GNU Lesser General Public License version 2 as published by the
+; Free Software Foundation (http://www.gnu.org).   They remain the
+; property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+; See LICENSE.TXT in the distribution for a copy of this license.
+;
+; THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+; OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+; PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+; LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+; OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+;
+;ฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤ
+;
+;                        http://www.mythos-engine.org/
+;
+;อออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออ
+
+
+[OPTIONS]
+HCW=0
+ERRORLOG=MythOS.ERR
+LCID=0x409 0x0 0x0 ;English (United States)
+REPORT=Yes
+TITLE=MythOS for Windows 95/98/NT Help
+COPYRIGHT=MythOS 95 Help -- Version 1.8
+BUILD=RELEASE
+HLP=MythOS.HLP
+
+[FILES]
+MythOS.RTF
+..\System\System.RTF
+..\Ivory\Ivory.RTF
+..\XFile\XFile.RTF
+..\Chronos\Chronos.RTF
+..\Bozo\Bozo.RTF
+..\Max\Max.RTF
+..\Felix\Felix.RTF
+..\VanGogh\VanGogh.RTF
+..\Escher\Escher.RTF
+..\Gutenbrg\Gutenbrg.RTF
+..\Turner\Turner.RTF
+..\Newton\Newton.RTF
+..\Bach\Bach.RTF
+..\Spielbrg\Spielbrg.RTF
+..\Pane\Pane.RTF
+..\Util\Util.RTF
+..\SimGine\SimGine.RTF
+
+[BUILDTAGS]
+DEBUG
+RELEASE
+
+[MAP]
+UG_ESCH_TOOL=1000
+UG_ESCH_TERR=1001
+UG_VNGO_PALTOOL=1002
+UG_UTIL_PIC=1003
+
+[BITMAPS]
+..\Escher\Esport.BMP
+..\Escher\Esmtl.BMP
+..\Escher\Eslight.BMP
+
+[WINDOWS]
+main="",(480,2,543,706),27904,(r12632256),(r8421376),f2
+
+[CONFIG]
+BrowseButtons()

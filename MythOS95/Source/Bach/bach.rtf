@@ -1,0 +1,1694 @@
+{\rtf1
+{\comment
+ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
+
+                                Bach Help
+
+                        Microsoft Windows 95/NT Version
+
+   Copyright (c) 1995-1999 by Dan Higdon, Tim Little, and Chuck Walbourn
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ This file and all associated files are subject to the terms of the
+ GNU Lesser General Public License version 2 as published by the
+ Free Software Foundation (http://www.gnu.org).   They remain the
+ property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+ See LICENSE.TXT in the distribution for a copy of this license.
+
+ THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+ OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+ PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+ LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+ OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+                        http://www.mythos-engine.org/
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ Bach is a component of the MythOS(tm) collection.
+
+ MythOS is a trademark of Charybdis Enterprises, Inc.
+
+ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
+}
+
+{\fonttbl
+\f0\fswiss Arial;
+\f1\froman Times New Roman;
+\f2\fmodern Courier New;
+\f3\fswiss MS Sans Serif;
+\f4\froman MS Serif;
+}
+\deff1
+\fs21
+
+{\colortbl;
+\red128\green128\blue128;
+\red0\green0\blue128;
+\red0\green128\blue0;
+\red128\green0\blue0;
+}
+
+{\comment
+°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+                            Programmer's Guide
+
+°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+}
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+Overview                                                                  ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_BACH_OVERVIEW}
+${\footnote Overview}
++{\footnote BW_PG_E}
+{\b\f0{\cf2\scaps Programmer's Guide: Bach}\line\fs32 Overview}\par\pard\sb100
+
+The {\i Bach} library provides a wrapper interface for Microsoft's
+ DirectSound and DirectMusic APIs with some additional functionality.  For
+ details on the operation of these APIs, see the DirectX SDK documentation.
+ The general design of {\i Bach} follows the architecture of DirectX, while
+ providing additional operations and handling restoration of buffers, file
+ loading, and other management requirements.
+\par
+
+{\cf2
+Note:  This library requires the Microsoft DirectX SDK V6.1.
+}\par
+
+\line{\b\fs28 Features}\par
+
+Standard frame-work for loading and playing digitial samples
+\par
+
+High-level interface for DirectSound which isolates API-specific behavior.
+\par
+
+Sample sequencer class for automatic playback of samples in proper order.
+\par
+
+Streaming support for playing large samples such as digital music.
+\par
+
+CD audio controller class.
+\par
+
+High-level interface for DirectMusic which isolates API-specific behavior.
+\par
+
+\line{\b\fs28 Future Work}\par
+
+Additional sample file formats as well as support for some sort of
+ notification callback mechanism may be added in future releases.  A
+ BachProceduralSample is being considered for signal-processing based effects.
+\par
+
+\line{\b\fs28 Organization}\par
+
+The {\i Bach} library contains a number of classes for sample playback
+ and a few helper classes.
+\par
+
+\tab {\uldb BachDigital}{\v PG_BACH_DIGI}\line
+\tab {\uldb BachDigital3D}{\v PG_BACH_DIGI3D}\line
+\tab {\uldb BachSample}{\v PG_BACH_SAMPLE}\line
+\tab {\uldb BachStaticSample}{\v PG_BACH_STATICSAMPLE}\line
+\tab {\uldb BachSample3D}{\v PG_BACH_SAMPLE3D}\line
+\tab {\uldb BachFileSample}{\v PG_BACH_FILESAMPLE}\line
+\tab {\uldb BachSampleSequencer}{\v PG_BACH_SAMPLESEQ}\line
+\tab {\uldb BachCD}{\v PG_BACH_CD}\line
+\tab {\uldb BachMusic}{\v PG_BACH_MUSIC}\line
+\tab {\uldb BachSequence}{\v PG_BACH_SEQUENCE}
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+BachDigital Class                                                         ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_BACH_DIGI}
+${\footnote Digital Sound Source Class}
+K{\footnote BachDigital;
+BachDigital, init;
+BachDigital, close;
+BachDigital, get_caps}
++{\footnote BW_PG_E}
+{\b\f0{\cf2\scaps Programmer's Guide: Bach}\line\fs32 Digital Sound Source Class}\par\pard\sb100
+
+This class controls the digital sound source, providing the connection to
+ DirectSound and the primary sound buffer.  An instance of this class is
+ required for all {\uldb BachSample}{\v PG_BACH_SAMPLE} derived classes
+ and must exist for their entire lifetime.
+\par
+
+{\cf2
+Note:  Once this class has been initalized, DirectSound will own the sound
+ device for the given Window handle.  This means that using other Windows
+ sound-related APIs may fail to operate until all BachSample instances are
+ destroyed and the BachDigital class instance is closed.
+}\par
+
+\line{\b\fs28 Name}\par
+
+BachDigital - DirectSound digital sound source
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "bachdigi.hpp"
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b BachDigital(ulong drate=BACH_DIGI_DRIVERRATE,
+ bach_digi_fmt fmt=BACH_DIGI_STEREO_16);}\par
+
+Sets the driver rate and format for the primary sound buffer.  init()
+ must be called manually.
+\par
+
+\line{\b\fs28 Member Data}\par
+
+{\b dword flags;}\par
+
+State and information flags for the device (see {\b Flags} below).
+\par
+
+{\b IDirectSound *dsound;}\par
+
+This points to the DirectSound instance after init() is called.  This pointer
+ should not be modified directly.
+\par
+
+{\b IDirectSoundBuffer *primary;}\par
+
+This points to the DirectSound primary sound buffer after init() is called.
+ This pointer should not be modified directly.
+\par
+
+{\b ulong driverRate;}\par
+
+This is the playback rate (in Hertz) which is used by init() to set the
+ format of the primary sound buffer (which requires a coop_level of at least
+ {\i DSSCL_PRIORITY}).  This determines the output rate that all samples
+ are converted to during mixing.
+\par
+
+{\b bach_digi_fmt driverFmt;}\par
+
+This is the playback format which is used by init() to set the format
+ of the primary sound buffer (which requires a coop_level of at least
+ {\i DSSCL_PRIORITY}).  The choices are {\i BACH_MONO_8} for 8-bit mono,
+ {\i BACH_MONO_16} for 16-bit mono, {\i BACH_STEREO_8} for 8-bit stereo,
+ or {\i BACH_STEREO_16} for 16-bit stereo.
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+{\b virtual bach_err_codes init (HWND hWnd,
+ DWORD coop_level = DSSCL_PRIORITY, int cont_play=1);}\par
+
+This connects to DirectSound and creates the primary sound buffer.  The
+ hWnd is needed to determine which window must be in focus for the sound
+ to be heard.  The coop_level is used to set DirectSound's cooperate
+ level.  If cont_play is set, then the primary buffer is set to playing
+ in a continous loop which reduces the latency of BachSample playback.
+\par
+
+{\cf2
+Note:  If you use {\i DSSCL_WRITEPRIMARY} then BachSample instances will
+ not be able to mix into the primary buffer, so this priority level should
+ not be used.
+}\par
+
+{\b virtual void close ();}\par
+
+This closes the DirectSound device.  Be sure that all referencing BachSample
+ classes have been destroyed before calling this member.  This is also
+ called by the destructor.
+\par
+
+{\scaps\cf4 NEW}\line
+{\b bach_err_codes get_caps(DSCAPS &caps) const;}\par
+
+This returns the capabilities of the DirectSound device.  See the DirectSound
+ API documentation from Microsoft for details.
+\par
+
+{\cf2
+Note:  This routine will zero the structure and set the dwSize member automatically
+ before calling DirectSound.
+}\par
+
+\line{\b\fs28 Flags}\par
+
+{\i BACH_DIGI_PRIMARY_INITIALIZED}\tab Indicates the primary buffer was created
+ successfully.  This is used internally for the close() implementation (Calling
+ Stop() on a valid buffer instance that was not fully created will crash
+ DirectSound).
+\par
+
+{\scaps\cf4 NEW}\line
+{\i BACH_DIGI_3D}\tab Indicates this is a 3D digital sound source (set by BachDigital3D).
+\par
+
+\line{\b\fs28 Error Codes}\par
+
+{\i BACH_ERR_NONE}\tab\tab\tab No error.
+\par
+
+{\i BACH_ERR_INVALIDPARAMS}\tab\tab Invalid parameters.
+\par
+
+{\i BACH_ERR_NOTSUPPORTED}\tab\tab Unsupported operation or format.
+\par
+
+{\i BACH_ERR_DSCONNECTFAIL}\tab\tab Failed to create DirectSound instance.
+\par
+
+{\i BACH_ERR_DSSETCOOPFAIL}\tab\tab Failed to set DirectSound coop level.
+\par
+
+{\i BACH_ERR_DSPRICREATFAIL}\tab Failed to create primary sound buffer.
+\par
+
+{\i BACH_ERR_DSFORMATFAILED}\tab Failed to set format for primary buffer.
+\par
+
+{\i BACH_ERR_DSFAILED}\tab\tab DirectSound operation failed.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+BachDigital3D Class                                                       ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_BACH_DIGI3D}
+${\footnote Digital 3D Sound Source Class}
+K{\footnote BachDigital3D;
+BachDigital3D, set;
+BachDigital3D, set_distance;
+BachDigital3D, set_doppler;
+BachDigital3D, set_rolloff;
+BachDigital3D, set_orient;
+BachDigital3D, set_position;
+BachDigital3D, set_velocity;
+BachDigital3D, recalc;
+BachDigital3D, get;
+BachDigital3D, get_distance;
+BachDigital3D, get_doppler;
+BachDigital3D, get_rolloff;
+BachDigital3D, get_orient;
+BachDigital3D, get_position;
+BachDigital3D, get_velocity}
++{\footnote BW_PG_E}
+{\b\f0{\cf2\scaps Programmer's Guide: Bach}\line\fs32 Digital 3D Sound Source Class}\par\pard\sb100
+
+{\scaps\cf4 NEW}\line
+This class extends the BachDigital class to include 3D controls.  If you wish to
+ use 3D sound controls, you must create the main digital device with this
+ class and then use {\uldb BachSample3D}{\v PG_BACH_SAMPLE3D} samples for 3D
+ sound effects--you can use other non-3D classes with this class as well.
+\par
+
+The 3D listener is controlled by member functions of this class to set position,
+ velocity, orientation, and other parameters.  When parameters are changed for
+ the listener or any BachSample3D, a system-wide recalculation is performed by
+ DirectSound.  If you specify '0' for the recalc parameter, the setting is added
+ to a deffered changes list and no recalculation is performed.  You must either
+ make another setting change with a non-zero recalc parameter or explicity call
+ this class's recalc() member for the settings to take effect.
+\par
+
+\line{\b\fs28 Name}\par
+
+BachDigital3D - DirectSound digital 3D sound source
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "bachdigi.hpp"
+\par
+
+\line{\b\fs28 Base Classes}\par
+
+{\uldb BachDigital}{\v PG_BACH_DIGI}
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b BachDigital3D(ulong drate=BACH_DIGI_DRIVERRATE,
+ bach_digi_fmt fmt=BACH_DIGI_STEREO_16);}\par
+
+Sets the driver rate and format for the primary sound buffer.  init()
+ must be called manually.
+\par
+
+{\cf2
+Note: Initializing this class with a MONO format will result in an error since STEREO output
+ is required for 3D effects.
+}\par
+
+\line{\b\fs28 Member Data}\par
+
+Same as {\uldb BachDigital}{\v PG_BACH_DIGI}, plus :-
+\par
+
+{\b IDirectSound3DListener *listener;}\par
+
+This points to the 3D listener interface after init() is called. This pointer
+ should not be modified directly.
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+Same as {\uldb BachDigital}{\v PG_BACH_DIGI}, plus :-
+\par
+
+{\b bach_err_codes set(DS3DLISTENER &settings, int recalc=1);}\par
+
+This will set all the parameters for the 3D listener in a single call.
+\par
+
+{\cf2
+Note:  This routine will set the dwSize member automatically before calling DirectSound.
+}\par
+
+{\b bach_err_codes set_distance(float factor, int recalc=1);}\par
+
+Sets the distance factor for the 3D listener which controls the scaling of application units to
+ real-world meters required for DirectSound's internal computation.  This is in
+ 'meters per applicaton unit'.  This primarily affects Doppler shift effects.  The default is 1.0.
+\par
+
+{\b bach_err_codes set_doppler(float factor, int recalc=1);}\par
+
+Sets a multiple of real-world Doppler shift (1.0 indicates real-world values, otherwise ranges
+ from 0.0 to 10.0--according to the Microsoft DirectX V6 documentation).  The default is 1.0.
+\par
+
+{\b bach_err_codes set_rolloff(float factor, int recalc=1);}\par
+
+Sets a multiple of real-world rolloff (1.0 indicates real-world values, otherwise ranges from
+ 0.0 to 10.0--according to the Microsoft DirectX V6 documentation).  The default is 1.0.
+\par
+
+{\b bach_err_codes set_orient(float fi, float fj, float fk,
+ float ti, float tj, float tk, int recalc=1);}\par
+
+Sets the front and top orientation vectors for the listener.  The default is [0 0 1] and [0 1 0].
+\par
+
+{\b bach_err_codes set_position(float x, float y, float z, int recalc=1);}\par
+
+Sets the position of the listener.  The default is [0 0 0].
+\par
+
+{\b bach_err_codes set_velocity(float i, float j, float k, int recalc=1);}\par
+
+Sets the current velocity of the listener (which is only used for sound computation and in no way
+ adjusts the position of the listener).  The default is [0 0 0].
+\par
+
+{\b bach_err_codes recalc();}\par
+
+This forces a system-wide recalculation of any deffered setting changes.
+\par
+
+{\b void get(DS3DLISTENER &settings) const;}\par
+
+Gets all the parameters for the 3D listener in a single call.
+\par
+
+{\cf2
+Note:  This routine will zero the structure and set the dwSize member automatically
+ before calling DirectSound.
+}\par
+
+{\b float get_distance() const;}\par
+
+Gets the distance factor.
+\par
+
+{\b float get_doppler() const;}\par
+
+Gets the Doppler factor.
+\par
+
+{\b float get_rolloff() const;}\par
+
+Gets the rolloff factor.
+\par
+
+{\b void get_orient(float &fi, float &fj, float &fk, float &ti, float &tj, float &tk) const;}\par
+
+Gets the orientation front and top vectors for the listener.
+\par
+
+{\b void get_position(float &x, float &y, float &z) const;}\par
+
+Gets the position of the listener.
+\par
+
+{\b void get_velocity(float &i, float &j, float &k) const;}\par
+
+Gets the velocity of the listener.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+BachSample Class                                                          ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_BACH_SAMPLE}
+${\footnote Base Sample Class}
+K{\footnote BachSample;
+BachSample, operator =;
+BachSample, release;
+BachSample, play;
+BachSample, stop;
+BachSample, pause;
+BachSample, resume;
+BachSample, status;
+BachSample, set_app_data;
+BachSample, set_flags}
++{\footnote BW_PG_E}
+{\b\f0{\cf2\scaps Programmer's Guide: Bach}\line\fs32 Base Sample Class}\par\pard\sb100
+
+{\scaps\cf4 CHANGED}\line
+This is the base container class for digital samples.  A digital sample
+ contains the sound (music, effect, etc.) to be heard and this class
+ provides the basic play, stop, and information functionality common to
+ all samples.  This is an abstract class, so it cannot be created directly.
+\par
+
+A {\b BachSample} contains a DirectSound secondary sound buffer which
+ may reside on the hardware of the sound device or in system memory.  The
+ CPU overhead required to play the sample is governed by the driver's
+ rate and format, the sound device, and the number of samples in play
+ simulataneously.
+\par
+
+\line{\b\fs28 Name}\par
+
+BachSample - Base digital sample container
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "bachdigi.hpp"
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b BachSample (BachDigital *digi);}\par
+
+Initalizes the sample with the given digital sound source instance.
+\par
+
+{\b BachSample (BachSample const &b);}\par
+
+Creates the sample based on the data within another sample (may not be
+ possible for all sample types), duplicating the DirectSound secondary
+ sound buffer for multiple simulatenous playback of a single sample.
+\par
+
+\line{\b\fs28 Member Data}\par
+
+{\b protected IDirectSound *dsound;}\par
+
+DirectSound instance for the sample.
+\par
+
+{\b protected IDirectSoundBuffer *sbuffer;}\par
+
+DirectSound secondary sound buffer for the sample.
+\par
+
+{\b dword flags;}\par
+
+State and information flags for the sample (see {\b Flags} below).  Use
+ set_flags() to change.
+\par
+
+{\b bach_digi_fmt fmt;}\par
+
+Format of the sample (DirectSound will automatically convert the sample
+ during playback to match the driver's format).  The choices for format
+ are {\i BACH_MONO_8} for 8-bit mono, {\i BACH_MONO_16} for 16-bit mono,
+ {\i BACH_STEREO_8} for 8-bit stereo, or {\i BACH_STEREO_16} for 16-bit
+ stereo.  This is set by create() or the load_() functions.
+\par
+
+{\b ulong rate;}\par
+
+Sample rate of the sample in Hertz (common rates include 8000, 11025,
+ 22500, 44000; DirectSound will automatically rate conver the sample
+ during playback, including any pitch shifting--see set_playrate()
+ below--to match the driver's rate).  This is set by create() or the
+ load_() functions.
+\par
+
+{\b void *app_data;}\par
+
+Data pointer for use by the application.  Should be set by set_app_data().
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+{\b BachSample &operator = (BachSample const &that);}\par
+
+Duplicates the sound buffer and copies the other data while clearing the
+ {\i BACH_SMP_OWNSDATA} bit.  Some samples cannot support this operation.
+\par
+
+{\b virtual void release ();}\par
+
+Releases all associated data.  This is called by the destructor.
+\par
+
+{\b virtual bach_err_codes play (int loop = 0)=0;}\par
+
+Begin playback of sample.
+\par
+
+{\b virtual bach_err_codes stop ()=0;}\par
+
+Stop play of sample and rewind position to start.
+\par
+
+{\b virtual bach_err_codes pause()=0;}\par
+
+Pause playback of sample.
+\par
+
+{\b virtual bach_err_codes resume()=0;}\par
+
+Resume playback of paused sample.
+\par
+
+{\b virtual dword status() const=0;}\par
+
+Return status of sample:  {\i BACH_SMPSTAT_PLAYING} indiciates the sample
+ is currently playing.  {\i BACH_SMPSTAT_LOOPING} indicates the sample
+ is looping durig playback.
+\par
+
+{\b void set_app_data(void *p);}\par
+
+Sets the app_data pointer.
+\par
+
+{\scaps\cf4 NEW}\line
+{\b void set_flags(dword f);}\par
+
+Sets the flags member.
+\par
+
+\line{\b\fs28 Flags}\par
+
+{\i BACH_SMP_LOOP}\tab\tab Indiciates sample playback should be looped (used by
+ the internal implementation of pause/resume).
+\par
+
+{\scaps\cf4 NEW}\line
+{\i BACH_SMP_3D}\tab\tab Indicates sample is a 3D sample (set by BachSample3D).
+\par
+
+{\scaps\cf4 NEW}\line
+{\i BACH_SMP_3DMUTEATMAX}\tab Set before loading data into a 3D sample if you
+ want the sound to mute when further than 'max distance'.
+\par
+
+{\scaps\cf4 NEW}\line
+{\i BACH_SMP_3DVOLUMECTRL}\tab Set before loading data into a 3D sample if you
+ want to have direct volume control.
+\par
+
+{\scaps\cf4 NEW}\line
+{\i BACH_SMP_3DFREQCTRL}\tab Set before loading data into a 3D sample if you
+ want to have direct frequency/pitch control.
+\par
+
+{\i BACH_SMP_OWNSDATA}\tab Associated data is owned by the sample and should
+ be freed by release()--note that sbuffer is always considered owned by
+ the sample since it must be specially duplicated to have two secondary
+ sound buffers point to the same data.
+\par
+
+{\i BACH_SMP_OVERRUN}\tab For streamed samples, this indicates that the
+ buffer size is too small for the latency encountered.
+\par
+
+{\i BACH_SMP_APP0} -\line
+{\i BACH_SMP_APP7}\tab\tab Application-defined bits.
+\par
+
+\line{\b\fs28 Error Codes}\par
+
+{\i BACH_ERR_NONE}\tab\tab\tab No error.
+\par
+
+{\i BACH_ERR_INVALIDPARAMS}\tab\tab Invalid parameters.
+\par
+
+{\i BACH_ERR_NOTSUPPORTED}\tab\tab Unsupported operation or format.
+\par
+
+{\i BACH_ERR_OUTOFMEMORY}\tab\tab Memory allocation failed.
+\par
+
+{\i BACH_ERR_LOCKFAILED}\tab\tab Handle memory lock failed.
+\par
+
+{\i BACH_ERR_UNINITIALIZED}\tab\tab Class instance has not been initalized.
+\par
+
+{\i BACH_ERR_BUSY}\tab\tab\tab Sample busy, cannot perform operation.
+\par
+
+{\i BACH_ERR_FILENOTFOUND}\tab\tab File not found.
+\par
+
+{\i BACH_ERR_FILEERROR}\tab\tab File error occurred.
+\par
+
+{\i BACH_ERR_NOTFOUND}\tab\tab Data not found.
+\par
+
+{\i BACH_ERR_THREADFAILED}\tab\tab Failed to create needed thread.
+\par
+
+{\i BACH_ERR_EVENTFAILED}\tab\tab Failed to create needed event object.
+\par
+
+{\i BACH_ERR_DSSECCREATFAIL}\tab Failed to create secondary sound buffer.
+\par
+
+{\i BACH_ERR_DSLOCKFAILED}\tab\tab DirectSound sound buffer lock failed.
+\par
+
+{\i BACH_ERR_DSBUFFERLOST}\tab\tab DirectSound sound buffer lost and can't
+ be restored.
+\par
+
+{\i BACH_ERR_DSFAILED}\tab\tab DirectSound operation failed.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+BachStaticSample Class                                                    ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_BACH_STATICSAMPLE}
+${\footnote Static Sample Class}
+K{\footnote BachStaticSample;
+BachStaticSample, set_volume;
+BachStaticSample, get_volume;
+BachStaticSample, set_pan;
+BachStaticSample, get_pan;
+BachStaticSample, set_playrate;
+BachStaticSample, get_playrate;
+BachStaticSample, set_position;
+BachStaticSample, get_position;
+BachStaticSample, create;
+BachStaticSample, get_playtime;
+BachStaticSample, load_raw;
+BachStaticSample, load_wav}
++{\footnote BW_PG_E}
+{\b\f0{\cf2\scaps Programmer's Guide: Bach}\line\fs32 Static Sample Class}\par\pard\sb100
+
+This class implements a static sample (usually a sound effect) which resides
+ entirely in memory and provides support for loading sample files (.RAW raw
+ data files and Microsoft RIFF .WAV files).
+\par
+
+{\cf2
+Note:  Since DirectSound secondary buffers may be lost at unpredictable
+ times, the sound data is kept in both the secondary buffer and in
+ handle memory.
+}\par
+
+\line{\b\fs28 Name}\par
+
+BachStaticSample - Static digital sample container
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "bachdigi.hpp"
+\par
+
+\line{\b\fs28 Base Class}\par
+
+{\uldb BachSample}{\v PG_BACH_SAMPLE}
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b BachStaticSample (BachDigital *digi);}\par
+
+Initializes the sample container to work with the given digital sound source.
+\par
+
+\line{\b\fs28 Member Data}\par
+
+Same as {\uldb BachSample}{\v PG_BACH_SAMPLE} plus :-
+\par
+
+{\b ulong length;}\par
+
+Length, in bytes, of the sample.
+\par
+
+{\b IvoryHandle handle;}\par
+
+Handle to sample backup memory buffer.
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+Same as {\uldb BachSample}{\v PG_BACH_SAMPLE} plus :-
+\par
+
+{\b bach_err_codes set_volume (long vol);\line
+long get_volume () const;}\par
+
+Sets/gets the playback volume of the sample (0=no volume, 127=full).
+\par
+
+{\b bach_err_codes set_pan (long heading);\line
+long get_pan () const;}\par
+
+Sets/gets the pan direction of the sample (-179 (left) to 180 (right)
+ degrees).
+\par
+
+{\b bach_err_codes set_playrate (ulong r);\line
+ulong get_playrate() const;}\par
+
+Sets/gets the playback rate (in Hertz) for pitch-shifting.
+\par
+
+{\b bach_err_codes set_position (ulong p);\line
+ulong get_position() const;}\par
+
+Sets/gets the playback position in the buffer (in bytes).
+\par
+
+{\b bach_err_codes create(void *p, ulong l,
+ bach_digi_fmt f=BACH_DIGI_MONO_8, ulong r=BACH_DIGI_DRIVERRATE);}\par
+
+Creates the sound buffer and backup handle memory buffer given a pointer
+ to the sample data, the length in bytes, the format, and the sample rate.
+ The original sample memory is no longer needed once this routine has
+ successfully completed.
+\par
+
+{\b ulong get_playtime () const;}\par
+
+This returns the playback time (in ms) of the sample from the current
+ position to the end of it's length assume the playback is at the
+ samples normal rate (no pitch-shifting).
+\par
+
+{\b bach_err_codes load_raw(const char *fname,
+ bach_digi_fmt f=BACH_DIGI_MONO_8, ulong r=BACH_SMP_DEFAULTRATE);\line
+bach_err_codes load_raw(XFile &xf,
+ bach_digi_fmt f=BACH_DIGI_MONO_8, ulong r=BACH_SMP_DEFAULTRATE);}\par
+
+Loads a .RAW file which contains sample data with no formating or header.
+ The data's format and rate is required to properly interpret it.
+\par
+
+{\b bach_err_codes load_wav(const char *fname);\line
+bach_err_codes load_wav(XFParseIFF &iff);}\par
+
+Loads a Microsoft RIFF .WAV file.  Currently only PCM format data is
+ supported.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+BachSample3D Class                                                        ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_BACH_SAMPLE3D}
+${\footnote Static 3D Sample Class}
+K{\footnote BachSample3D;
+BachSample3D, operator =;
+BachSample3D, set;
+BachSample3D, set_mode;
+BachSample3D, set_cone;
+BachSample3D, set_cone_orient;
+BachSample3D, set_cone_volume;
+BachSample3D, set_min_distance;
+BachSample3D, set_max_distance;
+BachSample3D, set_position;
+BachSample3D, set_velocity;
+BachSample3D, get;
+BachSample3D, get_mode;
+BachSample3D, get_cone;
+BachSample3D, get_cone_orient;
+BachSample3D, get_cone_volume;
+BachSample3D, get_min_distance;
+BachSample3D, get_max_distance;
+BachSample3D, get_position;
+BachSample3D, get_velocity}
++{\footnote BW_PG_E}
+{\b\f0{\cf2\scaps Programmer's Guide: Bach}\line\fs32 Static 3D Sample Class}\par\pard\sb100
+
+{\scaps\cf4 NEW}\line
+This class extends the static sample interface to include 3D sound controls.
+ You must use the {\uldb BachDigital3D}{\v PG_BACH_DIGI3D} class in order
+ to make use of this class.  When setting parameters, a system-wide recalculation
+ is performed unless the 'recalc' parameter is set to '0' to defer the settings until
+ the next setting performed with a non-zero 'recalc' parameter or direct call to
+ BachDigital3D::recalc().
+\par
+
+{\cf2
+Note:  3D sound samples use up a great deal of CPU time if emulated in software, so care
+ should be taken to check for 3D hardware (using BachDigital::get_caps()) and to allocate
+ all of your BachSample3D instances first to ensure they get hardware priority.
+}\par
+
+\line{\b\fs28 Name}\par
+
+BachSample3D - Static 3D digital sample container
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "bachdigi.hpp"
+\par
+
+\line{\b\fs28 Base Class}\par
+
+{\uldb BachStaticSample}{\v PG_BACH_STATICSAMPLE}
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b BachSample3D (BachDigital *digi);}\par
+
+Initializes the sample container to work with the given digital sound source.
+\par
+
+{\b BachSample3D (BachSample3D const &b);}\par
+
+Creates the sample based on the data within another 3D sample,
+ duplicating the DirectSound secondary sound buffer for multiple
+ simulatenous playback of a single sample.
+\par
+
+\line{\b\fs28 Member Data}\par
+
+Same as {\uldb BachStaticSample}{\v PG_BACH_STATICSAMPLE} plus :-
+\par
+
+{\b IDirectSound3DListener *listener;}\par
+
+Pointer to the 3D listener obtained from the BachDigital3D instance passed
+ to the constructor.  Used to implement 'recalc' functionality.  This pointer
+ should not be modified directly.
+\par
+
+{\b IDirectSound3DBuffer *sbuffer3d;}\par
+
+Pointer to the 3D interface for the sound buffer.  This pointer should not be
+ modified directly.
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+Same as {\uldb BachStaticSample}{\v PG_BACH_STATICSAMPLE} plus :-
+\par
+
+{\b BachSample3D &operator = (BachSample3D const &that);}\par
+
+Duplicates the sound buffer and copies the other data while clearing the
+ {\i BACH_SMP_OWNSDATA} bit.
+\par
+
+{\b bach_err_codes set(DS3DBUFFER &settings, int recalc=1);}\par
+
+Sets all 3D control parameters in a single call.
+\par
+
+{\cf2
+Note:  This routine will set the dwSize member automatically before calling DirectSound.
+}\par
+
+{\b bach_err_codes set_mode(DWORD mode=DS3DMODE_NORMAL, int recalc=1);}\par
+
+Sets the 3D mode for the sound buffer: {\i DS3DMODE_NORMAL}, {\i DS3DMODE_HEADRELATIVE},
+ or {\i DS3DMODE_DISABLE}.  Defaults to DS3DMODE_NORMAL.
+\par
+
+{\b bach_err_codes set_cone(ulong ia, ulong oa, int recalc=1);}\par
+
+Sets the inside and outside angles (in degrees) which define the sound cone for the
+ sound buffer.  Defaults to 90 and 120 but has no effect until the cone volume is changed.
+\par
+
+{\b bach_err_codes set_cone_orient(float i, float j, float k, int recalc=1);}\par
+
+Sets the orientation vector for the sound cone.  Defaults to [0 0 -1].
+\par
+
+{\b bach_err_codes set_cone_volume(long vol, int recalc=1);}\par
+
+Sets the volume outside of the sound cone.  This is defined as 0 for silence to
+ 127 (full volume based on the final volume after all other processing).  The default
+ is 127.
+\par
+
+{\cf2
+Note:  The volume is specified as attenuation in dB if using the DS3DBUFFER format, but is
+ converted here for consistency with the BachStaticSample::set_volume() routine.
+}\par
+
+{\b bach_err_codes set_min_distance(float dist, int recalc=1);}\par
+
+Sets the minimum distance for the 3D sound.  The default is 1.0.
+\par
+
+{\b bach_err_codes set_max_distance(float dist, int recalc=1);}\par
+
+Sets the maximum distance for the 3D sound.  The default is 50.0.  If
+ {\i BACH_SMP_3DMUTEATMAX} was set when loading data into the sample instance,
+ then the sound will be muted if located a greater than max distance from
+ the listener.
+\par
+
+{\b bach_err_codes set_position(float x, float y, float z, int recalc=1);}\par
+
+Sets the position for the 3D sound.  Defaults to [0 0 0].
+\par
+
+{\b bach_err_codes set_velocity(float i, float j, float k, int recalc=1);}\par
+
+Sets the velocity for the 3D sound (does not affect the position in any way).  Defaults
+ to [0 0 0].
+\par
+
+{\b void get(DS3DBUFFER &settings) const;}\par
+
+Gets all 3D control parameters in a single call.
+\par
+
+{\cf2
+Note:  This routine will zero the structure and set the dwSize member automatically
+ before calling DirectSound.
+}\par
+
+{\b DWORD get_mode() const;}\par
+
+Gets the 3D mode for the sound buffer.
+\par
+
+{\b void get_cone(ulong &ia, ulong &oa) const;}\par
+
+Gets the inside and outside angles for the sound cone (in degrees).
+\par
+
+{\b void get_cone_orient(float &i, float &j, float &k) const;}\par
+
+Gets the orientation vector for the sound cone.
+\par
+
+{\b long get_cone_volume() const;}\par
+
+Gets the outside volume for the sound cone (0 to 127 with 127 being full volume after all other
+ processing).
+\par
+
+{\b float get_min_distance() const;}\par
+
+Gets the minimum distance for the 3D sound.
+\par
+
+{\b float get_max_distance() const;}\par
+
+Gets the maximum distance for the 3D sound.
+\par
+
+{\b void get_position(float &x, float &y, float &z) const;}\par
+
+Gets the position of the 3D sound.
+\par
+
+{\b void get_velocity(float &i, float &j, float &k) const;}\par
+
+Gets the velocity of the 3D sound.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+BachFileSample Class                                                      ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_BACH_FILESAMPLE}
+${\footnote File Sample Class}
+K{\footnote BachFileSample;
+BachFileSample, init;
+BachFileSample, ready_raw;
+BachFileSample, ready_wav;
+BachFileSample, next}
++{\footnote BW_PG_E}
+{\b\f0{\cf2\scaps Programmer's Guide: Bach}\line\fs32 File Sample Class}\par\pard\sb100
+
+This class implements a streaming sample (usually background music) which
+ resides in a file (.RAW raw data files or Microsoft RIFF .WAV files in
+ PCM format).  The implementation can have a second file queued up to
+ stream after the completion of the current sample file.
+\par
+
+{\cf2
+Note:  A Windows thread is created for each instance of this class.
+}\par
+
+\line{\b\fs28 Name}\par
+
+BachFileSample - Streaming file digital sample
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "bachdigi.hpp"
+\par
+
+\line{\b\fs28 Base Class}\par
+
+{\uldb BachSample}{\v PG_BACH_SAMPLE}
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b BachFileSample (class BachDigital *digi, ulong bsize = 16384);}\par
+
+Initializes the instance for playback on the given digital sound source
+ and provides the size of the working buffer space which will impact the
+ CPU overhead of streaming the file.
+\par
+
+{\cf2
+Note:  If the {\i BACH_SMP_OVERRUN} bit is set after playback in your
+ application, then you should increase your buffer size to prevent hicups
+ in the playback.
+}\par
+
+\line{\b\fs28 Member Data}\par
+
+Same as {\uldb BachSample}{\v PG_BACH_SAMPLE}.
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+Same as {\uldb BachSample}{\v PG_BACH_SAMPLE} plus :-
+\par
+
+{\b virtual bach_err_codes pause();\line
+virtual bach_err_codes resume();}\par
+
+These operations are currently not supported for streaming.
+\par
+
+{\b bach_err_codes init();}\par
+
+Initializes the streaming thread needed for playback.  This is called
+ by the ready_() routines if needed.
+\par
+
+{\b bach_err_codes ready_raw (const char *fname,
+ bach_digi_fmt f=BACH_DIGI_MONO_8, ulong r=BACH_SMP_DEFAULTRATE);\line
+bach_err_codes ready_raw (XFile *xf,
+ bach_digi_fmt f=BACH_DIGI_MONO_8, ulong r=BACH_SMP_DEFAULTRATE, ulong l=0,
+ int owns=1);}\par
+
+Prepares a .RAW data file for streaming given the proper format and
+ rate of the data file.  If the instance is given ownership of the
+ XFile instance (owns set), then it will be deleted on completion
+ of playback.  The second version can specify a length for the part of
+ the file to playback, otherwise the entire file is played starting
+ at the current position.
+\par
+
+{\b bach_err_codes ready_wav (const char *fname);\line
+bach_err_codes ready_wav (XFile *xf, XFParseIFF *iff, int owns=0);}\par
+
+Prepares a Microsoft RIFF .WAV file for streaming.  If the instance is
+ given ownership of the XFile instance (owns set), then it will be
+ deleted on completion of playback.  The XFParseIFF instance is detached
+ from the XFIle instance during the ready operation.
+\par
+
+{\b bach_err_codes next();}\par
+
+This stops the current streaming file and switches immediately to the next
+ file, if any.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+BachSampleSequencer Class                                                 ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_BACH_SAMPLESEQ}
+${\footnote Sample Sequencer Class}
+K{\footnote BachSequencerSample;
+BachSequencerSample, release;
+BachSequencerSample, init;
+BachSequencerSample, add;
+BachSequencerSample, next;
+BachSequencerSample, play;
+BachSequencerSample, stop;
+BachSequencerSample, current;
+BachSequencerSample, get_playtime}
++{\footnote BW_PG_E}
+{\b\f0{\cf2\scaps Programmer's Guide: Bach}\line\fs32 Sample Sequencer Class}\par\pard\sb100
+
+This class implements a method for automatic playback of a sequence of
+ {\uldb BachStaticSamples}{\v PG_BACH_STATICSAMPLE}, one after the other.
+ This is useful for speech segements which should be chained into a sequence.
+\par
+
+{\cf2
+Note:  A Windows thread is created for each instance of this class.
+}\par
+
+\line{\b\fs28 Name}\par
+
+BachSampleSequencer - Sample sequence manager
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "bachmisc.hpp"
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b BachSampleSequencer ();}\par
+
+Initializes the instance.
+\par
+
+\line{\b\fs28 Member Data}\par
+
+{\b dword flags;}\par
+
+State control flags (see Flags below).
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+{\b virtual void release();}\par
+
+Releases the associated thread, events, and samples (if
+ {\i BACH_SSEQ_OWNSSAMPLES} is set.
+\par
+
+{\b bach_err_codes init();}\par
+
+Creates the thread and events needed by the class.  This is called by
+ add() if needed.
+\par
+
+{\b bach_err_codes add (BachStaticSample *sample, int start_play=1);}\par
+
+Adds a sample to the sequencer for playback.  If start_play is set and
+ playback has yet started, play() is called.
+\par
+
+{\b BachStaticSample *next ();}\par
+
+Advances to the next sample in the sequence, returning the next sample's
+ pointer or NULL if no sample pending.
+\par
+
+{\b bach_err_codes play();}\par
+
+Begins playback of any queued sequences.
+\par
+
+{\b void stop(int stop_current=1);}\par
+
+Stops the playback of sequences and clears the pending list.  If stop_current
+ is not set, then all but the current sample is cleared.
+\par
+
+{\b BachStaticSample *current () const;}\par
+
+Returns a pointer to the current sample (head of sequence).
+\par
+
+{\b ulong get_playtime () const;}\par
+
+Returns the cumaltive playback time (in ms) of all pending samples from
+ the current playback points.
+\par
+
+\line{\b\fs28 Flags}\par
+
+{\i BACH_SSEQ_OWNSSAMPLES}\tab BachStaticSample instances are owned by
+ the sequencer and should be freed when no longer needed.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+BachCD Class                                                              ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_BACH_CD}
+${\footnote CD Audio Class}
+K{\footnote BachCD;
+BachCD, init;
+BachCD, close;
+BachCD, play;
+BachCD, stop;
+BachCD, pause;
+BachCD, resume;
+BachCD, status;
+BachCD, eject;
+BachCD, retract;
+BachCD, set_track;
+BachCD, set_position;
+BachCD, get_track;
+BachCD, get_position;
+BachCD, get_num_tracks;
+BachCD, get_track_info;
+BachCD, set_flags}
++{\footnote BW_PG_E}
+{\b\f0{\cf2\scaps Programmer's Guide: Bach}\line\fs32 CD Audio Class}\par\pard\sb100
+
+{\scaps\cf4 NEW}\line
+This class implements a CD audio playback controller interface which uses the
+ Windows MCI API to send commands to the CD drive.  This can be used to
+ play audio tracks directly from the disk without using CPU or sound hardware.
+ This, of course, requires that no other CD operations be performed during
+ playback.
+\par
+
+\line{\b\fs28 Name}\par
+
+BachCD - CD audio control class
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "bachcd.hpp"
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b BachCD();}\par
+
+Initializes the instance.
+\par
+
+\line{\b\fs28 Member Data}\par
+
+{\b ulong devid;}\par
+
+Device ID saved during init() for multi-device systems.
+\par
+
+{\b dword flags;}\par
+
+Control flags (see Flags below).  Use set_flags() to change.
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+{\b virtual bach_err_codes init (ulong id=0);}\par
+
+Opens the CD audio device (where id specifies the specific device if multiple
+ devices are present).
+\par
+
+{\b virtual void close ();}\par
+
+Closes the CD audio device.
+\par
+
+{\b virtual bach_err_codes play (ulong sms=0, ulong ems=0);}\line
+{\b virtual bach_err_codes stop ();}\line
+{\b virtual bach_err_codes pause();}\line
+{\b virtual bach_err_codes resume();}\par
+
+Standard playback functions for play, stop, pause, and resume.  Play takes
+ the start and end time (in milliseconds) or 0 for sms to indicate start of
+ Track 1 and ems of 0 to indicate the full length of the CD.
+\par
+
+{\b virtual dword status() const;}\par
+
+Returns the current status of the CD device: {\i BACH_CDSTAT_PLAYING},
+ {\i BACH_CDSTAT_PAUSED}, {\i BACH_CDSTAT_DOOROPEN}, {\i BACH_CDSTAT_NOTREADY}.
+\par
+
+{\b virtual bach_err_codes eject();}\line
+{\b virtual bach_err_codes retract();}\par
+
+Controls opening and closing the CD drive bay.
+\par
+
+{\b virtual bach_err_codes set_track(ulong ntrack);}\par
+
+Sets the current position to the given track (not zero based).
+\par
+
+{\b virtual bach_err_codes set_position(ulong ms);}\par
+
+Setss the current position to the given run time (which does not always
+ start with 0).  Use get_track_info() to get specific time codes.
+\par
+
+{\b ulong get_track() const;}\par
+
+Returns the current track number (not zero based).
+\par
+
+{\b ulong get_position() const;}\par
+
+Returns the current position (in milliseconds).
+\par
+
+{\b ulong get_num_tracks() const;}\par
+
+Returns the number of tracks on the CD.
+\par
+
+{\b bach_err_codes get_track_info(ulong ntrack, ulong &sms, ulong &ems) const;}\par
+
+Gets the given track number's start and end time.
+\par
+
+{\b void set_flags(dword f);}\par
+
+Sets the flags member to a given control flags set (see Flags below).
+\par
+
+\line{\b\fs28 Flags}\par
+
+{\i BACH_CD_STOPONCLOSE}\tab Stop playback on close.  This is on by default.
+\par
+
+{\i BACH_CD_WAITONSTOP}\line
+{\i BACH_CD_WAITONPAUSE}\line
+{\i BACH_CD_WAITONRESUME}\line
+{\i BACH_CD_WAITONEJECT}\line
+{\i BACH_CD_WAITONRETRACT}\line
+{\i BACH_CD_WAITONSEEK}\tab Waits for the given operation to complete before returning.
+ These are all off by default and the functions return immediately.
+\par
+
+\line{\b\fs28 Error Codes}\par
+
+{\i BACH_ERR_NONE}\tab\tab\tab No error.
+\par
+
+{\i BACH_ERR_INVALIDPARAMS}\tab\tab Invalid parameters.
+\par
+
+{\i BACH_ERR_NOTSUPPORTED}\tab\tab Unsupported operation.
+\par
+
+{\i BACH_ERR_OUTOFMEMORY}\tab\tab Memory allocation failed.
+\par
+
+{\i BACH_ERR_UNINITIALIZED}\tab\tab Class instance has not been initalized.
+\par
+
+{\i BACH_ERR_ALREADYOPEN}\tab\tab Class instance already opened.
+\par
+
+{\i BACH_ERR_MCIDEVOPEN}\tab\tab CD device is already open.
+\par
+
+{\i BACH_ERR_MCIFAILED}\tab\tab MCI command failed.
+\par
+
+{\i BACH_ERR_MCIOUTOFRANGE}\tab MCI command failed due to out-of-range input.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+BachMusic Class                                                           ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_BACH_MUSIC}
+${\footnote Music Sound Source Class}
+K{\footnote BachMusic;
+BachMusic, init;
+BachMusic, close;
+BachMusic, activate;
+BachMusic, deactivate}
++{\footnote BW_PG_E}
+{\b\f0{\cf2\scaps Programmer's Guide: Bach}\line\fs32 Music Sound Source Class}\par\pard\sb100
+
+This class implements a DirectMusic control class for the output of message-based
+ music (i.e., MIDI).  This class connects to DirectMusic, creates the required
+ port, performance object, and loader for use by the
+ {\uldb BachSequence}{\v PG_BACH_SEQUENCE} class.
+\par
+
+{\cf2
+Note:  This library requires DirectX V6.1 since the final release of
+ DirectMusic is only available as of DX6.1.
+}\par
+
+\line{\b\fs28 Name}\par
+
+BachMusic - Music sound source class.
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "bachmus.hpp"
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b BachMusic();}\par
+
+Initializes the instance.
+\par
+
+\line{\b\fs28 Member Data}\par
+
+{\b IDirectMusic *dmusic;\line
+IDirectMusicPort *port;\line
+IDirectMusicPerformance *perf;\line
+IDirectMusicLoader *loader;}\par
+
+Pointers to DirectMusic interfaces.  These should not be modified directly.
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+{\b virtual bach_err_codes init (BachDigital *digi, HWND hwnd, DWORD effects=DMUS_EFFECT_NONE);}\par
+
+Initializes DirectMusic.  If you are using digital sound as well, you
+ must create the BachDigital instance first and pass it to this
+ init() routine.  The effects option is passed to DirectMusic when
+ creating the output port and is a combination of: DMUS_EFFECT_REVERB
+ and/or DMUS_EFFECT_CHORUS (see the DirectMusic V6.1 documentation
+ for details).
+\par
+
+{\b virtual void close ();}\par
+
+Closes the interfaces and releases objects allocated by this class.
+\par
+
+{\b bach_err_codes activate();\line
+bach_err_codes deactivate();}\par
+
+These should be called by the application's window procedure for the WM_ACTIVATEAPP
+ message to ensure proper focus handling for the music.
+\par
+
+\line{\b\fs28 Error Codes}\par
+
+{\i BACH_ERR_NONE}\tab\tab\tab No error.
+\par
+
+{\i BACH_ERR_INVALIDPARAMS}\tab\tab Invalid parameters.
+\par
+
+{\i BACH_ERR_NOTSUPPORTED}\tab\tab Unsupported operation.
+\par
+
+{\i BACH_ERR_OUTOFMEMORY}\tab\tab Memory allocation failed.
+\par
+
+{\i BACH_ERR_UNINITIALIZED}\tab\tab Class instance has not been initalized.
+\par
+
+{\i BACH_ERR_DMCONNECTFAIL}\tab Failed to connect to DirectMusic.
+\par
+
+{\i BACH_ERR_DMFAILED}\tab\tab DirectMusic operation failed.
+\par
+
+\pard\page
+
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+BachSequence Class                                                        ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_BACH_SEQUENCE}
+${\footnote Music Sequence Class}
+K{\footnote BachSequence;
+BachSequence, release;
+BachSequence, play;
+BachSequence, queue;
+BachSequence, stop;
+BachSequence, status;
+BachSequence, set_repeats;
+BachSequence, set_loop_points;
+BachSequence, get_length;
+BachSequence, load_mid}
++{\footnote BW_PG_E}
+{\b\f0{\cf2\scaps Programmer's Guide: Bach}\line\fs32 Music Sequence Class}\par\pard\sb100
+
+{\cf4 PRELIMINARY}\line
+This class is a container class for message-based music (MIDI).  Data can be loaded from
+ disk and played back using this class interface.  DirectMusic only supports playback of
+ a single sequence at a time, so starting another sequence with play() will stop() the
+ current sequence.
+\par
+
+\line{\b\fs28 Name}\par
+
+BachSequence - Music container class.
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "bachmus.hpp"
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b BachSequence(BachMusic *mus);}\par
+
+Initializes the instance.
+\par
+
+\line{\b\fs28 Member Data}\par
+
+{\b IDirectMusicPerformance *perf;\line
+IDirectMusicLoader *loader;}\par
+
+References to the performance and loader objects obtained from BachMusic.
+\par
+
+{\b IDirectMusicSegment *segment;}\par
+
+Pointer to the segment data if one has been created or loaded from disk.
+ This must exist before the other operations will function.
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+{\b void release();}\par
+
+Releases the segment, if it exists.
+\par
+
+{\b bach_err_codes play (long start=0);}\par
+
+Starts playing the sequence immediately at the start-point given in 'start'.
+\par
+
+{\b bach_err_codes queue (long start=0);}\par
+
+Queues the sequence for play once the current sequence has completed.  The start-point
+ is given in 'start'.
+\par
+
+{\b bach_err_codes stop ();}\par
+
+Stops the sequence.
+\par
+
+{\b dword status() const;}\par
+
+Returns the sequence status:  {\i BACH_SEQSTAT_PLAYING}.
+\par
+
+{\b bach_err_codes set_repeats(ulong count=0);}\par
+
+Sets the number of times the sequence will be repeated during playback.
+\par
+
+{\b bach_err_codes set_loop_points(long start, long end);}\par
+
+Sets the loop-points for repeating playback.
+\par
+
+{\b long get_length() const;}\par
+
+Returns the play length of the sequence.
+\par
+
+{\b bach_err_codes load_mid(const char *fname);}\par
+
+Loads sequence from disk.
+\par
+
+\pard\page
+
+{\comment °±² eof - bach.rtf ²±° }
+}

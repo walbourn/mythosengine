@@ -1,0 +1,671 @@
+{\rtf1
+{\comment
+ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
+
+                                  Newton Help
+
+                     Microsoft Windows 95/98/NT Version
+
+   Copyright (c) 1995-1999 by Dan Higdon, Tim Little, and Chuck Walbourn
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ This file and all associated files are subject to the terms of the
+ GNU Lesser General Public License version 2 as published by the
+ Free Software Foundation (http://www.gnu.org).   They remain the
+ property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+ See LICENSE.TXT in the distribution for a copy of this license.
+
+ THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+ OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+ PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+ LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+ OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+                        http://www.mythos-engine.org/
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ Newton is a component of the MythOS(tm) collection.
+
+ MythOS is a trademark of Charybdis Enterprises, Inc.
+
+ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
+}
+
+{\fonttbl
+\f0\fswiss Arial;
+\f1\froman Times New Roman;
+\f2\fmodern Courier New;
+\f3\fswiss MS Sans Serif;
+\f4\froman MS Serif;
+}
+\deff1
+\fs21
+
+{\colortbl;
+\red128\green128\blue128;
+\red0\green0\blue128;
+\red0\green128\blue0;
+\red128\green0\blue0;
+}
+
+{\comment
+°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+                            Programmer's Guide
+
+°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+}
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+Overview                                                                  ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_NEWTON_OVERVIEW}
+${\footnote Overview}
++{\footnote BW_PG_D}
+{\b\f0{\cf2\scaps Programmer's Guide: Newton}\line\fs32 Overview}\par\pard\sb100
+
+The {\i Newton} library provides a set of classes for simulating masses
+ accelerated/deccelerated by various forces.  Examples of such forces
+ include gravity, wind, and drag.
+\par
+
+All units in the system are arbitrary and are therefore up the user.  They
+ must be consistent, however.  For example, if the intervals are measured
+ in seconds, velocities must be in distance units/second.  If meters/second
+ are used for velocity, acceleration must be in meters/second^2.
+\par
+
+\line{\b\fs28 Features}\par
+
+Standard framework for performing physical simulation, with basic support
+ for vector-based computation.
+\par
+
+Easily extendable for special-case needs as well as more complicated
+ modelling.
+\par
+
+\line{\b\fs28 Future Work}\par
+
+Basic point-mass simulation has been implemented, so future work will
+ focus on developing additional forces and possibly extending {\i Newton}
+ to support non-point-mass or non-rigid objects.
+\par
+
+\line{\b\fs28 Organization}\par
+
+The library consists of a few support routines and a math support class,
+ as well as the object and force class heirarchies:
+\par
+
+C-style Routines\line
+\tab {\uldb Math Functions}{\v PG_NEWT_CSTYMATH}
+\par
+
+Object Class\line
+\tab {\uldb NewtObject}{\v PG_NEWT_OBJECT}
+\par
+
+Forces Class\line
+\tab {\uldb NewtForce}{\v PG_NEWT_FORCE}
+\par
+
+Math Support Classes\line
+\tab {\uldb NewtVector}{\v PG_NEWT_VECTOR}
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+C-style Math Functions                                                    ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_NEWT_CSTYMATH}
+${\footnote C-style Math Functions}
+K{\footnote newt_cross;
+newt_dot;
+newt_magnitude}
++{\footnote BW_PG_D}
+{\b\f0{\cf2\scaps Programmer's Guide: Newton}\line\fs32 C-style Math Functions}\par\pard\sb100
+
+{\cf4\scaps CHANGED}\line
+There are a few C-callable functions available in {\i Newton}.  These
+ are used internally to implement the {\uldb NewtVector}{\v PG_NEWT_VECTOR}
+ class.  There are no C headers for these functions or the types they require.
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "newtmath.hpp"
+\par
+
+\line{\b\fs28 Routines}\par
+
+{\b NewtVector *newt_cross(const NewtVector *v1,const NewtVector *v2,
+NewtVector *dest);}\par
+
+Computes the cross-product of the two input NewtVector objects.
+ The dest pointer may point to the same data as either v1 or v2.
+ The dest pointer is returned.
+\par
+
+{\b float newt_dot(const NewtVector *v1,const NewtVector *v2);}\par
+
+Computes the dot-product of the two input NewtVector class
+ instances.
+\par
+
+{\b float newt_magnitude(const NewtVector *vect);}\par
+
+Computes the magnitude of the vector.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+NewtObject Class                                                          ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_NEWT_OBJECT}
+${\footnote Object Class}
+K{\footnote NewtObject;
+NewtObject, get_last_position;
+NewtObject, get_position;
+NewtObject, set_position;
+NewtObject, set_initial_position;
+NewtObject, get_velocity;
+NewtObject, set_velocity;
+NewtObject, get_temp_velocity;
+NewtObject, set_temp_velocity;
+NewtObject, get_acceleration;
+NewtObject, set_acceleration;
+NewtObject, get_temp_acceleration;
+NewtObject, set_temp_acceleration;
+NewtObject, set_mass;
+NewtObject, set_drag;
+NewtObject, step}
++{\footnote BW_PG_D}
+{\b\f0{\cf2\scaps Programmer's Guide: Newton}\line\fs32 Object Class}\par\pard\sb100
+
+{\cf4\scaps CHANGED}\line
+This class represents the simulation objects which are affected by
+ forces.  Objects have a number of characteristics such as mass, drag,
+ position, velocity, and acceleration.  The user creates an instance
+ of this class for each object within the simulation.  Then each object
+ is 'stepped' by some interval to advance the simulation.  This class
+ forms the standard interface for 'objects' in a {\i Newton} simulation.
+\par
+
+At each 'step' the current acceleration, combined with any 'temporary'
+ acceleration, is applied to get the new velocity, which is then degraded
+ by 'drag'.  This new velocity, combined with any 'temporary' velocity, is
+ applied to get the new position.  Then all 'temporary' values are
+ cleared.  Therefore, 'temporary' values will only be applied once during
+ the next 'step'.
+\par
+
+\line{\b\fs28 Name}\par
+
+NewtObject - Simulation Object
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "newton.hpp"
+\par
+
+\line{\b\fs28 Base Classes}\par
+
+None
+\par
+
+\line{\b\fs28 Friend Class}\par
+
+{\uldb NewtForce}{\v PG_NEWT_FORCE}
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b NewtObject ();}\par
+
+Sets the mass to 1 and sets all other values to 0.
+\par
+
+{\b NewtObject (float m, const NewtVector &_pos, const NewtVector &_vel);\line
+NewtObject (float m, float x, float y, float z, const NewtVector &_vel);}\par
+
+Sets the intial mass, position, and velocity and sets all other values to 0.
+\par
+
+{\b NewtObject (float m, float x, float y, float z);}\par
+
+Sets the intial mass and position and sets all other values to 0.
+\par
+
+\line{\b\fs28 Member Data}\par
+
+{\b float mass;}\par
+
+Mass of the object.  Should be set by set_mass().
+\par
+
+{\b float drag;}\par
+
+Drag coeffecient.  Drag is defined as a percentange of velocity lossed
+ per unit interval.  Should be set by set_drag().
+\par
+
+\line{\b\fs28 Member Function}\par
+
+{\b void get_last_position (NewtVector *) const;}\par
+
+Returns the position previous to the last 'step'.
+\par
+
+{\b void get_position (NewtVector *) const;}\par
+
+Returns the current position.
+\par
+
+{\b void set_position (const NewtVector &pos);\line
+void set_position (float x, float y, float z);}\par
+
+Sets the current position.
+\par
+
+{\b void set_initial_position (const NewtVector &pos);\line
+void set_initial_position (float x, float y, float z);}\par
+
+Sets the current position for the first time, correctly setting the
+ last_position variable.
+\par
+
+{\b void get_velocity (NewtVector *) const;}\par
+
+Gets the current velocity vector.
+\par
+
+{\b void set_velocity (const NewtVector &vel);\line
+void set_velocity (float x, float y, float z);}\par
+
+Sets the current velocity vector.
+\par
+
+{\b void get_temp_velocity (NewtVector *) const;}\par
+
+Gets the current temporary velocity (i.e., the temporary
+ value that will be applied during the next 'step' only).
+\par
+
+{\b void set_temp_velocity (const NewtVector &vel);\line
+void set_temp_velocity (float x, float y, float z);}\par
+
+Sets the temporary velocity for the next 'step'.
+\par
+
+{\b void get_acceleration (NewtVector *) const;}\par
+
+Gets the current accleration (not including the current
+temporary value).
+\par
+
+{\b void set_acceleration (const NewtVector &acc);\line
+void set_acceleration (float x, float y, float z);}\par
+
+Sets the base acceleration.
+\par
+
+{\b void get_temp_acceleration (NewtVector *) const;}\par
+
+Gets the current temporary acceleration (i.e., the tempory
+ value that will be applied during the next 'step' only).
+\par
+
+{\b void set_temp_acceleration (const NewtVector &acc);\line
+void set_temp_acceleration (float x, float y, float z);}\par
+
+Sets the temporary acceleration for the next 'step'.
+\par
+
+{\b void set_mass (float m);}\par
+
+Sets the mass.
+\par
+
+{\b void set_drag (float d);}\par
+
+Sets the drag coefficient.
+\par
+
+{\b virtual void step (float time_interval);}\par
+
+This performs all computations needed to move the object's state forward
+ by the given interval.  If interval is zero, step should return
+ immediately.
+\par
+
+\line{\b\fs28 Example}\par
+
+This example performs a simple point-mass simulation:
+\par
+
+{\f2
+// Creates a 10 unit mass object at position 0,0,0
+\par
+NewtObject model(10,0,0,0);\par
+// Give it an initial velocity of 10 units in X and Y.
+\par
+model.set_velocity(10,10,0);\par
+// Apply a 'gravity' of 2 units/time unit in -Y direction.
+model.set_acceleration(0,-2,0);\par
+// Step model by 100 time units
+\par
+model.step(100);\par
+// Now get resulting position
+\par
+NewtVector pos;\line
+model.get_position(&pos);
+}
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+NewtForce Class                                                           ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_NEWT_FORCE}
+${\footnote Force Class}
+K{\footnote NewtForce;
+NewtForce, set_vector;
+NewtForce, affect;
+NewtForce, affect_permanent}
++{\footnote BW_PG_D}
+{\b\f0{\cf2\scaps Programmer's Guide: Newton}\line\fs32 Force Class}\par\pard\sb100
+
+{\cf4\scaps CHANGED}\line
+In addition to using accelerations directly, the user of {\i Newton} may
+ apply a force to an object with this class.  The force results in a
+ acceleration based on the mass of the object.  This class forms a
+ standard interface for forces in a {\i Newton} simulation.
+\par
+
+\line{\b\fs28 Name}\par
+
+NewtForce - Force Object
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "newton.hpp"
+\par
+
+\line{\b\fs28 Base Classes}\par
+
+None
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b NewtForce ();}\par
+
+This initializes the force vector to 0,0,0.
+\par
+
+{\b NewtForce (const NewtVector &_vector);\line
+NewtForce (float x, float y, float z);}\par
+
+This initializes the force vector to the given value.
+\par
+
+\line{\b\fs28 Member Data}\par
+
+{\b NewtVector  vector;}\par
+
+Force vector (gives direction and magnitude of force).  Should be
+ set by set_vector().
+\par
+
+\line{\b\fs28 Member Function}\par
+
+{\b void set_vector(const NewtVector &_vector);\line
+void set_vector(float i, float j, float k);}\par
+
+Sets the force vector.
+\par
+
+{\b virtual void affect (NewtObject *) const;}\par
+
+Affects an object's temporary acceleration with the force (adds to value).
+\par
+
+{\cf2 Note: Because the temporary accleration will only be applied for
+ the next 'step', there is no guarantee of the time over which the
+ force will be applied when 'affect' is called.  Care should be
+ taken that the interval passed to the next 'step' will be sufficiently
+ large that the force has an apparent affect.}
+\par
+
+{\b virtual void affect_permanent (NewtObject *) const;}\par
+
+Affects an object's acceleration with the force (adds to value).
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+NewtVector Class                                                          ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_NEWT_VECTOR}
+${\footnote Vector Class}
+K{\footnote NewtVector;
+NewtVector, operator +;
+NewtVector, operator +=;
+NewtVector, operator -;
+NewtVector, operator -=;
+NewtVector, operator *;
+NewtVector, operator *=;
+NewtVector, operator /;
+NewtVector, operator /=;
+NewtVector, operator CROSS;
+NewtVector, operator DOT;
+NewtVector, magnitude;
+NewtVector, normalize;
+NewtVector, scale;
+NewtVector, translate;
+NewtVector, transform;
+NewtVector, rotatex;
+NewtVector, rotatey;
+NewtVector, rotatez}
++{\footnote BW_PG_D}
+{\b\f0{\cf2\scaps Programmer's Guide: Newton}\line\fs32 Vector Class}\par\pard\sb100
+
+{\cf4\scaps CHANGED}\line
+Vectors are directions in 3-space.  They can be operated upon by
+ various arithmetic operations.  In addition, they are subject to
+ vector products and other vector operations.
+\par
+
+\line{\b\fs28 Name}\par
+
+NewtVector - 3D Vector
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "newtmath.hpp"
+\par
+
+\line{\b\fs28 Base Classes}\par
+
+None
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b NewtVector();}\par
+
+Clears all values to 0.
+\par
+
+{\b NewtVector(float ii, float ij, float ik);}\par
+
+Assigns the ii, ij, and ik parameters as the values of the i, j,
+ and k data members and sets flags to 0.
+\par
+
+{\b NewtVector (EschVector &v);}\par
+
+If {\i Escher} has been included before this header, then this constructor
+ for implicit conversion between {\i Escher} and {\i Newton} vectors
+ will be defined.
+\par
+
+\line{\b\fs28 Member Data}\par
+
+{\b float i;}\par
+
+I-component of vector.
+\par
+
+{\b float j;}\par
+
+J-component of vector.
+\par
+
+{\b float k;}\par
+
+K-component of vector.
+\par
+
+{\b dword flags;}\par
+
+Reserved for future use.
+\par
+
+\line{\b\fs28 Member Functions}\par
+
+{\b inline operator EschVector() const;}\par
+
+If {\i Escher} has been included before this header, then this operator
+ for implicit conversion between {\i Newton} and {\i Escher} vectors
+ will be defined.
+\par
+
+{\b float magnitude();}\par
+
+Computes the magnitude of the vector.
+\par
+
+{\b void normalize();}\par
+
+Normalizes the vector, resulting in unit length.
+\par
+
+\line{\b\fs28 Inline Functions}\par
+
+{\b NewtVector operator + (const NewtVector &b) const;\line
+NewtVector operator += (const NewtVector &b);}\par
+
+Component-wise addition of vectors.
+\par
+
+{\b NewtVector operator - (const NewtVector &b) const;\line
+NewtVector operator -= (const NewtVector &b);}\par
+
+Component-wise subtraction of vectors.
+\par
+
+{\b NewtVector operator - () const;}\par
+
+Component-wise negation of a vector.
+\par
+
+{\b NewtVector operator + (const float scalar) const;\line
+NewtVector operator += (const float scalar);}\par
+
+Addition of a scalar to each component of a vector.
+\par
+
+{\b NewtVector operator - (const float scalar) const;\line
+NewtVector operator -= (const float scalar);}\par
+
+Subtraction of a scalar from each component of a vector.
+\par
+
+{\b NewtVector operator * (const float scalar) const;\line
+NewtVector operator *= (const float scalar);}\par
+
+Multiplication of the vector's components by a scalar.
+\par
+
+{\b NewtVector operator / (const float scalar) const;\line
+NewtVector operator /= (const float scalar);}\par
+
+Division of the vector's components by a scalar.
+\par
+
+{\b NewtVector operator CROSS (const NewtVector &v) const;}\par
+
+Forms a cross-product between two vectors.
+\par
+
+{\cf2
+Note:  CROSS is actually a define for &.  This means that the
+ precedence of the operation is lower than one would expect, so
+ be sure to use parenthesis to force the proper precedence.
+}\par
+
+{\b float operator DOT (const NewtVector &v) const;}\par
+
+Forms a dot-product between two vectors.
+\par
+
+{\cf2
+Note:  DOT is actually a define for |.  This means that the
+ precedence of the operation is lower than one would expect, so
+ be sure to use parenthesis to force the proper precedence.
+}\par
+
+\line{\b\fs28 Example}\par
+
+This example performs various operations with vector objects:
+\par
+
+{\f2
+NewtVector v1(3,-2,3);
+\par
+NewtVector v2(-2,1,6);
+\par
+NewtVector v3;
+\par
+v3 = v1 CROSS v2;
+\par
+v3.normalize();
+}
+\par
+
+\pard\page
+
+{\comment °±² eof - newton.rtf ²±° }
+}

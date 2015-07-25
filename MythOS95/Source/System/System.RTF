@@ -1,0 +1,403 @@
+{\rtf1
+{\comment
+ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
+
+                                 System Help
+
+                     Microsoft Windows 95/98/NT Version
+
+   Copyright (c) 1994-1999 by Dan Higdon, Tim Little, and Chuck Walbourn
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ This file and all associated files are subject to the terms of the
+ GNU Lesser General Public License version 2 as published by the
+ Free Software Foundation (http://www.gnu.org).   They remain the
+ property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+ See LICENSE.TXT in the distribution for a copy of this license.
+
+ THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+ OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+ PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+ LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+ OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+                        http://www.mythos-engine.org/
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ System is a component of the MythOS(tm) collection.
+
+ MythOS is a trademark of Charybdis Enterprises, Inc.
+
+ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
+}
+
+{\fonttbl
+\f0\fswiss Arial;
+\f1\froman Times New Roman;
+\f2\fmodern Courier New;
+\f3\fswiss MS Sans Serif;
+\f4\froman MS Serif;
+}
+\deff1
+\fs21
+
+{\colortbl;
+\red128\green128\blue128;
+\red0\green0\blue128;
+\red0\green128\blue0;
+\red128\green0\blue0;
+}
+
+{\comment
+°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+                            Programmer's Guide
+
+°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+}
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+Overview                                                                  ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_SYSTEM_OVERVIEW}
+${\footnote Overview}
++{\footnote BW_PG_2}
+{\b\f0{\cf2\scaps Programmer's Guide: System}\line\fs32 Overview}\par\pard\sb100
+
+The MythOS\'99 {\i System} class integrates the components of the
+ MythOS collection for easy use, providing initialization and
+ termination of some or all of the libraries in proper sequence.
+ In addition, the {\i System} class includes handling of exit
+ conditions and system identification.
+\par
+
+\line{\b\fs28 Features}\par
+
+Integrates the various components of the MythOS system for
+ easy use.
+\par
+
+Provides handling of exit conditions and processor detection.
+\par
+
+\line{\b\fs28 Future Work}\par
+
+The {\i System} class will be expanded to include critical error
+ handling and exception handling for the processor.  Future
+ components to the MythOS collection will require changes to
+ this object.
+\par
+
+\line{\b\fs28 Organization}\par
+
+The {\i System} library consists of a single object and several
+ C-callable routines.  The following is a list of these
+ components and functions:
+\par
+
+\tab {\uldb System Detection}{\v PG_SYSTEM_DETECT}\line
+\tab   mythos_detect_mmx\line
+\tab   mythos_detect_amd3d
+\par
+
+\tab {\uldb At-exit Handling}{\v PG_SYSTEM_ATEXIT}\line
+\tab   mythos_atexit\line
+\tab   mythos_atexit_remove
+\par
+
+\tab {\uldb System Object}{\v PG_SYSTEM_OBJECT}\line
+\tab   MythosSystem
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+System Detection                                                          ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_SYSTEM_DETECT}
+${\footnote System Detection}
+K{\footnote mythos_detect_mmx;
+mythos_detect_amd3d}
++{\footnote BW_PG_2}
+{\b\f0{\cf2\scaps Programmer's Guide: System}\line\fs32 System Detection}\par\pard\sb100
+
+{\cf4\scaps NEW}\line
+Some of the MythOS libraries have routines which make use of
+ specialized instructions available on certain processors.  To ensure
+ that the run-time environment supports these operations, these routines
+ detect extended features via the CPUID function (if the CPU doesn't
+ support CPUID, the result is always false).
+\par
+
+These functions are C-callable and use the stack-calling
+ convention.
+\par
+
+\line{\b\fs28 Routines}\par
+
+{\b int mythos_detect_mmx();}\par
+
+Returns 1 if the processor supports the MMX(TM) instruction set, otherwise
+ it returns 0.
+\par
+
+{\b int mythos_detect_amd3d();}\par
+
+Returns 1 if the processor supports the AMD-3D instruction set, otherwise
+ it returns 0.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+At-Exit Handling                                                          ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_SYSTEM_ATEXIT}
+${\footnote At-exit Handling}
+K{\footnote mythos_atexit;
+mythos_atexit_remove}
++{\footnote BW_PG_2}
+{\b\f0{\cf2\scaps Programmer's Guide: System}\line\fs32 At-exit Handling}\par\pard\sb100
+
+Some of the MythOS libraries need cleanup routines to be called at
+ the end of the application.  To ensure that the system is terminated
+ properly, a series of cleanup  operations must be performed during exit
+ of the program.
+\par
+
+The standard C routine atexit performs this task, but is limited
+ to only 32 routines.  Therefore, the MythOS System library
+ includes its own atexit routine which uses a single standard
+ atexit entry, but allows an unlimited number of handlers to be
+ registered.  All MythOS libraries use mythos_atexit instead of
+ atexit for this reason.
+\par
+
+These functions are C-callable and use the stack-calling
+ convention.
+\par
+
+\line{\b\fs28 Routines}\par
+
+{\b int mythos_atexit( void (*__func( void ) ) );}\par
+
+Registers the routine __func as an at-exit handler which takes
+ no parameters and has no return value.  These handlers are
+ called in 'last-registered, first-called' order.  There is no
+ limit to the number of routines which may be registered (other
+ than memory for the internal data).  The first call to this
+ routine uses a single atexit slot from the standard library.
+ Returns 0 on success, non-zero on error.
+\par
+
+{\b void mythos_remove( void (*__func(void) ) );}\par
+
+Clears a function handler from the at-exit chain.  The most
+ recently registered instance of __func is removed, if any, by
+ this routine.
+\par
+
+\line{\b\fs28 Example}\par
+
+This example installs two exit handlers, then removes one of
+ them before terminating.  On exit, this program will call
+ handler1 only.
+\par
+
+{\f2
+
+void handler1(void)\line
+\{\line
+...\line
+\}\line
+\par
+
+void handler2(void)\line
+\{\line
+...\line
+\}\line
+\par
+
+main\line
+\{\line
+        mythos_atexit(handler1);\line
+        mythos_atexit(handler2);\line
+        mythos_remove(handler2);\line
+\}\line
+}
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+System Object                                                             ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_SYSTEM_OBJECT}
+${\footnote System Object}
+K{\footnote MythosSystem;
+MythosSystem, init;
+MythosSystem, atexit;
+MythosSystem, atexit_remove;
+MythosSystem, detect_mmx;
+MythosSystem, detect_amd3d}
++{\footnote BW_PG_2}
+{\b\f0{\cf2\scaps Programmer's Guide: System}\line\fs32 System Object}\par\pard\sb100
+
+{\cf4\scaps CHANGED}\line
+The {\i System} object for startup and termination of the various
+ MythOS collection components, and C++ interface for the
+ C-callable routines provided by the system library.
+\par
+
+\line{\b\fs28 Name}\par
+
+MythosSystem -- MythOS control class.
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "mythos.hpp"
+\par
+
+\line{\b\fs28 Base Classes}\par
+
+None
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b
+MythosSystem(ulong ivory_size=2*1024*1024,
+ ivory_init_codes ivory_opt=IVORY_RESERVE_STATIC);
+}
+\par
+
+Initializes the {\i Ivory}, {\i Bozo}, {\i Max}, and {\i Gutenberg}
+ libraries.  The parameters ivory_size and ivory_opt are passed along
+ to the constructor for {\i Ivory}.
+\par
+
+\line{\b\fs28 Member Data}\par
+
+{\b IvorySystem Ivory;}\par
+
+{\i Ivory} memory manager system instance.  This must be constructed
+ before any call to new/delete or ivory_ allocation routines is
+ made.
+\par
+
+{\b BozoSystem Bozo;}\par
+
+{\i Bozo} system instance.
+\par
+
+{\b MaxSystem Max;}\par
+
+{\i Max} event system instance.
+\par
+
+{\b ChronosSystem Chronos;}\par
+
+{\i Chronos} timer services instance.
+\par
+
+{\b GBergSystem Gutenberg;}\par
+
+{\i Gutenberg} system instance.
+\par
+
+{\b VngoSystem Vangogh;}\par
+
+{\i Van Gogh} 2D graphics system instance.
+\par
+
+{\b EschSystem Escher;}\par
+
+{\i Escher} 3D graphics system instance.
+\par
+
+\line{\b\fs28 Member Function}\par
+
+{\b int init(ulong esch_arena_size=ESCH_DEFAULT_ARENA,
+ ulong esch_sort_size=ESCH_DEFAULT_SORT,
+ IvorySubAlloc *bozo_alloc = 0);}\par
+
+Initializes {\i Chronos}, the {\i Escher} system instance with the arena
+ and sort size given, and will set the {\i Bozo} allocator for stack
+ memory, if one is supplied.  Returns zero on success, non-zero on error.
+\par
+
+{\b void atexit( register void (*__func( void) ) );}\par
+
+Calls mythos_atexit() (see {\uldb At-exit handling}{\v PG_SYSTEM_ATEXIT}).
+\par
+
+{\b void atexit_remove( register void (*__func( void) ) );}\par
+
+Calls mythos_atexit_remove() (see {\uldb At-exit handling}{\v PG_SYSTEM_ATEXIT}).
+\par
+
+{\b int detect_mmx();}\par
+
+Calls mythos_detect_mmx() (see {\uldb System Detection}{\v PG_SYSTEM_DETECT}).
+\par
+
+{\b int detect_amd3d();}\par
+
+Calls mythos_detect_amd3d() (see {\uldb System Detection}{\v PG_SYSTEM_DETECT}).
+\par
+
+\line{\b\fs28 Example}\par
+
+This example initializes the MythOS system libraries.
+\par
+
+{\f2
+
+// Because the Ivory memory system must be initialized\line
+// before any new/delete call is made, it is best to\line
+// made a global instance of the system class, placed\line
+// into the main module for the application.\line
+\par
+
+MythosSystem    MythOS;\line
+\par
+
+main()\line
+\{\line
+        // new/delete are valid here since the startup\line
+        // code called the MythOS constructor.\line
+\par
+        MythOS.init();\line
+\par
+        // On exit, the cleanup code will call the\line
+        // the MythOS destructor, which will terminate\line
+        // the various components, followed by the\line
+        // atexit handlers.
+\par
+\}\line
+}
+
+\pard\page
+
+{\comment °±² eof - system.rtf ²±° }
+}

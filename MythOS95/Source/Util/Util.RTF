@@ -1,0 +1,237 @@
+{\rtf1
+{\comment
+ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
+
+                               Utilities Help
+
+                     Microsoft Windows 95/98/NT Version
+
+   Copyright (c) 1994-1999 by Dan Higdon, Tim Little, and Chuck Walbourn
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ This file and all associated files are subject to the terms of the
+ GNU Lesser General Public License version 2 as published by the
+ Free Software Foundation (http://www.gnu.org).   They remain the
+ property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+ See LICENSE.TXT in the distribution for a copy of this license.
+
+ THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+ OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+ PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+ LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+ OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+                        http://www.mythos-engine.org/
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ These utilities are components of the MythOS(tm) collection.
+
+ MythOS is a trademark of Charybdis Enterprises, Inc.
+
+ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
+}
+
+{\fonttbl
+\f0\fswiss Arial;
+\f1\froman Times New Roman;
+\f2\fmodern Courier New;
+\f3\fswiss MS Sans Serif;
+\f4\froman MS Serif;
+}
+\deff1
+\fs21
+
+{\colortbl;
+\red128\green128\blue128;
+\red0\green0\blue128;
+\red0\green128\blue0;
+\red128\green0\blue0;
+}
+
+{\comment
+°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+                               User's Guide
+
+°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+}
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+Overview                                                                  ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote UG_UTIL_OVERVIEW}
+${\footnote Overview}
++{\footnote BW_UG_7}
+{\b\f0{\cf2\scaps User's Guide: Utilities}\line\fs32 Overview}\par\pard\sb100
+
+In addition to the utilities associated with the individual
+ components of MythOS, additional programs are provided.
+ These are outside of the scope of the individual components,
+ but provide services which are needed to take full advantage of
+ the MythOS collection.
+\par
+
+\line{\b\fs28 Features}\par
+
+Bitmap recoloring utility to ensure all images are precolored
+ with the run-time {\i Van Gogh} palette.
+\par
+
+\line{\b\fs28 Future Work}\par
+
+The Picture Utility will have an interactive mode added in the
+ near future.  Other utilities will be added as the need arises.
+\par
+
+\pard\page
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+Picture Utility                                                           ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote UG_UTIL_PIC}
+${\footnote Picture Utility}
+K{\footnote PIC}
++{\footnote BW_UG_7}
+{\b\f0{\cf2\scaps User's Guide: Utilities}\line\fs32 Picture Utility}\par\pard\sb100
+
+This program is used to recolor and/or convert a number of image
+ formats supported by the {\i XFile} library.  The recoloring
+ operation is needed to force the bitmaps to use the {\i Van Gogh}
+ palette, which is typically fixed for the lifetime of a given
+ viewport.  In order to avoid costly real-time color conversion,
+ this utility performs the processing off-line.
+\par
+
+The utility performs the following steps:
+\par
+
+Loads image and {\i Van Gogh} palette.
+\par
+
+Display any requested image information and/or palette entries.
+\par
+
+Converts an image to use the {\i Van Gogh} palette, if requested,
+ either by recoloring an 8-bit image or converting the format.
+\par
+
+Saves image, if requested.
+\par
+
+The utility currently supports BMP, CEL, LBM, PCX, TGA, and XEB
+ bitmaps as implemented by the {\i XFile} library.  Some formats
+ don't support all bitdepths, so watch for errors.  See {\i XFile}
+ for more details.
+\par
+
+{\cf2
+Note:  When recoloring images, it is best to use a true-color
+ input file since this will result in each pixel having the
+ closest color match in the new palette.  Transparent bitmaps, however,
+ require that an 8-bit image is used as the input with anything that is
+ to be transparent set to color 255.
+}\par
+
+\line{\b\fs28 Usage}\par
+
+pic [-q |  -i  | -s | -x | -m | -t <fname.pal>]\line
+\tab [-p | -2 | -3 ] <fname.xxx> [-o <fname.xxx>]
+\par
+
+\line{\b\fs28 Options}\par
+
+{\b -q}\par
+
+By default, the utility outputs a number of status messages.
+ This option directs the utility to operate silently.
+\par
+
+{\b -i}\par
+
+This option directs the utility to display the original images
+ statistics, including resolution and color-depth.
+\par
+
+{\b -s}\par
+
+This option directs the utility to display the palette entries
+ for the original image, if any.
+\par
+
+{\b -x}\par
+
+This option will direct the utility to preserve any entries in an 8-bit
+ image with index 255.  Since index 255 is used as a transparent color
+ index in {\i Van Gogh}, this is needed to prevent the palette conversion
+ from destroying these entries.
+\par
+
+{\b -m}\par
+
+This option will direct the utility to convert the image to a {\i Van
+ Gogh} monochrome Z-map image.  Index 255 is assumed to be a transparent
+ color and is mapped to a 0 bit in the Z-map, otherwise it is a 1 bit.
+ The result is saved to a .ZMP file (or the output file specified by -o).
+\par
+
+{\b -t <fname.pal>}\par
+
+This option is used to specify the {\i Van Gogh} palette file to use
+ for all operations.  By default, the file DEFAULT.PAL in the
+ same directory as the PIC.EXE is used.
+\par
+
+{\cf4\scaps CHANGED}\line
+{\b -p}\par
+
+This option will direct the utility to convert the loaded image
+ to use loaded palette.  This is the recolor/24-bit/32-bit to 8-bit
+ operation.  For a 32-bit image, anything with an alpha less than 255
+ is considered transparent.
+\par
+
+{\cf4\scaps NEW}\line
+{\b -2}\par
+
+This option will direct the utility to convert the loaded image
+ to a 15-bit 2 bytes/pixel format.  This does not work on 8-bit images.
+\par
+
+{\cf4\scaps NEW}\line
+{\b -3}\par
+
+This option will direct the utility to convert the loaded image
+ to a 24-bit 3 bytes/pixel format.  This does not work on 8-bit images.
+\par
+
+{\b -o <fname.xxx>}\par
+
+This option is used to specify an output image file for the
+ loaded and possibly converted image.
+\par
+
+\line{\b\fs28 Example}\par
+
+To convert the file TEST.BMP into TEST.CEL using the {\i Van Gogh}
+ palette TEST.PAL, the following command is used:
+\par
+
+{\f2
+pic test.bmp -p -t test.pal -o test.cel
+\par
+}
+
+\pard\page
+
+{\comment °±² eof - util.rtf ²±° }
+}

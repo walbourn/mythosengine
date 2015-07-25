@@ -1,0 +1,1043 @@
+{\rtf1
+{\comment
+ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
+
+                             Gutenberg Help
+
+                     Microsoft Windows 95/98/NT Version
+
+   Copyright (c) 1995-1999 by Dan Higdon, Tim Little, and Chuck Walbourn
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ This file and all associated files are subject to the terms of the
+ GNU Lesser General Public License version 2 as published by the
+ Free Software Foundation (http://www.gnu.org).   They remain the
+ property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
+ See LICENSE.TXT in the distribution for a copy of this license.
+
+ THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
+ OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
+ PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
+ LIABILITY, INCLUDING CONSEQUENTIAL AND INCIDENTAL DAMAGES FOR ERRORS,
+ OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+                        http://www.mythos-engine.org/
+
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+ Gutenberg is a component of the MythOS(tm) collection.
+
+ MythOS is a trademark of Charybdis Enterprises, Inc.
+
+ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
+}
+
+{\fonttbl
+\f0\fswiss Arial;
+\f1\froman Times New Roman;
+\f2\fmodern Courier New;
+\f3\fswiss MS Sans Serif;
+\f4\froman MS Serif;
+}
+\deff1
+\fs21
+
+{\colortbl;
+\red128\green128\blue128;
+\red0\green0\blue128;
+\red0\green128\blue0;
+\red128\green0\blue0;
+}
+
+{\comment
+°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+                            Programmer's Guide
+
+°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+}
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+Overview                                                                  ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_GBERG_OVERVIEW}
+${\footnote Overview}
++{\footnote BW_PG_B}
+{\b\f0{\cf2\scaps Programmer's Guide: Gutenberg}\line\fs32 Overview}\par\pard\sb100
+
+The purpose of the {\i Gutenberg} library is to provide a standard
+ collection of routines for working with text and text output.
+ Low-level text output via {\i Van Gogh} is provided.  In addition, a
+ standard string resource system is provided for externalizing
+ string files.  This reduces the executable footprint and allows
+ easier customization and internationalization.
+\par
+
+\line{\b\fs28 Features}\par
+
+Supports monochrome, monospace and variable-width raster fonts.
+\par
+
+Provides a standard for externalizing static strings.
+\par
+
+\line{\b\fs28 Future Work}\par
+
+Character mode support may be added to this library for direct
+ video character output in text-mode.
+\par
+
+Support for color fonts is planned.  Scaleable fonts could be
+ supported as well.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+C-style Control Routines                                                  ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_GBERG_CSTYCTRL}
+${\footnote C-style Control Routines}
+K{\footnote gberg_init;gberg_term}
++{\footnote BW_PG_B}
+{\b\f0{\cf2\scaps Programmer's Guide: Gutenberg}\line\fs32 C-style Control Routines}\par\pard\sb100
+
+The {\i Gutenberg} library can be initialized via either the
+ {\uldb GBergSystem}{\v PG_GBERG_SYSCLASS} class or directly via
+ the following C routines.
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "gutenbrg.h"
+\par
+
+\line{\b\fs28 Routines}\par
+
+{\b gberg_error_codes gberg_init();}\par
+
+Initializes the library, allocated needed memory structures,
+ returning a status (see Error Values).
+\par
+
+{\b void gberg_term();}\par
+
+Terminates the library, releasing all memory that is in use.
+\par
+
+\line{\b\fs28 Error Values}\par
+
+{\i GBERG_ERR_NONE}\tab\tab No error occurred.
+\par
+
+{\i GBERG_ERR_NOMEMORY}\tab A memory allocation failed.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+C-style Text Output Control Routines                                      ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_GBERG_CSTYTEXT}
+${\footnote C-style Text Output Control Routines}
+K{\footnote gberg_color;
+gberg_select_font;
+gberg_install_font;
+gberg_remove_font;
+gberg_info_font;
+gberg_outc;
+gberg_widthc;
+gberg_heightc;
+gberg_width
+}
++{\footnote BW_PG_B}
+{\b\f0{\cf2\scaps Programmer's Guide: Gutenberg}\line\fs32 C-style Text Output Control Routines}\par\pard\sb100
+
+Text output is {\i Gutenberg's} primary use and there are a number of
+ C-callable routines to control the output.  Since {\i Van Gogh}
+ viewports are C++ objects, however, the text output functions
+ are only callable from C++.
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "gutenbrg.h"\tab for C interface
+\par
+
+#include "gutenbrg.hpp"\tab for C++ interface
+\par
+
+\line{\b\fs28 Routines}\par
+
+{\b gberg_error_codes gberg_color(dword fcol, dword bcol);}\par
+
+Sets the current foreground and background colors to use for all
+ output in graphics mode.  If bcol is set to {\i VNGO_TRANSPARENT}, no
+ background will be drawn.
+\par
+
+{\b gberg_error_codes gberg_select_font(const char *fntname);}\par
+
+Sets the current font for use for all output in graphics mode.
+ The font is assumed to be installed via {\b gberg_install_font}.
+ Returns a status result (see Error Values).
+\par
+
+{\cf4Note:  Unlike the DOS version, SYSTEM fonts are not supported.}
+\par
+
+{\b gberg_error_codes gberg_install_font(const char *fname, const char *fntname);}\par
+
+Installs a font from a font data file, fname.  The fntname may
+ be empty or set to NULL if the first font found is to be used.
+ The installed font is automatically selected.  Returns a status
+ result (see Error Values).
+\par
+
+For information on creating a font data file, see {\uldb {\i Gutenberg}
+ User's Guide}{\v UG_GBERG_FONT}.
+\par
+
+{\b gberg_error_codes gberg_remove_font(const char *fntname);}\par
+
+Removes a font from memory.  Returns a status result (see Error Values).
+\par
+
+{\b gberg_error_codes gberg_info_font(const char *fntname, GBergFontInfo *info);}\par
+
+Copies information about a font, if installed, returning a
+ status (see Error Values).  Information returned includes :-
+\par
+
+\tab {\b char name[GBERG_MAX_NAME]}\line
+\tab   Font name\line
+
+\tab {\b ushort width, height}\line
+\tab   Font width and height (this is a bounding box for proportional)\line
+
+\tab {\b ushort bpc}\line
+\tab   Bytes per character\line
+
+\tab {\b ushort type}\line
+\tab   Font type (see Font Types)\line
+
+\tab {\b byte *ptr}\line
+\tab   If locked, this is a pointer to the font data.\line
+
+\tab {\b IvoryHandle data}\line
+\tab   Memory handle for font data.
+\par
+
+{\b long gberg_outc(VngoVport *vp, long x, long y, char c, BOOL vert=FALSE); (C++ only)}\par
+
+Outputs a character to the given Van Gogh viewport.  It returns
+ the width of the character unless vert is TRUE, in which case the
+ height is returned..
+\par
+
+{\b long gberg_widthc(char c); (C++ only)\par}
+
+Returns the width of the character for the currently selected font..
+\par
+
+{\b long gberg_heightc(); (C++ only)}\par
+
+Returns the height of a character for the currently selected font.
+\par
+
+{\cf4\scaps NEW}\line
+{\b long gberg_width(const char *str); (C++ only)\par}
+
+Returns the width of the character string for the currently selected font..
+\par
+
+\line{\b\fs28 Error Values}\par
+
+{\i GBERG_ERR_NONE}\tab No error occurred.
+\par
+
+{\i GBERG_ERR_NOMEMORY}\tab  A memory allocation failed.
+\par
+
+{\i GBERG_ERR_LOCKFAILED}\tab  An attempt to lock a memory handle failed.
+\par
+
+{\i GBERG_ERR_FILEERROR}\tab  File access failed.
+\par
+
+{\i GBERG_ERR_INVALIDDATA}\tab  Data in file is invalid.
+\par
+
+{\i GBERG_ERR_NOTSUPPORTED}\tab  Data format in file is not supported.
+\par
+
+{\i GBERG_ERR_FONTNOTINSTALLED}\tab  Requested font not installed.
+\par
+
+{\i GBERG_ERR_FONTNOTFOUND}\tab  Request font not in file.
+\par
+
+\line{\b\fs28 Font Types}\par
+
+{\i GBERG_FNT_MONOFIXED}\tab Monochrome, 128 character, fixed-size raster.
+\par
+
+{\i GBERG_FNT_COLORFIXED}\tab Color, 128 character, fixed-size raster.
+\par
+
+{\i GBERG_FNT_MONOFIXEDEX}\tab Monochrome, 256 character, fixed-size raster.
+\par
+
+{\i GBERG_FNT_MONOVARIABLE}\tab Monochrome, 128 character, variable-width raster.
+\par
+
+{\i GBERG_FNT_MONOVARIABLEEX}\tab Monochrome, 256 character, variable-width raster.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+C-style External String Routines                                          ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_GBERG_CSTYSTRING}
+${\footnote C-style External String Routines}
+K{\footnote gberg_loadstring;
+gberg_select_strings;
+gberg_install_strings;
+gberg_remove_strings;
+gberg_info_strings
+}
++{\footnote BW_PG_B}
+{\b\f0{\cf2\scaps Programmer's Guide: Gutenberg}\line\fs32 C-style External String Routines}\par\pard\sb100
+
+{\i Gutenberg} provides a standard for string resource.  A set of
+ numbered strings are stored within a string table for use by the
+ application.  The strings in this string table are compiled via
+ the GSTRING compiler into a data file (see {\uldb {\i Gutenberg}
+ User's Guide}{\v UG_GBERG_STRING}).  Strings tables may be
+ installed and then required strings copied at run-time.
+\par
+
+Altering the strings in the string table only require that the
+ support file be recompiled, rather than the entire application.
+ Code that utilizes loaded strings should not assume the length
+ of the string is known at compile time as changes could
+ invalidate these assumptions.
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "gutenbrg.h"
+\par
+
+\line{\b\fs28 Routines}\par
+
+{\b gberg_error_codes gberg_loadstring(ulong num, char *buff, ulong len);}\par
+
+Copies a string of up to len characters from the current string
+ resource into buffer given in buff.  The string resource number
+ is num.  Returns a status (see Error Values).
+\par
+
+{\b gberg_error_codes gberg_select_strings(const char *txtname);}\par
+
+Sets the current string files for the gberg_loadstring function.
+ Returns a status (see Error Values).
+\par
+
+{\b gberg_error_codes gberg_install_strings(const char *fname, const char *txtname);}\par
+
+Installs a string table from a string data file, fname.  The
+ txtname may be empty or set to NULL if the first string table
+ found is to be used.  The installed table is automatically
+ selected.  Returns a status result (see Error Values).
+\par
+
+{\b gberg_error_codes gberg_remove_strings(const char *txtname);}\par
+
+Removes a string table from memory.  Returns a status result (see Error
+ Values).
+\par
+
+{\b gberg_error_codes gberg_info_strings(const char *txtname, GBergTextInfo *info);}\par
+
+Copies information about a string table, if installed, returning
+ a status (see Error Values).  Information returned includes :-
+\par
+
+\tab{\b char name[GBERG_MAX_NAME]}\line
+\tab   String table name.\line
+
+\tab{\b ulong number_of_strings}\line
+\tab   Count of strings in the string table.\line
+
+\tab{\b IvoryHandle data}\line
+\tab   Memory handle for string table.
+\par
+
+\line{\b\fs28 Error Values}\par
+
+{\i GBERG_ERR_NONE}\tab No error occurred.
+\par
+
+{\i GBERG_ERR_NOMEMORY}\tab A memory allocation failed.
+\par
+
+{\i GBERG_ERR_LOCKFAILED}\tab An attempt to lock a memory handle failed.
+\par
+
+{\i GBERG_ERR_FILEERROR}\tab File access failed.
+\par
+
+{\i GBERG_ERR_INVALIDDATA}\tab Data in file is invalid.
+\par
+
+{\i GBERG_ERR_NOTSUPPORTED}\tab Data format in file is not supported.
+\par
+
+{\i GBERG_ERR_TEXTNOTINSTALLED}\tab Requested string file not installed.
+\par
+
+{\i GBERG_ERR_STRINGNOTFOUND}\tab Requested string number not in resource.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+Gutenberg System Class                                                    ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_GBERG_SYSCLASS}
+${\footnote Gutenberg System Class}
+K{\footnote GBergSystem;
+GBergSystem, color;
+GBergSystem, select_font;
+GBergSystem, install_font;
+GBergSystem, remove_font;
+GBergSystem, info_font;
+GBergSystem, select_strings;
+GBergSystem, install_strings;
+GBergSystem, remove_strings;
+GBergSystem, info_strings}
++{\footnote BW_PG_B}
+{\b\f0{\cf2\scaps Programmer's Guide: Gutenberg}\line\fs32 Gutenberg System Class}\par\pard\sb100
+
+The system class provides a standard C++ method for controlling
+ the {\i Gutenberg} library.
+\par
+
+\line{\b\fs28 Name}\par
+
+GBergSystem - System control class.
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "gutenbrg.hpp"
+\par
+
+\line{\b\fs28 Base Classes}\par
+
+None
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b GBergSystem();}\par
+
+The constructor calls the {\uldb gberg_init}{\v PG_GBERG_CSTYCTRL}
+ function.  The destructor will call the {\uldb gberg_term}
+ {\v PG_GBERG_CSTYCTRL} function.
+\par
+
+\line{\b\fs28 Member Function}\par
+
+{\b gberg_error_codes color(dword fc, dword bc=VNGO_TRANSPARENT);}\line
+{\b gberg_error_codes select_font(const char *f);}\line
+{\b gberg_error_codes install_font(const char *fn, const char *f);}\line
+{\b gberg_error_codes remove_font(const char *f);}\line
+{\b gberg_error_codes info_font(const char *f, GBergFontInfo *i);}\par
+
+Calls the {\uldb gberg_*}{\v PG_GBERG_CSTYTEXT} equivalent.
+\par
+
+{\b gberg_error_codes select_strings(const char *t);}\line
+{\b gberg_error_codes install_strings(const char *fn, const char *t);}\line
+{\b gberg_error_codes remove_strings(const char *t);}\line
+{\b gberg_error_codes info_strings(const char *t, GBergTextInfo *i);}\par
+
+Calls the {\uldb gberg_*}{\v PG_GBERG_CSTYSTRING} equivalent.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+Text Output Class                                                         ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote PG_GBERG_TEXTCLASS}
+${\footnote Text Output Class}
+K{\footnote GBergText;
+GBergText, outc;
+GBergText, outc_vert;
+GBergText, out;
+GBergText, out_vert;
+GBergText, outf;
+GBergText, outf_vert;
+GBergText, out_wrap;
+GBergText, setpos;
+GBergText, getpos}
++{\footnote BW_PG_B}
+{\b\f0{\cf2\scaps Programmer's Guide: Gutenberg}\line\fs32 Text Output Class}\par\pard\sb100
+
+Text output is typically done as if the screen consists of a
+ number of character rows and columns.  The GBergText class
+ implements to provide a convenient output syntax.  The currently
+ selected font and color is used for all processing.
+\par
+
+\line{\b\fs28 Name}\par
+
+GBergText - Text output object.
+\par
+
+\line{\b\fs28 Synopsis}\par
+
+#include "gutenbrg.hpp"
+\par
+
+\line{\b\fs28 Base Classes}\par
+
+None
+\par
+
+\line{\b\fs28 Constructors}\par
+
+{\b GBergText(VngoVport *vp);}\par
+
+Sets the vport member and sets the current position to 0,0.
+\par
+
+\line{\b\fs28 Member Data}\par
+
+{\b long curx;}\par
+
+Current X position in pixels.
+\par
+
+{\b long cury;}\par
+
+Current Y position in pixels.
+\par
+
+{\b VngoVport  *vport;}\par
+
+Associated Van Gogh viewport.
+\par
+
+\line{\b\fs28 Member Function}\par
+
+{\b void outc(char c);}\line
+{\b void outc(long x, long y, char c);}\par
+
+Outputs a character, using either the current location or
+ setting the current location before processing.  The current
+ position is updated after the character is output.  The newline
+ character ('\\n') is the only supported control character, and
+ '\\r' is ignored.
+\par
+
+{\b void out(const char *str);}\line
+{\b void out(long x, long y, char *str);}\par
+
+Outputs a string, using either the current location or setting
+ the current location before processing.  The current position is
+ updated after the string is output.
+\par
+
+{\b void out_wrap(const char *str, VngoRect *prct = 0);}\par
+
+Outputs a string, using either the current location or setting
+ the current location before processing, wrapping the output to
+ the given rectangle.  If no rectangle is supplied, the viewport's
+ rectangle will be used.  If a word is too wide to fit within the
+ width given, it will be split. The current position is
+ updated after the string is output.
+\par
+
+{\b void out(long num);}\line
+{\b void out(long x, long y, long num);}\par
+
+Outputs a long integer, using either the current location or
+ setting the current location before processing.  The current
+ position is updated after the value is output.
+\par
+
+{\b void outf(const char *fmt, ...);}\par
+
+Outputs using a standard C printf format string.  The total string must
+ be less than 256 characters and conform to the limits of wsprintf.
+\par
+
+{\b void outc_vert(char c);\line
+void outc_vert(long x, long y, char c);\line
+void out_vert(const char *str);\line
+void out_vert(long x, long y, const char *str);\line
+void out_vert(long num);
+void out_vert(long x, long y, long num);\line
+void outf_vert (const char *fmt, ...);}\par
+
+These are vertical-write versions of the various 'out' routines.
+\par
+
+{\b void setpos(byte row, byte col);}\par
+
+Sets the current position using the currently selected fonts
+ character's size (or bounding box) to compute the row and column.
+\par
+
+{\b void getpos(byte *row, byte *col);}\par
+
+Returns the current position using the currently selected fonts
+ character's size (or bounding box) to compute the row and column.
+\par
+
+\pard\page
+
+
+
+{\comment
+°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+                               User's Guide
+
+°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+}
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+Overview                                                                  ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote UG_GBERG_OVERVIEW}
+${\footnote Overview}
++{\footnote BW_UG_6}
+{\b\f0{\cf2\scaps User's Guide: Gutenberg}\line\fs32 Overview}\par\pard\sb100
+
+{\i Gutenberg} provides text services including font output and
+ externalized string tables.  A font converter and string table
+ compiler are provided to support these functions
+\par
+
+\line{\b\fs28 Features}\par
+
+Font converter for generating {\i Gutenberg} fonts from existing font
+ data.
+\par
+
+String compiler for generating loadable files of string tables,
+ reducing the application's memory footprint and isolating string
+ data.
+\par
+
+\line{\b\fs28 Future Work}\par
+
+Additional font formats may need to be supported.
+\par
+
+Extensions to the string compiler may be needed for more complex
+ internationalization support.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+Font Converter                                                            ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote UG_GBERG_FONT}
+${\footnote Font Converter}
+K{\footnote GFONT}
++{\footnote BW_UG_6}
+{\b\f0{\cf2\scaps User's Guide: Gutenberg}\line\fs32 Font Converter}\par\pard\sb100
+
+{\i Gutenberg} font data can be converted from either the X Windows
+ Bitmap Definition Format, from an {\i XFile} supported bitmap containing
+ a grid of character cells, or from installed TrueType fonts.  This
+ utility converts supported BDF and bitmap files into fixed-width
+ {\i Gutenberg} IFF data files and captures TrueType fonts into fixed-
+ or variable-width into {\i Gutenberg} IFF data files.
+\par
+
+{\cf2 Note:  Some TrueType fonts are licensed and can therefore not be
+ freely converted into data files to use in your applications.  The utility
+ will output information about the selected font, including whether or not
+ it is licensed if the -q flag is not in use.}
+\par
+
+\line{\b\fs28 Usage}\par
+
+gfont [-q] [-i] [-n fontname]
+\par
+
+\tab <filename.bdf> [<filename.iff>]
+\par
+-or-
+\par
+\tab -w<number> -h<number> [-x<number>] [-y<number>] [-p<number>]\line
+\tab -s<number> -c<number> [-r<number>] <filename.xxx> [<filename.iff>
+\par
+-or-
+\par
+\tab [-e] [-h<number>] [-w<number> [-s<number>] [-c<number>]\line
+\tab [-b] [-t] [-u] [-k] [-o] [-8] <TrueType fontname> [<filename.iff>]
+\par
+
+\line{\b\fs28 Options}\par
+
+{\b -q}\par
+
+By default, the font converter displays information about the
+ font during conversion.  This option directs the converter to
+ operate quietly.
+\par
+
+{\b -i}\par
+This causes the font converter to inverse the colors in the font cells
+ when converting.
+\par
+
+{\b -n}\par
+By default, the name of the font is the same as the base name of the
+ output filename.  This option provides a new font name string.
+\par
+
+{\b -w}\line
+{\cf2\scaps BITMAP FILES ONLY}\par
+Provides the width of the font cells.
+\par
+
+{\b -h}\line
+{\cf2\scaps BITMAP FILES ONLY}\par
+Provides the height of the font cells.
+\par
+
+{\b -x}\line
+{\cf2\scaps BITMAP FILES ONLY}\par
+Provides the starting offset in X of the font cells.
+\par
+
+{\b -y}\line
+{\cf2\scaps BITMAP FILES ONLY}\par
+Provides the starting offset in Y of the font cells.
+\par
+
+{\b -p}\line
+{\cf2\scaps BITMAP FILES ONLY}\par
+Space between cells in pixels for both X and Y.  This defaults to 0.
+\par
+
+{\b -s}\line
+{\cf2\scaps BITMAP FILES ONLY}\par
+Provides the character index of the first font cell in the bitmap.
+\par
+
+{\b -c}\line
+{\cf2\scaps BITMAP FILES ONLY}\par
+Provides the number of character cells in the bitmap file.
+\par
+
+{\b -r}\line
+{\cf2\scaps BITMAP FILES ONLY}\par
+Provides the number of character cells per row.  This default to 0, which
+ assumes the cell row ends when the edge of the bitmap is reached.
+\par
+
+{\b -e}\line
+{\cf2\scaps TRUETYPE CAPTURES ONLY}\par
+Enumerates the installed TrueType fonts on the current system.
+\par
+
+{\b -h}\line
+{\cf2\scaps TRUETYPE CAPTURES ONLY}\par
+Provides desired height of font to capture, otherwise a system default is
+ used.
+\par
+
+{\b -w}\line
+{\cf2\scaps TRUETYPE CAPTURES ONLY}\par
+When finding an appropriate TrueType font, the height is used to match and
+ whatever width the font requires is returned.  If this value is given, then
+ the height is iteratively shortened by one point until a width less than
+ the given value is found.
+\par
+
+{\b -s}\line
+{\cf2\scaps TRUETYPE CAPTURES ONLY}\par
+Starting character number to capture (defaults to 0.
+\par
+
+{\b -c}\line
+{\cf2\scaps TRUETYPE CAPTURES ONLY}\par
+Number of characters to capture (defaults to 256).
+\par
+
+{\b -b}\line
+{\cf2\scaps TRUETYPE CAPTURES ONLY}\par
+Captures Bold version of TrueType font.
+\par
+
+{\b -t}\line
+{\cf2\scaps TRUETYPE CAPTURES ONLY}\par
+Captures Italic version of TrueType font.
+\par
+
+{\b -u}\line
+{\cf2\scaps TRUETYPE CAPTURES ONLY}\par
+Captures Underline version of TrueType font.
+\par
+
+{\b -k}\line
+{\cf2\scaps TRUETYPE CAPTURES ONLY}\par
+Captures StrikeOut version of TrueType font.
+\par
+
+{\b -o}\line
+{\cf2\scaps TRUETYPE CAPTURES ONLY}\par
+TrueType fonts are normally provided in the ANSI character set.  This switch
+ forces the system-specific OEM character set to be captured.
+\par
+
+{\cf4\scaps CHANGED}\line
+{\b -8}\line
+{\cf2\scaps TRUETYPE CAPTURES ONLY}\par
+Windows uses Codepage 1232 for most systems while older DOS-based
+ translation services uses Codepage 850.  If this switch is set, then
+ full character sets have most of their special characters moved from
+ their CP1232 locations to where they occurr in CP850.  Characters
+ without corresponding entries are missing from the font.
+\par
+
+\pard\page
+
+
+{\comment
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+String Compiler                                                           ³
+ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+}
+\keepn
+#{\footnote UG_GBERG_STRING}
+${\footnote String Compiler}
+K{\footnote GSTRING}
++{\footnote BW_UG_6}
+{\b\f0{\cf2\scaps User's Guide: Gutenberg}\line\fs32 String Compiler}\par\pard\sb100
+
+Externalized strings for must be compiled into a {\i Gutenberg}
+ string IFF file before they may be loaded into the application
+ via the string functions.  This utility compiles a source file
+ description into these files.
+\par
+
+\line{\b\fs28 Usage}\par
+
+gstring [-q] [-h] [-r] <filename.cst> [-oi <filename.iff>] [-oh <filename.hpp/.h>]
+\par
+
+\line{\b\fs28 Options}\par
+
+{\b -q}\par
+
+By default, the string compiler outputs informative messages
+ during processing.  This option directs the compiler to operate
+ quietly.
+\par
+
+{\b -h}\par
+
+By default, the compiler generates a C++ header HPP file.  This
+ switch directs the compiler to generate a C header H file.
+\par
+
+{\b -r}\par
+
+By default, the compiler will include an author and description
+ strings for the string tables in the output file.  This option
+ directs the compiler to omit these for the 'release' version of
+ the file.
+\par
+
+{\b -oi <filename.iff>}\par
+
+By default, the compiler creates an output name from the
+ filename of the input file.  This option overrides the selecting
+ of the output IFF filename.
+\par
+
+{\b -oh <filename.hpp/h>}\par
+
+By default, the compiler creates an output name from the
+ filename of the input file.  This option overrides the selecting
+ of the output HPP/H filename (see -h for HPP vs. H usage).
+\par
+
+\line{\b\fs28 Language}\par
+
+The Charybdis CST source language is a simple grammar for
+ describing the data for string tables.
+\par
+
+Charybdis CST source files are free-form text files which may
+ contain assembly-style ';' to end-of-line comments.  Any number
+ of string tables and includes may be defined, with each string
+ table capable of using the include directive.
+\par
+
+{\b stringtable}\par
+
+The string table is the basis of the format.  The syntax of a
+ 'stringtable' is:
+\par
+
+{\f2
+stringtable <options>\line
+\{\line
+        <data items>\line
+\}
+}
+\par
+
+The string table options define global information about the
+ entries.  The following options may be included:
+\par
+
+{\f2 name "<string>"}\par
+
+This provides the name of the string table, which may be used to
+ load and select the table at run-time.  This is the only
+ required option.
+\par
+
+{\f2 author "<string>"}\par
+
+This provides the author identification string.  This string is
+ ignored for the production version of the output file.
+\par
+
+{\f2 description "<string>"}\par
+
+This provides the description string.  This string is ignored
+ for the 'release' version of the output file.
+\par
+
+{\f2 copyright "<string>"}\par
+
+This provides the copyright string.
+\par
+
+Data items are strings which have the following syntax:
+\par
+
+{\f2
+<identifier> [ = <expression> ] "<string>" [ "<string>" ]*
+}
+\par
+
+The identifier is a unique C identifier which is put into the
+ output header file with the associated string number for use by
+ the application source code.  If the optional expression is not
+ given, then the string number is one higher than the previous
+ number (or 1, if no previous string exists in the string table).
+ If multiple strings are given, they are concatenated.  C escape
+ sequences may be used within the string ('\\n', '\\t', '\\r', '\\v',
+ '\\f', '\\b', '\\', '\\x<hex>', '\\<octal>', etc.), but embedded
+ NULs are not allowed and will result in a compiler error.
+\par
+
+{\b include}\par
+
+An include section inserts another Charybdis CST source file
+ into the current file and continues to generate the string table
+ file.  The syntax of an include section is:
+\par
+
+{\f2
+include "<filename.cst>"
+}
+\par
+
+\line{\b\fs28 Example}\par
+
+{\f2
+;-----------------------------------------------------\line
+;\line
+; TEST.CST\line
+;\line
+; Example for string compiler.\line
+;\line
+;-----------------------------------------------------\line
+\line
+stringtable\line
+        name        "MyTable"\line
+        author      "Chuck Walbourn"\line
+        description "This is a test string entry"\line
+        copyright   "(C) 1995-1999 by CEI"\line
+\{\line
+MYTHOS_NAME\line
+        "MythOS(tm)"\line
+COMPANY_NAME=34\line
+        "Charybdis Enterprises, Inc."\line
+GBERG_NAME\line
+        "Gutenberg"\line
+        " - a font and string support library\n"\line
+\}
+}
+\par
+
+Type the following to compile 'TEST.CST' into 'TEST.IFF' and
+'TEST.HPP'
+\par
+
+{\f2 gstring test.cst}\par
+
+The resulting 'TEST.IFF' will contain a valid {\i Gutenberg} string
+table named 'MyTable' with three strings:
+\par
+
+String 1:  "MythOS(tm)"\line
+String 34:  "Charybdis Enterprises, Inc."\line
+String 35:  "Gutenberg - a font and string support library\n"\line
+\par
+
+\pard\page
+
+{\comment °±² eof - gutenbrg.rtf ²±° }
+}
