@@ -6,7 +6,7 @@
 //                                                           |. _  .   .|
 //          Microsoft Windows '95 Version                    | / \   .  |
 //                                                           |_|_|_._._.|
-// Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
+// Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
 //              All rights reserved.                        %\__________/%
 //                                                           %          %
 //
@@ -93,13 +93,13 @@ VngoVVport16::VngoVVport16 (VngoRect &dim,VngoPal *my_pal,dword flags)
 
 VNGError VngoVVport16::init (VngoRect &dim,VngoPal *my_pal,dword flags)
 {
-    persp_pixcount = VNGO_PERSP_PRECISION;
     vbuff.width = dim.dx;
     vbuff.pitch = dim.dx << 1;
     vbuff.height = dim.dy;
     vbuff.zpitch = vbuff.pitch;
     vflags = flags;
     vflags |= VNGO_PAL_MAPPED_DEV;
+    vflags |= VNGO_SKIPS_LAST_PIX;
     size_in_bytes = dim.dx * dim.dy * 2;
     vbuff.zbuff_ptr = NULL;
 
@@ -201,6 +201,7 @@ VNGError VngoVVport16::init (VngoRect &dim,VngoPal *my_pal,dword flags)
         reset();
         unlock();
     }
+    set_perspective(7.f);
     return (VNGO_NO_ERROR);
 }
 
@@ -450,8 +451,6 @@ dword VngoVVport16::read_pixel(int x, int y, VngoPoint *dest)
 
 dword VngoVVport16::read_pixel(VngoPoint *pt, VngoPoint *dest)
 {
-    assert(lock_status);
-
     return read_pixel(pt->x,pt->y,dest);
 }
 
@@ -540,14 +539,7 @@ VNGError VngoVVport16::clip_frect(VngoRect *rect,dword color, VngoRect *clip)
 
 VNGError VngoVVport16::line(VngoPoint *p1,VngoPoint *p2, VngoColor24bit *rgb_val)
 {
-    if (rgb_val)
-    {
-        p1->clr = vbuff.pal->get_index(*rgb_val);
-        p1->shade = vbuff.pal->shd_pal->mid_point;
-        p2->clr = vbuff.pal->get_index(*rgb_val);
-        p2->shade = vbuff.pal->shd_pal->mid_point;
-    }
-    vngo_line(this,p1,p2);
+    vngo_line(this,p1,p2, rgb_val);
     return VNGO_NO_ERROR;
 }
 
@@ -621,8 +613,6 @@ VNGError VngoVVport16::clip_line(VngoPoint *p1,VngoPoint *p2,
                                 VngoColor24bit *rgb_val,
                                 VngoRect *clip_rect)
 {
-    assert(lock_status);
-
     VngoPoint tp1,tp2;
 
     tp1 = *p1;
@@ -821,16 +811,14 @@ VNGError VngoVVport16::clip_line(VngoPoint *p1,VngoPoint *p2,
 
 VNGError VngoVVport16::gline(VngoPoint *p1,VngoPoint *p2)
 {
-    assert(lock_status);
-
     assert (p1->x >=0);
-    assert (p1->x < vbuff.width);
+    assert (p1->x <= vbuff.width);
     assert (p1->y >=0);
-    assert (p1->y < vbuff.height);
+    assert (p1->y <= vbuff.height);
     assert (p2->x >=0);
-    assert (p2->x < vbuff.width);
+    assert (p2->x <= vbuff.width);
     assert (p2->y >=0);
-    assert (p2->y < vbuff.height);
+    assert (p2->y <= vbuff.height);
 
 
 
@@ -900,8 +888,6 @@ VNGError VngoVVport16::clip_gline(VngoPointF *p1,VngoPointF *p2,
 
 VNGError VngoVVport16::clip_gline(VngoPoint *p1, VngoPoint *p2, VngoRect *clip_rect)
 {
-    assert(lock_status);
-
     VngoPoint tp1,tp2;
 
     tp1 = *p1;

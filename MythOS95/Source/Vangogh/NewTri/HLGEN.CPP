@@ -6,7 +6,7 @@
 //                                                           |. _  .   .|
 //          Microsoft Windows '95 Version                    | / \   .  |
 //                                                           |_|_|_._._.|
-// Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
+// Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
 //              All rights reserved.                        %\__________/%
 //                                                           %          %
 //
@@ -25,9 +25,9 @@
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
-// tri8.cpp
+// thline128.cpp
 //
-//     The Flat/Solid colored triangle code for the VanGogh Draw library.
+//     The non-texturemapped horizontal scan line code.
 //
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ Revision History ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
@@ -37,12 +37,11 @@
 //                                Includes
 //
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-//#include <assert.h>
-#include <string.h>
 
 #include "debug.h"
 #include "portable.h"
 #include "vangogh.hpp"
+#include <math.h>
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
@@ -57,115 +56,98 @@
 //
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
+extern long DitherMatrix[4][4];
+
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                               Routines
 //
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
-extern "C" void scan_zgouraud_edge(VngoPoint2 *edge,VngoPoint2 *p1, VngoPoint2 *p2);
-extern "C" void draw_zghlines16(VngoTriangle *tri);
 
-//±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
-//
-//                                 Data
-//
-//±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
-
-extern long DitherMatrix[4][4];
-
-//±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
-//
-//                                 Code
-//
-//±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-//  void vngo_triangle8(VngoVbuffer *vb,VngoPoint2 *pts,dword color)
-//      This routine draws a flat shaded triangle, making the assumption
-//      that it has already been clipped.
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-
-extern "C" void vngo_zgtriangle16 (VngoVbuffer *vb,VngoPoint2 *pts,dword color)
+extern "C" void vngo_ghlines16 (VngoTriangle *tri)
 {
-    long            mid_y;
-    int             high_pt_idx = 0;
-    int             low_pt_idx = 2;
-    int             mid_pt_idx = 1;
-    VngoTriangle    tri;
-    VngoPoint2      *edge1 = vb->edge1;
-    VngoPoint2      *edge2 = vb->edge2;
+    VngoShadePal16   *tp = (VngoShadePal16 *)tri->vbuff->pal->shd_pal;
+    VngoColorShade16 *tc = &(*tp)[tri->color];
+    word             *stable = &tc->shl[0];
 
-    calc_order(high_pt_idx,mid_pt_idx,low_pt_idx,pts);
+    long            count = tri->height;
+    long            pitch = tri->pitch >> 1;
 
-    VngoPoint2 *high_pt = &pts[high_pt_idx];
-    VngoPoint2 *mid_pt = &pts[mid_pt_idx];
-    VngoPoint2 *low_pt = &pts[low_pt_idx];
+    long            sstep_dx1 = tri->sstep_dx1;
 
-    long    dy1 = ((low_pt->y + 0x8000) >> 16) - ((high_pt->y + 0x8000) >> 16);
-    long    dy2 = ((mid_pt->y + 0x8000) >> 16) - ((high_pt->y + 0x8000) >> 16);
+    word            *scrn = (word*)tri->sptr;
+    VngoPoint2      *edge1 = tri->left_edge;
+    VngoPoint2      *edge2 = tri->right_edge;
+    long            start_y = tri->start_y;
 
-    if (dy1 == 0)
-    {   // the triangle is completely flat if this is true.
-        return;
-    }
-
-    if (dy1 > dy2)
+    for (long y=0;y <= count;y++)
     {
-        mid_y = dy2;
-    }
-    else
-    {
-        mid_y = dy2 - 1;
-    }
+        long ts = edge1->shade;
 
-    tri.start_y = (high_pt->y + 0x8000) >> 16;
-    tri.color = color;
-    tri.sptr  = (word*)(dword(vb->scrn_ptr) + vb->ytable[(high_pt->y + 0x8000) >> 16]);
-    tri.zptr  = (word*)(long(vb->zbuff_ptr) + vb->ztable[tri.start_y]);
+        long tx = edge1->x;
+        word *ptr = scrn + tx;
+        int dx = edge2->x;
+        long *dmatrix = &DitherMatrix[(start_y+y)&3][0];
 
-    scan_zgouraud_edge(edge1,high_pt,low_pt);
-
-    scan_zgouraud_edge(edge2,high_pt,mid_pt);
-
-    scan_zgouraud_edge(&edge2[dy2],mid_pt,low_pt);
-
-    tri.vbuff = vb;
-    tri.pitch = vb->pitch;
-    tri.zpitch = vb->zpitch;
-    tri.height = dy1;
-
-    long mid_dx = ((edge2[mid_y].x + 0x8000) >> 16) - ((edge1[mid_y].x + 0x8000) >> 16);
-
-    if (mid_dx >= 0)
-    {
-        tri.left_edge = edge1;
-        tri.right_edge = edge2;
-        if (mid_dx)
+        for (int x = tx;x < dx; x++)
         {
-            tri.zstep_dx1 = (long(edge2[mid_y].z) - long(edge1[mid_y].z)) / mid_dx;
-            tri.sstep_dx1 = (long(edge2[mid_y].shade) - long(edge1[mid_y].shade)) / mid_dx;
-        }
-        else
-        {
-            tri.zstep_dx1 = 0;
-            tri.sstep_dx1 = 0;
-        }
-    }
-    else
-    {
-        tri.left_edge = edge2;
-        tri.right_edge = edge1;
+            long  matval = dmatrix[x&3];
+            int ws = (ts + matval) >> 19;
 
-        tri.zstep_dx1 = (long(edge1[mid_y].z) - long(edge2[mid_y].z)) / -mid_dx;
-        tri.sstep_dx1 = (long(edge1[mid_y].shade) - long(edge2[mid_y].shade)) / -mid_dx;
+            if (ws > 31)
+                ws = 31;
+            else if (ws < 0)
+                ws = 0;
+
+            *ptr = stable[ws];
+
+            ptr++;
+            ts += sstep_dx1;
+        }
+        scrn += pitch;
+        edge1++;
+        edge2++;
     }
-    draw_zghlines16(&tri);
+}
+
+extern "C" void vngo_hlines16 (VngoTriangle *tri)
+{
+    VngoShadePal16   *tp = (VngoShadePal16 *)tri->vbuff->pal->shd_pal;
+    VngoColorShade16 *tc = &(*tp)[tri->color];
+    word             clr = tc->shl[tri->left_edge->shade >> 19];
+
+    long            count = tri->height;
+    long            pitch = tri->pitch >> 1;
+
+    word            *scrn = (word*)tri->sptr;
+    VngoPoint2      *edge1 = tri->left_edge;
+    VngoPoint2      *edge2 = tri->right_edge;
+    long            start_y = tri->start_y;
+
+    for (long y=0;y <= count;y++)
+    {
+        long tx = edge1->x;
+        word *ptr = scrn + tx;
+        int dx = edge2->x;
+
+        for (int x = tx;x < dx; x++)
+        {
+            *ptr = clr;
+            ptr++;
+        }
+        scrn += pitch;
+        edge1++;
+        edge2++;
+    }
 }
 
 
 
-extern "C" void draw_zghlines16(VngoTriangle *tri)
+
+// Zbuffered stuff.
+
+extern "C" void vngo_zghlines16 (VngoTriangle *tri)
 {
     VngoShadePal16   *tp = (VngoShadePal16 *)tri->vbuff->pal->shd_pal;
     VngoColorShade16 *tc = &(*tp)[tri->color];
@@ -174,36 +156,39 @@ extern "C" void draw_zghlines16(VngoTriangle *tri)
     long            count = tri->height;
     long            pitch = tri->pitch >> 1;
     long            zpitch = tri->zpitch >> 1;
+
     long            zstep_dx1 = tri->zstep_dx1;
     long            sstep_dx1 = tri->sstep_dx1;
+
     word            *scrn = (word*)tri->sptr;
     word            *zbuff = (word*)tri->zptr;
     VngoPoint2      *edge1 = tri->left_edge;
     VngoPoint2      *edge2 = tri->right_edge;
+    long            start_y = tri->start_y;
 
-    long start_y = tri->start_y;
     for (long y=0;y <= count;y++)
     {
         long tz = edge1->z;
         long ts = edge1->shade;
-        long tx = (edge1->x + 0x8000) >> 16;
+
+        long tx = edge1->x;
         word *ptr = scrn + tx;
         word *zptr = zbuff + tx;
-        int  dx = ((edge2->x + 0x8000) >> 16);
+        int  dx = edge2->x;
         long *dmatrix = &DitherMatrix[(start_y+y)&3][0];
 
-        for (int x = tx;x <= dx; x++)
+        for (int x = tx;x < dx; x++)
         {
             word wz = word(tz >> 15);
             if (wz < *zptr)
             {
                 *zptr = wz;
-
                 int ws = (ts + dmatrix[x&3]) >> 19;
+
                 if (ws > 31)
                     ws = 31;
                 else if (ws < 0)
-                    ws =0;
+                    ws = 0;
 
                 *ptr = stable[ws];
             }
@@ -219,4 +204,52 @@ extern "C" void draw_zghlines16(VngoTriangle *tri)
     }
 }
 
-//°±² End of module - ztri8.cpp ²±°
+
+
+
+
+extern "C" void vngo_zhlines16 (VngoTriangle *tri)
+{
+    VngoShadePal16   *tp = (VngoShadePal16 *)tri->vbuff->pal->shd_pal;
+    VngoColorShade16 *tc = &(*tp)[tri->color];
+    word             clr = tc->shl[tri->left_edge->shade >> 19];
+
+    long            count = tri->height;
+    long            pitch = tri->pitch >> 1;
+    long            zpitch = tri->zpitch >> 1;
+    long            zstep_dx1 = tri->zstep_dx1;
+
+    word            *scrn = (word*)tri->sptr;
+    word            *zbuff = (word*)tri->zptr;
+    VngoPoint2      *edge1 = tri->left_edge;
+    VngoPoint2      *edge2 = tri->right_edge;
+    long            start_y = tri->start_y;
+
+    for (long y=0;y <= count;y++)
+    {
+        long tx = edge1->x;
+        long tz = edge1->z;
+        word *ptr = scrn + tx;
+        word *zptr = zbuff + tx;
+        int dx = edge2->x;
+
+        for (int x = tx;x < dx; x++)
+        {
+            word wz = word(tz >> 15);
+            if (wz < *zptr)
+            {
+                *zptr = wz;
+                *ptr = clr;
+            }
+
+            ptr++;
+            zptr++;
+            tz += zstep_dx1;
+        }
+        scrn += pitch;
+        zbuff += zpitch;
+        edge1++;
+        edge2++;
+    }
+}
+

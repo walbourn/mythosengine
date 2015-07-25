@@ -9,7 +9,9 @@
 //
 //                          Across the event horizon...
 //
-//           Copyright (c) 1994 - 1997 by Charybdis Enterprises, Inc.
+//                          Microsoft Windows '95 Version
+//
+//            Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved.
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -26,6 +28,8 @@
 // INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//
+// maxmouse.cpp
 //
 // Event Devices
 //
@@ -105,7 +109,9 @@
 //  Constructor                                                             ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 MaxMouse::MaxMouse():
-    initialized (false)
+    initialized (false),
+    max_x (GetSystemMetrics (SM_CXSCREEN)),
+    max_y (GetSystemMetrics (SM_CYSCREEN))
 {
 }
 
@@ -146,6 +152,17 @@ bool MaxMouse::is_present () const
 {
     return true;
 }
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//  set_extents                                                             ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+void MaxMouse::set_extents (short x, short y)
+{
+    max_x = x;
+    max_y = y;
+}
+
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
@@ -201,6 +218,12 @@ void MaxMouseWin32::get_pos (short *mx, short *my) const
     POINT pt;
     GetCursorPos (&pt);
 
+    if (pt.x > max_x)
+        pt.x = max_x;
+
+    if (pt.y > max_y)
+        pt.y = max_y;
+
     *mx = short (pt.x);
     *my = short (pt.y);
 }
@@ -211,6 +234,12 @@ void MaxMouseWin32::get_pos (short *mx, short *my) const
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 void MaxMouseWin32::set_pos (short _mx, short _my)
 {
+    if (_mx > max_x)
+        _mx = max_x;
+
+    if (_my > max_y)
+        _my = max_y;
+
     SetCursorPos (_mx, _my);
 }
 
@@ -273,17 +302,6 @@ MaxMouseDirectX::MaxMouseDirectX (IDirectInput *pdi, HWND _hwnd):
         pdid = 0;
 
     pdid->SetCooperativeLevel (_hwnd, DISCL_FOREGROUND | DISCL_NONEXCLUSIVE);
-
-    // Retrieve the window's parameters, for mouse position reporting
-    // This becomes normalized to 0,0 upper-left hand corner, since I'm
-    // expecting this window will fill the screen.  In other cases, this
-    // might not work quite right...
-    GetWindowRect (_hwnd, &wnd_rect);
-
-    wnd_rect.top  = 0;
-    wnd_rect.left = 0;
-    wnd_rect.right  = 1023;
-    wnd_rect.bottom = 767;
 }
 
 
@@ -457,20 +475,26 @@ void MaxMouseDirectX::update()
         POINT pt;
         GetCursorPos (&pt);
 
+        if (pt.x > max_x)
+            pt.x = max_x;
+
+        if (pt.y > max_y)
+            pt.y = max_y;
+
         xpos = pt.x;
         ypos = pt.y;
     }
     else
     {
-        if (xpos < wnd_rect.left)
-            xpos = wnd_rect.left;
-        else if (xpos > wnd_rect.right)
-            xpos = wnd_rect.right;
+        if (xpos < 0)
+            xpos = 0;
+        else if (xpos > max_x)
+            xpos = max_x;
 
-        if (ypos < wnd_rect.top)
-            ypos = wnd_rect.top;
-        else if (ypos > wnd_rect.bottom)
-            ypos = wnd_rect.bottom;
+        if (ypos < 0)
+            ypos = 0;
+        else if (ypos > max_y)
+            ypos = max_y;
     }
 }
 
@@ -491,9 +515,26 @@ void MaxMouseDirectX::get_pos (short *mx, short *my) const
 {
     assert (mx && my);
 
-    // This should have been clipped into something sane....
-    *mx = short (xpos);
-    *my = short (ypos);
+    if (cursor_on)
+    {
+        POINT pt;
+        GetCursorPos (&pt);
+
+        if (pt.x > max_x)
+            pt.x = max_x;
+
+        if (pt.y > max_y)
+            pt.y = max_y;
+
+        *mx = short (pt.x);
+        *my = short (pt.y);
+    }
+    else
+    {
+        // This should have been clipped into something sane....
+        *mx = short (xpos);
+        *my = short (ypos);
+    }
 }
 
 
@@ -502,6 +543,12 @@ void MaxMouseDirectX::get_pos (short *mx, short *my) const
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 void MaxMouseDirectX::set_pos (short _mx, short _my)
 {
+    if (_mx > max_x)
+        _mx = max_x;
+
+    if (_my > max_y)
+        _my = max_y;
+
     xpos = _mx;
     ypos = _my;
 

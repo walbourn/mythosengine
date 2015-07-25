@@ -356,6 +356,10 @@ void EschTerrain::compute_texture_uv(float &u_left, float &u_right,
         v_top *= sfactor;
         v_bottom *= sfactor;
     }
+    u_left += 0.00825f;
+    u_right -= 0.00825f;
+    v_top += 0.00825f;
+    v_bottom -= 0.00825f;
 }
 
 
@@ -2047,7 +2051,7 @@ dword EschTerrain::get_surface_color(float x, float z) const
 // points.                                                                  ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 int EschTerrain::check_LOS (EschPoint *pt1, EschPoint *pt2,
-                           int precision,float *ndist) const
+                           int precision,float *ndist, EschPoint *npos) const
 {
 //ÄÄÄ Form vector
     EschVector  temp (pt1->x - pt2->x, pt1->y - pt2->y, pt1->z - pt2->z);
@@ -2083,15 +2087,31 @@ int EschTerrain::check_LOS (EschPoint *pt1, EschPoint *pt2,
                 EschVector tvect(curx-pt1->x,nheight-pt1->y,curz-pt1->z);
                 *ndist = tvect.magnitude();
             }
+            if (npos != NULL)
+            {
+                npos->x = curx;
+                npos->y = nheight;
+                npos->z = curz;
+            }
             return 0;
         }
         curx += xstep;
         cury += ystep;
         curz += zstep;
     }
+
+    if (ndist != NULL)
+    {
+        *ndist = dist;
+    }
+    if (npos != NULL)
+    {
+        npos->x = pt2->x;
+        npos->y = get_height (pt2->x, pt2->z);
+        npos->z = pt2->z;
+    }
     return 1;
 }
-
 
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°

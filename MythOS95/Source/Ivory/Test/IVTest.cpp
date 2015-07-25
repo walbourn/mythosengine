@@ -2,7 +2,7 @@
 //
 //            Ivory 95 -- A Memory Management Library for Windows 95
 //
-//            Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.
+//            Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved.
 //
 //컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�

@@ -2036,11 +2036,11 @@ void EschKeyframeDraw::unhide_by_absolute_ktype (ulong kt)
     if (parent()
         && next())
     {
-        ((EschKeyframeDraw *)next())->unhide_by_ktype(kt);
+        ((EschKeyframeDraw *)next())->unhide_by_absolute_ktype(kt);
     }
     if (child())
     {
-        ((EschKeyframeDraw *)child())->unhide_by_ktype(kt);
+        ((EschKeyframeDraw *)child())->unhide_by_absolute_ktype(kt);
     }
 }
 

@@ -6,7 +6,7 @@
 //                                                           |. _  .   .|
 //          Microsoft Windows '95 Version                    | / \   .  |
 //                                                           |_|_|_._._.|
-// Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
+// Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
 //              All rights reserved.                        %\__________/%
 //                                                           %          %
 //
@@ -76,6 +76,17 @@ STATIC void wide_plot8(VngoVport *vp, VngoRect *trect, long ox,
 
 STATIC void clip_wide_plot8(VngoVport *vp, VngoRect *trect, long ox,
                        long oy, dword color);
+
+
+
+
+
+STATIC void plot8(VngoVport *vp, long px, long py, long ox,
+                  long oy, VngoColor24bit *color);
+
+STATIC void clip_plot8(VngoVport *vp, long px, long py, long ox,
+                  long oy, VngoColor24bit *color);
+
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
@@ -200,6 +211,27 @@ void vngo_circle(VngoVport *vp,long xoffset, long yoffset,long r,dword color)
     }
 }
 
+void vngo_circle(VngoVport *vp,long xoffset, long yoffset,long r,VngoColor24bit *color)
+{
+    int     x,y,e;
+
+    y = r;
+    x = 0;
+    e = -y;
+    while (x <= y)
+    {
+        plot8(vp,x,y,xoffset,yoffset,color);
+        e +=(x<<1)+1;
+        if (e > 0)
+        {
+            --y;
+            e -= (y << 1);
+        }
+        ++x;
+    }
+}
+
+
 
 STATIC void plot8(VngoVport *vp,long px,long py,long ox,long oy,dword color)
 {
@@ -227,6 +259,29 @@ STATIC void plot8(VngoVport *vp,long px,long py,long ox,long oy,dword color)
     vp->pixel(&p1);
 }
 
+STATIC void plot8(VngoVport *vp,long px,long py,long ox,long oy,VngoColor24bit *color)
+{
+    VngoPoint   p1;
+    p1.x = ox+px;
+    p1.y = oy+py;
+    vp->pixel(&p1,color);
+    p1.y = oy-py;
+    vp->pixel(&p1,color);
+    p1.x = ox-px;
+    vp->pixel(&p1,color);
+    p1.y = oy+py;
+    vp->pixel(&p1,color);
+
+    p1.x = ox+py;
+    p1.y = oy+px;
+    vp->pixel(&p1,color);
+    p1.y = oy-px;
+    vp->pixel(&p1,color);
+    p1.x = ox-py;
+    vp->pixel(&p1,color);
+    p1.y = oy+px;
+    vp->pixel(&p1,color);
+}
 
 void vngo_clip_circle(VngoVport *vp,long xoffset, long yoffset,long r,dword color)
 {
@@ -247,6 +302,28 @@ void vngo_clip_circle(VngoVport *vp,long xoffset, long yoffset,long r,dword colo
         ++x;
     }
 }
+
+
+void vngo_clip_circle(VngoVport *vp,long xoffset, long yoffset,long r,VngoColor24bit *color)
+{
+    int     x,y,e;
+
+    y = r;
+    x = 0;
+    e = -y;
+    while (x <= y)
+    {
+        clip_plot8(vp,x,y,xoffset,yoffset,color);
+        e +=(x<<1)+1;
+        if (e > 0)
+        {
+            --y;
+            e -= (y << 1);
+        }
+        ++x;
+    }
+}
+
 
 
 STATIC void clip_plot8(VngoVport *vp,long px,long py,long ox,long oy,dword color)
@@ -273,6 +350,32 @@ STATIC void clip_plot8(VngoVport *vp,long px,long py,long ox,long oy,dword color
     vp->clip_pixel(&p1);
     p1.y = oy+px;
     vp->clip_pixel(&p1);
+}
+
+
+
+STATIC void clip_plot8(VngoVport *vp,long px,long py,long ox,long oy,VngoColor24bit *color)
+{
+    VngoPoint   p1;
+    p1.x = ox+px;
+    p1.y = oy+py;
+    vp->clip_pixel(&p1,color);
+    p1.y = oy-py;
+    vp->clip_pixel(&p1,color);
+    p1.x = ox-px;
+    vp->clip_pixel(&p1,color);
+    p1.y = oy+py;
+    vp->clip_pixel(&p1,color);
+
+    p1.x = ox+py;
+    p1.y = oy+px;
+    vp->clip_pixel(&p1,color);
+    p1.y = oy-px;
+    vp->clip_pixel(&p1,color);
+    p1.x = ox-py;
+    vp->clip_pixel(&p1,color);
+    p1.y = oy+px;
+    vp->clip_pixel(&p1,color);
 }
 
 
@@ -332,7 +435,6 @@ STATIC void wide_plot8(VngoVport *vp, VngoRect *trect,
 
 
 
-
 void vngo_clip_circle(VngoVport *vp,long xoffset, long yoffset,
                  long r, dword color,int width)
 {
@@ -385,6 +487,8 @@ STATIC void clip_wide_plot8(VngoVport *vp, VngoRect *trect,
     tr.y = oy+trect->x;
     vp->clip_frect(&tr,color);
 }
+
+
 
 //°±² End of module - vngcircl.cpp ²±°
 

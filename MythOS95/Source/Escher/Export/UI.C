@@ -61,7 +61,7 @@
 //
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
-#define VERSION "2.02"
+#define VERSION "2.03"
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
@@ -77,6 +77,7 @@ static void feel_target(Dialog *d, int mouse);
 static void feel_lights(Dialog *d, int mouse);
 static void feel_keyframes(Dialog *d, int mouse);
 static void feel_complete(Dialog *d, int mouse);
+static void feel_log(Dialog *d, int mouse);
 //static void feel_nyi(Dialog *d, int mouse);
 
 //ÄÄÄ Functions in other modules
@@ -116,6 +117,7 @@ static FeelSub Escher_feel[] =
     TARGET,     feel_target,
     INC_LGTS,   feel_lights,
     KEYFRAME,   feel_keyframes,
+    LOG,        feel_log,
 
     -1, FNULL
 };
@@ -127,6 +129,7 @@ int material_mode=1;
 int hierarchy_mode=1;
 int orientation_mode=1;
 int format_mode=1;
+int log_mode=0;
 
 dword  object_flags=0;
 
@@ -168,6 +171,7 @@ static RadSub Escher_rad[] =
 
 extern char mtl_palpath[];
 extern char mtl_palname[];
+char log_fname[256] = "ESPORT.LOG";
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
@@ -224,6 +228,9 @@ void do_user_interaction()
 
     strcpy(mtl_palpath,path);
     strcpy(mtl_palname,"ESPORT.VGP");
+
+    strcpy(log_fname,path);
+    strcat(log_fname,"\\ESPORT.LOG");
 
     if (! inited)
     {
@@ -494,6 +501,13 @@ static void feel_complete(Dialog *d, int mouse)
         restore_under_dialog();
         do_mtl();
     }
+}
+
+static void feel_log(Dialog *d, int mouse)
+{
+    feel_button(d,mouse);
+
+    log_mode = (d->radio) ? 1 : 0;
 }
 
 //°±² End of module - ui.c ²±°

@@ -6,7 +6,7 @@
 //                                                           |. _  .   .|
 //          Microsoft Windows '95 Version                    | / \   .  |
 //                                                           |_|_|_._._.|
-// Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
+// Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
 //              All rights reserved.                        %\__________/%
 //                                                           %          %
 //
@@ -76,6 +76,13 @@ public:
     VngoTexture3D   *tex;
     VngoCacheHndl   *next;
     VngoCacheHndl   *prev;
+    VngoCacheHndl()
+    {
+        flags=0;
+        tex=0;
+        next=0;
+        prev=0;
+    }
 
     ~VngoCacheHndl();
 };
@@ -207,15 +214,16 @@ public:
 
 class VngoMemTexture3D : public VngoTexture3D
 {
-    dword       iflags;
+    dword           iflags;
 public:
-    VngoTexture *vtxt;
-    long        widthshift;
-    long        heightshift;
-    long        u_upshift;
-    long        v_upshift;
-    long        u_downshift;
-    long        v_downshift;
+    VngoTexture     *vtxt;
+    long            widthshift;
+    long            heightshift;
+    long            u_upshift;
+    long            v_upshift;
+    long            u_downshift;
+    long            v_downshift;
+    VngoTextureSize tdimension;
 
     VngoMemTexture3D ();
     VngoMemTexture3D (VngoTexture *_src,VngoPal *_pal=NULL);
@@ -255,34 +263,6 @@ public:
 private:
     VNGError restore();
 };
-
-#ifdef _OEMS
-#ifdef _CLEAR_3D
-class VngoCL3DTexture3D : public VngoTexture3D
-{
-    dword       iflags;
-public:
-    IDirectDrawSurface  *DeviceSurface;
-    IDirectDrawPalette  *pal;
-
-    VngoCL3DTexture3D ()
-    {
-        dev_type = VNGO_CLEAR3D_TEX;
-        DeviceSurface = NULL;
-        pal           = NULL;
-    }
-
-    VngoCL3DTexture3D (VngoTexture *_src,VngoPal *_pal=NULL);
-    virtual ~VngoCL3DTexture3D();
-    virtual VNGError init(VngoTexture *_src,VngoPal *_pal=NULL);
-    virtual VNGError reinit(VngoTexture *_src,VngoPal *_pal=NULL);
-    virtual VNGError ready_texture();
-    virtual void release();
-private:
-    VNGError restore();
-};
-#endif          // _CLEAR_3D
-#endif          // _OEMS
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -336,34 +316,6 @@ public:
     virtual int save(XFParseIFF *iffp);
 };
 
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-// System class
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-class VngoSystem
-{
-public:
-    VngoVport           *cur_vport;
-    VngoTextureManager  *DIBTx;     // Assumed to be a VngoDIB
-    VngoTextureManager  *DDTx;      // Assumed to be a VngoDirectDraw
-    VngoTextureManager  *D3DTx;     // Assumed to be a VngoDirect3D
-    VngoTextureManager  *OGLTx;     // Assumed to be a VngoOpenGL
-    VngoTextureManager  *CL3DTx;    // Assumed to be a VngoClear3D
-    VngoTextureManager  *GlideTx;   // Assumed to be a Vngo3Dfx
-    VngoTextureManager  *MSITx;     // Assumed to be a VngoMSI
-
-    VngoSystem()
-    {
-        cur_vport = NULL;
-        DIBTx = NULL;
-        DDTx = NULL;
-        D3DTx = NULL;
-        OGLTx = NULL;
-        CL3DTx = NULL;
-        GlideTx = NULL;
-        MSITx = NULL;
-    }
-};
 
 #ifdef __WATCOMC__
 #pragma pack();

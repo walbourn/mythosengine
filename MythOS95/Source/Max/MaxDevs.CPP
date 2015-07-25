@@ -9,7 +9,9 @@
 //
 //                          Across the event horizon...
 //
-//           Copyright (c) 1994 - 1997 by Charybdis Enterprises, Inc.
+//                          Microsoft Windows '95 Version
+//
+//            Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved.
 //
 //컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
@@ -26,6 +28,8 @@
 // INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 //
 //컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
+//
+// maxdevs.cpp
 //
 // Event Devices
 //
@@ -109,8 +113,15 @@
 MaxDevices::MaxDevices():
     theKeyboard (0),
     theMouse    (0),
-    theJoystick (0)
+    theJoystick (0),
+    snapshot_mx (0),
+    snapshot_my (0),
+    snapshot_mdx (0),
+    snapshot_mdy (0),
+    snapshot_mbuttons (0)
 {
+    // Joystick state info
+    memset (&snapshot_jstat, 0, sizeof (snapshot_jstat));
 }
 
 

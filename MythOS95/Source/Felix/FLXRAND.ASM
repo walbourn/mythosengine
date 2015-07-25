@@ -8,9 +8,9 @@
 ;     __...--''     ___...--_..'  .;.'
 ;    (,__....----'''       (,..--''
 ;
-;                      Microsoft Windows '95 Version
+;                      Microsoft Windows 95/NT Version
 ;   
-;           Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.
+;           Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.
 ;                           All Rights Reserved.
 ;
 ;컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�

@@ -6,7 +6,7 @@
 ;                                                           |. _  .   .|
 ;          Microsoft Windows '95 Version                    | / \   .  | 
 ;                                                           |_|_|_._._.|
-;  Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.   |.-.-.-.-..|
+;  Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.   |.-.-.-.-..|
 ;              All rights reserved.                        %\__________/%
 ;                                                           %          %
 ;
@@ -133,9 +133,9 @@ y_loop:
         dec     edx
         jg      y_loop
 
-        pop	ebx
-        pop	esi
-        pop	edi
+        pop     ebx
+        pop     esi
+        pop     edi
         ret
 END_PROC       vngo_rect8     
 

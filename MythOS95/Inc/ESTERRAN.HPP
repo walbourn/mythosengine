@@ -215,7 +215,9 @@ public:
         return get_surface_color(pt->x, pt->z);
     }
 
-    virtual int check_LOS(EschPoint *pt1, EschPoint *pt2, int precision=-1,float *dist=NULL) const;
+    virtual int check_LOS(EschPoint *pt1, EschPoint *pt2,
+                          int precision=-1,
+                          float *dist=0, EschPoint *npos=0) const;
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Utility functions.                                                   ³
@@ -447,7 +449,9 @@ public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
     virtual void draw();
     virtual void release();
-    virtual int check_LOS(EschPoint *pt1, EschPoint *pt2, int precision=-1,float *dist=NULL) const;
+    virtual int check_LOS(EschPoint *pt1, EschPoint *pt2,
+                          int precision=-1,
+                          float *dist=0, EschPoint *npos=0) const;
     virtual float get_height(float x, float z) const;
 
     void update_lods();

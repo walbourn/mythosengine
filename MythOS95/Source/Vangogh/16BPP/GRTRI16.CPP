@@ -6,7 +6,7 @@
 //                                                           |. _  .   .|
 //          Microsoft Windows '95 Version                    | / \   .  |
 //                                                           |_|_|_._._.|
-// Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
+// Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
 //              All rights reserved.                        %\__________/%
 //                                                           %          %
 //
@@ -104,8 +104,8 @@ extern "C" void vngo_grtriangle16 (VngoVbuffer *vb,VngoPoint2 *pts,dword color)
     VngoPoint2 *mid_pt = &pts[mid_pt_idx];
     VngoPoint2 *low_pt = &pts[low_pt_idx];
 
-    long    dy1 = ((low_pt->y + 0x8000) >> 16) - ((high_pt->y + 0x8000) >> 16);
-    long    dy2 = ((mid_pt->y + 0x8000) >> 16) - ((high_pt->y + 0x8000) >> 16);
+    long    dy1 = ((low_pt->y) >> 16) - ((high_pt->y) >> 16);
+    long    dy2 = ((mid_pt->y) >> 16) - ((high_pt->y) >> 16);
 
     if (dy1 == 0)
     {   // the triangle is completely flat if this is true.
@@ -121,9 +121,9 @@ extern "C" void vngo_grtriangle16 (VngoVbuffer *vb,VngoPoint2 *pts,dword color)
         mid_y = dy2 - 1;
     }
 
-    tri.start_y = (high_pt->y + 0x8000) >> 16;
+    tri.start_y = (high_pt->y) >> 16;
     tri.color = pts[0].clr;
-    tri.sptr  = (word*)(dword(vb->scrn_ptr) + vb->ytable[(high_pt->y + 0x8000) >> 16]);
+    tri.sptr  = (word*)(dword(vb->scrn_ptr) + vb->ytable[(high_pt->y) >> 16]);
 
     scan_gradient_edge(edge1,high_pt,low_pt);
 
@@ -185,20 +185,20 @@ extern "C" void draw_grhlines16 (VngoTriangle *tri)
     long start_y = tri->start_y;
     if (vb->pal->flags & VNGO_15BIT)
     {
-        for (long y=0;y <= count;y++)
+        for (long y=0;y < count;y++)
         {
             long tR = edge1->shade;
             long tG = edge1->u;
             long tB = edge1->v;
-            long tx = ((edge1->x + 0x8000) >> 16);
+            long tx = ((edge1->x + 0xffff) >> 16);
             word *ptr = scrn + tx;
-            int dx = ((edge2->x + 0x8000) >> 16);
+            int dx = ((edge2->x + 0xffff) >> 16);
 
             long *dmatrixR = &RedDitherMatrix[(start_y+y)&3][0];
             long *dmatrixG = &GreenDitherMatrix[(start_y+y)&3][0];
             long *dmatrixB = &BlueDitherMatrix[(start_y+y)&3][0];
 
-            for (int x = tx;x <= dx; x++)
+            for (int x = tx;x < dx; x++)
             {
                 int ltx = x & 3;
                 word val = 0;
@@ -234,20 +234,20 @@ extern "C" void draw_grhlines16 (VngoTriangle *tri)
     }
     else
     {
-        for (long y=0;y <= count;y++)
+        for (long y=0;y < count;y++)
         {
             long tR = edge1->shade;
             long tG = edge1->u;
             long tB = edge1->v;
-            long tx = ((edge1->x + 0x8000) >> 16);
+            long tx = ((edge1->x + 0xffff) >> 16);
             word *ptr = scrn + tx;
-            int dx = ((edge2->x + 0x8000) >> 16);
+            int dx = ((edge2->x + 0xffff) >> 16);
 
             long *dmatrixR = &RedDitherMatrix[(start_y+y)&3][0];
             long *dmatrixG = &GreenDitherMatrix[(start_y+y)&3][0];
             long *dmatrixB = &BlueDitherMatrix[(start_y+y)&3][0];
 
-            for (int x = tx;x <= dx; x++)
+            for (int x = tx;x < dx; x++)
             {
                 int ltx = x & 3;
                 word val = 0;

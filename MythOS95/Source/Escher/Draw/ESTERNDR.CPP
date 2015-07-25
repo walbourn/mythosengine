@@ -1170,13 +1170,17 @@ void EschTerrainEx::draw_terrain_trans_top (VngoRect *rect,
 
     dword tlflags;
 
-    for (ushort j=0; j<_count; j+=2)
+    for (ushort j=0; j < _count; j+=2)
     {
         // build and draw polys
-        if ((((   rect->x + ((j+2) << dlevel)) >= left_edge[rect->y])
-            || (( rect->x + ((j+2) << dlevel)) >= left_edge[rect->y + (2 << dlevel)]))
-            && (((rect->x + (j << dlevel)) <= right_edge[rect->y])
-            || (( rect->x + (j << dlevel)) <= right_edge[rect->y + (2 << dlevel)])))
+        if (   (   (( rect->x + ((j+2) << dlevel)) >= left_edge[rect->y])
+                || (( rect->x + ((j+2) << dlevel)) >= left_edge[rect->y + (2 << dlevel)])
+               )
+            ||
+               (   (( rect->x + (j << dlevel)) <= right_edge[rect->y])
+                || (( rect->x + (j << dlevel)) <= right_edge[rect->y + (2 << dlevel)])
+               )
+           )
         {
             tlflags = lsptr->flags;
             if (!(visflags[j>>1] & 1))
@@ -1233,8 +1237,6 @@ void EschTerrainEx::draw_terrain_trans_top (VngoRect *rect,
                     if (face[0].flags & ESCH_FACE_TEXTURED)
                     {
                         compute_texture_uv(u_left, u_right, v_top, v_bottom,
-//                                           tlflags, rect->x + (i << dlevel),
-//                                           rect->y + (i << dlevel),
                                            tlflags, rect->x + (j << dlevel),
                                            rect->y,
                                            texture_shift);
@@ -1578,10 +1580,16 @@ void EschTerrainEx::draw_terrain_trans_bottom (VngoRect *rect,
     for (ushort j=0; j<_count; j+=2)
     {
         // build and draw polys
-        if ((((   rect->x + ((j+2) << dlevel)) >= left_edge[rect->y])
-            || (( rect->x + ((j+2) << dlevel)) >= left_edge[rect->y + (2 << dlevel)]))
-            && (((rect->x + (j << dlevel)) <= right_edge[rect->y])
-            || (( rect->x + (j << dlevel)) <= right_edge[rect->y + (2 << dlevel)])))
+#if 1
+        if (   (   (( rect->x + ((j+2) << dlevel)) >= left_edge[rect->y])
+                || (( rect->x + ((j+2) << dlevel)) >= left_edge[rect->y + (2 << dlevel)])
+               )
+            ||
+               (   (( rect->x + (j << dlevel)) <= right_edge[rect->y])
+                || (( rect->x + (j << dlevel)) <= right_edge[rect->y + (2 << dlevel)])
+               )
+           )
+#endif
         {
             tlflags = lsptr->flags;
             if (!(visflags[j>>1] & 1))
@@ -1989,10 +1997,14 @@ void EschTerrainEx::draw_terrain_trans_left (VngoRect *rect,
         // build and draw polys
 
         tlflags = lsptr->flags;
-        if ((((   rect->x + (2 << dlevel)) >= left_edge[rect->y + (j << dlevel)])
-            || (( rect->x + (2 << dlevel)) >= left_edge[rect->y + ((j+2) << dlevel)]))
-            && (((rect->x) <= right_edge[rect->y + (j << dlevel)])
-            || (( rect->x) <= right_edge[rect->y + ((j+2) << dlevel)])))
+        if (   (   (( rect->x + (2 << dlevel)) >= left_edge[rect->y + (j << dlevel)])
+                || (( rect->x + (2 << dlevel)) >= left_edge[rect->y + ((j+2) << dlevel)])
+               )
+            ||
+               (   ( rect->x <= right_edge[rect->y + (j << dlevel)])
+                || ( rect->x <= right_edge[rect->y + ((j+2) << dlevel)])
+               )
+           )
         {
             if (!(visflags[j>>1] & 1))
             {
@@ -2207,9 +2219,9 @@ void EschTerrainEx::draw_terrain_trans_right (VngoRect *rect,
 
     // A B C
     // -----
-    // |\|/|
-    // | --+
     // |/|/|
+    // +-- |
+    // |/|\|
     // -----
 
     float dterm = float(1 << dlevel);
@@ -2398,10 +2410,14 @@ void EschTerrainEx::draw_terrain_trans_right (VngoRect *rect,
         // build and draw polys
 
         tlflags = lsptr->flags;
-        if ((((   rect->x + (2 << dlevel)) >= left_edge[rect->y + (j << dlevel)])
-            || (( rect->x + (2 << dlevel)) >= left_edge[rect->y + ((j+2) << dlevel)]))
-            && (((rect->x) <= right_edge[rect->y + (j << dlevel)])
-            || (( rect->x) <= right_edge[rect->y + ((j+2) << dlevel)])))
+        if (   (   (( rect->x + (2 << dlevel)) >= left_edge[rect->y + (j << dlevel)])
+                || (( rect->x + (2 << dlevel)) >= left_edge[rect->y + ((j+2) << dlevel)])
+               )
+            ||
+               (   ( rect->x <= right_edge[rect->y + (j << dlevel)])
+                || ( rect->x <= right_edge[rect->y + ((j+2) << dlevel)])
+               )
+           )
         {
             if (!(visflags[j>>1] & 1))
             {
@@ -2548,10 +2564,16 @@ void EschTerrainEx::draw_terrain_trans_ul (VngoRect *rect,
                                            int dlevel,
                                            dword lflags)
 {
-    if (!((((   rect->x + (2 << dlevel)) >= left_edge[rect->y])
-          || (( rect->x + (2 << dlevel)) >= left_edge[rect->y + (2 << dlevel)]))
-          && (((rect->x) <= right_edge[rect->y])
-          || (( rect->x) <= right_edge[rect->y + (2 << dlevel)]))))
+    if (!(
+            ( (( rect->x + (2 << dlevel)) >= left_edge[rect->y])
+            || (( rect->x + (2 << dlevel)) >= left_edge[rect->y + (2 << dlevel)])
+            )
+         || 
+            ( ((rect->x) <= right_edge[rect->y])
+            || (( rect->x) <= right_edge[rect->y + (2 << dlevel)])
+            )
+         )
+       ) 
     {
         return;
     }
@@ -2950,10 +2972,23 @@ void EschTerrainEx::draw_terrain_trans_ur (VngoRect *rect,
                                            int dlevel,
                                            dword lflags)
 {
+#if 1
+    if (!(
+            ( (( rect->x + (2 << dlevel)) >= left_edge[rect->y])
+            || (( rect->x + (2 << dlevel)) >= left_edge[rect->y + (2 << dlevel)])
+            )
+         || 
+            ( ((rect->x) <= right_edge[rect->y])
+            || (( rect->x) <= right_edge[rect->y + (2 << dlevel)])
+            )
+         )
+       ) 
+#else
     if (!((((   rect->x + (2 << dlevel)) >= left_edge[rect->y])
           || (( rect->x + (2 << dlevel)) >= left_edge[rect->y + (2 << dlevel)]))
           && (((rect->x) <= right_edge[rect->y])
           || (( rect->x) <= right_edge[rect->y + (2 << dlevel)]))))
+#endif
     {
         return;
     }
@@ -3354,10 +3389,23 @@ void EschTerrainEx::draw_terrain_trans_bl (VngoRect *rect,
                                            int dlevel,
                                            dword lflags)
 {
+#if 1
+    if (!(
+            ( (( rect->x + (2 << dlevel)) >= left_edge[rect->y])
+            || (( rect->x + (2 << dlevel)) >= left_edge[rect->y + (2 << dlevel)])
+            )
+         || 
+            ( ((rect->x) <= right_edge[rect->y])
+            || (( rect->x) <= right_edge[rect->y + (2 << dlevel)])
+            )
+         )
+       ) 
+#else
     if (!((((   rect->x + (2 << dlevel)) >= left_edge[rect->y])
           || (( rect->x + (2 << dlevel)) >= left_edge[rect->y + (2 << dlevel)]))
           && (((rect->x) <= right_edge[rect->y])
           || (( rect->x) <= right_edge[rect->y + (2 << dlevel)]))))
+#endif
     {
         return;
     }
@@ -3756,10 +3804,23 @@ void EschTerrainEx::draw_terrain_trans_br (VngoRect *rect,
                                            int dlevel,
                                            dword lflags)
 {
+#if 1
+    if (!(
+            ( (( rect->x + (2 << dlevel)) >= left_edge[rect->y])
+            || (( rect->x + (2 << dlevel)) >= left_edge[rect->y + (2 << dlevel)])
+            )
+         || 
+            ( ((rect->x) <= right_edge[rect->y])
+            || (( rect->x) <= right_edge[rect->y + (2 << dlevel)])
+            )
+         )
+       ) 
+#else
     if (!((((   rect->x + (2 << dlevel)) >= left_edge[rect->y])
           || (( rect->x + (2 << dlevel)) >= left_edge[rect->y + (2 << dlevel)]))
           && (((rect->x) <= right_edge[rect->y])
           || (( rect->x) <= right_edge[rect->y + (2 << dlevel)]))))
+#endif
     {
         return;
     }

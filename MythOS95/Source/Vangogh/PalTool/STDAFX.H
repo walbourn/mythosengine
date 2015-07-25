@@ -4,7 +4,7 @@
 //
 //                   A Palette extraction/definition tool
 //
-//           Copyright (c) 1995-1997 by Charybdis Enterprises, Inc.
+//           Copyright (c) 1995-1998 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved
 //
 //                      Microsoft Windows '95 Version
@@ -28,7 +28,7 @@
 //
 // stdafx.h
 //
-// Include file for standard system include files, or project specific 
+// Include file for standard system include files, or project specific
 // include files that are used frequently, but are changed infrequently
 //
 //อออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออ
@@ -36,7 +36,7 @@
 //ฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐ
 //
 //                                Includes
-//                                
+//
 //ฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐ
 
 #include <afxwin.h>         // MFC core and standard components

@@ -4,7 +4,7 @@
 //
 //                   A Palette extraction/definition tool
 //
-//           Copyright (c) 1995-1997 by Charybdis Enterprises, Inc.
+//           Copyright (c) 1995-1998 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved
 //
 //                      Microsoft Windows '95 Version
@@ -25,7 +25,7 @@
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
 // Dan Higdon & Chuck Walbourn
-// 
+//
 // paltodoc.h
 //
 // PalTool document class.
@@ -41,27 +41,27 @@
 class CPalToolDoc : public CDocument
 {
 protected: // create from serialization only
-	CPalToolDoc();
-	DECLARE_DYNCREATE(CPalToolDoc)
+        CPalToolDoc();
+        DECLARE_DYNCREATE(CPalToolDoc)
 
 // Attributes
 public:
     char        name[16];
-	VngoPal		*base_pal;
+        VngoPal         *base_pal;
 
     char        desc[256];
     char        auth[256];
     char        copy[256];
 
-	enum
+        enum
     {
         LINEAR,
         BEZIER,
         QUADRATIC
     } curve_mode;
 
-	long &shade_env_break() const { return base_pal->shd_pal->mid_point; }
-    
+        long &shade_env_break() const { return base_pal->shd_pal->mid_point; }
+
 // Operations
 public:
     enum genpal_type
@@ -77,53 +77,53 @@ public:
 
     void Generate (genpal_type typ);
     void CalcConvert ();
-	void CalcShades ();
+        void CalcShades ();
 
-	int  ImportWindowsPalette (LPCSTR);
-	int  ImportVGPalette (LPCSTR);
+        int  ImportWindowsPalette (LPCSTR);
+        int  ImportVGPalette (LPCSTR);
 
     void UIPalette(CWnd *parent, UINT ind=0);
     void UIProperties(CWnd *parent, UINT ipage=0);
 
 // Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CPalToolDoc)
-	public:
-	virtual BOOL OnNewDocument();
-	virtual void DeleteContents();
-	//}}AFX_VIRTUAL
+        // ClassWizard generated virtual function overrides
+        //{{AFX_VIRTUAL(CPalToolDoc)
+        public:
+        virtual BOOL OnNewDocument();
+        virtual void DeleteContents();
+        //}}AFX_VIRTUAL
 
 // Implementation
 public:
-	virtual ~CPalToolDoc();
-	virtual void Serialize(CArchive& ar);   // overridden for document i/o
+        virtual ~CPalToolDoc();
+        virtual void Serialize(CArchive& ar);   // overridden for document i/o
 #ifdef _DEBUG
-	virtual void AssertValid() const;
-	virtual void Dump(CDumpContext& dc) const;
+        virtual void AssertValid() const;
+        virtual void Dump(CDumpContext& dc) const;
 #endif
 
 protected:
     void gen_rampHLS(VngoColor24bit base, VngoColor24bit *colors, int steps);
     void gen_rampRGB(VngoColor24bit base, VngoColor24bit *colors, int steps);
 
-	void use_colors8  (VngoColor24bit *colors, int steps, int color_index);
-	void use_colors15 (VngoColor24bit *colors, int steps, int color_index);
-	void use_colors16 (VngoColor24bit *colors, int steps, int color_index);
-	void use_colors24 (VngoColor24bit *colors, int steps, int color_index);
+        void use_colors8  (VngoColor24bit *colors, int steps, int color_index);
+        void use_colors15 (VngoColor24bit *colors, int steps, int color_index);
+        void use_colors16 (VngoColor24bit *colors, int steps, int color_index);
+        void use_colors24 (VngoColor24bit *colors, int steps, int color_index);
 
-	void calc_linear_colors (VngoColor24bit *colors, int steps,
-							 VngoColor24bit color, int break_point);
-	void calc_bez_colors (VngoColor24bit *colors, int steps,
-						 VngoColor24bit color, int break_point);
-	void calc_quad_colors (VngoColor24bit *colors, int steps,
-						 VngoColor24bit color, int break_point);
+        void calc_linear_colors (VngoColor24bit *colors, int steps,
+                                                         VngoColor24bit color, int break_point);
+        void calc_bez_colors (VngoColor24bit *colors, int steps,
+                                                 VngoColor24bit color, int break_point);
+        void calc_quad_colors (VngoColor24bit *colors, int steps,
+                                                 VngoColor24bit color, int break_point);
 
 // Generated message map functions
 protected:
-	//{{AFX_MSG(CPalToolDoc)
-	afx_msg void OnFileImport();
-	//}}AFX_MSG
-	DECLARE_MESSAGE_MAP()
+        //{{AFX_MSG(CPalToolDoc)
+        afx_msg void OnFileImport();
+        //}}AFX_MSG
+        DECLARE_MESSAGE_MAP()
 };
 
 //°±² eof - paltodoc.h ²±°

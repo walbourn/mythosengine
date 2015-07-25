@@ -6,7 +6,7 @@
 //                                                           |. _  .   .|
 //          Microsoft Windows '95 Version                    | / \   .  |
 //                                                           |_|_|_._._.|
-// Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
+// Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
 //              All rights reserved.                        %\__________/%
 //                                                           %          %
 //
@@ -103,7 +103,6 @@ VNGError VngoVportDB16::init (long width,long height,void *vbptr,
                                      void *zbptr,VngoPal *my_pal,dword flags,
                                      int _pitch, int _zpitch)
 {
-    persp_pixcount = VNGO_PERSP_PRECISION;
     vbuff.width = width;
     vbuff.height = height;
     if (_pitch)
@@ -117,7 +116,8 @@ VNGError VngoVportDB16::init (long width,long height,void *vbptr,
         vbuff.zpitch = vbuff.pitch << 1;
 
     vflags = flags;
-    vflags |= VNGO_PAL_MAPPED_DEV;
+    vflags |= VNGO_PAL_MAPPED_DEV | VNGO_SKIPS_LAST_PIX;
+
     size_in_bytes = width * height;
     vbuff.zbuff_ptr = (word *)zbptr;
 
@@ -241,6 +241,8 @@ VNGError VngoVportDB16::init (long width,long height,void *vbptr,
         reset();
         unlock();
     }
+
+    set_perspective(7.f);
     return (VNGO_NO_ERROR);
 }
 

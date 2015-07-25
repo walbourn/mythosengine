@@ -365,6 +365,7 @@ typedef enum _esch_error_codes
 #define ESCH_DRWT_PRTPYRAMID        0x0210
 #define ESCH_DRWT_PRTGEOMETRY       0x0220
 #define ESCH_DRWT_PRTSPRITE         0x0230
+#define ESCH_DRWT_PRTLINE           0x0240
 #define ESCH_DRWT_PSYSTEM           0x0300
 #define ESCH_DRWT_PGENERATOR        0x0310
 #define ESCH_DRWT_GEOM              0x0400
@@ -475,6 +476,7 @@ typedef enum _esch_error_codes
 #define ESCH_VVERT_CLIPTOP          0x40    // Vertex is clipped top
 #define ESCH_VVERT_CLIPBOTTOM       0x80    // Vertex is clipped bottom
 
+#define ESCH_VVERT_SHADE_CONVERT    0x10000 // Vertex has shading converted
 
 //컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
 // EschFace                                                                 �

@@ -1,5 +1,4 @@
 //อออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออ
-//
 //                oooooooooo.                                 
 //                `888'   `Y8b                                
 //                 888     888  .ooooo.    oooooooo  .ooooo.  
@@ -13,7 +12,7 @@
 //                                       _| _|       
 //                       Microsoft Windows '95 Version
 //
-//            Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.
+//            Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved.
 //
 //ฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤ

@@ -77,7 +77,6 @@ simgine.obj\
 simobj.obj\
 simofld.obj\
 simproc.obj\
-simscl3d.obj\
 simscrn.obj\
 simsd3d.obj\
 simsdd.obj\
@@ -126,9 +125,6 @@ $(LIB).pch :
 
 simpch.obj : ..\simpch.cpp
     $(CPP) /Ycsimgine.hpp /Fp$(LIB).pch $(CCOPTIONS) ..\$*.cpp
-
-simscl3d.obj : ..\simscl3d.cpp
-    $(CPP) $(CCOPTIONS) ..\$*.cpp
 
 #컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
 # Library                                                                  �

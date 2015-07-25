@@ -96,6 +96,378 @@ extern "C" void esch_clipdraw_face(ulong ind, dword ctrlfl)
     dword               level;
     dword               cflags;
     dword               color;
+    float               height;
+    float               width;
+    float               tx;
+    float               ty;
+    float               z;
+    float               tv;
+    EschCamera          *cam;
+    VngoVport           *vp;
+    EschDrawable        *current;
+    EschFace            *face;
+    int                 edge_adj = 0;
+    VngoPointF3         *points;
+
+    // Static work-space
+    static VngoPointF3  *vpt[ES_MAX_VERTS];
+    static dword        *vflags[ES_MAX_VERTS];
+    static dword        flags[ES_MAX_VERTS];
+    static VngoPointF   vpoly2[ES_MAX_VERTS];
+    static VngoPointF3  vpoly[ES_MAX_VERTS];
+    static VngoPointF3  tvpoly[ES_MAX_VERTS];
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Setup
+
+//ÄÄÄ Setup local pointers to current camera and Van Gogh viewport.
+    assertMyth("esch_clipdraw_face needs camera in current context",
+               EschCurrent != 0 && EschCurrent->camera != 0);
+
+    EschProposedTris++;
+
+    cam=EschCurrent->camera;
+
+//ÄÄÄ Setup values/quick references
+    assertMyth("esch_clipdraw_face needs valid draw data in context",
+               EschCurrent != 0 && EschCurrent->faces != 0
+               && EschCurrent->vpoints != 0 && EschCurrent->vflags != 0
+               && EschCurrent->current != 0);
+
+    current=EschCurrent->current;
+
+    face=&EschCurrent->faces[ind];
+
+    cflags = cam->flags;
+
+    points = (VngoPointF3 *)EschCurrent->vpoints;
+
+    // take EschCurrent->vpoints[face->a,b,c] and stuff them into an array
+    vpt[0] = &points[face->a];
+    vpt[1] = &points[face->b];
+    vpt[2] = &points[face->c];
+
+    vpt[0]->u = face->u[0];
+    vpt[0]->v = face->v[0];
+
+    vpt[1]->u = face->u[1];
+    vpt[1]->v = face->v[1];
+
+    vpt[2]->u = face->u[2];
+    vpt[2]->v = face->v[2];
+
+    vflags[0]=&EschCurrent->vflags[face->a];
+    vflags[1]=&EschCurrent->vflags[face->b];
+    vflags[2]=&EschCurrent->vflags[face->c];
+
+    color = (ctrlfl & ESCH_CDF_COLOR)
+            ? EschCurrent->color : vpt[0]->clr;
+
+    vpt[0]->clr = color;
+    vpt[1]->clr = color;
+    vpt[2]->clr = color;
+
+    edge_count = 3;
+
+//ÄÄÄ Figure out shade level (take minimum of shade levels for
+//ÄÄÄ camera, drawable limits, and face limits)
+
+    level = ( (cflags & current->limits)
+              | ((ctrlfl & ESCH_CDF_MUSTTXT) ? ESCH_CAM_TEXTURED : 0) )
+            & face->flags;
+
+    //ÄÄÄ Perspective mode invalid for ortho cameras
+    if (cflags & ESCH_CAM_ORTHO)
+        level &= ~ESCH_CAM_PERSPECTIVE;
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Perform Backface and/or Clip
+    if ((ctrlfl & (ESCH_CDF_BFCULL | ESCH_CDF_CLIP)))
+    {
+        for (i = 0; i < edge_count; i++)
+        {
+            tvpoly[i] = *vpt[i]; // copy content to work space so we have solid data instead of pointers
+            tvpoly[i].clr = color;
+            if (!(level & ESCH_CAM_SHADE_SMOOTH))
+                tvpoly[i].shade = points[face->a].shade;
+        }
+
+        //ÄÄÄ Back Face Cull if needed.
+        if (ctrlfl & ESCH_CDF_BFCULL)
+        {
+            if (!esch_rotate_check(edge_count,tvpoly,cam))
+            {
+                return;
+            }
+        }
+
+        //ÄÄÄ Clip if needed
+        if (ctrlfl & ESCH_CDF_CLIP)
+        {
+            // call the new 3d-clip here.
+            int clip_test = esch_clip_to_frustrum(&edge_count, tvpoly, vpoly, cam, level);
+            if (clip_test == 1)
+            {
+                // we've got new points.
+                // we need new flags
+                lclip_flags = 1;
+                for (i=0; i<edge_count; i++)
+                {
+                    vpt[i] = &vpoly[i];
+                    flags[i] = 0;
+                    vflags[i] = &flags[i];
+                    vpt[i]->clr = color;
+                }
+            }
+            else if (!clip_test)
+            {
+                // it is fully clipped.
+                return;
+            }
+            // a return of -1 means that the poly was fully visible.
+        }
+    }
+
+//ÄÄÄ Setup local copies of frequently used data
+    assertMyth("esch_clipdraw_face expects current context's camera to have a viewport",
+               cam->vport != 0);
+    vp=cam->vport;
+
+    edge_adj = vp->skips_last_pix();
+
+    height = float(vp->vbuff.height >> 1);
+    width = float(vp->vbuff.width >> 1);
+
+    tx = cam->xscalar;
+    ty = cam->yscalar;
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Project vertecies
+    for(i=0; i < edge_count; i++)
+    {
+        if (!(*vflags[i] & ESCH_VVERT_PROJECTED))
+        {
+            *vflags[i] |= ESCH_VVERT_PROJECTED;
+
+            z = vpt[i]->wz;
+
+            if (cflags & ESCH_CAM_ORTHO)
+            {
+#ifdef ES_SNAP_VERTS
+                vpt[i]->x = float(floor((vpt[i]->wx * tx) + width + 0.5f));
+                vpt[i]->y = float(floor(height - (vpt[i]->wy * ty) + 0.5f));
+#else
+                vpt[i]->x = ((vpt[i]->wx * tx) + width);
+                vpt[i]->y = (height - (vpt[i]->wy * ty));
+#endif
+            }
+            else
+            {
+                tv = (vpt[i]->wx * tx) / z;
+
+#ifdef ES_SNAP_VERTS
+                vpt[i]->x = float(floor(tv + width + 0.5f));
+#else
+                vpt[i]->x = tv + width;
+#endif
+                tv = (vpt[i]->wy * ty) / z;
+
+#ifdef ES_SNAP_VERTS
+                vpt[i]->y = float(floor(height - tv + 0.5f));
+#else
+                vpt[i]->y = height - tv;
+#endif
+            }
+
+            //!!! w is 2.30 fixed instead of float  (not!)
+//            vpt[i]->w = flx_recip230(Flx16(z));
+            assert(vpt[i]->wz >= cam->hither);
+            vpt[i]->w = 1.f / vpt[i]->wz;
+        }
+    }
+
+    int swidth = vp->vbuff.width + edge_adj;
+    int sheight = vp->vbuff.height + edge_adj;
+
+    color = (ctrlfl & ESCH_CDF_COLOR)
+            ? EschCurrent->color
+            : points[face->a].clr;
+
+    float shade;
+//    shade = float(EschCurrent->vpoints[face->a].shade);
+//    shade = float(((VngoPoint*)points)[face->a].shade);
+//    if (*vflags[0] & ESCH_VVERT_SHADE_CONVERT)
+        shade = float(points[face->a].shade);
+//    else
+//        shade = float(((VngoPoint *)points)[face->a].shade);
+
+    for(i=0; i < edge_count; i++)
+    {
+        vpoly2[i].x      = vpt[i]->x;
+        vpoly2[i].y      = vpt[i]->y;
+        vpoly2[i].z      = vpt[i]->z;
+        vpoly2[i].shade  = vpt[i]->shade;
+        vpoly2[i].u      = vpt[i]->u;
+        vpoly2[i].v      = vpt[i]->v;
+
+        vpoly2[i].w      = vpt[i]->w;
+
+        vpoly2[i].clr = color;
+
+        if (!(level & ESCH_CAM_SHADE_SMOOTH))
+            vpoly2[i].shade = shade; //float(((VngoPoint *)points)[face->a].shade);
+
+        if (vpoly2[i].x < 0.f)
+            vpoly2[i].x = 0.f;
+        else if (vpoly2[i].x >= swidth)
+            vpoly2[i].x = float(swidth-1);
+        if (vpoly2[i].y < 0.f)
+            vpoly2[i].y = 0.f;
+        else if (vpoly2[i].y >= sheight)
+            vpoly2[i].y = float(sheight - 1);
+    }
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Scale Zs
+    assertMyth ("esch_clipdraw_face has invalid polygon after clipping",
+                (edge_count > 2) && (edge_count < ES_MAX_VERTS));
+
+    if ((edge_count < 3) || (edge_count > ES_MAX_VERTS))
+    {
+        return;
+    }
+
+    //ÄÄÄ Scale Z between hither & yon
+    if (ctrlfl & ESCH_CDF_INFINITEZ)
+    {
+        for (i=0; i < edge_count; i++)
+            vpoly2[i].z = 0.99998f;
+    }
+    else
+    {
+        for (i=0; i < edge_count; i++)
+        {
+            vpoly2[i].z = vpt[i]->wz * cam->z_factor;
+        }
+    }
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Draw triangle
+    EschDrawnTris++;
+    current->flags |= ESCH_DRW_VISIBLE;
+
+    if ((ctrlfl & ESCH_CDF_DONTSORT)
+        || (!(cam->flags & ESCH_CAM_SORT) && !(level & ESCH_CAM_ALPHA)))
+    {
+        if (iesch_immediate(vp, level, face, edge_count, vpoly2, ctrlfl))
+        {
+            //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Draw wireframe
+            if (level & ESCH_CAM_SHADE_WIRE)
+            {
+                if (!lclip_flags)
+                {
+                    if ((cflags & ESCH_CAM_SHOW_ALL_LINES)
+                        || (face->flags & ESCH_FACE_ABLINE))
+                        vp->line(&vpoly2[0],&vpoly2[1]);
+
+                    if ((cflags & ESCH_CAM_SHOW_ALL_LINES)
+                        || (face->flags & ESCH_FACE_BCLINE))
+                        vp->line(&vpoly2[1],&vpoly2[2]);
+
+                    if ((cflags & ESCH_CAM_SHOW_ALL_LINES)
+                        || (face->flags & ESCH_FACE_CALINE))
+                        vp->line(&vpoly2[2],&vpoly2[0]);
+                }
+                else
+                {
+                    for (i=0;i < edge_count-1;i++)
+                    {
+                        vp->line(&vpoly2[i],&vpoly2[i+1]);
+                    }
+                    vp->line(&vpoly2[i],&vpoly2[0]);
+                }
+            }
+        }
+    }
+    else
+    {
+        if (iesch_elmlist(vp, level, face, edge_count, vpoly2, ctrlfl))
+        {
+            //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Wireframe
+            if (level & ESCH_CAM_SHADE_WIRE)
+            {
+                if (!lclip_flags)
+                {
+                    if ((cflags & ESCH_CAM_SHOW_ALL_LINES) || (face->flags & ESCH_FACE_ABLINE))
+                    {
+                        //ÄÄÄ line
+                        EschElement *elm = new (EschSysInstance->sspace)
+                                        EschLineElement(&vpoly2[0],&vpoly2[1]);
+
+                        assertMyth("esch_clipdraw_face() can't allocate sort area memory",
+                                elm != 0);
+                        if (elm)
+                            elm->insert();
+                    }
+
+                    if ((cflags & ESCH_CAM_SHOW_ALL_LINES) || (face->flags & ESCH_FACE_BCLINE))
+                    {
+                        //ÄÄÄ line
+                        EschElement *elm = new (EschSysInstance->sspace)
+                                        EschLineElement(&vpoly2[1],&vpoly2[2]);
+
+                        assertMyth("esch_clipdraw_face() can't allocate sort area memory",
+                                elm != 0);
+                        if (elm)
+                            elm->insert();
+                    }
+
+                    if ((cflags & ESCH_CAM_SHOW_ALL_LINES) || (face->flags & ESCH_FACE_CALINE))
+                    {
+                        //ÄÄÄ line
+                        EschElement *elm = new (EschSysInstance->sspace)
+                                        EschLineElement(&vpoly2[2],&vpoly2[0]);
+
+                        assertMyth("esch_clipdraw_face() can't allocate sort area memory",
+                                elm != 0);
+                        if (elm)
+                            elm->insert();
+                    }
+                }
+                else
+                {
+                    for (i=0;i < edge_count-1;i++)
+                    {
+                        //ÄÄÄ line
+                        EschElement *elm = new (EschSysInstance->sspace)
+                                        EschLineElement(&vpoly2[i],&vpoly2[i+1]);
+
+                        assertMyth("esch_clipdraw_face() can't allocate sort area memory",
+                                elm != 0);
+                        if (elm)
+                            elm->insert();
+                    }
+
+                    //ÄÄÄ line
+                    EschElement *elm = new (EschSysInstance->sspace)
+                                            EschLineElement(&vpoly2[i],&vpoly2[0]);
+
+                    assertMyth("esch_clipdraw_face() can't allocate sort area memory",
+                            elm != 0);
+                    if (elm)
+                        elm->insert();
+                }
+            }
+        }
+    }
+}
+
+
+#if 0
+extern "C" void esch_clipdraw_face(ulong ind, dword ctrlfl)
+{
+    ulong               i;
+    dword               lclip_flags=0;
+    ulong               edge_count;
+    dword               level;
+    dword               cflags;
+    dword               color;
     long                height;
     long                width;
     float               tx;
@@ -445,7 +817,7 @@ extern "C" void esch_clipdraw_face(ulong ind, dword ctrlfl)
         }
     }
 }
-
+#endif
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // iesch_immediate                                                          ³

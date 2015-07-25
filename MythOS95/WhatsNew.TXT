@@ -17,45 +17,41 @@
 
                             W H A T ' S   N E W
 
-                         *** Version 1.6 Release ***
+                       *** Version 1.7 Release ***
 
-                             January 15, 1998
+                               March 9, 1998
 
  ---------------------------------------------------------------------------
- 3D HARDWARE
+ OPTIMIZATIONS
 
- Van Gogh's 3D hardware support has been updated and more functionality 
- added to the Direct3D and other classes, particularly for the texture
- cache management.  Also added fogging support for the Direct3D
- implementation.
+ The 15/16bpp rasterization functions in Van Gogh have been rewritten for
+ faster performance and easier maintenance.
 
- Note: We will probably be removing support for Cirrus Laguna since Cirrus
-       has cancelled this project and the Matrox Simple Interface will
-       probably be dropped.
+ The clipping routines in the Escher library have been optimized somewhat
+ for better performance.
 
 
  ---------------------------------------------------------------------------
- 3D ENGINE ENHANCEMENTS
+ GAMMA CORRECTION
 
- Orthographic (parallel) cameras are now supported by Escher.
-
-
- ---------------------------------------------------------------------------
- SOUND LIBRARY
-
- The Bach sound library has been redesigned and documented.  It includes
- support for DirectSound sample playback and file streaming.  Conversion
- for applications using the older version of Bach is a simple process of
- changing a few identifiers and parameter lists.
+ Van Gogh now supports true gamma correction which is done automatically
+ for loaded palettes and images converted to textures.
 
 
  ---------------------------------------------------------------------------
- ANIMATION/MOVIE LIBRARY
+ MEMORY MANAGER FIX
 
- The Spielberg library has been added to this release which supports
- playback of AVIs, MPEGs, and QuickTime movie files using Microsoft's
- DX Media APIs.  Playback can be sent to a window or to a DirectDraw
- surface.
+ There was a bug in the alignment logic for the Ivory memory manager which
+ prevented allocated memory from being properly aligned on a paragraph
+ boundary.
+
+ 
+ ---------------------------------------------------------------------------
+ MAX MOUSE RANGE
+
+ Added a set_extents() routine to the MaxMouseDevice to set the range
+ of the mouse values since in DirectDraw applications Windows can become
+ confused about which extents are valid for the current mode.
 
 END OF DOCUMENT
 

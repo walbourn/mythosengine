@@ -24,10 +24,10 @@
 //
 //                     Newtonian Physics Simulation Library
 //
-//            Copyright (c) 1995-1997 by Charybdis Enterprises, Inc.
+//            Copyright (c) 1995-1998 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved.
 //
-//                       Microsoft Windows '95 Version
+//                     Microsoft Windows 95/NT Version
 //
 //컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
 //
@@ -81,6 +81,7 @@ NewtObject::NewtObject (float m, const NewtVector &_position, const NewtVector &
     mass     (m),
     drag     (0),
     position (_position),
+    last_position (_position),
     velocity (_velocity)
 {
 }
@@ -93,6 +94,7 @@ NewtObject::NewtObject (float m, float x, float y, float z, const NewtVector &_v
     mass     (m),
     drag     (0),
     position (x, y, z),
+    last_position (x, y, z),
     velocity (_velocity)
 {
 }
@@ -104,7 +106,8 @@ NewtObject::NewtObject (float m, float x, float y, float z, const NewtVector &_v
 NewtObject::NewtObject (float m, float x, float y, float z):
     mass     (m),
     drag     (0),
-    position (x, y, z)
+    position (x, y, z),
+    last_position (x, y, z)
 {
 }
 
@@ -115,7 +118,8 @@ NewtObject::NewtObject (float m, float x, float y, float z):
 NewtObject::NewtObject ():
     mass     (1),
     drag     (0),
-    position (0, 0, 0)
+    position (0, 0, 0),
+    last_position (0, 0, 0)
 {
 }
 

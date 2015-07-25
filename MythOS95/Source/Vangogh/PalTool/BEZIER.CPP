@@ -4,7 +4,7 @@
 //
 //                   A Palette extraction/definition tool
 //
-//           Copyright (c) 1995-1997 by Charybdis Enterprises, Inc.
+//           Copyright (c) 1995-1998 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved
 //
 //                      Microsoft Windows '95 Version
@@ -25,7 +25,7 @@
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
 // Dan Higdon & Chuck Walbourn
-// 
+//
 // bezier.cpp
 //
 // This is a simple bezier support module.  See the header file for
@@ -36,7 +36,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include "stdafx.h"
@@ -53,21 +53,21 @@
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 static void bezier_recurse (BezierClosure &func, POINT pt0, POINT pt1, POINT pt2)
 {
-	if (pt0 == pt1 && pt1 == pt2)
-	{
-		func (pt0.x, pt0.y);
-	}
-	// Otherwise, draw curve segs
-	else
-	{
+        if (pt0 == pt1 && pt1 == pt2)
+        {
+                func (pt0.x, pt0.y);
+        }
+        // Otherwise, draw curve segs
+        else
+        {
         // Calculate midpoints
-		POINT m1 = midpoint (pt0, pt1);
-		POINT m3 = midpoint (pt1, pt2);
-		POINT m2 = midpoint (m1, m3);
+                POINT m1 = midpoint (pt0, pt1);
+                POINT m3 = midpoint (pt1, pt2);
+                POINT m2 = midpoint (m1, m3);
 
-		bezier_recurse (func, pt0, m1, m2);
-		bezier_recurse (func, m2, m3, pt2);
-	}
+                bezier_recurse (func, pt0, m1, m2);
+                bezier_recurse (func, m2, m3, pt2);
+        }
 }
 
 
@@ -76,8 +76,8 @@ static void bezier_recurse (BezierClosure &func, POINT pt0, POINT pt1, POINT pt2
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 void bezier (BezierClosure &func, POINT pts[4])
 {
-	bezier_recurse (func, pts[0], pts[1], pts[3]);
-	//bezier_recurse (func, pts[1], pts[2], pts[3]);
+        bezier_recurse (func, pts[0], pts[1], pts[3]);
+        //bezier_recurse (func, pts[1], pts[2], pts[3]);
 }
 
 //°±² eof - bezier.cpp ²±°

@@ -80,7 +80,7 @@ extern "C" void esch_clipdraw_line(VngoPointF *vpt2, dword ctrlfl)
 //ÄÄÄ Setup local pointer to current camera
     assertMyth("esch_clipdraw_point needs camera in current context",
                EschCurrent != 0 && EschCurrent->camera != 0);
-    
+
     cam = EschCurrent->camera;
 
     cflags = cam->flags;
@@ -88,27 +88,26 @@ extern "C" void esch_clipdraw_line(VngoPointF *vpt2, dword ctrlfl)
 //ÄÄÄ Perform Clip
     if (ctrlfl & ESCH_CDF_CLIP)
     {
-        // This is messy because the clip routines don't take
-        // VngoPointF yet!
-
+#if 1
         ulong count = 2;
-        static VngoPoint    vpoly[2];
-        static VngoPoint    tvpoly[2];
+
+        static VngoPointF3  vpoly[2];
+        static VngoPointF3  tvpoly[2];
 
         tvpoly[0].wx = EschTempVPointF.x;
         tvpoly[0].wy = EschTempVPointF.y;
         tvpoly[0].wz = EschTempVPointF.z;
-        tvpoly[0].x = long(EschTempVPointF.x);
-        tvpoly[0].y = long(EschTempVPointF.y);
-        tvpoly[0].z = long(EschTempVPointF.z);
+        tvpoly[0].x = EschTempVPointF.x;
+        tvpoly[0].y = EschTempVPointF.y;
+        tvpoly[0].z = EschTempVPointF.z;
         tvpoly[0].shade  = long(EschTempVPointF.shade);
 
         tvpoly[1].wx = vpt2->x;
         tvpoly[1].wy = vpt2->y;
         tvpoly[1].wz = vpt2->z;
-        tvpoly[1].x = long(vpt2->x);
-        tvpoly[1].y = long(vpt2->y);
-        tvpoly[1].z = long(vpt2->z);
+        tvpoly[1].x = vpt2->x;
+        tvpoly[1].y = vpt2->y;
+        tvpoly[1].z = vpt2->z;
         tvpoly[1].shade  = long(vpt2->shade);
 
         int cstate = esch_clip_to_frustrum(&count, tvpoly, vpoly,
@@ -117,21 +116,21 @@ extern "C" void esch_clipdraw_line(VngoPointF *vpt2, dword ctrlfl)
                                            & EschCurrent->current->limits);
         if (cstate == 1)        // Was clipped
         {
-            EschTempVPointF.x = float(vpoly[0].x);
-            EschTempVPointF.y = float(vpoly[0].y);
-            EschTempVPointF.z = float(vpoly[0].z);
+            EschTempVPointF.x = vpoly[0].wx;
+            EschTempVPointF.y = vpoly[0].wy;
+            EschTempVPointF.z = vpoly[0].wz;
             EschTempVPointF.shade = float(vpoly[0].shade);
 
-            vpt2->x = float(vpoly[1].x);
-            vpt2->y = float(vpoly[1].y);
-            vpt2->z = float(vpoly[1].z);
+            vpt2->x = vpoly[1].wx;
+            vpt2->y = vpoly[1].wy;
+            vpt2->z = vpoly[1].wz;
             vpt2->shade = float(vpoly[1].shade);
         }
         else if (cstate == 0)   // It is fully clipped.
         {
             return;
         }
-        // the return of -1 means that the poly was fully visible.
+#endif
     }
 
 //ÄÄÄ Project end-points

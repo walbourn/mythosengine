@@ -2,11 +2,11 @@
 ;
 ;                                                           %__________%
 ;                                                          %/ . .  .   \%
-;           Van Gogh 2D-Display Library                     |  . .  o. | 
+;           Van Gogh 2D-Display Library                     |  . .  o. |
 ;                                                           |. _  .   .|
-;          Microsoft Windows '95 Version                    | / \   .  | 
+;          Microsoft Windows '95 Version                    | / \   .  |
 ;                                                           |_|_|_._._.|
-;  Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.   |.-.-.-.-..|
+;  Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.   |.-.-.-.-..|
 ;              All rights reserved.                        %\__________/%
 ;                                                           %          %
 ;
@@ -37,7 +37,7 @@ __VNGSTRCT_INC EQU 1
 ;°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 ;
 ;                                Includes
-;                                
+;
 ;°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 include vngdefs.inc
@@ -54,17 +54,17 @@ include vngdefs.inc
 ; This structure is intentionaly 16 BYTES long.                            ³
 ;ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 VNGO_RECT       STRUCT
-rect_x          dd ? 
-rect_y          dd ? 
-rect_dx         dd ? 
-rect_dy         dd ?    
+rect_x          dd ?
+rect_y          dd ?
+rect_dx         dd ?
+rect_dy         dd ?
 VNGO_RECT       ENDS
 
-                
+
 ;ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 ; VNGO_POINT is a 2D draw point, it contains all of the needed information ³
 ; needed to draw into the view port for most drawing types.                ³
-; This structure is intentionaly 32 BYTES long.                            ³
+; This structure is intentionaly 48 BYTES long.                            ³
 ;ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 VNGO_POINT      STRUCT
 pt_wx           dd ?            ; 3D X value
@@ -152,9 +152,9 @@ short_v         dd ?            ; long
 short_v_step1   dd ?            ; long
 short_v_step2   dd ?            ; long
 short_w         dd ?            ; long
-short_w_step    dd ?            ; long             
+short_w_step    dd ?            ; long
 
-VNGO_TRIANGLE   ENDS            
+VNGO_TRIANGLE   ENDS
 
 
 ;ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
@@ -172,12 +172,12 @@ vb_ytable       dd ?            ; pointer to the table of pre-calculated y offse
 
 vb_zbuff_ptr    dd ?            ; pointer to the zbuffer if it exist.
 vb_zpitch       dd ?            ; zbuffer pitch.
-vb_ztable       dd ?            ; y table for the zbuffer.   
+vb_ztable       dd ?            ; y table for the zbuffer.
 
-vb_edge1	dd ?		; Edge arrays for the scan converters to use.  
-vb_edge2	dd ?		; Edge arrays for the scan converters to use.  
+vb_edge1        dd ?            ; Edge arrays for the scan converters to use.
+vb_edge2        dd ?            ; Edge arrays for the scan converters to use.
 
-VNGO_VBUFFER    ENDS            
+VNGO_VBUFFER    ENDS
 
 
 ;ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿

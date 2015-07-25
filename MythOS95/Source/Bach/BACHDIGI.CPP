@@ -1,13 +1,13 @@
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
 //
-//                        ÜÜÜÜÜÜÜÜÜÜ                       ÜÜÜÜ        
-//     ÚÄÄ¿                ÛÛÛ     ÛÛÜ                     ÞÛÛÛ        
-//     ³  ³       ÚÄÄ¿     ÛÛÛ     ÛÛÛ   ÜÜÜÜ      ÜÜÜÜÜ    ÛÛÛ ÜÜÜ    
-//     ³  ³ ÚÄÄ¿  ³  ³     ÛÛÛÜÜÜÜÛÛÛß  ß  ÞÛÝ    ÛÛß   ßÛ  ÛÛÛÛÛßÛÛ   
-//     ³  ³ ³  ³  ³  ³     ÛÛÛ     ÛÛÜ  ÜÛÛÛÛÛÝ  ÛÛÛ        ÛÛÛ   ÛÛÛ  
-//    OÙ OÙ ³  ³  ³  ³     ÛÛÛ     ÛÛÛ ÞÛÝ  ÛÛÛ  ÛÛÛ    ÜÛ  ÛÛÛ   ÛÛÛ  
-//          ³  ³ OÙ OÙ    ÜÛÛÛÜÜÜÛÛÛß   ÛÛÛÛÝßÛÜ  ßÛÛÜÜÛÛ  ÜÛÛÛÜ ÜÛÛÛÜ 
-//         OÙ OÙ  
+//                        ÜÜÜÜÜÜÜÜÜÜ                       ÜÜÜÜ
+//     ÚÄÄ¿                ÛÛÛ     ÛÛÜ                     ÞÛÛÛ
+//     ³  ³       ÚÄÄ¿     ÛÛÛ     ÛÛÛ   ÜÜÜÜ      ÜÜÜÜÜ    ÛÛÛ ÜÜÜ
+//     ³  ³ ÚÄÄ¿  ³  ³     ÛÛÛÜÜÜÜÛÛÛß  ß  ÞÛÝ    ÛÛß   ßÛ  ÛÛÛÛÛßÛÛ
+//     ³  ³ ³  ³  ³  ³     ÛÛÛ     ÛÛÜ  ÜÛÛÛÛÛÝ  ÛÛÛ        ÛÛÛ   ÛÛÛ
+//    OÙ OÙ ³  ³  ³  ³     ÛÛÛ     ÛÛÛ ÞÛÝ  ÛÛÛ  ÛÛÛ    ÜÛ  ÛÛÛ   ÛÛÛ
+//          ³  ³ OÙ OÙ    ÜÛÛÛÜÜÜÛÛÛß   ÛÛÛÛÝßÛÜ  ßÛÛÜÜÛÛ  ÜÛÛÛÜ ÜÛÛÛÜ
+//         OÙ OÙ
 //                            C++ Music, Sound, and Effects Library
 //                               Microsoft Windows 95/NT Version
 //
@@ -40,7 +40,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include <stdlib.h>
@@ -65,7 +65,8 @@ BachDigital::BachDigital (ulong drate, bach_digi_fmt fmt):
     dsound (0),
     primary (0),
     driverRate (drate),
-    driverFmt (fmt)
+    driverFmt (fmt),
+    flags (0)
 {
     assertMyth ("BachDigital needs valid driver rate", drate != 0);
 }
@@ -86,7 +87,7 @@ BachDigital::~BachDigital()
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-// BachDigital - init 
+// BachDigital - init
 //
 // Initializes the digital driver.
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -152,32 +153,32 @@ bach_err_codes BachDigital::init (HWND hWnd, DWORD coop_level, int cont_play)
 //ÄÄ Setup format
     WAVEFORMATEX    wfmt;
     memset(&wfmt,0,sizeof(wfmt));
-    
+
     switch (driverFmt)
     {
         //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Mono 8-bit
         case BACH_DIGI_MONO_8:
-            wfmt.nChannels		= 1;
+            wfmt.nChannels              = 1;
             wfmt.wBitsPerSample = 8;
-		    wfmt.nBlockAlign    = 1;
+                    wfmt.nBlockAlign    = 1;
             break;
         //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Mono 16-bit
         case BACH_DIGI_MONO_16:
-            wfmt.nChannels		= 1;
+            wfmt.nChannels              = 1;
             wfmt.wBitsPerSample = 16;
-		    wfmt.nBlockAlign    = 2;
+                    wfmt.nBlockAlign    = 2;
             break;
         //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Stereo 8-bit
         case BACH_DIGI_STEREO_8:
-            wfmt.nChannels		= 2;
+            wfmt.nChannels              = 2;
             wfmt.wBitsPerSample = 8;
-		    wfmt.nBlockAlign    = 2;
+                    wfmt.nBlockAlign    = 2;
             break;
         //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Stereo 16-bit
         case BACH_DIGI_STEREO_16:
-            wfmt.nChannels		= 2;
+            wfmt.nChannels              = 2;
             wfmt.wBitsPerSample = 16;
-		    wfmt.nBlockAlign    = 4;
+                    wfmt.nBlockAlign    = 4;
             break;
         //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Unknown
         default:
@@ -187,8 +188,8 @@ bach_err_codes BachDigital::init (HWND hWnd, DWORD coop_level, int cont_play)
 
     wfmt.wFormatTag      = WAVE_FORMAT_PCM;
     wfmt.nSamplesPerSec  = driverRate;
-    wfmt.cbSize			 = 0;
-	wfmt.nAvgBytesPerSec = driverRate * wfmt.nBlockAlign;
+    wfmt.cbSize          = 0;
+    wfmt.nAvgBytesPerSec = driverRate * wfmt.nBlockAlign;
 
 //ÄÄ Set format for primaray buffer
     if (coop_level == DSSCL_WRITEPRIMARY)
@@ -219,6 +220,8 @@ bach_err_codes BachDigital::init (HWND hWnd, DWORD coop_level, int cont_play)
         }
     }
 
+    flags |= BACH_DIGI_PRIMARY_INITIALIZED;
+
     return BACH_ERR_NONE;
 }
 
@@ -231,9 +234,11 @@ void BachDigital::close()
 //ÄÄ Release Direct Sound Buffer and Object
     if (primary)
     {
-        primary->Stop();
+        if (flags & BACH_DIGI_PRIMARY_INITIALIZED)
+            primary->Stop();
         primary->Release();
         primary = 0;
+        flags &= ~BACH_DIGI_PRIMARY_INITIALIZED;
     }
 
     if (dsound)
@@ -241,7 +246,7 @@ void BachDigital::close()
         dsound->Release();
         dsound = 0;
     }
+
 }
 
 //°±² End of module - bachdigi.cpp ²±°
-

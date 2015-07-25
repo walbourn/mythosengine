@@ -47,8 +47,6 @@
 //
 // SimScreenD3D - Microsoft Direct3D video class
 
-// SimScreenCL3D - Cirrus Clear3D video class
-//
 //ммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммммм
 
 #ifndef __SIMSCRN_HPP
@@ -239,31 +237,6 @@ public:
     virtual long lock ();
     virtual int  unlock ();
 };
-
-
-//ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд
-// SimScreenCL3D - Cirrus Clear3D implementation of screen class
-//ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд
-#ifdef  _OEMS
-#ifdef  _CLEAR_3D
-class SimScreenCL3D : public SimScreen
-{
-public:
-    //дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
-    // Constructor/Destructors                                              Ё
-    //дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
-    SimScreenCL3D();
-    virtual ~SimScreenCL3D();
-
-    //дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
-    // Operations                                                           Ё
-    //дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
-    virtual error_codes init (ushort w, ushort h, 
-                              ushort bd = 16, dword flags=FULLSCREEN);
-    virtual VngoVport *create_subviewport(VngoRect &srect, dword flags);
-};
-#endif // _CLEAR_3D
-#endif // _OEMS
 
 //╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟╟
 //

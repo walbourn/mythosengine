@@ -6,7 +6,7 @@
 //                                                           |. _  .   .|
 //          Microsoft Windows '95 Version                    | / \   .  |
 //                                                           |_|_|_._._.|
-// Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
+// Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
 //              All rights reserved.                        %\__________/%
 //                                                           %          %
 //
@@ -108,11 +108,10 @@ VNGError VngoVportDD16::init (VngoSurfaceManager *_pddsurf,
                               VngoSurfaceManager *zbptr,
                               VngoPal *my_pal,dword flags)
 {
-    persp_pixcount = VNGO_PERSP_PRECISION;
     vp_offset = 0;
     zp_offset = 0;
     vflags = flags;
-    vflags |= VNGO_PAL_MAPPED_DEV;
+    vflags |= VNGO_PAL_MAPPED_DEV | VNGO_SKIPS_LAST_PIX;
     vbuff.zbuff_ptr = NULL;
 
     surf_stat = _pddsurf;
@@ -253,6 +252,7 @@ VNGError VngoVportDD16::init (VngoSurfaceManager *_pddsurf,
         }
     }
 
+    set_perspective(7.f);
     return (VNGO_NO_ERROR);
 }
 
@@ -273,9 +273,8 @@ VNGError VngoVportDD16::init (VngoSurfaceManager *_pddsurf,
                              VngoSurfaceManager *zbptr,
                              VngoRect &srect, VngoPal *my_pal,dword flags)
 {
-    persp_pixcount = VNGO_PERSP_PRECISION;
     vflags = flags;
-    vflags |= VNGO_PAL_MAPPED_DEV;
+    vflags |= VNGO_PAL_MAPPED_DEV | VNGO_SKIPS_LAST_PIX;
     vbuff.zbuff_ptr = NULL;
 
     surf_stat = _pddsurf;
@@ -409,6 +408,7 @@ VNGError VngoVportDD16::init (VngoSurfaceManager *_pddsurf,
                 unlock();
         }
     }
+    set_perspective(7.f);
     return (VNGO_NO_ERROR);
 }
 
@@ -416,11 +416,14 @@ int VngoVportDD16::lock()
 {
     int fail_safe=0;
     int ret_val = surf_stat->lock();
+    int working_lock = lock_status;
     lock_status = ret_val;
-    if (ret_val != 1)
+
+    if (ret_val != 1 && working_lock != 1)
     {
         int locked=0;
         HRESULT hr;
+
         while (!locked && (fail_safe < 50000))
         {
             fail_safe++;    // just so we can't loop infinately.

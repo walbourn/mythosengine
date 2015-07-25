@@ -6,7 +6,7 @@
 //                                                           |. _  .   .|
 //          Microsoft Windows '95 Version                    | / \   .  |
 //                                                           |_|_|_._._.|
-// Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
+// Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
 //              All rights reserved.                        %\__________/%
 //                                                           %          %
 //
@@ -78,7 +78,7 @@ extern "C" void vngo_wordcopy(void *dest,void *src,dword count);
 //
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 
-extern VngoSystem   VgSystem;
+extern VngoSystem   *VgSystem;
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
@@ -94,27 +94,39 @@ extern VngoSystem   VgSystem;
 
 void VngoHazeInfoD3D::setup(VngoHazeInfo *info)
 {
-    int start_index = int(info->start_depth * 256.f);
-    int mid_index = int(info->mid_depth * 256.f);
-    for (int i=0;i < start_index;i++)
+    if (info)
     {
-        fog_lut[i]=255;
-    }
-    float step1 = 0.5f / float(mid_index - start_index);
-    float step2 = 0.5f / float(256-mid_index);
-    float accumulator=0.f;
-    for (i=start_index;i < mid_index; i++)
-    {
-        fog_lut[i] = int((1.f - accumulator)*255);
-        accumulator += step1;
-    }
+        int start_index = int(info->start_depth * 256.f);
+        int mid_index = int(info->mid_depth * 256.f);
+        for (int i=0;i < start_index;i++)
+        {
+            fog_lut[i]=255;
+        }
+        float step1 = 0.5f / float(mid_index - start_index);
+        float step2 = 0.5f / float(256-mid_index);
+        float accumulator=0.f;
+        for (i=start_index;i < mid_index; i++)
+        {
+            fog_lut[i] = int((1.f - accumulator)*255);
+            accumulator += step1;
+        }
 
-    for (i=mid_index;i < 256; i++)
-    {
-        fog_lut[i] = int((1.f - accumulator)*255);
-        accumulator += step2;
+        for (i=mid_index;i < 256; i++)
+        {
+            fog_lut[i] = int((1.f - accumulator)*255);
+            accumulator += step2;
+        }
+        target_color = info->target_color;
     }
-    target_color = info->target_color;
+    else
+    {
+        for (int i=0; i < 256;i++)
+        {
+            fog_lut[i] = 255;
+        }
+        target_color = VngoColor24bit (0,0,0);
+
+    }
 
 };
 
@@ -143,7 +155,10 @@ VNGError VngoVportD3D::init (VngoRect &dim,VngoPal *my_pal,dword flags,VngoScree
     left = dim.x;
 
     if (!(_screen->sins & VNGO_NO_VERTEX_FOG))
+    {
         vflags |= VNGO_ACTIVE_HAZE_DEV;
+        fog_table.setup(NULL);
+    }
 
     int was_locked = plock();
     if (was_locked == -1)
@@ -226,15 +241,16 @@ VNGError VngoVportD3D::init (VngoRect &dim,VngoPal *my_pal,dword flags,VngoScree
 
     if (!(vflags & VNGO_INIT_NO_RESET))
     {
-        was_locked = plock();
+//        was_locked = plock();
         if (was_locked != -1)
         {
             reset();
-            if (!was_locked)
-                punlock();
+//            if (!was_locked)
+//                punlock();
         }
     }
 
+    haze_off();
     return (VNGO_NO_ERROR);
 }
 
@@ -261,22 +277,22 @@ VngoVportD3D::~VngoVportD3D()
 void VngoVportD3D::zbuffer_on()
 {
     VngoVport::zbuffer_on();
-    VgSystem.cur_vport = NULL;
+    VgSystem->cur_vport = NULL;
     make_current();
 }
 
 void VngoVportD3D::zbuffer_off()
 {
     VngoVport::zbuffer_off();
-    VgSystem.cur_vport = NULL;
+    VgSystem->cur_vport = NULL;
     make_current();
 }
 
 void VngoVportD3D::make_current()
 {
-    if (VgSystem.cur_vport != this)
+    if (VgSystem->cur_vport != this)
     {
-        VgSystem.cur_vport = this;
+        VgSystem->cur_vport = this;
         if ((vflags & VNGO_ZBUFFER_DEV)
             && (vflags & VNGO_ZBUFFER_ACTIVE))
         {
@@ -301,7 +317,7 @@ void VngoVportD3D::make_current()
             float one = 1.f;
             float zero = 0.0f;
             float two55 = 255.f;
-#if 1
+
             screen->d3dDevice->SetLightState(D3DLIGHTSTATE_FOGMODE,D3DFOG_LINEAR);
             screen->d3dDevice->SetLightState(D3DLIGHTSTATE_FOGSTART,*((dword *)&one));
             screen->d3dDevice->SetLightState(D3DLIGHTSTATE_FOGEND,*((dword *)&two55));
@@ -309,28 +325,14 @@ void VngoVportD3D::make_current()
             screen->d3dDevice->SetRenderState(D3DRENDERSTATE_FOGCOLOR,dword(fog_table.target_color.r<<16 |
                                                                               fog_table.target_color.g<< 8 |
                                                                               fog_table.target_color.b));
-/*
-            screen->d3dDevice->SetRenderState(D3DRENDERSTATE_FOGCOLOR,D3DRGBA(fog_table.target_color.r,
-                                                                              fog_table.target_color.g,
-                                                                              fog_table.target_color.b,
-                                                                              0));
-*/
             screen->d3dDevice->SetRenderState(D3DRENDERSTATE_FOGENABLE,TRUE);
-#else
-            screen->d3dDevice->SetRenderState(D3DRENDERSTATE_FOGENABLE,TRUE);
-            screen->d3dDevice->SetRenderState(D3DRENDERSTATE_FOGCOLOR,D3DRGB(fog_table.target_color.r,fog_table.target_color.g,fog_table.target_color.b));
-            screen->d3dDevice->SetRenderState(D3DRENDERSTATE_FOGTABLEMODE,D3DFOG_LINEAR);
-            screen->d3dDevice->SetRenderState(D3DRENDERSTATE_FOGTABLESTART,*((dword *)&zero));
-            screen->d3dDevice->SetRenderState(D3DRENDERSTATE_FOGTABLEEND,*((dword *)&one));
-            screen->d3dDevice->SetRenderState(D3DRENDERSTATE_FOGTABLEDENSITY,*((dword*)&one));
-#endif
-            // Setup the hazing info from the viewport....
         }
         else
         {
             screen->d3dDevice->SetRenderState(D3DRENDERSTATE_FOGENABLE,FALSE);
         }
 
+#if 0
         if (vflags & VNGO_TEXTURE_FILTER)
         {
             screen->d3dDevice->SetRenderState(D3DRENDERSTATE_TEXTUREMAG, D3DFILTER_LINEAR);
@@ -341,6 +343,7 @@ void VngoVportD3D::make_current()
             screen->d3dDevice->SetRenderState(D3DRENDERSTATE_TEXTUREMAG, D3DFILTER_NEAREST);
             screen->d3dDevice->SetRenderState(D3DRENDERSTATE_TEXTUREMIN, D3DFILTER_NEAREST);
         }
+#endif
     }
 }
 
@@ -871,6 +874,10 @@ VNGError VngoVportD3D::frect(VngoRect *rect,VngoColor24bit *rgb_val)
 
 VNGError VngoVportD3D::frect(VngoRect *rect,dword color)
 {
+    make_current();
+
+    screen->close_frame();
+
     VngoColor24bit tclr;
     if (color & VNGO_COLOR_15BIT)
     {
@@ -983,13 +990,19 @@ VNGError VngoVportD3D::line (VngoPoint *p1, VngoPoint *p2,VngoColor24bit *rgb_va
     verts[0].sy = (D3DVALUE)p1->y+top;
     verts[0].sz = (D3DVALUE)float(ulong(p1->z) >> 16)*ZCONST;
     verts[0].color = RGB_MAKE(rgb.r,rgb.g,rgb.b);
-    verts[0].specular = RGBA_MAKE(0,0,0,fog_table.get_fog(verts[0].sz));
+    if (vflags & VNGO_HAZE_ON)
+        verts[0].specular = RGBA_MAKE(0,0,0,fog_table.get_fog(verts[0].sz));
+    else
+        verts[0].specular = RGBA_MAKE(0,0,0,255);
 
     verts[1].sx = (D3DVALUE)p2->x+left;
     verts[1].sy = (D3DVALUE)p2->y+top;
     verts[1].sz = (D3DVALUE)float(ulong(p2->z) >> 16)*ZCONST;
     verts[1].color = RGB_MAKE(rgb.r,rgb.g,rgb.b);
-    verts[1].specular = RGBA_MAKE(0,0,0,fog_table.get_fog(verts[1].sz));
+    if (vflags & VNGO_HAZE_ON)
+        verts[1].specular = RGBA_MAKE(0,0,0,fog_table.get_fog(verts[1].sz));
+    else
+        verts[1].specular = RGBA_MAKE(0,0,0,255);
 
     dword dflags = VNGO_D3DSFLAGS_TBLEND_MOD |
                    VNGO_D3DSFLAGS_DITHER;
@@ -1032,13 +1045,20 @@ VNGError VngoVportD3D::line (VngoPointF *p1, VngoPointF *p2,VngoColor24bit *rgb_
     verts[0].sy = (D3DVALUE)p1->y+top;
     verts[0].sz = (D3DVALUE)p1->z;
     verts[0].color = RGB_MAKE(rgb.r,rgb.g,rgb.b);
-    verts[0].specular = RGBA_MAKE(0,0,0,fog_table.get_fog(verts[0].sz));
+
+    if (vflags & VNGO_HAZE_ON)
+        verts[0].specular = RGBA_MAKE(0,0,0,fog_table.get_fog(verts[0].sz));
+    else
+        verts[0].specular = RGBA_MAKE(0,0,0,255);
 
     verts[1].sx = (D3DVALUE)p2->x+left;
     verts[1].sy = (D3DVALUE)p2->y+top;
     verts[1].sz = (D3DVALUE)p2->z;
     verts[1].color = RGB_MAKE(rgb.r,rgb.g,rgb.b);
-    verts[1].specular = RGBA_MAKE(0,0,0,fog_table.get_fog(verts[1].sz));
+    if (vflags & VNGO_HAZE_ON)
+        verts[1].specular = RGBA_MAKE(0,0,0,fog_table.get_fog(verts[1].sz));
+    else
+        verts[1].specular = RGBA_MAKE(0,0,0,255);
 
     dword dflags = VNGO_D3DSFLAGS_TBLEND_MOD |
                    VNGO_D3DSFLAGS_DITHER;
@@ -1141,13 +1161,20 @@ VNGError VngoVportD3D::gline (VngoPoint *p1, VngoPoint *p2)
     verts[0].sy = (D3DVALUE)p1->y+top;
     verts[0].sz = (D3DVALUE)float(ulong(p1->z) >> 16)*ZCONST;
     verts[0].color = RGB_MAKE(rgb1.r,rgb1.g,rgb1.b);
-    verts[0].specular = RGBA_MAKE(0,0,0,fog_table.get_fog(verts[0].sz));
+    if (vflags & VNGO_HAZE_ON)
+        verts[0].specular = RGBA_MAKE(0,0,0,fog_table.get_fog(verts[0].sz));
+    else
+        verts[0].specular = RGBA_MAKE(0,0,0,255);
 
     verts[1].sx = (D3DVALUE)p2->x+left;
     verts[1].sy = (D3DVALUE)p2->y+top;
     verts[1].sz = (D3DVALUE)float(ulong(p2->z) >> 16)*ZCONST;
     verts[1].color = RGB_MAKE(rgb2.r,rgb2.g,rgb2.b);
-    verts[1].specular = RGBA_MAKE(0,0,0,fog_table.get_fog(verts[1].sz));
+    if (vflags & VNGO_HAZE_ON)
+        verts[1].specular = RGBA_MAKE(0,0,0,fog_table.get_fog(verts[1].sz));
+    else
+        verts[1].specular = RGBA_MAKE(0,0,0,255);
+
 
     dword dflags = VNGO_D3DSFLAGS_TBLEND_MOD |
                    VNGO_D3DSFLAGS_DITHER |
@@ -1198,13 +1225,19 @@ VNGError VngoVportD3D::gline (VngoPointF *p1, VngoPointF *p2)
     verts[0].sy = (D3DVALUE)p1->y+top;
     verts[0].sz = (D3DVALUE)p1->z;
     verts[0].color = RGB_MAKE(rgb1.r,rgb1.g,rgb1.b);
-    verts[0].specular = RGBA_MAKE(0,0,0,fog_table.get_fog(verts[0].sz));
+    if (vflags & VNGO_HAZE_ON)
+        verts[0].specular = RGBA_MAKE(0,0,0,fog_table.get_fog(verts[0].sz));
+    else
+        verts[0].specular = RGBA_MAKE(0,0,0,255);
 
     verts[1].sx = (D3DVALUE)p2->x+left;
     verts[1].sy = (D3DVALUE)p2->y+top;
     verts[1].sz = (D3DVALUE)p2->z;
     verts[1].color = RGB_MAKE(rgb2.r,rgb2.g,rgb2.b);
-    verts[1].specular = RGBA_MAKE(0,0,0,fog_table.get_fog(verts[1].sz));
+    if (vflags & VNGO_HAZE_ON)
+        verts[1].specular = RGBA_MAKE(0,0,0,fog_table.get_fog(verts[1].sz));
+    else
+        verts[1].specular = RGBA_MAKE(0,0,0,255);
 
     dword dflags = VNGO_D3DSFLAGS_TBLEND_MOD |
                    VNGO_D3DSFLAGS_DITHER |
@@ -1407,7 +1440,10 @@ VNGError VngoVportD3D::poly (int count,VngoPoint pts[])
         else
             verts[i].sz = 0.f;
         verts[i].color = RGB_MAKE(rgb.r,rgb.g,rgb.b);
-        verts[i].specular = RGBA_MAKE(0,0,0,fog_table.get_fog(verts[i].sz));
+        if (vflags & VNGO_HAZE_ON)
+            verts[i].specular = RGBA_MAKE(0,0,0,fog_table.get_fog(verts[i].sz));
+        else
+            verts[i].specular = RGBA_MAKE(0,0,0,255);
     }
 
     dword dflags = VNGO_D3DSFLAGS_TBLEND_MOD |
@@ -1454,7 +1490,10 @@ VNGError VngoVportD3D::poly (int count,VngoPointF pts[])
         verts[i].sy = (D3DVALUE)pts[i].y+top;
         verts[i].sz = (D3DVALUE)pts[i].z;
         verts[i].color = RGB_MAKE(rgb.r,rgb.g,rgb.b);
-        verts[i].specular = RGBA_MAKE(0,0,0,fog_table.get_fog(verts[i].sz));
+        if (vflags & VNGO_HAZE_ON)
+            verts[i].specular = RGBA_MAKE(0,0,0,fog_table.get_fog(verts[i].sz));
+        else
+            verts[i].specular = RGBA_MAKE(0,0,0,255);
     }
 
     dword dflags = VNGO_D3DSFLAGS_TBLEND_MOD |
@@ -1504,7 +1543,10 @@ VNGError VngoVportD3D::gpoly (int count,VngoPoint pts[])
         }
 
         verts[i].color = RGB_MAKE(rgb.r,rgb.g,rgb.b);
-        verts[i].specular = RGBA_MAKE(0,0,0,fog_table.get_fog(verts[i].sz));
+        if (vflags & VNGO_HAZE_ON)
+            verts[i].specular = RGBA_MAKE(0,0,0,fog_table.get_fog(verts[i].sz));
+        else
+            verts[i].specular = RGBA_MAKE(0,0,0,255);
     }
 
     dword dflags = VNGO_D3DSFLAGS_TBLEND_MOD |
@@ -1552,7 +1594,10 @@ VNGError VngoVportD3D::gpoly (int count,VngoPointF pts[])
         }
 
         verts[i].color = RGB_MAKE(rgb.r,rgb.g,rgb.b);
-        verts[i].specular = RGBA_MAKE(0,0,0,fog_table.get_fog(verts[i].sz));
+        if (vflags & VNGO_HAZE_ON)
+            verts[i].specular = RGBA_MAKE(0,0,0,fog_table.get_fog(verts[i].sz));
+        else
+            verts[i].specular = RGBA_MAKE(0,0,0,255);
     }
 
     dword dflags = VNGO_D3DSFLAGS_TBLEND_MOD |
@@ -1652,7 +1697,11 @@ VNGError VngoVportD3D::tpoly (int count,VngoPoint pts[],VngoTexture *tex)
 
 
         tpts[i].color = RGB_MAKE (shade,shade,shade);
-        tpts[i].specular = RGBA_MAKE(0,0,0,fog_table.get_fog(tpts[i].sz));
+        if (vflags & VNGO_HAZE_ON)
+            tpts[i].specular = RGBA_MAKE(0,0,0,fog_table.get_fog(tpts[i].sz));
+        else
+            tpts[i].specular = RGBA_MAKE(0,0,0,255);
+
         tpts[i].tu = float(pts[i].u) / float(0x10000);
         tpts[i].tv = float(pts[i].v) / float(0x10000);
         assert (pts[i].x >= 0);
@@ -1665,9 +1714,13 @@ VNGError VngoVportD3D::tpoly (int count,VngoPoint pts[],VngoTexture *tex)
     dword dflags = VNGO_D3DSFLAGS_TBLEND_MOD |
                    VNGO_D3DSFLAGS_DITHER;
 
+    if (vflags & VNGO_TEXTURE_FILTER)
+        dflags |= VNGO_D3DSFLAGS_FILTER;
+
     if (tex->flags & VNGO_TEXTURE_TRANSPARENT)
     {
         dflags |= VNGO_D3DSFLAGS_CKEY_ENABLE;
+        dflags &= ~VNGO_D3DSFLAGS_FILTER;
     }
 
     screen->set_draw_state(dflags,((VngoD3DTexture3D*)tptr)->handle);
@@ -1743,7 +1796,11 @@ VNGError VngoVportD3D::tpoly (int count,VngoPointF pts[],VngoTexture *tex)
 
 
         tpts[i].color = RGB_MAKE (shade,shade,shade);
-        tpts[i].specular = RGBA_MAKE(0,0,0,fog_table.get_fog(tpts[i].sz));
+        if (vflags & VNGO_HAZE_ON)
+            tpts[i].specular = RGBA_MAKE(0,0,0,fog_table.get_fog(tpts[i].sz));
+        else
+            tpts[i].specular = RGBA_MAKE(0,0,0,255);
+
         tpts[i].tu = pts[i].u;
         tpts[i].tv = pts[i].v;
 
@@ -1756,9 +1813,13 @@ VNGError VngoVportD3D::tpoly (int count,VngoPointF pts[],VngoTexture *tex)
     dword dflags = VNGO_D3DSFLAGS_TBLEND_MOD |
                    VNGO_D3DSFLAGS_DITHER;
 
+    if (vflags & VNGO_TEXTURE_FILTER)
+        dflags |= VNGO_D3DSFLAGS_FILTER;
+
     if (tex->flags & VNGO_TEXTURE_TRANSPARENT)
     {
         dflags |= VNGO_D3DSFLAGS_CKEY_ENABLE;
+        dflags &= ~VNGO_D3DSFLAGS_FILTER;
     }
 
     screen->set_draw_state(dflags,((VngoD3DTexture3D*)tptr)->handle);
@@ -1840,7 +1901,11 @@ VNGError VngoVportD3D::tpoly_persp (int count,VngoPoint pts[],VngoTexture *tex)
 
 
         tpts[i].color = RGB_MAKE (shade,shade,shade);
-        tpts[i].specular = RGBA_MAKE(0,0,0,fog_table.get_fog(tpts[i].sz));
+        if (vflags & VNGO_HAZE_ON)
+            tpts[i].specular = RGBA_MAKE(0,0,0,fog_table.get_fog(tpts[i].sz));
+        else
+            tpts[i].specular = RGBA_MAKE(0,0,0,255);
+
         tpts[i].tu = float(pts[i].u) / float(0x10000);
         tpts[i].tv = float(pts[i].v) / float(0x10000);
         assert (pts[i].x >= 0);
@@ -1853,9 +1918,13 @@ VNGError VngoVportD3D::tpoly_persp (int count,VngoPoint pts[],VngoTexture *tex)
                    VNGO_D3DSFLAGS_DITHER |
                    VNGO_D3DSFLAGS_PERSPECTIVE;
 
+    if (vflags & VNGO_TEXTURE_FILTER)
+        dflags |= VNGO_D3DSFLAGS_FILTER;
+
     if (tex->flags & VNGO_TEXTURE_TRANSPARENT)
     {
         dflags |= VNGO_D3DSFLAGS_CKEY_ENABLE;
+        dflags &= ~VNGO_D3DSFLAGS_FILTER;
     }
 
     screen->set_draw_state(dflags,((VngoD3DTexture3D*)tptr)->handle);
@@ -1934,7 +2003,11 @@ VNGError VngoVportD3D::tpoly_persp (int count,VngoPointF pts[],VngoTexture *tex)
 
 
         tpts[i].color = RGB_MAKE (shade,shade,shade);
-        tpts[i].specular = RGBA_MAKE(0,0,0,fog_table.get_fog(tpts[i].sz));
+        if (vflags & VNGO_HAZE_ON)
+            tpts[i].specular = RGBA_MAKE(0,0,0,fog_table.get_fog(tpts[i].sz));
+        else
+            tpts[i].specular = RGBA_MAKE(0,0,0,255);
+
         tpts[i].tu = pts[i].u;
         tpts[i].tv = pts[i].v;
         assert (pts[i].x >= 0);
@@ -1947,9 +2020,13 @@ VNGError VngoVportD3D::tpoly_persp (int count,VngoPointF pts[],VngoTexture *tex)
                    VNGO_D3DSFLAGS_DITHER |
                    VNGO_D3DSFLAGS_PERSPECTIVE;
 
+    if (vflags & VNGO_TEXTURE_FILTER)
+        dflags |= VNGO_D3DSFLAGS_FILTER;
+
     if (tex->flags & VNGO_TEXTURE_TRANSPARENT)
     {
         dflags |= VNGO_D3DSFLAGS_CKEY_ENABLE;
+        dflags &= ~VNGO_D3DSFLAGS_FILTER;
     }
 
     screen->set_draw_state(dflags,((VngoD3DTexture3D*)tptr)->handle);
@@ -2028,7 +2105,11 @@ VNGError VngoVportD3D::gtpoly (int count,VngoPoint pts[],VngoTexture *tex)
         }
         shade = int(float(shade) * modifier);
         tpts[i].color = RGB_MAKE (shade,shade,shade);
-        tpts[i].specular = RGBA_MAKE(specular,specular,specular,fog_table.get_fog(tpts[i].sz));
+        if (vflags & VNGO_HAZE_ON)
+            tpts[i].specular = RGBA_MAKE(specular,specular,specular,fog_table.get_fog(tpts[i].sz));
+        else
+            tpts[i].specular = RGBA_MAKE(specular,specular,specular,255);
+
         tpts[i].tu = float(pts[i].u) / float(0x10000);
         tpts[i].tv = float(pts[i].v) / float(0x10000);
         assert (pts[i].x >= 0);
@@ -2041,9 +2122,13 @@ VNGError VngoVportD3D::gtpoly (int count,VngoPoint pts[],VngoTexture *tex)
                    VNGO_D3DSFLAGS_DITHER |
                    VNGO_D3DSFLAGS_GOURAUD;
 
+    if (vflags & VNGO_TEXTURE_FILTER)
+        dflags |= VNGO_D3DSFLAGS_FILTER;
+
     if (tex->flags & VNGO_TEXTURE_TRANSPARENT)
     {
         dflags |= VNGO_D3DSFLAGS_CKEY_ENABLE;
+        dflags &= ~VNGO_D3DSFLAGS_FILTER;
     }
 
     screen->set_draw_state(dflags,((VngoD3DTexture3D*)tptr)->handle);
@@ -2117,7 +2202,10 @@ VNGError VngoVportD3D::gtpoly (int count,VngoPointF pts[],VngoTexture *tex)
         }
         shade = int(float(shade) * modifier);
         tpts[i].color = RGB_MAKE (shade,shade,shade);
-        tpts[i].specular = RGBA_MAKE(specular,specular,specular,fog_table.get_fog(tpts[i].sz));
+        if (vflags & VNGO_HAZE_ON)
+            tpts[i].specular = RGBA_MAKE(specular,specular,specular,fog_table.get_fog(tpts[i].sz));
+        else
+            tpts[i].specular = RGBA_MAKE(specular,specular,specular,255);
         tpts[i].tu = pts[i].u;
         tpts[i].tv = pts[i].v;
         assert (pts[i].x >= 0);
@@ -2130,9 +2218,13 @@ VNGError VngoVportD3D::gtpoly (int count,VngoPointF pts[],VngoTexture *tex)
                    VNGO_D3DSFLAGS_DITHER |
                    VNGO_D3DSFLAGS_GOURAUD;
 
+    if (vflags & VNGO_TEXTURE_FILTER)
+        dflags |= VNGO_D3DSFLAGS_FILTER;
+
     if (tex->flags & VNGO_TEXTURE_TRANSPARENT)
     {
         dflags |= VNGO_D3DSFLAGS_CKEY_ENABLE;
+        dflags &= ~VNGO_D3DSFLAGS_FILTER;
     }
 
     screen->set_draw_state(dflags,((VngoD3DTexture3D*)tptr)->handle);
@@ -2214,7 +2306,11 @@ VNGError VngoVportD3D::gtpoly_persp (int count,VngoPoint pts[],VngoTexture *tex)
         }
         shade = int(float(shade) * modifier);
         tpts[i].color = RGB_MAKE (shade,shade,shade);
-        tpts[i].specular = RGBA_MAKE(specular,specular,specular,fog_table.get_fog(tpts[i].sz));
+        if (vflags & VNGO_HAZE_ON)
+            tpts[i].specular = RGBA_MAKE(specular,specular,specular,fog_table.get_fog(tpts[i].sz));
+        else
+            tpts[i].specular = RGBA_MAKE(specular,specular,specular,255);
+
         tpts[i].tu = float(pts[i].u) / float(0x10000);
         tpts[i].tv = float(pts[i].v) / float(0x10000);
         assert (pts[i].x >= 0);
@@ -2228,9 +2324,13 @@ VNGError VngoVportD3D::gtpoly_persp (int count,VngoPoint pts[],VngoTexture *tex)
                    VNGO_D3DSFLAGS_PERSPECTIVE |
                    VNGO_D3DSFLAGS_GOURAUD;
 
+    if (vflags & VNGO_TEXTURE_FILTER)
+        dflags |= VNGO_D3DSFLAGS_FILTER;
+
     if (tex->flags & VNGO_TEXTURE_TRANSPARENT)
     {
         dflags |= VNGO_D3DSFLAGS_CKEY_ENABLE;
+        dflags &= ~VNGO_D3DSFLAGS_FILTER;
     }
 
     screen->set_draw_state(dflags,((VngoD3DTexture3D*)tptr)->handle);
@@ -2309,7 +2409,11 @@ VNGError VngoVportD3D::gtpoly_persp (int count,VngoPointF pts[],VngoTexture *tex
         }
         shade = int(float(shade) * modifier);
         tpts[i].color = RGB_MAKE (shade,shade,shade);
-        tpts[i].specular = RGBA_MAKE(specular,specular,specular,fog_table.get_fog(tpts[i].sz));
+        if (vflags & VNGO_HAZE_ON)
+            tpts[i].specular = RGBA_MAKE(specular,specular,specular,fog_table.get_fog(tpts[i].sz));
+        else
+            tpts[i].specular = RGBA_MAKE(specular,specular,specular,255);
+
         tpts[i].tu = pts[i].u;
         tpts[i].tv = pts[i].v;
         assert (pts[i].x >= 0);
@@ -2323,9 +2427,13 @@ VNGError VngoVportD3D::gtpoly_persp (int count,VngoPointF pts[],VngoTexture *tex
                    VNGO_D3DSFLAGS_PERSPECTIVE |
                    VNGO_D3DSFLAGS_GOURAUD;
 
+    if (vflags & VNGO_TEXTURE_FILTER)
+        dflags |= VNGO_D3DSFLAGS_FILTER;
+
     if (tex->flags & VNGO_TEXTURE_TRANSPARENT)
     {
         dflags |= VNGO_D3DSFLAGS_CKEY_ENABLE;
+        dflags &= ~VNGO_D3DSFLAGS_FILTER;
     }
 
     screen->set_draw_state(dflags,((VngoD3DTexture3D*)tptr)->handle);
@@ -2382,7 +2490,11 @@ VNGError VngoVportD3D::grpoly (int count, VngoPoint pts[])
         }
 
         verts[i].color = RGB_MAKE(rgb.r,rgb.g,rgb.b);
-        verts[i].specular = RGBA_MAKE(0,0,0,fog_table.get_fog(verts[i].sz));
+        if (vflags & VNGO_HAZE_ON)
+            verts[i].specular = RGBA_MAKE(0,0,0,fog_table.get_fog(verts[i].sz));
+        else
+            verts[i].specular = RGBA_MAKE(0,0,0,255);
+
     }
 
     dword dflags = VNGO_D3DSFLAGS_TBLEND_MOD |
@@ -2440,7 +2552,11 @@ VNGError VngoVportD3D::grpoly (int count, VngoPointF pts[])
         }
 
         verts[i].color = RGB_MAKE(rgb.r,rgb.g,rgb.b);
-        verts[i].specular = RGBA_MAKE(0,0,0,fog_table.get_fog(verts[i].sz));
+        if (vflags & VNGO_HAZE_ON)
+            verts[i].specular = RGBA_MAKE(0,0,0,fog_table.get_fog(verts[i].sz));
+        else
+            verts[i].specular = RGBA_MAKE(0,0,0,255);
+
     }
 
     dword dflags = VNGO_D3DSFLAGS_TBLEND_MOD |
@@ -2495,7 +2611,10 @@ VNGError VngoVportD3D::poly_a (int count,VngoPoint pts[],long alpha)
         else
             verts[i].sz = 0.f;
         verts[i].color = RGBA_MAKE(rgb.r,rgb.g,rgb.b,alpha);
-        verts[i].specular = RGBA_MAKE(0,0,0,fog_table.get_fog(verts[i].sz));
+        if (vflags & VNGO_HAZE_ON)
+            verts[i].specular = RGBA_MAKE(0,0,0,fog_table.get_fog(verts[i].sz));
+        else
+            verts[i].specular = RGBA_MAKE(0,0,0,255);
     }
 
     dword dflags = VNGO_D3DSFLAGS_ALPHA |
@@ -2542,7 +2661,10 @@ VNGError VngoVportD3D::poly_a (int count,VngoPointF pts[],long alpha)
         verts[i].sy = (D3DVALUE)pts[i].y+top;
         verts[i].sz = (D3DVALUE)pts[i].z;
         verts[i].color = RGBA_MAKE(rgb.r,rgb.g,rgb.b,alpha);
-        verts[i].specular = RGBA_MAKE(0,0,0,fog_table.get_fog(verts[i].sz));
+        if (vflags & VNGO_HAZE_ON)
+            verts[i].specular = RGBA_MAKE(0,0,0,fog_table.get_fog(verts[i].sz));
+        else
+            verts[i].specular = RGBA_MAKE(0,0,0,255);
     }
 
     dword dflags = VNGO_D3DSFLAGS_ALPHA |
@@ -2593,7 +2715,10 @@ VNGError VngoVportD3D::gpoly_a (int count,VngoPoint pts[],long alpha)
         }
 
         verts[i].color = RGBA_MAKE(rgb.r,rgb.g,rgb.b,alpha);
-        verts[i].specular = RGBA_MAKE(0,0,0,fog_table.get_fog(verts[i].sz));
+        if (vflags & VNGO_HAZE_ON)
+            verts[i].specular = RGBA_MAKE(0,0,0,fog_table.get_fog(verts[i].sz));
+        else
+            verts[i].specular = RGBA_MAKE(0,0,0,255);
     }
 
     dword dflags = VNGO_D3DSFLAGS_ALPHA |
@@ -2642,7 +2767,10 @@ VNGError VngoVportD3D::gpoly_a (int count,VngoPointF pts[],long alpha)
         }
 
         verts[i].color = RGBA_MAKE(rgb.r,rgb.g,rgb.b,alpha);
-        verts[i].specular = RGBA_MAKE(0,0,0,fog_table.get_fog(verts[i].sz));
+        if (vflags & VNGO_HAZE_ON)
+            verts[i].specular = RGBA_MAKE(0,0,0,fog_table.get_fog(verts[i].sz));
+        else
+            verts[i].specular = RGBA_MAKE(0,0,0,255);
     }
 
     dword dflags = VNGO_D3DSFLAGS_ALPHA |
@@ -2742,7 +2870,11 @@ VNGError VngoVportD3D::tpoly_a (int count,VngoPoint pts[],VngoTexture *tex,long 
         tpts[i].rhw = (D3DVALUE) pts[i].w;
 
         tpts[i].color = RGBA_MAKE (shade,shade,shade,alpha);
-        tpts[i].specular = RGBA_MAKE(specular,specular,specular,fog_table.get_fog(tpts[i].sz));
+        if (vflags & VNGO_HAZE_ON)
+            tpts[i].specular = RGBA_MAKE(specular,specular,specular,fog_table.get_fog(tpts[i].sz));
+        else
+            tpts[i].specular = RGBA_MAKE(specular,specular,specular,255);
+
         tpts[i].tu = float(pts[i].u) / float(0x10000);
         tpts[i].tv = float(pts[i].v) / float(0x10000);
         assert (pts[i].x >= 0);
@@ -2755,9 +2887,13 @@ VNGError VngoVportD3D::tpoly_a (int count,VngoPoint pts[],VngoTexture *tex,long 
                    VNGO_D3DSFLAGS_TBLEND_MOD |
                    VNGO_D3DSFLAGS_DITHER;
 
+    if (vflags & VNGO_TEXTURE_FILTER)
+        dflags |= VNGO_D3DSFLAGS_FILTER;
+
     if (tex->flags & VNGO_TEXTURE_TRANSPARENT)
     {
         dflags |= VNGO_D3DSFLAGS_CKEY_ENABLE;
+        dflags &= ~VNGO_D3DSFLAGS_FILTER;
     }
 
     screen->set_draw_state(dflags,((VngoD3DTexture3D*)tptr)->handle);
@@ -2834,7 +2970,10 @@ VNGError VngoVportD3D::tpoly_a (int count,VngoPointF pts[],VngoTexture *tex,long
         tpts[i].rhw = (D3DVALUE) pts[i].w;
 
         tpts[i].color = RGBA_MAKE (shade,shade,shade,alpha);
-        tpts[i].specular = RGBA_MAKE(specular,specular,specular,fog_table.get_fog(tpts[i].sz));
+        if (vflags & VNGO_HAZE_ON)
+            tpts[i].specular = RGBA_MAKE(specular,specular,specular,fog_table.get_fog(tpts[i].sz));
+        else
+            tpts[i].specular = RGBA_MAKE(specular,specular,specular,255);
         tpts[i].tu = pts[i].u;
         tpts[i].tv = pts[i].v;
 
@@ -2848,9 +2987,13 @@ VNGError VngoVportD3D::tpoly_a (int count,VngoPointF pts[],VngoTexture *tex,long
                    VNGO_D3DSFLAGS_TBLEND_MOD |
                    VNGO_D3DSFLAGS_DITHER;
 
+    if (vflags & VNGO_TEXTURE_FILTER)
+        dflags |= VNGO_D3DSFLAGS_FILTER;
+
     if (tex->flags & VNGO_TEXTURE_TRANSPARENT)
     {
         dflags |= VNGO_D3DSFLAGS_CKEY_ENABLE;
+        dflags &= ~VNGO_D3DSFLAGS_FILTER;
     }
 
     screen->set_draw_state(dflags,((VngoD3DTexture3D*)tptr)->handle);
@@ -2933,7 +3076,11 @@ VNGError VngoVportD3D::tpoly_persp_a (int count,VngoPoint pts[],VngoTexture *tex
         tpts[i].rhw = (D3DVALUE) pts[i].w;
 
         tpts[i].color = RGBA_MAKE (shade,shade,shade,alpha);
-        tpts[i].specular = RGBA_MAKE(specular,specular,specular,fog_table.get_fog(tpts[i].sz));
+        if (vflags & VNGO_HAZE_ON)
+            tpts[i].specular = RGBA_MAKE(specular,specular,specular,fog_table.get_fog(tpts[i].sz));
+        else
+            tpts[i].specular = RGBA_MAKE(specular,specular,specular,255);
+
         tpts[i].tu = float(pts[i].u) / float(0x10000);
         tpts[i].tv = float(pts[i].v) / float(0x10000);
         assert (pts[i].x >= 0);
@@ -2948,9 +3095,13 @@ VNGError VngoVportD3D::tpoly_persp_a (int count,VngoPoint pts[],VngoTexture *tex
                    VNGO_D3DSFLAGS_DITHER |
                    VNGO_D3DSFLAGS_PERSPECTIVE;
 
+    if (vflags & VNGO_TEXTURE_FILTER)
+        dflags |= VNGO_D3DSFLAGS_FILTER;
+
     if (tex->flags & VNGO_TEXTURE_TRANSPARENT)
     {
         dflags |= VNGO_D3DSFLAGS_CKEY_ENABLE;
+        dflags &= ~VNGO_D3DSFLAGS_FILTER;
     }
 
     screen->set_draw_state(dflags,((VngoD3DTexture3D*)tptr)->handle);
@@ -3029,7 +3180,11 @@ VNGError VngoVportD3D::tpoly_persp_a (int count,VngoPointF pts[],VngoTexture *te
         tpts[i].rhw = (D3DVALUE) pts[i].w;
 
         tpts[i].color = RGBA_MAKE (shade,shade,shade,alpha);
-        tpts[i].specular = RGBA_MAKE(specular,specular,specular,fog_table.get_fog(tpts[i].sz));
+        if (vflags & VNGO_HAZE_ON)
+            tpts[i].specular = RGBA_MAKE(specular,specular,specular,fog_table.get_fog(tpts[i].sz));
+        else
+            tpts[i].specular = RGBA_MAKE(specular,specular,specular,255);
+
         tpts[i].tu = pts[i].u;
         tpts[i].tv = pts[i].v;
         assert (pts[i].x >= 0);
@@ -3043,9 +3198,13 @@ VNGError VngoVportD3D::tpoly_persp_a (int count,VngoPointF pts[],VngoTexture *te
                    VNGO_D3DSFLAGS_DITHER |
                    VNGO_D3DSFLAGS_PERSPECTIVE;
 
+    if (vflags & VNGO_TEXTURE_FILTER)
+        dflags |= VNGO_D3DSFLAGS_FILTER;
+
     if (tex->flags & VNGO_TEXTURE_TRANSPARENT)
     {
         dflags |= VNGO_D3DSFLAGS_CKEY_ENABLE;
+        dflags &= ~VNGO_D3DSFLAGS_FILTER;
     }
 
     screen->set_draw_state(dflags,((VngoD3DTexture3D*)tptr)->handle);
@@ -3124,7 +3283,11 @@ VNGError VngoVportD3D::gtpoly_a (int count,VngoPoint pts[],VngoTexture *tex,long
         }
         shade = int(float(shade) * modifier);
         tpts[i].color = RGBA_MAKE (shade,shade,shade,alpha);
-        tpts[i].specular = RGBA_MAKE(specular,specular,specular,fog_table.get_fog(tpts[i].sz));
+        if (vflags & VNGO_HAZE_ON)
+            tpts[i].specular = RGBA_MAKE(specular,specular,specular,fog_table.get_fog(tpts[i].sz));
+        else
+            tpts[i].specular = RGBA_MAKE(specular,specular,specular,255);
+
         tpts[i].tu = float(pts[i].u) / float(0x10000);
         tpts[i].tv = float(pts[i].v) / float(0x10000);
         assert (pts[i].x >= 0);
@@ -3138,9 +3301,13 @@ VNGError VngoVportD3D::gtpoly_a (int count,VngoPoint pts[],VngoTexture *tex,long
                    VNGO_D3DSFLAGS_DITHER |
                    VNGO_D3DSFLAGS_GOURAUD;
 
+    if (vflags & VNGO_TEXTURE_FILTER)
+        dflags |= VNGO_D3DSFLAGS_FILTER;
+
     if (tex->flags & VNGO_TEXTURE_TRANSPARENT)
     {
         dflags |= VNGO_D3DSFLAGS_CKEY_ENABLE;
+        dflags &= ~VNGO_D3DSFLAGS_FILTER;
     }
 
     screen->set_draw_state(dflags,((VngoD3DTexture3D*)tptr)->handle);
@@ -3215,7 +3382,11 @@ VNGError VngoVportD3D::gtpoly_a (int count,VngoPointF pts[],VngoTexture *tex,lon
         }
         shade = int(float(shade) * modifier);
         tpts[i].color = RGBA_MAKE (shade,shade,shade,alpha);
-        tpts[i].specular = RGBA_MAKE(specular,specular,specular,fog_table.get_fog(tpts[i].sz));
+        if (vflags & VNGO_HAZE_ON)
+            tpts[i].specular = RGBA_MAKE(specular,specular,specular,fog_table.get_fog(tpts[i].sz));
+        else
+            tpts[i].specular = RGBA_MAKE(specular,specular,specular,255);
+
         tpts[i].tu = pts[i].u;
         tpts[i].tv = pts[i].v;
         assert (pts[i].x >= 0);
@@ -3229,9 +3400,13 @@ VNGError VngoVportD3D::gtpoly_a (int count,VngoPointF pts[],VngoTexture *tex,lon
                    VNGO_D3DSFLAGS_DITHER |
                    VNGO_D3DSFLAGS_GOURAUD;
 
+    if (vflags & VNGO_TEXTURE_FILTER)
+        dflags |= VNGO_D3DSFLAGS_FILTER;
+
     if (tex->flags & VNGO_TEXTURE_TRANSPARENT)
     {
         dflags |= VNGO_D3DSFLAGS_CKEY_ENABLE;
+        dflags &= ~VNGO_D3DSFLAGS_FILTER;
     }
 
     screen->set_draw_state(dflags,((VngoD3DTexture3D*)tptr)->handle);
@@ -3309,7 +3484,11 @@ VNGError VngoVportD3D::gtpoly_persp_a (int count,VngoPointF pts[],VngoTexture *t
         }
         shade = int(float(shade) * modifier);
         tpts[i].color = RGBA_MAKE (shade,shade,shade,alpha);
-        tpts[i].specular = RGBA_MAKE(specular,specular,specular,fog_table.get_fog(tpts[i].sz));
+        if (vflags & VNGO_HAZE_ON)
+            tpts[i].specular = RGBA_MAKE(specular,specular,specular,fog_table.get_fog(tpts[i].sz));
+        else
+            tpts[i].specular = RGBA_MAKE(specular,specular,specular,255);
+
         tpts[i].tu = pts[i].u;
         tpts[i].tv = pts[i].v;
 
@@ -3325,9 +3504,13 @@ VNGError VngoVportD3D::gtpoly_persp_a (int count,VngoPointF pts[],VngoTexture *t
                    VNGO_D3DSFLAGS_PERSPECTIVE |
                    VNGO_D3DSFLAGS_GOURAUD;
 
+    if (vflags & VNGO_TEXTURE_FILTER)
+        dflags |= VNGO_D3DSFLAGS_FILTER;
+
     if (tex->flags & VNGO_TEXTURE_TRANSPARENT)
     {
         dflags |= VNGO_D3DSFLAGS_CKEY_ENABLE;
+        dflags &= ~VNGO_D3DSFLAGS_FILTER;
     }
 
     screen->set_draw_state(dflags,((VngoD3DTexture3D*)tptr)->handle);
@@ -3409,7 +3592,11 @@ VNGError VngoVportD3D::gtpoly_persp_a (int count,VngoPoint pts[],VngoTexture *te
         }
         shade = int(float(shade) * modifier);
         tpts[i].color = RGBA_MAKE (shade,shade,shade,alpha);
-        tpts[i].specular = RGBA_MAKE(specular,specular,specular,fog_table.get_fog(tpts[i].sz));
+        if (vflags & VNGO_HAZE_ON)
+            tpts[i].specular = RGBA_MAKE(specular,specular,specular,fog_table.get_fog(tpts[i].sz));
+        else
+            tpts[i].specular = RGBA_MAKE(specular,specular,specular,255);
+
         tpts[i].tu = float(pts[i].u) / float(0x10000);
         tpts[i].tv = float(pts[i].v) / float(0x10000);
         assert (pts[i].x >= 0);
@@ -3424,9 +3611,13 @@ VNGError VngoVportD3D::gtpoly_persp_a (int count,VngoPoint pts[],VngoTexture *te
                    VNGO_D3DSFLAGS_PERSPECTIVE |
                    VNGO_D3DSFLAGS_GOURAUD;
 
+    if (vflags & VNGO_TEXTURE_FILTER)
+        dflags |= VNGO_D3DSFLAGS_FILTER;
+
     if (tex->flags & VNGO_TEXTURE_TRANSPARENT)
     {
         dflags |= VNGO_D3DSFLAGS_CKEY_ENABLE;
+        dflags &= ~VNGO_D3DSFLAGS_FILTER;
     }
 
     screen->set_draw_state(dflags,((VngoD3DTexture3D*)tptr)->handle);

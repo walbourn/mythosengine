@@ -49,9 +49,9 @@
 #endif
 
 //같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같�
-//             
+//
 //                                Includes
-//                                
+//
 //같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같�
 
 #include <vangogh.hpp>
@@ -161,7 +161,7 @@ public:
 
         if (pt1->y < pt2->y) { miny = pt1->y;  maxy = pt2->y; }
         else { miny = pt2->y;  maxy = pt1->y; }
-        
+
         EschElementSize += sizeof(*this);
     }
 
@@ -376,15 +376,26 @@ class EschCamera;
 class EschPlane;
 
 // Internal clip functions
+
+#if 1
+extern "C" int esch_clip_to_frustrum (ulong *count, VngoPointF3 *pts, VngoPointF3 *outpts,
+                                      EschCamera *cam, dword level);
+extern "C" int esch_clip_to_plane(int *count, VngoPointF3 *in, VngoPointF3 *out,
+                                  EschPlane *plane, dword level);
+#else
 extern "C" int esch_clip_to_frustrum (ulong *count, VngoPoint *pts,
                                       VngoPoint *outpts,
                                       EschCamera *cam, dword level);
 extern "C" int esch_clip_to_plane(int *count, VngoPoint *in, VngoPoint *out,
                                   EschPlane *plane, dword level);
+#endif
 
 // Internal rotate check functions
 int esch_rotate_check(ulong count,VngoPoint2 *pts);
 int esch_rotate_check(ulong count,VngoPoint *pts,EschCamera *cam=0);
+
+int esch_rotate_check(ulong count, VngoPointF3 *pts);
+int esch_rotate_check(ulong count, VngoPointF3 *pts, EschCamera *cam=0);
 
 #ifdef __WATCOMC__
 #pragma pack();

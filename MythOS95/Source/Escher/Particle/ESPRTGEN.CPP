@@ -40,7 +40,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include "escher.hpp"
@@ -71,7 +71,12 @@ EschParticleGenerator::EschParticleGenerator() :
     EschParticleSystem(),
     func(esch_generate_particle),
     data(0),
-    pal(0)
+    pal(0),
+    rot_rate(0),
+    var_rot_rate(0),
+    rot_rate_low(0),
+    rot_rate_high(0),
+    init_dir(0,1,0)
 {
     dtyp = ESCH_DRWT_PGENERATOR;
 };
@@ -80,7 +85,12 @@ EschParticleGenerator::EschParticleGenerator(ulong mc) :
     EschParticleSystem(),
     func(esch_generate_particle),
     data(0),
-    pal(0)
+    pal(0),
+    rot_rate(0),
+    var_rot_rate(0),
+    rot_rate_low(0),
+    rot_rate_high(0),
+    init_dir(0,1,0)
 {
     dtyp = ESCH_DRWT_PGENERATOR;
 
@@ -179,9 +189,9 @@ ulong EschParticleGenerator::generate()
             parms.pos.y = 0;
             parms.pos.z = RANDOM() * gsize1;
 
-            parms.velocity.i = 0;
-            parms.velocity.j = 1;
-            parms.velocity.k = 0;
+            parms.velocity.i = init_dir.i;
+            parms.velocity.j = init_dir.j;
+            parms.velocity.k = init_dir.k;
 
             assertMyth("EschParticleGenerator::generate needs valid max angle",
                        maxangle >= 0);
@@ -202,9 +212,9 @@ ulong EschParticleGenerator::generate()
             parms.pos.y = 0;
             parms.pos.z = RANDOM() * gsize2;
 
-            parms.velocity.i = 0;
-            parms.velocity.j = 1;
-            parms.velocity.k = 0;
+            parms.velocity.i = init_dir.i;
+            parms.velocity.j = init_dir.j;
+            parms.velocity.k = init_dir.k;
 
             assertMyth("EschParticleGenerator::generate needs valid max angle",
                        maxangle >= 0);
@@ -236,9 +246,9 @@ ulong EschParticleGenerator::generate()
             }
             else
             {
-                parms.velocity.i = 0;
-                parms.velocity.j = 1;
-                parms.velocity.k = 0;
+                parms.velocity.i = init_dir.i;
+                parms.velocity.j = init_dir.j;
+                parms.velocity.k = init_dir.k;
             }
         }
 
@@ -314,6 +324,19 @@ ulong EschParticleGenerator::generate()
         }
         else
             parms.alpha = mean_alpha;
+
+        if (var_rot_rate > 0)
+        {
+            float rr = rot_rate + RANDOM()*float(var_rot_rate);
+        }
+        else if (rot_rate_high || rot_rate_low)
+        {
+            parms.rot_rate = rot_rate + (rot_rate_high - (RANDOM()*float(rot_rate_high-rot_rate_low)));
+        }
+        else
+            parms.rot_rate = rot_rate;
+
+
 
         //ÄÄÄ Create new particle with callback
         EschParticle *p = func(&parms);
@@ -429,8 +452,31 @@ EschParticle *esch_generate_sprite(EschParticleGenParams *parms)
     if (!(parms->generator->flags & ESCH_PRTG_FRAMEBASED))
         p->set_flags(p->flags | ESCH_PRT_TIMEBASED);
 
+    p->set_rot_rate(parms->rot_rate);
+
     return p;
 }
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// esch_generate_line
+//
+// Callback routine which creates an instance of EschParticleLine
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+EschParticle *esch_generate_line(EschParticleGenParams *parms)
+{
+    assert(parms != 0 && parms->generator != 0);
+
+    EschParticleLine *p = new EschParticleLine(&parms->pos, &parms->velocity,
+                                               parms->color, parms->lifetime);
+    if (!p)
+        return 0;
+
+    if (!(parms->generator->flags & ESCH_PRTG_FRAMEBASED))
+        p->set_flags(p->flags | ESCH_PRT_TIMEBASED);
+
+    return p;
+}
+
 
 //°±² End of module - esprtgen.cpp ²±°
 

@@ -7,9 +7,9 @@
        __...--''     ___...--_..'  .;.'
       (,__....----'''       (,..--''
   
-                       Microsoft Windows '95 Version
+                     Microsoft Windows 95/NT Version
      
-          Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.
+          Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.
                            All Rights Reserved.
   
   ---------------------------------------------------------------------------
@@ -31,27 +31,11 @@
                                 _Library Status_
 
   Notes by:  Tim Little
-  Updated:   June 24, 1996
+  Updated:   March 9, 1998
 
   Changes for this release --------------------------------------------------
 
-    o Changed the precision of the trig functions to .0625 degrees accuracy.
-
-    o Added the atan() functions.
-
-  Proposed changes ----------------------------------------------------------
-
-    o Implement :-
-
-        atan2()
-        exp()
-        pow()
-        log10()
-        log()
-
-    o 2.30, 24.8, 20.12, 12.20 formats.
-
-    o Support for floating point table-based trig functions
+    o Updated copyrights
 
 
   Problems ------------------------------------------------------------------

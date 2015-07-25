@@ -9,7 +9,9 @@
 //
 //                          Across the event horizon...
 //
-//           Copyright (c) 1994 - 1997 by Charybdis Enterprises, Inc.
+//                        Microsoft Windows 95/NT Version
+//
+//            Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved.
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -26,6 +28,8 @@
 // INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//
+// maxmouse.hpp
 //
 // Event Devices
 //
@@ -94,6 +98,8 @@ protected:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
     short   last_x;
     short   last_y;
+    short   max_x;
+    short   max_y;
     bool    initialized;
 
 public:
@@ -126,6 +132,7 @@ public:
     virtual bool is_present () const;
 
     bool is_initialized () const { return initialized; }
+    void set_extents (short, short);
 };
 
 

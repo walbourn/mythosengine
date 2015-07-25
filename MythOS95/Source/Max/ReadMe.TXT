@@ -10,7 +10,7 @@
 
                           Microsoft Windows '95 Version
 
-            Copyright (c) 1994 - 1997 by Charybdis Enterprises, Inc.
+             Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.
                              All Rights Reserved.
 
   --------------------------------------------------------------------------
@@ -31,13 +31,16 @@
                               _Library Status_
 
   Notes by: Dan Higdon
-  Updated: November 12, 1997
+  Updated: February 28, 1998
 
   Changes for this release --------------------------------------------------
 
-    o Fixed joystick bug which caused the joystick to operate only the
-      first time you init Max.
-    
+    o Added a new MaxMouse::set_extents (x,y) which allows you to clip the
+      mouse position to a specific area of the screen.  Usually, the extents
+      are set to GetSystemMetrics (SM_CXEXTENT) and SM_CYEXTENT, but with some
+      DirectDraw applications, Windows can get confused about which device has
+      the mouse.
+
 
   Pending changes -----------------------------------------------------------
 

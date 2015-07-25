@@ -41,11 +41,11 @@
 
  ---------------------------------------------------------------------------
 
-                         *** Version 1.6 Release ***
+                         *** Version 1.7 Release ***
 
-                             January 15, 1998
+                               March 9, 1998
 
- This is the seventh full release of the MythOS collection.  Usage of this 
+ This is the eight full release of the MythOS collection.  Usage of this 
  library is subject to your license agreement.  All materials herein 
  should be treated as confidential information.
 
@@ -66,7 +66,7 @@
 
     \Dx5            DirectX V5 SDK
     \DXMedia51      DirectX Media V5.1 SDK
-    \Platform SDK   Microsoft November 1997 Platform SDK
+    \Platform SDK   Microsoft January 1998 Platform SDK
 
  To install these, read the ReadME.TXT file in the subdirectory.
 

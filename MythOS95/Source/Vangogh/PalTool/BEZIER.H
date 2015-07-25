@@ -4,7 +4,7 @@
 //
 //                   A Palette extraction/definition tool
 //
-//           Copyright (c) 1995-1997 by Charybdis Enterprises, Inc.
+//           Copyright (c) 1995-1998 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved
 //
 //                      Microsoft Windows '95 Version
@@ -62,18 +62,18 @@ virtual void operator () (int x, int y) = 0;
 // Find the midpoint
 inline POINT midpoint (POINT a, POINT b)
 {
-	POINT res;
+        POINT res;
 
-	res.x = int ((float(a.x + b.x) / 2.0) + 0.5);
-	res.y = int ((float (a.y + b.y) / 2.0) + 0.5);
+        res.x = int ((float(a.x + b.x) / 2.0) + 0.5);
+        res.y = int ((float (a.y + b.y) / 2.0) + 0.5);
 
-	return res;
+        return res;
 }
 
 // Compare two points.
 inline int operator == (POINT p1, POINT p2)
 {
-	return abs (p1.x - p2.x) <= 1 && abs (p1.y - p2.y) <= 1;
+        return abs (p1.x - p2.x) <= 1 && abs (p1.y - p2.y) <= 1;
 }
 
 // The API call for beziers.  What it does is call
@@ -84,4 +84,4 @@ void bezier (BezierClosure &func, POINT pts[4]);
 #endif
 
 //°±² eof - bezier.h ²±°
-                  
+

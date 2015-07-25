@@ -6,7 +6,7 @@
 //                                                           |. _  .   .|
 //          Microsoft Windows '95 Version                    | / \   .  |
 //                                                           |_|_|_._._.|
-// Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
+// Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
 //              All rights reserved.                        %\__________/%
 //                                                           %          %
 //
@@ -332,8 +332,8 @@ VNGError VngoTexture::convert(XFBitmap *bm, VngoPal *pal)
                     clr.b = (pcolor << 3) & 0xf8;
 
                     if ((flags & VNGO_TEXTURE_TRANSPARENT)
-                        && (clr.r == 248)
-                        && (clr.b == 248)
+                        && (clr.r >= 0xf8)
+                        && (clr.b >= 0xf8)
                         && (clr.g == 0))
                     {
                         *(dptr++) = (byte)255;
@@ -348,30 +348,53 @@ VNGError VngoTexture::convert(XFBitmap *bm, VngoPal *pal)
             }
             else if (flags & VNGO_TEXTURE_15BIT)
             {
-                memcpy(tex, bm->data, width*height*2);
+                word *sptr=(word*)bm->data, *dptr=(word*)tex;
+                for(int i=0; i < width*height; i++)
+                {
+                    VngoColor24bit trgb;
+                    trgb.r = (*sptr >> 7) & 0xF8;
+                    trgb.g = (*sptr >> 2) & 0xF8;
+                    trgb.b = (*sptr << 3) & 0xF8;
+                    sptr++;
+
+                    if ((flags & VNGO_TEXTURE_TRANSPARENT)
+                        && (trgb.r >= 0xf8)
+                        && (trgb.g == 0)
+                        && (trgb.b >= 0xf8))
+                    {
+                        *(dptr++) = (word)0x7c1f;
+                    }
+                    else
+                    {
+                        gamma_correct_RGB(&trgb);
+                        *dptr = trgb.compress();
+                        dptr++;
+                    }
+                }
+//                memcpy(tex, bm->data, width*height*2);
             }
             else if (flags & VNGO_TEXTURE_16BIT)
             {
                 word *sptr=(word*)bm->data, *dptr=(word*)tex;
                 for(int i=0; i < width*height; i++)
                 {
-                    int r = *sptr >> 10;
-                    int g = (*sptr >> 5) & 0x1F;
-                    int b = *sptr & 0x1F;
+                    VngoColor24bit trgb;
+                    trgb.r = (*sptr >> 7) & 0xF8;
+                    trgb.g = (*sptr >> 2) & 0xF8;
+                    trgb.b = (*sptr << 3) & 0xF8;
                     sptr++;
 
                     if ((flags & VNGO_TEXTURE_TRANSPARENT)
-                        && (r == 248)
-                        && (g == 0)
-                        && (b == 248))
+                        && (trgb.r >= 0xf8)
+                        && (trgb.g == 0)
+                        && (trgb.b >= 0xf8))
                     {
                         *(dptr++) = (word)0xf81f;
                     }
                     else
                     {
-                        *dptr = r << 11;
-                        *dptr |= g << 6;
-                        *dptr |= b;
+                        gamma_correct_RGB(&trgb);
+                        *dptr = trgb.compress16();
                         dptr++;
                     }
                 }
@@ -429,7 +452,8 @@ VNGError VngoTexture::convert(XFBitmap *bm, VngoPal *pal)
                     }
                     else
                     {
-                        *(dptr++) = VngoColor15bit(clr).pcolor;
+                        gamma_correct_RGB(&clr);
+                        *(dptr++) = clr.compress();
                     }
                 }
             }
@@ -453,7 +477,8 @@ VNGError VngoTexture::convert(XFBitmap *bm, VngoPal *pal)
                     }
                     else
                     {
-                        *(dptr++) = VngoColor16bit(clr).pcolor;
+                        gamma_correct_RGB(&clr);
+                        *(dptr++) = clr.compress16();
                     }
                 }
             }
@@ -743,22 +768,112 @@ VNGError VngoMemTexture3D::init(VngoTexture *_src,VngoPal *_pal)
         case    32:
             widthshift     = 5;
             u_upshift      = 11;
+            switch(_src->height)
+            {
+                case    16:
+                    tdimension = TEX32x16;
+                    break;
+                case    32:
+                    tdimension = TEX32x32;
+                    break;
+                case    64:
+                    tdimension = TEX32x64;
+                    break;
+                case    128:
+                    tdimension = TEX32x128;
+                    break;
+                case    256:
+                    tdimension = TEX32x256;
+                    break;
+            }
             break;
         case    64:
             widthshift     = 6;
             u_upshift      = 10;
+            switch(_src->height)
+            {
+                case    16:
+                    tdimension = TEX64x16;
+                    break;          
+                case    32:         
+                    tdimension = TEX64x32;
+                    break;          
+                case    64:         
+                    tdimension = TEX64x64;
+                    break;          
+                case    128:        
+                    tdimension = TEX64x128;
+                    break;          
+                case    256:        
+                    tdimension = TEX64x256;
+                    break;
+            }
             break;
         case    128:
             widthshift     = 7;
             u_upshift      = 9;
+            switch(_src->height)
+            {
+                case    16:
+                    tdimension = TEX128x16;
+                    break;
+                case    32:
+                    tdimension = TEX128x32;
+                    break;
+                case    64:
+                    tdimension = TEX128x64;
+                    break;
+                case    128:
+                    tdimension = TEX128x128;
+                    break;
+                case    256:
+                    tdimension = TEX128x256;
+                    break;
+            }
             break;
         case    256:
             widthshift     = 8;
             u_upshift      = 8;
+            switch(_src->height)
+            {
+                case    16:
+                    tdimension = TEX256x16;
+                    break;
+                case    32:
+                    tdimension = TEX256x32;
+                    break;
+                case    64:
+                    tdimension = TEX256x64;
+                    break;
+                case    128:
+                    tdimension = TEX256x128;
+                    break;
+                case    256:
+                    tdimension = TEX256x256;
+                    break;
+            }
             break;
         case    16:
             widthshift     = 4;
             u_upshift      = 12;
+            switch(_src->height)
+            {
+                case    16:
+                    tdimension = TEX16x16;
+                    break;
+                case    32:
+                    tdimension = TEX16x32;
+                    break;
+                case    64:
+                    tdimension = TEX16x64;
+                    break;
+                case    128:
+                    tdimension = TEX16x128;
+                    break;
+                case    256:
+                    tdimension = TEX16x256;
+                    break;
+            }
             break;
         default:
             // Could also at this point create a texture of the closest
@@ -799,6 +914,7 @@ VNGError VngoMemTexture3D::init(VngoTexture *_src,VngoPal *_pal)
             // supported size and resample source into it.
             return (VNGO_UNSUPPORTED_TEXTURE);
     }
+
     next = _src->vtex3d;
     _src->vtex3d = this;
     return VNGO_NO_ERROR;
@@ -856,39 +972,24 @@ void VngoMemTexture3D::release()
 //컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
 VngoCacheHndl::~VngoCacheHndl()
 {
-    if (VgSystem.DIBTx)
+    if (VgSystem->DIBTx)
     {
-        if (VgSystem.DIBTx->remove(this) == VNGO_NO_ERROR)
+        if (VgSystem->DIBTx->remove(this) == VNGO_NO_ERROR)
             return;
     }
-    if (VgSystem.DDTx)
+    if (VgSystem->DDTx)
     {
-        if (VgSystem.DDTx->remove(this) == VNGO_NO_ERROR)
+        if (VgSystem->DDTx->remove(this) == VNGO_NO_ERROR)
             return;
     }
-    if (VgSystem.D3DTx)
+    if (VgSystem->D3DTx)
     {
-        if (VgSystem.D3DTx->remove(this) == VNGO_NO_ERROR)
+        if (VgSystem->D3DTx->remove(this) == VNGO_NO_ERROR)
             return;
     }
-    if (VgSystem.OGLTx)
+    if (VgSystem->OGLTx)
     {
-        if (VgSystem.OGLTx->remove(this) == VNGO_NO_ERROR)
-            return;
-    }
-    if (VgSystem.CL3DTx)
-    {
-        if (VgSystem.CL3DTx->remove(this) == VNGO_NO_ERROR)
-            return;
-    }
-    if (VgSystem.GlideTx)
-    {
-        if (VgSystem.GlideTx->remove(this) == VNGO_NO_ERROR)
-            return;
-    }
-    if (VgSystem.MSITx)
-    {
-        if (VgSystem.MSITx->remove(this) == VNGO_NO_ERROR)
+        if (VgSystem->OGLTx->remove(this) == VNGO_NO_ERROR)
             return;
     }
     return;
@@ -929,40 +1030,47 @@ VNGError VngoTextureManager::ready(VngoCacheHndl *hndl)
 //컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
 VNGError VngoTextureManager::add(VngoCacheHndl *ntex,int ready)
 {
+if (ntex->next != NULL)
+    char *huH="Whats UP";
+
+if (ntex->prev != NULL)
+    char *huH="Whats UP";
+
+
     if(ready)
     {
         // The texture is ready to go and should be put in the ready queue.
-        if (ready_tail)
-        {
-            ntex->prev = ready_tail;
-            ready_tail->next = ntex;
-        }
-        else
+        if (!ready_head)
         {
             ready_head = ntex;
-            ntex->prev = NULL;
+            ready_tail = NULL;
         }
+        if (ready_tail)
+        {
+            ready_tail->next = ntex;
+        }
+
         ntex->next = NULL;
+        ntex->prev = ready_tail;
         ready_tail = ntex;
-        ntex->flags &= ~VNGO_TEXTURE_CACHED_OUT;
         ntex->flags |= VNGO_TEXTURE_CACHED_IN;
     }
     else
     {
         // put it in the out queue at the tail.
-        if (out_tail)
-        {
-            ntex->prev = out_tail;
-            out_tail->next = ntex;
-        }
-        else
+        if (!out_head)
         {
             out_head = ntex;
-            ntex->prev = NULL;
+            out_tail = NULL;
         }
+        if (out_tail)
+        {
+            out_tail->next = ntex;
+        }
+
         ntex->next = NULL;
+        ntex->prev = out_tail;
         out_tail = ntex;
-        ntex->flags &= ~VNGO_TEXTURE_CACHED_IN;
         ntex->flags |= VNGO_TEXTURE_CACHED_OUT;
     }
     return VNGO_NO_ERROR;
@@ -976,82 +1084,68 @@ VNGError VngoTextureManager::remove(VngoCacheHndl *ntex)
 {
     if (ntex != NULL)
     {
+        if (ready_head == ready_tail)
+        {
+            if (ready_head == ntex)
+            {
+                // remove from the ready head position.
+                ready_head = NULL;
+                ready_tail = NULL;
+            }
+        }
+        if (out_head == out_tail)
+        {
+            if (out_head == ntex)
+            {
+                // remove from the out head position.
+                out_head = NULL;
+                out_tail = NULL;
+            }
+        }
+
         if(ready_head == ntex)
         {
             // remove from the ready head position.
             ready_head = ntex->next;
             if (ready_head)
                 ready_head->prev = NULL;
-            ntex->next = NULL;
-            ntex->prev = NULL;
         }
-        else if (ready_tail == ntex)
+
+        if (ready_tail == ntex)
         {
             // remove from the ready tail position.
             ready_tail = ntex->prev;
             if (ready_tail)
                 ready_tail->next = NULL;
-            ntex->prev = NULL;
-            ntex->next = NULL;
         }
-        else if (out_head == ntex)
+
+        if (out_head == ntex)
         {
             // remove from the out head position.
             out_head = ntex->next;
             if (out_head)
                 out_head->prev = NULL;
-            ntex->next = NULL;
-            ntex->prev = NULL;
         }
-        else if (out_tail == ntex)
+
+        if (out_tail == ntex)
         {
             // remove from the out tail position.
             out_tail = ntex->prev;
             if (out_tail)
                 out_tail->next = NULL;
-            ntex->prev = NULL;
-            ntex->next = NULL;
         }
-        else
-        {
-            // look through the ready queue for the texture and remove it.
-            // then look through the out queue for the texture and remove it.
-            if (ready_head)
-            {
-                VngoCacheHndl *t = ready_head->next;
-                while(t != ntex && t != NULL)
-                {
-                    t = t->next;
-                }
-                if (t != NULL)
-                {
-                    if (t->prev)
-                        t->prev->next = t->next;
-                    if (t->next)
-                        t->next->prev = t->prev;
-                    t->next = NULL;
-                    t->prev = NULL;
-                }
-            }
-            // Now look in the out queue.
-            if (out_head)
-            {
-                VngoCacheHndl *t = out_head->next;
-                while(t != ntex && t != NULL)
-                {
-                    t = t->next;
-                }
-                if (t != NULL)
-                {
-                    if (t->prev)
-                        t->prev->next = t->next;
-                    if (t->next)
-                        t->next->prev = t->prev;
-                    t->next = NULL;
-                    t->prev = NULL;
-                }
-            }
-        }
+
+        if (ntex->prev)
+            ntex->prev->next = ntex->next;
+
+        if (ntex->next)
+            ntex->next->prev = ntex->prev;
+
+        ntex->prev = NULL;
+        ntex->next = NULL;
+
+        ntex->flags &= ~VNGO_TEXTURE_CACHED_IN;
+        ntex->flags &= ~VNGO_TEXTURE_CACHED_OUT;
     }
     return VNGO_NO_ERROR;
 }

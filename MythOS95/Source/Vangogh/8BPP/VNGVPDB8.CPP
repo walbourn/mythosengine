@@ -2,11 +2,11 @@
 //
 //                                                           %__________%
 //                                                          %/ . .  .   \%
-//           Van Gogh 2D-Display Library                     |  . .  o. | 
+//           Van Gogh 2D-Display Library                     |  . .  o. |
 //                                                           |. _  .   .|
-//          Microsoft Windows '95 Version                    | / \   .  | 
+//          Microsoft Windows '95 Version                    | / \   .  |
 //                                                           |_|_|_._._.|
-// Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
+// Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
 //              All rights reserved.                        %\__________/%
 //                                                           %          %
 //
@@ -35,7 +35,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include <string.h>
@@ -51,7 +51,7 @@
 //
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
-#define MIN(a,b)  ((a) < (b)) ? (a) : (b)  
+#define MIN(a,b)  ((a) < (b)) ? (a) : (b)
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
@@ -93,7 +93,7 @@
 
 
 VngoVportDB8::VngoVportDB8 (long width,long height,void *vbptr,void *zbptr,
-                            VngoPal *my_pal,dword flags, 
+                            VngoPal *my_pal,dword flags,
                             int _pitch, int _zpitch)
 {
     init_status = init (width,height,vbptr,zbptr,my_pal,flags,_pitch,_zpitch);
@@ -192,7 +192,7 @@ VNGError VngoVportDB8::init (long width,long height,void *vbptr,
         {
             ivory_free((void **)&(vbuff.zbuff_ptr));
             ivory_free((void **)&(vbuff.ztable));
-        }   
+        }
         ivory_free((void**)&(vbuff.ytable));
         return (VNGO_MEMALLOC_ERROR);
     }
@@ -204,7 +204,7 @@ VNGError VngoVportDB8::init (long width,long height,void *vbptr,
         {
             ivory_free((void **)&(vbuff.zbuff_ptr));
             ivory_free((void **)&(vbuff.ztable));
-        }   
+        }
         ivory_free((void**)&(vbuff.ytable));
         ivory_free((void**)&(vbuff.edge1));
         return (VNGO_MEMALLOC_ERROR);

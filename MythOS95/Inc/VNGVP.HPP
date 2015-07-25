@@ -6,7 +6,7 @@
 //                                                           |. _  .   .|
 //          Microsoft Windows '95 Version                    | / \   .  |
 //                                                           |_|_|_._._.|
-// Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
+// Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
 //              All rights reserved.                        %\__________/%
 //                                                           %          %
 //
@@ -54,7 +54,7 @@
 #pragma pack(push,1)
 #endif
 
-extern VngoSystem VgSystem;
+extern VngoSystem *VgSystem;
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
@@ -77,7 +77,8 @@ public:
     dword               vflags;
     int                 vzdepth_in_bits;
     VngoVbuffer         vbuff;
-    int                 persp_pixcount;
+    float               persp_pixcount;
+    float               persp_pixcount2;
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Constructor/Destructors                                              ³
@@ -124,9 +125,20 @@ public:
             vflags |= VNGO_ZMAP_ACTIVE;
     }
     inline void zmap_off() { vflags &= ~VNGO_ZMAP_ACTIVE;}
-    inline void set_perspective (int pcount)
+    inline void set_perspective (float percent)
     {
-        persp_pixcount = pcount;
+        if (percent > 100.f)
+            percent = 100.f;
+        else if (percent < 1.f)
+            percent = 1.f;
+
+        persp_pixcount = (float(vbuff.width) * percent) / 100.f;
+        persp_pixcount2 = persp_pixcount * 4.f;
+    }
+
+    inline float get_perspective ()
+    {
+        return ((persp_pixcount / float(vbuff.width)) * 100.f);
     }
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
@@ -150,7 +162,7 @@ public:
     virtual void haze_on() {vflags |= VNGO_HAZE_ON;}
     virtual void haze_off() {vflags &= ~VNGO_HAZE_ON;}
 
-    virtual void make_current() { VgSystem.cur_vport = this; }
+    virtual void make_current() { VgSystem->cur_vport = this; }
 
     virtual VNGError capture(XFBitmap *bm);
 

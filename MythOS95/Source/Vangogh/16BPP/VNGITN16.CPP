@@ -6,7 +6,7 @@
 //                                                           |. _  .   .|
 //          Microsoft Windows '95 Version                    | / \   .  |
 //                                                           |_|_|_._._.|
-// Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
+// Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
 //              All rights reserved.                        %\__________/%
 //                                                           %          %
 //
@@ -90,20 +90,27 @@ extern "C" void vngo_wordcopy(void *dest,void *src,dword count);
 
 VNGError VngoVVport16::image_trans (VngoRect *dest_rect,VngoTexture *img,dword flags)
 {
-    assert(lock_status);
-
     long        w,h;
+    VNGError    ret_val = VNGO_NO_ERROR;
     VngoRect    dr;
+
+    VngoPal *temp_pal = vbuff.pal;
+    if (img->pal_ptr)
+        vbuff.pal = img->pal_ptr;
 
     if (flags & VNGO_STRETCH)
     {
-        return (VNGO_NOT_SUPPORTED);
+        ret_val = VNGO_NOT_SUPPORTED;
+        goto DONE;
+//        return (VNGO_NOT_SUPPORTED);
     }
 
     if ((img->flags & VNGO_TEXTURE_15BIT && vbuff.pal->flags & VNGO_16BIT)
         || (img->flags & VNGO_TEXTURE_16BIT && vbuff.pal->flags & VNGO_15BIT))
     {
-        return (VNGO_UNSUPPORTED_TEXTURE);
+        ret_val = VNGO_UNSUPPORTED_TEXTURE;
+        goto DONE;
+//        return (VNGO_UNSUPPORTED_TEXTURE);
     }
 
     w = MIN(img->width,dest_rect->dx);
@@ -143,7 +150,8 @@ VNGError VngoVVport16::image_trans (VngoRect *dest_rect,VngoTexture *img,dword f
                     ptr++;
                 }
             }
-            return VNGO_NO_ERROR;
+            goto DONE;
+//            return VNGO_NO_ERROR;
         }
     }
 #if 0       // For now we will clip everything.
@@ -151,7 +159,11 @@ VNGError VngoVVport16::image_trans (VngoRect *dest_rect,VngoTexture *img,dword f
 #endif
     {
         if (img->flags & VNGO_TEXTURE_COMPRESSED)
-            return VNGO_UNSUPPORTED_TEXTURE;
+        {
+            ret_val = VNGO_UNSUPPORTED_TEXTURE;
+            goto DONE;
+//            return VNGO_UNSUPPORTED_TEXTURE;
+        }
 
         if ((dest_rect->x < vbuff.width) && (dest_rect->y < vbuff.height) &&
             (dest_rect->x + w >= 0) && (dest_rect->y + h >= 0))
@@ -212,46 +224,50 @@ VNGError VngoVVport16::image_trans (VngoRect *dest_rect,VngoTexture *img,dword f
                     xcount = w + dest_rect->x;
                 }
             }
-            if (img->flags & VNGO_TEXTURE_16BIT)
+            if (xcount > 0)
             {
-                lptr = (word *)t;
-                tptr = (word *)((ty * (img->width << 1)) + (tx << 1) + (dword)img->tex);
-                for (int i=0;i < ycount;i++)
+                if (img->flags & VNGO_TEXTURE_16BIT)
                 {
-                    vngo_iline16(lptr,tptr,xcount,flags);
-                    lptr += (vbuff.pitch >> 1);
-                    tptr += img->width;
+                    lptr = (word *)t;
+                    tptr = (word *)((ty * (img->width << 1)) + (tx << 1) + (dword)img->tex);
+                    for (int i=0;i < ycount;i++)
+                    {
+                        vngo_iline16(lptr,tptr,xcount,flags);
+                        lptr += (vbuff.pitch >> 1);
+                        tptr += img->width;
+                    }
+                }
+                else if (img->flags & VNGO_TEXTURE_15BIT)
+                {
+                    lptr = (word *)t;
+                    tptr = (word *)((ty * (img->width << 1)) + (tx << 1) + (dword)img->tex);
+                    for (int i=0;i < ycount;i++)
+                    {
+                        vngo_iline15(lptr,tptr,xcount,flags);
+                        lptr += (vbuff.pitch >> 1);
+                        tptr += img->width;
+                    }
+                }
+                else if (img->flags & VNGO_TEXTURE_8BIT)
+                {
+                    lptr = (word *)t;
+                    byte *btptr = (byte *)((ty * img->width) + tx + (dword)img->tex);
+                    VngoShadePal16   *tp = (VngoShadePal16 *)vbuff.pal->shd_pal;
+                    VngoColorShade16 *tc = &(*tp)[0];
+                    word             *stable = &tc->shl[vbuff.pal->shd_pal->mid_point >> 3];
+                    for (int i=0;i < ycount;i++)
+                    {
+                        vngo_iline8to16(lptr,btptr,xcount,stable,flags);
+                        lptr  += (vbuff.pitch >> 1);
+                        btptr += img->width;
+                    }
                 }
             }
-            else if (img->flags & VNGO_TEXTURE_15BIT)
-            {
-                lptr = (word *)t;
-                tptr = (word *)((ty * (img->width << 1)) + (tx << 1) + (dword)img->tex);
-                for (int i=0;i < ycount;i++)
-                {
-                    vngo_iline15(lptr,tptr,xcount,flags);
-                    lptr += (vbuff.pitch >> 1);
-                    tptr += img->width;
-                }
-            }
-            else if (img->flags & VNGO_TEXTURE_8BIT)
-            {
-                lptr = (word *)t;
-                byte *btptr = (byte *)((ty * img->width) + tx + (dword)img->tex);
-                VngoShadePal16   *tp = (VngoShadePal16 *)vbuff.pal->shd_pal;
-                VngoColorShade16 *tc = &(*tp)[0];
-                word             *stable = &tc->shl[vbuff.pal->shd_pal->mid_point >> 3];
-                for (int i=0;i < ycount;i++)
-                {
-                    vngo_iline8to16(lptr,btptr,xcount,stable,flags);
-                    lptr  += (vbuff.pitch >> 1);
-                    btptr += img->width;
-                }
-            }
-
         }
     }
-    return VNGO_NO_ERROR;
+DONE:
+    vbuff.pal = temp_pal;
+    return ret_val;
 }
 
 
@@ -350,8 +366,6 @@ VNGError VngoVVport16::zblit_mono (VngoRect *dest_rect,VngoZMap *img,dword fgcol
 
 VNGError VngoVVport16::image_trans_mono (VngoRect *dest_rect,VngoTexture *img,dword _fgcol,dword _bgcol)
 {
-    assert(lock_status);
-
     dword   fgcol,bgcol;
     long    w,h,x,y;
 

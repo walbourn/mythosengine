@@ -36,6 +36,9 @@
 // and have a velocity.  The base implementation draws a colored point
 // at the particle's position.
 //
+// EschParticleLine draws the particle as a line from the old position
+// to the new.
+//
 // EschParticlePyramid draws the particle as a 4-sided polyhedra.
 //
 // EschParticleSprite draws an EschSprite instance at the particle's
@@ -94,6 +97,7 @@ struct EschParticleGenParams
     float                   lifetime;
     byte                    alpha;
     byte                    na[3];
+    float                   rot_rate;
 
     EschParticleGenParams(EschParticleGenerator *g, void *d=0) :
         generator(g),
@@ -125,6 +129,12 @@ protected:
     float       interval;
 
 public:
+    enum
+    {
+        ESCH_PRTK_NOTVISIBLE    = 1,
+        ESCH_PRTK_VISIBLE       = 2,
+        ESCH_PRTK_MOVED_OUT     = 3,
+    };
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Public data members                                                  ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
@@ -133,6 +143,8 @@ public:
     float       life;                       // Lifetime (0=unlimited)
     EschVector  velocity;                   // Velocity of particle
     EschVector  acceleration;               // Acceleration of particle
+
+    dword       pflags;                     // particle flags for drawing/dying
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Constructor/Destructors                                              ³
@@ -185,6 +197,50 @@ public:
     void set_acceleration(const EschVector *v)
     {
         acceleration.i = v->i;  acceleration.j = v->j;  acceleration.k = v->k;
+    }
+};
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// EschParticleLine - A dynamic line in 3-space.                            ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+class EschParticleLine : public EschParticle
+{
+public:
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    // Public data members                                                  ³
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+    EschPoint   pos2;
+
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    // Constructor/Destructors                                              ³
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+    EschParticleLine() : EschParticle(), pos2(0,0,0) { dtyp=ESCH_DRWT_PRTLINE; }
+    EschParticleLine(float ix, float iy, float iz, dword c, float l=0);
+    EschParticleLine(float ix, float iy, float iz,
+                     float ii, float ij, float ik, dword c, float l=0);
+    EschParticleLine(const EschPoint *p, const EschVector *v, dword c, float l=0);
+
+    virtual ~EschParticleLine() {}
+
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    // Operations                                                           ³
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+    virtual void draw();
+    virtual void animate();
+
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    // Utility routines.                                                    ³
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+    void set_position(float ix, float iy, float iz)
+    {
+        pos2 = pos;
+        pos.x = ix;  pos.y = iy;  pos.z = iz;
+    }
+    void set_position(EschPoint *pnt)
+    {
+        pos2 = pos;
+        pos.x = pnt->x;  pos.y = pnt->y;  pos.z = pnt->z;
     }
 };
 
@@ -400,6 +456,7 @@ class EschParticleSystem : public EschDrawable
 {
 protected:
     float       interval;
+    BOOL        linear_accel;
 
 public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
@@ -407,6 +464,7 @@ public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
     ulong           maxcount;
     EschParticle    **particles;
+    EschVector      l_acceleration;
     EschVector      acceleration;
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
@@ -449,12 +507,37 @@ public:
 
     void set_acceleration(float ii, float ij, float ik)
     {
-        acceleration.i = ii;  acceleration.j = ij;  acceleration.k = ik;
+        l_acceleration.i = ii;  l_acceleration.j = ij;  l_acceleration.k = ik;
+
+        acceleration.i = l_acceleration.i * l_acceleration.i;
+        acceleration.j = l_acceleration.j * l_acceleration.j;
+        acceleration.k = l_acceleration.k * l_acceleration.k;
+
+        if (l_acceleration.i < 0)
+            acceleration.i *= -1.0f;
+        if (l_acceleration.j < 0)
+            acceleration.j *= -1.0f;
+        if (l_acceleration.k < 0)
+            acceleration.k *= -1.0f;
     }
     void set_acceleration(const EschVector *v)
     {
-        acceleration.i = v->i;  acceleration.j = v->j;  acceleration.k = v->k;
+        l_acceleration.i = v->i;  l_acceleration.j = v->j;  l_acceleration.k = v->k;
+
+        acceleration.i = l_acceleration.i * l_acceleration.i;
+        acceleration.j = l_acceleration.j * l_acceleration.j;
+        acceleration.k = l_acceleration.k * l_acceleration.k;
+
+        if (l_acceleration.i < 0)
+            acceleration.i *= -1.0f;
+        if (l_acceleration.j < 0)
+            acceleration.j *= -1.0f;
+        if (l_acceleration.k < 0)
+            acceleration.k *= -1.0f;
     }
+
+    void set_linear(BOOL l) {linear_accel = (!!l);}
+    BOOL is_linear() {return linear_accel;}
 };
 
 
@@ -469,6 +552,9 @@ protected:
     float                       part_accum;
     dword                       cindex;
     VngoPal                     *pal;
+
+    EschVector                  init_dir;
+
 
 public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
@@ -495,6 +581,11 @@ public:
     byte            mean_alpha;         // Distribution of particle alpha
     byte            var_alpha;
 
+    float           rot_rate;
+    float           var_rot_rate;
+    float           rot_rate_low;
+    float           rot_rate_high;
+
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Constructor/Destructors                                              ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
@@ -514,6 +605,24 @@ public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Utility routines.                                                    ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+    void get_init_dir(EschVector *d) const { *d = init_dir;}
+    void set_init_dir (float i, float j, float k)
+    {
+        if (i != 0 || j != 0 || k != 0)
+        {
+            init_dir.i = i; init_dir.j = j; init_dir.k = k;
+            init_dir.normalize();
+        }
+        else
+        {
+            init_dir.i = 0; init_dir.j = 1.0f; init_dir.k = 0;
+        }
+    }
+    void set_init_dir (EschVector *v)
+    {
+        set_init_dir (v->i, v->j, v->k);
+    }
+
     void get_position(EschPoint *p) const { world.get_position(p);}
 
     void set_position(float ix, float iy, float iz, dword update=ESCH_UPD_ALL)
@@ -648,19 +757,19 @@ public:
     void set_speed(float mean, float var=0)
     {
         mean_speed = mean;
-        var_speed = var;        
+        var_speed = var;
     }
 
     void set_size(float mean, float var=0)
     {
         mean_size = mean;
-        var_size = var;        
+        var_size = var;
     }
 
     void set_lifetime(float mean, float var=0)
     {
         mean_life = mean;
-        var_life = var;        
+        var_life = var;
     }
 
     void set_color(dword c)
@@ -694,6 +803,21 @@ public:
         var_alpha = var;
     }
 
+    void set_rotrate (float rr, float var=0)
+    {
+        rot_rate = rr;
+        var_rot_rate = var;
+    }
+
+    void set_rotrate_low (float rrl)
+    {
+        rot_rate_low = rrl;
+    }
+    void set_rotrate_high (float rrh)
+    {
+        rot_rate_high = rrh;
+    }
+
     void set_callback(EschParticleGenCallback f, void *d=0);
 };
 
@@ -704,6 +828,7 @@ public:
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 EschParticle *esch_generate_particle(EschParticleGenParams *parms);
+EschParticle *esch_generate_line(EschParticleGenParams *parms);
 EschParticle *esch_generate_pyramid(EschParticleGenParams *parms);
 EschParticle *esch_generate_sprite(EschParticleGenParams *parms);
 

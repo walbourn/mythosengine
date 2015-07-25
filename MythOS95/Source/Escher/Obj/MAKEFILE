@@ -112,6 +112,7 @@ esplosn.obj\
 espntdrw.obj\
 esprtgen.obj\
 esprtgeo.obj\
+esprtlin.obj\
 esprtpyr.obj\
 esprtspr.obj\
 esprtsys.obj\

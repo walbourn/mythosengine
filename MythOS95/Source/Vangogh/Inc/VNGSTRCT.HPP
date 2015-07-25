@@ -6,7 +6,7 @@
 //                                                           |. _  .   .|
 //          Microsoft Windows '95 Version                    | / \   .  |
 //                                                           |_|_|_._._.|
-// Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
+// Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
 //              All rights reserved.                        %\__________/%
 //                                                           %          %
 //
@@ -63,6 +63,41 @@
 struct VngoVbuffer;
 class VngoTexture3D;
 class VngoMemTexture3D;
+class VngoSystem;
+
+extern VngoSystem *VgSystem;
+#ifndef __ESCH_EXPORT
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// System class
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+class VngoSystem
+{
+public:
+    float               gamma_correct;
+    byte                gtable[256];
+    byte                alpha_table[256*32];
+    VngoVport           *cur_vport;
+    VngoTextureManager  *DIBTx;     // Assumed to be a VngoDIB
+    VngoTextureManager  *DDTx;      // Assumed to be a VngoDirectDraw
+    VngoTextureManager  *D3DTx;     // Assumed to be a VngoDirect3D
+    VngoTextureManager  *OGLTx;     // Assumed to be a VngoOpenGL
+
+    VngoSystem()
+    {
+        VgSystem = this;
+        set_gamma(1.f);
+        init_alpha();
+        cur_vport = NULL;
+        DIBTx = NULL;
+        DDTx = NULL;
+        D3DTx = NULL;
+        OGLTx = NULL;
+    }
+    void set_gamma (float gamma);
+    void init_alpha ();
+};
+
+#endif
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // VngoPoint is a 2D draw point, it contains all of the needed information  ³
@@ -72,15 +107,9 @@ class VngoMemTexture3D;
 class VngoPoint
 {
 public:
-#if 1
     float   wx;
     float   wy;
     float   wz;
-#else
-    long    wx;
-    long    wy;
-    long    wz;
-#endif
     long    x;
     long    y;
     long    z;
@@ -104,6 +133,26 @@ public:
 
 };
 
+#if 1
+class VngoPointF3
+{
+public:
+    float   wx;
+    float   wy;
+    float   wz;
+
+    float   x;
+    float   y;
+    float   z;
+    dword   clr;
+    long    shade;
+    float   u;
+    float   v;
+    float   w;
+    dword   pflags;
+};
+#endif
+
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // VngoPoint2 is an internal version of VngoPoint                           ³
@@ -126,11 +175,14 @@ public:
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // VngoPointF is a 2D draw point, it contains all of the needed information ³
 // needed to draw into the view port for most drawing types.                ³
-// This structure is intentionaly 32 BYTES long.                            ³
+// This structure is intentionaly 44 BYTES long.                            ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 class VngoPointF
 {
 public:
+    float   wx;
+    float   wy;
+    float   wz;
     float   x;
     float   y;
     float   z;

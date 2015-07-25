@@ -23,10 +23,10 @@
 
                      Newtonian Physics Simulation Library
 
-            Copyright (c) 1995-1997 by Charybdis Enterprises, Inc.
+            Copyright (c) 1995-1998 by Charybdis Enterprises, Inc.
                            All Rights Reserved.
 
-                       Microsoft Windows '95 Version
+                     Microsoft Windows 95/NT Version
 
  ---------------------------------------------------------------------------
  
@@ -52,10 +52,13 @@
 
                              _Library Status_
 
- Notes by: Chuck Walbourn
- Updated: May 22, 1997
+ Notes by: Dan Higdon
+ Updated: February 2, 1998
 
  Changes for this release --------------------------------------------------
+
+ o Added NewtObject::set_initial_position(), which correctly initializes
+   the last_position member variable.
 
  o Converted to use float instead of Flx16.
 

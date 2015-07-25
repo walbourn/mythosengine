@@ -10,8 +10,10 @@
  *
  *                          Across the event horizon...
  *
- *          Copyright (c) 1994 - 1997 by Charybdis Enterprises, Inc.
- *                           All Rights Reserved.
+ *                        Microsoft Windows 95/NT Version
+ *
+ *            Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.
+ *                            All Rights Reserved.
  *
  *컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
  *

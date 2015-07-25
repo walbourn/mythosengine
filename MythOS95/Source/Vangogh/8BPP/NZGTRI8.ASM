@@ -6,7 +6,7 @@
 ;                                                           |. _  .   .|
 ;          Microsoft Windows '95 Version                    | / \   .  | 
 ;                                                           |_|_|_._._.|
-;  Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.   |.-.-.-.-..|
+;  Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.   |.-.-.-.-..|
 ;              All rights reserved.                        %\__________/%
 ;                                                           %          %
 ;
@@ -100,7 +100,7 @@ _zpitch$ = -100
 _curz$ = -76
 _vngo_zgtriangle8 PROC NEAR
 ; Line 86
-        sub     esp, 124				
+        sub     esp, 124                                
         mov     DWORD PTR _high_pt_idx$[esp+124], 0
         mov     DWORD PTR _has_flat_top$[esp+124], 0
         mov     DWORD PTR _low_pt_idx$[esp+124], 2
@@ -120,7 +120,7 @@ _vngo_zgtriangle8 PROC NEAR
         push    edx
         call    _calc_order
         mov     eax, DWORD PTR _high_pt_idx$[esp+156]
-        add     esp, 16					
+        add     esp, 16                                 
 ; Line 94
         shl     eax, 5
         lea     edi, DWORD PTR [eax+esi]
@@ -129,7 +129,7 @@ _vngo_zgtriangle8 PROC NEAR
         shl     eax, 5
         add     eax, esi
         mov     ebp, DWORD PTR [edi+4]
-        sar     ebp, 20					
+        sar     ebp, 20                                 
         mov     DWORD PTR _mid_pt$[esp+140], eax
 ; Line 96
         mov     eax, DWORD PTR _low_pt_idx$[esp+140]
@@ -140,335 +140,335 @@ _vngo_zgtriangle8 PROC NEAR
 ; Line 98
         mov     ebx, DWORD PTR [eax+4]
         mov     eax, DWORD PTR _mid_pt$[esp+140]
-        add     ebx, 524288				
-        sar     ebx, 20					
+        add     ebx, 524288                             
+        sar     ebx, 20                                 
         mov     ecx, DWORD PTR [eax+4]
         sub     ebx, ebp
-        add     ecx, 524288				
-        sar     ecx, 20					
+        add     ecx, 524288                             
+        sar     ecx, 20                                 
 ;        inc     ebx
 ; Line 99
-	sub	ecx, ebp
-;	inc	ecx
+        sub     ecx, ebp
+;       inc     ecx
 ; Line 101
-	test	ebx, ebx
-	je	$L23346
+        test    ebx, ebx
+        je      $L23346
 ; Line 107
-	mov	eax, DWORD PTR [edi]
-	mov	edx, DWORD PTR [edi+16]
-	mov	DWORD PTR _edge1$[esp+140], eax
-	mov	DWORD PTR _s1$[esp+140], edx
+        mov     eax, DWORD PTR [edi]
+        mov     edx, DWORD PTR [edi+16]
+        mov     DWORD PTR _edge1$[esp+140], eax
+        mov     DWORD PTR _s1$[esp+140], edx
 ; Line 109
-	mov	eax, DWORD PTR [edi+8]
-	mov	edx, DWORD PTR _low_pt$[esp+140]
-	shr	eax, 1
-	mov	DWORD PTR -80+[esp+140], eax
-	mov	esi, DWORD PTR [edx]
+        mov     eax, DWORD PTR [edi+8]
+        mov     edx, DWORD PTR _low_pt$[esp+140]
+        shr     eax, 1
+        mov     DWORD PTR -80+[esp+140], eax
+        mov     esi, DWORD PTR [edx]
 ; Line 111
-	mov	edx, DWORD PTR [edi]
-	mov	DWORD PTR _z1$[esp+140], eax
+        mov     edx, DWORD PTR [edi]
+        mov     DWORD PTR _z1$[esp+140], eax
 ; Line 113
-	mov	eax, esi
-	sub	eax, edx
-	cdq
-	idiv	ebx
-	mov	DWORD PTR _xstep1$[esp+140], eax
-	test	ecx, ecx
+        mov     eax, esi
+        sub     eax, edx
+        cdq
+        idiv    ebx
+        mov     DWORD PTR _xstep1$[esp+140], eax
+        test    ecx, ecx
 ; Line 124
-	jne	$L23373
-	mov	eax, DWORD PTR _mid_pt$[esp+140]
-	mov	ecx, DWORD PTR [eax]
-	mov	edx, DWORD PTR [eax+16]
-	mov	DWORD PTR -100+[esp+140], ecx
-	mov	DWORD PTR _edge2$[esp+140], ecx
+        jne     $L23373
+        mov     eax, DWORD PTR _mid_pt$[esp+140]
+        mov     ecx, DWORD PTR [eax]
+        mov     edx, DWORD PTR [eax+16]
+        mov     DWORD PTR -100+[esp+140], ecx
+        mov     DWORD PTR _edge2$[esp+140], ecx
 ; Line 126
-	mov	ecx, DWORD PTR [eax+8]
-	mov	DWORD PTR -104+[esp+140], edx
+        mov     ecx, DWORD PTR [eax+8]
+        mov     DWORD PTR -104+[esp+140], edx
 ; Line 127
-	shr	ecx, 1
-	mov	eax, DWORD PTR -100+[esp+140]
-	sub	esi, eax
-	mov	DWORD PTR _s2$[esp+140], edx
+        shr     ecx, 1
+        mov     eax, DWORD PTR -100+[esp+140]
+        sub     esi, eax
+        mov     DWORD PTR _s2$[esp+140], edx
 ; Line 128
-	mov	eax, esi
-	mov	DWORD PTR _z2$[esp+140], ecx
+        mov     eax, esi
+        mov     DWORD PTR _z2$[esp+140], ecx
 ; Line 129
-	cdq
-	idiv	ebx
-	mov	edx, DWORD PTR [edi]
-	mov	DWORD PTR _xstep2$[esp+140], eax
+        cdq
+        idiv    ebx
+        mov     edx, DWORD PTR [edi]
+        mov     DWORD PTR _xstep2$[esp+140], eax
 ; Line 131
-	mov	eax, DWORD PTR -100+[esp+140]
-	mov	DWORD PTR _line_count$[esp+140], ebx
-	mov	DWORD PTR _has_flat_top$[esp+140], 1
+        mov     eax, DWORD PTR -100+[esp+140]
+        mov     DWORD PTR _line_count$[esp+140], ebx
+        mov     DWORD PTR _has_flat_top$[esp+140], 1
 ; Line 135
-	cmp	eax, edx
-	jle	SHORT $L23374
-	mov	eax, DWORD PTR _low_pt$[esp+140]
-	mov	ecx, DWORD PTR -80+[esp+140]
-	add	eax, 8
-	mov	DWORD PTR -56+[esp+140], eax
+        cmp     eax, edx
+        jle     SHORT $L23374
+        mov     eax, DWORD PTR _low_pt$[esp+140]
+        mov     ecx, DWORD PTR -80+[esp+140]
+        add     eax, 8
+        mov     DWORD PTR -56+[esp+140], eax
 ; Line 137
-	mov	eax, DWORD PTR [eax]
-	shr	eax, 1
-	sub	eax, ecx
-	cdq
-	idiv	ebx
-	mov	edx, DWORD PTR [edi+16]
-	mov	DWORD PTR _zstep1$[esp+140], eax
-	mov	eax, DWORD PTR _low_pt$[esp+140]
-	add	eax, 16					; 00000010H
-	mov	DWORD PTR _edge1_on_left$[esp+140], 1
-	mov	ecx, DWORD PTR _edge2$[esp+140]
-	mov	DWORD PTR -52+[esp+140], eax
+        mov     eax, DWORD PTR [eax]
+        shr     eax, 1
+        sub     eax, ecx
+        cdq
+        idiv    ebx
+        mov     edx, DWORD PTR [edi+16]
+        mov     DWORD PTR _zstep1$[esp+140], eax
+        mov     eax, DWORD PTR _low_pt$[esp+140]
+        add     eax, 16                                 ; 00000010H
+        mov     DWORD PTR _edge1_on_left$[esp+140], 1
+        mov     ecx, DWORD PTR _edge2$[esp+140]
+        mov     DWORD PTR -52+[esp+140], eax
 ; Line 138
-	mov	eax, DWORD PTR [eax]
-	add	ecx, 524288				; 00080000H
-	sar	ecx, 20					; 00000014H
-	sub	eax, edx
-	cdq
-	idiv	ebx
-	mov	DWORD PTR _sstep1$[esp+140], eax
+        mov     eax, DWORD PTR [eax]
+        add     ecx, 524288                             ; 00080000H
+        sar     ecx, 20                                 ; 00000014H
+        sub     eax, edx
+        cdq
+        idiv    ebx
+        mov     DWORD PTR _sstep1$[esp+140], eax
 ; Line 140
-	mov	eax, DWORD PTR _edge1$[esp+140]
-	sar	eax, 20					; 00000014H
-	sub	ecx, eax
+        mov     eax, DWORD PTR _edge1$[esp+140]
+        sar     eax, 20                                 ; 00000014H
+        sub     ecx, eax
 ; Line 141
-	je	$L23586
+        je      $L23586
 ; Line 143
-	mov	eax, DWORD PTR _s2$[esp+140]
-	mov	edx, DWORD PTR _s1$[esp+140]
-	sub	eax, edx
-	mov	ebx, DWORD PTR _z1$[esp+140]
-	cdq
-	idiv	ecx
-	mov	DWORD PTR _sstep$[esp+140], eax
+        mov     eax, DWORD PTR _s2$[esp+140]
+        mov     edx, DWORD PTR _s1$[esp+140]
+        sub     eax, edx
+        mov     ebx, DWORD PTR _z1$[esp+140]
+        cdq
+        idiv    ecx
+        mov     DWORD PTR _sstep$[esp+140], eax
 ; Line 144
-	mov	eax, DWORD PTR _z2$[esp+140]
-	sub	eax, ebx
-	cdq
-	idiv	ecx
-	jmp	$L23587
+        mov     eax, DWORD PTR _z2$[esp+140]
+        sub     eax, ebx
+        cdq
+        idiv    ecx
+        jmp     $L23587
 ; Line 152
 $L23374:
 ; Line 154
-	mov	eax, DWORD PTR _low_pt$[esp+140]
-	mov	edx, DWORD PTR -104+[esp+140]
-	mov	DWORD PTR _edge1_on_left$[esp+140], 0
-	add	eax, 16					; 00000010H
-	mov	DWORD PTR -52+[esp+140], eax
+        mov     eax, DWORD PTR _low_pt$[esp+140]
+        mov     edx, DWORD PTR -104+[esp+140]
+        mov     DWORD PTR _edge1_on_left$[esp+140], 0
+        add     eax, 16                                 ; 00000010H
+        mov     DWORD PTR -52+[esp+140], eax
 ; Line 155
-	mov	eax, DWORD PTR [eax]
-	sub	eax, edx
-	cdq
-	idiv	ebx
-	mov	DWORD PTR _sstep2$[esp+140], eax
-	mov	eax, DWORD PTR _low_pt$[esp+140]
-	add	eax, 8
-	mov	DWORD PTR -56+[esp+140], eax
+        mov     eax, DWORD PTR [eax]
+        sub     eax, edx
+        cdq
+        idiv    ebx
+        mov     DWORD PTR _sstep2$[esp+140], eax
+        mov     eax, DWORD PTR _low_pt$[esp+140]
+        add     eax, 8
+        mov     DWORD PTR -56+[esp+140], eax
 ; Line 156
-	mov	eax, DWORD PTR [eax]
-	shr	eax, 1
-	sub	eax, ecx
-	mov	ecx, DWORD PTR _edge1$[esp+140]
-	cdq
-	idiv	ebx
-	add	ecx, 524288				; 00080000H
-	mov	DWORD PTR _zstep2$[esp+140], eax
+        mov     eax, DWORD PTR [eax]
+        shr     eax, 1
+        sub     eax, ecx
+        mov     ecx, DWORD PTR _edge1$[esp+140]
+        cdq
+        idiv    ebx
+        add     ecx, 524288                             ; 00080000H
+        mov     DWORD PTR _zstep2$[esp+140], eax
 ; Line 158
-	sar	ecx, 20					; 00000014H
-	mov	eax, DWORD PTR _edge2$[esp+140]
-	sar	eax, 20					; 00000014H
-	sub	ecx, eax
+        sar     ecx, 20                                 ; 00000014H
+        mov     eax, DWORD PTR _edge2$[esp+140]
+        sar     eax, 20                                 ; 00000014H
+        sub     ecx, eax
 ; Line 159
-	je	$L23586
+        je      $L23586
 ; Line 161
-	mov	eax, DWORD PTR _s1$[esp+140]
-	mov	edx, DWORD PTR _s2$[esp+140]
-	sub	eax, edx
-	mov	ebx, DWORD PTR _z2$[esp+140]
-	cdq
-	idiv	ecx
-	mov	DWORD PTR _sstep$[esp+140], eax
+        mov     eax, DWORD PTR _s1$[esp+140]
+        mov     edx, DWORD PTR _s2$[esp+140]
+        sub     eax, edx
+        mov     ebx, DWORD PTR _z2$[esp+140]
+        cdq
+        idiv    ecx
+        mov     DWORD PTR _sstep$[esp+140], eax
 ; Line 162
-	mov	eax, DWORD PTR _z1$[esp+140]
-	sub	eax, ebx
-	cdq
-	idiv	ecx
-	jmp	$L23587
+        mov     eax, DWORD PTR _z1$[esp+140]
+        sub     eax, ebx
+        cdq
+        idiv    ecx
+        jmp     $L23587
 ; Line 171
 $L23373:
 ; Line 173
-	mov	eax, DWORD PTR _s1$[esp+140]
-	mov	edx, DWORD PTR _z1$[esp+140]
-	mov	esi, DWORD PTR _edge1$[esp+140]
-	mov	DWORD PTR _s2$[esp+140], eax
+        mov     eax, DWORD PTR _s1$[esp+140]
+        mov     edx, DWORD PTR _z1$[esp+140]
+        mov     esi, DWORD PTR _edge1$[esp+140]
+        mov     DWORD PTR _s2$[esp+140], eax
 ; Line 174
-	mov	eax, DWORD PTR _mid_pt$[esp+140]
-	mov	DWORD PTR _z2$[esp+140], edx
+        mov     eax, DWORD PTR _mid_pt$[esp+140]
+        mov     DWORD PTR _z2$[esp+140], edx
 ; Line 175
-	mov	edx, DWORD PTR [edi]
-	mov	DWORD PTR _edge2$[esp+140], esi
-	mov	esi, DWORD PTR [eax]
+        mov     edx, DWORD PTR [edi]
+        mov     DWORD PTR _edge2$[esp+140], esi
+        mov     esi, DWORD PTR [eax]
 ; Line 177
-	mov	eax, esi
-	sub	eax, edx
-	cdq
-	idiv	ecx
-	mov	edx, DWORD PTR [edi+16]
-	mov	DWORD PTR _xstep2$[esp+140], eax
-	mov	eax, DWORD PTR _low_pt$[esp+140]
-	add	eax, 16					; 00000010H
-	mov	DWORD PTR -52+[esp+140], eax
+        mov     eax, esi
+        sub     eax, edx
+        cdq
+        idiv    ecx
+        mov     edx, DWORD PTR [edi+16]
+        mov     DWORD PTR _xstep2$[esp+140], eax
+        mov     eax, DWORD PTR _low_pt$[esp+140]
+        add     eax, 16                                 ; 00000010H
+        mov     DWORD PTR -52+[esp+140], eax
 ; Line 178
-	mov	eax, DWORD PTR [eax]
-	sub	eax, edx
-	cdq
-	idiv	ebx
-	mov	edx, DWORD PTR -80+[esp+140]
-	mov	DWORD PTR _sstep1$[esp+140], eax
-	mov	eax, DWORD PTR _low_pt$[esp+140]
-	add	eax, 8
-	mov	DWORD PTR -56+[esp+140], eax
+        mov     eax, DWORD PTR [eax]
+        sub     eax, edx
+        cdq
+        idiv    ebx
+        mov     edx, DWORD PTR -80+[esp+140]
+        mov     DWORD PTR _sstep1$[esp+140], eax
+        mov     eax, DWORD PTR _low_pt$[esp+140]
+        add     eax, 8
+        mov     DWORD PTR -56+[esp+140], eax
 ; Line 179
-	mov	DWORD PTR _line_count$[esp+140], ecx
-	mov	eax, DWORD PTR [eax]
-	shr	eax, 1
-	sub	eax, edx
-	cdq
-	idiv	ebx
-	mov	ebx, DWORD PTR _xstep2$[esp+140]
-	mov	DWORD PTR _zstep1$[esp+140], eax
+        mov     DWORD PTR _line_count$[esp+140], ecx
+        mov     eax, DWORD PTR [eax]
+        shr     eax, 1
+        sub     eax, edx
+        cdq
+        idiv    ebx
+        mov     ebx, DWORD PTR _xstep2$[esp+140]
+        mov     DWORD PTR _zstep1$[esp+140], eax
 ; Line 183
-	mov	eax, DWORD PTR _xstep1$[esp+140]
-	cmp	ebx, eax
-	jle	SHORT $L23383
+        mov     eax, DWORD PTR _xstep1$[esp+140]
+        cmp     ebx, eax
+        jle     SHORT $L23383
 ; Line 185
-	add	esi, 524288				; 00080000H
-	mov	edx, DWORD PTR _edge1$[esp+140]
-	mov	DWORD PTR _edge1_on_left$[esp+140], 1
+        add     esi, 524288                             ; 00080000H
+        mov     edx, DWORD PTR _edge1$[esp+140]
+        mov     DWORD PTR _edge1_on_left$[esp+140], 1
 ; Line 186
-	imul	eax, ecx
-	sar	esi, 20					; 00000014H
-	add	eax, edx
-	sar	eax, 20					; 00000014H
-	mov	edi, DWORD PTR _s1$[esp+140]
-	sub	esi, eax
+        imul    eax, ecx
+        sar     esi, 20                                 ; 00000014H
+        add     eax, edx
+        sar     eax, 20                                 ; 00000014H
+        mov     edi, DWORD PTR _s1$[esp+140]
+        sub     esi, eax
 ; Line 187
-	mov	eax, DWORD PTR _sstep1$[esp+140]
-	imul	eax, ecx
-	imul	ecx, DWORD PTR _zstep1$[esp+140]
-	add	edi, eax
-	add	ecx, DWORD PTR _z1$[esp+140]
+        mov     eax, DWORD PTR _sstep1$[esp+140]
+        imul    eax, ecx
+        imul    ecx, DWORD PTR _zstep1$[esp+140]
+        add     edi, eax
+        add     ecx, DWORD PTR _z1$[esp+140]
 ; Line 190
-	test	esi, esi
-	je	$L23586
+        test    esi, esi
+        je      $L23586
 ; Line 192
-	mov	eax, DWORD PTR _mid_pt$[esp+140]
-	mov	eax, DWORD PTR [eax+16]
-	sub	eax, edi
-	cdq
-	idiv	esi
-	mov	edx, DWORD PTR _mid_pt$[esp+140]
-	mov	DWORD PTR _sstep$[esp+140], eax
+        mov     eax, DWORD PTR _mid_pt$[esp+140]
+        mov     eax, DWORD PTR [eax+16]
+        sub     eax, edi
+        cdq
+        idiv    esi
+        mov     edx, DWORD PTR _mid_pt$[esp+140]
+        mov     DWORD PTR _sstep$[esp+140], eax
 ; Line 193
-	mov	eax, DWORD PTR [edx+8]
-	shr	eax, 1
-	sub	eax, ecx
-	cdq
-	idiv	esi
-	jmp	$L23587
+        mov     eax, DWORD PTR [edx+8]
+        shr     eax, 1
+        sub     eax, ecx
+        cdq
+        idiv    esi
+        jmp     $L23587
 ; Line 201
 $L23383:
 ; Line 203
-	mov	eax, DWORD PTR _mid_pt$[esp+140]
-	mov	ebx, DWORD PTR [edi+16]
-	mov	DWORD PTR _edge1_on_left$[esp+140], 0
-	mov	edx, DWORD PTR [eax+16]
-	mov	eax, edx
-	mov	DWORD PTR -104+[esp+140], edx
+        mov     eax, DWORD PTR _mid_pt$[esp+140]
+        mov     ebx, DWORD PTR [edi+16]
+        mov     DWORD PTR _edge1_on_left$[esp+140], 0
+        mov     edx, DWORD PTR [eax+16]
+        mov     eax, edx
+        mov     DWORD PTR -104+[esp+140], edx
 ; Line 204
-	sub	eax, ebx
-	cdq
-	idiv	ecx
-	mov	edx, DWORD PTR _mid_pt$[esp+140]
-	mov	edi, DWORD PTR -80+[esp+140]
-	mov	DWORD PTR _sstep2$[esp+140], eax
-	mov	eax, DWORD PTR [edx+8]
-	shr	eax, 1
-	mov	DWORD PTR -100+[esp+140], eax
+        sub     eax, ebx
+        cdq
+        idiv    ecx
+        mov     edx, DWORD PTR _mid_pt$[esp+140]
+        mov     edi, DWORD PTR -80+[esp+140]
+        mov     DWORD PTR _sstep2$[esp+140], eax
+        mov     eax, DWORD PTR [edx+8]
+        shr     eax, 1
+        mov     DWORD PTR -100+[esp+140], eax
 ; Line 205
-	sub	eax, edi
-	cdq
-	idiv	ecx
-	mov	edi, DWORD PTR _xstep1$[esp+140]
-	mov	DWORD PTR _zstep2$[esp+140], eax
+        sub     eax, edi
+        cdq
+        idiv    ecx
+        mov     edi, DWORD PTR _xstep1$[esp+140]
+        mov     DWORD PTR _zstep2$[esp+140], eax
 ; Line 207
-	sar	esi, 20					; 00000014H
-	mov	eax, DWORD PTR _edge1$[esp+140]
-	imul	edi, ecx
-	add	edi, eax
-	mov	eax, DWORD PTR _sstep1$[esp+140]
-	imul	eax, ecx
-	imul	ecx, DWORD PTR _zstep1$[esp+140]
-	add	edi, 524288				; 00080000H
-	add	eax, DWORD PTR _s1$[esp+140]
-	sar	edi, 20					; 00000014H
-	add	ecx, DWORD PTR _z1$[esp+140]
-	sub	edi, esi
+        sar     esi, 20                                 ; 00000014H
+        mov     eax, DWORD PTR _edge1$[esp+140]
+        imul    edi, ecx
+        add     edi, eax
+        mov     eax, DWORD PTR _sstep1$[esp+140]
+        imul    eax, ecx
+        imul    ecx, DWORD PTR _zstep1$[esp+140]
+        add     edi, 524288                             ; 00080000H
+        add     eax, DWORD PTR _s1$[esp+140]
+        sar     edi, 20                                 ; 00000014H
+        add     ecx, DWORD PTR _z1$[esp+140]
+        sub     edi, esi
 ; Line 211
-	test	edi, edi
-	jle	SHORT $L23586
+        test    edi, edi
+        jle     SHORT $L23586
 ; Line 213
-	sub	eax, DWORD PTR -104+[esp+140]
-	cdq
-	idiv	edi
-	mov	DWORD PTR _sstep$[esp+140], eax
+        sub     eax, DWORD PTR -104+[esp+140]
+        cdq
+        idiv    edi
+        mov     DWORD PTR _sstep$[esp+140], eax
 ; Line 214
-	mov	eax, ecx
-	sub	eax, DWORD PTR -100+[esp+140]
-	cdq
-	idiv	edi
-	jmp	SHORT $L23587
+        mov     eax, ecx
+        sub     eax, DWORD PTR -100+[esp+140]
+        cdq
+        idiv    edi
+        jmp     SHORT $L23587
 $L23586:
 ; Line 218
-	xor	eax, eax
-	mov	DWORD PTR _sstep$[esp+140], eax
+        xor     eax, eax
+        mov     DWORD PTR _sstep$[esp+140], eax
 $L23587:
 ; Line 219
-	mov	edx, DWORD PTR _vb$[esp+136]
-	mov	esi, DWORD PTR _color$[esp+136]
-	mov	DWORD PTR _zstep$[esp+140], eax
+        mov     edx, DWORD PTR _vb$[esp+136]
+        mov     esi, DWORD PTR _color$[esp+136]
+        mov     DWORD PTR _zstep$[esp+140], eax
 ; Line 226
-	mov	eax, DWORD PTR [edx+20]
-	mov	eax, DWORD PTR [eax+4]
+        mov     eax, DWORD PTR [edx+20]
+        mov     eax, DWORD PTR [eax+4]
 ; Line 228
-	mov	cl, BYTE PTR [eax+4]
-	mov	ebx, DWORD PTR [edx+16]
-	shl	esi, cl
-	mov	ecx, DWORD PTR [eax+16]
-	mov	eax, DWORD PTR [edx+24]
-	add	esi, ecx
-	mov	ecx, DWORD PTR [edx+44]
-	mov	eax, DWORD PTR [eax+ebp*4]
-	mov	DWORD PTR _stble$[esp+140], esi
+        mov     cl, BYTE PTR [eax+4]
+        mov     ebx, DWORD PTR [edx+16]
+        shl     esi, cl
+        mov     ecx, DWORD PTR [eax+16]
+        mov     eax, DWORD PTR [edx+24]
+        add     esi, ecx
+        mov     ecx, DWORD PTR [edx+44]
+        mov     eax, DWORD PTR [eax+ebp*4]
+        mov     DWORD PTR _stble$[esp+140], esi
 ; Line 230
-	add	eax, ebx
-	mov	DWORD PTR _scrnptr$[esp+140], eax
+        add     eax, ebx
+        mov     DWORD PTR _scrnptr$[esp+140], eax
 ; Line 231
-	mov	eax, DWORD PTR [ecx+ebp*4]
-	and	eax, -2					; fffffffeH
-	mov	ebp, DWORD PTR [edx+32]
-	add	eax, ebp
-	mov	ecx, DWORD PTR [edx+36]
-	mov	edi, 4194304				; 00400000H
-	mov	DWORD PTR _zptr$[esp+140], eax
+        mov     eax, DWORD PTR [ecx+ebp*4]
+        and     eax, -2                                 ; fffffffeH
+        mov     ebp, DWORD PTR [edx+32]
+        add     eax, ebp
+        mov     ecx, DWORD PTR [edx+36]
+        mov     edi, 4194304                            ; 00400000H
+        mov     DWORD PTR _zptr$[esp+140], eax
 ; Line 232
-	mov	eax, DWORD PTR [edx+40]
-	mov	DWORD PTR _pitch$[esp+140], ecx
+        mov     eax, DWORD PTR [edx+40]
+        mov     DWORD PTR _pitch$[esp+140], ecx
 ; Line 233
-	shr	eax, 1
-	mov	DWORD PTR _zpitch$[esp+140], eax
+        shr     eax, 1
+        mov     DWORD PTR _zpitch$[esp+140], eax
 
 ;  this is for problems with the seams.
         inc     DWORD PTR _line_count$[esp+140]
@@ -479,45 +479,45 @@ $L23587:
 
 
 ; Line 242
-	mov	eax, DWORD PTR _has_flat_top$[esp+140]
-	cmp	eax, 2
-	jge	$L23346
+        mov     eax, DWORD PTR _has_flat_top$[esp+140]
+        cmp     eax, 2
+        jge     $L23346
 $L23411:
 ; Line 244
-	mov	eax, DWORD PTR _edge1_on_left$[esp+140]
-	test	eax, eax
+        mov     eax, DWORD PTR _edge1_on_left$[esp+140]
+        test    eax, eax
 
-	;;
-	;; Start of outside loop 1.
-	;;
+        ;;
+        ;; Start of outside loop 1.
+        ;;
 
 ; Line 246
-	mov	eax, DWORD PTR _line_count$[esp+140]
-	je	$L23574
-	test	eax, eax
-	je	$L23430
-	mov	eax, DWORD PTR _zpitch$[esp+140]
-	add	eax, eax
-	mov	DWORD PTR -104+[esp+140], eax
+        mov     eax, DWORD PTR _line_count$[esp+140]
+        je      $L23574
+        test    eax, eax
+        je      $L23430
+        mov     eax, DWORD PTR _zpitch$[esp+140]
+        add     eax, eax
+        mov     DWORD PTR -104+[esp+140], eax
 $L23415:
 ; Line 248
-	mov	ecx, DWORD PTR _edge1$[esp+140]
-	mov	esi, DWORD PTR _scrnptr$[esp+140]
-;	add	ecx, 00080000h
-	mov	edx, DWORD PTR _zptr$[esp+140]
-	sar	ecx, 20					; 00000014H
-	mov	ebx, DWORD PTR _edge2$[esp+140]
+        mov     ecx, DWORD PTR _edge1$[esp+140]
+        mov     esi, DWORD PTR _scrnptr$[esp+140]
+;       add     ecx, 00080000h
+        mov     edx, DWORD PTR _zptr$[esp+140]
+        sar     ecx, 20                                 ; 00000014H
+        mov     ebx, DWORD PTR _edge2$[esp+140]
 ; Line 249
 ; Added to help seaming problems.
         add     ebx, 080000h
-	sar	ebx, 20					; 00000014H
-	add	esi, ecx
+        sar     ebx, 20                                 ; 00000014H
+        add     esi, ecx
 ; Line 250
-	lea	eax, DWORD PTR [edx+ecx*2]
-	sub	ebx, ecx
+        lea     eax, DWORD PTR [edx+ecx*2]
+        sub     ebx, ecx
 ; Line 253
-	mov	ecx, DWORD PTR _s1$[esp+140]
-	mov	edx, DWORD PTR _z1$[esp+140]
+        mov     ecx, DWORD PTR _s1$[esp+140]
+        mov     edx, DWORD PTR _z1$[esp+140]
 ; Line 254
 
 ;;-----------------------------------------------------------------------------
@@ -564,7 +564,7 @@ $L23425:
         mov     ebp, DWORD PTR _zstep$[esp+140]
         add     ecx, edx
         mov     edx, DWORD PTR _curz$[esp+140]
-        xor     edi, 0400000h		
+        xor     edi, 0400000h           
         add     edx, ebp
         dec     ebx                                     ; Decrement the loop counter.
                                                         ; doing this up here help branch prediction.
@@ -593,48 +593,48 @@ $L23423:
         dec     eax
         mov     DWORD PTR _edge1$[esp+140], ecx
         mov     DWORD PTR _edge2$[esp+140], ebx
-	mov	ecx, DWORD PTR _pitch$[esp+140]
-	mov	DWORD PTR _s1$[esp+140], ebp
-	mov	edx, DWORD PTR -104+[esp+140]
-	mov	DWORD PTR _z1$[esp+140], esi
-	mov	DWORD PTR _line_count$[esp+140], eax
-	mov	eax, DWORD PTR _scrnptr$[esp+140]
-	add	eax, ecx
-	mov	ecx, DWORD PTR _line_count$[esp+140]
-	mov	DWORD PTR _scrnptr$[esp+140], eax
-	mov	eax, DWORD PTR _zptr$[esp+140]
-	add	eax, edx
-	test	ecx, ecx
-	mov	DWORD PTR _zptr$[esp+140], eax
-	jne	$L23415
-	jmp	$L23430
+        mov     ecx, DWORD PTR _pitch$[esp+140]
+        mov     DWORD PTR _s1$[esp+140], ebp
+        mov     edx, DWORD PTR -104+[esp+140]
+        mov     DWORD PTR _z1$[esp+140], esi
+        mov     DWORD PTR _line_count$[esp+140], eax
+        mov     eax, DWORD PTR _scrnptr$[esp+140]
+        add     eax, ecx
+        mov     ecx, DWORD PTR _line_count$[esp+140]
+        mov     DWORD PTR _scrnptr$[esp+140], eax
+        mov     eax, DWORD PTR _zptr$[esp+140]
+        add     eax, edx
+        test    ecx, ecx
+        mov     DWORD PTR _zptr$[esp+140], eax
+        jne     $L23415
+        jmp     $L23430
 ;;
 ;; End of outside loop 1.
 ;;
 
 $L23574:
-	test	eax, eax
-	je	$L23430
-	mov	eax, DWORD PTR _zpitch$[esp+140]
-	add	eax, eax
-	mov	DWORD PTR -104+[esp+140], eax
+        test    eax, eax
+        je      $L23430
+        mov     eax, DWORD PTR _zpitch$[esp+140]
+        add     eax, eax
+        mov     DWORD PTR -104+[esp+140], eax
 ; Line 285
 $L23432:
 ; Line 287
-	mov	ecx, DWORD PTR _edge2$[esp+140]
-	mov	esi, DWORD PTR _scrnptr$[esp+140]
-;	add	ecx, 524288				; 00080000H
-	mov	edx, DWORD PTR _zptr$[esp+140]
-	sar	ecx, 20					; 00000014H
-	mov	ebx, DWORD PTR _edge1$[esp+140]
+        mov     ecx, DWORD PTR _edge2$[esp+140]
+        mov     esi, DWORD PTR _scrnptr$[esp+140]
+;       add     ecx, 524288                             ; 00080000H
+        mov     edx, DWORD PTR _zptr$[esp+140]
+        sar     ecx, 20                                 ; 00000014H
+        mov     ebx, DWORD PTR _edge1$[esp+140]
 ; Line 288
 ; added for seaming problems.
         add     ebx, 080000h
-	sar	ebx, 20					; 00000014H
-	add	esi, ecx
+        sar     ebx, 20                                 ; 00000014H
+        add     esi, ecx
 ; Line 289
-	lea	eax, DWORD PTR [edx+ecx*2]
-	sub	ebx, ecx
+        lea     eax, DWORD PTR [edx+ecx*2]
+        sub     ebx, ecx
 ; Line 293
 
 ;;-----------------------------------------------------------------------------
@@ -693,36 +693,36 @@ $L23442:
 ;;
 ;;-----------------------------------------------------------------------------
 $L23440:
-	mov	eax, DWORD PTR _xstep1$[esp+140]
-	mov	ecx, DWORD PTR _edge1$[esp+140]
-	add	ecx, eax
-	mov	edx, DWORD PTR _xstep2$[esp+140]
-	mov	ebx, DWORD PTR _edge2$[esp+140]
-	mov	eax, DWORD PTR _sstep2$[esp+140]
-	add	ebx, edx
-	mov	ebp, DWORD PTR _s2$[esp+140]
-	add	ebp, eax
-	mov	esi, DWORD PTR _z2$[esp+140]
-	mov	eax, DWORD PTR _line_count$[esp+140]
-	mov	DWORD PTR _edge1$[esp+140], ecx
-	mov	ecx, DWORD PTR _zstep2$[esp+140]
-	dec	eax
-	add	esi, ecx
-	mov	DWORD PTR _edge2$[esp+140], ebx
-	mov	ecx, DWORD PTR _pitch$[esp+140]
-	mov	DWORD PTR _s2$[esp+140], ebp
-	mov	edx, DWORD PTR -104+[esp+140]
-	mov	DWORD PTR _z2$[esp+140], esi
-	mov	DWORD PTR _line_count$[esp+140], eax
-	mov	eax, DWORD PTR _scrnptr$[esp+140]
-	add	eax, ecx
-	mov	ecx, DWORD PTR _line_count$[esp+140]
-	mov	DWORD PTR _scrnptr$[esp+140], eax
-	mov	eax, DWORD PTR _zptr$[esp+140]
-	add	eax, edx
-	test	ecx, ecx
-	mov	DWORD PTR _zptr$[esp+140], eax
-	jne	$L23432
+        mov     eax, DWORD PTR _xstep1$[esp+140]
+        mov     ecx, DWORD PTR _edge1$[esp+140]
+        add     ecx, eax
+        mov     edx, DWORD PTR _xstep2$[esp+140]
+        mov     ebx, DWORD PTR _edge2$[esp+140]
+        mov     eax, DWORD PTR _sstep2$[esp+140]
+        add     ebx, edx
+        mov     ebp, DWORD PTR _s2$[esp+140]
+        add     ebp, eax
+        mov     esi, DWORD PTR _z2$[esp+140]
+        mov     eax, DWORD PTR _line_count$[esp+140]
+        mov     DWORD PTR _edge1$[esp+140], ecx
+        mov     ecx, DWORD PTR _zstep2$[esp+140]
+        dec     eax
+        add     esi, ecx
+        mov     DWORD PTR _edge2$[esp+140], ebx
+        mov     ecx, DWORD PTR _pitch$[esp+140]
+        mov     DWORD PTR _s2$[esp+140], ebp
+        mov     edx, DWORD PTR -104+[esp+140]
+        mov     DWORD PTR _z2$[esp+140], esi
+        mov     DWORD PTR _line_count$[esp+140], eax
+        mov     eax, DWORD PTR _scrnptr$[esp+140]
+        add     eax, ecx
+        mov     ecx, DWORD PTR _line_count$[esp+140]
+        mov     DWORD PTR _scrnptr$[esp+140], eax
+        mov     eax, DWORD PTR _zptr$[esp+140]
+        add     eax, edx
+        test    ecx, ecx
+        mov     DWORD PTR _zptr$[esp+140], eax
+        jne     $L23432
 
 ;;
 ;; End of outer loop 2.
@@ -730,88 +730,88 @@ $L23440:
 
 $L23430:
 ; Line 324
-	mov	eax, DWORD PTR _has_flat_top$[esp+140]
-	test	eax, eax
-	jne	$L23346
+        mov     eax, DWORD PTR _has_flat_top$[esp+140]
+        test    eax, eax
+        jne     $L23346
 ; Line 326
-	mov	eax, DWORD PTR _low_pt$[esp+140]
-	mov	ecx, DWORD PTR [eax+4]
-	mov	eax, DWORD PTR _mid_pt$[esp+140]
+        mov     eax, DWORD PTR _low_pt$[esp+140]
+        mov     ecx, DWORD PTR [eax+4]
+        mov     eax, DWORD PTR _mid_pt$[esp+140]
         add     ecx, 080000h
-	sar	ecx, 20					; 00000014H
-	mov	eax, DWORD PTR [eax+4]
-	add	eax, 524288				; 00080000H
-	sar	eax, 20					; 00000014H
-	sub	ecx, eax
-;	inc	ecx
+        sar     ecx, 20                                 ; 00000014H
+        mov     eax, DWORD PTR [eax+4]
+        add     eax, 524288                             ; 00080000H
+        sar     eax, 20                                 ; 00000014H
+        sub     ecx, eax
+;       inc     ecx
 ; Line 328
-	test	ecx, ecx
-	jle	SHORT $L23346
-	mov	eax, DWORD PTR _mid_pt$[esp+140]
-	mov	edx, DWORD PTR _low_pt$[esp+140]
-	mov	ebx, DWORD PTR _edge1_on_left$[esp+140]
-	nop
-	mov	esi, DWORD PTR [eax]
+        test    ecx, ecx
+        jle     SHORT $L23346
+        mov     eax, DWORD PTR _mid_pt$[esp+140]
+        mov     edx, DWORD PTR _low_pt$[esp+140]
+        mov     ebx, DWORD PTR _edge1_on_left$[esp+140]
+        nop
+        mov     esi, DWORD PTR [eax]
 ; Line 330
-	mov	eax, DWORD PTR [edx]
-	sub	eax, esi
-	cdq
-	idiv	ecx
-	mov	DWORD PTR _xstep2$[esp+140], eax
-	test	ebx, ebx
+        mov     eax, DWORD PTR [edx]
+        sub     eax, esi
+        cdq
+        idiv    ecx
+        mov     DWORD PTR _xstep2$[esp+140], eax
+        test    ebx, ebx
 ; Line 331
-	jne	SHORT $L23449
-	mov	eax, DWORD PTR _mid_pt$[esp+140]
-	mov	ebx, DWORD PTR [eax+8]
-	mov	eax, DWORD PTR -56+[esp+140]
-	shr	ebx, 1
+        jne     SHORT $L23449
+        mov     eax, DWORD PTR _mid_pt$[esp+140]
+        mov     ebx, DWORD PTR [eax+8]
+        mov     eax, DWORD PTR -56+[esp+140]
+        shr     ebx, 1
 ; Line 333
-	mov	eax, DWORD PTR [eax]
-	shr	eax, 1
-	sub	eax, ebx
-	cdq
-	idiv	ecx
-	mov	edx, DWORD PTR _mid_pt$[esp+140]
-	mov	DWORD PTR _zstep2$[esp+140], eax
+        mov     eax, DWORD PTR [eax]
+        shr     eax, 1
+        sub     eax, ebx
+        cdq
+        idiv    ecx
+        mov     edx, DWORD PTR _mid_pt$[esp+140]
+        mov     DWORD PTR _zstep2$[esp+140], eax
 ; Line 335
-	add	eax, ebx
-	mov	DWORD PTR _z2$[esp+140], eax
-	mov	ebx, DWORD PTR [edx+16]
+        add     eax, ebx
+        mov     DWORD PTR _z2$[esp+140], eax
+        mov     ebx, DWORD PTR [edx+16]
 ; Line 336
-	mov	eax, DWORD PTR -52+[esp+140]
-	mov	eax, DWORD PTR [eax]
-	sub	eax, ebx
-	cdq
-	idiv	ecx
-	mov	DWORD PTR _sstep2$[esp+140], eax
+        mov     eax, DWORD PTR -52+[esp+140]
+        mov     eax, DWORD PTR [eax]
+        sub     eax, ebx
+        cdq
+        idiv    ecx
+        mov     DWORD PTR _sstep2$[esp+140], eax
 ; Line 338
-	add	eax, ebx
-	mov	DWORD PTR _s2$[esp+140], eax
+        add     eax, ebx
+        mov     DWORD PTR _s2$[esp+140], eax
 ; Line 340
 $L23449:
-	mov	eax, DWORD PTR _xstep2$[esp+140]
-;	dec	ecx     ; because we are no longer adding 1 above
-	add	eax, esi
-	mov	edx, DWORD PTR _has_flat_top$[esp+140]
-	inc	edx
-	mov	DWORD PTR _edge2$[esp+140], eax
+        mov     eax, DWORD PTR _xstep2$[esp+140]
+;       dec     ecx     ; because we are no longer adding 1 above
+        add     eax, esi
+        mov     edx, DWORD PTR _has_flat_top$[esp+140]
+        inc     edx
+        mov     DWORD PTR _edge2$[esp+140], eax
 ; Line 341
-	mov	DWORD PTR _line_count$[esp+140], ecx
-	mov	DWORD PTR _has_flat_top$[esp+140], edx
+        mov     DWORD PTR _line_count$[esp+140], ecx
+        mov     DWORD PTR _has_flat_top$[esp+140], edx
 ; Line 344
-	cmp	edx, 2
-	jl	$L23411
+        cmp     edx, 2
+        jl      $L23411
 ; Line 355
 $L23346:
-	pop	ebp
-	pop	edi
-	pop	esi
-	pop	ebx
-	add	esp, 124				; 0000007cH
-	ret	0
-	; This stuff is for alignment, I think.
-	DB 08Dh, 49h, 00h
-	DB 8dh, 0a4h, 24h, 00h,00h,00h,00h
+        pop     ebp
+        pop     edi
+        pop     esi
+        pop     ebx
+        add     esp, 124                                ; 0000007cH
+        ret     0
+        ; This stuff is for alignment, I think.
+        DB 08Dh, 49h, 00h
+        DB 8dh, 0a4h, 24h, 00h,00h,00h,00h
 _vngo_zgtriangle8 ENDP
-_TEXT	ENDS
+_TEXT   ENDS
 END

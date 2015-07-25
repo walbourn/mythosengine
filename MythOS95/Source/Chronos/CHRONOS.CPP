@@ -17,10 +17,10 @@
 //         °°²²²²²²²²²²²²²²²²°°
 //        °°°°°°°°°°°°°°°°°°°°°°
 //
-//          Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.
+//          Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved.
 //
-//                      Microsoft Windows '95 Version
+//                      Microsoft Windows 95/NT Version
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
@@ -98,7 +98,7 @@ static volatile ulong   system_freq;
 static volatile int     instance = 0;
 static iChronosUserProc timer_handles[MAX_CALLBACKS];
 static bool             __chronos_use_pentium = false;
-static double           __chronos_scale;
+double                  __chronos_scale;
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
@@ -118,7 +118,7 @@ inline ulong mult2ms (ulong multiplier)
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-// ichronos_timer_proc 
+// ichronos_timer_proc
 //
 //  This routine will call our timer proc.
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ

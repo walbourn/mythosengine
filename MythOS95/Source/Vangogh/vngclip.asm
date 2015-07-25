@@ -6,7 +6,7 @@
 ;                                                           |. _  .   .|
 ;          Microsoft Windows '95 Version                    | / \   .  | 
 ;                                                           |_|_|_._._.|
-;  Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.   |.-.-.-.-..|
+;  Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.   |.-.-.-.-..|
 ;              All rights reserved.                        %\__________/%
 ;                                                           %          %
 ;
@@ -96,8 +96,8 @@ START_PROC vng_clip_x_line,    C  p:dword, s:dword, f:dword, out_point:dword
         mov     eax,(VNGO_POINT PTR [esi]).pt_clr
         mov     (VNGO_POINT PTR [ecx]).pt_clr,eax
 
-        
-       
+
+
         mov     edx,ebx
         cmp     edx,(VNGO_POINT PTR [edi]).pt_x
         jge     @f

@@ -9,7 +9,9 @@
 //
 //                          Across the event horizon...
 //
-//           Copyright (c) 1994 - 1997 by Charybdis Enterprises, Inc.
+//                        Microsoft Windows 95/NT Version
+//
+//            Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved.
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -130,7 +132,7 @@ STATIC char cpp_header[] =
 {
     "//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿\r\n"
     "// MaxC -- Event and Trigger Definition System                              ³\r\n"
-    "// (C) 1995-1997 by Charybdis Enterprises, Inc.  All Rights Reserved.       ³\r\n"
+    "// (C) 1994-1998 by Charybdis Enterprises, Inc.  All Rights Reserved.       ³\r\n"
     "//                                                                          ³\r\n"
     "// Event Constants header file for C++                                      ³\r\n"
     "//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ\r\n"

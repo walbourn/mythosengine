@@ -4,7 +4,7 @@
 //
 //                   A Palette extraction/definition tool
 //
-//           Copyright (c) 1995-1997 by Charybdis Enterprises, Inc.
+//           Copyright (c) 1995-1998 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved
 //
 //                      Microsoft Windows '95 Version
@@ -27,7 +27,7 @@
 // Dan Higdon & Chuck Walbourn
 //
 // stdafx.cpp
-// 
+//
 // Source file that includes just the standard includes.
 //
 // paltool.pch will be the pre-compiled header
@@ -38,7 +38,7 @@
 //같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같�
 //
 //                                Includes
-//                                
+//
 //같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같�
 
 #include "stdafx.h"

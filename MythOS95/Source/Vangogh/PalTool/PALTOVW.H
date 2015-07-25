@@ -4,7 +4,7 @@
 //
 //                   A Palette extraction/definition tool
 //
-//           Copyright (c) 1995-1997 by Charybdis Enterprises, Inc.
+//           Copyright (c) 1995-1998 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved
 //
 //                      Microsoft Windows '95 Version
@@ -25,7 +25,7 @@
 //컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
 //
 // Dan Higdon & Chuck Walbourn
-// 
+//
 // PalTovw.h
 //
 // PalTool view class.
@@ -41,66 +41,66 @@
 class CPalToolView : public CView
 {
 protected: // create from serialization only
-	CPalToolView();
-	DECLARE_DYNCREATE(CPalToolView)
+        CPalToolView();
+        DECLARE_DYNCREATE(CPalToolView)
 
 // Attributes
 public:
-	CPalToolDoc* GetDocument();
+        CPalToolDoc* GetDocument();
 
-	enum
+        enum
     {
         SB_HEIGHT = 15,
-		ENV_WIDTH = 128,
-		ENV_HEIGHT = 128,
+                ENV_WIDTH = 128,
+                ENV_HEIGHT = 128,
         VP_WIDTH = 256,
      };
 
 // Operations
 public:
 
-	void DrawShadeEnv (CDC *);
-	void DrawHazeEnv (CDC *);
-	void DrawShades ();
-	CRect ShadePoint () const;
-	CRect HazePoint () const;
+        void DrawShadeEnv (CDC *);
+        void DrawHazeEnv (CDC *);
+        void DrawShades ();
+        CRect ShadePoint () const;
+        CRect HazePoint () const;
 
 
 // Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CPalToolView)
-	public:
-	virtual void OnDraw(CDC* pDC);  // overridden to draw this view
-	virtual void OnInitialUpdate();
-	protected:
-	virtual void OnActivateView(BOOL bActivate, CView* pActivateView, CView* pDeactiveView);
-	virtual void OnUpdate(CView* pSender, LPARAM lHint, CObject* pHint);
-	//}}AFX_VIRTUAL
+        // ClassWizard generated virtual function overrides
+        //{{AFX_VIRTUAL(CPalToolView)
+        public:
+        virtual void OnDraw(CDC* pDC);  // overridden to draw this view
+        virtual void OnInitialUpdate();
+        protected:
+        virtual void OnActivateView(BOOL bActivate, CView* pActivateView, CView* pDeactiveView);
+        virtual void OnUpdate(CView* pSender, LPARAM lHint, CObject* pHint);
+        //}}AFX_VIRTUAL
 
 // Implementation
 public:
-	virtual ~CPalToolView();
+        virtual ~CPalToolView();
 #ifdef _DEBUG
-	virtual void AssertValid() const;
-	virtual void Dump(CDumpContext& dc) const;
+        virtual void AssertValid() const;
+        virtual void Dump(CDumpContext& dc) const;
 #endif
     void EditNew(CPalToolDoc::genpal_type typ);
 
 protected:
-	int	        shade_env_divisions;
-	CPoint	    shade_env;
+        int             shade_env_divisions;
+        CPoint      shade_env;
 
-	BYTE		*shade_bits;
-	BYTE		*haze_bits;
-	BITMAPINFO	*bmi;
+        BYTE            *shade_bits;
+        BYTE            *haze_bits;
+        BITMAPINFO      *bmi;
 
-	CPalette	pal;
-	CPen		dotted;
+        CPalette        pal;
+        CPen            dotted;
 
-	VngoVport	*shade_vp;
-	VngoVport	*haze_vp;
+        VngoVport       *shade_vp;
+        VngoVport       *haze_vp;
 
-	enum
+        enum
     {
         DRAG_NONE,
         DRAG_SHADE,
@@ -110,29 +110,29 @@ protected:
 
 // Generated message map functions
 protected:
-	//{{AFX_MSG(CPalToolView)
-	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
-	afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
-	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
-	afx_msg void OnOptionsBezier();
-	afx_msg void OnUpdateOptionsBezier(CCmdUI* pCmdUI);
-	afx_msg void OnOptionsLinear();
-	afx_msg void OnUpdateOptionsLinear(CCmdUI* pCmdUI);
-	afx_msg void OnOptionsQuadratic();
-	afx_msg void OnUpdateOptionsQuadratic(CCmdUI* pCmdUI);
-	afx_msg void OnEditNewEmpty();
-	afx_msg void OnEditNewGeneral();
-	afx_msg void OnEditNewGeneralOld();
-	afx_msg void OnEditNewGreyscale();
-	afx_msg void OnEditNew332();
-	afx_msg void OnEditNewRGBG();
-	afx_msg void OnEditPalette();
-	afx_msg void OnEditProperties();
-	afx_msg void OnRButtonDown(UINT nFlags, CPoint point);
-	afx_msg void OnEditNewSpecial1();
-	afx_msg void OnViewRefresh();
-	//}}AFX_MSG
-	DECLARE_MESSAGE_MAP()
+        //{{AFX_MSG(CPalToolView)
+        afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
+        afx_msg void OnLButtonUp(UINT nFlags, CPoint point);
+        afx_msg void OnMouseMove(UINT nFlags, CPoint point);
+        afx_msg void OnOptionsBezier();
+        afx_msg void OnUpdateOptionsBezier(CCmdUI* pCmdUI);
+        afx_msg void OnOptionsLinear();
+        afx_msg void OnUpdateOptionsLinear(CCmdUI* pCmdUI);
+        afx_msg void OnOptionsQuadratic();
+        afx_msg void OnUpdateOptionsQuadratic(CCmdUI* pCmdUI);
+        afx_msg void OnEditNewEmpty();
+        afx_msg void OnEditNewGeneral();
+        afx_msg void OnEditNewGeneralOld();
+        afx_msg void OnEditNewGreyscale();
+        afx_msg void OnEditNew332();
+        afx_msg void OnEditNewRGBG();
+        afx_msg void OnEditPalette();
+        afx_msg void OnEditProperties();
+        afx_msg void OnRButtonDown(UINT nFlags, CPoint point);
+        afx_msg void OnEditNewSpecial1();
+        afx_msg void OnViewRefresh();
+        //}}AFX_MSG
+        DECLARE_MESSAGE_MAP()
 };
 
 #ifndef _DEBUG  // debug version in PalTovw.cpp

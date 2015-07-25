@@ -127,6 +127,7 @@ public:     // Construction/Destruction
     float   mbox_size;
     long    alpha;
 
+    // key-frame animation data
     BOOL    keyframe_animation;
     float   anim_time;
     float   anim_step_time;
@@ -136,6 +137,16 @@ public:     // Construction/Destruction
     float   anim_max_compress;
     EschKeyframeDraw *anim_root;
     float   scale;
+
+    // particle system data
+    int     part_count;
+    float   part_speed;
+    float   part_life;
+    int     part_linear;
+    int     part_alpha;
+    float   part_rotrate;
+    float   part_rotrate_low;
+    float   part_rotrate_high;
 
     EschCameraEx            *cam;
     EschLight               *light;

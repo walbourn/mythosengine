@@ -1,13 +1,13 @@
 //อออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออ
 //
-//                                /\    /\ 
-//                               /  \  /  \ 
-//                              /    \/    \ 
-//                             /  /\    /\  \ 
+//                                /\    /\
+//                               /  \  /  \
+//                              /    \/    \
+//                             /  /\    /\  \
 //                            /  /  \  /  Y T H O S
-//                           /  /    \/    \  \ 
-//                          /  /            \  \ 
-//                         /__/              \__\ 
+//                           /  /    \/    \  \
+//                          /  /            \  \
+//                         /__/              \__\
 //
 //                    Microsoft Windows 95/NT Version
 //
@@ -42,7 +42,7 @@
 //ฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐ
 //
 //                                Includes
-//                                
+//
 //ฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐ
 
 #include <ivory.h>
@@ -63,8 +63,8 @@
 //ฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤู
 MythosSystem::MythosSystem(ulong ivory_size,
                            ivory_init_codes ivory_opt) :
-    Ivory(ivory_size,ivory_opt), Bozo(), Max(), Chronos(), 
-    Escher(), Gutenberg()
+    Ivory(ivory_size,ivory_opt), Bozo(), Max(), Chronos(),
+    Escher(), Gutenberg(), Vangogh()
 {
 };
 
@@ -93,7 +93,7 @@ int MythosSystem::init(ulong esch_arena_size, ulong esch_sort_size,
 
 //ฤฤฤ Init Chronos
     Chronos.init();
-    
+
 //ฤฤฤ Init Bozo
     if (bozo_alloc)
         Bozo.set_allocator(bozo_alloc);

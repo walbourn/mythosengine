@@ -4,7 +4,7 @@
 //
 //                   A Palette extraction/definition tool
 //
-//           Copyright (c) 1995-1997 by Charybdis Enterprises, Inc.
+//           Copyright (c) 1995-1998 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved
 //
 //                      Microsoft Windows '95 Version
@@ -25,7 +25,7 @@
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
 // Dan Higdon & Chuck Walbourn
-// 
+//
 // mainfrm.cpp
 //
 // implementation of the CMainFrame class
@@ -35,7 +35,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include "stdafx.h"
@@ -62,10 +62,10 @@ static char BASED_CODE THIS_FILE[] = __FILE__;
 IMPLEMENT_DYNAMIC(CMainFrame, CMDIFrameWnd)
 
 BEGIN_MESSAGE_MAP(CMainFrame, CMDIFrameWnd)
-	//{{AFX_MSG_MAP(CMainFrame)
-	ON_WM_CREATE()
-	ON_COMMAND(ID_APP_HELP, OnAppHelp)
-	//}}AFX_MSG_MAP
+        //{{AFX_MSG_MAP(CMainFrame)
+        ON_WM_CREATE()
+        ON_COMMAND(ID_APP_HELP, OnAppHelp)
+        //}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -75,24 +75,24 @@ END_MESSAGE_MAP()
 // toolbar buttons - IDs are command buttons
 static UINT BASED_CODE buttons[] =
 {
-	// same order as in the bitmap 'toolbar.bmp'
-	ID_FILE_NEW,
-	ID_FILE_OPEN,
-	ID_FILE_SAVE,
-		ID_SEPARATOR,
+        // same order as in the bitmap 'toolbar.bmp'
+        ID_FILE_NEW,
+        ID_FILE_OPEN,
+        ID_FILE_SAVE,
+                ID_SEPARATOR,
     ID_EDIT_PALETTE,
-		ID_SEPARATOR,
+                ID_SEPARATOR,
     ID_EDIT_PROP,
-		ID_SEPARATOR,
-	ID_APP_ABOUT,
+                ID_SEPARATOR,
+        ID_APP_ABOUT,
 };
 
 static UINT BASED_CODE indicators[] =
 {
-	ID_SEPARATOR,           // status line indicator
-	ID_INDICATOR_CAPS,
-	ID_INDICATOR_NUM,
-	ID_INDICATOR_SCRL,
+        ID_SEPARATOR,           // status line indicator
+        ID_INDICATOR_CAPS,
+        ID_INDICATOR_NUM,
+        ID_INDICATOR_SCRL,
 };
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
@@ -132,7 +132,7 @@ CMainFrame::~CMainFrame()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 void CMainFrame::AssertValid() const
 {
-	CMDIFrameWnd::AssertValid();
+        CMDIFrameWnd::AssertValid();
 }
 
 
@@ -141,7 +141,7 @@ void CMainFrame::AssertValid() const
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 void CMainFrame::Dump(CDumpContext& dc) const
 {
-	CMDIFrameWnd::Dump(dc);
+        CMDIFrameWnd::Dump(dc);
 }
 #endif //_DEBUG
 
@@ -162,46 +162,46 @@ void CMainFrame::Dump(CDumpContext& dc) const
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 int CMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 {
-	if (CMDIFrameWnd::OnCreate(lpCreateStruct) == -1)
-		return -1;
-	
-	if (!m_wndToolBar.Create(this) ||
-		!m_wndToolBar.LoadBitmap(IDR_MAINFRAME) ||
-		!m_wndToolBar.SetButtons(buttons,
-		  sizeof(buttons)/sizeof(UINT)))
-	{
-		TRACE0("Failed to create toolbar\n");
-		return -1;      // fail to create
-	}
+        if (CMDIFrameWnd::OnCreate(lpCreateStruct) == -1)
+                return -1;
 
-	if (!m_wndStatusBar.Create(this) ||
-		!m_wndStatusBar.SetIndicators(indicators,
-		  sizeof(indicators)/sizeof(UINT)))
-	{
-		TRACE0("Failed to create status bar\n");
-		return -1;      // fail to create
-	}
+        if (!m_wndToolBar.Create(this) ||
+                !m_wndToolBar.LoadBitmap(IDR_MAINFRAME) ||
+                !m_wndToolBar.SetButtons(buttons,
+                  sizeof(buttons)/sizeof(UINT)))
+        {
+                TRACE0("Failed to create toolbar\n");
+                return -1;      // fail to create
+        }
 
-	m_wndToolBar.EnableDocking(CBRS_ALIGN_ANY);
-	EnableDocking(CBRS_ALIGN_ANY);
-	DockControlBar(&m_wndToolBar);
+        if (!m_wndStatusBar.Create(this) ||
+                !m_wndStatusBar.SetIndicators(indicators,
+                  sizeof(indicators)/sizeof(UINT)))
+        {
+                TRACE0("Failed to create status bar\n");
+                return -1;      // fail to create
+        }
 
-	m_wndToolBar.SetBarStyle(m_wndToolBar.GetBarStyle() |
-		CBRS_TOOLTIPS | CBRS_FLYBY);
+        m_wndToolBar.EnableDocking(CBRS_ALIGN_ANY);
+        EnableDocking(CBRS_ALIGN_ANY);
+        DockControlBar(&m_wndToolBar);
 
-	return 0;
+        m_wndToolBar.SetBarStyle(m_wndToolBar.GetBarStyle() |
+                CBRS_TOOLTIPS | CBRS_FLYBY);
+
+        return 0;
 }
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 // CMainFrame - OnAppHelp
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-void CMainFrame::OnAppHelp() 
+void CMainFrame::OnAppHelp()
 {
     int     i;
     char    *c;
     char    fname[256];
-  
+
     GetModuleFileName(NULL, fname, 256);
 
     for (i=strlen(fname), c = &fname[i-1]; i > 0; i--, c--)

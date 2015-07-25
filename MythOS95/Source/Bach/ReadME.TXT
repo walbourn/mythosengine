@@ -31,9 +31,12 @@
                              _Library Status_
 
  Notes by: Chuck Walbourn
- Updated: January 2, 1998
+ Updated: March 7, 1998
 
  Changes for this release --------------------------------------------------
+
+ o Minor update to prevent Stop()ing a primary buffer that was never
+   started.  This may fix an error in initialization/cleanup.
 
  o Redesigned and cleaned up interface (BachSample is now an abstract
    base class with BachStaticSample implementation the standard

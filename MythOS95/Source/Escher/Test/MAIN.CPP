@@ -248,6 +248,40 @@ int APIENTRY WinMain (HINSTANCE hInstance,
             return FALSE;
     }
 
+    if (!ini.read("ParticleCount",buff))
+    {
+        mode->part_count = atoi(buff);
+    }
+    if (!ini.read("PartitionSpeed",buff))
+    {
+        mode->part_speed = float(atof(buff));
+    }
+    if (!ini.read("ParticleLife",buff))
+    {
+        mode->part_life = float(atof(buff));
+    }
+    if (!ini.read("ParticleAccel",buff))
+    {
+        strlwr(buff);
+        if (strstr(buff,"nonlinear"))
+            mode->part_linear=0;
+    }
+    if (!ini.read("ParticleAlpha",buff))
+    {
+        mode->part_alpha = atoi(buff);
+    }
+    if (!ini.read("ParticleRotRate",buff))
+    {
+        mode->part_rotrate = float(atof(buff));
+    }
+    if (!ini.read("ParticleRotRateLow",buff))
+    {
+        mode->part_rotrate_low = float(atof(buff));
+    }
+    if (!ini.read("ParticleRotRateHigh",buff))
+    {
+        mode->part_rotrate_high = float(atof(buff));
+    }
     if (!ini.read("ParticleSystem",buff))
     {
         strlwr(buff);

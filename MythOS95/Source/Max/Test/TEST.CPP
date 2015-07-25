@@ -9,7 +9,9 @@
 //
 //                          Across the event horizon...
 //
-//           Copyright (c) 1994 - 1997 by Charybdis Enterprises, Inc.
+//                        Microsoft Windows 95/NT Version
+//
+//            Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved.
 //
 //컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
@@ -72,7 +74,7 @@ MaxValueMap vmap (VMAP_SIZE, vmap_table);
 void main ()
 {
 //컴컴 Print welcome banner 컴컴
-    cout << "Max Tester - (C) 1994 - 1997 by Charybdis Enterprises, Inc.\n\n";
+    cout << "Max Tester - (C) 1994-1998 by Charybdis Enterprises, Inc.\n\n";
 
     cout << "Load the events" << endl;
 

@@ -1,13 +1,13 @@
 //ЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭ
 //
-//                        мммммммммм                       мммм        
-//     кФФП                ллл     ллм                     оллл        
-//     Г  Г       кФФП     ллл     ллл   мммм      ммммм    ллл ммм    
-//     Г  Г кФФП  Г  Г     лллммммлллп  п  олн    ллп   пл  лллллплл   
-//     Г  Г Г  Г  Г  Г     ллл     ллм  млллллн  ллл        ллл   ллл  
-//    Oй Oй Г  Г  Г  Г     ллл     ллл олн  ллл  ллл    мл  ллл   ллл  
-//          Г  Г Oй Oй    млллмммлллп   ллллнплм  пллммлл  млллм млллм 
-//         Oй Oй  
+//                        мммммммммм                       мммм
+//     кФФП                ллл     ллм                     оллл
+//     Г  Г       кФФП     ллл     ллл   мммм      ммммм    ллл ммм
+//     Г  Г кФФП  Г  Г     лллммммлллп  п  олн    ллп   пл  лллллплл
+//     Г  Г Г  Г  Г  Г     ллл     ллм  млллллн  ллл        ллл   ллл
+//    Oй Oй Г  Г  Г  Г     ллл     ллл олн  ллл  ллл    мл  ллл   ллл
+//          Г  Г Oй Oй    млллмммлллп   ллллнплм  пллммлл  млллм млллм
+//         Oй Oй
 //                            C++ Music, Sound, and Effects Library
 //                               Microsoft Windows 95/NT Version
 //
@@ -34,7 +34,7 @@
 // bachdefs.h
 //
 // Contains defines and constants for the Bach library.
-// 
+//
 //ЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭЭ
 
 #ifndef __BACHDEFS_H
@@ -110,8 +110,11 @@ typedef enum bach_err_codes
 //ФФ General constants
 #define BACH_DIGI_DRIVERRATE            11025   // Default driver rate
 
+//ФФ Flags
+#define BACH_DIGI_PRIMARY_INITIALIZED   0x1
+
 //ФФ Data format types
-typedef enum bach_digi_fmt 
+typedef enum bach_digi_fmt
 {
     BACH_DIGI_MONO_8                    =0,     // Mono 8-bit
     BACH_DIGI_MONO_16                   =1,     // Mono 16-bit
@@ -129,4 +132,3 @@ typedef enum bach_digi_fmt
 #endif
 
 //АБВ End of header - bachdefs.h ВБА
-

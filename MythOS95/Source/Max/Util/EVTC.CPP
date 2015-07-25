@@ -9,7 +9,9 @@
 //
 //                          Across the event horizon...
 //
-//           Copyright (c) 1994 - 1997 by Charybdis Enterprises, Inc.
+//                        Microsoft Windows 95/NT Version
+//
+//            Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved.
 //
 //컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
@@ -88,7 +90,7 @@ extern void compile (const char *evt_name);
 extern "C" FILE *yyin;
 
 STATIC char Util_name[]
-       = "갚 Max CEL Compiler - (C) 1994 - 1997 Charybdis Enterprises, Inc. 굅\n"
+       = "갚 Max CEL Compiler - (C) 1994-1998 Charybdis Enterprises, Inc. 굅\n"
          "                      All Rights Reserved. " __DATE__ "\n";
 
 XFParseIFF  IFF;

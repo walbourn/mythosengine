@@ -3593,7 +3593,7 @@ void EschTerrainTreeTop::draw_slip_endcap (VngoRect *rect, dword type, int dleve
 
     points[4].shade = sptr->shd;
     sptr ++;
-    h = htable[*(hfield + (width * corner.y + (corner.x + 1)))];
+    h = htable[*(hfield + (width * corner.y + (corner.x+1)))];
     cpt.x = origin.x + float ((corner.x+corner.dx) << scaleshift);
     cpt.y = origin.y;
     cpt.z = origin.z + float (corner.y << scaleshift);
@@ -3706,7 +3706,7 @@ void EschTerrainTreeTop::draw_slip_endcap (VngoRect *rect, dword type, int dleve
             temp_y = rect->y + 2;
             _h = (hgt_dither_mat[(temp_x)&3][(temp_y)&3] * hgt_dither_scalar);
 
-            h += (_h + 2.0f);
+            h += (_h / 2.0f);
         }
         else if (type & ESCH_TERNEX_SLIP_TOPRIGHT)
         {
@@ -3843,7 +3843,7 @@ void EschTerrainTreeTop::draw_slip_endcap (VngoRect *rect, dword type, int dleve
 // EschTerrainTreeTop - check_LOS
 //컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
 int EschTerrainTreeTop::check_LOS (EschPoint *pt1, EschPoint *pt2,
-                           int precision,float *ndist) const
+                           int precision,float *ndist, EschPoint *npos) const
 {
     // build a world rect from left/right, top/bottom
     VngoRect tree_world;
@@ -3930,6 +3930,12 @@ int EschTerrainTreeTop::check_LOS (EschPoint *pt1, EschPoint *pt2,
                 EschVector tvect(curx-pt1->x,test_hgt-pt1->y,curz-pt1->z);
                 if (ndist)
                     *ndist = tvect.magnitude();
+                if (npos != NULL)
+                {
+                    npos->x = curx;
+                    npos->y = test_hgt;
+                    npos->z = curz;
+                }
             }
             return 0;
         }

@@ -6,7 +6,7 @@
 //                                                           |. _  .   .|
 //          Microsoft Windows '95 Version                    | / \   .  |
 //                                                           |_|_|_._._.|
-// Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
+// Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
 //              All rights reserved.                        %\__________/%
 //                                                           %          %
 //
@@ -39,8 +39,27 @@
 const int COLORS = 256;
 
 
+VngoDIB::VngoDIB():
+    dd(0),
+    dd2(0),
+    bmi(0),
+    hdc(0),
+    gmap(0),
+    hpal(0),
+    hWndClient(NULL)
+{
+    sins = 0;
+    lflags = 0;
+    frame_is_open=FALSE;
+    strcpy(hwName,"DIB Draw");
+    pal = NULL;
+    init_state = VNGO_NOSCREEN_ERROR;
+}
+
+
 VngoDIB::VngoDIB(HWND hwndclient):
     dd(0),
+    dd2(0),
     bmi(0),
     hdc(0),
     gmap(0),
@@ -48,6 +67,8 @@ VngoDIB::VngoDIB(HWND hwndclient):
     hWndClient(hwndclient)
 {
     sins = 0;
+    lflags = 0;
+    frame_is_open=FALSE;
     strcpy(hwName,"DIB Draw");
     pal = NULL;
     init_state = init();

@@ -6,7 +6,7 @@
 //                                                           |. _  .   .|
 //          Microsoft Windows '95 Version                    | / \   .  |
 //                                                           |_|_|_._._.|
-// Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
+// Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
 //              All rights reserved.                        %\__________/%
 //                                                           %          %
 //
@@ -56,7 +56,7 @@
 #include "vgvpdb16.hpp"
 #include "vgvpdd16.hpp"
 #include "vngscrn.hpp"
-#include "vngoems.hpp"
+// #include "vngoems.hpp"
 #include "vngd3d.hpp"
 
 #ifdef __WATCOMC__
@@ -77,9 +77,11 @@ extern dword *vngo_get_invert();
 extern void triangle_setup(VngoPoint2 *pts, VngoTriangle *tri);
 extern void vngo_circle(VngoVport *vp,VngoPoint *center,long r);
 extern void vngo_circle(VngoVport *vp,long xoffset, long yoffset,long r,dword color);
+extern void vngo_circle(VngoVport *vp,long xoffset, long yoffset,long r,VngoColor24bit *color);
 extern void vngo_circle(VngoVport *vp,long xoffset, long yoffset,long r,dword color, int width);
 extern void vngo_clip_circle(VngoVport *vp,VngoPoint *center,long r);
 extern void vngo_clip_circle(VngoVport *vp,long xoffset, long yoffset,long r,dword color);
+extern void vngo_clip_circle(VngoVport *vp,long xoffset, long yoffset,long r,VngoColor24bit *color);
 extern void vngo_clip_circle(VngoVport *vp,long xoffset, long yoffset,long r,dword color, int width);
 extern void vngo_smooth_rect(VngoVport *vp, VngoPoint *pts, VngoRect *clip = NULL);
 extern VNGError vngo_smooth_blit(VngoVport *vp,VngoTexture *img, VngoRect *target,VngoRect *clip = NULL);
@@ -131,6 +133,9 @@ extern void vngo_atgpoly_persp16 (VngoVport *vp, int count, VngoPoint2 *pts, Vng
 
 extern "C"
 {
+
+typedef void (*lineproc) (VngoTriangle *tri);
+
 extern void calc_order(int &high_pt,int &mid_pt, int &low_pt, VngoPoint2 *pts);
 extern long vngo_calc_xstep(int x1,int x2,int dy);
 extern long vngo_calc_zstep(int z1,int z2,int dy);
@@ -171,6 +176,9 @@ extern void zbuff_reset_rect16(VngoVbuffer *vbuf,VngoRect *rect, dword depth);
 
 extern void vng_clip_x_line(long p,VngoPoint *s, VngoPoint *f, VngoPoint *out_put);
 extern void vng_clip_y_line(long p,VngoPoint *s, VngoPoint *f, VngoPoint *out_put);
+
+extern void vngo_poly(VngoVport *vp,int count, dword flags, VngoPointF *pts, VngoTexture *tex, long alpha);
+
 }
 
 #ifdef __WATCOMC__

@@ -6,7 +6,7 @@
 //                                                           |. _  .   .|
 //          Microsoft Windows '95 Version                    | / \   .  |
 //                                                           |_|_|_._._.|
-// Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
+// Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
 //              All rights reserved.                        %\__________/%
 //                                                           %          %
 //
@@ -39,6 +39,7 @@
 #include "debug.h"
 #include "portable.h"
 #include "vangogh.hpp"
+#include <math.h>
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
@@ -61,7 +62,6 @@
 //
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 
-extern VngoSystem VgSystem;
 STATIC  dword invert_table[2048];
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
@@ -578,5 +578,42 @@ void VngoHazeInfoVVP8::release()
         ivory_free((void**)&htable);
 }
 
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°° VngoSystem °°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+void VngoSystem::set_gamma(float gamma)
+{
+    gamma_correct = gamma;
+    float k = (255.f / powf(255.f,(1.f/gamma)));
+    for (int i=0;i < 256;i++)
+    {
+        float t = k * powf(float(i),(1.f/gamma));
+        if (t > 255.f)
+            t = 255.f;
+        if (t < 0.f)
+            t = 0.f;
+
+        gtable[i] = byte(t);
+    }
+}
+
+void VngoSystem::init_alpha()
+{
+    float   astep = 1.f/256.f;
+    float   cur_a = 0;
+    byte    *ptr = alpha_table;
+
+    for (int j=0;j < 256; j++)
+    {
+        for (int i=0;i < 32;i++)
+        {
+            *ptr = byte(float(i) * cur_a);
+            ptr++;
+        }
+        cur_a+=astep;
+    }
+}
 //°±² End of module - vngserv.cpp ²±°
 

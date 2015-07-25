@@ -6,7 +6,7 @@
 #                                                            |. _  .   .|
 #           Microsoft Windows '95 Version                    | / \   .  |
 #                                                            |_|_|_._._.|
-#  Copyright (c) 1994 - 1997 by Charybdis Enterprises, Inc.  |.-.-.-.-..|
+#  Copyright (c) 1994 - 1998 by Charybdis Enterprises, Inc.  |.-.-.-.-..|
 #               All rights reserved.                        %\__________/%
 #                                                           %          %
 #
@@ -58,6 +58,28 @@ LIB = VanGogh
 
 OBJS=\
 vngpch.obj\
+vngedge.obj\
+vngpoly.obj\
+hlgen.obj\
+tahlgen.obj\
+thlgen.obj\
+th3232.obj\
+th3264.obj\
+th32128.obj\
+th32256.obj\
+th6432.obj\
+th6464.obj\
+th64128.obj\
+th64256.obj\
+th12832.obj\
+th12864.obj\
+th128128.obj\
+th128256.obj\
+th25632.obj\
+th25664.obj\
+th256128.obj\
+th256256.obj\
+tathlgen.obj\
 vngvp.obj\
 vngitrns.obj\
 vngzrect.obj\
@@ -119,67 +141,17 @@ vgvpdb16.obj\
 vgvpdd16.obj\
 vngitn16.obj\
 vgpoly16.obj\
-vngtri16.obj\
-vnggtr16.obj\
-vgttri16.obj\
-vngptr16.obj\
 vggrtr16.obj\
 vgrect16.obj\
-tri16.obj\
-ztri16.obj\
-gtri16.obj\
-zgtri16.obj\
-lttri16.obj\
-zlttri16.obj\
-lgttri16.obj\
-zlgttr16.obj\
 grtri16.obj\
 zgrtri16.obj\
-pttr16.obj\
-zpttr16.obj\
-pgttr16.obj\
-zpgttr16.obj\
-agtri16.obj\
-tagtri16.obj\
-algtt16.obj\
-altt16.obj\
-apgttr16.obj\
-apttri16.obj\
-atri16.obj\
-tatri16.obj\
-azgtri16.obj\
-tazgtr16.obj\
-azlgtt16.obj\
-azltt16.obj\
-tazltt16.obj\
-taltt16.obj\
-azpgtt16.obj\
-azpttr16.obj\
-aztri16.obj\
-taztri16.obj\
-vng3dfx.obj\
 vngd3d.obj\
-vngcl3d.obj\
-vngMSI.obj\
 ddrwscrn.obj\
 hybrscrn.obj\
-3dfxscrn.obj\
 d3dscrn.obj\
 d3dtex.obj\
-cl3dscrn.obj\
-cl3dtex.obj\
-MSIscrn.obj\
 dibscrn.obj
 
-#pttri8.obj\
-#zpttri8.obj\
-#pgttri8.obj\
-#zpgttri8.obj\
-#zlgttri8.obj\
-
-#vngvvp16.obj\
-#vng3dfx.obj\
-#3dfxscrn.obj
 
 
 #ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
@@ -209,7 +181,7 @@ all: setstden $(LIB).pch $(LIB).lib
 {..\16bpp\}.asm{}.obj:
    $(ASM) $(ASMOPTS) $<
 
-{..\24bpp\}.asm{}.obj:
+{..\newtri\}.asm{}.obj:
    $(ASM) $(ASMOPTS) $<
 
 {..\screen\}.asm{}.obj:
@@ -228,7 +200,7 @@ all: setstden $(LIB).pch $(LIB).lib
 {..\16bpp\}.cpp{}.obj:
         $(CPP) $(CCOPTIONS) /Yuvangogh.hpp /Fp$(LIB).pch $<
 
-{..\24bpp\}.cpp{}.obj:
+{..\newtri\}.cpp{}.obj:
         $(CPP) $(CCOPTIONS) /Yuvangogh.hpp /Fp$(LIB).pch $<
 
 {..\screen}.cpp{}.obj:
@@ -248,6 +220,71 @@ $(LIB).pch :
 
 vngpch.obj : ..\vngpch.cpp
     $(CPP) /Ycvangogh.hpp /Fp$(LIB).pch $(CCOPTIONS) ..\$*.cpp
+
+th3232.obj : ..\newtri\thlspec.cpp\
+              ..\inc\thlspec.h
+    $(CPP) /D_32X32 $(CCOPTIONS) ..\newtri\thlspec.cpp /Foth3232.obj
+
+th3264.obj : ..\newtri\thlspec.cpp\
+              ..\inc\thlspec.h
+    $(CPP) /D_32X64 $(CCOPTIONS) ..\newtri\thlspec.cpp /Foth3264.obj
+
+th32128.obj : ..\newtri\thlspec.cpp\
+               ..\inc\thlspec.h
+    $(CPP) /D_32X128 $(CCOPTIONS) ..\newtri\thlspec.cpp /Foth32128.obj
+
+th32256.obj : ..\newtri\thlspec.cpp\
+               ..\inc\thlspec.h
+    $(CPP) /D_32X256 $(CCOPTIONS) ..\newtri\thlspec.cpp /Foth32256.obj
+
+th6432.obj : ..\newtri\thlspec.cpp\
+              ..\inc\thlspec.h
+    $(CPP) /D_64X32 $(CCOPTIONS) ..\newtri\thlspec.cpp /Foth6432.obj
+
+th6464.obj : ..\newtri\thlspec.cpp\
+              ..\inc\thlspec.h
+    $(CPP) /D_64X64 $(CCOPTIONS) ..\newtri\thlspec.cpp /Foth6464.obj
+
+th64128.obj : ..\newtri\thlspec.cpp\
+               ..\inc\thlspec.h
+    $(CPP) /D_64X128 $(CCOPTIONS) ..\newtri\thlspec.cpp /Foth64128.obj
+
+th64256.obj : ..\newtri\thlspec.cpp\
+               ..\inc\thlspec.h
+    $(CPP) /D_64X256 $(CCOPTIONS) ..\newtri\thlspec.cpp /Foth64256.obj
+
+th12832.obj : ..\newtri\thlspec.cpp\
+              ..\inc\thlspec.h
+    $(CPP) /D_128X32 $(CCOPTIONS) ..\newtri\thlspec.cpp /Foth12832.obj
+
+th12864.obj : ..\newtri\thlspec.cpp\
+              ..\inc\thlspec.h
+    $(CPP) /D_128X64 $(CCOPTIONS) ..\newtri\thlspec.cpp /Foth12864.obj
+
+th128128.obj : ..\newtri\thlspec.cpp\
+               ..\inc\thlspec.h
+    $(CPP) /D_128X128 $(CCOPTIONS) ..\newtri\thlspec.cpp /Foth128128.obj
+
+th128256.obj : ..\newtri\thlspec.cpp\
+               ..\inc\thlspec.h
+    $(CPP) /D_128X256 $(CCOPTIONS) ..\newtri\thlspec.cpp /Foth128256.obj
+
+th25632.obj : ..\newtri\thlspec.cpp\
+              ..\inc\thlspec.h
+    $(CPP) /D_256X32 $(CCOPTIONS) ..\newtri\thlspec.cpp /Foth25632.obj
+
+th25664.obj : ..\newtri\thlspec.cpp\
+              ..\inc\thlspec.h
+    $(CPP) /D_256X64 $(CCOPTIONS) ..\newtri\thlspec.cpp /Foth25664.obj
+
+th256128.obj : ..\newtri\thlspec.cpp\
+               ..\inc\thlspec.h
+    $(CPP) /D_256X128 $(CCOPTIONS) ..\newtri\thlspec.cpp /Foth256128.obj
+
+th256256.obj : ..\newtri\thlspec.cpp\
+               ..\inc\thlspec.h
+    $(CPP) /D_256X256 $(CCOPTIONS) ..\newtri\thlspec.cpp /Foth256256.obj
+
 
 #ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 # Library                                                                  ³

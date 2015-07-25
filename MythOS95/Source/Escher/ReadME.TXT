@@ -37,26 +37,24 @@
                              _Library Status_
 
  Notes by: Chuck Walbourn
- Updated: January 2, 1998
+ Updated: March 9, 1998
 
  Changes for this release --------------------------------------------------
 
-    o Camera
+    o Element
 
-        - Added support for orthographic projection.
-        - Fixed minor problem with assignment of clipping planes in
-          perspective mode.
+        - Internal changes and optimizations for the clipping routines.
+        - Lines now properly clip in 3D.
 
-    o Element/Drawables/Extents
+    o Particles
 
-        - Updated for orthographic projection mode.
-        - EschLineDraw now uses true 3D clipping.
-        - Minor optimizations made in the draw routines.
+        - Added EschParticleLine class.
+        - Various changes and opimizations.  These have not been fully
+          developed or documented at this time.
 
-    o Motion
+    o Terrain
 
-        - Continued development and refinement for the keyframer
-          classes.
+        - Optimizations and bug fixes for the terrain and tree tops.
 
 
  Pending changes -----------------------------------------------------------

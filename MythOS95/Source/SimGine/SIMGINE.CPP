@@ -222,19 +222,7 @@ BOOL SimGine::init_instance()
     {
         Screen = new SimScreenD3D;
     }
-    else
-
-#ifdef  _OEMS
-#ifdef  _CLEAR_3D
-    if (startup & STARTUP_CLEAR3D)
-    {
-        Screen = new SimScreenCL3D;
-    }
-    else
-#endif // _CLEAR_3D
-#endif // _OEMS
-
-    if (startup & STARTUP_DDRAW)
+    else if (startup & STARTUP_DDRAW)
     {
         Screen = new SimScreenDD;
     }

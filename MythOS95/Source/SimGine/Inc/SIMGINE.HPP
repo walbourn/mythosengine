@@ -124,7 +124,6 @@ public:
     {
         STARTUP_DDRAW               = 0x1,
         STARTUP_D3D                 = 0x2,
-        STARTUP_CLEAR3D             = 0x4,
         STARTUP_FULLSCREEN          = 0x1000,
         STARTUP_TRUEFLIP            = 0x2000,
         STARTUP_AUDIO               = 0x4000,

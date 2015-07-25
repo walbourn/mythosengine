@@ -86,6 +86,8 @@
 4 Low-level Output Functions=PG_VNGO_CSTYLOW
 4 Support Functions=PG_VNGO_CSTYSUPPORT
 4 Misc. Functions=PG_VNGO_CSTYMISC
+3 Control Class
+4 VngoSystem Class=PG_VNGO_SYSTEM
 3 Viewport Classes
 4 VngoVport Class=PG_VNGO_VPORT
 4 8 bpp
@@ -98,9 +100,6 @@
 5 VngoVportDD16 Class=PG_VNGO_VPORTDD16
 4 Hardware-specific
 5 VngoVportD3D Class=PG_VNGO_VPORTD3D
-5 VngoVport3Dfx Class=PG_VNGO_VPORT3DFX
-5 VngoVportCL3D Class=PG_VNGO_VPORTCL3D
-5 VngoVportMSI Class=PG_VNGO_VPORTMSI
 3 Screen Manager Classes
 4 VngoScreenManager Class=PG_VNGO_SCRNMNGR
 4 VngoDIB Class=PG_VNGO_DIB
@@ -108,9 +107,6 @@
 4 VngoHybrid Class=PG_VNGO_HYBRID
 4 Hardware-specific
 5 VngoDirect3D Class=PG_VNGO_DIRECT3D
-5 Vngo3Dfx Class=PG_VNGO_3DFX
-5 VngoClear3D Class=PG_VNGO_CLEAR3D
-5 VngoMSI Class=PG_VNGO_MSI
 5 VngoOpenGL Class=PG_VNGO_OPENGL
 3 Color Classes
 4 VngoColorHLS Class=PG_VNGO_COLORHLS
@@ -137,7 +133,6 @@
 5 VngoTexture3D Class=PG_VNGO_TEXTURE3D
 5 VngoMemTexture3D Class=PG_VNGO_MEMTEXTURE3D
 5 VngoD3DTexture3D Class=PG_VNGO_D3DTEXTURE3D
-5 VngoCL3DTexture3D Class=PG_VNGO_CL3DTEXTURE3D
 3 Support Structures
 4 VngoRect=PG_VNGO_RECT
 4 VngoPoint=PG_VNGO_POINT
@@ -146,7 +141,6 @@
 3 Support Classes
 4 VngoSurfaceManager Class=PG_VNGO_SURFMNGR
 4 VngoTextureManager Class=PG_VNGO_TXTRMNGR
-4 VngoSystem Class=PG_VNGO_SYSTEM
 4 VngoZMap Class=PG_VNGO_ZMAP
 2 Escher
 3 Overview=PG_ESCH_OVERVIEW
@@ -165,6 +159,7 @@
 5 EschSprite Class=PG_ESCH_SPRITE
 4 Particle Drawables
 5 EschParticle Class=PG_ESCH_PARTICLE
+5 EschParticleLine Class=PG_ESCH_PARTICLELINE
 5 EschParticlePyramid Class=PG_ESCH_PARTICLEPYR
 5 EschParticleGeometry Class=PG_ESCH_PARTICLEGEOM
 5 EschParticleSprite Class=PG_ESCH_PARTICLESPR

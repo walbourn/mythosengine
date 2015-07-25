@@ -6,7 +6,7 @@
 //                                                           |. _  .   .|
 //          Microsoft Windows '95 Version                    | / \   .  |
 //                                                           |_|_|_._._.|
-// Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
+// Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
 //              All rights reserved.                        %\__________/%
 //                                                           %          %
 //
@@ -64,12 +64,13 @@
 //
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
+
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
 //                                 Data
 //
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
-
+extern VngoSystem *VgSystem;
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
@@ -133,9 +134,13 @@ void VngoPal::create_ddpal(LPDIRECTDRAW _dd,IDirectDrawPalette **_ddpal)
             ape[i].peGreen = hw_pal.p[i].g;
             ape[i].peBlue = hw_pal.p[i].b & 0xfe;
         }
-        ape[256].peRed = hw_pal.p[256].r;
-        ape[256].peRed = hw_pal.p[256].g;
-        ape[256].peRed = hw_pal.p[256].b;
+        ape[256].peRed = 48;
+        ape[256].peRed = 48;
+        ape[256].peRed = 48;
+
+//        ape[256].peRed = hw_pal.p[256].r;
+//        ape[256].peRed = hw_pal.p[256].g;
+//        ape[256].peRed = hw_pal.p[256].b;
 
         _dd->CreatePalette(DDPCAPS_8BIT,ape,&ddpal,NULL);
         *_ddpal = ddpal;
@@ -586,6 +591,7 @@ find_pal:
     // ---- Clean up and close down.
     err = iffp->leaveform();
 
+    gamma_correct_RGB(pal->hw_pal.p,256);
     return (err);
 }
 
@@ -1081,6 +1087,8 @@ find_pal:
 
 // This will go through and make a 16bit shade_pal.  Not that the
 // memory has to be allocated before you get to this routine.
+    gamma_correct_RGB(pal->hw_pal.p,256);
+
     for (int i=0;i < 256;i++)
     {
         calc_linear_colors15(&data15[i <<5],32,pal->get_RGB(i),
@@ -1330,6 +1338,7 @@ void MakePal16fromPal8(VngoPal16 *p16, VngoPal8 *p8)
     // This will mock up a Pal16 using the Pal8s shade info.
     byte *data8 = (byte *)(p8->shd_pal->ptr);
     word *data16 = (word *)(p16->shd_pal->ptr);
+
 
 // This will go through and make a 16bit shade_pal.  Not that the
 // memory has to be allocated before you get to this routine.
@@ -1629,6 +1638,8 @@ find_pal:
     // This will mock up a Pal16 using the Pal8s shade info.
     word *data16 = (word *)(pal->shd_pal->ptr);
 
+    gamma_correct_RGB(pal->hw_pal.p,256);
+
 // This will go through and make a 16bit shade_pal.  Not that the
 // memory has to be allocated before you get to this routine.
     for (int i=0;i < 256;i++)
@@ -1641,6 +1652,19 @@ find_pal:
     err = iffp->leaveform();
 
     return (err);
+}
+
+void gamma_correct_RGB(VngoColor24bit *p,int count)
+{
+    if (VgSystem && VgSystem->gamma_correct != 1.0f)
+    {
+        for (int i=0;i < count; i++)
+        {
+            p[i].r = VgSystem->gtable[p[i].r];
+            p[i].g = VgSystem->gtable[p[i].g];
+            p[i].b = VgSystem->gtable[p[i].b];
+        }
+    }
 }
 
 //°±² End of module - vngpal.cpp ²±°

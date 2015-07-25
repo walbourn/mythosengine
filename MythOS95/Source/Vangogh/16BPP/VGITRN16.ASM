@@ -216,6 +216,7 @@ START_PROC      vngo_iline15,    C lptr:DWORD,tptr:DWORD,xcount:DWORD,flags:DWOR
         mov     esi,tptr
         mov     edi,lptr
         mov     ecx,xcount
+        jcxz    exit
 
         test    flags,VNGO_TRANSPARENT
         js      clear_transfer_loop
@@ -254,6 +255,7 @@ START_PROC      vngo_iline16,    C lptr:DWORD,tptr:DWORD,xcount:DWORD,flags:DWOR
         mov     esi,tptr
         mov     edi,lptr
         mov     ecx,xcount
+        jcxz    exit
 
         test    flags,VNGO_TRANSPARENT
         js      clear_transfer_loop

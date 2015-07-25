@@ -2,11 +2,11 @@
 //
 //                                                           %__________%
 //                                                          %/ . .  .   \%
-//           Van Gogh 2D-Display Library                     |  . .  o. | 
+//           Van Gogh 2D-Display Library                     |  . .  o. |
 //                                                           |. _  .   .|
-//          Microsoft Windows '95 Version                    | / \   .  | 
+//          Microsoft Windows '95 Version                    | / \   .  |
 //                                                           |_|_|_._._.|
-// Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
+// Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
 //              All rights reserved.                        %\__________/%
 //                                                           %          %
 //
@@ -35,7 +35,7 @@
 //같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같�
 //
 //                                Includes
-//                                
+//
 //같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같�
 
 #include "debug.h"
@@ -117,7 +117,7 @@ void Vngo24to8bit::init(VngoPal *mypal)
             {
                 close = 0x7ffffff;      // reset close to greater than 256^3
                 for (c=0;c < 255;c++)
-                {                    
+                {
                     dr = (r<<3) - my_pal8->p[c].r;
                     dg = (g<<3) - my_pal8->p[c].g;
                     db = (b<<3) - my_pal8->p[c].b;
@@ -126,7 +126,7 @@ void Vngo24to8bit::init(VngoPal *mypal)
                     dg *= dg;
                     db *= db;
 #else  // This methos distorts color matching in order of eye sensitivity.
-#if 0   // These seemed a little too exagerated so for now we will use 
+#if 0   // These seemed a little too exagerated so for now we will use
         // some calmer values.
                     dr *= dr * 30;
                     dg *= dg * 59;
@@ -196,7 +196,7 @@ VngoColorHLS VngoColor24bit::to_HLS()
             max = db;
     else if (dg > db)
         max = dg;
-    else   
+    else
         max = db;
 
     if (dr < dg)
@@ -233,7 +233,7 @@ VngoColorHLS VngoColor24bit::to_HLS()
         while (c.h < 0)
             c.h = c.h + (Flx16)360;
     }
-    
+
     return (c);
 }
 

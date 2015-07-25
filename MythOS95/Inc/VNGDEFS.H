@@ -4,7 +4,7 @@
 //                                                          %/ . .  .   \%
 //           Van Gogh 2D-Display Library                     |  . .  o. |
 //                                                           |. _  .   .|
-// Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.    | / \   .  |
+// Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.    | / \   .  |
 //              All rights reserved.                         |_|_|_._._.|
 //                                                           |.-.-.-.-..|
 //                                                          %\__________/%
@@ -83,6 +83,7 @@ extern "C" {
 #define VNGO_DITHER_4X4         0x2000
 #define VNGO_TRUE_ALPHA         0x4000
 #define VNGO_TEXTURE_FILTER     0x8000
+#define VNGO_DEBUG_OUTLINE      0x10000
 
 #define VNGO_MYMEM_SHADE        0x10
 #define VNGO_MYMEM_HAZE         0x20
@@ -106,8 +107,8 @@ extern "C" {
 #define VNGO_COPY               0x000
 
 // Flags for the Texture Manager
-#define VNGO_TEXTURE_CACHED_OUT     0x0
-#define VNGO_TEXTURE_CACHED_IN      0x1
+#define VNGO_TEXTURE_CACHED_OUT     0x1
+#define VNGO_TEXTURE_CACHED_IN      0x2
 
 // VangoTexture flags.
 #define VNGO_TEXTURE_MONO           0x1
@@ -125,6 +126,20 @@ extern "C" {
 #define VNGO_TEXTURE_SHADE          0x800   // Not Currently in use
 #define VNGO_TEXTURE_COMPRESSED     0x1000
 #define VNGO_TEXTURE_TRANSPARENT    0x2000
+
+// VanGogh triangle drawing flags.
+#define VNGO_TRITYPE_ZBUFFER        0x1
+#define VNGO_TRITYPE_GOURAUD        0x2
+#define VNGO_TRITYPE_FILTERED       0x4
+#define VNGO_TRITYPE_TEXTURED       0x8
+#define VNGO_TRITYPE_ALPHA          0x10
+#define VNGO_TRITYPE_8BPP           0x20
+#define VNGO_TRITYPE_RGB            0x40
+#define VNGO_TRITYPE_PERSPECTIVE    0x80
+#define VNGO_TRITYPE_OUTLINE        0x8000
+
+#define VNGO_TRITYPE_INDEX          0x3f
+
 
 // VanGogh Clipping flags
 #define VNGO_CLIP_Z                 0x1
@@ -209,6 +224,41 @@ enum _vngo_texture_type
 };
 
 typedef enum _vngo_texture_type VngoTextureType;
+
+enum _vngo_texture_dim
+{
+    TEX16x16        = 0,
+    TEX16x32        = 1,
+    TEX16x64        = 2,
+    TEX16x128       = 3,
+    TEX16x256       = 4,
+
+    TEX32x16        = 5,
+    TEX32x32        = 6,
+    TEX32x64        = 7,
+    TEX32x128       = 8,
+    TEX32x256       = 9,
+
+    TEX64x16        = 10,
+    TEX64x32        = 11,
+    TEX64x64        = 12,
+    TEX64x128       = 13,
+    TEX64x256       = 14,
+
+    TEX128x16       = 15,
+    TEX128x32       = 16,
+    TEX128x64       = 17,
+    TEX128x128      = 18,
+    TEX128x256      = 19,
+
+    TEX256x16       = 20,
+    TEX256x32       = 21,
+    TEX256x64       = 22,
+    TEX256x128      = 23,
+    TEX256x256      = 24,
+};
+
+typedef enum _vngo_texture_dim VngoTextureSize;
 
 //같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같�
 //

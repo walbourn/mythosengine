@@ -10,9 +10,9 @@
                             /_\     |    _  _ | _ ._ 
                            /   \  \_||_|(_|(_||(/_|  
                                          _| _|       
-                        Microsoft Windows '95 Version
+                        Microsoft Windows 95 Version
   
-              Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.
+              Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.
                              All Rights Reserved.
   
   ---------------------------------------------------------------------------
@@ -33,20 +33,14 @@
                             _Library Status_
 
   Notes by: Dan Higdon
-  Updated: June 20, 1996
+  Updated: March 9, 1998
 
   Changes for this release --------------------------------------------------
 
-	o The BozoTask::init member now returns an error code in the form
-	  of a bozo_task pointer.  A null result means that the task
-	  failed to initialize.
+    o Updated copyrights
 
-    o Added bz_term and bz_return to the BozoTask to correct a rather
-	  subtle bug.
-
-  Pending changes ------------------------------------------------------------
-
-    o Possibly the exception handling issue will be investigated and,
-      if necessary, corrected.
+    Note: It seems that Visual C++ V5.0 handling of stack variables prevents
+          the workaround for use under Windows 95 from operating correctly.
+          Therefore, we no longer recommend using Bozo in your applications.
 
 *** END OF FILE ***

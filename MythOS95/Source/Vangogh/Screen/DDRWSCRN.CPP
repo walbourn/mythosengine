@@ -6,7 +6,7 @@
 //                                                           |. _  .   .|
 //          Microsoft Windows '95 Version                    | / \   .  |
 //                                                           |_|_|_._._.|
-// Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
+// Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
 //              All rights reserved.                        %\__________/%
 //                                                           %          %
 //
@@ -43,14 +43,39 @@
 #include "vangogh.hpp"
 #include "vngscrn.hpp"
 
-VngoDirectDraw::VngoDirectDraw(HWND hwndclient):
+VngoDirectDraw::VngoDirectDraw():
     dd(0),
+    dd2(0),
     FrontBuffer(NULL),
     BackBuffer(NULL),
+    Primary(NULL),
     SurfaceManager(NULL),
+    ZBuffer(NULL),
+    Palette(NULL),
+    hWndClient(0)
+{
+    sins = 0;
+    lflags = 0;
+    frame_is_open = FALSE;
+    strcpy(hwName,"Direct Draw");
+    pal = NULL;
+    init_state = VNGO_NOSCREEN_ERROR;
+}
+
+
+VngoDirectDraw::VngoDirectDraw(HWND hwndclient):
+    dd(0),
+    dd2(0),
+    FrontBuffer(NULL),
+    BackBuffer(NULL),
+    Primary(NULL),
+    SurfaceManager(NULL),
+    ZBuffer(NULL),
     Palette(NULL),
     hWndClient(hwndclient)
 {
+    lflags = 0;
+    frame_is_open = FALSE;
     sins = 0;
     strcpy(hwName,"Direct Draw");
     pal = NULL;
@@ -243,7 +268,7 @@ VNGError VngoDirectDraw::set_mode(int _width, int _height, int bpp, VngoPal *_pa
     }
 
     ZBuffer = NULL;
-
+#if 0
     if (flags & VNGO_ALLOC_ZBUFFER)
     {
         ddsd.dwFlags = DDSD_CAPS | DDSD_HEIGHT | DDSD_WIDTH;
@@ -265,7 +290,7 @@ VNGError VngoDirectDraw::set_mode(int _width, int _height, int bpp, VngoPal *_pa
             return VNGO_INTERNAL_ERROR;
         }
     }
-
+#endif
 
     SurfaceManager = new VngoSurfaceManager(FrontBuffer,ZBuffer);
 

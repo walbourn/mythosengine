@@ -6,7 +6,7 @@
 ;                                                           |. _  .   .|
 ;          Microsoft Windows '95 Version                    | / \   .  | 
 ;                                                           |_|_|_._._.|
-; Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
+; Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
 ;              All rights reserved.                        %\__________/%
 ;                                                           %          %
 ;
@@ -68,7 +68,7 @@ _TEXT  SEGMENT PARA PUBLIC USE32 'CODE'
 ;     the Y distance described in dy.  It returns a 12.20 step value.      ³
 ;ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 ALIGN   4
-START_PROC vngo_calc_sstep,	C   s1:DWORD, s2:DWORD, dy:DWORD
+START_PROC vngo_calc_sstep,     C   s1:DWORD, s2:DWORD, dy:DWORD
         cmp     dy,0
         je      @f
         xor     eax,eax
@@ -87,12 +87,12 @@ START_PROC vngo_calc_xstep,     C   x1:DWORD, x2:DWORD, dy:DWORD
         cmp     dy,0
         je      @f
 if 1
-	xor	edx,edx
-	mov	eax,x2
-	sub	eax,x1
-	test	eax,080000000h
-	jns	@f
-	mov	edx,-1
+        xor     edx,edx
+        mov     eax,x2
+        sub     eax,x1
+        test    eax,080000000h
+        jns     @f
+        mov     edx,-1
 @@:
 else
         xor     eax,eax
@@ -323,8 +323,8 @@ START_PROC vngo_calc_quadratic2, C       w0:DWORD, w2:DWORD, t0:DWORD, t2:DWORD,
         sub     eax,t2
         imul    pstep
 ;; leave result shifted up by the correct amount.
-		mov	ecx,16
-		sub	ecx,ushift
+                mov     ecx,16
+                sub     ecx,ushift
         shrd    eax,edx,cl
 ;; done with up shift with precision.
 ;        shrd    eax,edx,16
@@ -338,11 +338,11 @@ START_PROC vngo_calc_quadratic2, C       w0:DWORD, w2:DWORD, t0:DWORD, t2:DWORD,
         shl     eax,1
         imul    pstep
 ;; leave result shifted up by the correct amount.
-		push	ecx
-		mov	ecx,16
-		sub	ecx,ushift
+                push    ecx
+                mov     ecx,16
+                sub     ecx,ushift
         shrd    eax,edx,cl
-		pop	ecx
+                pop     ecx
 ;; done with up shift with precision.
         imul    pstep
         shrd    eax,edx,16
@@ -363,94 +363,94 @@ START_PROC vngo_calc_quadratic2, C       w0:DWORD, w2:DWORD, t0:DWORD, t2:DWORD,
         ret
 END_PROC   vngo_calc_quadratic2
 
-START_PROC 	vngo_midpt, C	p1:DWORD, p2:DWORD, outpt:DWORD
-	LOCAL	HighVal:DWORD
-	LOCAL	LowVal:DWORD
-	push	esi
-	push	edi
-	push	ebx
+START_PROC      vngo_midpt, C   p1:DWORD, p2:DWORD, outpt:DWORD
+        LOCAL   HighVal:DWORD
+        LOCAL   LowVal:DWORD
+        push    esi
+        push    edi
+        push    ebx
 
-	mov	ebx,p1
-	mov	esi,p2
-	mov	edi,outpt
+        mov     ebx,p1
+        mov     esi,p2
+        mov     edi,outpt
 
-	mov	eax,(VNGO_POINT2 PTR [ebx]).pt_clr
-	mov	(VNGO_POINT2 PTR [edi]).pt_clr,eax
+        mov     eax,(VNGO_POINT2 PTR [ebx]).pt_clr
+        mov     (VNGO_POINT2 PTR [edi]).pt_clr,eax
 
-	mov	eax,(VNGO_POINT2 PTR [ebx]).pt_x
-	add	eax,(VNGO_POINT2 PTR [esi]).pt_x
-	sar	eax,1
-	mov	(VNGO_POINT2 PTR [edi]).pt_x, eax
+        mov     eax,(VNGO_POINT2 PTR [ebx]).pt_x
+        add     eax,(VNGO_POINT2 PTR [esi]).pt_x
+        sar     eax,1
+        mov     (VNGO_POINT2 PTR [edi]).pt_x, eax
 
-	mov	eax,(VNGO_POINT2 PTR [ebx]).pt_y
-	add	eax,(VNGO_POINT2 PTR [esi]).pt_y
-	sar	eax,1
-	mov	(VNGO_POINT2 PTR [edi]).pt_y, eax
+        mov     eax,(VNGO_POINT2 PTR [ebx]).pt_y
+        add     eax,(VNGO_POINT2 PTR [esi]).pt_y
+        sar     eax,1
+        mov     (VNGO_POINT2 PTR [edi]).pt_y, eax
 
-	mov	eax,(VNGO_POINT2 PTR [ebx]).pt_w
-	add	eax,(VNGO_POINT2 PTR [esi]).pt_w
-	sar	eax,1
-	mov	(VNGO_POINT2 PTR [edi]).pt_w, eax
+        mov     eax,(VNGO_POINT2 PTR [ebx]).pt_w
+        add     eax,(VNGO_POINT2 PTR [esi]).pt_w
+        sar     eax,1
+        mov     (VNGO_POINT2 PTR [edi]).pt_w, eax
 
 ;; These need to be perspectively corrected.
-	mov	eax,(VNGO_POINT2 PTR [ebx]).pt_z
-	imul	(VNGO_POINT2 PTR [ebx]).pt_w
-	mov	HighVal,edx
-	mov	LowVal,eax
-	mov	eax,(VNGO_POINT2 PTR [esi]).pt_z
-	imul	(VNGO_POINT2 PTR [esi]).pt_w
-	add	eax,LowVal
-	adc	edx,HighVal
-	shrd	eax,edx,1
-	sar	edx,1
-	idiv	(VNGO_POINT2 PTR [edi]).pt_w
-	mov	(VNGO_POINT2 PTR [edi]).pt_z, eax
+        mov     eax,(VNGO_POINT2 PTR [ebx]).pt_z
+        imul    (VNGO_POINT2 PTR [ebx]).pt_w
+        mov     HighVal,edx
+        mov     LowVal,eax
+        mov     eax,(VNGO_POINT2 PTR [esi]).pt_z
+        imul    (VNGO_POINT2 PTR [esi]).pt_w
+        add     eax,LowVal
+        adc     edx,HighVal
+        shrd    eax,edx,1
+        sar     edx,1
+        idiv    (VNGO_POINT2 PTR [edi]).pt_w
+        mov     (VNGO_POINT2 PTR [edi]).pt_z, eax
 
-	mov	eax,(VNGO_POINT2 PTR [ebx]).pt_shade
-	imul	(VNGO_POINT2 PTR [ebx]).pt_w
-	mov	HighVal,edx
-	mov	LowVal,eax
-	mov	eax,(VNGO_POINT2 PTR [esi]).pt_shade
-	imul	(VNGO_POINT2 PTR [esi]).pt_w
-	add	eax,LowVal
-	adc	edx,HighVal
-	shrd	eax,edx,1
-	sar	edx,1
-	idiv	(VNGO_POINT2 PTR [edi]).pt_w
-	mov	(VNGO_POINT2 PTR [edi]).pt_shade, eax
+        mov     eax,(VNGO_POINT2 PTR [ebx]).pt_shade
+        imul    (VNGO_POINT2 PTR [ebx]).pt_w
+        mov     HighVal,edx
+        mov     LowVal,eax
+        mov     eax,(VNGO_POINT2 PTR [esi]).pt_shade
+        imul    (VNGO_POINT2 PTR [esi]).pt_w
+        add     eax,LowVal
+        adc     edx,HighVal
+        shrd    eax,edx,1
+        sar     edx,1
+        idiv    (VNGO_POINT2 PTR [edi]).pt_w
+        mov     (VNGO_POINT2 PTR [edi]).pt_shade, eax
 
-	mov	eax,(VNGO_POINT2 PTR [ebx]).pt_u
-	imul	(VNGO_POINT2 PTR [ebx]).pt_w
-	mov	HighVal,edx
-	mov	LowVal,eax
-	mov	eax,(VNGO_POINT2 PTR [esi]).pt_u
-	imul	(VNGO_POINT2 PTR [esi]).pt_w
-	add	eax,LowVal
-	adc	edx,HighVal
-	shrd	eax,edx,1
-	sar	edx,1
-	idiv	(VNGO_POINT2 PTR [edi]).pt_w
-	mov	(VNGO_POINT2 PTR [edi]).pt_u, eax
+        mov     eax,(VNGO_POINT2 PTR [ebx]).pt_u
+        imul    (VNGO_POINT2 PTR [ebx]).pt_w
+        mov     HighVal,edx
+        mov     LowVal,eax
+        mov     eax,(VNGO_POINT2 PTR [esi]).pt_u
+        imul    (VNGO_POINT2 PTR [esi]).pt_w
+        add     eax,LowVal
+        adc     edx,HighVal
+        shrd    eax,edx,1
+        sar     edx,1
+        idiv    (VNGO_POINT2 PTR [edi]).pt_w
+        mov     (VNGO_POINT2 PTR [edi]).pt_u, eax
 
-	mov	eax,(VNGO_POINT2 PTR [ebx]).pt_v
-	imul	(VNGO_POINT2 PTR [ebx]).pt_w
-	mov	HighVal,edx
-	mov	LowVal,eax
-	mov	eax,(VNGO_POINT2 PTR [esi]).pt_v
-	imul	(VNGO_POINT2 PTR [esi]).pt_w
-	add	eax,LowVal
-	adc	edx,HighVal
-	shrd	eax,edx,1
-	sar	edx,1
-	idiv	(VNGO_POINT2 PTR [edi]).pt_w
-	mov	(VNGO_POINT2 PTR [edi]).pt_v, eax
+        mov     eax,(VNGO_POINT2 PTR [ebx]).pt_v
+        imul    (VNGO_POINT2 PTR [ebx]).pt_w
+        mov     HighVal,edx
+        mov     LowVal,eax
+        mov     eax,(VNGO_POINT2 PTR [esi]).pt_v
+        imul    (VNGO_POINT2 PTR [esi]).pt_w
+        add     eax,LowVal
+        adc     edx,HighVal
+        shrd    eax,edx,1
+        sar     edx,1
+        idiv    (VNGO_POINT2 PTR [edi]).pt_w
+        mov     (VNGO_POINT2 PTR [edi]).pt_v, eax
 
         pop     ebx
         pop     edi
         pop     esi
 
         ret
-END_PROC   	vngo_midpt
+END_PROC        vngo_midpt
 
 _text   ends
         end

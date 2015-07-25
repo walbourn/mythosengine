@@ -8,9 +8,9 @@
 //     __...--''     ___...--_..'  .;.'
 //    (,__....----'''       (,..--''
 //
-//                      Microsoft Windows '95 Version
+//                    Microsoft Windows 95/NT Version
 //   
-//           Copyright (c) 1994, 1995 by Charybdis Enterprises, Inc.
+//           Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved.
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -90,7 +90,7 @@ void main()
    clock_t        ticks;
    clock_t        start;
 
-   cout << "°±² Felix Tester (C) 1994, 1995 Charybdis Enterprises, Inc. ²±°\n";
+   cout << "°±² Felix Tester (C) 1994-1998 Charybdis Enterprises, Inc. ²±°\n";
 
    printf("\n\nMUL_DIV Section-------\n");
    a  = -32760;

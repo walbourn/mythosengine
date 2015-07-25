@@ -6,7 +6,7 @@
 //                                                           |. _  .   .|
 //          Microsoft Windows '95 Version                    | / \   .  |
 //                                                           |_|_|_._._.|
-// Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
+// Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
 //              All rights reserved.                        %\__________/%
 //                                                           %          %
 //
@@ -91,39 +91,39 @@ public:
     virtual void texture_filter_on()
     {
         vflags |= VNGO_TEXTURE_FILTER;
-        VgSystem.cur_vport = NULL;
+        VgSystem->cur_vport = NULL;
         make_current();
     }
     virtual void texture_filter_off()
     {
         vflags &= ~VNGO_TEXTURE_FILTER;
-        VgSystem.cur_vport = NULL;
+        VgSystem->cur_vport = NULL;
         make_current();
     }
 
     virtual void true_alpha_on()
     {
         vflags |= VNGO_TRUE_ALPHA;
-        VgSystem.cur_vport = NULL;
+        VgSystem->cur_vport = NULL;
         make_current();
     }
     virtual void true_alpha_off()
     {
         vflags &= ~VNGO_TRUE_ALPHA;
-        VgSystem.cur_vport = NULL;
+        VgSystem->cur_vport = NULL;
         make_current();
     }
 
     virtual void haze_on()
     {
         VngoVport::haze_on();
-        VgSystem.cur_vport = NULL;
+        VgSystem->cur_vport = NULL;
         make_current();
     }
     virtual void haze_off()
     {
         VngoVport::haze_off();
-        VgSystem.cur_vport = NULL;
+        VgSystem->cur_vport = NULL;
         make_current();
     }
 

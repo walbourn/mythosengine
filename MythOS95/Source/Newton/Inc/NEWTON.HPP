@@ -24,10 +24,10 @@
 //
 //                     Newtonian Physics Simulation Library
 //
-//            Copyright (c) 1995-1997 by Charybdis Enterprises, Inc.
+//            Copyright (c) 1995-1998 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved.
 //
-//                       Microsoft Windows '95 Version
+//                     Microsoft Windows 95/NT Version
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
@@ -60,9 +60,9 @@
 #endif
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-//             
+//
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include <portable.h>
@@ -98,7 +98,7 @@ public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
     float       mass;               // mass (acceleration resistance)
     float       drag;               // drag coefficient (velocity resistance)
-    
+
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Constructor/Destructors                                              ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
@@ -116,6 +116,8 @@ public:
     void get_position (NewtVector *) const;
     void set_position (const NewtVector &pos);
     void set_position (float x, float y, float z);
+    void set_initial_position (const NewtVector &pos);
+    void set_initial_position (float x, float y, float z);
 
     void get_velocity (NewtVector *) const;
     void set_velocity (const NewtVector &vel);
@@ -217,6 +219,22 @@ inline void NewtObject::set_position (float x, float y, float z)
     position.i=x;
     position.j=y;
     position.k=z;
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//  NewtObject - set_initial_position
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+inline void NewtObject::set_initial_position (const NewtVector &pos)
+{
+    last_position = position = pos;
+}
+
+inline void NewtObject::set_initial_position (float x, float y, float z)
+{
+    last_position.i=position.i=x;
+    last_position.j=position.j=y;
+    last_position.k=position.k=z;
 }
 
 

@@ -6,7 +6,7 @@
 //                                                           |. _  .   .|
 //          Microsoft Windows '95 Version                    | / \   .  |
 //                                                           |_|_|_._._.|
-// Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
+// Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
 //              All rights reserved.                        %\__________/%
 //                                                           %          %
 //
@@ -56,9 +56,36 @@
 
 // #define RENDER_FRONT
 
-extern VngoSystem   VgSystem;
+extern VngoSystem   *VgSystem;
 
 BOOL CALLBACK FindDeviceCallback(GUID *lpGUID,LPSTR szName,LPSTR szDevice,LPVOID lParam);
+
+
+
+VngoDirect3D::VngoDirect3D():
+    dd(0),
+    dd2(0),
+    Primary(NULL),
+    FrontBuffer(NULL),
+    BackBuffer(NULL),
+    ZBuffer(NULL),
+    DirtyCursor(NULL),
+    Cursor(NULL),
+    SurfaceManager(NULL),
+    Palette(NULL),
+    d3d(NULL),
+    d3dDevice(NULL),
+    d3dViewport(NULL),
+    target(NULL),
+    hWndClient(0)
+{
+    sins = 0;
+    frame_is_open = FALSE;
+    pal = NULL;
+    init_state = VNGO_NOSCREEN_ERROR;
+}
+
+
 
 VngoDirect3D::VngoDirect3D(HWND hwndclient,char *targetname):
     dd(0),
@@ -67,6 +94,8 @@ VngoDirect3D::VngoDirect3D(HWND hwndclient,char *targetname):
     FrontBuffer(NULL),
     BackBuffer(NULL),
     ZBuffer(NULL),
+    DirtyCursor(NULL),
+    Cursor(NULL),
     SurfaceManager(NULL),
     Palette(NULL),
     d3d(NULL),
@@ -83,8 +112,8 @@ VngoDirect3D::VngoDirect3D(HWND hwndclient,char *targetname):
 
 VngoDirect3D::~VngoDirect3D()
 {
-    if ((lflags & VNGO_SET_RESOLUTION) && dd != NULL)
-        dd->RestoreDisplayMode();
+//    if ((lflags & VNGO_SET_RESOLUTION) && dd != NULL)
+//        dd->RestoreDisplayMode();
 
     term();
 }
@@ -136,8 +165,16 @@ VNGError VngoDirect3D::init(char *targetName)
         return VNGO_INTERNAL_ERROR;
 
 
-    VgSystem.D3DTx = new VngoTextureManager;
-    VgSystem.D3DTx->screen = this;
+    VgSystem->D3DTx = new VngoTextureManager;
+    if (VgSystem->D3DTx)
+    {
+        VgSystem->D3DTx->screen = this;
+    }
+    else
+    {
+        term();
+        return VNGO_INTERNAL_ERROR;
+    }
 
     type_info = SCREENTYPE_D3D;
     return VNGO_NO_ERROR;
@@ -339,7 +376,11 @@ VNGError VngoDirect3D::set_mode(int _width, int _height, int bpp, VngoPal *_pal,
     if (locked)
         BackBuffer->Unlock(NULL);
     else
+    {
+        term();
         return VNGO_INTERNAL_ERROR;
+    }
+
 
     if (tdesc.ddpfPixelFormat.dwRBitMask == 0xf800)   // Is it 16bpp?
     {
@@ -642,6 +683,37 @@ VNGError VngoDirect3D::set_mode(int _width, int _height, int bpp, VngoPal *_pal,
     d3dDevice->SetRenderState(D3DRENDERSTATE_TEXTUREHANDLE,NULL);
     d3dDevice->SetRenderState(D3DRENDERSTATE_LASTPIXEL,FALSE);
 
+
+    //
+    // Now create the cursor buffers.
+    //
+    if (0)
+    {
+        ddsd.dwFlags = DDSD_CAPS | DDSD_HEIGHT | DDSD_WIDTH;
+
+        ddsd.ddsCaps.dwCaps = DDSCAPS_SYSTEMMEMORY;
+        ddsd.dwHeight = 32;
+        ddsd.dwWidth = 32;
+        // Please note that the ddsd.ddpfPixelFormat is still here from
+        // the last surface we queried.
+
+        ddsd.dwHeight = height;
+        ddsd.dwWidth = width;
+        err = dd->CreateSurface (&ddsd, &DirtyCursor, NULL);
+        if (err != DD_OK)
+        {
+            term();
+            return VNGO_INTERNAL_ERROR;
+        }
+        err = dd->CreateSurface (&ddsd, &Cursor,NULL);
+        if (err != DD_OK)
+        {
+            term();
+            return VNGO_INTERNAL_ERROR;
+        }
+    }
+
+
     return VNGO_NO_ERROR;
 }
 
@@ -782,6 +854,8 @@ void VngoDirect3D::close_frame()
 VNGError VngoDirect3D::term()
 {
 
+    close_frame();
+
     if (SurfaceManager)
     {
         delete SurfaceManager;
@@ -812,22 +886,33 @@ VNGError VngoDirect3D::term()
         ZBuffer = NULL;
     }
 
-    if (VgSystem.D3DTx)
+    if (Cursor)
     {
-        delete VgSystem.D3DTx;
-        VgSystem.D3DTx = NULL;
+        Cursor->Release();
+        Cursor = NULL;
     }
 
-    if (d3dDevice)
+    if (DirtyCursor)
     {
-        d3dDevice->Release();
-        d3dDevice = NULL;
+        DirtyCursor->Release();
+        DirtyCursor = NULL;
+    }
+    if (VgSystem->D3DTx)
+    {
+        delete VgSystem->D3DTx;
+        VgSystem->D3DTx = NULL;
     }
 
     if (d3dViewport)
     {
         d3dViewport->Release();
         d3dViewport = NULL;
+    }
+
+    if (d3dDevice)
+    {
+        d3dDevice->Release();
+        d3dDevice = NULL;
     }
 
     if (d3d)
@@ -956,6 +1041,22 @@ void VngoDirect3D::set_draw_state(dword state, D3DTEXTUREHANDLE handle)
                 d3dDevice->SetRenderState(D3DRENDERSTATE_DITHERENABLE,TRUE);
             }
         }
+        if (((last_state & VNGO_D3DSFLAGS_FILTER) != (state & VNGO_D3DSFLAGS_FILTER)) || always_set)
+        {
+            if (state & VNGO_D3DSFLAGS_FILTER)
+            {
+                last_state |= VNGO_D3DSFLAGS_FILTER;
+                d3dDevice->SetRenderState(D3DRENDERSTATE_TEXTUREMAG, D3DFILTER_LINEAR);
+                d3dDevice->SetRenderState(D3DRENDERSTATE_TEXTUREMIN, D3DFILTER_LINEAR);
+            }
+            else
+            {
+                last_state &= ~VNGO_D3DSFLAGS_FILTER;
+                d3dDevice->SetRenderState(D3DRENDERSTATE_TEXTUREMAG, D3DFILTER_NEAREST);
+                d3dDevice->SetRenderState(D3DRENDERSTATE_TEXTUREMIN, D3DFILTER_NEAREST);
+            }
+        }
+
         if (((last_state & VNGO_D3DSFLAGS_PERSPECTIVE) != (state & VNGO_D3DSFLAGS_PERSPECTIVE)) || always_set)
         {
             if (state & VNGO_D3DSFLAGS_PERSPECTIVE)

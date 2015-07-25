@@ -6,7 +6,7 @@
 //                                                           |. _  .   .|
 //          Microsoft Windows '95 Version                    | / \   .  |
 //                                                           |_|_|_._._.|
-// Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
+// Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
 //              All rights reserved.                        %\__________/%
 //                                                           %          %
 //
@@ -86,7 +86,7 @@ void ChooseTextureFormat(IDirect3DDevice2 *Device, DWORD bpp, DDPIXELFORMAT *pdd
 //
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 
-extern VngoSystem   VgSystem;
+extern VngoSystem   *VgSystem;
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
@@ -111,14 +111,14 @@ VngoD3DTexture3D::~VngoD3DTexture3D()
 
 VNGError VngoD3DTexture3D::init(VngoTexture *_src,VngoPal *_pal)
 {
-    if (VgSystem.D3DTx == NULL)
+    if (VgSystem->D3DTx == NULL)
         return VNGO_NOSCREEN_ERROR;
 
-    VngoDirect3D    *d3dscreen = (VngoDirect3D*)VgSystem.D3DTx->screen;
+    VngoDirect3D    *d3dscreen = (VngoDirect3D*)VgSystem->D3DTx->screen;
 
     palette = 0;
     ref     = _src;
-    chandle = new VngoCacheHndl;
+    chandle = new VngoCacheHndl();
     chandle->tex = this;
 
     long    bpp;
@@ -162,8 +162,9 @@ VNGError VngoD3DTexture3D::init(VngoTexture *_src,VngoPal *_pal)
 
     if (d3dscreen->dd->CreateSurface(&ddsd,&DeviceSurface,NULL) != DD_OK)
     {
+//        return VNGO_INTERNAL_ERROR;
         // Here we need to unload someone else, and put ourselves there.
-        VngoCacheHndl   *t = VgSystem.D3DTx->ready_head;
+        VngoCacheHndl   *t = VgSystem->D3DTx->ready_head;
         while (t != NULL && ((t->tex->ref->width != ref->width)
                || (t->tex->ref->height != ref->height)))
         {
@@ -175,19 +176,21 @@ VNGError VngoD3DTexture3D::init(VngoTexture *_src,VngoPal *_pal)
             if (((VngoD3DTexture3D*)t->tex)->DeviceSurface == NULL)
                 return VNGO_INTERNAL_ERROR;
 
-            VgSystem.D3DTx->remove(chandle);
-            VgSystem.D3DTx->add(chandle);
+            VgSystem->D3DTx->remove(chandle);
+            VgSystem->D3DTx->add(chandle);
             DeviceSurface = ((VngoD3DTexture3D*)t->tex)->DeviceSurface;
             handle = ((VngoD3DTexture3D*)t->tex)->handle;
 
-            VgSystem.D3DTx->remove(t);
-            VgSystem.D3DTx->add(t,0);    // Add it to the out queue.
+            VgSystem->D3DTx->remove(t);
+            VgSystem->D3DTx->add(t,0);    // Add it to the out queue.
             ((VngoD3DTexture3D*)t->tex)->DeviceSurface = NULL;
             ((VngoD3DTexture3D*)t->tex)->handle = NULL;
         }
         else
         {
-            t = VgSystem.D3DTx->ready_head;
+//            return VNGO_NOT_SUPPORTED;
+
+            t = VgSystem->D3DTx->ready_head;
             VngoCacheHndl *new_tex = 0;
             int min_height=2048;    // that should be sufficiently
                                     // larger than any texture we use.
@@ -208,7 +211,7 @@ VNGError VngoD3DTexture3D::init(VngoTexture *_src,VngoPal *_pal)
             {
                 // Ok, there isn't one the same width, so just
                 // take anything that is bigger.
-                t = VgSystem.D3DTx->ready_head;
+                t = VgSystem->D3DTx->ready_head;
                 while (t != NULL)
                 {
                     if ((t->tex->ref->width >= ref->width)
@@ -229,8 +232,8 @@ VNGError VngoD3DTexture3D::init(VngoTexture *_src,VngoPal *_pal)
                 ((VngoD3DTexture3D*)t->tex)->DeviceSurface->Release();
                 ((VngoD3DTexture3D*)t->tex)->DeviceSurface = NULL;
                 ((VngoD3DTexture3D*)t->tex)->handle = 0;
-                VgSystem.D3DTx->remove(t);
-                VgSystem.D3DTx->add(t,0);    // Add it to the out queue.
+                VgSystem->D3DTx->remove(t);
+                VgSystem->D3DTx->add(t,0);    // Add it to the out queue.
 
                 if (d3dscreen->dd->CreateSurface(&ddsd,&DeviceSurface,NULL) != DD_OK)
                     return VNGO_INTERNAL_ERROR;
@@ -247,7 +250,7 @@ VNGError VngoD3DTexture3D::init(VngoTexture *_src,VngoPal *_pal)
     }
     else
     {
-        VngoCacheHndl   *t2 = VgSystem.D3DTx->ready_head;
+        VngoCacheHndl   *t2 = VgSystem->D3DTx->ready_head;
         if (ddsd.ddsCaps.dwCaps &= DDSCAPS_VIDEOMEMORY)
         {
             if (t2 != NULL)
@@ -288,19 +291,26 @@ VNGError VngoD3DTexture3D::init(VngoTexture *_src,VngoPal *_pal)
     {
         IDirect3DTexture2   *Texture;
 
-        DeviceSurface->QueryInterface(IID_IDirect3DTexture2, (void**)&Texture);
+        HRESULT herr=DeviceSurface->QueryInterface(IID_IDirect3DTexture2, (void**)&Texture);
 
-        HRESULT herr=Texture->GetHandle(d3dscreen->d3dDevice,&handle);
         if (herr != D3D_OK)
+            return VNGO_INTERNAL_ERROR;
+
+        herr=Texture->GetHandle(d3dscreen->d3dDevice,&handle);
+
+        if (herr == DDERR_INVALIDPARAMS)
+            return VNGO_INTERNAL_ERROR;
+        else if (herr != D3D_OK)
             return VNGO_INTERNAL_ERROR;
 
         Texture->Release();
 
-        assert(VgSystem.D3DTx != NULL);
+        assert(VgSystem->D3DTx != NULL);
+
         if (handle)
-            VgSystem.D3DTx->add(chandle);
+            VgSystem->D3DTx->add(chandle);
         else
-            VgSystem.D3DTx->add(chandle,0);
+            VgSystem->D3DTx->add(chandle,0);
     }
 
     restore();
@@ -323,30 +333,33 @@ VNGError VngoD3DTexture3D::ready_texture()
              || chandle->flags & VNGO_TEXTURE_CACHED_OUT)
     {
 
+//        return VNGO_NOT_SUPPORTED;
+
         // Here is where we find a new device surface and set that up.
-        VngoCacheHndl   *t = VgSystem.D3DTx->ready_head;
+        VngoCacheHndl   *t = VgSystem->D3DTx->ready_head;
         while (t != NULL && ((t->tex->ref->width != ref->width)
                || (t->tex->ref->height != ref->height)))
+//               && (t->flags & VNGO_TEXTURE_CACHED_IN))
         {
             t = t->next;
         }
 
-        if (t != NULL)
+        if (t != NULL /*&& t->flags & VNGO_TEXTURE_CACHED_IN*/)
         {
             DeviceSurface = ((VngoD3DTexture3D*)t->tex)->DeviceSurface;
             handle = ((VngoD3DTexture3D*)t->tex)->handle;
-            VgSystem.D3DTx->remove(chandle);
-            VgSystem.D3DTx->add(chandle);
+            VgSystem->D3DTx->remove(chandle);
+            VgSystem->D3DTx->add(chandle);
 
-            VgSystem.D3DTx->remove(t);
-            VgSystem.D3DTx->add(t,0);    // Add it to the out queue.
+            VgSystem->D3DTx->remove(t);
+            VgSystem->D3DTx->add(t,0);    // Add it to the out queue.
             ((VngoD3DTexture3D*)t->tex)->DeviceSurface = NULL;
             ((VngoD3DTexture3D*)t->tex)->handle = NULL;
         }
         else
         {
             // There is no one to steal a surface from :(
-            return VNGO_NOT_SUPPORTED;
+            return VNGO_INTERNAL_ERROR;
         }
 
         if (DeviceSurface == NULL)
@@ -358,10 +371,10 @@ VNGError VngoD3DTexture3D::ready_texture()
         restore();
     }
 
-    if (DeviceSurface->IsLost() == DDERR_SURFACELOST)
-        DeviceSurface->Restore();
+//    if (DeviceSurface->IsLost() == DDERR_SURFACELOST)
+//        DeviceSurface->Restore();
 
-    VgSystem.D3DTx->ready(chandle);
+    VgSystem->D3DTx->ready(chandle);
     return VNGO_NO_ERROR;
 }
 
@@ -408,6 +421,12 @@ VNGError VngoD3DTexture3D::restore()
     if (DeviceSurface->Restore() != DD_OK)
         return VNGO_INTERNAL_ERROR;
 
+    VngoDirect3D    *d3dscreen = (VngoDirect3D*)VgSystem->D3DTx->screen;
+    palette = ref->pal_ptr;
+    palette->create_ddpal(d3dscreen->dd,&pal);
+    MemorySurface->SetPalette(pal);
+    DeviceSurface->SetPalette(pal);
+
     DeviceSurface->QueryInterface(IID_IDirect3DTexture2, (void**)&DevTexture);
     MemorySurface->QueryInterface(IID_IDirect3DTexture2, (void**)&MemTexture);
 
@@ -421,9 +440,9 @@ VNGError VngoD3DTexture3D::restore()
 
 VNGError    VngoD3DTexture3D::load_texture()
 {
-    VngoDirect3D    *d3dscreen = (VngoDirect3D*)VgSystem.D3DTx->screen;
+    VngoDirect3D    *d3dscreen = (VngoDirect3D*)VgSystem->D3DTx->screen;
 
-    if (palette != ref->pal_ptr)
+//    if (palette != ref->pal_ptr)
     {
         palette = ref->pal_ptr;
         palette->create_ddpal(d3dscreen->dd,&pal);

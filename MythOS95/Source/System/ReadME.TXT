@@ -38,10 +38,10 @@
                              _Library Status_
 
  Notes by: Chuck Walbourn
- Updated: January 2, 1998
+ Updated: February 5, 1998
 
  Changes for this release --------------------------------------------------
 
- o Minor update to comments.
+ o Updated for new Van Gogh system.
 
 *** END OF FILE ***

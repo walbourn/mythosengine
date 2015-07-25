@@ -17,10 +17,10 @@
 //         °°²²²²²²²²²²²²²²²²°°
 //        °°°°°°°°°°°°°°°°°°°°°°
 //
-//          Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.
+//          Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved.
 //
-//                      Microsoft Windows '95 Version
+//                      Microsoft Windows 95/NT Version
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
@@ -98,6 +98,10 @@ void    chronos_clear_callbacks ();
 clock_t chronos_time_now ();
 double  chronos_time_now_precise ();
 
+// Support
+extern "C" double chronos_rdtsc();
+extern double __chronos_scale;
+
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Classes
@@ -138,6 +142,25 @@ public:
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 // A timer class, used as a stopwatch.
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+#if 0
+class AtomicChronometer
+{
+    double  elapsed_time;
+    double  start_time;
+
+public:
+    AtomicChronometer (){ clear (); }
+
+    void   clear ()     { elapsed_time = 0.0;
+                          start_time = chronos_rdtsc(); }
+
+    double start ()     { return (start_time = chronos_rdtsc ()); }
+    double stop ()      { return (elapsed_time += chronos_rdtsc() - start_time); }
+
+    double check () const { return (chronos_rdtsc() - start_time) * __chronos_scale; }
+    double check_elapsed () const { return elapsed_time * __chronos_scale; }
+};
+#else
 class AtomicChronometer
 {
     double  elapsed_time;
@@ -155,6 +178,7 @@ public:
     double check () const { return chronos_time_now_precise() - start_time; }
     double check_elapsed () const { return elapsed_time; }
 };
+#endif
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ

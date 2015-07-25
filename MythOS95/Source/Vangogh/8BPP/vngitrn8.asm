@@ -6,7 +6,7 @@
 ;                                                           |. _  .   .|
 ;          Microsoft Windows '95 Version                    | / \   .  | 
 ;                                                           |_|_|_._._.|
-;  Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.   |.-.-.-.-..|
+;  Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.   |.-.-.-.-..|
 ;              All rights reserved.                        %\__________/%
 ;                                                           %          %
 ;
@@ -37,7 +37,7 @@
 .486p
 
         OPTION SCOPED                   ; Enable local labels.
-        
+
 
 ;°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 ;
@@ -71,7 +71,7 @@ include vngstrct.inc
 
         ASSUME  ds:_DATA
 _DATA   SEGMENT PARA PUBLIC USE32 'DATA'
-       
+
 
 _DATA   ENDS
 
@@ -189,33 +189,33 @@ END_PROC        vngo_iline_s8
 ;       of image transfer.                                                 ³
 ;ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 START_PROC      vngo_iline_z8,    C lptr:DWORD,zptr:DWORD,tptr:DWORD,xcount:DWORD,depth:DWORD,flags:DWORD
-        LOCAL   tdepth:DWORD	; pointer to the current shade palette.
+        LOCAL   tdepth:DWORD    ; pointer to the current shade palette.
 
         push    esi
         push    edi
-	push	ebx
+        push    ebx
 
         mov     esi,tptr
         mov     edi,lptr
         mov     ecx,xcount
-	mov	eax,depth
-	shr	eax,16
-	mov	tdepth,eax
-	mov	edx,zptr
-	xor	ebx,ebx
+        mov     eax,depth
+        shr     eax,16
+        mov     tdepth,eax
+        mov     edx,zptr
+        xor     ebx,ebx
 
         test    flags,VNGO_TRANSPARENT
         js      clear_transfer_loop
 
 transfer_loop:
-	mov	bx,WORD PTR [edx]
-	cmp	ebx,tdepth
-	jle	@f
+        mov     bx,WORD PTR [edx]
+        cmp     ebx,tdepth
+        jle     @f
         mov     al,[esi]
         mov     [edi],al
 @@:
         inc     esi
-	lea	edx,[edx+2]
+        lea     edx,[edx+2]
         inc     edi
         dec     ecx
         jnz     SHORT transfer_loop
@@ -230,27 +230,27 @@ clear_transfer_loop:
         mov     al,[esi]
         cmp     al,255
         je      @f
-	mov	bx,WORD PTR [edx]
-	cmp	ebx,tdepth
-	jle	@f
+        mov     bx,WORD PTR [edx]
+        cmp     ebx,tdepth
+        jle     @f
         mov     [edi],al
 @@:
         inc     esi
-	lea	edx,[edx+2]
+        lea     edx,[edx+2]
         inc     edi
         dec     ecx
         jnz     SHORT clear_transfer_loop
 
 exit:
-	pop	ebx
+        pop     ebx
         pop     edi
         pop     esi
 
         ret
 END_PROC        vngo_iline_z8
 
-                
-                
+
+
 ;ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 ; vngo_ilinemono8 (byte *lptr, byte *tptr, long xcount,                    ³
 ;                  dword tskip, dword fgcol, dword bgcol);                 ³
@@ -316,7 +316,7 @@ start_byte:
         jz      skip_6
         dec     edx
         jz      skip_7
-                                
+
 
 skip_0:
         shl     al,1
@@ -535,7 +535,7 @@ tskip_7_bg:
         jmp     start_byte_trans_bg
 
 exit2:
-	jmp	exit3
+        jmp     exit3
 
 clear_transfer_loop_start_fg:
         mov     ebx,bgcol
@@ -652,14 +652,14 @@ tskip_7_fg:
         jmp     start_byte_trans_fg
 
 exit3:
-	
+
         pop     ebx
         pop     edi
         pop     esi
 
         ret
 END_PROC        vngo_ilinemono8
-                
+
 
 ;ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 ; vngo_itrans8 (VngoVbuffer *vbuf, VngoRect *dest_rect,                    ³
@@ -679,7 +679,7 @@ START_PROC      vngo_itrans8,   C CurScreen:DWORD, dest:DWORD, img:DWORD, flags:
 
         mov     ax,ds
         mov     es,ax
-       
+
         mov     edi,(VNGO_VBUFFER PTR [esi]).vb_scrn_ptr
         mov     edx,(VNGO_VBUFFER PTR [esi]).vb_ytable
         mov     ebx,dest
@@ -778,10 +778,10 @@ START_PROC      vngo_itrans_s8,   C CurScreen:DWORD, dest:DWORD, img:DWORD, shad
         mov     esi,CurScreen
         mov     ebx,dest
 
-        
+
         mov     ax,ds
         mov     es,ax
-       
+
         mov     eax,shade
         shr     eax,3
 
@@ -889,10 +889,10 @@ END_PROC        vngo_itrans_s8
 ;               VngoTexture *img,dword flags);                             ³
 ;       This routine transfers a VngoTexture to the target viewport.       ³
 ;ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-START_PROC      vngo_itrans_z8,	C CurScreen:DWORD, dest:DWORD, img:DWORD, flags:DWORD
+START_PROC      vngo_itrans_z8, C CurScreen:DWORD, dest:DWORD, img:DWORD, flags:DWORD
         LOCAL   delta_pitch:DWORD
-	LOCAL	delta_zpitch:DWORD
-	LOCAL	zptr:DWORD
+        LOCAL   delta_zpitch:DWORD
+        LOCAL   zptr:DWORD
 
         push    ebx
         push    esi
@@ -904,7 +904,7 @@ START_PROC      vngo_itrans_z8,	C CurScreen:DWORD, dest:DWORD, img:DWORD, flags:
 
         mov     ax,ds
         mov     es,ax
-       
+
         mov     edi,(VNGO_VBUFFER PTR [esi]).vb_scrn_ptr
         mov     edx,(VNGO_VBUFFER PTR [esi]).vb_ytable
         mov     ebx,dest

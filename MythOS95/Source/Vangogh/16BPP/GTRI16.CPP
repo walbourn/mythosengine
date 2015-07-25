@@ -6,7 +6,7 @@
 //                                                           |. _  .   .|
 //          Microsoft Windows '95 Version                    | / \   .  |
 //                                                           |_|_|_._._.|
-// Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
+// Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
 //              All rights reserved.                        %\__________/%
 //                                                           %          %
 //
@@ -102,8 +102,8 @@ extern "C" void vngo_gtriangle16 (VngoVbuffer *vb,VngoPoint2 *pts,dword color)
     VngoPoint2 *mid_pt = &pts[mid_pt_idx];
     VngoPoint2 *low_pt = &pts[low_pt_idx];
 
-    long    dy1 = ((low_pt->y + 0x8000) >> 16) - ((high_pt->y + 0x8000) >> 16);
-    long    dy2 = ((mid_pt->y + 0x8000) >> 16) - ((high_pt->y + 0x8000) >> 16);
+    long    dy1 = ((low_pt->y) >> 16) - ((high_pt->y) >> 16);
+    long    dy2 = ((mid_pt->y) >> 16) - ((high_pt->y) >> 16);
 
     if (dy1 == 0)
     {   // the triangle is completely flat if this is true.
@@ -166,9 +166,6 @@ extern "C" void draw_ghlines16(VngoTriangle *tri)
     word            *tp = (word*)(((VngoShadePal16 *)tri->vbuff->pal->shd_pal)->ptr);
     word            *tc = &tp[tri->color<<5];
     word             *stable = tc;
-//    VngoShadePal16   *tp = (VngoShadePal16 *)tri->vbuff->pal->shd_pal;
-//    VngoColorShade16 *tc = &(*tp)[tri->color];
-//    word             *stable = &tc->shl[0];
 
     long            count = tri->height;
     long            pitch = tri->pitch >> 1;
@@ -178,15 +175,15 @@ extern "C" void draw_ghlines16(VngoTriangle *tri)
     VngoPoint2      *edge2 = tri->right_edge;
 
     long start_y = tri->start_y;
-    for (long y=0;y <= count;y++)
+    for (long y=0;y < count;y++)
     {
         long ts = edge1->shade;
-        long tx = (edge1->x + 0x8000) >> 16;
+        long tx = (edge1->x + 0xffff) >> 16;
         word *ptr = scrn + tx;
-        int dx = ((edge2->x + 0x8000) >> 16);
+        int dx = ((edge2->x + 0xffff) >> 16);
         long *dmatrix = &DitherMatrix[(start_y+y)&3][0];
 
-        for (int x = tx;x <= dx; x++)
+        for (int x = tx;x < dx; x++)
         {
             int ws = (ts + dmatrix[x&3]) >> 19;
             if (ws > 31)

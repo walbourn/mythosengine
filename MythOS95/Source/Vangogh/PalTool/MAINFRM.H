@@ -4,7 +4,7 @@
 //
 //                   A Palette extraction/definition tool
 //
-//           Copyright (c) 1995-1997 by Charybdis Enterprises, Inc.
+//           Copyright (c) 1995-1998 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved
 //
 //                      Microsoft Windows '95 Version
@@ -25,7 +25,7 @@
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
 // Dan Higdon & Chuck Walbourn
-// 
+//
 // mainfrm.h
 //
 // Main window frame class.
@@ -40,9 +40,9 @@
 
 class CMainFrame : public CMDIFrameWnd
 {
-	DECLARE_DYNAMIC(CMainFrame)
+        DECLARE_DYNAMIC(CMainFrame)
 public:
-	CMainFrame();
+        CMainFrame();
 
 // Attributes
 public:
@@ -51,29 +51,29 @@ public:
 public:
 
 // Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CMainFrame)
-	//}}AFX_VIRTUAL
+        // ClassWizard generated virtual function overrides
+        //{{AFX_VIRTUAL(CMainFrame)
+        //}}AFX_VIRTUAL
 
 // Implementation
 public:
-	virtual ~CMainFrame();
+        virtual ~CMainFrame();
 #ifdef _DEBUG
-	virtual void AssertValid() const;
-	virtual void Dump(CDumpContext& dc) const;
+        virtual void AssertValid() const;
+        virtual void Dump(CDumpContext& dc) const;
 #endif
 
 protected:  // control bar embedded members
-	CStatusBar  m_wndStatusBar;
-	CToolBar    m_wndToolBar;
+        CStatusBar  m_wndStatusBar;
+        CToolBar    m_wndToolBar;
 
 // Generated message map functions
 protected:
-	//{{AFX_MSG(CMainFrame)
-	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
-	afx_msg void OnAppHelp();
-	//}}AFX_MSG
-	DECLARE_MESSAGE_MAP()
+        //{{AFX_MSG(CMainFrame)
+        afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
+        afx_msg void OnAppHelp();
+        //}}AFX_MSG
+        DECLARE_MESSAGE_MAP()
 };
 
 //°±² eof - mainfrm.h ²±°

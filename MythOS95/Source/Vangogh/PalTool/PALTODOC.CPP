@@ -4,7 +4,7 @@
 //
 //                   A Palette extraction/definition tool
 //
-//           Copyright (c) 1995-1997 by Charybdis Enterprises, Inc.
+//           Copyright (c) 1995-1998 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved
 //
 //                      Microsoft Windows '95 Version
@@ -25,7 +25,7 @@
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
 // Dan Higdon & Chuck Walbourn
-// 
+//
 // paltodoc.cpp
 //
 // PalTool document class.
@@ -35,7 +35,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include "stdafx.h"
@@ -61,11 +61,11 @@ static char BASED_CODE THIS_FILE[] = __FILE__;
 IMPLEMENT_DYNCREATE(CPalToolDoc, CDocument)
 
 BEGIN_MESSAGE_MAP(CPalToolDoc, CDocument)
-	//{{AFX_MSG_MAP(CPalToolDoc)
-	ON_COMMAND(IDM_FILE_IMPORT, OnFileImport)
-	//}}AFX_MSG_MAP
-	ON_COMMAND(ID_FILE_SEND_MAIL, OnFileSendMail)
-	ON_UPDATE_COMMAND_UI(ID_FILE_SEND_MAIL, OnUpdateFileSendMail)
+        //{{AFX_MSG_MAP(CPalToolDoc)
+        ON_COMMAND(IDM_FILE_IMPORT, OnFileImport)
+        //}}AFX_MSG_MAP
+        ON_COMMAND(ID_FILE_SEND_MAIL, OnFileSendMail)
+        ON_UPDATE_COMMAND_UI(ID_FILE_SEND_MAIL, OnUpdateFileSendMail)
 END_MESSAGE_MAP()
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
@@ -82,8 +82,8 @@ END_MESSAGE_MAP()
 // CPalToolDoc - Constructor
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 CPalToolDoc::CPalToolDoc():
-	base_pal (0),
-	curve_mode (LINEAR)
+        base_pal (0),
+        curve_mode (LINEAR)
 {
 }
 
@@ -107,7 +107,7 @@ CPalToolDoc::~CPalToolDoc()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 void CPalToolDoc::AssertValid() const
 {
-	CDocument::AssertValid();
+        CDocument::AssertValid();
 }
 
 
@@ -116,7 +116,7 @@ void CPalToolDoc::AssertValid() const
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 void CPalToolDoc::Dump(CDumpContext& dc) const
 {
-	CDocument::Dump(dc);
+        CDocument::Dump(dc);
 }
 #endif //_DEBUG
 
@@ -129,7 +129,7 @@ void CPalToolDoc::Dump(CDumpContext& dc) const
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 // CPalToolDoc - DeleteContents
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-void CPalToolDoc::DeleteContents() 
+void CPalToolDoc::DeleteContents()
 {
     if (base_pal)
     {
@@ -141,8 +141,8 @@ void CPalToolDoc::DeleteContents()
     memset(desc,0,sizeof(desc));
     memset(auth,0,sizeof(auth));
     memset(copy,0,sizeof(copy));
-	
-	CDocument::DeleteContents();
+
+        CDocument::DeleteContents();
 }
 
 
@@ -153,13 +153,13 @@ void CPalToolDoc::Serialize(CArchive& ar)
 {
     int         i;
     dword       id;
-	CXFile		f (ar.GetFile ());
-	XFParseIFF	iff (&f);
-	iff.begin ();
+        CXFile          f (ar.GetFile ());
+        XFParseIFF      iff (&f);
+        iff.begin ();
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Saving
-	if (ar.IsStoring ())
-	{
+        if (ar.IsStoring ())
+        {
         int err;
 
         assert(base_pal != 0);
@@ -263,16 +263,16 @@ save_error_exit: ;
         char    str[512];
 
         sprintf(str,"Error 0x%x saving file.",err);
-                                              
+
         MessageBox(NULL,
                    str,"Palette Tool",MB_OK | MB_ICONEXCLAMATION);
 
         AfxThrowArchiveException(CArchiveException::generic);
         return;
-	}
+        }
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Loading
-	else
-	{
+        else
+        {
         int err;
         int shade_found=0;
         int hw_found=0;
@@ -284,7 +284,7 @@ save_error_exit: ;
         {
             base_pal = new VngoPal8;
             assert(base_pal != 0);
-        	base_pal->shd_pal = new VngoShadePal8 (32);
+                base_pal->shd_pal = new VngoShadePal8 (32);
             base_pal->flags |= VNGO_MYMEM_SHADE;
         }
         assert(base_pal->shd_pal != 0);
@@ -302,7 +302,7 @@ save_error_exit: ;
                 continue;
 
             //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Found an VPAL form
-            
+
             iff.enterform();
 
             //ÄÄ Scan and load chunks in form
@@ -462,7 +462,7 @@ save_error_exit: ;
 
             iff.leaveform();
 
-            if (!shade_found 
+            if (!shade_found
                 || !hw_found
                 || !cnvrt_found)
             {
@@ -485,14 +485,14 @@ save_error_exit: ;
             char    str[512];
 
             sprintf(str,"Error 0x%x loading file.",(int)err);
-                                              
+
             MessageBox(NULL,
                        str,"Palette Tool",MB_OK | MB_ICONEXCLAMATION);
 
             AfxThrowArchiveException(CArchiveException::generic);
             return;
         }
-	}
+        }
 }
 
 
@@ -554,7 +554,7 @@ void CPalToolDoc::Generate (genpal_type typ)
     assert(base_pal != 0);
 
     d255 = 255;
-                         
+
     switch (typ)
     {
         //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -894,13 +894,13 @@ void CPalToolDoc::Generate (genpal_type typ)
 
             gen_rampRGB(VngoColor24bit(255, 255, 0),&pclrs[i],19);
             i += 19;
- 
+
             gen_rampHLS(VngoColor24bit(254, 185, 0),&pclrs[i],19);
             i += 19;
- 
+
             gen_rampHLS(VngoColor24bit(255, 128, 0),&pclrs[i],19);
             i += 19;
- 
+
             gen_rampHLS(VngoColor24bit(178, 122, 0),&pclrs[i],19);
             i += 19;
 
@@ -954,10 +954,10 @@ void CPalToolDoc::use_colors8 (VngoColor24bit *colors, int steps, int color_inde
 {
     VngoShadePal8 &tp = *(VngoShadePal8 *)base_pal->shd_pal;
 
-	for (int i = 0; i < steps; i++)
-	{
-	    tp[color_index].shl[i] = (byte)base_pal->get_index (colors[i]);
-	}
+        for (int i = 0; i < steps; i++)
+        {
+            tp[color_index].shl[i] = (byte)base_pal->get_index (colors[i]);
+        }
 }
 
 
@@ -993,7 +993,7 @@ void CPalToolDoc::use_colors24 (VngoColor24bit *colors, int steps, int color_ind
 // CPalToolDoc - calc_linear_colors
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 void CPalToolDoc::calc_linear_colors (VngoColor24bit *colors, int steps,
-									  VngoColor24bit color, int break_point)
+                                                                          VngoColor24bit color, int break_point)
 {
     VngoColorHLS    hlst;
     Flx16           t1;
@@ -1002,11 +1002,11 @@ void CPalToolDoc::calc_linear_colors (VngoColor24bit *colors, int steps,
     hlst = color;
     mean = hlst.l;
     base = hlst.l * (Flx16)0.2;
-   
+
     t1 = hlst.l - base;
     step = t1 / Flx16 (break_point);
 
-	break_point--;	// Convert to 0 based value
+        break_point--;  // Convert to 0 based value
 
     for (int i = break_point-1; i >= 0; i--)
     {
@@ -1035,7 +1035,7 @@ void CPalToolDoc::calc_linear_colors (VngoColor24bit *colors, int steps,
 // CPalToolDoc - calc_bez_colors
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 void CPalToolDoc::calc_bez_colors (VngoColor24bit *colors, int steps,
-							 	   VngoColor24bit color, int break_point)
+                                                                   VngoColor24bit color, int break_point)
 {
 }
 
@@ -1045,7 +1045,7 @@ void CPalToolDoc::calc_bez_colors (VngoColor24bit *colors, int steps,
 // CPalToolDoc - calc_quad_colors
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 void CPalToolDoc::calc_quad_colors (VngoColor24bit *colors, int steps,
-							 		VngoColor24bit color, int break_point)
+                                                                        VngoColor24bit color, int break_point)
 {
 }
 
@@ -1056,8 +1056,8 @@ void CPalToolDoc::calc_quad_colors (VngoColor24bit *colors, int steps,
 void CPalToolDoc::CalcShades ()
 {
     int i;
-	const int shade_count = 32;
-	VngoColor24bit	shades[shade_count];
+        const int shade_count = 32;
+        VngoColor24bit  shades[shade_count];
 
     assert(base_pal != 0);
 
@@ -1073,27 +1073,27 @@ void CPalToolDoc::CalcShades ()
         return;
 
     // Determine interpoloation mode
-	void (CPalToolDoc:: *calc) (VngoColor24bit *, int, VngoColor24bit, int);
+        void (CPalToolDoc:: *calc) (VngoColor24bit *, int, VngoColor24bit, int);
 
-	switch (curve_mode)
-	{
-    	case LINEAR:
+        switch (curve_mode)
+        {
+        case LINEAR:
             calc = calc_linear_colors;
-		    break;
-	    case BEZIER:
+                    break;
+            case BEZIER:
             calc = calc_bez_colors;
-    		break;
-    	case QUADRATIC:
+                break;
+        case QUADRATIC:
             calc = calc_quad_colors;
-		    break;
-	}
+                    break;
+        }
 
     // Compute for each palette indexl
-	for (i = 0; i < 256; i++)
-	{
-		(this->*calc) (shades, shade_count, base_pal->get_RGB (i), (shade_env_break()+7) >> 3);
-		use_colors8 (shades, shade_count, i);
-	}
+        for (i = 0; i < 256; i++)
+        {
+                (this->*calc) (shades, shade_count, base_pal->get_RGB (i), (shade_env_break()+7) >> 3);
+                use_colors8 (shades, shade_count, i);
+        }
 }
 
 
@@ -1103,82 +1103,82 @@ void CPalToolDoc::CalcShades ()
 int CPalToolDoc::ImportVGPalette (LPCSTR filename)
 {
     VngoShadePal8   *tpal = (VngoShadePal8 *)base_pal->shd_pal;
-	XFParseIFF  iffp;
-	int         err=0;
+        XFParseIFF  iffp;
+        int         err=0;
 
-	// Assert that there is memory allocated to load into.
-	assert(base_pal != NULL);
-	assert(base_pal->shd_pal != NULL);
+        // Assert that there is memory allocated to load into.
+        assert(base_pal != NULL);
+        assert(base_pal->shd_pal != NULL);
 //    assert(base_pal->hz_pal != NULL);
 
-	err = iffp.open (filename,XF_OPEN_READ);
-	if (err)
-		return err;
+        err = iffp.open (filename,XF_OPEN_READ);
+        if (err)
+                return err;
 
-	err = iffp.seekform (iffp.makeid('V','P','A','L'));
-	if (err)
-		return err;
+        err = iffp.seekform (iffp.makeid('V','P','A','L'));
+        if (err)
+                return err;
 
-	err = iffp.enterform();
-	if (err)
-		return err;
+        err = iffp.enterform();
+        if (err)
+                return err;
 
-	// ---- Find and read the shade palette.
-	err = iffp.seekchunk (iffp.makeid('s','h','d','P'));
-	if (err)
-		return err;
+        // ---- Find and read the shade palette.
+        err = iffp.seekchunk (iffp.makeid('s','h','d','P'));
+        if (err)
+                return err;
 
-	// ---- Read the old shade palette format
-	err = iffp.read (&(*tpal)[0]);
-	if (err)
-		return err;
+        // ---- Read the old shade palette format
+        err = iffp.read (&(*tpal)[0]);
+        if (err)
+                return err;
 
 
 #if 0
-	// ---- Find and read the haze palette.
-	err = iffp.seekchunk (iffp.makeid ('h','a','z','P'));
-	if (err)
-		return err;
+        // ---- Find and read the haze palette.
+        err = iffp.seekchunk (iffp.makeid ('h','a','z','P'));
+        if (err)
+                return err;
 
-	err = iffp.read (base_pal->hz_pal);
-	if (err)
-		return err;
+        err = iffp.read (base_pal->hz_pal);
+        if (err)
+                return err;
 #endif
 
-	// ---- Find and read the hardware palette.
-	err = iffp.seekchunk (iffp.makeid('h','w','d','P'));
-	if (err)
-		return err;
+        // ---- Find and read the hardware palette.
+        err = iffp.seekchunk (iffp.makeid('h','w','d','P'));
+        if (err)
+                return err;
 
-	err = iffp.read (&((VngoPal8 *)base_pal)->hw_pal);
-	if (err)
-		return err;
+        err = iffp.read (&((VngoPal8 *)base_pal)->hw_pal);
+        if (err)
+                return err;
 
-	// ---- Find and read the color conversion table.
-	err = iffp.seekchunk (iffp.makeid ('c','n','v','t'));
-	if (err)
-		return err;
+        // ---- Find and read the color conversion table.
+        err = iffp.seekchunk (iffp.makeid ('c','n','v','t'));
+        if (err)
+                return err;
 
-	err = iffp.read (&((VngoPal8 *)base_pal)->convert);
-	if (err)
-		return err;
+        err = iffp.read (&((VngoPal8 *)base_pal)->convert);
+        if (err)
+                return err;
 
-	// ---- Clean up and close down.
-	err = iffp.leaveform();
-	if (err)
-		return err;
+        // ---- Clean up and close down.
+        err = iffp.leaveform();
+        if (err)
+                return err;
 
-	err = iffp.close();
-	if (err)
-		return err;
+        err = iffp.close();
+        if (err)
+                return err;
 
-	// Initialize the palette header
-	tpal->num_shd_lvl = 32;
-	tpal->num_shd_lvl_bits = 5;
-	tpal->mid_point = 192;
+        // Initialize the palette header
+        tpal->num_shd_lvl = 32;
+        tpal->num_shd_lvl_bits = 5;
+        tpal->mid_point = 192;
 
-	// ---- Since no error occured return zero.
-	return 0;
+        // ---- Since no error occured return zero.
+        return 0;
 }
 
 
@@ -1187,7 +1187,7 @@ int CPalToolDoc::ImportVGPalette (LPCSTR filename)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 int CPalToolDoc::ImportWindowsPalette (LPCSTR filename)
 {
-	return 1;
+        return 1;
 
 }
 
@@ -1203,18 +1203,18 @@ void CPalToolDoc::UIPalette(CWnd *parent, UINT ind)
     if (dlg.DoModal() == IDOK)
     {
         //ÄÄÄ Save values and recompute
-		CProgressDlg	prog;
+                CProgressDlg    prog;
 
-		prog.m_pbar.SetRange (0, 2);
-		prog.m_pbar.SetPos (0);
-		prog.SetWindowText ("Recomputing");
-		prog.ShowWindow (SW_SHOW);
+                prog.m_pbar.SetRange (0, 2);
+                prog.m_pbar.SetPos (0);
+                prog.SetWindowText ("Recomputing");
+                prog.ShowWindow (SW_SHOW);
 
-		((VngoPal8 *)base_pal)->set_hwpal ((VngoColor24bit *)dlg.pal, 256);
-		prog.m_pbar.SetPos (1);
+                ((VngoPal8 *)base_pal)->set_hwpal ((VngoColor24bit *)dlg.pal, 256);
+                prog.m_pbar.SetPos (1);
         CalcConvert();
-		prog.m_pbar.SetPos (2);
-		CalcShades ();
+                prog.m_pbar.SetPos (2);
+                CalcShades ();
 
         SetModifiedFlag();
         UpdateAllViews(NULL);
@@ -1274,7 +1274,7 @@ void CPalToolDoc::UIProperties(CWnd *parent, UINT ipage)
         CalcShades();
         SetModifiedFlag();
         UpdateAllViews(NULL);
-    }  
+    }
 }
 
 
@@ -1288,119 +1288,119 @@ void CPalToolDoc::UIProperties(CWnd *parent, UINT ipage)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 BOOL CPalToolDoc::OnNewDocument()
 {
-	if (!CDocument::OnNewDocument())
-		return FALSE;
+        if (!CDocument::OnNewDocument())
+                return FALSE;
 
     VngoPal8 *tpal = new VngoPal8;
     if (!tpal)
         return FALSE;
 
-	base_pal = tpal;
-	tpal->shd_pal = new VngoShadePal8 (32);
+        base_pal = tpal;
+        tpal->shd_pal = new VngoShadePal8 (32);
     if (!tpal->shd_pal)
         return FALSE;
     base_pal->flags |= VNGO_MYMEM_SHADE;
 
-	tpal->shd_pal->mid_point = 192;
-	Generate (PAL_EMPTY);
+        tpal->shd_pal->mid_point = 192;
+        Generate (PAL_EMPTY);
 
     strcpy(name,"Default");
     *desc = 0;
     *auth = 0;
     *copy = 0;
 
-	return TRUE;
+        return TRUE;
 }
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 // CPalToolDoc - OnFileImport
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-void CPalToolDoc::OnFileImport() 
+void CPalToolDoc::OnFileImport()
 {
-	// Import the BMP file.
-	CFileDialog	fdlg (TRUE, ".pal", NULL, OFN_HIDEREADONLY | OFN_FILEMUSTEXIST,
+        // Import the BMP file.
+        CFileDialog     fdlg (TRUE, ".pal", NULL, OFN_HIDEREADONLY | OFN_FILEMUSTEXIST,
 "Bitmap Files (*.bmp;*.pcx;*.lbm;*.cel)|*.bmp;*.pcx;*.lbm;*.cel|Palette Files (*.pal)|*.pal|All Files (*.*)|*.*||");
 
-	fdlg.m_ofn.lpstrTitle = "Import Picture's Palette";
+        fdlg.m_ofn.lpstrTitle = "Import Picture's Palette";
 
-	if (fdlg.DoModal() == IDOK)
-	{
-		CString pathname  = fdlg.GetPathName();
-		CString extension = fdlg.GetFileExt();
+        if (fdlg.DoModal() == IDOK)
+        {
+                CString pathname  = fdlg.GetPathName();
+                CString extension = fdlg.GetFileExt();
 
-		if (extension.CompareNoCase ("pal") == 0)
-		{
-			// This is either a windows palette or an old-style Vangogh palette.
-			// Let's try the old-style palette first:
-			if (ImportVGPalette (pathname) == 0)
-			{
-				// Successful import
-			}
-			else if (ImportWindowsPalette (pathname) == 0)
-			{
-				// Successful import
-			}
-			else
-			{
-				MessageBox (NULL, fdlg.GetFileTitle() + " has an unrecongnized format.  Aborting import.",
-							"Error", MB_OK | MB_ICONEXCLAMATION);
-			}
-		}
-		else
-		{
-			// It must be one of our bitmap formats
-			XFParseBitmap	*bm;
+                if (extension.CompareNoCase ("pal") == 0)
+                {
+                        // This is either a windows palette or an old-style Vangogh palette.
+                        // Let's try the old-style palette first:
+                        if (ImportVGPalette (pathname) == 0)
+                        {
+                                // Successful import
+                        }
+                        else if (ImportWindowsPalette (pathname) == 0)
+                        {
+                                // Successful import
+                        }
+                        else
+                        {
+                                MessageBox (NULL, fdlg.GetFileTitle() + " has an unrecongnized format.  Aborting import.",
+                                                        "Error", MB_OK | MB_ICONEXCLAMATION);
+                        }
+                }
+                else
+                {
+                        // It must be one of our bitmap formats
+                        XFParseBitmap   *bm;
 
-			if (extension.CompareNoCase ("bmp") == 0)
-			{
-				bm = new XFParseBMP ();
-			}
-			else if (extension.CompareNoCase ("pcx") == 0)
-			{
-				bm = new XFParsePCX ();
-			}
-			else if (extension.CompareNoCase ("lbm") == 0)
-			{
-				bm = new XFParseLBM ();
-			}
-			else if (extension.CompareNoCase ("cel") == 0)
-			{
-				bm = new XFParseCEL ();
-			}
-			else
-			{
-				MessageBox (NULL, "Unable to load file: '" + pathname + "'.  Canceling import.",
-							"Error", MB_OK | MB_ICONEXCLAMATION);
-				return;
-			}
+                        if (extension.CompareNoCase ("bmp") == 0)
+                        {
+                                bm = new XFParseBMP ();
+                        }
+                        else if (extension.CompareNoCase ("pcx") == 0)
+                        {
+                                bm = new XFParsePCX ();
+                        }
+                        else if (extension.CompareNoCase ("lbm") == 0)
+                        {
+                                bm = new XFParseLBM ();
+                        }
+                        else if (extension.CompareNoCase ("cel") == 0)
+                        {
+                                bm = new XFParseCEL ();
+                        }
+                        else
+                        {
+                                MessageBox (NULL, "Unable to load file: '" + pathname + "'.  Canceling import.",
+                                                        "Error", MB_OK | MB_ICONEXCLAMATION);
+                                return;
+                        }
 
-			if (bm->nameread(pathname) != 0 || bm->bm->bpp != 1)
-			{
-				MessageBox (NULL, "File not supported: '" + pathname + "'.  Canceling import.",
-							"Error", MB_OK | MB_ICONEXCLAMATION);
-				return;
-			}
+                        if (bm->nameread(pathname) != 0 || bm->bm->bpp != 1)
+                        {
+                                MessageBox (NULL, "File not supported: '" + pathname + "'.  Canceling import.",
+                                                        "Error", MB_OK | MB_ICONEXCLAMATION);
+                                return;
+                        }
 
-			CProgressDlg	prog;
+                        CProgressDlg    prog;
 
-			prog.m_pbar.SetRange (0, 2);
-			prog.m_pbar.SetPos (0);
-			prog.SetWindowText ("Computing Import Palette");
-			prog.ShowWindow (SW_SHOW);
+                        prog.m_pbar.SetRange (0, 2);
+                        prog.m_pbar.SetPos (0);
+                        prog.SetWindowText ("Computing Import Palette");
+                        prog.ShowWindow (SW_SHOW);
 
-			((VngoPal8 *)base_pal)->set_hwpal ((VngoColor24bit *)bm->bm->pal, 256);
-			prog.m_pbar.SetPos (1);
+                        ((VngoPal8 *)base_pal)->set_hwpal ((VngoColor24bit *)bm->bm->pal, 256);
+                        prog.m_pbar.SetPos (1);
             CalcConvert();
-			prog.m_pbar.SetPos (2);
-			CalcShades ();
+                        prog.m_pbar.SetPos (2);
+                        CalcShades ();
 
-			delete bm;
-		}
+                        delete bm;
+                }
 
-		// Update our internal values, and redisplay everything
-		UpdateAllViews (NULL);
-	}
+                // Update our internal values, and redisplay everything
+                UpdateAllViews (NULL);
+        }
 }
 
 
@@ -1408,30 +1408,30 @@ void CPalToolDoc::OnFileImport()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 // CPalToolDoc - OnFileExport
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-void CPalToolDoc::OnFileExport() 
+void CPalToolDoc::OnFileExport()
 {
-	// Export the palette to some "public" format.
-	CFileDialog	fdlg (FALSE, ".pal", NULL, OFN_HIDEREADONLY,
-						"Windows Palette Files (*.pal)|*.pal||");
+        // Export the palette to some "public" format.
+        CFileDialog     fdlg (FALSE, ".pal", NULL, OFN_HIDEREADONLY,
+                                                "Windows Palette Files (*.pal)|*.pal||");
 
-	fdlg.m_ofn.lpstrTitle = "Export Palette";
+        fdlg.m_ofn.lpstrTitle = "Export Palette";
 
-	if (fdlg.DoModal() == IDOK)
-	{
-		switch (fdlg.m_ofn.nFilterIndex)
-		{
-		case 0:	// User-specified file extension (assume Windows Palette)
-		case 1: // Windows Palette Files
-			MessageBox (NULL, "Windows Format export not yet implemented",
-						"Note", MB_OK | MB_ICONEXCLAMATION);
-			break;
+        if (fdlg.DoModal() == IDOK)
+        {
+                switch (fdlg.m_ofn.nFilterIndex)
+                {
+                case 0: // User-specified file extension (assume Windows Palette)
+                case 1: // Windows Palette Files
+                        MessageBox (NULL, "Windows Format export not yet implemented",
+                                                "Note", MB_OK | MB_ICONEXCLAMATION);
+                        break;
 
-		default:
-			MessageBox (NULL, "Invalid Export Format selected",
-						"Error", MB_OK | MB_ICONEXCLAMATION);
-			break;
-		}
-	}
+                default:
+                        MessageBox (NULL, "Invalid Export Format selected",
+                                                "Error", MB_OK | MB_ICONEXCLAMATION);
+                        break;
+                }
+        }
 }
 #endif
 

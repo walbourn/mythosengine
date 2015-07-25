@@ -6,7 +6,7 @@
 ;                                                           |. _  .   .|
 ;          Microsoft Windows '95 Version                    | / \   .  | 
 ;                                                           |_|_|_._._.|
-;  Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.   |.-.-.-.-..|
+;  Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.   |.-.-.-.-..|
 ;              All rights reserved.                        %\__________/%
 ;                                                           %          %
 ;
@@ -37,7 +37,7 @@
 .486p
 
         OPTION SCOPED                   ; Enable local labels.
-        
+
 
 ;같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같�
 ;
@@ -71,7 +71,7 @@ include vngstrct.inc
 
         ASSUME  ds:_DATA
 _DATA   SEGMENT PARA PUBLIC USE32 'DATA'
-       
+
 
 _DATA   ENDS
 
@@ -144,7 +144,7 @@ start_byte:
         jz      skip_6
         dec     edx
         jz      skip_7
-                                
+
 
 skip_0:
         shl     al,1
@@ -266,7 +266,7 @@ exit:
 
         ret
 END_PROC        vngo_zlinemono16
-                
+
 
 _text   ends
         end

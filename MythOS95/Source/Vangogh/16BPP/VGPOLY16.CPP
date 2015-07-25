@@ -6,7 +6,7 @@
 //                                                           |. _  .   .|
 //          Microsoft Windows '95 Version                    | / \   .  |
 //                                                           |_|_|_._._.|
-// Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
+// Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
 //              All rights reserved.                        %\__________/%
 //                                                           %          %
 //
@@ -90,96 +90,70 @@
 
 VNGError VngoVVport16::poly (int count,VngoPointF pts[])
 {
-    assert(lock_status);
     assert (count < VNGO_MAX_VERTCOUNT);
+    VngoTexture *tex = NULL;
+    dword poly_flags = 0;
 
-    VngoPoint2 tpts[VNGO_MAX_VERTCOUNT];
-    for (int i = 0; i < count; i++)
-    {
-        tpts[i].x = long(pts[i].x * float(0x10000));
-        tpts[i].y = long(pts[i].y * float(0x10000));
-        tpts[i].z = dword(pts[i].z * float(0xffffffff));
-        tpts[i].clr = pts[i].clr;
-        tpts[i].shade = long(pts[i].shade) << 16;
+    if (vflags & VNGO_ZBUFFER_ACTIVE)
+        poly_flags |= VNGO_TRITYPE_ZBUFFER;
 
-        assert (pts[i].x >= 0);
-        assert (pts[i].x < vbuff.width);
-        assert (pts[i].y >= 0);
-        assert (pts[i].y < vbuff.height);
-    }
-    vngo_poly16(this,count,tpts);
+    if (vflags & VNGO_DEBUG_OUTLINE)
+        poly_flags |= VNGO_TRITYPE_OUTLINE;
+
+    vngo_poly(this,count,poly_flags,pts,tex,255);
     return VNGO_NO_ERROR;
 }
 
 VNGError VngoVVport16::poly (int count,VngoPoint pts[])
 {
-    assert(lock_status);
     assert (count < VNGO_MAX_VERTCOUNT);
 
-    VngoPoint2 tpts[VNGO_MAX_VERTCOUNT];
+    VngoPointF tpts[VNGO_MAX_VERTCOUNT];
 
     for (int i = 0; i < count; i++)
     {
-        tpts[i].x = pts[i].x << 16;
-        tpts[i].y = pts[i].y << 16;
-        tpts[i].z = pts[i].z;
-        tpts[i].w = pts[i].w;
+        tpts[i].x = float(pts[i].x);
+        tpts[i].y = float(pts[i].y);
+        tpts[i].z = float(dword(pts[i].z)) / float(0xffffffff);
         tpts[i].clr = pts[i].clr;
-        tpts[i].shade = pts[i].shade << 16;
-
-        assert (pts[i].x >= 0);
-        assert (pts[i].x < vbuff.width);
-        assert (pts[i].y >= 0);
-        assert (pts[i].y < vbuff.height);
+        tpts[i].shade = float(pts[i].shade);
     }
-    vngo_poly16(this,count,tpts);
+    poly(count,tpts);
     return VNGO_NO_ERROR;
 }
 
 
 VNGError VngoVVport16::gpoly (int count,VngoPoint pts[])
 {
-    assert(lock_status);
-    assert (count <= VNGO_MAX_VERTCOUNT);
+    assert (count < VNGO_MAX_VERTCOUNT);
 
-    VngoPoint2 tpts[VNGO_MAX_VERTCOUNT];
-    for (int i=0;i < count; i++)
+    VngoPointF tpts[VNGO_MAX_VERTCOUNT];
+
+    for (int i = 0; i < count; i++)
     {
-        tpts[i].x = pts[i].x << 16;
-        tpts[i].y = pts[i].y << 16;
-        tpts[i].z = pts[i].z;
-        tpts[i].w = pts[i].w;
+        tpts[i].x = float(pts[i].x);
+        tpts[i].y = float(pts[i].y);
+        tpts[i].z = float(dword(pts[i].z)) / float(0xffffffff);
         tpts[i].clr = pts[i].clr;
-        tpts[i].shade = pts[i].shade << 16;
-        assert (pts[i].x >= 0);
-        assert (pts[i].x < vbuff.width);
-        assert (pts[i].y >= 0);
-        assert (pts[i].y < vbuff.height);
+        tpts[i].shade = float(pts[i].shade);
     }
-    vngo_gpoly16(this,count,tpts);
+    gpoly(count,tpts);
     return VNGO_NO_ERROR;
 }
 
 VNGError VngoVVport16::gpoly (int count,VngoPointF pts[])
 {
-    assert(lock_status);
     assert (count <= VNGO_MAX_VERTCOUNT);
+    VngoTexture *tex = NULL;
+    dword poly_flags = VNGO_TRITYPE_GOURAUD;
 
-    VngoPoint2 tpts[VNGO_MAX_VERTCOUNT];
-    for (int i=0;i < count; i++)
-    {
-        tpts[i].x = long(pts[i].x * float(0x10000));
-        tpts[i].y = long(pts[i].y * float(0x10000));
-        tpts[i].z = dword(pts[i].z * float(0xffffffff));
-        tpts[i].clr = pts[i].clr;
-        tpts[i].shade = long(pts[i].shade) << 16;
+    if (vflags & VNGO_ZBUFFER_ACTIVE)
+        poly_flags |= VNGO_TRITYPE_ZBUFFER;
 
-        assert (pts[i].x >= 0);
-        assert (pts[i].x < vbuff.width << 16);
-        assert (pts[i].y >= 0);
-        assert (pts[i].y < vbuff.height << 16);
-    }
-    vngo_gpoly16(this,count,tpts);
+    if (vflags & VNGO_DEBUG_OUTLINE)
+        poly_flags |= VNGO_TRITYPE_OUTLINE;
+
+    vngo_poly(this,count,poly_flags,pts,tex,255);
     return VNGO_NO_ERROR;
 }
 
@@ -197,442 +171,169 @@ VNGError VngoVVport16::gpoly_persp (int count,VngoPointF pts[])
 
 VNGError VngoVVport16::tpoly (int count,VngoPoint pts[],VngoTexture *tex)
 {
-    assert(lock_status);
-    assert (count <= VNGO_MAX_VERTCOUNT);
+    assert (count < VNGO_MAX_VERTCOUNT);
 
-    VngoTexture3D *tptr = tex->vtex3d;
+    VngoPointF tpts[VNGO_MAX_VERTCOUNT];
 
-    while(tptr != NULL && tptr->get_type() != VNGO_MEM_TEX)
+    for (int i = 0; i < count; i++)
     {
-        tptr = tptr->next;
+        tpts[i].x = float(pts[i].x);
+        tpts[i].y = float(pts[i].y);
+        tpts[i].z = float(dword(pts[i].z)) / float(0xffffffff);
+        tpts[i].u = float(pts[i].u) / float(0x10000);
+        tpts[i].v = float(pts[i].v) / float(0x10000);
+        tpts[i].w = float(pts[i].w) / float(0x3fffffff);
+        tpts[i].clr = pts[i].clr;
+        tpts[i].shade = float(pts[i].shade);
     }
-    if (tptr == NULL)
-    {
-        if (tex->pal_ptr == NULL)
-            tex->pal_ptr = vbuff.pal;
-
-        tptr = new VngoMemTexture3D(tex,tex->pal_ptr);
-        if (tptr->get_err_status() != VNGO_NO_ERROR)
-        {
-            delete tptr;
-            return (VNGO_UNSUPPORTED_TEXTURE);
-        }
-    }
-
-
-    if (!(((VngoMemTexture3D*)tptr)->vtxt->flags & VNGO_TEXTURE_8BIT))
-    {
-        return (VNGO_UNSUPPORTED_TEXTURE);
-    }
-
-    VngoPal *tpal = vbuff.pal;
-    vbuff.pal = tex->pal_ptr;
-
-    VngoPoint2 tpts[VNGO_MAX_VERTCOUNT];
-    for (int i=0;i < count;i++)
-    {
-        tpts[i].x = pts[i].x << 16;
-        tpts[i].y = pts[i].y << 16;
-        tpts[i].z = pts[i].z;
-        tpts[i].w = pts[i].w;
-        tpts[i].shade = pts[i].shade << 16;
-        tpts[i].u = pts[i].u << ((VngoMemTexture3D*)tptr)->widthshift;
-        tpts[i].v = pts[i].v << ((VngoMemTexture3D*)tptr)->heightshift;
-        assert (pts[i].x >= 0);
-        assert (pts[i].x < vbuff.width);
-        assert (pts[i].y >= 0);
-        assert (pts[i].y < vbuff.height);
-    }
-
-    vngo_tpoly16(this,count,tpts,tptr);
-
-    vbuff.pal = tpal;
-
+    tpoly(count,tpts,tex);
     return VNGO_NO_ERROR;
+
 }
 
 
 VNGError VngoVVport16::tpoly (int count,VngoPointF pts[],VngoTexture *tex)
 {
-    assert(lock_status);
     assert (count <= VNGO_MAX_VERTCOUNT);
 
-    VngoTexture3D *tptr = tex->vtex3d;
+    dword poly_flags = VNGO_TRITYPE_TEXTURED;
 
-    while(tptr != NULL && tptr->get_type() != VNGO_MEM_TEX)
-    {
-        tptr = tptr->next;
-    }
-    if (tptr == NULL)
-    {
-        if (tex->pal_ptr == NULL)
-            tex->pal_ptr = vbuff.pal;
+    if (vflags & VNGO_ZBUFFER_ACTIVE)
+        poly_flags |= VNGO_TRITYPE_ZBUFFER;
 
-        tptr = new VngoMemTexture3D(tex,tex->pal_ptr);
-        if (tptr->get_err_status() != VNGO_NO_ERROR)
-        {
-            delete tptr;
-            return (VNGO_UNSUPPORTED_TEXTURE);
-        }
-    }
+    if (vflags & VNGO_TEXTURE_FILTER)
+        poly_flags |= VNGO_TRITYPE_FILTERED;
 
+    if (vflags & VNGO_DEBUG_OUTLINE)
+        poly_flags |= VNGO_TRITYPE_OUTLINE;
 
-    if (!(((VngoMemTexture3D*)tptr)->vtxt->flags & VNGO_TEXTURE_8BIT))
-    {
-        return (VNGO_UNSUPPORTED_TEXTURE);
-    }
-
-    VngoPal *tpal = vbuff.pal;
-    vbuff.pal = tex->pal_ptr;
-
-    VngoPoint2 tpts[VNGO_MAX_VERTCOUNT];
-    for (int i=0;i < count;i++)
-    {
-        tpts[i].x = long(pts[i].x * float(0x10000));
-        tpts[i].y = long(pts[i].y * float(0x10000));
-        tpts[i].z = dword(pts[i].z * float(0xffffffff));
-        tpts[i].shade = long(pts[i].shade) << 16;
-        tpts[i].u = long(pts[i].u * float(0x10000)) << ((VngoMemTexture3D*)tptr)->widthshift;
-        tpts[i].v = long(pts[i].v * float(0x10000)) << ((VngoMemTexture3D*)tptr)->heightshift;
-
-        assert (pts[i].x >= 0);
-        assert (pts[i].x < vbuff.width << 16);
-        assert (pts[i].y >= 0);
-        assert (pts[i].y < vbuff.height << 16);
-    }
-
-    vngo_tpoly16(this,count,tpts,tptr);
-    vbuff.pal = tpal;
+    vngo_poly(this,count,poly_flags,pts,tex,255);
 
     return VNGO_NO_ERROR;
 }
 
 VNGError VngoVVport16::tpoly_persp (int count,VngoPoint pts[],VngoTexture *tex)
 {
-    assert(lock_status);
-    assert (count <= VNGO_MAX_VERTCOUNT);
+    assert (count < VNGO_MAX_VERTCOUNT);
 
-    VngoTexture3D *tptr = tex->vtex3d;
+    VngoPointF tpts[VNGO_MAX_VERTCOUNT];
 
-    while(tptr != NULL && tptr->get_type() != VNGO_MEM_TEX)
+    for (int i = 0; i < count; i++)
     {
-        tptr = tptr->next;
+        tpts[i].x = float(pts[i].x);
+        tpts[i].y = float(pts[i].y);
+        tpts[i].z = float(dword(pts[i].z)) / float(0xffffffff);
+        tpts[i].u = float(pts[i].u) / float(0x10000);
+        tpts[i].v = float(pts[i].v) / float(0x10000);
+        tpts[i].w = float(pts[i].w) / float(0x3fffffff);
+        tpts[i].clr = pts[i].clr;
+        tpts[i].shade = float(pts[i].shade);
     }
-    if (tptr == NULL)
-    {
-        if (tex->pal_ptr == NULL)
-            tex->pal_ptr = vbuff.pal;
-
-        tptr = new VngoMemTexture3D(tex,tex->pal_ptr);
-        if (tptr->get_err_status() != VNGO_NO_ERROR)
-        {
-            delete tptr;
-            return (VNGO_UNSUPPORTED_TEXTURE);
-        }
-    }
-
-
-    if (!(((VngoMemTexture3D*)tptr)->vtxt->flags & VNGO_TEXTURE_8BIT))
-    {
-        return (VNGO_UNSUPPORTED_TEXTURE);
-    }
-
-    VngoPal *tpal = vbuff.pal;
-    vbuff.pal = tex->pal_ptr;
-
-    VngoPoint2 tpts[VNGO_MAX_VERTCOUNT];
-    for (int i=0;i < count;i++)
-    {
-        tpts[i].x = pts[i].x << 16;
-        tpts[i].y = pts[i].y << 16;
-        tpts[i].z = pts[i].z;
-        tpts[i].w = pts[i].w;
-        tpts[i].shade = pts[i].shade << 16;
-        tpts[i].u = pts[i].u << ((VngoMemTexture3D*)tptr)->widthshift;
-        tpts[i].v = pts[i].v << ((VngoMemTexture3D*)tptr)->heightshift;
-        assert (pts[i].x >= 0);
-        assert (pts[i].x < vbuff.width);
-        assert (pts[i].y >= 0);
-        assert (pts[i].y < vbuff.height);
-    }
-
-    vngo_tpoly_persp16 (this,count,tpts,tptr);
-    vbuff.pal = tpal;
-
+    tpoly_persp(count,tpts,tex);
     return VNGO_NO_ERROR;
 }
 
 
 VNGError VngoVVport16::tpoly_persp (int count,VngoPointF pts[],VngoTexture *tex)
 {
-    assert(lock_status);
     assert (count <= VNGO_MAX_VERTCOUNT);
 
-    VngoTexture3D *tptr = tex->vtex3d;
+    dword poly_flags = VNGO_TRITYPE_TEXTURED | VNGO_TRITYPE_PERSPECTIVE;
 
-    while(tptr != NULL && tptr->get_type() != VNGO_MEM_TEX)
-    {
-        tptr = tptr->next;
-    }
-    if (tptr == NULL)
-    {
-        if (tex->pal_ptr == NULL)
-            tex->pal_ptr = vbuff.pal;
+    if (vflags & VNGO_ZBUFFER_ACTIVE)
+        poly_flags |= VNGO_TRITYPE_ZBUFFER;
 
-        tptr = new VngoMemTexture3D(tex,tex->pal_ptr);
-        if (tptr->get_err_status() != VNGO_NO_ERROR)
-        {
-            delete tptr;
-            return (VNGO_UNSUPPORTED_TEXTURE);
-        }
-    }
+    if (vflags & VNGO_TEXTURE_FILTER)
+        poly_flags |= VNGO_TRITYPE_FILTERED;
 
+    if (vflags & VNGO_DEBUG_OUTLINE)
+        poly_flags |= VNGO_TRITYPE_OUTLINE;
 
-    if (!(((VngoMemTexture3D*)tptr)->vtxt->flags & VNGO_TEXTURE_8BIT))
-    {
-        return (VNGO_UNSUPPORTED_TEXTURE);
-    }
-
-    VngoPal *tpal = vbuff.pal;
-    vbuff.pal = tex->pal_ptr;
-
-    VngoPoint2 tpts[VNGO_MAX_VERTCOUNT];
-    for (int i=0;i < count;i++)
-    {
-        tpts[i].x = long(pts[i].x * float(0x10000));
-        tpts[i].y = long(pts[i].y * float(0x10000));
-        tpts[i].z = dword(pts[i].z * float(0xffffffff));
-        tpts[i].w = dword(pts[i].w * float(0x3fffffff));
-        tpts[i].shade = long(pts[i].shade) << 16;
-        tpts[i].u = long(pts[i].u * float(0x10000)) << ((VngoMemTexture3D*)tptr)->widthshift;
-        tpts[i].v = long(pts[i].v * float(0x10000)) << ((VngoMemTexture3D*)tptr)->heightshift;
-
-        assert (pts[i].x >= 0);
-        assert (pts[i].x < vbuff.width << 16);
-        assert (pts[i].y >= 0);
-        assert (pts[i].y < vbuff.height << 16);
-    }
-
-    vngo_tpoly_persp16 (this,count,tpts,tptr);
-    vbuff.pal = tpal;
+    vngo_poly(this,count,poly_flags,pts,tex,255);
 
     return VNGO_NO_ERROR;
 }
 
 VNGError VngoVVport16::gtpoly (int count,VngoPoint pts[],VngoTexture *tex)
 {
-    assert( lock_status);
-    assert (count <= VNGO_MAX_VERTCOUNT);
+    assert (count < VNGO_MAX_VERTCOUNT);
 
-    VngoTexture3D *tptr = tex->vtex3d;
+    VngoPointF tpts[VNGO_MAX_VERTCOUNT];
 
-    while(tptr != NULL && tptr->get_type() != VNGO_MEM_TEX)
+    for (int i = 0; i < count; i++)
     {
-        tptr = tptr->next;
+        tpts[i].x = float(pts[i].x);
+        tpts[i].y = float(pts[i].y);
+        tpts[i].z = float(dword(pts[i].z)) / float(0xffffffff);
+        tpts[i].u = float(pts[i].u) / float(0x10000);
+        tpts[i].v = float(pts[i].v) / float(0x10000);
+        tpts[i].w = float(pts[i].w) / float(0x3fffffff);
+        tpts[i].clr = pts[i].clr;
+        tpts[i].shade = float(pts[i].shade);
     }
-    if (tptr == NULL)
-    {
-        if (tex->pal_ptr == NULL)
-            tex->pal_ptr = vbuff.pal;
-
-        tptr = new VngoMemTexture3D(tex,tex->pal_ptr);
-        if (tptr->get_err_status() != VNGO_NO_ERROR)
-        {
-            delete tptr;
-            return (VNGO_UNSUPPORTED_TEXTURE);
-        }
-    }
-
-
-    if (!(((VngoMemTexture3D*)tptr)->vtxt->flags & VNGO_TEXTURE_8BIT))
-    {
-        return (VNGO_UNSUPPORTED_TEXTURE);
-    }
-
-    VngoPal *tpal = vbuff.pal;
-    vbuff.pal = tex->pal_ptr;
-
-    VngoPoint2 tpts[VNGO_MAX_VERTCOUNT];
-    for (int i=0;i < count;i++)
-    {
-        tpts[i].x = pts[i].x << 16;
-        tpts[i].y = pts[i].y << 16;
-        tpts[i].z = pts[i].z;
-        tpts[i].w = pts[i].w;
-        tpts[i].shade = pts[i].shade << 16;
-        tpts[i].u = pts[i].u << ((VngoMemTexture3D*)tptr)->widthshift;
-        tpts[i].v = pts[i].v << ((VngoMemTexture3D*)tptr)->heightshift;
-        assert (pts[i].x >= 0);
-        assert (pts[i].x < vbuff.width);
-        assert (pts[i].y >= 0);
-        assert (pts[i].y < vbuff.height);
-    }
-    vngo_tgpoly16(this,count,tpts,tptr);
-    vbuff.pal = tpal;
-
+    gtpoly(count,tpts,tex);
     return VNGO_NO_ERROR;
 }
 
 
 VNGError VngoVVport16::gtpoly (int count,VngoPointF pts[],VngoTexture *tex)
 {
-    assert( lock_status);
     assert (count <= VNGO_MAX_VERTCOUNT);
 
-    VngoTexture3D *tptr = tex->vtex3d;
+    dword poly_flags = VNGO_TRITYPE_TEXTURED | VNGO_TRITYPE_GOURAUD;
 
-    while(tptr != NULL && tptr->get_type() != VNGO_MEM_TEX)
-    {
-        tptr = tptr->next;
-    }
-    if (tptr == NULL)
-    {
-        if (tex->pal_ptr == NULL)
-            tex->pal_ptr = vbuff.pal;
+    if (vflags & VNGO_ZBUFFER_ACTIVE)
+        poly_flags |= VNGO_TRITYPE_ZBUFFER;
 
-        tptr = new VngoMemTexture3D(tex,tex->pal_ptr);
-        if (tptr->get_err_status() != VNGO_NO_ERROR)
-        {
-            delete tptr;
-            return (VNGO_UNSUPPORTED_TEXTURE);
-        }
-    }
+    if (vflags & VNGO_TEXTURE_FILTER)
+        poly_flags |= VNGO_TRITYPE_FILTERED;
 
+    if (vflags & VNGO_DEBUG_OUTLINE)
+        poly_flags |= VNGO_TRITYPE_OUTLINE;
 
-    if (!(((VngoMemTexture3D*)tptr)->vtxt->flags & VNGO_TEXTURE_8BIT))
-    {
-        return (VNGO_UNSUPPORTED_TEXTURE);
-    }
-
-    VngoPal *tpal = vbuff.pal;
-    vbuff.pal = tex->pal_ptr;
-
-    VngoPoint2 tpts[VNGO_MAX_VERTCOUNT];
-    for (int i=0;i < count;i++)
-    {
-        tpts[i].x = long(pts[i].x * float(0x10000));
-        tpts[i].y = long(pts[i].y * float(0x10000));
-        tpts[i].z = dword(pts[i].z * float(0xffffffff));
-        tpts[i].shade = long(pts[i].shade) << 16;
-        tpts[i].u = long(pts[i].u * float(0x10000)) << ((VngoMemTexture3D*)tptr)->widthshift;
-        tpts[i].v = long(pts[i].v * float(0x10000)) << ((VngoMemTexture3D*)tptr)->heightshift;
-
-        assert (pts[i].x >= 0);
-        assert (pts[i].x < vbuff.width << 16);
-        assert (pts[i].y >= 0);
-        assert (pts[i].y < vbuff.height << 16);
-    }
-    vngo_tgpoly16(this,count,tpts,tptr);
-    vbuff.pal = tpal;
+    vngo_poly(this,count,poly_flags,pts,tex,255);
 
     return VNGO_NO_ERROR;
 }
 
 VNGError VngoVVport16::gtpoly_persp (int count,VngoPoint pts[],VngoTexture *tex)
 {
-    assert(lock_status);
-    assert (count <= VNGO_MAX_VERTCOUNT);
+    assert (count < VNGO_MAX_VERTCOUNT);
 
-    VngoTexture3D *tptr = tex->vtex3d;
+    VngoPointF tpts[VNGO_MAX_VERTCOUNT];
 
-    while(tptr != NULL && tptr->get_type() != VNGO_MEM_TEX)
+    for (int i = 0; i < count; i++)
     {
-        tptr = tptr->next;
-    }
-    if (tptr == NULL)
-    {
-        if (tex->pal_ptr == NULL)
-            tex->pal_ptr = vbuff.pal;
-
-        tptr = new VngoMemTexture3D(tex,tex->pal_ptr);
-        if (tptr->get_err_status() != VNGO_NO_ERROR)
-        {
-            delete tptr;
-            return (VNGO_UNSUPPORTED_TEXTURE);
-        }
+        tpts[i].x = float(pts[i].x);
+        tpts[i].y = float(pts[i].y);
+        tpts[i].z = float(dword(pts[i].z)) / float(0xffffffff);
+        tpts[i].u = float(pts[i].u) / float(0x10000);
+        tpts[i].v = float(pts[i].v) / float(0x10000);
+        tpts[i].w = float(pts[i].w) / float(0x3fffffff);
+        tpts[i].clr = pts[i].clr;
+        tpts[i].shade = float(pts[i].shade);
     }
 
-
-    if (!(((VngoMemTexture3D*)tptr)->vtxt->flags & VNGO_TEXTURE_8BIT))
-    {
-        return (VNGO_UNSUPPORTED_TEXTURE);
-    }
-
-    VngoPal *tpal = vbuff.pal;
-    vbuff.pal = tex->pal_ptr;
-
-    VngoPoint2 tpts[VNGO_MAX_VERTCOUNT];
-    for (int i=0;i < count;i++)
-    {
-        tpts[i].x = pts[i].x << 16;
-        tpts[i].y = pts[i].y << 16;
-        tpts[i].z = pts[i].z;
-        tpts[i].w = pts[i].w;
-        tpts[i].shade = pts[i].shade << 16;
-        tpts[i].u = pts[i].u << ((VngoMemTexture3D*)tptr)->widthshift;
-        tpts[i].v = pts[i].v << ((VngoMemTexture3D*)tptr)->heightshift;
-        assert (pts[i].x >= 0);
-        assert (pts[i].x < vbuff.width);
-        assert (pts[i].y >= 0);
-        assert (pts[i].y < vbuff.height);
-    }
-    vngo_tgpoly_persp16(this,count,tpts,tptr);
-    vbuff.pal = tpal;
-
+    gtpoly_persp(count,tpts,tex);
     return VNGO_NO_ERROR;
 }
 
 VNGError VngoVVport16::gtpoly_persp (int count,VngoPointF pts[],VngoTexture *tex)
 {
-    assert(lock_status);
     assert (count <= VNGO_MAX_VERTCOUNT);
 
-    VngoTexture3D *tptr = tex->vtex3d;
+    dword poly_flags = VNGO_TRITYPE_TEXTURED | VNGO_TRITYPE_GOURAUD | VNGO_TRITYPE_PERSPECTIVE;
 
-    while(tptr != NULL && tptr->get_type() != VNGO_MEM_TEX)
-    {
-        tptr = tptr->next;
-    }
-    if (tptr == NULL)
-    {
-        if (tex->pal_ptr == NULL)
-            tex->pal_ptr = vbuff.pal;
+    if (vflags & VNGO_ZBUFFER_ACTIVE)
+        poly_flags |= VNGO_TRITYPE_ZBUFFER;
 
-        tptr = new VngoMemTexture3D(tex,tex->pal_ptr);
-        if (tptr->get_err_status() != VNGO_NO_ERROR)
-        {
-            delete tptr;
-            return (VNGO_UNSUPPORTED_TEXTURE);
-        }
-    }
+    if (vflags & VNGO_TEXTURE_FILTER)
+        poly_flags |= VNGO_TRITYPE_FILTERED;
 
+    if (vflags & VNGO_DEBUG_OUTLINE)
+        poly_flags |= VNGO_TRITYPE_OUTLINE;
 
-    if (!(((VngoMemTexture3D*)tptr)->vtxt->flags & VNGO_TEXTURE_8BIT))
-    {
-        return (VNGO_UNSUPPORTED_TEXTURE);
-    }
-
-    VngoPal *tpal = vbuff.pal;
-    vbuff.pal = tex->pal_ptr;
-
-    VngoPoint2 tpts[VNGO_MAX_VERTCOUNT];
-    for (int i=0;i < count;i++)
-    {
-        tpts[i].x = long(pts[i].x * float(0x10000));
-        tpts[i].y = long(pts[i].y * float(0x10000));
-        tpts[i].z = dword(pts[i].z * float(0xffffffff));
-        tpts[i].w = dword(pts[i].w * float(0x3fffffff));
-        tpts[i].shade = long(pts[i].shade) << 16;
-        tpts[i].u = long(pts[i].u * float(0x10000)) << ((VngoMemTexture3D*)tptr)->widthshift;
-        tpts[i].v = long(pts[i].v * float(0x10000)) << ((VngoMemTexture3D*)tptr)->heightshift;
-
-        assert (pts[i].x >= 0);
-        assert (pts[i].x < vbuff.width << 16);
-        assert (pts[i].y >= 0);
-        assert (pts[i].y < vbuff.height << 16);
-    }
-    vngo_tgpoly_persp16 (this,count,tpts,tptr);
-    vbuff.pal = tpal;
+    vngo_poly(this,count,poly_flags,pts,tex,255);
 
     return VNGO_NO_ERROR;
 }
@@ -698,24 +399,17 @@ VNGError VngoVVport16::poly_a (int count,
                               VngoPointF pts[],
                               long alpha)
 {
-    assert(lock_status);
     assert (count < VNGO_MAX_VERTCOUNT);
+    VngoTexture *tex = NULL;
+    dword poly_flags = VNGO_TRITYPE_ALPHA;
 
-    VngoPoint2 tpts[VNGO_MAX_VERTCOUNT];
-    for (int i = 0; i < count; i++)
-    {
-        tpts[i].x = long(pts[i].x * float(0x10000));
-        tpts[i].y = long(pts[i].y * float(0x10000));
-        tpts[i].z = dword(pts[i].z * float(0xffffffff));
-        tpts[i].clr = pts[i].clr;
-        tpts[i].shade = long(pts[i].shade) << 16;
+    if (vflags & VNGO_ZBUFFER_ACTIVE)
+        poly_flags |= VNGO_TRITYPE_ZBUFFER;
 
-        assert (pts[i].x >= 0);
-        assert (pts[i].x < vbuff.width << 16);
-        assert (pts[i].y >= 0);
-        assert (pts[i].y < vbuff.height << 16);
-    }
-    vngo_apoly16(this,count,tpts,alpha);
+    if (vflags & VNGO_DEBUG_OUTLINE)
+        poly_flags |= VNGO_TRITYPE_OUTLINE;
+
+    vngo_poly(this,count,poly_flags,pts,tex,alpha);
     return VNGO_NO_ERROR;
 }
 
@@ -723,26 +417,19 @@ VNGError VngoVVport16::poly_a (int count,
                               VngoPoint pts[],
                               long alpha)
 {
-    assert(lock_status);
     assert (count < VNGO_MAX_VERTCOUNT);
 
-    VngoPoint2 tpts[VNGO_MAX_VERTCOUNT];
+    VngoPointF tpts[VNGO_MAX_VERTCOUNT];
 
     for (int i = 0; i < count; i++)
     {
-        tpts[i].x = pts[i].x << 16;
-        tpts[i].y = pts[i].y << 16;
-        tpts[i].z = pts[i].z;
-        tpts[i].w = pts[i].w;
+        tpts[i].x = float(pts[i].x);
+        tpts[i].y = float(pts[i].y);
+        tpts[i].z = float(dword(pts[i].z)) / float(0xffffffff);
         tpts[i].clr = pts[i].clr;
-        tpts[i].shade = pts[i].shade << 16;
-
-        assert (pts[i].x >= 0);
-        assert (pts[i].x < vbuff.width);
-        assert (pts[i].y >= 0);
-        assert (pts[i].y < vbuff.height);
+        tpts[i].shade = float(pts[i].shade);
     }
-    vngo_apoly16(this,count,tpts,alpha);
+    poly_a(count,tpts,alpha);
     return VNGO_NO_ERROR;
 }
 
@@ -751,24 +438,19 @@ VNGError VngoVVport16::gpoly_a (int count,
                                VngoPoint pts[],
                                long alpha)
 {
-    assert(lock_status);
-    assert (count <= VNGO_MAX_VERTCOUNT);
+    assert (count < VNGO_MAX_VERTCOUNT);
 
-    VngoPoint2 tpts[VNGO_MAX_VERTCOUNT];
-    for (int i=0;i < count; i++)
+    VngoPointF tpts[VNGO_MAX_VERTCOUNT];
+
+    for (int i = 0; i < count; i++)
     {
-        tpts[i].x = pts[i].x << 16;
-        tpts[i].y = pts[i].y << 16;
-        tpts[i].z = pts[i].z;
-        tpts[i].w = pts[i].w;
+        tpts[i].x = float(pts[i].x);
+        tpts[i].y = float(pts[i].y);
+        tpts[i].z = float(dword(pts[i].z)) / float(0xffffffff);
         tpts[i].clr = pts[i].clr;
-        tpts[i].shade = pts[i].shade << 16;
-        assert (pts[i].x >= 0);
-        assert (pts[i].x < vbuff.width);
-        assert (pts[i].y >= 0);
-        assert (pts[i].y < vbuff.height);
+        tpts[i].shade = float(pts[i].shade);
     }
-    vngo_agpoly16(this,count,tpts,alpha);
+    gpoly_a(count,tpts,alpha);
     return VNGO_NO_ERROR;
 }
 
@@ -776,24 +458,17 @@ VNGError VngoVVport16::gpoly_a (int count,
                                VngoPointF pts[],
                                long alpha)
 {
-    assert(lock_status);
-    assert (count <= VNGO_MAX_VERTCOUNT);
+    assert (count < VNGO_MAX_VERTCOUNT);
+    VngoTexture *tex = NULL;
+    dword poly_flags = VNGO_TRITYPE_GOURAUD | VNGO_TRITYPE_ALPHA;
 
-    VngoPoint2 tpts[VNGO_MAX_VERTCOUNT];
-    for (int i=0;i < count; i++)
-    {
-        tpts[i].x = long(pts[i].x * float(0x10000));
-        tpts[i].y = long(pts[i].y * float(0x10000));
-        tpts[i].z = dword(pts[i].z * float(0xffffffff));
-        tpts[i].clr = pts[i].clr;
-        tpts[i].shade = long(pts[i].shade) << 16;
+    if (vflags & VNGO_ZBUFFER_ACTIVE)
+        poly_flags |= VNGO_TRITYPE_ZBUFFER;
 
-        assert (pts[i].x >= 0);
-        assert (pts[i].x < vbuff.width << 16);
-        assert (pts[i].y >= 0);
-        assert (pts[i].y < vbuff.height << 16);
-    }
-    vngo_agpoly16(this,count,tpts,alpha);
+    if (vflags & VNGO_DEBUG_OUTLINE)
+        poly_flags |= VNGO_TRITYPE_OUTLINE;
+
+    vngo_poly(this,count,poly_flags,pts,tex,alpha);
     return VNGO_NO_ERROR;
 }
 
@@ -801,7 +476,6 @@ VNGError VngoVVport16::gpoly_persp_a (int count,
                                      VngoPoint pts[],
                                      long alpha)
 {
-    assert(lock_status);
     assert(count < VNGO_MAX_VERTCOUNT);
     return (gpoly_a(count,pts,alpha));
 }
@@ -810,7 +484,6 @@ VNGError VngoVVport16::gpoly_persp_a (int count,
                                      VngoPointF pts[],
                                      long alpha)
 {
-    assert(lock_status);
     assert(count < VNGO_MAX_VERTCOUNT);
     return (gpoly_a(count,pts,alpha));
 }
@@ -819,56 +492,23 @@ VNGError VngoVVport16::tpoly_a (int count,VngoPoint pts[],
                                VngoTexture *tex,
                                long alpha)
 {
-    assert(lock_status);
-    assert (count <= VNGO_MAX_VERTCOUNT);
+    assert (count < VNGO_MAX_VERTCOUNT);
 
-    VngoTexture3D *tptr = tex->vtex3d;
+    VngoPointF tpts[VNGO_MAX_VERTCOUNT];
 
-    while(tptr != NULL && tptr->get_type() != VNGO_MEM_TEX)
+    for (int i = 0; i < count; i++)
     {
-        tptr = tptr->next;
-    }
-    if (tptr == NULL)
-    {
-        if (tex->pal_ptr == NULL)
-            tex->pal_ptr = vbuff.pal;
-
-        tptr = new VngoMemTexture3D(tex,tex->pal_ptr);
-        if (tptr->get_err_status() != VNGO_NO_ERROR)
-        {
-            delete tptr;
-            return (VNGO_UNSUPPORTED_TEXTURE);
-        }
+        tpts[i].x = float(pts[i].x);
+        tpts[i].y = float(pts[i].y);
+        tpts[i].z = float(dword(pts[i].z)) / float(0xffffffff);
+        tpts[i].u = float(pts[i].u) / float(0x10000);
+        tpts[i].v = float(pts[i].v) / float(0x10000);
+        tpts[i].w = float(pts[i].w) / float(0x3fffffff);
+        tpts[i].clr = pts[i].clr;
+        tpts[i].shade = float(pts[i].shade);
     }
 
-
-    if (!(((VngoMemTexture3D*)tptr)->vtxt->flags & VNGO_TEXTURE_8BIT))
-    {
-        return (VNGO_UNSUPPORTED_TEXTURE);
-    }
-
-    VngoPal *tpal = vbuff.pal;
-    vbuff.pal = tex->pal_ptr;
-
-    VngoPoint2 tpts[VNGO_MAX_VERTCOUNT];
-    for (int i=0;i < count;i++)
-    {
-        tpts[i].x = pts[i].x << 16;
-        tpts[i].y = pts[i].y << 16;
-        tpts[i].z = pts[i].z;
-        tpts[i].w = pts[i].w;
-        tpts[i].shade = pts[i].shade << 16;
-        tpts[i].u = pts[i].u << ((VngoMemTexture3D*)tptr)->widthshift;
-        tpts[i].v = pts[i].v << ((VngoMemTexture3D*)tptr)->heightshift;
-        assert (pts[i].x >= 0);
-        assert (pts[i].x < vbuff.width);
-        assert (pts[i].y >= 0);
-        assert (pts[i].y < vbuff.height);
-    }
-
-    vngo_atpoly16(this,count,tpts,tptr,alpha);
-    vbuff.pal = tpal;
-
+    tpoly_a(count,tpts,tex,alpha);
     return VNGO_NO_ERROR;
 }
 
@@ -877,56 +517,21 @@ VNGError VngoVVport16::tpoly_a (int count,VngoPointF pts[],
                                VngoTexture *tex,
                                long alpha)
 {
-    assert(lock_status);
     assert (count <= VNGO_MAX_VERTCOUNT);
 
-    VngoTexture3D *tptr = tex->vtex3d;
+    dword poly_flags = VNGO_TRITYPE_ALPHA
+                       | VNGO_TRITYPE_TEXTURED;
 
-    while(tptr != NULL && tptr->get_type() != VNGO_MEM_TEX)
-    {
-        tptr = tptr->next;
-    }
-    if (tptr == NULL)
-    {
-        if (tex->pal_ptr == NULL)
-            tex->pal_ptr = vbuff.pal;
+    if (vflags & VNGO_ZBUFFER_ACTIVE)
+        poly_flags |= VNGO_TRITYPE_ZBUFFER;
 
-        tptr = new VngoMemTexture3D(tex,tex->pal_ptr);
-        if (tptr->get_err_status() != VNGO_NO_ERROR)
-        {
-            delete tptr;
-            return (VNGO_UNSUPPORTED_TEXTURE);
-        }
-    }
+    if (vflags & VNGO_DEBUG_OUTLINE)
+        poly_flags |= VNGO_TRITYPE_OUTLINE;
 
+    if (vflags & VNGO_TEXTURE_FILTER)
+        poly_flags |= VNGO_TRITYPE_FILTERED;
 
-    if (!(((VngoMemTexture3D*)tptr)->vtxt->flags & VNGO_TEXTURE_8BIT))
-    {
-        return (VNGO_UNSUPPORTED_TEXTURE);
-    }
-
-    VngoPal *tpal = vbuff.pal;
-    vbuff.pal = tex->pal_ptr;
-
-    VngoPoint2 tpts[VNGO_MAX_VERTCOUNT];
-    for (int i=0;i < count;i++)
-    {
-        tpts[i].x = long(pts[i].x * float(0x10000));
-        tpts[i].y = long(pts[i].y * float(0x10000));
-        tpts[i].z = dword(pts[i].z * float(0xffffffff));
-        tpts[i].shade = long(pts[i].shade) << 16;
-        tpts[i].u = long(pts[i].u * float(0x10000)) << ((VngoMemTexture3D*)tptr)->widthshift;
-        tpts[i].v = long(pts[i].v * float(0x10000)) << ((VngoMemTexture3D*)tptr)->heightshift;
-
-        assert (pts[i].x >= 0);
-        assert (pts[i].x < vbuff.width << 16);
-        assert (pts[i].y >= 0);
-        assert (pts[i].y < vbuff.height << 16);
-    }
-
-    vngo_atpoly16(this,count,tpts,tptr,alpha);
-    vbuff.pal = tpal;
-
+    vngo_poly(this,count,poly_flags,pts,tex,alpha);
     return VNGO_NO_ERROR;
 }
 
@@ -934,56 +539,23 @@ VNGError VngoVVport16::tpoly_persp_a (int count,VngoPoint pts[],
                                      VngoTexture *tex,
                                      long alpha)
 {
-    assert(lock_status);
-    assert (count <= VNGO_MAX_VERTCOUNT);
+    assert (count < VNGO_MAX_VERTCOUNT);
 
-    VngoTexture3D *tptr = tex->vtex3d;
+    VngoPointF tpts[VNGO_MAX_VERTCOUNT];
 
-    while(tptr != NULL && tptr->get_type() != VNGO_MEM_TEX)
+    for (int i = 0; i < count; i++)
     {
-        tptr = tptr->next;
-    }
-    if (tptr == NULL)
-    {
-        if (tex->pal_ptr == NULL)
-            tex->pal_ptr = vbuff.pal;
-
-        tptr = new VngoMemTexture3D(tex,tex->pal_ptr);
-        if (tptr->get_err_status() != VNGO_NO_ERROR)
-        {
-            delete tptr;
-            return (VNGO_UNSUPPORTED_TEXTURE);
-        }
+        tpts[i].x = float(pts[i].x);
+        tpts[i].y = float(pts[i].y);
+        tpts[i].z = float(dword(pts[i].z)) / float(0xffffffff);
+        tpts[i].u = float(pts[i].u) / float(0x10000);
+        tpts[i].v = float(pts[i].v) / float(0x10000);
+        tpts[i].w = float(pts[i].w) / float(0x3fffffff);
+        tpts[i].clr = pts[i].clr;
+        tpts[i].shade = float(pts[i].shade);
     }
 
-
-    if (!(((VngoMemTexture3D*)tptr)->vtxt->flags & VNGO_TEXTURE_8BIT))
-    {
-        return (VNGO_UNSUPPORTED_TEXTURE);
-    }
-
-    VngoPal *tpal = vbuff.pal;
-    vbuff.pal = tex->pal_ptr;
-
-    VngoPoint2 tpts[VNGO_MAX_VERTCOUNT];
-    for (int i=0;i < count;i++)
-    {
-        tpts[i].x = pts[i].x << 16;
-        tpts[i].y = pts[i].y << 16;
-        tpts[i].z = pts[i].z;
-        tpts[i].w = pts[i].w;
-        tpts[i].shade = pts[i].shade << 16;
-        tpts[i].u = pts[i].u << ((VngoMemTexture3D*)tptr)->widthshift;
-        tpts[i].v = pts[i].v << ((VngoMemTexture3D*)tptr)->heightshift;
-        assert (pts[i].x >= 0);
-        assert (pts[i].x < vbuff.width);
-        assert (pts[i].y >= 0);
-        assert (pts[i].y < vbuff.height);
-    }
-
-    vngo_atpoly_persp16(this,count,tpts,tptr,alpha);
-    vbuff.pal = tpal;
-
+    tpoly_persp_a (count,tpts,tex,alpha);
     return VNGO_NO_ERROR;
 }
 
@@ -992,56 +564,21 @@ VNGError VngoVVport16::tpoly_persp_a (int count,VngoPointF pts[],
                                      VngoTexture *tex,
                                      long alpha)
 {
-    assert(lock_status);
     assert (count <= VNGO_MAX_VERTCOUNT);
+    dword poly_flags = VNGO_TRITYPE_PERSPECTIVE
+                       | VNGO_TRITYPE_TEXTURED
+                       | VNGO_TRITYPE_ALPHA;
 
-    VngoTexture3D *tptr = tex->vtex3d;
+    if (vflags & VNGO_ZBUFFER_ACTIVE)
+        poly_flags |= VNGO_TRITYPE_ZBUFFER;
 
-    while(tptr != NULL && tptr->get_type() != VNGO_MEM_TEX)
-    {
-        tptr = tptr->next;
-    }
-    if (tptr == NULL)
-    {
-        if (tex->pal_ptr == NULL)
-            tex->pal_ptr = vbuff.pal;
+    if (vflags & VNGO_DEBUG_OUTLINE)
+        poly_flags |= VNGO_TRITYPE_OUTLINE;
 
-        tptr = new VngoMemTexture3D(tex,tex->pal_ptr);
-        if (tptr->get_err_status() != VNGO_NO_ERROR)
-        {
-            delete tptr;
-            return (VNGO_UNSUPPORTED_TEXTURE);
-        }
-    }
+    if (vflags & VNGO_TEXTURE_FILTER)
+        poly_flags |= VNGO_TRITYPE_FILTERED;
 
-
-    if (!(((VngoMemTexture3D*)tptr)->vtxt->flags & VNGO_TEXTURE_8BIT))
-    {
-        return (VNGO_UNSUPPORTED_TEXTURE);
-    }
-
-    VngoPal *tpal = vbuff.pal;
-    vbuff.pal = tex->pal_ptr;
-
-    VngoPoint2 tpts[VNGO_MAX_VERTCOUNT];
-    for (int i=0;i < count;i++)
-    {
-        tpts[i].x = long(pts[i].x * float(0x10000));
-        tpts[i].y = long(pts[i].y * float(0x10000));
-        tpts[i].z = dword(pts[i].z * float(0xffffffff));
-        tpts[i].w = dword(pts[i].w * float(0x3fffffff));
-        tpts[i].shade = long(pts[i].shade) << 16;
-        tpts[i].u = long(pts[i].u * float(0x10000)) << ((VngoMemTexture3D*)tptr)->widthshift;
-        tpts[i].v = long(pts[i].v * float(0x10000)) << ((VngoMemTexture3D*)tptr)->heightshift;
-
-        assert (pts[i].x >= 0);
-        assert (pts[i].x < vbuff.width << 16);
-        assert (pts[i].y >= 0);
-        assert (pts[i].y < vbuff.height << 16);
-    }
-
-    vngo_atpoly_persp16(this,count,tpts,tptr,alpha);
-    vbuff.pal = tpal;
+    vngo_poly(this,count,poly_flags,pts,tex,alpha);
 
     return VNGO_NO_ERROR;
 }
@@ -1050,55 +587,23 @@ VNGError VngoVVport16::gtpoly_a (int count,VngoPoint pts[],
                                 VngoTexture *tex,
                                 long alpha)
 {
-    assert( lock_status);
-    assert (count <= VNGO_MAX_VERTCOUNT);
+    assert (count < VNGO_MAX_VERTCOUNT);
 
-    VngoTexture3D *tptr = tex->vtex3d;
+    VngoPointF tpts[VNGO_MAX_VERTCOUNT];
 
-    while(tptr != NULL && tptr->get_type() != VNGO_MEM_TEX)
+    for (int i = 0; i < count; i++)
     {
-        tptr = tptr->next;
-    }
-    if (tptr == NULL)
-    {
-        if (tex->pal_ptr == NULL)
-            tex->pal_ptr = vbuff.pal;
-
-        tptr = new VngoMemTexture3D(tex,tex->pal_ptr);
-        if (tptr->get_err_status() != VNGO_NO_ERROR)
-        {
-            delete tptr;
-            return (VNGO_UNSUPPORTED_TEXTURE);
-        }
+        tpts[i].x = float(pts[i].x);
+        tpts[i].y = float(pts[i].y);
+        tpts[i].z = float(dword(pts[i].z)) / float(0xffffffff);
+        tpts[i].u = float(pts[i].u) / float(0x10000);
+        tpts[i].v = float(pts[i].v) / float(0x10000);
+        tpts[i].w = float(pts[i].w) / float(0x3fffffff);
+        tpts[i].clr = pts[i].clr;
+        tpts[i].shade = float(pts[i].shade);
     }
 
-
-    if (!(((VngoMemTexture3D*)tptr)->vtxt->flags & VNGO_TEXTURE_8BIT))
-    {
-        return (VNGO_UNSUPPORTED_TEXTURE);
-    }
-
-    VngoPal *tpal = vbuff.pal;
-    vbuff.pal = tex->pal_ptr;
-
-    VngoPoint2 tpts[VNGO_MAX_VERTCOUNT];
-    for (int i=0;i < count;i++)
-    {
-        tpts[i].x = pts[i].x << 16;
-        tpts[i].y = pts[i].y << 16;
-        tpts[i].z = pts[i].z;
-        tpts[i].w = pts[i].w;
-        tpts[i].shade = pts[i].shade << 16;
-        tpts[i].u = pts[i].u << ((VngoMemTexture3D*)tptr)->widthshift;
-        tpts[i].v = pts[i].v << ((VngoMemTexture3D*)tptr)->heightshift;
-        assert (pts[i].x >= 0);
-        assert (pts[i].x < vbuff.width);
-        assert (pts[i].y >= 0);
-        assert (pts[i].y < vbuff.height);
-    }
-    vngo_atgpoly16(this,count,tpts,tptr,alpha);
-    vbuff.pal = tpal;
-
+    gtpoly_a(count,tpts,tex,alpha);
     return VNGO_NO_ERROR;
 }
 
@@ -1107,56 +612,22 @@ VNGError VngoVVport16::gtpoly_a (int count,VngoPointF pts[],
                                 VngoTexture *tex,
                                 long alpha)
 {
-    assert( lock_status);
     assert (count <= VNGO_MAX_VERTCOUNT);
 
-    VngoTexture3D *tptr = tex->vtex3d;
+    dword poly_flags = VNGO_TRITYPE_GOURAUD
+                       | VNGO_TRITYPE_TEXTURED
+                       | VNGO_TRITYPE_ALPHA;
 
-    while(tptr != NULL && tptr->get_type() != VNGO_MEM_TEX)
-    {
-        tptr = tptr->next;
-    }
-    if (tptr == NULL)
-    {
-        if (tex->pal_ptr == NULL)
-            tex->pal_ptr = vbuff.pal;
+    if (vflags & VNGO_ZBUFFER_ACTIVE)
+        poly_flags |= VNGO_TRITYPE_ZBUFFER;
 
-        tptr = new VngoMemTexture3D(tex,tex->pal_ptr);
-        if (tptr->get_err_status() != VNGO_NO_ERROR)
-        {
-            delete tptr;
-            return (VNGO_UNSUPPORTED_TEXTURE);
-        }
-    }
+    if (vflags & VNGO_DEBUG_OUTLINE)
+        poly_flags |= VNGO_TRITYPE_OUTLINE;
 
+    if (vflags & VNGO_TEXTURE_FILTER)
+        poly_flags |= VNGO_TRITYPE_FILTERED;
 
-    if (!(((VngoMemTexture3D*)tptr)->vtxt->flags & VNGO_TEXTURE_8BIT))
-    {
-        return (VNGO_UNSUPPORTED_TEXTURE);
-    }
-
-
-    VngoPal *tpal = vbuff.pal;
-    vbuff.pal = tex->pal_ptr;
-
-    VngoPoint2 tpts[VNGO_MAX_VERTCOUNT];
-    for (int i=0;i < count;i++)
-    {
-        tpts[i].x = long(pts[i].x * float(0x10000));
-        tpts[i].y = long(pts[i].y * float(0x10000));
-        tpts[i].z = dword(pts[i].z * float(0xffffffff));
-        tpts[i].shade = long(pts[i].shade) << 16;
-        tpts[i].u = long(pts[i].u * float(0x10000)) << ((VngoMemTexture3D*)tptr)->widthshift;
-        tpts[i].v = long(pts[i].v * float(0x10000)) << ((VngoMemTexture3D*)tptr)->heightshift;
-
-        assert (pts[i].x >= 0);
-        assert (pts[i].x < vbuff.width << 16);
-        assert (pts[i].y >= 0);
-        assert (pts[i].y < vbuff.height << 16);
-    }
-    vngo_atgpoly16(this,count,tpts,tptr,alpha);
-    vbuff.pal = tpal;
-
+    vngo_poly(this,count,poly_flags,pts,tex,alpha);
     return VNGO_NO_ERROR;
 }
 
@@ -1164,55 +635,23 @@ VNGError VngoVVport16::gtpoly_persp_a (int count,VngoPoint pts[],
                                       VngoTexture *tex,
                                       long alpha)
 {
-    assert(lock_status);
-    assert (count <= VNGO_MAX_VERTCOUNT);
+    assert (count < VNGO_MAX_VERTCOUNT);
 
-    VngoTexture3D *tptr = tex->vtex3d;
+    VngoPointF tpts[VNGO_MAX_VERTCOUNT];
 
-    while(tptr != NULL && tptr->get_type() != VNGO_MEM_TEX)
+    for (int i = 0; i < count; i++)
     {
-        tptr = tptr->next;
-    }
-    if (tptr == NULL)
-    {
-        if (tex->pal_ptr == NULL)
-            tex->pal_ptr = vbuff.pal;
-
-        tptr = new VngoMemTexture3D(tex,tex->pal_ptr);
-        if (tptr->get_err_status() != VNGO_NO_ERROR)
-        {
-            delete tptr;
-            return (VNGO_UNSUPPORTED_TEXTURE);
-        }
+        tpts[i].x = float(pts[i].x);
+        tpts[i].y = float(pts[i].y);
+        tpts[i].z = float(dword(pts[i].z)) / float(0xffffffff);
+        tpts[i].u = float(pts[i].u) / float(0x10000);
+        tpts[i].v = float(pts[i].v) / float(0x10000);
+        tpts[i].w = float(pts[i].w) / float(0x3fffffff);
+        tpts[i].clr = pts[i].clr;
+        tpts[i].shade = float(pts[i].shade);
     }
 
-
-    if (!(((VngoMemTexture3D*)tptr)->vtxt->flags & VNGO_TEXTURE_8BIT))
-    {
-        return (VNGO_UNSUPPORTED_TEXTURE);
-    }
-
-    VngoPal *tpal = vbuff.pal;
-    vbuff.pal = tex->pal_ptr;
-
-    VngoPoint2 tpts[VNGO_MAX_VERTCOUNT];
-    for (int i=0;i < count;i++)
-    {
-        tpts[i].x = pts[i].x << 16;
-        tpts[i].y = pts[i].y << 16;
-        tpts[i].z = pts[i].z;
-        tpts[i].w = pts[i].w;
-        tpts[i].shade = pts[i].shade << 16;
-        tpts[i].u = pts[i].u << ((VngoMemTexture3D*)tptr)->widthshift;
-        tpts[i].v = pts[i].v << ((VngoMemTexture3D*)tptr)->heightshift;
-        assert (pts[i].x >= 0);
-        assert (pts[i].x < vbuff.width);
-        assert (pts[i].y >= 0);
-        assert (pts[i].y < vbuff.height);
-    }
-    vngo_atgpoly_persp16(this,count,tpts,tptr,alpha);
-    vbuff.pal = tpal;
-
+    gtpoly_persp_a(count,tpts,tex,alpha);
     return VNGO_NO_ERROR;
 }
 
@@ -1220,56 +659,23 @@ VNGError VngoVVport16::gtpoly_persp_a (int count,VngoPointF pts[],
                                       VngoTexture *tex,
                                       long  alpha)
 {
-    assert(lock_status);
     assert (count <= VNGO_MAX_VERTCOUNT);
 
-    VngoTexture3D *tptr = tex->vtex3d;
+    dword poly_flags = VNGO_TRITYPE_GOURAUD
+                       | VNGO_TRITYPE_TEXTURED
+                       | VNGO_TRITYPE_PERSPECTIVE
+                       | VNGO_TRITYPE_ALPHA;
 
-    while(tptr != NULL && tptr->get_type() != VNGO_MEM_TEX)
-    {
-        tptr = tptr->next;
-    }
-    if (tptr == NULL)
-    {
-        if (tex->pal_ptr == NULL)
-            tex->pal_ptr = vbuff.pal;
+    if (vflags & VNGO_TEXTURE_FILTER)
+        poly_flags |= VNGO_TRITYPE_FILTERED;
 
-        tptr = new VngoMemTexture3D(tex,tex->pal_ptr);
-        if (tptr->get_err_status() != VNGO_NO_ERROR)
-        {
-            delete tptr;
-            return (VNGO_UNSUPPORTED_TEXTURE);
-        }
-    }
+    if (vflags & VNGO_ZBUFFER_ACTIVE)
+        poly_flags |= VNGO_TRITYPE_ZBUFFER;
 
+    if (vflags & VNGO_DEBUG_OUTLINE)
+        poly_flags |= VNGO_TRITYPE_OUTLINE;
 
-    if (!(((VngoMemTexture3D*)tptr)->vtxt->flags & VNGO_TEXTURE_8BIT))
-    {
-        return (VNGO_UNSUPPORTED_TEXTURE);
-    }
-
-    VngoPal *tpal = vbuff.pal;
-    vbuff.pal = tex->pal_ptr;
-
-    VngoPoint2 tpts[VNGO_MAX_VERTCOUNT];
-    for (int i=0;i < count;i++)
-    {
-        tpts[i].x = long(pts[i].x * float(0x10000));
-        tpts[i].y = long(pts[i].y * float(0x10000));
-        tpts[i].z = dword(pts[i].z * float(0xffffffff));
-        tpts[i].w = dword(pts[i].w * float(0x3fffffff));
-        tpts[i].shade = long(pts[i].shade) << 16;
-        tpts[i].u = long(pts[i].u * float(0x10000)) << ((VngoMemTexture3D*)tptr)->widthshift;
-        tpts[i].v = long(pts[i].v * float(0x10000)) << ((VngoMemTexture3D*)tptr)->heightshift;
-
-        assert (pts[i].x >= 0);
-        assert (pts[i].x < vbuff.width << 16);
-        assert (pts[i].y >= 0);
-        assert (pts[i].y < vbuff.height << 16);
-    }
-    vngo_atgpoly_persp16(this,count,tpts,tptr,alpha);
-    vbuff.pal = tpal;
-
+    vngo_poly(this,count,poly_flags,pts,tex,alpha);
     return VNGO_NO_ERROR;
 }
 

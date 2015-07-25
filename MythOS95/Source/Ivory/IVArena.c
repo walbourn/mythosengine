@@ -4,7 +4,7 @@
 //
 //                          Microsoft Windows '95 Version
 //
-//            Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.
+//            Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved.
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -28,13 +28,13 @@
 //
 // Ivory Allocation - Arena allocation routines.
 //
-//		Ivory provides a malloc-style memory allocation library.
-//	Ivory allows the programmer to allocate memory either from a global
-//	pool (like malloc), or to allocate chunks from a special arena.
+//              Ivory provides a malloc-style memory allocation library.
+//      Ivory allows the programmer to allocate memory either from a global
+//      pool (like malloc), or to allocate chunks from a special arena.
 //
-//	Arena allocations may be rapidly freed by freeing the arena, or
-//	by re-initializing the arena's internal pointers.  As you may have
-//	guessed, the arena may be allocated with the global allocation routines.
+//      Arena allocations may be rapidly freed by freeing the arena, or
+//      by re-initializing the arena's internal pointers.  As you may have
+//      guessed, the arena may be allocated with the global allocation routines.
 //  The objects allocated by the arena routines may not be individually
 //  freed, and do not incur any overhead in bytes over their basic sizes.
 //  Thus, they lend themselves to small, quickly allocated items, such
@@ -54,7 +54,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Includes
-//                                
+//
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include <memory.h>
@@ -76,9 +76,9 @@
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-// ivory_arena_initialize                                                  
+// ivory_arena_initialize
 //
-// Prepare the provided block to be used as an arena.                 
+// Prepare the provided block to be used as an arena.
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 IvoryArena *ivory_arena_initialize (IvoryArena *arena, size_t arena_size)
 {
@@ -89,7 +89,7 @@ IvoryArena *ivory_arena_initialize (IvoryArena *arena, size_t arena_size)
 
 //ÄÄÄ Set up the arena fields
     p->size = arena_size;
-    p->end	= p->data + arena_size - sizeof (IvoryArena);
+    p->end      = p->data + arena_size - sizeof (IvoryArena);
     p->current = p->data;
     p->next = 0;
 
@@ -138,7 +138,7 @@ void *ivory_arena_alloc_internal (IvoryArena *arena, size_t size)
     void *new_object;
 
     assertMyth("ivory_arena_alloc_internal needs valid inputs",
-               arena != 0 && size > 0 && size < arena->size); 
+               arena != 0 && size > 0 && size < arena->size);
 
     while (arena->current + size > arena->end)
     {

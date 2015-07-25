@@ -17,7 +17,9 @@
 #         °°²²²²²²²²²²²²²²²²°°
 #        °°°°°°°°°°°°°°°°°°°°°°
 #
-#          Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.
+#                        Microsoft Windows 95/NT Version
+#
+#          Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.
 #                           All Rights Reserved.
 #
 #ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -122,6 +124,7 @@ clean:
     del *.lst
     del *.ilk
     del *.pdb
+    del *.pch
 
 #°±² End of makefile ²±°
 

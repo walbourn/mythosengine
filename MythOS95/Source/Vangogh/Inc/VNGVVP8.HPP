@@ -6,7 +6,7 @@
 //                                                           |. _  .   .|
 //          Microsoft Windows '95 Version                    | / \   .  |
 //                                                           |_|_|_._._.|
-// Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
+// Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
 //              All rights reserved.                        %\__________/%
 //                                                           %          %
 //
@@ -113,7 +113,7 @@ public:
                                        dword fgcol,dword bgcol=VNGO_TRANSPARENT);
     virtual VNGError zblit_mono (VngoRect *dest_rect,VngoZMap *zmp,
                                  dword fdist,dword ndist=0);
-    
+
     //ÄÄÄ Line drawing functions
     virtual VNGError line (VngoPoint *p1, VngoPoint *p2,
                            VngoColor24bit *rgb_val=NULL);
@@ -184,7 +184,7 @@ public:
     //ÄÄÄ Fogging/hazing functions
     virtual VNGError set_haze(VngoHazeInfo *haze_info)
     {
-        hinfo.setup(haze_info,vbuff.pal); 
+        hinfo.setup(haze_info,vbuff.pal);
         return VNGO_NO_ERROR;
     }
     virtual VNGError haze();

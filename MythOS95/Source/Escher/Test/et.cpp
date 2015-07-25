@@ -116,6 +116,11 @@ EscherTest::EscherTest (MaxDevices *d):
     anim_current_step(0),
     anim_chain_count(0),
     anim_root(0),
+    part_linear(1),
+    part_life(5),
+    part_speed(50),
+    part_count(128),
+    part_alpha(255),
     scale(1.0f)
 {
     int use_fullscreen = 0;
@@ -1086,7 +1091,7 @@ BOOL EscherTest::LoadTerrain(char *fn)
     }
 //    cam->set_fov(27);
 //    cam->set_factor(7.5f);
-    cam->set_yon(8000);
+    cam->set_yon(3800);
 
     if (!use_new_terrain)
     {
@@ -1096,7 +1101,7 @@ BOOL EscherTest::LoadTerrain(char *fn)
     {
         EschTerrainEx   *tt=(EschTerrainEx*)terrain;
 //        tt->set_lod(2,250.0f);
-        tt->set_lod(5,350.0f,750.0f,1500.f,3000.f);
+        tt->set_lod(3,350.0f,750.0f,1500.f,3000.f);
         tt->set_perspective_lod(0);
         tt->set_texture_lod(3);
         tt->set_smooth_lod(3);
@@ -1127,21 +1132,23 @@ BOOL EscherTest::SetupParticleSystem(const char *name)
 //ÄÄÄ Setup generator
     prtgen =new EschParticleGenerator;
     if (!prtgen
-        || prtgen->init(4098))
+        || prtgen->init(part_count))
     {
         MessageBox("Could not create particle generator",
                    MB_OK | MB_ICONEXCLAMATION);
         return FALSE;
     }
+    prtgen->set_linear(part_linear);
 
     if (strstr(name,"gravity"))
     {
-        prtgen->set_acceleration(0,-8,0);
+        prtgen->set_acceleration(-2.0f,-9.8f,0);
     }
 
     if (strstr(name,"circle"))
     {
-        prtgen->set_circle(5, 45);
+        prtgen->set_circle(250, 0);
+        prtgen->set_init_dir(0,-1,0);
     }
     else if (strstr(name,"rect"))
     {
@@ -1152,8 +1159,8 @@ BOOL EscherTest::SetupParticleSystem(const char *name)
         prtgen->set_sphere(5);
     }
 
-    prtgen->set_speed(50);
-    prtgen->set_alpha(255);
+    prtgen->set_speed(part_speed,(part_speed/4));
+    prtgen->set_alpha(part_alpha,(part_alpha/4));
 
     if (strstr(name,"color"))
     {
@@ -1170,7 +1177,6 @@ BOOL EscherTest::SetupParticleSystem(const char *name)
     if (strstr(name,"pyramids"))
     {
         prtgen->set_parts(100);
-        prtgen->set_lifetime(5);
         prtgen->set_size(2,7);
         prtgen->set_callback(esch_generate_pyramid);
     }
@@ -1181,15 +1187,31 @@ BOOL EscherTest::SetupParticleSystem(const char *name)
             MessageBox("Must have Sprite Test enabled",
                        MB_OK | MB_ICONEXCLAMATION);
         }
-        prtgen->set_parts(100);
-        prtgen->set_lifetime(5);
+        float temp_part = (part_count < 1000)?100.0f:part_count / 10.0f;
+        prtgen->set_parts(temp_part);
         prtgen->set_callback(esch_generate_sprite,sprite);
+        prtgen->set_rotrate(part_rotrate);
+        prtgen->set_rotrate_low(part_rotrate_low);
+        prtgen->set_rotrate_high(part_rotrate_high);
+    }
+    if (strstr(name, "lines"))
+    {
+        float temp_part = (part_count < 1000)?100.0f:part_count / 10.0f;
+        prtgen->set_parts(temp_part);
+        prtgen->set_callback(esch_generate_line);
+        prtgen->set_color (mypal, VngoColor24bit (205,205,205),
+                           VngoColor24bit (50,50,50));
+        prtgen->set_init_dir (0,1.f,0);
     }
     else
     {
-        prtgen->set_parts(500,100);
-        prtgen->set_lifetime(5);
+        float temp_part = (part_count < 1000)?100.0f:part_count / 10.0f;
+        prtgen->set_parts(temp_part,100);
+        prtgen->set_color (mypal, VngoColor24bit (205,205,205),
+                                  VngoColor24bit(50,50,50));
+        prtgen->set_init_dir(0,-1.0f,0);
     }
+    prtgen->set_lifetime(part_life,(part_life/4));
 
 //ÄÄÄ Create camera/lights if not already defined
     if (!cam)
@@ -1662,6 +1684,10 @@ void EscherTest::ProcessEvents()
     // The shift has the effect of simultaneously
     // converting the number to a Flx16 and dividing by 1024,
     Flx16 interval(clock.check() << 6,0);
+
+    if (prtgen)
+        prtgen->set_interval(interval);
+
     clock.clear();
 
     evt->get_mouse_movement (&dx, &dy);
@@ -2549,7 +2575,20 @@ void EscherTest::ProcessEvents()
 
     if (prtgen)
         prtgen->set_interval(interval);
+#if 0
+    if (prtgen)
+    {
+        EschPoint cam_pos;
+        cam->get_position(&cam_pos);
+        cam_pos.y += 50.0f;
+        prtgen->set_position (&cam_pos);
 
+        EschVector v(0,0, 1.0f);
+        v.transform(&cam->eye.orient);
+        v.j=0;
+        prtgen->set_init_dir (&v);
+    }
+#endif
     if (fire)
     {
         if (events.check(FIRE_INCREASE))

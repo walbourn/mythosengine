@@ -350,7 +350,7 @@ esch_error_codes EschKeyframer::load (XFParseIFF *iff)
             key.rotation[0] = v1key.rotation[0] / 65536.0f;
             key.rotation[1] = v1key.rotation[1] / 65536.0f;
             key.rotation[2] = v1key.rotation[2] / 65536.0f;
-#if 1
+#if 0
             if (key.k_type & ESCH_KEYFRAME_ROOT
                 && key.frame_num == 0)
             {

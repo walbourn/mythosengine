@@ -36,11 +36,16 @@
 
  Notes by: Chuck Walbourn
 
- Last Updated: January 2, 1998
+ Last Updated: February 2, 1998
 
  Escher Exporter - 3D Studio R4 IPAS PXP Routine
 
  Changes for this release --------------------------------------------------
+
+ Version 2.03
+
+    o Fixed problem with sequentially numbered bitmaps used as opacity maps.
+    o Added LOG option to save messages to ESPORT.LOG during export.
 
  Version 2.02
 

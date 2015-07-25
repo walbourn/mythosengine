@@ -6,7 +6,7 @@
 //                                                           |. _  .   .|
 //          Microsoft Windows '95 Version                    | / \   .  |
 //                                                           |_|_|_._._.|
-// Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
+// Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
 //              All rights reserved.                        %\__________/%
 //                                                           %          %
 //
@@ -43,23 +43,6 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include "ivory.hpp"
-
-#ifdef _OEMS
-
-#ifdef _3DFX
-    extern "C" {
-    #include <glide.h>
-    }
-#endif // _3DFX
-
-#ifdef _MSI
-    #include <msi95.h>
-#endif // _MSI
-
-#ifdef _CLEAR_3D
-    #include <wll3d.h>
-#endif // _CLEAR_3D
-#endif // _OEMS
 
 #ifdef _OPENGL
 #include "gl/gl.h"
@@ -175,7 +158,7 @@ public:
     HWND                hWndClient;
 
 
-    VngoDIB() {};
+    VngoDIB();
     VngoDIB(HWND hwndclient);
 
     virtual ~VngoDIB();
@@ -210,7 +193,7 @@ public:
     HFONT                   AppFont;
     HWND                    hWndClient;
 
-    VngoDirectDraw() {};
+    VngoDirectDraw();
     VngoDirectDraw(HWND hwndclient);
     virtual ~VngoDirectDraw();
 
@@ -273,6 +256,8 @@ public:
     LPDIRECTDRAWSURFACE     BackBuffer;
     LPDIRECTDRAWSURFACE     Primary;
     LPDIRECTDRAWSURFACE     ZBuffer;
+    LPDIRECTDRAWSURFACE     DirtyCursor;
+    LPDIRECTDRAWSURFACE     Cursor;
     VngoSurfaceManager      *SurfaceManager;
     LPDIRECTDRAWPALETTE     Palette;
     DDSURFACEDESC           ddsd;
@@ -284,7 +269,7 @@ public:
     char                    *target;
     GUID                    targetID;
 
-    VngoDirect3D() {};
+    VngoDirect3D();
     VngoDirect3D(HWND hwndclient,char *targetname=NULL);
     virtual ~VngoDirect3D();
 
@@ -311,143 +296,11 @@ public:
 #define VNGO_D3DSFLAGS_TBLEND_MOD       0x8
 #define VNGO_D3DSFLAGS_CKEY_ENABLE      0x10
 #define VNGO_D3DSFLAGS_ALPHA            0x20
+#define VNGO_D3DSFLAGS_FILTER           0x40
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 // Cirrus Clear3D screen manager
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-#ifdef _OEMS
-#ifdef _CLEAR_3D
-
-#define CLEAR3D_MAX_BATCH_COPROCESSOR 25
-#define CLEAR3D_MAX_BATCH_PROCESSOR 1000
-#define CLEAR3D_MAX_BATCH CLEAR3D_MAX_BATCH_COPROCESSOR
-
-class VngoClear3D : public VngoScreenManager
-{
-public:
-    HRESULT                 err;
-    LPDIRECTDRAW            dd;
-    LPDIRECTDRAW2           dd2;
-    LPDIRECTDRAWSURFACE     FrontBuffer;
-    LPDIRECTDRAWSURFACE     BackBuffer;
-    LPDIRECTDRAWSURFACE     Primary;
-    LPDIRECTDRAWSURFACE     ZBuffer;
-    VngoSurfaceManager      *SurfaceManager;
-    LPDIRECTDRAWPALETTE     Palette;
-    DDSURFACEDESC           ddsd;
-    HFONT                   AppFont;
-    HWND                    hWndClient;
-
-    int                     BatchCount;
-    ClrContext              *pContext;
-    LL_Batch                *pBatchRef;
-    LL_Batch                *pBatch;
-    IvoryArena              *VertPool;
-
-    VngoClear3D(HWND hwndclient);
-    virtual ~VngoClear3D();
-
-    virtual VNGError init();
-    virtual VNGError reinit(Flx16 brightness);
-    virtual VNGError check_mode(int _width, int _height, int _bpp, dword _flags, VngoPixelInfo *pinfo);
-    virtual VNGError set_mode(int _width, int _height, int _bpp, VngoPal *_pal,dword flags);
-    virtual VNGError flip();
-    virtual VNGError set_palette(VngoPal *p,Flx16 brightness);
-    virtual VNGError term();
-    virtual VNGError dump_textures();
-
-    virtual void open_frame();
-    virtual void close_frame();
-    virtual void flush();
-    virtual void run_dl();
-    virtual void wait_busy();
-
-    LL_Batch *get_batch(int num_batches=1);
-};
-#endif _CLEAR_3D
-
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-// 3D/fx Glide screen manager
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-#ifdef _3DFX
-class Vngo3Dfx : public VngoScreenManager
-{
-    GrHwConfiguration       hwconfig;
-    GrScreenResolution_t    screenRes;
-
-public:
-    Vngo3Dfx();
-    virtual ~Vngo3Dfx();
-
-    virtual VNGError init();
-    virtual VNGError reinit(Flx16 brightness=0){return VNGO_NO_ERROR;};
-    virtual VNGError set_mode(int width, int height, int bpp, VngoPal *pal, dword flags = 0);
-    virtual VNGError check_mode(int width, int height, int bpp, dword _flags, VngoPixelInfo *pinfo) {return VNGO_NOT_SUPPORTED;}
-    virtual VNGError flip();
-    virtual VNGError set_palette(VngoPal *p,Flx16 brightness=0){return VNGO_NO_ERROR;};
-    virtual VNGError term();
-    virtual VNGError dump_textures();
-};
-#endif // _3DFX
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-// Matrox Simple Interface screen manager
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-#ifdef _MSI
-class VngoMSI : public VngoScreenManager
-{
-    WNDPROC lpWinProc;
-public:
-    T_msiParameters     msiParms;
-    T_msiInfo           *pInfo;
-    QueryInfoStruct     BoardInfo;
-
-    VngoMSI();
-    VngoMSI(WNDPROC lpWindowProc);
-    virtual ~VngoMSI();
-
-    virtual VNGError init();
-    virtual VNGError init(WNDPROC lpWindowProc=NULL);
-    virtual VNGError reinit(Flx16 brightness=0){return VNGO_NO_ERROR;};
-    virtual VNGError set_mode(int width, int height, int bpp, VngoPal *pal, dword flags = 0);
-    virtual VNGError check_mode(int width, int height, int bpp, dword _flags, VngoPixelInfo *pinfo) {return VNGO_NOT_SUPPORTED;}
-    virtual VNGError flip();
-    virtual VNGError set_palette(VngoPal *p,Flx16 brightness=0){return VNGO_NO_ERROR;};
-    virtual VNGError term();
-    virtual VNGError dump_textures();
-
-    virtual void open_frame()
-    {
-        if (!frame_is_open)
-        {
-            if (msiStartFrame(FALSE,0.f,0.f,0.f,FALSE,1.f))
-            {
-                frame_is_open = TRUE;
-            }
-        }
-    }
-    virtual void close_frame() { close_frame(0,0,1);}
-
-    int close_frame(BOOL dump,long frame,BOOL wait)
-    {
-        if (frame_is_open)
-        {
-            if (msiEndFrame(dump,frame,wait))
-            {
-                frame_is_open=FALSE;
-                return TRUE;
-            }
-            else
-                return FALSE;
-        }
-        else
-            return TRUE;
-    }
-};
-#endif // _MSI
-#endif // _OEMS
-
 #ifdef _OPENGL
 class VngoOpenGL : public VngoScreenManager
 {

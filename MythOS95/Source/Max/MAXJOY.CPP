@@ -9,7 +9,9 @@
 //
 //                          Across the event horizon...
 //
-//           Copyright (c) 1994 - 1997 by Charybdis Enterprises, Inc.
+//                          Microsoft Windows '95 Version
+//
+//            Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved.
 //
 //컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
@@ -26,6 +28,8 @@
 // INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
 //
 //컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
+//
+// maxjoy.cpp
 //
 // Event Devices
 //
@@ -154,6 +158,8 @@ IDirectInputDevice2 *MaxJoystick::get_di2() const
 MaxJoystickWin32::MaxJoystickWin32():
     MaxJoystick ()
 {
+    // Make sure this starts off empty
+    memset (&info, 0, sizeof (info));
     info.dwSize  = sizeof (JOYINFOEX);
     info.dwFlags = JOY_RETURNALL | JOY_RETURNCENTERED | JOY_USEDEADZONE;
 
@@ -183,11 +189,11 @@ short MaxJoystickWin32::init ()
         // Fill in the capabilities
         joyGetDevCaps (0, &caps, sizeof (caps));
 
-        JOYINFOEX stat;
-
-        stat.dwSize = sizeof (JOYINFOEX);
-        stat.dwFlags = JOY_RETURNALL | JOY_RETURNCENTERED | JOY_USEDEADZONE;
-        if (joyGetPosEx (0, &stat) != JOYERR_NOERROR)
+        // Get the initial state of the joystick.
+        // (In autopoll it would otherwise be possible to get the value before a poll cycle)
+        info.dwSize = sizeof (JOYINFOEX);
+        info.dwFlags = JOY_RETURNALL | JOY_RETURNCENTERED | JOY_USEDEADZONE;
+        if (joyGetPosEx (0, &info) != JOYERR_NOERROR)
             joy_present = 0;
     }
 

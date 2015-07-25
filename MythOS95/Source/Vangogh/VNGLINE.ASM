@@ -6,7 +6,7 @@
 ;                                                           |. _  .   .|
 ;          Microsoft Windows '95 Version                    | / \   .  | 
 ;                                                           |_|_|_._._.|
-;  Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.   |.-.-.-.-..|
+;  Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.   |.-.-.-.-..|
 ;              All rights reserved.                        %\__________/%
 ;                                                           %          %
 ;
@@ -212,7 +212,7 @@ START_PROC     vngo_line8, C CurScreen:DWORD, p1:DWORD, p2:DWORD
         cmp     eax,ecx
         jg      x_primary       ; jump if x primary line.
         jl      y_primary       ; jump if y primary line.
-               
+
                                 ; otherwise it is perfectly diagonal.
 no_primary:
         inc     ecx             ; draw both ends.

@@ -55,9 +55,8 @@
 //
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
-// #define TERRAIN_DEBUG_AID
+#define TERRAIN_DEBUG_AID
 // #define TERRAIN_NO_FRUSTRUM_WALK
-// #define TERRAIN_NO_PATCHUP
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
@@ -809,7 +808,6 @@ void EschTerrainEx::draw_terrain_rect (VngoRect *rect, int dlevel,dword lflags)
         draw_terrain_trans_top(&wrect,&troot2,lhfield+hfoff,sptr+spoff,
                                dlevel,count,lflags);
     }
-#if 1
     if (lflags & ESCH_TERNEX_SMOOTH_BOTTOM)
     {
         int count_mod = 0;
@@ -820,6 +818,7 @@ void EschTerrainEx::draw_terrain_rect (VngoRect *rect, int dlevel,dword lflags)
         troot2.x += dvec.i * float(rect->dy - mod);
         troot2.y += dvec.j * float(rect->dy - mod);
         troot2.z += dvec.k * float(rect->dy - mod);
+
         // check to ensure troot2 within clip rect...  How could it not be in if it is within dy?
         int hfoff = width * (rect->dy - mod);
         int spoff = hfoff >> surfshift;
@@ -929,7 +928,6 @@ void EschTerrainEx::draw_terrain_rect (VngoRect *rect, int dlevel,dword lflags)
         draw_terrain_trans_right(&wrect,&troot2,lhfield+hfoff,
                                  sptr+spoff,dlevel,count,lflags);
     }
-#endif
 }
 
 

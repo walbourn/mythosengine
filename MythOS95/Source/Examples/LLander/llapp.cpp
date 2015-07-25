@@ -111,20 +111,11 @@ BOOL LanderApp::init_instance()
                 strlwr(buff);
 
                 startup &= ~(STARTUP_DDRAW
-                             | STARTUP_D3D
-                             | STARTUP_CLEAR3D);
+                             | STARTUP_D3D);
 
                 if (strstr(buff,"d3d"))
                     startup |= STARTUP_D3D;
                 else
-
-#ifdef  _OEMS
-#ifdef  _CLEAR_3D
-                if (strstr(buff,"cl3d"))
-                    startup |= STARTUP_CLEAR3D;
-                else
-#endif
-#endif
 
                 if (strstr(buff,"ddraw"))
                     startup |= STARTUP_DDRAW;

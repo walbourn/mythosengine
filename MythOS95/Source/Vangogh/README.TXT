@@ -27,27 +27,28 @@
                             _Library Status_
 
   Notes by:  Tim Little
-  Updated:   January 15, 1998
+  Updated:   March 9, 1998
 
   Changes for this release --------------------------------------------------
 
-    o Continued development of Direct3D for texture caching, fogging
-      support, and optimizations.
+    o Rewrote 16bpp rasterization routines for faster performance and easier
+      maintenance.
 
-    o Fixed problems with pixel output in 16bpp virtual viewport.
+    o Added gamma correction to texture conversion and palette management.
 
+    o Added cursor drawing for Direct3D devices.
+
+    o Added new vngo_circle/vngo_clip_circle version which takes a 24-bit
+      color.
+
+    o Dropped incomplete 3Dfx, MSI, and Clear3D implementations.
+
+    o Fixed texture caching and hazing problems with D3D.
 
 
   Pending changes -----------------------------------------------------------
 
-    o Update documentation for internals of the 3D management.
-
     o The screen manager check_mode() functions need to be implemented.
-
-    o Implementation of 3D/fx Glide.
-
-    o Removal of now defunct Cirrus Laguna support and drop Matrox
-      Simple Interface.
 
     o Total rewrite planned for MythOS 98
 

@@ -6,7 +6,7 @@
 //                                                           |. _  .   .|
 //          Microsoft Windows '95 Version                    | / \   .  |
 //                                                           |_|_|_._._.|
-// Copyright (c) 1994-1997 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
+// Copyright (c) 1994-1998 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
 //              All rights reserved.                        %\__________/%
 //                                                           %          %
 //
@@ -118,155 +118,293 @@ void vngo_line (VngoVport *vp, VngoPoint *p1,VngoPoint *p2,VngoColor24bit *rgb_v
     int color = p1->clr;
     int shade = p1->shade;
 
-    if (rgb_val)
-    {
-        color = vp->vbuff.pal->get_index(*rgb_val);
-        shade = vp->vbuff.pal->shd_pal->mid_point;
-    }
-
-    pt1.clr = color;
-    pt2.clr = color;
-    pt1.shade = shade;
-    pt2.shade = shade;
-
     int d,x,y,x3,y3,ydir=1,xdir=1;
     int i;
     Flx16 tz=0;
     Flx16 zstep=0;
 
 
-
-    if(dy==0 || dx==0)
+    if (rgb_val)
     {
-        if(dy==0 && dx)
+        if(dy==0 || dx==0)
         {
-            if (vp->vflags & VNGO_ZBUFFER_ACTIVE)
+            if(dy==0 && dx)
             {
-                tz.flx = pt2.z - pt1.z;
-                zstep = tz / Flx16 (x2 - x1);
-            }
-            // The horizontal line.
-            pt1.y = y1;
-            for (i=x1; i < x2; i++)
-            {
-                pt1.x = i;
-                pt1.z += zstep.flx;
-                vp->pixel(&pt1);
-            }
-        }
-        else if (dy)
-        {
-            if (vp->vflags & VNGO_ZBUFFER_ACTIVE)
-            {
-                tz.flx = pt2.z - pt1.z;
-                zstep = tz / Flx16 (y2 - y1);
-            }
-            // The vertical line.
-            pt1.x = x1;
-            for (i = y1; i < y2; i++)
-            {
-                pt1.y = i;
-                pt1.z += zstep.flx;
-                vp->pixel(&pt1);
-            }
-        }
-    }
-    else
-    {
-        if(dx >= dy)
-        {
-            if (vp->vflags & VNGO_ZBUFFER_ACTIVE)
-            {
-                tz.flx = pt2.z - pt1.z;
-                zstep = tz / Flx16 (x2 - x1);
-            }
-            if(y2<y1)
-            {
-                ydir=-1;
-            }
-            x=x1;
-            y=y1;
-            y3=y2;
-            x3=x2;
-            d=(dy<<1)-dx;
-            while(x<x3)
-            {
-                if(d >= 0)
+                if (vp->vflags & VNGO_ZBUFFER_ACTIVE)
                 {
-                    x++;
-                    x3--;
-                    y3-=ydir;
-                    y+=ydir;
-                    d+=((dy-dx)<<1);
+                    tz.flx = pt2.z - pt1.z;
+                    zstep = tz / Flx16 (x2 - x1);
                 }
-                else
+                // The horizontal line.
+                pt1.y = y1;
+                for (i=x1; i < x2; i++)
                 {
-                    x++;
-                    x3--;
-                    d+=(dy<<1);
+                    pt1.x = i;
+                    pt1.z += zstep.flx;
+                    vp->pixel(&pt1,rgb_val);
                 }
-                pt1.x = x;
-                pt1.y = y;
-                pt1.z += zstep.flx;
-                pt2.x = x3;
-                pt2.y = y3;
-                pt2.z -= zstep.flx;
-                vp->pixel(&pt1);
-                vp->pixel(&pt2);
+            }
+            else if (dy)
+            {
+                if (vp->vflags & VNGO_ZBUFFER_ACTIVE)
+                {
+                    tz.flx = pt2.z - pt1.z;
+                    zstep = tz / Flx16 (y2 - y1);
+                }
+                // The vertical line.
+                pt1.x = x1;
+                for (i = y1; i < y2; i++)
+                {
+                    pt1.y = i;
+                    pt1.z += zstep.flx;
+                    vp->pixel(&pt1,rgb_val);
+                }
             }
         }
         else
         {
-            if (vp->vflags & VNGO_ZBUFFER_ACTIVE)
+            if(dx >= dy)
             {
-                tz.flx = pt2.z - pt1.z;
-                zstep = tz / Flx16 (y2 - y1);
+                if (vp->vflags & VNGO_ZBUFFER_ACTIVE)
+                {
+                    tz.flx = pt2.z - pt1.z;
+                    zstep = tz / Flx16 (x2 - x1);
+                }
+                if(y2<y1)
+                {
+                    ydir=-1;
+                }
+                x=x1;
+                y=y1;
+                y3=y2;
+                x3=x2;
+                d=(dy<<1)-dx;
+                while(x<x3)
+                {
+                    if(d >= 0)
+                    {
+                        x++;
+                        x3--;
+                        y3-=ydir;
+                        y+=ydir;
+                        d+=((dy-dx)<<1);
+                    }
+                    else
+                    {
+                        x++;
+                        x3--;
+                        d+=(dy<<1);
+                    }
+                    pt1.x = x;
+                    pt1.y = y;
+                    pt1.z += zstep.flx;
+                    pt2.x = x3;
+                    pt2.y = y3;
+                    pt2.z -= zstep.flx;
+                    vp->pixel(&pt1,rgb_val);
+                    vp->pixel(&pt2,rgb_val);
+                }
             }
-            if(x2<x1)
+            else
             {
-                xdir=-1;
-            }
-            x=x1;
-            y=y1;
-            x3=x2;
-            y3=y2;
-            d=(dx<<1)-dy;
+                if (vp->vflags & VNGO_ZBUFFER_ACTIVE)
+                {
+                    tz.flx = pt2.z - pt1.z;
+                    zstep = tz / Flx16 (y2 - y1);
+                }
+                if(x2<x1)
+                {
+                    xdir=-1;
+                }
+                x=x1;
+                y=y1;
+                x3=x2;
+                y3=y2;
+                d=(dx<<1)-dy;
 
-            while(y<y3)
-            {
-                if(d >= 0)
+                while(y<y3)
                 {
-                    y++;
-                    y3--;
-                    x+=xdir;
-                    x3-=xdir;
-                    d+=((dx-dy)<<1);
+                    if(d >= 0)
+                    {
+                        y++;
+                        y3--;
+                        x+=xdir;
+                        x3-=xdir;
+                        d+=((dx-dy)<<1);
+                    }
+                    else
+                    {
+                        y++;
+                        y3--;
+                        d+=(dx<<1);
+                    }
+                    pt1.x = x;
+                    pt1.y = y;
+                    pt1.z += zstep.flx;
+                    pt2.x = x3;
+                    pt2.y = y3;
+                    pt2.z -= zstep.flx;
+                    vp->pixel(&pt1,rgb_val);
+                    vp->pixel(&pt2,rgb_val);
                 }
-                else
-                {
-                    y++;
-                    y3--;
-                    d+=(dx<<1);
-                }
-                pt1.x = x;
-                pt1.y = y;
-                pt1.z += zstep.flx;
-                pt2.x = x3;
-                pt2.y = y3;
-                pt2.z -= zstep.flx;
-                vp->pixel(&pt1);
-                vp->pixel(&pt2);
             }
         }
+        COPYPOINT(&pt1,p1);
+        COPYPOINT(&pt2,p2);
+        pt1.clr = color;
+        pt2.clr = color;
+        pt1.shade = shade;
+        pt2.shade = shade;
+        if (!(vp->vflags & VNGO_SKIPS_LAST_PIX))
+        {
+            vp->pixel(&pt1,rgb_val);
+            vp->pixel(&pt2,rgb_val);
+        }
     }
-    COPYPOINT(&pt1,p1);
-    COPYPOINT(&pt2,p2);
-    pt1.clr = color;
-    pt2.clr = color;
-    pt1.shade = shade;
-    pt2.shade = shade;
-    vp->pixel(&pt1);
-    vp->pixel(&pt2);
+    else
+    {
+        pt1.clr = color;
+        pt2.clr = color;
+        pt1.shade = shade;
+        pt2.shade = shade;
+
+
+        if(dy==0 || dx==0)
+        {
+            if(dy==0 && dx)
+            {
+                if (vp->vflags & VNGO_ZBUFFER_ACTIVE)
+                {
+                    tz.flx = pt2.z - pt1.z;
+                    zstep = tz / Flx16 (x2 - x1);
+                }
+                // The horizontal line.
+                pt1.y = y1;
+                for (i=x1; i < x2; i++)
+                {
+                    pt1.x = i;
+                    pt1.z += zstep.flx;
+                    vp->pixel(&pt1);
+                }
+            }
+            else if (dy)
+            {
+                if (vp->vflags & VNGO_ZBUFFER_ACTIVE)
+                {
+                    tz.flx = pt2.z - pt1.z;
+                    zstep = tz / Flx16 (y2 - y1);
+                }
+                // The vertical line.
+                pt1.x = x1;
+                for (i = y1; i < y2; i++)
+                {
+                    pt1.y = i;
+                    pt1.z += zstep.flx;
+                    vp->pixel(&pt1);
+                }
+            }
+        }
+        else
+        {
+            if(dx >= dy)
+            {
+                if (vp->vflags & VNGO_ZBUFFER_ACTIVE)
+                {
+                    tz.flx = pt2.z - pt1.z;
+                    zstep = tz / Flx16 (x2 - x1);
+                }
+                if(y2<y1)
+                {
+                    ydir=-1;
+                }
+                x=x1;
+                y=y1;
+                y3=y2;
+                x3=x2;
+                d=(dy<<1)-dx;
+                while(x<x3)
+                {
+                    if(d >= 0)
+                    {
+                        x++;
+                        x3--;
+                        y3-=ydir;
+                        y+=ydir;
+                        d+=((dy-dx)<<1);
+                    }
+                    else
+                    {
+                        x++;
+                        x3--;
+                        d+=(dy<<1);
+                    }
+                    pt1.x = x;
+                    pt1.y = y;
+                    pt1.z += zstep.flx;
+                    pt2.x = x3;
+                    pt2.y = y3;
+                    pt2.z -= zstep.flx;
+                    vp->pixel(&pt1);
+                    vp->pixel(&pt2);
+                }
+            }
+            else
+            {
+                if (vp->vflags & VNGO_ZBUFFER_ACTIVE)
+                {
+                    tz.flx = pt2.z - pt1.z;
+                    zstep = tz / Flx16 (y2 - y1);
+                }
+                if(x2<x1)
+                {
+                    xdir=-1;
+                }
+                x=x1;
+                y=y1;
+                x3=x2;
+                y3=y2;
+                d=(dx<<1)-dy;
+
+                while(y<y3)
+                {
+                    if(d >= 0)
+                    {
+                        y++;
+                        y3--;
+                        x+=xdir;
+                        x3-=xdir;
+                        d+=((dx-dy)<<1);
+                    }
+                    else
+                    {
+                        y++;
+                        y3--;
+                        d+=(dx<<1);
+                    }
+                    pt1.x = x;
+                    pt1.y = y;
+                    pt1.z += zstep.flx;
+                    pt2.x = x3;
+                    pt2.y = y3;
+                    pt2.z -= zstep.flx;
+                    vp->pixel(&pt1);
+                    vp->pixel(&pt2);
+                }
+            }
+        }
+        COPYPOINT(&pt1,p1);
+        COPYPOINT(&pt2,p2);
+        pt1.clr = color;
+        pt2.clr = color;
+        pt1.shade = shade;
+        pt2.shade = shade;
+        if (!(vp->vflags & VNGO_SKIPS_LAST_PIX))
+        {
+            vp->pixel(&pt1);
+            vp->pixel(&pt2);
+        }
+    }
+
 }
 
 
@@ -489,8 +627,11 @@ void vngo_gline (VngoVport *vp, VngoPoint *p1,VngoPoint *p2,VngoColor24bit *rgb_
     COPYPOINT(&pt2,p2);
     pt1.clr = color;
     pt2.clr = color;
-    vp->pixel(&pt1);
-    vp->pixel(&pt2);
+    if (!(vp->vflags & VNGO_SKIPS_LAST_PIX))
+    {
+        vp->pixel(&pt1);
+        vp->pixel(&pt2);
+    }
 }
 
 //°±² End of module - vnggen.cpp ²±°

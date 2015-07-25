@@ -75,7 +75,8 @@ EschParticle::EschParticle(float ix, float iy, float iz,
     color(c),
     life(l),
     velocity(0,0,0),
-    acceleration(0,0,0)
+    acceleration(0,0,0),
+    pflags(ESCH_PRTK_NOTVISIBLE)
 {
 }
 
@@ -87,7 +88,8 @@ EschParticle::EschParticle(float ix, float iy, float iz,
     color(c),
     life(l),
     velocity(ii,ij,ik),
-    acceleration(0,0,0)
+    acceleration(0,0,0),
+    pflags(ESCH_PRTK_NOTVISIBLE)
 {
 }
 
@@ -99,7 +101,8 @@ EschParticle::EschParticle(const EschPoint *p,
     color(c),
     life(l),
     velocity(v->i,v->j,v->k),
-    acceleration(0,0,0)
+    acceleration(0,0,0),
+    pflags(ESCH_PRTK_NOTVISIBLE)
 {
 }
 
@@ -144,10 +147,25 @@ void EschParticle::draw()
     EschTempVPointF.shade = float(cam->vport->vbuff.pal->shd_pal->mid_point);
 
 //ÄÄÄ Draw
+    flags &= ~(ESCH_DRW_VISIBLE);
     esch_clipdraw_point(ESCH_CDF_CLIP);
 
 //ÄÄÄ Cleanup
     ec.pop();
+
+    if (pflags == ESCH_PRTK_NOTVISIBLE
+        && flags & ESCH_DRW_VISIBLE)
+    {
+        pflags = ESCH_PRTK_VISIBLE;
+    }
+    else if (pflags == ESCH_PRTK_VISIBLE
+             && !(flags & ESCH_DRW_VISIBLE))
+    {
+        // time to kill myself...
+        life = 0;
+        flags |= ESCH_DRW_SKIP;
+    }
+
 }
 
 

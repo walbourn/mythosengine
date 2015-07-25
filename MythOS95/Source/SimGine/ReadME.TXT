@@ -43,21 +43,11 @@
                              _Library Status_
 
  Notes by: Chuck Walbourn
- Updated: January 2, 1998
+ Updated: February 3, 1998
 
  Changes for this release --------------------------------------------------
 
- o Enabled SimAudio class by deriving it from BachDigital.
-
- o Updated SimScreen classes to clean up interface and to update for new
-   15/16-bit bit-depth error handling in Van Gogh for automatic determination
-   of 15 vs. 16-bit devices.  Also updated for new Van Gogh capture() routine.
-
- o Updated Max device initialization to check for failed DirectInput
-   initialization and fallback onto Win32 if it does.
-
- o Logic fix for SimScreen load_palette() routine to fix potential invalid
-   memory access bug.
+ o Removed defunct Clear3D support.
 
 *** END OF FILE ***
 

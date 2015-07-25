@@ -46,6 +46,7 @@
 #define __VNGSCRN_HPP  1
 #define __ESTERRAN_HPP    1
 #define __VNGTXTR_HPP 1
+#define __ESCH_EXPORT 1
 
 #define assert(a)
 
@@ -117,6 +118,10 @@ struct FloatPoint { double x, y, z; };
 //                               Routines
 //
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+extern "C" void write_to_log(char *str);
+extern "C" void report_and_log(char *str);
+extern "C" void prompt_and_log(char *str);
 
 extern "C" int capture_setup();
 extern "C" void capture_terminate();
@@ -266,12 +271,57 @@ int actual_morph_key_count;
 char dump[80];
 int next_key = 0;
 
+// Log file for prompt window
+extern "C" int log_mode;
+extern "C" char log_fname[256];
+XFile *log_file=0;
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
 //                                 Code
 //
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// logging routines                                                         ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+extern "C" void write_to_log(char *str)
+{
+    static char buff[2] = { '\r', '\n' };
+
+    if (!log_file)
+        return;
+
+    log_file->write(str,strlen(str));
+    log_file->write(buff,2);
+}
+
+extern "C" void report_and_log(char *str)
+{
+    static char buff[2] = { '\r', '\n' };
+
+    gfx_report(str);
+
+    if (log_file)
+    {
+        log_file->write(str,strlen(str));
+        log_file->write(buff,2);
+    }
+}
+
+extern "C" void prompt_and_log(char *str)
+{
+    static char buff[2] = { '\r', '\n' };
+
+    gfx_prompt(str);
+
+    if (log_file)
+    {
+        log_file->write(str,strlen(str));
+        log_file->write(buff,2);
+    }
+}
+
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // export                                                                   ³
@@ -288,6 +338,25 @@ extern "C" void export()
     char                buff[256];
     int i;
     int keys_only = 0;
+
+    if (log_mode)
+    {
+        if (log_file)
+            delete log_file;
+
+        log_file = new XFileDisk;
+        if (!log_file)
+        {
+            gfx_continu_line("Out of Memory!");
+            return;
+        }
+
+        if (log_file->create(log_fname,0))
+        {
+            gfx_continu_line("Failed to open log file");
+            return;
+        }
+    }
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Get initial data information, check for outputable data.
     switch(capture_setup())
@@ -310,6 +379,8 @@ extern "C" void export()
     if (output_path[strlen(output_path)-1] != '\\')
         strcat(buff,"\\");
     strcat(buff,output_name);
+
+    write_to_log(buff);
 
     if (!keys_only)
     {
@@ -438,7 +509,7 @@ extern "C" void export()
 
                         sprintf(buff,"Loading Van Gogh palette %s...",
                                 pname);
-                        gfx_prompt(buff);
+                        prompt_and_log(buff);
 
                         int j;
                         if ((j=load_pal(pal,pname))!=0)
@@ -483,6 +554,13 @@ error_exit:;
 
     capture_terminate();
 
+    if (log_file)
+    {
+        log_file->close();
+        delete log_file;
+        log_file=0;
+    }
+
     gfx_report("");
 
     gfx_put_hole();
@@ -503,7 +581,7 @@ STATIC int export_camera(XFParseIFF &iff, ItemData *idata)
 
     sprintf(buff,"Exporting Camera: %s",idata->name);
     gfx_stand_by(buff);
-    gfx_report(buff);
+    report_and_log(buff);
 
 //ÄÄÄ Compute look-at vector from bank and target point
 
@@ -529,7 +607,7 @@ STATIC int export_camera(XFParseIFF &iff, ItemData *idata)
     }
     else
     {
-        gfx_prompt("!!! Error during normalize in camera");
+        prompt_and_log("!!! Error during normalize in camera");
         tx = 0;  ty = 1;  tz = 0;
     }
 
@@ -550,7 +628,7 @@ STATIC int export_camera(XFParseIFF &iff, ItemData *idata)
     }
     else
     {
-        gfx_prompt("!!! Error during normalize in camera");
+        prompt_and_log("!!! Error during normalize in camera");
         vr[0] = 0;  vr[1] = 0;  vr[2] = 1;
     }
 
@@ -575,7 +653,7 @@ STATIC int export_camera(XFParseIFF &iff, ItemData *idata)
     }
     else
     {
-        gfx_prompt("!!! Error during normalize in camera");
+        prompt_and_log("!!! Error during normalize in camera");
         tx = 1;  ty = 0;  tz = 0;
     }
 
@@ -661,7 +739,7 @@ STATIC int export_ambient(XFParseIFF &iff, ItemData *idata)
 
     sprintf(buff,"Exporting Ambient: %s",idata->name);
     gfx_stand_by(buff);
-    gfx_report(buff);
+    report_and_log(buff);
 
     memset(&adata,0,sizeof(adata));
     strncpy(adata.name,idata->name,ESCH_MAX_NAME);
@@ -693,7 +771,7 @@ STATIC int export_spot_light(XFParseIFF &iff, ItemData *idata)
 
     sprintf(buff,"Exporting Spot Light: %s",idata->name);
     gfx_stand_by(buff);
-    gfx_report(buff);
+    report_and_log(buff);
 
 //ÄÄÄ Vector
     if (lgt_spotas == 3)
@@ -712,7 +790,7 @@ STATIC int export_spot_light(XFParseIFF &iff, ItemData *idata)
         }
         else
         {
-            gfx_prompt("!!! Error during normalize in light");
+            prompt_and_log("!!! Error during normalize in light");
             vr[0] = 0;  vr[1] = 0;  vr[2] = 1;
         }
 
@@ -810,7 +888,7 @@ STATIC int export_spot_light(XFParseIFF &iff, ItemData *idata)
         }
         else
         {
-            gfx_prompt("!!! Error during normalize in light");
+            prompt_and_log("!!! Error during normalize in light");
             vr[0] = 0;  vr[1] = 0;  vr[2] = 1;
         }
 
@@ -943,7 +1021,7 @@ STATIC int export_omni_light(XFParseIFF &iff, ItemData *idata)
 
     sprintf(buff,"Exporting Omni Light: %s",idata->name);
     gfx_stand_by(buff);
-    gfx_report(buff);
+    report_and_log(buff);
 
     //ÄÄÄ Attenuated version
     if (lgt_atten
@@ -1144,7 +1222,7 @@ STATIC int export_mesh(XFParseIFF &iff, ItemData *idata,
 
     sprintf(buff,"Exporting Object: %s",idata->name);
     gfx_show_gasgauge(buff);
-    gfx_report(buff);
+    report_and_log(buff);
 
     int steps = idata->item.m.verts + idata->item.m.faces;
 
@@ -1323,7 +1401,7 @@ STATIC int export_mesh(XFParseIFF &iff, ItemData *idata,
         }
         else
         {
-            gfx_prompt("!!! Error during normalize in mesh face");
+            prompt_and_log("!!! Error during normalize in mesh face");
             vr[0] = 0;  vr[1] = 1;  vr[2] = 0;
         }
 
@@ -1475,7 +1553,7 @@ STATIC int export_mesh(XFParseIFF &iff, ItemData *idata,
 
                 sprintf(buff,"%s: non-Texture1/Opacity maps ignored",
                         name);
-                gfx_prompt(buff);
+                prompt_and_log(buff);
             }
 
             if (!*fname && *tfname)
@@ -1486,7 +1564,7 @@ STATIC int export_mesh(XFParseIFF &iff, ItemData *idata,
 
                 sprintf(buff,"%s: Opacity maps without Texture1 maps ignored",
                         name);
-                gfx_prompt(buff);
+                prompt_and_log(buff);
             }
 
             // Handle valid map definition
@@ -1615,7 +1693,7 @@ STATIC int export_mesh(XFParseIFF &iff, ItemData *idata,
         }
         else
         {
-            gfx_prompt("!!! Error during normalize in mesh vertex");
+            prompt_and_log("!!! Error during normalize in mesh vertex");
             vr[0] = 0;  vr[1] = 1;  vr[2] = 0;
         }
         everts[i].normal.i = vr[0];
@@ -1846,7 +1924,7 @@ STATIC int export_mesh(XFParseIFF &iff, ItemData *idata,
                 sprintf(buff,"%s <= T1: %s...",
                         name,fname);
             }
-            gfx_prompt(buff);
+            prompt_and_log(buff);
 
             if (check_abort())
                 goto error_exit;
@@ -1915,6 +1993,10 @@ STATIC int export_mesh(XFParseIFF &iff, ItemData *idata,
                     gfx_continu_line(buff);
                     goto error_exit;
                 }
+
+                write_to_log("T1: Sequential sorted maps");
+                for(int k=0; k < seq_count; k++)
+                    write_to_log(&seq_names[256*k]);
 
                 mtlhdr.nframes = ushort((mtl_animatedtxt) ? seq_count : 1);
 
@@ -1997,6 +2079,10 @@ STATIC int export_mesh(XFParseIFF &iff, ItemData *idata,
                         gfx_continu_line(buff);
                         goto error_exit;
                     }
+
+                    write_to_log("O: Sequential sorted maps");
+                    for(int k=0; k < tseq_count; k++)
+                        write_to_log(&tseq_names[256*k]);
 
                     if (mtl_animatedtxt
                         && (tseq_count > (ulong)mtlhdr.nframes))
@@ -2209,7 +2295,7 @@ STATIC int export_mesh(XFParseIFF &iff, ItemData *idata,
                 //ÄÄÄ Progress
                 sprintf(buff,"%s [%d/%d]",
                              name,frame+1,mtlhdr.nframes);
-                gfx_prompt(buff);
+                prompt_and_log(buff);
 
                 //ÄÄÄ Advance frame
                 frame++;
@@ -2275,7 +2361,7 @@ STATIC int export_mesh(XFParseIFF &iff, ItemData *idata,
                         tfnumber++;
 
                     free(tbm);
-                    tbm=capture_mtlbitmap(&seq_names[256*tfnumber], 0,
+                    tbm=capture_mtlbitmap(&tseq_names[256*tfnumber], 0,
                                           &mtlhdr.xsize, &mtlhdr.ysize, 1);
                     if (!tbm)
                     {
@@ -2344,7 +2430,7 @@ STATIC int export_mesh(XFParseIFF &iff, ItemData *idata,
             if (mtlhdr.compress)
                 strcat(buff," compressed");
 
-            gfx_prompt(buff);
+            prompt_and_log(buff);
         }
     }
 
@@ -2594,7 +2680,7 @@ STATIC void compute_quick_extents(  ItemData *idata,
     }
     else
     {
-        gfx_prompt("!!! Error during quick extents computation");
+        prompt_and_log("!!! Error during quick extents computation");
         rad_sq = 1;  rad = 1;
     }
 
@@ -2759,7 +2845,7 @@ STATIC int compute_optimal_extents(  ItemData *idata,
         mextents->extent_radius = (esch_sqrt(max_sq) / 2.0) * scale_3ds2esch;
     else
     {
-        gfx_prompt("!!! Error during optimal extents computation");
+        prompt_and_log("!!! Error during optimal extents computation");
         mextents->extent_radius = 1;
     }
 
@@ -3027,7 +3113,7 @@ STATIC int export_keyframes()
 
     sprintf(buff,"Exporting All Keyframes");
     gfx_show_gasgauge(buff);
-    gfx_report(buff);
+    report_and_log(buff);
 
 //ÄÄÄ Open the key_output file
     strcpy (buff,key_output_path);
