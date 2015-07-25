@@ -8,7 +8,7 @@
 //ששששש²±²ששששששש²±²שששש²±²ש²±²שששש²±²ש²±²שששש²±²ש²±²שששששששש²±²שששש²±²שששששש
 //שששש²²²²²²²²²²ש²²²²²²²²ששש²²²²²²²²שש²²²שששש²²²ש²²²²²²²²²²ש²²²שששש²²²ששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//ששששששששששCopyrightש(c)ש1994,ש1995שbyשCharybdisשEnterprises,שInc.שששששששששש
+//שששששששששששCopyrightש(c)ש1994-1996שbyשCharybdisשEnterprises,שInc.שששששששששש
 //ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
 //ששששששששששששששששששששש Microsoft Windows '95 Version ששששששששששששששששששששששש
@@ -53,6 +53,7 @@
 #include <ivory.hpp>
 #include <max.hpp>
 #include <vangogh.hpp>
+#include <gutenbrg.hpp>
 
 #include "escher.hpp"
 
@@ -98,10 +99,14 @@ protected:
     MaxEventList    toggle_events;
 
 public:     // Construction/Destruction
+#ifdef DEBUG
     enum { MAP_XSIZE = 320, MAP_YSIZE = 200 };
+#else
+    enum { MAP_XSIZE = 640, MAP_YSIZE = 480 };
+#endif
     BITMAPINFO      *bmi;
     BYTE            *gmap;
-    VngoVportDD8    *gvp;
+    VngoVport       *gvp;
     VngoPal         *mypal;
     HPALETTE        hpal;
     HDC             hdc;
@@ -111,19 +116,36 @@ public:     // Construction/Destruction
 
     BOOL    active;
 
-    EschCamera      *cam;
-    EschLight       *light;
-    EschScene       *scene;
-    EschTerrain     *terrain;
-    EschMeshDraw    *curmesh;
-    Flx16           RotateDegrees;
-    Flx16           ScriptRotateDegrees;
+    BOOL    pick_test;
+    BOOL    collide_test;
+    BOOL    fire_test;
 
-    ulong           frames;
-    ulong           ticks;
+    EschCameraEx        *cam;
+    EschLight           *light;
+    EschDrawable        *draws;
+    EschScene           *scene;
+    EschTerrain         *terrain;
+    EschParticleSystem  *prtsystem;
+    EschStarfield       *starfield;
+    EschMeshDraw        *curmesh;
+    EschFireTexture     *fire;
+    EschSprite          *sprite;
+    int                 drawexts;
+    dword               exts_color;
+    Flx16               RotateDegrees;
+    Flx16               ScriptRotateDegrees;
+    int                 kind_of_particles;
+    XFBitmap            *backgrnd;
+
+    Chronometer         render_timer;
+    ulong               frames;
+    ulong               ticks;
 
     BOOL LoadScene(char *fn);
     BOOL LoadTerrain(char *fn);
+    BOOL SetupParticleSystem(const char *name);
+    BOOL SetupStarfield(BOOL fixed, BOOL brights);
+    BOOL SetupSprite(const char *name);
 
             // Per-Frame Members
     virtual BOOL    PumpWindows ();

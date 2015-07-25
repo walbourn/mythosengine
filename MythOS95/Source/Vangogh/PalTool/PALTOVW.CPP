@@ -1,11 +1,13 @@
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
 //
-//                                PalTool
+//                                 PalTool
 //
 //                   A Palette extraction/definition tool
 //
-//              Copyright (c) 1995 by Charybdis Enterprises, Inc.
+//           Copyright (c) 1995, 1996 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved
+//
+//                      Microsoft Windows '95 Version
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
@@ -22,8 +24,11 @@
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
+// Dan Higdon & Chuck Walbourn
+// 
 // PalTovw.cpp
-// 	implementation of the CPalToolView class
+//
+// PalTool view class.
 //
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
 
@@ -34,16 +39,54 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include "stdafx.h"
-#include "PalTool.h"
+#include "paltool.h"
 
-#include "PalTodoc.h"
-#include "PalTovw.h"
+#include "paltodoc.h"
+#include "paltovw.h"
 #include "bezier.h"
+#include "dialog.h"
+
+//±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+//
+//                                 Data
+//
+//±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 
 #ifdef _DEBUG
 #undef THIS_FILE
 static char BASED_CODE THIS_FILE[] = __FILE__;
 #endif
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// CPalToolView
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+IMPLEMENT_DYNCREATE(CPalToolView, CView)
+
+BEGIN_MESSAGE_MAP(CPalToolView, CView)
+	//{{AFX_MSG_MAP(CPalToolView)
+	ON_WM_LBUTTONDOWN()
+	ON_WM_LBUTTONUP()
+	ON_WM_MOUSEMOVE()
+	ON_COMMAND(IDM_OPTIONS_BEZIER, OnOptionsBezier)
+	ON_UPDATE_COMMAND_UI(IDM_OPTIONS_BEZIER, OnUpdateOptionsBezier)
+	ON_COMMAND(IDM_OPTIONS_LINEAR, OnOptionsLinear)
+	ON_UPDATE_COMMAND_UI(IDM_OPTIONS_LINEAR, OnUpdateOptionsLinear)
+	ON_COMMAND(IDM_OPTIONS_QUADRATIC, OnOptionsQuadratic)
+	ON_UPDATE_COMMAND_UI(IDM_OPTIONS_QUADRATIC, OnUpdateOptionsQuadratic)
+	ON_COMMAND(ID_EDIT_NEW_EMPTY, OnEditNewEmpty)
+	ON_COMMAND(ID_EDIT_NEW_GEN, OnEditNewGeneral)
+	ON_COMMAND(ID_EDIT_NEW_ORIGGEN, OnEditNewGeneralOld)
+	ON_COMMAND(ID_EDIT_NEW_GREYSCALE, OnEditNewGreyscale)
+	ON_COMMAND(ID_EDIT_NEW_332, OnEditNew332)
+	ON_COMMAND(ID_EDIT_NEW_RGBG, OnEditNewRGBG)
+	ON_COMMAND(ID_EDIT_PALETTE, OnEditPalette)
+	ON_COMMAND(ID_EDIT_PROP, OnEditProperties)
+	ON_WM_RBUTTONDOWN()
+	ON_COMMAND(ID_EDIT_NEW_SPC1, OnEditNewSpecial1)
+	ON_COMMAND(ID_VIEW_REFRESH, OnViewRefresh)
+	//}}AFX_MSG_MAP
+END_MESSAGE_MAP()
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
@@ -51,10 +94,10 @@ static char BASED_CODE THIS_FILE[] = __FILE__;
 //
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 
-
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 // clip_to
-//   utility to restrict a number to an inclusive range
+//
+// utility to restrict a number to an inclusive range
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 inline int clip_to (int x, int low, int high)
 {
@@ -71,9 +114,10 @@ inline int clip_to (int x, int low, int high)
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 // draw_bezier
-//  This is a function closure for use with the bezier()
-//  function, which will use this particular closure to
-//  draw the bezier on the supplied CDC.
+//
+// This is a function closure for use with the bezier()
+// function, which will use this particular closure to
+// draw the bezier on the supplied CDC.
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 class draw_bezier: public BezierClosure
 {
@@ -91,13 +135,14 @@ public:
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 // draw_quadratic
-//  This function iterates a quadratic
+//
+// This function iterates a quadratic
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-void draw_quadratic (CDC *pDC,
-					 const int x1,   const int x2,
-					 const Flx16 u0, const Flx16 v0,
-					 const Flx16 u1, const Flx16 v1,
-					 const Flx16 u2, const Flx16 v2)
+static void draw_quadratic (CDC *pDC,
+                            const int x1,   const int x2,
+		    			    const Flx16 u0, const Flx16 v0,
+        				    const Flx16 u1, const Flx16 v1,
+			                const Flx16 u2, const Flx16 v2)
 {
 	const Flx16 flx_2	(2);
 	const Flx16 flx_4	(4);
@@ -131,25 +176,9 @@ void draw_quadratic (CDC *pDC,
 
 
 
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-// CPalToolView - Message Maps
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-IMPLEMENT_DYNCREATE(CPalToolView, CView)
-
-BEGIN_MESSAGE_MAP(CPalToolView, CView)
-	//{{AFX_MSG_MAP(CPalToolView)
-	ON_WM_LBUTTONDOWN()
-	ON_WM_LBUTTONUP()
-	ON_WM_MOUSEMOVE()
-	ON_COMMAND(IDM_OPTIONS_BEZIER, OnOptionsBezier)
-	ON_UPDATE_COMMAND_UI(IDM_OPTIONS_BEZIER, OnUpdateOptionsBezier)
-	ON_COMMAND(IDM_OPTIONS_LINEAR, OnOptionsLinear)
-	ON_UPDATE_COMMAND_UI(IDM_OPTIONS_LINEAR, OnUpdateOptionsLinear)
-	ON_COMMAND(IDM_OPTIONS_QUADRATIC, OnOptionsQuadratic)
-	ON_UPDATE_COMMAND_UI(IDM_OPTIONS_QUADRATIC, OnUpdateOptionsQuadratic)
-	//}}AFX_MSG_MAP
-END_MESSAGE_MAP()
-
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°° Constructor/Destructor °°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 // CPalToolView - Constructor
@@ -181,6 +210,45 @@ CPalToolView::~CPalToolView()
 		delete haze_vp;
 #endif
 }
+
+
+
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°° Diagnostics °°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+#ifdef _DEBUG
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// CPalToolView - AssertValid
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+void CPalToolView::AssertValid() const
+{
+	CView::AssertValid();
+}
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// CPalToolView - Dump
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+void CPalToolView::Dump(CDumpContext& dc) const
+{
+	CView::Dump(dc);
+}
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// CPalToolView - GetDocument
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+CPalToolDoc* CPalToolView::GetDocument() // non-debug version is inline
+{
+	ASSERT(m_pDocument->IsKindOf(RUNTIME_CLASS(CPalToolDoc)));
+	return (CPalToolDoc*)m_pDocument;
+}
+#endif //_DEBUG
+
+
+
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°° Operations °°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 // CPalToolView - ShadePoint
@@ -229,45 +297,46 @@ void CPalToolView::DrawShadeEnv (CDC *pDC)
 
 	switch (pDoc->curve_mode)
 	{
-	case CPalToolDoc::QUADRATIC:
-		// Draw the control point
-		pDC->Rectangle (ShadePoint ());
+    	case CPalToolDoc::QUADRATIC:
 
-		draw_quadratic (pDC, 0, ENV_WIDTH,
+		    // Draw the control point
+		    pDC->Rectangle (ShadePoint ());
 
-						0,
-						ENV_HEIGHT,
+		    draw_quadratic (pDC, 0, ENV_WIDTH,
 
-						envp.x,
-						envp.y,
+						    0,
+						    ENV_HEIGHT,
 
-						midpt.x,
-						ENV_HEIGHT/2 /* - midpt.y*/);
-		break;
+						    envp.x,
+						    envp.y,
 
-	case CPalToolDoc::BEZIER:
-		// Draw the control point
-		pDC->Rectangle (ShadePoint ());
+						    midpt.x,
+						    ENV_HEIGHT/2 /* - midpt.y*/);
+		    break;
 
-		pts[0].x = 0;
-		pts[0].y = ENV_HEIGHT;
-		pts[1].x = envp.x;
-		pts[1].y = envp.y;
-		pts[2].x = envp.x;
-		pts[2].y = envp.y;
-		pts[3].x = midpt.x;
-		pts[3].y = ENV_HEIGHT/2;
+	    case CPalToolDoc::BEZIER:
+    		// Draw the control point
+		    pDC->Rectangle (ShadePoint ());
 
-		bezier (bez, pts);
-		//::PolyBezier (pDC->m_hDC, pts, 4);
-		break;
+		    pts[0].x = 0;
+		    pts[0].y = ENV_HEIGHT;
+		    pts[1].x = envp.x;
+		    pts[1].y = envp.y;
+		    pts[2].x = envp.x;
+		    pts[2].y = envp.y;
+		    pts[3].x = midpt.x;
+		    pts[3].y = ENV_HEIGHT/2;
 
-	case CPalToolDoc::LINEAR:
-		// Draw the control point
-		//pDC->Rectangle ();
-		pDC->MoveTo (0, ENV_HEIGHT);
-		pDC->LineTo (pDoc->shade_env_break() * ENV_HEIGHT / shade_env_divisions, envp.y);
-		break;
+		    bezier (bez, pts);
+		    //::PolyBezier (pDC->m_hDC, pts, 4);
+		    break;
+
+    	case CPalToolDoc::LINEAR:
+		    // Draw the control point
+		    //pDC->Rectangle ();
+		    pDC->MoveTo (0, ENV_HEIGHT);
+		    pDC->LineTo (pDoc->shade_env_break() * ENV_HEIGHT / shade_env_divisions, envp.y);
+		    break;
 	}
 
 	// below split
@@ -280,45 +349,45 @@ void CPalToolView::DrawShadeEnv (CDC *pDC)
 
 	switch (pDoc->curve_mode)
 	{
-	case CPalToolDoc::QUADRATIC:
-		draw_quadratic (pDC, 0, ENV_WIDTH,
+	    case CPalToolDoc::QUADRATIC:
+		    draw_quadratic (pDC, 0, ENV_WIDTH,
 
-						ENV_WIDTH,
-						0,
+						    ENV_WIDTH,
+						    0,
 
-						envp.x,
-						envp.y,
+						    envp.x,
+						    envp.y,
 
-						midpt.x,
-						ENV_HEIGHT/2);
-		pDC->Rectangle (envp.x + 2,
-						envp.y + 2,
-						envp.x - 2,
-						envp.y - 2);
-		break;
+						    midpt.x,
+						    ENV_HEIGHT/2);
+		    pDC->Rectangle (envp.x + 2,
+						    envp.y + 2,
+						    envp.x - 2,
+						    envp.y - 2);
+		    break;
 
-	case CPalToolDoc::BEZIER:
-		pts[0].x= ENV_WIDTH;
-		pts[0].y= 0;
-		pts[1].x= envp.x;
-		pts[1].y= envp.y;
-		pts[2].x= envp.x;
-		pts[2].y= envp.y;
-		pts[3].x= midpt.x;
-		pts[3].y= ENV_HEIGHT/2;
+	    case CPalToolDoc::BEZIER:
+		    pts[0].x= ENV_WIDTH;
+		    pts[0].y= 0;
+		    pts[1].x= envp.x;
+		    pts[1].y= envp.y;
+		    pts[2].x= envp.x;
+		    pts[2].y= envp.y;
+		    pts[3].x= midpt.x;
+		    pts[3].y= ENV_HEIGHT/2;
 
-		bezier (bez, pts);
-		//::PolyBezier (pDC->m_hDC, pts, 4);
+		    bezier (bez, pts);
+		    //::PolyBezier (pDC->m_hDC, pts, 4);
 
-		pDC->Rectangle (envp.x + 2,
-						envp.y + 2,
-						envp.x - 2,
-						envp.y - 2);
-		break;
+		    pDC->Rectangle (envp.x + 2,
+						    envp.y + 2,
+						    envp.x - 2,
+						    envp.y - 2);
+		    break;
 
-	case CPalToolDoc::LINEAR:
-		pDC->LineTo (ENV_WIDTH, 0);
-		break;
+	    case CPalToolDoc::LINEAR:
+		    pDC->LineTo (ENV_WIDTH, 0);
+		    break;
 	}
 
 	// Display the shade midpoint position
@@ -336,6 +405,7 @@ void CPalToolView::DrawShadeEnv (CDC *pDC)
 	pDC->TextOut (rct.right-1, rct.bottom+1, str);
 }
 
+
 #if 0
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 // CPalToolView - DrawHazeEnv
@@ -344,6 +414,7 @@ void CPalToolView::DrawHazeEnv (CDC *pDC)
 {
 }
 #endif
+
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 // CPalToolView - DrawShades
@@ -404,6 +475,11 @@ void CPalToolView::DrawShades ()
 }
 
 
+
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°° Message Handlers °°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 // CPalToolView - OnDraw
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -412,6 +488,7 @@ void CPalToolView::OnDraw(CDC* pDC)
 	const CPalToolDoc* pDoc = GetDocument();
 	ASSERT_VALID(pDoc);
 
+    // Force palette
 	pDC->SelectPalette (&pal, this != GetFocus());
 	pDC->RealizePalette ();
 
@@ -428,28 +505,6 @@ void CPalToolView::OnDraw(CDC* pDC)
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-// CPalToolView - Diagnostics
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-#ifdef _DEBUG
-void CPalToolView::AssertValid() const
-{
-	CView::AssertValid();
-}
-
-void CPalToolView::Dump(CDumpContext& dc) const
-{
-	CView::Dump(dc);
-}
-
-CPalToolDoc* CPalToolView::GetDocument() // non-debug version is inline
-{
-	ASSERT(m_pDocument->IsKindOf(RUNTIME_CLASS(CPalToolDoc)));
-	return (CPalToolDoc*)m_pDocument;
-}
-#endif //_DEBUG
-
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 // CPalToolView - OnInitialUpdate
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 void CPalToolView::OnInitialUpdate() 
@@ -457,14 +512,16 @@ void CPalToolView::OnInitialUpdate()
 	//CView::OnInitialUpdate();
 
 	const CPalToolDoc	*pDoc = GetDocument();
+	ASSERT_VALID(pDoc);
+
 	const VngoHwPal	*hw_pal = &((const VngoPal8 *)pDoc->base_pal)->hw_pal;
 	int	i;
 
-	shade_bits = (BYTE *)malloc (256 * (ENV_HEIGHT+2));
+	shade_bits = (BYTE *)malloc (VP_WIDTH * (ENV_HEIGHT+2));
 
 	bmi  = (LPBITMAPINFO)malloc (sizeof (BITMAPINFOHEADER) + 256*sizeof (WORD));
 	bmi->bmiHeader.biSize        = sizeof (BITMAPINFOHEADER);
-	bmi->bmiHeader.biWidth       = 256;
+	bmi->bmiHeader.biWidth       = VP_WIDTH;
 	bmi->bmiHeader.biHeight      = -(ENV_HEIGHT+2);
 	bmi->bmiHeader.biPlanes      = 1;
 	bmi->bmiHeader.biBitCount    = 8;
@@ -491,7 +548,7 @@ void CPalToolView::OnInitialUpdate()
 	pal.CreatePalette (lpal);
 	free (lpal);
 
-	shade_vp = new VngoVportDD8 (256, ENV_HEIGHT+2, shade_bits, NULL, pDoc->base_pal, VNGO_PHYSICAL_DEV);
+	shade_vp = new VngoVportDB8 (VP_WIDTH, ENV_HEIGHT+2, shade_bits, NULL, pDoc->base_pal, 0);
 
 	DrawShades ();
 }
@@ -503,7 +560,9 @@ void CPalToolView::OnInitialUpdate()
 void CPalToolView::OnLButtonDown(UINT nFlags, CPoint point) 
 {
 	CRect	shade_rct (0, 0, ENV_WIDTH, ENV_HEIGHT);
-	const CPalToolDoc	*pDoc = GetDocument();
+
+    CPalToolDoc	*pDoc = GetDocument();
+    ASSERT_VALID(pDoc);
 
 	if (shade_rct.PtInRect (point))
 	{
@@ -519,6 +578,10 @@ void CPalToolView::OnLButtonDown(UINT nFlags, CPoint point)
 			SetCapture ();
 		}
 	}
+    else if (point.x < (ENV_WIDTH+2+VP_WIDTH) && point.y < ENV_HEIGHT+2)
+    {
+        pDoc->UIPalette(this, (point.x - (ENV_WIDTH+2)));
+    }
 }
 
 
@@ -528,28 +591,75 @@ void CPalToolView::OnLButtonDown(UINT nFlags, CPoint point)
 void CPalToolView::OnLButtonUp(UINT nFlags, CPoint point) 
 {
 	const CPalToolDoc	*pDoc = GetDocument();
+	ASSERT_VALID(pDoc);
 
 	if (GetCapture() == this)
 	{
 		ReleaseCapture();
 		switch (pDoc->curve_mode)
 		{
-		case CPalToolDoc::LINEAR:
-			OnOptionsLinear();
-			break;
+		    case CPalToolDoc::LINEAR:
+			    OnOptionsLinear();
+			    break;
 
-		case CPalToolDoc::QUADRATIC:
-			OnOptionsQuadratic();
-			break;
+		    case CPalToolDoc::QUADRATIC:
+			    OnOptionsQuadratic();
+			    break;
 
-		case CPalToolDoc::BEZIER:
-			OnOptionsBezier();
-			break;
+		    case CPalToolDoc::BEZIER:
+			    OnOptionsBezier();
+			    break;
 		}
 	}
 	drag_mode = DRAG_NONE;
 	
 	CView::OnLButtonUp (nFlags, point);
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// CPalToolView - OnRButtonDown
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+void CPalToolView::OnRButtonDown(UINT nFlags, CPoint point) 
+{
+	if (GetCapture() == this)
+        return;
+
+	CRect	shade_rct (0, 0, ENV_WIDTH, ENV_HEIGHT);
+    int is_in_shade = shade_rct.PtInRect (point);
+
+//ÄÄÄ Create menu(s)
+
+    CRect   rct;
+    GetWindowRect (&rct);
+
+    point.x += rct.left;
+    point.y += rct.top;
+
+//ÄÄÄ Create menu(s)
+
+    //ÄÄÄ Menu
+    CMenu   rMenu;
+    rMenu.CreatePopupMenu();
+
+	if (is_in_shade)
+	{
+        rMenu.AppendMenu(MF_STRING, IDM_OPTIONS_LINEAR, "Linear");
+        rMenu.AppendMenu(MF_STRING, IDM_OPTIONS_BEZIER, "Bezier");
+        rMenu.AppendMenu(MF_STRING, IDM_OPTIONS_QUADRATIC, "Quadratic");
+        rMenu.AppendMenu(MF_SEPARATOR);
+    }
+    rMenu.AppendMenu(MF_STRING, ID_EDIT_PALETTE, "Palette");
+    rMenu.AppendMenu(MF_SEPARATOR);
+    rMenu.AppendMenu(MF_STRING, ID_EDIT_PROP, "Properties");
+
+ 
+//ÄÄÄ Display and perform action
+    ASSERT(AfxGetMainWnd());
+    rMenu.TrackPopupMenu( TPM_RIGHTBUTTON | TPM_LEFTALIGN,
+                          point.x, point.y,
+                          AfxGetMainWnd());
+    rMenu.DestroyMenu();
 }
 
 
@@ -568,23 +678,23 @@ void CPalToolView::OnMouseMove(UINT nFlags, CPoint point)
 		// Redraw the envelope
 		switch (drag_mode)
 		{
-		case DRAG_SHADE:
-			shade_env.x = clip_to (point.x * shade_env_divisions / ENV_WIDTH,
-								   1, pDoc->shade_env_break() - 1);
-			shade_env.y = clip_to (point.y * shade_env_divisions / ENV_WIDTH,
-								   shade_env_divisions / 2, shade_env_divisions -1);
+		    case DRAG_SHADE:
+			    shade_env.x = clip_to (point.x * shade_env_divisions / ENV_WIDTH,
+								       1, pDoc->shade_env_break() - 1);
+			    shade_env.y = clip_to (point.y * shade_env_divisions / ENV_WIDTH,
+								       shade_env_divisions / 2, shade_env_divisions -1);
 
-			DrawShadeEnv (&dc);
-			break;
+			    DrawShadeEnv (&dc);
+			    break;
 
-		case DRAG_SHADE_BREAK:
-			// You must leave space for at least 1 downshade color!
-			pDoc->shade_env_break() = clip_to (point.x * shade_env_divisions / ENV_WIDTH,
-												2, shade_env_divisions -1);
-			shade_env.x = clip_to (shade_env.x,
-								   1, pDoc->shade_env_break() - 1);
-			DrawShadeEnv (&dc);
-			break;
+		    case DRAG_SHADE_BREAK:
+			    // You must leave space for at least 1 downshade color!
+			    pDoc->shade_env_break() = clip_to (point.x * shade_env_divisions / ENV_WIDTH,
+												    2, shade_env_divisions -1);
+			    shade_env.x = clip_to (shade_env.x,
+								       1, pDoc->shade_env_break() - 1);
+			    DrawShadeEnv (&dc);
+			    break;
 		}
 	}
 	
@@ -610,98 +720,12 @@ void CPalToolView::OnActivateView(BOOL bActivate, CView* pActivateView, CView* p
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-// CPalToolView - OnOptionsBezier
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-void CPalToolView::OnOptionsBezier()
-{
-	HCURSOR old_cursor = ::SetCursor (::LoadCursor (NULL, IDC_WAIT));
-
-	CPalToolDoc	*pDoc = GetDocument();
-
-	pDoc->curve_mode = CPalToolDoc::BEZIER;
-	pDoc->calc_shades();
-	DrawShades ();
-
-	::SetCursor (old_cursor);
-	pDoc->UpdateAllViews (NULL);
-}
-
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-// CPalToolView - OnUpdateOptionsBezier
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-void CPalToolView::OnUpdateOptionsBezier(CCmdUI* pCmdUI)
-{
-	const CPalToolDoc	*pDoc = GetDocument();
-	pCmdUI->Enable (FALSE);
-	//pCmdUI->SetCheck (pDoc->curve_mode == CPalToolDoc::BEZIER);
-}
-
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-// CPalToolView - OnOptionsLinear
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-void CPalToolView::OnOptionsLinear()
-{
-	HCURSOR old_cursor = ::SetCursor (::LoadCursor (NULL, IDC_WAIT));
-
-	CPalToolDoc	*pDoc = GetDocument();
-
-	pDoc->curve_mode = CPalToolDoc::LINEAR;
-	pDoc->calc_shades();
-	DrawShades ();
-
-	::SetCursor (old_cursor);
-	pDoc->UpdateAllViews (NULL);
-}
-
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-// CPalToolView - OnUpdateOptionsLinear
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-void CPalToolView::OnUpdateOptionsLinear(CCmdUI* pCmdUI)
-{
-	const CPalToolDoc	*pDoc = GetDocument();
-	pCmdUI->Enable (TRUE);
-	pCmdUI->SetCheck (pDoc->curve_mode == CPalToolDoc::LINEAR);
-}
-
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-// CPalToolView - OnOptionsQuadratic
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-void CPalToolView::OnOptionsQuadratic()
-{
-	HCURSOR old_cursor = ::SetCursor (::LoadCursor (NULL, IDC_WAIT));
-
-	CPalToolDoc	*pDoc = GetDocument();
-
-	pDoc->curve_mode = CPalToolDoc::QUADRATIC;
-	pDoc->calc_shades();
-	DrawShades ();
-
-	::SetCursor (old_cursor);
-	pDoc->UpdateAllViews (NULL);
-}
-
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-// CPalToolView - OnUpdateOptionsQuadratic
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-void CPalToolView::OnUpdateOptionsQuadratic(CCmdUI* pCmdUI) 
-{
-	const CPalToolDoc	*pDoc = GetDocument();
-	pCmdUI->Enable (FALSE);
-	//pCmdUI->SetCheck (pDoc->curve_mode == CPalToolDoc::QUADRATIC);
-}
-
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 // CPalToolView - OnUpdate
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 void CPalToolView::OnUpdate (CView* pSender, LPARAM lHint, CObject* pHint) 
 {
 	const CPalToolDoc	*pDoc = GetDocument();
+	ASSERT_VALID(pDoc);
 	const VngoHwPal		*hw_pal = &((const VngoPal8 *)pDoc->base_pal)->hw_pal;
 
 	// Each entry maps onto the same entry in the logical palette
@@ -724,4 +748,218 @@ void CPalToolView::OnUpdate (CView* pSender, LPARAM lHint, CObject* pHint)
 }
 
 
-// eof - PalTovw.cpp
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// CPalToolView - OnEditPalette
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+void CPalToolView::OnEditPalette() 
+{
+	CPalToolDoc	*pDoc = GetDocument();
+	ASSERT_VALID(pDoc);
+
+    pDoc->UIPalette(this);
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// CPalToolView - EditNew
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+void CPalToolView::EditNew(CPalToolDoc::genpal_type typ)
+{
+	CPalToolDoc	*pDoc = GetDocument();
+	ASSERT_VALID(pDoc);
+
+    if (MessageBox("This option will overwrite all palette entries.\n\n"
+                   "Are you sure you wish to proceed?",
+                   "Palette Tool",
+                   MB_YESNO | MB_ICONEXCLAMATION) == IDYES)
+    {
+		CProgressDlg	prog(this);
+
+		prog.m_pbar.SetRange (0, 2);
+		prog.m_pbar.SetPos (0);
+		prog.SetWindowText ("Computing Palette");
+        if (typ != CPalToolDoc::PAL_EMPTY)
+    		prog.ShowWindow (SW_SHOW);
+
+        pDoc->Generate (typ);
+
+        if (typ != CPalToolDoc::PAL_EMPTY)
+        {
+		    prog.m_pbar.SetPos (1);
+            pDoc->CalcConvert();
+		    prog.m_pbar.SetPos (2);
+		    pDoc->CalcShades ();
+        }
+		pDoc->UpdateAllViews (NULL);
+    }
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// CPalToolView - OnEditNewEmpty
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+void CPalToolView::OnEditNewEmpty() 
+{
+    EditNew(CPalToolDoc::PAL_EMPTY);
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// CPalToolView - OnEditNewGeneral
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+void CPalToolView::OnEditNewGeneral() 
+{
+    EditNew(CPalToolDoc::PAL_GEN);
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// CPalToolView - OnEditNewGeneralOld
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+void CPalToolView::OnEditNewGeneralOld() 
+{
+    EditNew(CPalToolDoc::PAL_ORIGGEN);
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// CPalToolView - OnEditNewGreyscale
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+void CPalToolView::OnEditNewGreyscale() 
+{
+    EditNew(CPalToolDoc::PAL_GREY);
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// CPalToolView - OnEditNew332
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+void CPalToolView::OnEditNew332() 
+{
+    EditNew(CPalToolDoc::PAL_332);
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// CPalToolView - OnEditNewRGBG
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+void CPalToolView::OnEditNewRGBG() 
+{
+    EditNew(CPalToolDoc::PAL_RGBG);
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// CPalToolView - OnEditNewSpecial1
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+void CPalToolView::OnEditNewSpecial1() 
+{
+    EditNew(CPalToolDoc::PAL_SPC1);
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// CPalToolView - OnEditProperties
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+void CPalToolView::OnEditProperties() 
+{
+	CPalToolDoc	*pDoc = GetDocument();
+	ASSERT_VALID(pDoc);
+
+    pDoc->UIProperties(this);
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// CPalToolView - OnViewRefresh
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+void CPalToolView::OnViewRefresh() 
+{
+    RedrawWindow();
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// CPalToolView - On(Update)OptionsBezier
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+void CPalToolView::OnOptionsBezier()
+{
+	HCURSOR old_cursor = ::SetCursor (::LoadCursor (NULL, IDC_WAIT));
+
+	CPalToolDoc	*pDoc = GetDocument();
+	ASSERT_VALID(pDoc);
+
+	pDoc->curve_mode = CPalToolDoc::BEZIER;
+	pDoc->CalcShades();
+	DrawShades ();
+
+	::SetCursor (old_cursor);
+	pDoc->UpdateAllViews (NULL);
+}
+
+void CPalToolView::OnUpdateOptionsBezier(CCmdUI* pCmdUI)
+{
+	const CPalToolDoc	*pDoc = GetDocument();
+    ASSERT_VALID(pDoc);
+
+	pCmdUI->Enable (FALSE);
+	//pCmdUI->SetCheck (pDoc->curve_mode == CPalToolDoc::BEZIER);
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// CPalToolView - On(Update)OptionsLinear
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+void CPalToolView::OnOptionsLinear()
+{
+	HCURSOR old_cursor = ::SetCursor (::LoadCursor (NULL, IDC_WAIT));
+
+	CPalToolDoc	*pDoc = GetDocument();
+	ASSERT_VALID(pDoc);
+
+	pDoc->curve_mode = CPalToolDoc::LINEAR;
+	pDoc->CalcShades();
+	DrawShades ();
+
+	::SetCursor (old_cursor);
+	pDoc->UpdateAllViews (NULL);
+}
+
+void CPalToolView::OnUpdateOptionsLinear(CCmdUI* pCmdUI)
+{
+	const CPalToolDoc	*pDoc = GetDocument();
+	ASSERT_VALID(pDoc);
+
+	pCmdUI->Enable (TRUE);
+	pCmdUI->SetCheck (pDoc->curve_mode == CPalToolDoc::LINEAR);
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// CPalToolView - On(Update)OptionsQuadratic
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+void CPalToolView::OnOptionsQuadratic()
+{
+	HCURSOR old_cursor = ::SetCursor (::LoadCursor (NULL, IDC_WAIT));
+
+	CPalToolDoc	*pDoc = GetDocument();
+	ASSERT_VALID(pDoc);
+
+	pDoc->curve_mode = CPalToolDoc::QUADRATIC;
+	pDoc->CalcShades();
+	DrawShades ();
+
+	::SetCursor (old_cursor);
+	pDoc->UpdateAllViews (NULL);
+}
+
+void CPalToolView::OnUpdateOptionsQuadratic(CCmdUI* pCmdUI) 
+{
+	const CPalToolDoc	*pDoc = GetDocument();
+	ASSERT_VALID(pDoc);
+
+	pCmdUI->Enable (FALSE);
+	//pCmdUI->SetCheck (pDoc->curve_mode == CPalToolDoc::QUADRATIC);
+}
+
+//°±² eof - paltovw.cpp ²±°

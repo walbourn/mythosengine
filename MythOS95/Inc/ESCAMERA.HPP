@@ -8,7 +8,7 @@
 //ùùùùù²±²ùùùùùùù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùùùùùù²±²ùùùù²±²ùùùùùù
 //ùùùù²²²²²²²²²²ù²²²²²²²²ùùù²²²²²²²²ùù²²²ùùùù²²²ù²²²²²²²²²²ù²²²ùùùù²²²ùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùCopyrightù(c)ù1994,ù1995ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
+//ùùùùùùùùùùùCopyrightù(c)ù1994-1996ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùù Microsoft Windows '95 Version ùùùùùùùùùùùùùùùùùùùùùùù
@@ -32,9 +32,12 @@
 //
 // escamera.hpp
 //
-//     The EschCamera object provides the viewing parameters for rendering
-//     the object database.  EschCameras can be linked into lists, as
-//     well as loaded from files.
+// The EschCamera class provides the viewing parameters for rendering
+// the object database.  EschCameras can be linked into lists, as
+// well as loaded from files.
+//
+// EschCameraEx class extends the basic camera to include support for bitmap
+// backgrounds and special-effects like hazing.
 //
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
 
@@ -77,15 +80,20 @@ class EschLight;
 class EschCamera {
 
 protected:
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    // Protected data members                                               ³
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
     EschCamera  *inext;                     // Linked-list pointers
     EschCamera  *iprev;
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-    // Internal render function which is overlayed by derived EschCameras.  ³
-    // This function will assume that the currently active context contains ³
-    // the required data for drawing.                                       ³
+    // Internal render functions which are overlayed by derived EschCameras.³
+    // These functions will assume that the currently active context        ³
+    // contains the required data for drawing.                              ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-    virtual void rend(void);
+    virtual int pre_rend();
+    virtual void rend();
+    virtual void post_rend();
 
 public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
@@ -99,7 +107,7 @@ public:
     Flx16           yscalar;                // 2D scale factor in Y
     Flx16           xsize;                  // Projection-plane size in X
     Flx16           ysize;                  // Projection-plane size in Y
-    Flx16           aspect_ratio;           // Aspect ratio (Y:X)
+    Flx16           aspect_ratio;           // Aspect ratio (X:Y)
     Flx16           factor;                 // User scale factor
     Flx16           hither;                 // Distance to near clip plane
     Flx16           yon;                    // Distance to far clip plane
@@ -114,115 +122,110 @@ public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
     EschCamera(VngoVport *vport=0);
     EschCamera(const char *fname, const char *cname=0);
-    // EschCamera(EschCamera *cam) { *this = *cam; }
+    EschCamera(const EschCamera &cam);
 
     virtual ~EschCamera();
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-    // Operations on cameras.                                               ³
+    // Accessor functions                                                   ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+    EschCamera *next() const { return inext; }
+    EschCamera *prev() const { return iprev; }
+
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    // Operations                                                           ³
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+    const EschCamera &operator = (const EschCamera &cam);
+
     virtual void attach(VngoVport *vp);
 
     virtual void sibling(EschCamera *myprev);
-    virtual void remove(void);
+    virtual void remove();
 
-    EschCamera *next(void) { return inext; }
-    EschCamera *prev(void) { return iprev; }
+    virtual EschCamera *find(const char *cname) const;
 
-    virtual EschCamera *find(const char *cname);
+    virtual void reset();
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Renders the view starting with the olist as the parent EschDrawable. ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-    void render(void)
+    void render(dword ctrl=ESCH_REND_ALL)
     {
         EschContext ec(EschCurrent);
         ec.camera = this;
         ec.push();
-        rend();
+        if (ctrl & ESCH_REND_PRE)
+            if (pre_rend())
+                return;
+        if (ctrl & ESCH_REND_DRAW)
+            rend();
+        if (ctrl & ESCH_REND_POST)
+            post_rend();
         ec.pop();
     }
-    void render(EschDrawable *olist)
+    void render(EschDrawable *olist, dword ctrl=ESCH_REND_ALL)
     {
         EschContext ec(EschCurrent);
         ec.eschs = olist;
         ec.camera = this;
         ec.push();
-        rend();
+        if (ctrl & ESCH_REND_PRE)
+            if (pre_rend())
+                return;
+        if (ctrl & ESCH_REND_DRAW)
+            rend();
+        if (ctrl & ESCH_REND_POST)
+            post_rend();
         ec.pop();
     }
-    void render(EschLight *llist)
+    void render(EschLight *llist, dword ctrl=ESCH_REND_ALL)
     {
         EschContext ec(EschCurrent);
         ec.camera = this;
         ec.lights = llist;
         ec.push();
-        rend();
+        if (ctrl & ESCH_REND_PRE)
+            if (pre_rend())
+                return;
+        if (ctrl & ESCH_REND_DRAW)
+            rend();
+        if (ctrl & ESCH_REND_POST)
+            post_rend();
         ec.pop();
     }
-    void render(EschDrawable *olist, EschLight *llist)
+    void render(EschDrawable *olist, EschLight *llist, dword ctrl=ESCH_REND_ALL)
     {
         EschContext ec(EschCurrent);
         ec.eschs = olist;
         ec.lights = llist;
         ec.camera = this;
         ec.push();
-        rend();
+        if (ctrl & ESCH_REND_PRE)
+            if (pre_rend())
+                return;
+        if (ctrl & ESCH_REND_DRAW)
+            rend();
+        if (ctrl & ESCH_REND_POST)
+            post_rend();
         ec.pop();
     }
-
-    virtual void reset(void);
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-    // Utility functions for changing the camera's status and information.  ³
+    // Utility functions.                                                   ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-    void set_top(const EschVector *t)
-    {
-        top=*t;
-        top.normalize();
-        compute_eye();
-    }
+    void set_top(const EschVector *t, dword update=ESCH_UPD_ALL);
+    void set_top(const Flx16 ii, const Flx16 ij, const Flx16 ik,
+                 dword update=ESCH_UPD_ALL);
 
-    void set_top(const Flx16 ii, const Flx16 ij, const Flx16 ik)
-    {
-        top.i=ii;
-        top.j=ij;
-        top.k=ik;
-        top.normalize();
-        compute_eye();
-    }
-
-    void set_dir(const EschVector *d)
-    {
-        eye.dir=*d;
-        eye.dir.normalize();
-        compute_eye();
-    }
-    void set_dir(const Flx16 ii, const Flx16 ij, const Flx16 ik)
-    {
-        eye.dir.i=ii;
-        eye.dir.j=ij;
-        eye.dir.k=ik;
-        eye.dir.normalize();
-        compute_eye();
-    }
+    void set_dir(const EschVector *d, dword update=ESCH_UPD_ALL);
+    void set_dir(const Flx16 ii, const Flx16 ij, const Flx16 ik,
+                 dword update=ESCH_UPD_ALL);
  
-    void set_vects(const EschVector *t,const EschVector *d);
+    void set_vects(const EschVector *t,const EschVector *d,
+                   dword update=ESCH_UPD_ALL);
     void set_vects(const Flx16 ti, const Flx16 tj, const Flx16 tk,
-                   const Flx16 di, const Flx16 dj, const Flx16 dk)
-    {
-        EschVector t, d;
-
-        t.i = ti;
-        t.j = tj;
-        t.k = tk;
-
-        d.i = di;
-        d.j = dj;
-        d.k = dk;
-
-        set_vects(&t,&d);
-    }
+                   const Flx16 di, const Flx16 dj, const Flx16 dk,
+                   dword update=ESCH_UPD_ALL);
  
     void get_position(EschPoint *pt) const
     {
@@ -231,70 +234,71 @@ public:
         pt->z.flx = eye.orient.mtx[ESCH_MTX_L].flx;
     }
  
-    void set_position(const EschPoint *pt) { eye.set_position(pt); }
-    void set_position(const Flx16 ix, const Flx16 iy, const Flx16 iz)
-        { eye.set_position(ix,iy,iz); }
+    void set_position(const EschPoint *pt, dword update=ESCH_UPD_ALL)
+         { eye.set_position(pt,update); }
+    void set_position(const Flx16 ix, const Flx16 iy, const Flx16 iz, dword update=ESCH_UPD_ALL)
+         { eye.set_position(ix,iy,iz,update); }
 
-    void set_lookat(const EschPoint  *pt);
-    void set_lookat(const Flx16 ix, const Flx16 iy, const Flx16 iz)
-    {
-        EschPoint p;
+    void set_lookat(const EschPoint *pt, dword update=ESCH_UPD_ALL);
+    void set_lookat(const Flx16 ix, const Flx16 iy, const Flx16 iz,
+                    dword update=ESCH_UPD_ALL);
+ 
+    void rotatex(const Flx16 degrees, dword update=ESCH_UPD_ALL);
+    void rotatey(const Flx16 degrees, dword update=ESCH_UPD_ALL);
+    void rotatez(const Flx16 degrees, dword update=ESCH_UPD_ALL);
+ 
+    void pitch(const Flx16 degrees, dword update=ESCH_UPD_ALL);
+    void yaw(const Flx16 degrees, dword update=ESCH_UPD_ALL);
+    void roll(const Flx16 degrees, dword update=ESCH_UPD_ALL);
+ 
+    void translate(const EschVector *v, dword update=ESCH_UPD_ALL)
+         { eye.translate(v->i,v->j,v->k,update); }
+    void translate(const Flx16 ii, const Flx16 ij, const Flx16 ik,
+                   dword update=ESCH_UPD_ALL)
+         { eye.translate(ii,ij,ik,update); }
+ 
+    void move(const EschVector *v, dword update=ESCH_UPD_ALL)
+         { eye.move(v->i,v->j,v->k,update); }
+    void move(const Flx16 ii, const Flx16 ij, const Flx16 ik,
+              dword update=ESCH_UPD_ALL)
+         { eye.move(ii,ij,ik,update); }
+ 
+    void orthogonalize(dword update=ESCH_UPD_ALL);
+    void orthogonalize_top(dword update=ESCH_UPD_ALL);
 
-        p.x = ix;
-        p.y = iy;
-        p.z = iz;
-
-        set_lookat(&p);
-    }
- 
-    void rotatex(const Flx16 degrees);
-    void rotatey(const Flx16 degrees);
-    void rotatez(const Flx16 degrees);
- 
-    void pitch(const Flx16 degrees);
-    void yaw(const Flx16 degrees);
-    void roll(const Flx16 degrees);
- 
-    void translate(const EschVector *v) { eye.translate(v->i,v->j,v->k); }
-    void translate(const Flx16 ii, const Flx16 ij, const Flx16 ik)
-                                        { eye.translate(ii,ij,ik); }
- 
-    void move(const EschVector *v) { eye.move(v->i,v->j,v->k); }
-    void move(const Flx16 ii, const Flx16 ij, const Flx16 ik)
-                                        { eye.move(ii,ij,ik); }
- 
-    void orthogonalize(void);
-
-    void set_factor(const Flx16 f)
+    void set_factor(const Flx16 f, dword update=ESCH_UPD_ALL)
     {
         factor=f;
-        compute_scalar();
-        compute_eye();
+        if (update & ESCH_UPD_SCALAR)
+            compute_scalar();
     }
  
-    void zoom(const Flx16 f)
+    void zoom(const Flx16 f, dword update=ESCH_UPD_ALL)
     {
         factor=factor * f;
-        compute_scalar();
-        compute_eye();
+        if (update & ESCH_UPD_SCALAR)
+            compute_scalar();
     }
  
-    void set_fov(const Flx16 f)
+    void set_fov(const Flx16 f, dword update=ESCH_UPD_ALL)
     {
         fov=f;
-        compute_scalar();
+        if (update & ESCH_UPD_SCALAR)
+            compute_scalar();
     }
 
-    void set_hither(const Flx16 h)
+    void set_hither(const Flx16 h, dword update=ESCH_UPD_ALL)
     {
         hither=h;
-        compute_scalar();
+        if (update & ESCH_UPD_SCALAR)
+            compute_z_factor();
     }
  
-    void set_yon(const Flx16 y) 
+    void set_yon(const Flx16 y, dword update=ESCH_UPD_ALL) 
     { 
-       yon=y; 
-       compute_z_factor();
+        yon=y; 
+        if (update & ESCH_UPD_SCALAR)
+            compute_z_factor();
     }
  
     void set_bcolor(const dword c=0)
@@ -303,13 +307,21 @@ public:
     }
  
     void set_flags(const dword f) { flags=f; }
+
+    void set_aspect_ratio(const Flx16 ar, dword update=ESCH_UPD_ALL)
+    {
+        aspect_ratio=ar;
+        if (update & ESCH_UPD_SCALAR)
+            compute_scalar();
+    }
  
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Compute functions to calculate viewing constants.                    ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-    void compute_z_factor(void);
-    void compute_scalar(void);
-    void compute_eye(void);
+    void compute_scalar();
+    void compute_z_factor();
+    void compute_eye(dword update=ESCH_UPD_ALL);
+    void compute_inverse() { eye.compute_inverse(); }
  
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // I/O routines.                                                        ³
@@ -320,15 +332,16 @@ public:
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// EschCameraEx - Extended camera object.                                   ³
+// EschCameraEx - Extended camera class.                                    ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 class EschCameraEx : public EschCamera {
 
 protected:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-    // Internal render function                                             ³
+    // Internal render functions                                            ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-    virtual void rend(void);
+    virtual int pre_rend();
+    virtual void post_rend();
 
 public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
@@ -336,33 +349,38 @@ public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
     short           bg_offx;                // Bitmap Background window offset
     short           bg_offy;
-    short           bg_w;                   // Bitmap Background size
-    short           bg_h;
     XFBitmap        *bg_bitmap;             // Bitmap background
-    dword           hz_near;                // Hazing near distance (scaled)
-    dword           hz_far;                 // Hazing far distance (scaled)
-    dword           hz_factor;              // Scale factor for Z to shade range
-    VngoHazePal8    *hz_pal;
+    VngoShadePal    *hz_pal;                // Haze shade palette
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Constructor/Destructors                                              ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
     EschCameraEx(VngoVport *vport=0);
     EschCameraEx(const char *fname, const char *cname=0);
+    EschCameraEx(const EschCamera &cam);
+    EschCameraEx(const EschCameraEx &cam);
 
     virtual ~EschCameraEx();
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-    // Utility functions for changing the camera's status and information.  ³
+    // Operations                                                           ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-    void set_bg_offset(short x, short y);
-    void set_bg_size(short w, short h);
-    void set_bg_bitmap(XFBitmap *bm, int owns=1);
+    const EschCameraEx &operator = (const EschCamera &cam);
+    const EschCameraEx &operator = (const EschCameraEx &cam);
 
-#if 0
-    void set_hz_palette(VngoHazePal8 *hp, int owns=0);
-    void set_hz_range(Flx16 n, Flx16 f);
-#endif
+    virtual void release();
+
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    // Utility functions.                                                   ³
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+    void set_bg_offset(short x, short y) { bg_offx=x; bg_offy=y; }
+    int set_bg_bitmap(XFBitmap *bm, int owns=1);
+
+    int set_haze(VngoShadePal *hzp, int owns=1);
+    esch_error_codes create_haze(ushort levels,
+                                 ushort slevel,
+                                 ushort blevel, Flx16 bpercent,
+                                 VngoColor24bit tcolor);
 };
 
 #ifdef __WATCOMC__

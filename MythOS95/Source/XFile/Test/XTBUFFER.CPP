@@ -6,7 +6,7 @@
 //    (_)       ^          * *     *      *   *    *            (_)
 //             (_)       **   **   *    ***** **** ****
 //
-//            Copyright (c) 1994,1995 by Charybdis Enterprises, Inc.
+//            Copyright (c) 1994-1996 by Charybdis Enterprises, Inc.
 //                            All Rights Reserved.
 //                        Microsoft Windows '95 Version
 //
@@ -64,9 +64,9 @@ void print_error(class XFile *xf, char *s);
 void buffer()
 {
 //ÄÄÄÄ Perform file tests ÄÄÄÄ
-   cout << "\n\n\n°°°°°°±±±±±±²²²²²² Buffered DOS tests ²²²²²²±±±±±±°°°°°°\n";
+   cout << "\n\n\n°°°°°°±±±±±±²²²²²² Buffered Disk tests ²²²²²²±±±±±±°°°°°°\n";
 
-   XFileDOSBuff xf;
+   XFileDiskBuf xf;
 
    if (xf.create("TESTFILE.DAT",XF_OPEN_WRITE|XF_OPEN_READ))
    {

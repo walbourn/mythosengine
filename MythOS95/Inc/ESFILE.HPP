@@ -8,7 +8,7 @@
 //ùùùùù²±²ùùùùùùù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùùùùùù²±²ùùùù²±²ùùùùùù
 //ùùùù²²²²²²²²²²ù²²²²²²²²ùùù²²²²²²²²ùù²²²ùùùù²²²ù²²²²²²²²²²ù²²²ùùùù²²²ùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùCopyrightù(c)ù1994,ù1995ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
+//ùùùùùùùùùùùCopyrightù(c)ù1994-1996ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùù Microsoft Windows '95 Version ùùùùùùùùùùùùùùùùùùùùùùù
@@ -65,9 +65,10 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// CHUNK 'ECAM' - Camera data IFF block.                                    ³
+// Cameras                                                                  ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
+//ÄÄÄ 'ECAM' - Camera data
 struct EschFileCamera
 {
     char    name[ESCH_MAX_NAME];
@@ -85,10 +86,12 @@ struct EschFileCamera
     char    na[4];
 };
 
+
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// CHUNK 'EAMB' - Ambient light data IFF block                              ³
+// Lights                                                                   ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
+//ÄÄÄ 'EAMB' - Ambient light source
 struct EschFileLightAmbi
 {
     char    name[ESCH_MAX_NAME];
@@ -97,10 +100,20 @@ struct EschFileLightAmbi
     char    na[8];
 };
 
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// CHUNK 'EPNT' - Point light data IFF block                                ³
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+//ÄÄÄ 'EVEC' - Vector light source
+struct EschFileLightVect
+{
+    char    name[ESCH_MAX_NAME];
+    dword   flags;
+    Flx16   i;
+    Flx16   j;
+    Flx16   k;
+    dword   color;
+    char    na[12];
+};
 
+//ÄÄÄ 'EFPT' - Fast point light source
+//ÄÄÄ 'EPNT' - Point light source
 struct EschFileLightPoint
 {
     char    name[ESCH_MAX_NAME];
@@ -112,20 +125,40 @@ struct EschFileLightPoint
     char    na[12];
 };
 
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// CHUNK 'EVEC' - Vector light data IFF block                               ³
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-
-struct EschFileLightVect
+//ÄÄÄ 'EFAT' - Fast Attenuated point light source
+//ÄÄÄ 'EATN' - Attenuated point light source
+struct EschFileLightAtten
 {
     char    name[ESCH_MAX_NAME];
     dword   flags;
+    Flx16   x;
+    Flx16   y;
+    Flx16   z;
+    dword   color;
+    Flx16   inner;
+    Flx16   outer;
+    char    na[4];
+};
+
+//ÄÄÄ 'EFSP' - Spot light source
+//ÄÄÄ 'ESPT' - Spot light source
+struct EschFileLightSpot
+{
+    char    name[ESCH_MAX_NAME];
+    dword   flags;
+    Flx16   x;
+    Flx16   y;
+    Flx16   z;
     Flx16   i;
     Flx16   j;
     Flx16   k;
     dword   color;
-    char    na[12];
+    Flx16   inner;
+    Flx16   outer;
+    Flx16   hotspot;
+    Flx16   falloff;
 };
+
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // FORM 'EMSH' - Mesh data IFF form.                                        ³
@@ -179,6 +212,7 @@ struct EschFileMeshMTL
     char    name[ESCH_MAX_NAME];
 };
 
+
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // FORM 'EMTL' - Material Data Form.                                        ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
@@ -198,6 +232,7 @@ struct EschFileMtlMHDR
 //ÄÄÄ 'BODY' - Material Body
 // Raw data for the bitmap (use type in header to decode)
 
+
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // FORM 'ESEN' - Scene data IFF form.                                       ³
 //               This form will contain all FORMs within the scene and      ³
@@ -215,8 +250,14 @@ struct EschFileSceneHDR
     ulong   nmaterials;
     ulong   nvectorlights;
     ulong   npointlights;
-    char    na[28];
+    ushort  nfpointlights;
+    ushort  nattenlights; 
+    ushort  nfattenlights; 
+    ushort  nspotlights; 
+    ushort  nfspotlights; 
+    char    na[18];
 };
+
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // FORM 'ETER' - Terrain Data Form.                                         ³
@@ -232,10 +273,14 @@ struct EschFileTerrHDR
     ushort  surfratio;                  // Height:Surface points ratio
     byte    compression;                // Compression flag for data (0=none)
     byte    ntxts;                      // Number of textures
-    Flx16   wscale;                     // World space per unit in width
-    Flx16   dscale;                     // World space per unit in depth
+    Flx16   wscale;                     // World space per unit in width (obs)
+    Flx16   dscale;                     // World space per unit in depth (obs)
     Flx16   hscale;                     // World space per unit in height
-    char    na[72];
+    Flx16   scale;                      // World space per unit in width & depth
+    Flx16   origin_x;                   // Origin location
+    Flx16   origin_y;
+    Flx16   origin_z;
+    char    na[56];
     char    palname[16];                // Van Gogh palette used to color
                                         // terrain data
 };
@@ -252,6 +297,22 @@ struct EschFileTerrHDR
 //ÄÄÄ 'COLR' - Texture color data 
 // Byte array for texture colors.
 
+//ÄÄÄ 'HCLR' - Height color bands
+struct EschFileTerrHCLR
+{
+    ushort  blue;
+    ushort  lblue;
+    ushort  white;
+    ushort  green;
+    ushort  lgreen;
+    ushort  yellow;
+    ushort  lorange;
+    ushort  orange;
+    ushort  lbrown;
+    ushort  brown;
+    ushort  red;
+    char    na[10];
+};
 
 #ifdef __WATCOMC__
 #pragma pack();

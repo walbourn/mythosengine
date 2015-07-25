@@ -11,7 +11,7 @@
 //                     Text Output and Font Management System
 //                          Microsoft Windows '95 Version
 //
-//               Copyright (c) 1995 by Charybdis Enterprises, Inc.
+//            Copyright (c) 1995, 1996 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved.
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -72,10 +72,10 @@
 
 // these must be C++ since Van Gogh is not C-callable
 
-void gberg_outc(VngoVport *vp, long x, long y, char c);
+long gberg_outc(VngoVport *vp, long x, long y, char c);
 
-// void gberg_sizec(char c, VngoRect *r);
-// void gberg_sizes(char *str, VngoRect *r);
+long gberg_widthc(char c);
+long gberg_heightc(char c);
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
@@ -86,7 +86,8 @@ void gberg_outc(VngoVport *vp, long x, long y, char c);
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // System class                                                             ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-class GBergSystem {
+class GBergSystem
+{
 public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Constructor/Destructors                                              ³
@@ -99,13 +100,15 @@ public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
     gberg_error_codes color(dword fc, dword bc=VNGO_TRANSPARENT)
                                            { return gberg_color(fc,bc); }
-    gberg_error_codes select_font(char *f) { return gberg_select_font(f); }
-    gberg_error_codes install_font(char *fn, char *f) { return gberg_install_font(fn,f); }
-    gberg_error_codes info_font(char *f, GBergFontInfo *i) { return gberg_info_font(f,i); }
+    gberg_error_codes select_font(const char *f) { return gberg_select_font(f); }
+    gberg_error_codes install_font(const char *fn, const char *f) { return gberg_install_font(fn,f); }
+    gberg_error_codes remove_font(const char *f) { return gberg_remove_font(f); }
+    gberg_error_codes info_font(const char *f, GBergFontInfo *i) const { return gberg_info_font(f,i); }
 
-    gberg_error_codes select_strings(char *t) { return gberg_select_strings(t); }
-    gberg_error_codes install_strings(char *fn, char *t) { return gberg_install_strings(fn,t); }
-    gberg_error_codes info_strings(char *t, GBergTextInfo *i) { return gberg_info_strings(t,i); }
+    gberg_error_codes select_strings(const char *t) { return gberg_select_strings(t); }
+    gberg_error_codes install_strings(const char *fn, const char *t) { return gberg_install_strings(fn,t); }
+    gberg_error_codes remove_strings(const char *t) { return gberg_remove_strings(t); }
+    gberg_error_codes info_strings(const char *t, GBergTextInfo *i) { return gberg_info_strings(t,i); }
 
 };
 
@@ -134,14 +137,18 @@ public:
     void outc(char c);
     void outc(long x, long y, char c) { curx=x; cury=y; outc(c); }
 
-    void out(char *str);
-    void out(long x, long y, char *str) { curx=x; cury=y; out(str); }
+    void out(const char *str);
+    void out(long x, long y, const char *str) { curx=x; cury=y; out(str); }
 
     void out(long num);
     void out(long x, long y, long num) { curx=x; cury=y; out(num); }
 
+    void outf(const char *fmt, ...);
+
+    void out_wrap(const char *, const VngoRect * = 0);
+
     void setpos(byte row, byte col);
-    void getpos(byte *row, byte *col);
+    void getpos(byte *row, byte *col) const;
 };
 
 #ifdef __WATCOMC__

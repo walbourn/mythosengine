@@ -11,7 +11,7 @@
 //                     Text Output and Font Management System
 //                          Microsoft Windows '95 Version
 //
-//               Copyright (c) 1995 by Charybdis Enterprises, Inc.
+//            Copyright (c) 1995, 1996 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved.
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -176,17 +176,19 @@ void gberg_term();
 // Font control functions.                                                  ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 gberg_error_codes gberg_color(dword fcol, dword bcol);
-gberg_error_codes gberg_select_font(char *fntname);
-gberg_error_codes gberg_install_font(char *fname, char *fntname);
-gberg_error_codes gberg_info_font(char *fntname, GBergFontInfo *info);
+gberg_error_codes gberg_select_font(const char *fntname);
+gberg_error_codes gberg_install_font(const char *fname, const char *fntname);
+gberg_error_codes gberg_info_font(const char *fntname, GBergFontInfo *info);
+gberg_error_codes gberg_remove_font(const char *fntname);
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // External string functions.                                               ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 gberg_error_codes gberg_loadstring(ulong num, char *buff, ulong len);
-gberg_error_codes gberg_select_strings(char *txtname);
-gberg_error_codes gberg_install_strings(char *fname, char *txtname);
-gberg_error_codes gberg_info_strings(char *txtname, GBergTextInfo *info);
+gberg_error_codes gberg_select_strings(const char *txtname);
+gberg_error_codes gberg_install_strings(const char *fname, const char *txtname);
+gberg_error_codes gberg_info_strings(const char *txtname, GBergTextInfo *info);
+gberg_error_codes gberg_remove_strings(const char *txtname);
 
 #ifdef __cplusplus
 }

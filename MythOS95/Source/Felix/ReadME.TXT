@@ -9,7 +9,7 @@
   
                        Microsoft Windows '95 Version
      
-             Copyright (c) 1994, 1995 by Charybdis Enterprises, Inc.
+          Copyright (c) 1994, 1995, 1996 by Charybdis Enterprises, Inc.
                              All Rights Reserved.
   
   ---------------------------------------------------------------------------
@@ -31,35 +31,30 @@
                                 _Library Status_
 
   Notes by:  Tim Little
-  Updated:   Oct 24, 1995
+  Updated:   June 24, 1996
 
   Changes for this release --------------------------------------------------
+    o Changed the precision of the trig functions to .0625 degrees accuracy.
 
-    o Release Version 1.0
-
-
+    o Added teh atan() functions.
 
   Proposed changes ----------------------------------------------------------
 
     o Implement :-
 
-        acos()
-        asin()        
-        tan()         
-        atan()
         atan2()
         exp()
         pow()
         log10()
         log()
 
-    o 2.30 and 24.8 formats.
+    o 2.30, 24.8, 20.12, 12.20 formats.
 
 
 
   Problems ------------------------------------------------------------------
 
-    o Microsoft Visual C++ v2.0 generates extra overhead on inline functions
+    o Microsoft Visual C++ generates extra overhead on inline functions
       for Flx16 if a copy constructor is defined.  This is resolved by
       removing the copy constructor.
 

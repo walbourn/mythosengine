@@ -6,7 +6,7 @@
 ;                                                           |. _  .   .|
 ;          Microsoft Windows '95 Version                    | / \   .  | 
 ;                                                           |_|_|_._._.|
-; Copyright (c) 1994, 1995 by Charybdis Enterprises, Inc.   |.-.-.-.-..|
+;  Copyright (c) 1994-1996 by Charybdis Enterprises, Inc.   |.-.-.-.-..|
 ;              All rights reserved.                        %\__________/%
 ;                                                           %          %
 ;
@@ -97,8 +97,82 @@ pt_pflags       dd ?            ; flags.
 VNGO_POINT      ENDS
 
 
+;ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+; VNGO_POINT2 is a 2D draw point, it contains all of the needed information ³
+; needed to draw into the view port for most drawing types.                ³
+; This structure is intentionaly 32 BYTES long.                            ³
+;ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+                
+VNGO_POINT2     STRUCT
+pt2_x           dd ?            ; 2D X value
+pt2_y           dd ?            ; 2D Y value
+pt2_z           dd ?            ; Scaled Z value for z-buffering.
+pt2_clr         dd ?            ; Base color of the point.
+pt2_shade       dd ?            ; The shading percentage of the base color.
+pt2_u           dd ?            ; Texture map U coordiante.
+pt2_v           dd ?            ; Texture map V coordinate.
+pt2_w           dd ?            ; Texture map W (used for perspective.)
+VNGO_POINT2     ENDS
 
 
+;ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+;                                                                          ³
+;ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+VNGO_TRIANGLE   STRUCT
+
+long_top        dd ?            ; VNGO_POINT ptr
+long_bottom     dd ?            ; VNGO_POINT ptr
+short_top       dd ?            ; VNGO_POINT ptr
+short_bottom    dd ?            ; VNGO_POINT ptr
+hline_bptr      dd ?            ; byte ptr
+hline_zptr      dd ?            ; word ptr
+stable_ptr      dd ?            ; byte ptr
+
+; Horizontal line info.
+x_dir           dd ?            ; long
+z_step          dd ?            ; long
+shade_step      dd ?            ; long
+u_step1         dd ?            ; long
+u_step2         dd ?            ; long
+v_step1         dd ?            ; long
+v_step2         dd ?            ; long
+
+; Texture information
+u_upshift       dd ?            ; long
+u_downshift     dd ?            ; long
+v_upshift       dd ?            ; long
+v_downshift     dd ?            ; long
+widthshift      dd ?            ; long
+
+; Long edge info.
+long_x          dd ?            ; long
+long_x_step     dd ?            ; long
+long_z          dd ?            ; long
+long_z_step     dd ?            ; long
+long_s          dd ?            ; long
+long_s_step     dd ?            ; long
+long_u          dd ?            ; long
+long_u_step1    dd ?            ; long
+long_u_step2    dd ?            ; long
+long_v          dd ?            ; long
+long_v_step1    dd ?            ; long
+long_v_step2    dd ?            ; long
+long_w          dd ?            ; long
+long_w_step     dd ?            ; long
+
+; Short edge info.
+short_x         dd ?            ; long
+short_x_step    dd ?            ; long
+short_u         dd ?            ; long
+short_u_step1   dd ?            ; long
+short_u_step2   dd ?            ; long
+short_v         dd ?            ; long
+short_v_step1   dd ?            ; long
+short_v_step2   dd ?            ; long
+short_w         dd ?            ; long
+short_w_step    dd ?            ; long             
+
+VNGO_TRIANGLE   ENDS            
 
 ;ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 ; VNGO_VBUFFER is a view port structure which contains all of the info     ³
@@ -115,7 +189,9 @@ vb_pal          dd ?            ; pointer to the alternate LUT for this mode.
 vb_ytable       dd ?            ; pointer to the table of pre-calculated y offsets.
 vb_invert       dd ?            ; table of 1/max(xres,yres) values to save divides.
 vb_zbuff_ptr    dd ?            ; pointer to the zbuffer if it exist.
-vb_na           dd ?            ; na.
+vb_pitch        dd ?            ; screen pitch.
+vb_zpitch       dd ?            ; zbuffer pitch.
+vb_ztable       dd ?            ; y table for the zbuffer.   
 VNGO_VBUFFER    ENDS            
 
 
@@ -135,80 +211,6 @@ tx_width        dw ?
 tx_height       dw ?
 tex             dd ?
 VNGO_TEXTURE    ENDS
-
-
-
-;ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-; The folowing section is the block of data structures defined for use     ³
-; with the VESA compatible modes.                                          ³
-;ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-
-VgaInfoBlock    STRUCT
-VESASignature   db      'VESA'          ;4 signature bytes.  Should be 'VESA'
-VESAVersion     dw      ?               ;VESA version number.
-OEMStringPtr    dd      ?               ;Pointer to OEM string.
-Capabilities    db      4 dup (?)       ;capabilities of the video environment.
-VideoModePtr    dd      ?               ;pointer to supported Super VGA modes.
-TotalMemory     dw      ?               ;Number of 64kb memory blocks on board.
-Reserved        db      236 dup (?)     ;Remainder of VgaInfoBlock.
-VgaInfoBlock    ENDS
-                        
-ModeInfoBlock   STRUCT
-ModeAttributes          dw      ?
-WinAAttributes          db      ?
-WinBAttributes          db      ?
-WinGranularity          dw      ?
-WinSize                 dw      ?
-WinASegment             dw      ?
-WinBSegment             dw      ?
-WinFuncPtr              dd      ?
-BytesPerScanLine        dw      ?
-;
-XResolution             dw      ?
-YResolution             dw      ?
-XCharSize               db      ?
-YCharSize               db      ?
-NumberOfPlanes          db      ?
-BitsPerPixel            db      ?
-NumberOfBanks           db      ?
-MemoryModel             db      ?
-BankSize                db      ?
-NumberOfImagePages      db      ?
-Reserved1               db      ?
-;
-RedMaskSize             db      ?
-RedFieldPosition        db      ?
-GreenMaskSize           db      ?
-GreenFieldPosition      db      ?
-BlueMaskSize            db      ?
-BlueFieldPosition       db      ?
-RsvdMaskSize            db      ?
-RsvdFieldPosition       db      ?
-DirectColorModeInfo     db      ?
-;
-Reserved                db      216 dup (?)
-ModeInfoBlock   ENDS
-
-RM_call_struct  STRUCT
-RMI_edi         dd      ?
-RMI_esi         dd      ?
-RMI_ebp         dd      ?
-RMI_reserved    dd      ?
-RMI_ebx         dd      ?
-RMI_edx         dd      ?
-RMI_ecx         dd      ?
-RMI_eax         dd      ?
-RMI_flags       dw      ?
-RMI_es          dw      ?
-RMI_ds          dw      ?
-RMI_fs          dw      ?
-RMI_gs          dw      ?
-RMI_ip          dw      ?
-RMI_cs          dw      ?
-RMI_sp          dw      ?
-RMI_ss          dw      ?
-
-RM_call_struct  ENDS
 
 
 endif          ; __VNGSTRCT_INC

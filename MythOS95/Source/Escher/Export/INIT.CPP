@@ -8,7 +8,7 @@
 //ששששש²±²ששששששש²±²שששש²±²ש²±²שששש²±²ש²±²שששש²±²ש²±²שששששששש²±²שששש²±²שששששש
 //שששש²²²²²²²²²²ש²²²²²²²²ששש²²²²²²²²שש²²²שששש²²²ש²²²²²²²²²²ש²²²שששש²²²ששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//ששששששששששCopyrightש(c)ש1994,ש1995שbyשCharybdisשEnterprises,שInc.שששששששששש
+//שששששששששששCopyrightש(c)ש1994-1996שbyשCharybdisשEnterprises,שInc.שששששששששש
 //ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
@@ -77,11 +77,22 @@ extern "C" int orientation_mode;
 
 extern "C" int mtl_sizemode;                // 1=just to power of 2,
                                             // 2=force to mtl_sizex/y
+                                            // 3=query
 extern "C" int mtl_sizex;
 extern "C" int mtl_sizey;
 
+extern "C" int query_xsize;
+extern "C" int query_ysize;
+
 extern "C" char mtl_palpath[];
 extern "C" char mtl_palname[];
+
+// Light export information
+
+extern "C" int lgt_omnias;
+extern "C" int lgt_spotas;
+extern "C" int lgt_ambient;
+extern "C" int lgt_atten;
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
@@ -241,15 +252,22 @@ extern "C" void load_from_ini(char *inifname)
             strcat(mtl_palname,ext);
         }
 
+        mtl_sizemode=1;
+
+        // QuerySize: 'yes' or 'no' (overridden by ForceSize)
+        if (!ini.read("QuerySize",buff))
+        {
+            strlwr(buff);
+            if (!strcmp(buff,"yes"))
+                mtl_sizemode=3;
+        }
+
         // ForceSize: 'yes' or 'no'
         if (!ini.read("ForceSize",buff))
         {
             strlwr(buff);
-            if (!strcmp(buff,"no"))
-                mtl_sizemode=1;
-            else if (!strcmp(buff,"yes"))
+            if (!strcmp(buff,"yes"))
                 mtl_sizemode=2;
-
         }
 
         // SizeX: <number>
@@ -265,6 +283,7 @@ extern "C" void load_from_ini(char *inifname)
                 case 128:
                 case 256:
                     mtl_sizex=x;
+                    query_xsize=x;
                     break;
             }
         }
@@ -282,8 +301,51 @@ extern "C" void load_from_ini(char *inifname)
                 case 128:
                 case 256:
                     mtl_sizey=y;
+                    query_ysize=y;
                     break;
             }
+        }
+    }
+
+//ִִִ Read light section
+    if (!ini.section("Light"))
+    {
+        // OmniAs: 'fast' or 'point'
+        lgt_omnias=1;
+        if (!ini.read("OmniAs",buff))
+        {
+            strlwr(buff);
+            if (!strcmp(buff,"point"))
+                lgt_omnias=2;
+        }
+
+        // SpotAs: 'fast, 'vector' or 'spot'
+        lgt_spotas=1;
+        if (!ini.read("SpotAs",buff))
+        {
+            strlwr(buff);
+            if (!strcmp(buff,"spot"))
+                lgt_spotas=2;
+            else if (!strcmp(buff,"vector"))
+                lgt_spotas=3;
+        }
+
+        // Ambient: 'yes' or 'no'
+        lgt_ambient=1;
+        if (!ini.read("Ambient",buff))
+        {
+            strlwr(buff);
+            if (!strcmp(buff,"no"))
+                lgt_ambient=0;
+        }
+
+        // Atten: 'yes' or 'no'
+        lgt_atten=1;
+        if (!ini.read("Atten",buff))
+        {
+            strlwr(buff);
+            if (!strcmp(buff,"no"))
+                lgt_atten=0;
         }
     }
 }

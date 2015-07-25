@@ -11,7 +11,7 @@
 //                     Text Output and Font Management System
 //                          Microsoft Windows '95 Version
 //
-//               Copyright (c) 1995 by Charybdis Enterprises, Inc.
+//            Copyright (c) 1995, 1996 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved.
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -71,6 +71,8 @@ HWND        hWndClient;
 const char  szAppName[] = "Gutenberg";
 GameState   *game;
 
+MaxDevices  Devs;
+
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
 //                                 Code
@@ -103,17 +105,28 @@ int APIENTRY WinMain (HINSTANCE hInstance,
 
     // Initialize game here.
     IvorySystem ivory (1024*1024);
-    MaxDevices  devs;
     GBergSystem gberg;
 
     // Load fonts
-    if (load_font("8X13.IFF")
-        || load_font("5X8.IFF")
-        || load_font("9X15.IFF")
-        || load_font("12X24.IFF"))
-        return FALSE;
+    if (xf_exist("3X6.IFF"))
+        load_font("3X6.IFF");
+    if (xf_exist("5X8.IFF"))
+        load_font("5X8.IFF");
+    if (xf_exist("7X12.IFF"))
+        load_font("7X12.IFF");
+    if (xf_exist("8X13.IFF"))
+        load_font("8X13.IFF");
+    if (xf_exist("9X15.IFF"))
+        load_font("9X15.IFF");
+    if (xf_exist("12X24.IFF"))
+        load_font("12X24.IFF");
 
-    gberg_select_font("8x13");
+    if (gberg_select_font("3x6")
+        && gberg_select_font("7x12")
+        && gberg_select_font("8x13")
+        && gberg_select_font("9x15")
+        && gberg_select_font("12x24"))
+        return FALSE;
 
     // Load strings
     if (load_strings("TEST.IFF"))
@@ -121,7 +134,7 @@ int APIENTRY WinMain (HINSTANCE hInstance,
 
     // Initialize any "DirectX" services
 
-    game = new GameState (devs);
+    game = new GameState (Devs);
     game->LoadEvents ("gframe.iff");
     if (!game->active)
     {
@@ -137,7 +150,7 @@ int APIENTRY WinMain (HINSTANCE hInstance,
     while (game->PumpWindows())
     {
         // Do per-frame processing here
-        devs.update ();
+        Devs.update ();
         game->GetEvents();
         game->ProcessEvents();
         game->Render();

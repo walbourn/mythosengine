@@ -6,7 +6,7 @@
  *    (_)       ^          * *     *      *   *    *            (_)
  *             (_)       **   **   *    ***** **** ****
  *
- *            Copyright (c) 1994,1995 by Charybdis Enterprises, Inc.
+ *            Copyright (c) 1994-1996 by Charybdis Enterprises, Inc.
  *                              All Rights Reserved.
  *
  *ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -58,6 +58,10 @@ double      YY_real;
 int         YY_lineno=1;
 int         YY_esc_allowed=1;
 
+/*ÄÄÄ Error/warning routines */
+void error(const char *str);
+void warning(const char *str);
+
 /*ÄÄÄ Include handling */
 #undef yywrap
 
@@ -66,6 +70,7 @@ int         YY_esc_allowed=1;
 static int              YY_depth=0;
 static FILE             *YY_filestack[YY_MAX_DEPTH];
 static YY_BUFFER_STATE  YY_stack[YY_MAX_DEPTH];
+static int              YY_linenostack[YY_MAX_DEPTH];
 
 %}
 
@@ -133,6 +138,8 @@ riff                            return(YY_FORM);
 chunk                           return(YY_CHUNK);
 
 merge                           return(YY_MERGE);
+
+bitmap                          return(YY_BITMAP);
                                 
 intel                           return(YY_INTEL);
 
@@ -144,23 +151,28 @@ littleendian                    return(YY_LITTLEENDIAN);
 
 size                            return(YY_SIZE);
 
+maxsize                         return(YY_MAXSIZE);
+
 byte                            return(YY_BYTE);
+char                            return(YY_BYTE);
 
 ubyte                           return(YY_UBYTE);
  
 word                            return(YY_WORD);
+short                           return(YY_WORD);
 
 uword                           return(YY_UWORD);
- 
-long                            return(YY_LONG);
-
-ulong                           return(YY_ULONG);
+ushort                          return(YY_UWORD);
  
 dword                           return(YY_DWORD);
+long                            return(YY_DWORD);
 
 udword                          return(YY_UDWORD);
+ulong                           return(YY_UDWORD);
 
 text                            return(YY_TEXT);
+
+ntext                           return(YY_NTEXT);
 
 binary                          return(YY_BINARY);
 
@@ -181,7 +193,7 @@ fixed16                         return(YY_FIXED16);
                                 }
 
 {real}                          {  
-                                    YY_real = atof(yytext);
+                                    sscanf(yytext,"%lf",&YY_real);
                                     return(YY_REAL);
                                 }
 
@@ -346,7 +358,8 @@ fixed16                         return(YY_FIXED16);
                                     }
                                 }
 
-.                               { /* Unexpected character */
+.                               {
+                                  error("Unexpected character in CIF file");
                                 }
 
 %%
@@ -376,6 +389,9 @@ int yy_pushfile(const char *fname)
         return 3;   /* Not enough memory */
     }
 
+    YY_linenostack[YY_depth] = YY_lineno;
+    YY_lineno=1;
+
     yy_switch_to_buffer(YY_stack[YY_depth]);
     
     return 0;
@@ -390,6 +406,8 @@ int yywrap()
 
     yy_delete_buffer(YY_stack[YY_depth]);
     fclose(YY_filestack[YY_depth]);
+
+    YY_lineno=YY_linenostack[YY_depth];
 
     YY_depth--;
 

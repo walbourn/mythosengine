@@ -8,7 +8,7 @@
 //
 // A Framework for Microsoft Windows '95 Entertainment Software Using MythOS
 //
-//              Copyright (c) 1995 by Charybdis Enterprises, Inc.
+//           Copyright (c) 1995, 1996 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -40,9 +40,8 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #define WIN32_LEAN_AND_MEAN
-#include "global.hpp"
-
-#include "resource.h"
+#include <global.hpp>
+#include <resource.h>
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
@@ -51,6 +50,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 LRESULT CALLBACK ClientWndProc (HWND, UINT, WPARAM, LPARAM);
+void fatal_error(ulong id, char *file, int line);
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
@@ -59,151 +59,44 @@ LRESULT CALLBACK ClientWndProc (HWND, UINT, WPARAM, LPARAM);
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-//°°°°°°°°°°°°°°°°°°°°°°°°°°° GFScreen Class °°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-// GFScreen - Constructor
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-GFScreen::GFScreen ():
-    hdc (GetDC (hWndClient)),
-    bmi (0),
-    hpal (0)
-{
-}
-
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-// GFScreen - Destructor
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-GFScreen::~GFScreen ()
-{
-    if (hpal)
-        DeleteObject (hpal);
-
-    if (bmi)
-        ivory_free ((void **)&bmi);
-
-    if (bits)
-        delete [] bits;
-
-    if (pal)
-        delete pal;
-
-    if (gvport)
-        delete gvport;
-}
-
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-// GFScreen init
-//
-// Performs the initialization of the memory buffer and sets up a palette
-// instance.
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-int GFScreen::init (int w, int h)
-{
-    width = w;
-    height = h;
-
-    // Specify the DIB parameters.
-    bmi  = (LPBITMAPINFO)ivory_zalloc (sizeof (BITMAPINFOHEADER) + 256*sizeof (WORD));
-    if (bmi == 0)
-        return 3;
-
-    bmi->bmiHeader.biSize        = sizeof (BITMAPINFOHEADER);
-    bmi->bmiHeader.biWidth       = w;
-    bmi->bmiHeader.biHeight      = -h;
-    bmi->bmiHeader.biPlanes      = 1;
-    bmi->bmiHeader.biBitCount    = 8;
-    bmi->bmiHeader.biCompression = BI_RGB;
-    bmi->bmiHeader.biClrUsed     = 256;
-    bmi->bmiHeader.biClrImportant= 256;
-
-    // Each entry maps onto the same entry in the logical palette
-    for (int i = 0; i < 256; i++)
-        LPWORD (bmi->bmiColors)[i]  = i;
-
-    // Now, create a standard palette
-    pal = new VngoPal8;
-    if (pal == 0)
-    {
-        ivory_free ((void **)&bmi);
-        return 2;
-    }
-
-    pal->init (0);
-
-    bits   = new BYTE [width * height];
-    gvport = new VngoVportDD8 (width, height, bits, NULL, pal,
-                               VNGO_PHYSICAL_DEV | VNGO_ZBUFFER_DEV);
-
-    if (bits == 0 || gvport == 0)
-    {
-        ivory_free ((void **)&bmi);
-        delete pal;
-        pal = 0;
-        return 3;
-    }
-
-    return 0;
-}
-
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-// GFScreen - load_palette
-//
-// Loads a VanGogh palette file and sets up Windows with the 'hardware'
-// palette for the VanGogh data.
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-int GFScreen::load_palette (const char *lpszFile)
-{
-    int res = 2;
-
-    assertMyth ("GFScreen: Load_palette must be called after init", pal != 0);
-
-    // Initialize the palette (both DIB and Windows)
-    pal->init (0, (char *)lpszFile);
-
-    LOGPALETTE *lpal = (LOGPALETTE *)ivory_alloc (sizeof (LOGPALETTE) + 256 * sizeof (PALETTEENTRY));
-    if (lpal != 0)
-    {
-        res = 1;
-
-        lpal->palVersion = 0x300;
-        lpal->palNumEntries = 256;
-        for (int i = 0; i < 256; i++)
-        {
-            lpal->palPalEntry[i].peRed  = pal->hw_pal.p[i].r;
-            lpal->palPalEntry[i].peGreen= pal->hw_pal.p[i].g;
-            lpal->palPalEntry[i].peBlue = pal->hw_pal.p[i].b;
-            lpal->palPalEntry[i].peFlags= PC_NOCOLLAPSE;
-        }
-
-        // Create a palette and make it our own
-        hpal = CreatePalette (lpal);
-        if (hpal != 0)
-        {
-            res = 0;
-
-            // Get this palette into the DC
-            SelectPalette (hdc, hpal, FALSE);
-
-            // Now, get this palette mapped into the system palette
-            RealizePalette (hdc);
-        }
-
-        ivory_free ((void **)&lpal);
-    }
-
-    return res;
-}
-
-
-
-//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //°°°°°°°°°°°°°°°°°°°°°°°°°°° Game State Members °°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// GameState - Constructor
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+GameState::GameState ()
+{
+    // Nothing to construct here
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// GameState - Destructor
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+GameState::~GameState ()
+{
+    // Nothing to destroy here
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// GameState - activate
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+void GameState::activate ()
+{
+    // NOP in the base class
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// GameState - deactivate
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+void GameState::deactivate ()
+{
+    // NOP in the base class
+}
+
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 // GameState - pump_windows
@@ -219,7 +112,8 @@ BOOL GameState::pump_windows ()
 {
     MSG msg;
 
-    if (PeekMessage (&msg, NULL, 0, 0, PM_NOREMOVE))
+    Devs->wm_clear();
+    while (PeekMessage (&msg, NULL, 0, 0, PM_NOREMOVE))
     {
     	if (GetMessage (&msg, 0, 0, 0) == 0)
             return FALSE;
@@ -236,13 +130,44 @@ BOOL GameState::pump_windows ()
 //
 // Copies data from the backbuffer to the window.
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-void GameState::display()
+void GameState::display ()
 {
     assertMyth ("GameState: display needs valid Screen instance", Screen != 0);
 
-    SetDIBitsToDevice (Screen->hdc, 0, 0, Screen->width, Screen->height,
-                       0, 0, 0, Screen->height,
-                       Screen->bits, Screen->bmi, DIB_PAL_COLORS);
+    Screen->flip();
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// GameState - panic
+//
+// Fatal error during game, must clean up as much as possible and get out,
+// after displaying cause of error.  Derived classes can override panic and
+// call base version after performing clean up.
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+void GameState::panic (ulong id, const char *str)
+{
+    char    buff[1024];
+
+    if (Screen)
+    {
+        Screen->unlock();
+        Screen->cursor_set(GFScreen::CURS_STD);
+    }
+
+    LoadString(hInst, id, buff, sizeof(buff) - 128);
+
+    //ÄÄÄ Add any additional comments.
+    if (str)
+    {
+        strcat(buff,"\n\n");
+        strcat(buff,str);
+    }
+
+    MessageBox (hWndClient,
+                buff,
+                szAppName, MB_OK | MB_ICONEXCLAMATION);
+    DestroyWindow(hWndClient);
 }
 
 
@@ -271,12 +196,18 @@ BOOL InitApplication (HINSTANCE hInstance, int nCmdShow, int w, int h)
             ShowWindow (hwnd, SW_RESTORE);
         SetForegroundWindow (hwnd);
 
-        MessageBox (NULL, "You're already running this program, dummy!", "Note", MB_OK);
+        char    buff[1024];
 
-        // If this app actually had any functionality, we would
-        // also want to communicate any action that our 'twin'
-        // should now perform based on how the user tried to
-        // execute us.
+        LoadString(hInstance, 
+                   IDS_ERR_MULTINSTANCE,
+                   buff,
+                   sizeof(buff));
+
+        MessageBox (NULL,
+                    buff,
+                    szAppName,
+                    MB_OK | MB_ICONEXCLAMATION);
+
         return FALSE;
     }
 
@@ -311,7 +242,6 @@ BOOL InitApplication (HINSTANCE hInstance, int nCmdShow, int w, int h)
     if (!RegisterClassEx (&wc))
         return FALSE;
 
-
     // Save the instance handle in static variable, which will be used in
     // many subsequence calls from this application to Windows.
     hInst = hInstance;
@@ -345,47 +275,90 @@ BOOL InitApplication (HINSTANCE hInstance, int nCmdShow, int w, int h)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 LRESULT CALLBACK ClientWndProc (HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
-    LRESULT     res		= (LRESULT)0;
-
     switch (message)
     {
-    case WM_CREATE:
-        break;
+        //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Mouse Events
+        case WM_SETCURSOR:
+            // Don't let windows reassert its mouse cursor!
+            return 0;
 
-#if 0
-        // Don't let these go through!
-    case WM_KEYDOWN:
-    case WM_SYSKEYDOWN:
-    case WM_CHAR:
-    case WM_SYSCHAR:
-        break;
-#endif
+        //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Keyboard Events
+        case WM_SYSKEYDOWN:
+            if (Devs)
+                Devs->theKeyboard.wm_keydown (wParam);
+            return DefWindowProc (hWnd, message, wParam, lParam);
 
-    case WM_ACTIVATEAPP:
-        // ShowWindow (hWnd, wParam ? SW_SHOWNORMAL: SW_MINIMIZE);
-        if (wParam && Screen && Screen->hdc)
-            RealizePalette (Screen->hdc);
-        break;
+        case WM_KEYDOWN:
+            if (Devs)
+                Devs->theKeyboard.wm_keydown (wParam);
+            return 0;
 
-    case WM_DESTROY:
-        // Get the heck outta here.
-        PostQuitMessage (0);
-        break;
+        case WM_SYSKEYUP:
+        case WM_KEYUP:
+            if (Devs)
+                Devs->theKeyboard.wm_keyup (wParam);
+            return 0;
 
-    default:    /* Pass other commands through */
-        res = DefWindowProc (hWnd, message, wParam, lParam);
-        break;
+        case WM_SETFOCUS:
+        case WM_KILLFOCUS:
+            if (Devs)
+                Devs->theKeyboard.init();
+            return 0;
+
+        //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Application Events
+        case WM_CREATE:
+            return 0;
+
+        case WM_ACTIVATEAPP:
+            if (wParam)
+            {
+                if (Screen)
+                {
+                    Screen->reinit();
+                    Screen->invalidate();
+                }
+            }
+            return 0;
+
+        case WM_CLOSE:
+            if (MessageBox(hWndClient,
+                        "Are you sure you wish to exit this application?",
+                        szAppName, MB_YESNO | MB_ICONQUESTION) == IDYES)
+                DestroyWindow(hWndClient);
+            return 0;
+
+        case WM_DESTROY:
+            // Get the heck outta here.
+            PostQuitMessage (0);
+            return 0;
+
+        default:    // Pass other commands through
+            return DefWindowProc (hWnd, message, wParam, lParam);
     }
-
-    return res;
 }
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// fatal_error
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+void fatal_error(ulong id, char *file, int line)
+{
+    char buff[1024];
+
+    int bytes = LoadString (hInst, id, buff, sizeof (buff) - 128);
+
+    wsprintf (buff + bytes, "\n\n%s (%d)", file, line);
+
+    MessageBox (hWndClient,
+                buff,
+                szAppName, MB_OK | MB_ICONEXCLAMATION);
+}
+
 
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //°°°°°°°°°°°°°°°°°°°°°°°°°° MythOS Assert Display °°°°°°°°°°°°°°°°°°°°°°°°°°
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-
-
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 // _charybdis_assert
@@ -393,11 +366,14 @@ LRESULT CALLBACK ClientWndProc (HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 // Handler for failed asserts.  If msg is set to non-NULL, then an assertMyth
 // was used with a comment.
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-extern "C" void _charybdis_assert(char *msg, char *exp, char *f, unsigned ln)
+extern "C" void _charybdis_assert (char *msg, char *exp, char *f, unsigned ln)
 {
-    int     i;
+    int     i, l=0;
     char    title[32];
     char    buff[988];
+
+    if (Screen)
+        l = Screen->unlock();
 
     wsprintf (buff,"Assertion Failed\t\t\t\t\t\n"
                    "Expr:\t%s\n"
@@ -412,13 +388,15 @@ extern "C" void _charybdis_assert(char *msg, char *exp, char *f, unsigned ln)
     strcpy (title, szAppName);
     strcat (title, " Debug Message");
 
-    i = MessageBox ((IsWindow (hWndClient)) ? hWndClient : NULL,
+    i = MessageBox (IsWindow (hWndClient) ? hWndClient : NULL,
                     buff,
                     title,
                     MB_OKCANCEL | MB_DEFBUTTON2 | MB_APPLMODAL | MB_ICONSTOP);
 
     if (i == IDCANCEL)
         ExitProcess (1);
+    else if (l)
+        Screen->lock();
 }
 
 //°±² eof - support.cpp ²±°

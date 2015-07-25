@@ -6,7 +6,7 @@
 //    (_)       ^          * *     *      *   *    *            (_)
 //             (_)       **   **   *    ***** **** ****
 //
-//            Copyright (c) 1994,1995 by Charybdis Enterprises, Inc.
+//            Copyright (c) 1994-1996 by Charybdis Enterprises, Inc.
 //                            All Rights Reserved.
 //                        Microsoft Windows '95 Version
 //
@@ -69,6 +69,7 @@ void bitmap()
    XFParseCEL     cel;
    XFParseLBM     lbm;
    XFParsePCX     pcx;
+   XFParseXEB     xeb;
 
    cout << "\n\n\n같같같굇굇굇께께께 XFParseBitmap object tests 께께께굇굇굇같같같\n";
 
@@ -76,49 +77,59 @@ void bitmap()
 
    //컴컴 16-color read
    cout << "Testing 16-color BMP reader...\n";
-   if (bmp.nameread("TEST16.BMP")) {
+   if (bmp.nameread("TEST16.BMP"))
+   {
        print_error(&bmp,"Error name-reading TEST16.BMP");
    }
 
    //컴컴 256-color read
    cout << "Testing 256-color BMP reader...\n";
-   if (bmp.nameread("TEST256.BMP")) {
+   if (bmp.nameread("TEST256.BMP"))
+   {
        print_error(&bmp,"Error name-reading TEST256.BMP");
    }
 
    //컴컴 256-color write
    cout << "Testing 256-color BMP writer...\n";
-   if (bmp.namewrite("OUT256.BMP")) {
+   if (bmp.namewrite("OUT256.BMP"))
+   {
        print_error(&bmp,"Error writing OUT256.BMP");
    }
-   else {
+   else
+   {
        cout << "OUT256.BMP written...\n";
 
-       if (bmp.nameread("OUT256.BMP")) {
+       if (bmp.nameread("OUT256.BMP"))
+       {
            print_error(&bmp,"Error name-reading OUT256.BMP");
        }
    }
 
    //컴컴 Padded file
    cout << "Testing padded BMP reader/writer...\n";
-   if (bmp.nameread("TEST.BMP")) {
+   if (bmp.nameread("TEST.BMP"))
+   {
        print_error(&bmp,"Error name-reading TEST.BMP");
    }
 
    //컴컴 Compressed file
    cout << "Testing compressed BMP reader/writer...\n";
-   if (bmp.nameread("BOUNCE.BMP")) {
+   if (bmp.nameread("BOUNCE.BMP"))
+   {
        print_error(&bmp,"Error name-reading BOUNCE.BMP");
    }
 
    //컴컴 256-color write
-   if (bmp.namewrite("OUT.BMP")) {
+   if (bmp.namewrite("OUT.BMP"))
+   {
        print_error(&bmp,"Error writing OUT.BMP");
    }
-   else {
+   else
+   {
        cout << "OUT.BMP written...\n";
 
-       if (bmp.nameread("OUT.BMP")) {
+       if (bmp.nameread("OUT.BMP"))
+       {
            print_error(&bmp,"Error name-reading OUT.BMP");
        }
    }
@@ -128,36 +139,44 @@ void bitmap()
    //컴컴 Read
    cout << "Testing CEL reader...\n";
 
-   if (cel.nameread("APE.CEL")) {
+   if (cel.nameread("APE.CEL"))
+   {
        print_error(&cel,"Error name-reading APE.CEL");
    }
 
    //컴컴 Write
    cout << "Testing CEL writer...\n";
-   if (cel.namewrite("OUT.CEL")) {
+   if (cel.namewrite("OUT.CEL"))
+   {
        print_error(&bmp,"Error writing OUT.CEL");
    }
-   else {
+   else
+   {
        cout << "OUT.CEL written...\n";
 
-       if (cel.nameread("OUT.CEL")) {
+       if (cel.nameread("OUT.CEL"))
+       {
            print_error(&bmp,"Error name-reading OUT.CEL");
        }
    }
 
    //컴컴Convert
    cout << "Converting APE.CEL to APE.BMP...\n";
-   if (cel.nameread("APE.CEL")) {
+   if (cel.nameread("APE.CEL"))
+   {
        print_error(&cel,"Error name-reading APE.CEL");
    }
 
-   if (bmp.namewrite("APE.BMP",cel.bm)) {
+   if (bmp.namewrite("APE.BMP",cel.bm))
+   {
        print_error(&bmp,"Error writing APE.BMP");
    }
-   else {
+   else
+   {
        cout << "APE.BMP written...\n";
 
-       if (bmp.nameread("APE.BMP")) {
+       if (bmp.nameread("APE.BMP"))
+       {
            print_error(&bmp,"Error name-reading APE.BMP");
        }
    }
@@ -167,23 +186,28 @@ void bitmap()
    //컴컴 Read
    cout << "Testing LBM reader...\n";
 
-   if (lbm.nameread("TEST.LBM")) {
+   if (lbm.nameread("TEST.LBM"))
+   {
        print_error(&lbm,"Error name-reading TEST.LBM");
    }
 
    //컴컴 Convert
    cout << "Converting APE.CEL to APE.LBM...\n";
-   if (cel.nameread("APE.CEL")) {
+   if (cel.nameread("APE.CEL"))
+   {
        print_error(&cel,"Error name-reading APE.CEL");
    }
 
-   if (lbm.namewrite("APE.LBM",cel.bm)) {
+   if (lbm.namewrite("APE.LBM",cel.bm))
+   {
        print_error(&lbm,"Error writing APE.LBM");
    }
-   else {
+   else
+   {
        cout << "APE.LBM written...\n";
 
-       if (lbm.nameread("APE.LBM")) {
+       if (lbm.nameread("APE.LBM"))
+       {
            print_error(&lbm,"Error name-reading APE.LBM");
        }
    }
@@ -193,25 +217,94 @@ void bitmap()
    //컴컴 Read
    cout << "Testing PCX reader...\n";
 
-   if (pcx.nameread("TEST.PCX")) {
+   if (pcx.nameread("TEST.PCX"))
+   {
        print_error(&pcx,"Error name-reading TEST.PCX");
    }
 
    //컴컴 Convert
    cout << "Converting APE.CEL to APE.PCX...\n";
-   if (cel.nameread("APE.CEL")) {
+   if (cel.nameread("APE.CEL"))
+   {
        print_error(&cel,"Error name-reading APE.CEL");
    }
 
-   if (pcx.namewrite("APE.PCX",cel.bm)) {
+   if (pcx.namewrite("APE.PCX",cel.bm))
+   {
        print_error(&pcx,"Error writing APE.PCX");
    }
-   else {
+   else
+   {
        cout << "APE.PCX written...\n";
 
-       if (pcx.nameread("APE.PCX")) {
+       if (pcx.nameread("APE.PCX"))
+       {
            print_error(&pcx,"Error name-reading APE.PCX");
        }
+   }
+
+//컴컴 XEB
+
+   //컴컴 Convert
+   cout << "Converting APE.CEL to APE.XEB...\n";
+   if (cel.nameread("APE.CEL"))
+   {
+       print_error(&cel,"Error name-reading APE.CEL");
+   }
+
+   if (xeb.namewrite("APE.XEB",cel.bm))
+   {
+       print_error(&xeb,"Error writing APE.XEB");
+   }
+   else
+   {
+       cout << "APE.XEB written...\n";
+   }
+
+   cout << "Converting APE.XEB to APEXEB.PCX...\n";
+   if (xeb.nameread("APE.XEB"))
+   {
+       print_error(&xeb,"Error name-reading APE.XEB");
+   }
+
+   if (pcx.namewrite("APEXEB.PCX",xeb.bm))
+   {
+       print_error(&pcx,"Error writing APEXEB.PCX");
+   }
+   else
+   {
+       cout << "APEXEB.PCX written...\n";
+   }
+
+   //컴컴 Convert
+   cout << "Converting BOUNCE.BMP to APE.XEB...\n";
+   if (bmp.nameread("BOUNCE.BMP"))
+   {
+       print_error(&bmp,"Error name-reading BOUNCE.BMP");
+   }
+
+   if (xeb.namewrite("BOUNCE.XEB",bmp.bm))
+   {
+       print_error(&xeb,"Error writing BOUNCE.XEB");
+   }
+   else
+   {
+       cout << "BOUNCE.XEB written...\n";
+   }
+
+   cout << "Converting BOUNCE.XEB to BOUNXEB.BMP...\n";
+   if (xeb.nameread("BOUNCE.XEB"))
+   {
+       print_error(&xeb,"Error name-reading BOUNCE.XEB");
+   }
+
+   if (bmp.namewrite("BOUNXEB.BMP",xeb.bm))
+   {
+       print_error(&bmp,"Error writing BOUNXEB.BMP");
+   }
+   else
+   {
+       cout << "BOUNXEB.BMP written...\n";
    }
 };
 

@@ -11,7 +11,7 @@
 //                     Text Output and Font Management System
 //                          Microsoft Windows '95 Version
 //
-//               Copyright (c) 1995 by Charybdis Enterprises, Inc.
+//            Copyright (c) 1995, 1996 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved.
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -56,7 +56,7 @@
 //
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
-GBergTextInfo *igberg_empty_strings();
+extern GBergTextInfo *igberg_empty_strings();
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
@@ -77,10 +77,10 @@ extern GBergIData   *GBergInstance;
 //                                                                          ³
 // Makes the given text active.                                             ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-gberg_error_codes gberg_select_strings(char *txtname)
+gberg_error_codes gberg_select_strings(const char *txtname)
 {
     ulong               i;
-    GBergTextInfo       *txt;
+    GBergTextInfo       *txt, *ntxt;
 
     assertMyth("Gutenberg must be initialized",GBergInstance);
 
@@ -90,22 +90,20 @@ gberg_error_codes gberg_select_strings(char *txtname)
     txt=GBergInstance->text_active;
     if (txt)
     {
-
 //ÄÄ Check to see if already active
         if (*txtname == *txt->name)
         {
             if (!strcmp(txtname,txt->name))
                 return GBERG_ERR_NONE;
         }
-
-        GBergInstance->text_active=0;
     }
 
 //ÄÄ Search for given text name
-    for(i=0, txt=&GBergInstance->text[0]; i < GBergInstance->text_hi; i++, txt++)
+    for(i=0, ntxt=&GBergInstance->text[0]; i < GBergInstance->text_hi; i++, ntxt++)
     {
-        if (*txtname == *txt->name) {
-            if (!strcmp(txtname,txt->name))
+        if (*txtname == *ntxt->name)
+		{
+            if (!strcmp(txtname,ntxt->name))
                 break;
         }
     }
@@ -115,10 +113,11 @@ gberg_error_codes gberg_select_strings(char *txtname)
         return GBERG_ERR_TEXTNOTINSTALLED;
     }
 
-    GBergInstance->text_active=txt;
+    GBergInstance->text_active=ntxt;
     
     return GBERG_ERR_NONE;
 }
+
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // gberg_loadstring                                                         ³
@@ -146,7 +145,8 @@ gberg_error_codes gberg_loadstring(ulong num, char *buff, ulong len)
     }
 
 //ÄÄ Find string
-    for(i=txt->number_of_strings; i > 0; i--)
+    err = GBERG_ERR_STRINGNOTFOUND;
+    for (i = txt->number_of_strings; i > 0; i--)
     {
         if ( *((ulong *)ptr) == num )
         {
@@ -154,7 +154,8 @@ gberg_error_codes gberg_loadstring(ulong num, char *buff, ulong len)
                 strcpy(buff,ptr+4);
             else
                 strncpy(buff,ptr+4,len);
-            goto leave;
+			err = GBERG_ERR_NONE;
+            break;
         }
         else
         {
@@ -164,13 +165,9 @@ gberg_error_codes gberg_loadstring(ulong num, char *buff, ulong len)
         }
     }
 
-    err=GBERG_ERR_STRINGNOTFOUND;
-
 //ÄÄ Unlock & exit
-leave: ;
     ivory_hunlock(txt->data);
     return err;
 }
 
-//°±² End of module - gbrgtxt.c ²±°
-
+//°±² End of module - gbrgstr.c ²±°

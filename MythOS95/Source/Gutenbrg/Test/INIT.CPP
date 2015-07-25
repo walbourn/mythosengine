@@ -11,7 +11,7 @@
 //                     Text Output and Font Management System
 //                          Microsoft Windows '95 Version
 //
-//               Copyright (c) 1995 by Charybdis Enterprises, Inc.
+//            Copyright (c) 1995, 1996 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved.
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -63,6 +63,7 @@ LRESULT CALLBACK ClientWndProc (HWND, UINT, WPARAM, LPARAM);
 //
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 
+extern MaxDevices Devs;
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
@@ -171,18 +172,24 @@ LRESULT CALLBACK ClientWndProc (HWND hWnd, UINT message, WPARAM wParam, LPARAM l
     {
     case WM_CREATE:
         break;
-#if 0
-        // Don't let these go through!
-    case WM_KEYDOWN:
-    case WM_SYSKEYDOWN:
-    case WM_CHAR:
-    case WM_SYSCHAR:
-        break;
 
-    case WM_ACTIVATEAPP:
-        ShowWindow (hWnd, wParam ? SW_SHOWNORMAL: SW_MINIMIZE);
-        break;
-#endif
+    case WM_SYSKEYDOWN:
+        Devs.theKeyboard.wm_keydown (wParam);
+        return DefWindowProc (hWnd, message, wParam, lParam);
+
+    case WM_KEYDOWN:
+        Devs.theKeyboard.wm_keydown (wParam);
+        return 0;
+
+    case WM_SYSKEYUP:
+    case WM_KEYUP:
+        Devs.theKeyboard.wm_keyup (wParam);
+        return 0;
+
+    case WM_SETFOCUS:
+    case WM_KILLFOCUS:
+        Devs.theKeyboard.init();
+        return 0;
     case WM_DESTROY:
         // Get the heck outta here.
         PostQuitMessage (0);

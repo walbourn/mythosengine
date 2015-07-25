@@ -8,7 +8,7 @@
 #
 # A Framework for Microsoft Windows '95 Entertainment Software Using MythOS
 #
-#              Copyright (c) 1995 by Charybdis Enterprises, Inc.
+#           Copyright (c) 1995, 1996 by Charybdis Enterprises, Inc.
 #                           All Rights Reserved
 #
 #ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -57,8 +57,9 @@ EXE = llander
 OBJS=\
     main.obj\
     llander.obj\
-    resource.res\
-    support.obj
+    screen.obj\
+    support.obj\
+    resource.res
 
 LIBPATH = ..\..\obj;$(MYTH95ROOT)\lib;
 
@@ -76,6 +77,8 @@ LIBS=\
     version.lib\
     gdi32.lib\
     winmm.lib\
+    user32.lib\
+    ddraw.lib\
     dplay.lib\
     turner.lib
 
@@ -105,21 +108,57 @@ all: setstden $(EXE).exe
 #
 #±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 
-#ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-# Executable                                                               ³
-#ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-
-$(EXE).exe: ..\landevt.iff ..\llander.iff $(OBJS)
-    $(LINK) $(LINKOPTS) /OUT:$*.exe /subsystem:windows,4 @<<
-    $(OBJS) $(LIBS)
-<<
+#ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+# Event system Files
+#ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 
 ..\landevt.iff : ..\landevt.hpp
 
 ..\landevt.hpp:  ..\landevt.cel
    $(MYTH95ROOT)\bin\maxc ..\landevt.cel 
 
-..\llander.iff: ..\llander.cif ..\landevt.iff ..\lltitle.iff
+#ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+# C++ files
+#ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+
+..\inc\global.hpp: \
+        ..\inc\screen.hpp
+
+main.obj: ..\main.cpp\
+          ..\inc\global.hpp\
+          ..\inc\resource.h\
+          ..\inc\llander.hpp
+
+llander.obj: ..\llander.cpp\
+             ..\inc\global.hpp\
+             ..\inc\llander.hpp\
+             ..\landevt.hpp
+
+screen.obj: ..\screen.cpp\
+            ..\inc\global.hpp
+
+support.obj: ..\support.cpp\
+             ..\inc\global.hpp\
+             ..\inc\resource.h
+
+resource.res: ..\resource.rc\
+              ..\inc\resource.h
+
+#ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+# Executable                                                               ³
+#ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+$(EXE).exe: ..\llander.iff $(OBJS)
+    $(LINK) $(LINKOPTS) /OUT:$*.exe /subsystem:windows,4 @<<
+    $(OBJS) $(LIBS)
+<<
+
+..\llander.iff: \
+      ..\llander.cif\
+      ..\Data\9x15.iff\
+      ..\Data\12x24.iff\
+      ..\landevt.iff\
+      ..\Data\lltitle.iff
    $(MYTH95ROOT)\bin\iffc -q ..\llander.cif
 
 clean:
@@ -130,8 +169,9 @@ clean:
     del *.ilk
     del *.pdb
     del *.vcp
-    del *.bak
-    del b.rst
+    del ..\landevt.hpp
+    del ..\landevt.iff
+    del ..\llander.iff
 
 #°±² End of makefile ²±°
 

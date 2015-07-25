@@ -6,7 +6,7 @@
 //    (_)       ^          * *     *      *   *    *            (_)
 //             (_)       **   **   *    ***** **** ****
 //
-//            Copyright (c) 1994,1995 by Charybdis Enterprises, Inc.
+//            Copyright (c) 1994-1996 by Charybdis Enterprises, Inc.
 //                              All Rights Reserved.
 //                        Microsoft Windows '95 Version
 //
@@ -139,7 +139,8 @@ xf_error_codes XFParseLBM::read(XFParseIFF *iff, XFBitmap *b)
         b = bm;
 
 //ÄÄ Verify correct form name
-    if (iff->chunkid != iff->makeid('F','O','R','M')
+    if ((iff->chunkid != iff->makeid('F','O','R','M')
+         && iff->chunkid != iff->makeid('R','I','F','F'))
         || iff->formid != iff->makeid('I','L','B','M'))
     {
         errorn=XF_ERR_NOTSUPPORTED;
@@ -248,7 +249,9 @@ xf_error_codes XFParseLBM::read(XFParseIFF *iff, XFBitmap *b)
         *(ptr++) = tpal[i*3+1];     // green
         *(ptr++) = tpal[i*3+2];     // blue
         *(ptr++) = 0;               // na to make dword
-    }                               
+    }
+
+    b->clrinuse=int (iff->chunkSize / 3) - 1;
 
 //ÄÄÄ Image data ÄÄÄ
     //
@@ -444,7 +447,7 @@ xf_error_codes XFParseLBM::write(XFParseIFF *iff, XFBitmap *b)
     ulong           rowsize;
     byte            *ptr, *src;
     byte            msk, pmsk;
-    int             locked;
+    int             locked=0;
     xf_error_codes  err;
     Bitmap_header   header;
     byte            *work=0;
@@ -551,6 +554,7 @@ xf_error_codes XFParseLBM::write(XFParseIFF *iff, XFBitmap *b)
             b->unlock();
         goto error_exit;
     }
+    memset(work,0,size);
 
     // Convert to interlaced, bitpacked format
 
@@ -561,17 +565,20 @@ xf_error_codes XFParseLBM::write(XFParseIFF *iff, XFBitmap *b)
     {
         for(k=0, pmsk=0x1; k < header.nPlanes; k++, pmsk <<= 1)
         {
-            for(i=0, *ptr=0, msk=0x80, src=(byte*)b->data + (b->width*j);
-                i < b->width;
+            assert(ptr < work+size);
+
+            for(i=0, msk=0x80, src=(byte*)b->data + (b->width*j);
+                i < b->width; 
                 i++)
             {
+                assert(ptr < work+size);
                 if (*(src++) & pmsk)
                     *ptr |= msk;
 
                 if (msk == 0x1)
                 {
                     msk = 0x80;
-                    *(++ptr)=0;
+                    ptr++;
                 }
                 else msk >>= 1;
             }
@@ -581,7 +588,9 @@ xf_error_codes XFParseLBM::write(XFParseIFF *iff, XFBitmap *b)
             }
 
             if (rowsize & 0x1)
-                *(ptr)++=0;
+            {
+                ptr++;
+            }
         }
     }
 

@@ -8,7 +8,7 @@
 //ששששש²±²ששששששש²±²שששש²±²ש²±²שששש²±²ש²±²שששש²±²ש²±²שששששששש²±²שששש²±²שששששש
 //שששש²²²²²²²²²²ש²²²²²²²²ששש²²²²²²²²שש²²²שששש²²²ש²²²²²²²²²²ש²²²שששש²²²ששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//ששששששששששCopyrightש(c)ש1994,ש1995שbyשCharybdisשEnterprises,שInc.שששששששששש
+//שששששששששששCopyrightש(c)ש1994-1996שbyשCharybdisשEnterprises,שInc.שששששששששש
 //ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
 //ששששששששששששששששששששש Microsoft Windows '95 Version ששששששששששששששששששששששש
@@ -32,7 +32,7 @@
 //
 // essystem.cpp
 //
-//      Contains the code for the EschSystem library control class.
+// Contains the code for the EschSystem library control class.
 //
 //ֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽ
 
@@ -59,7 +59,15 @@
 //                                                                          ³
 // Sets up the library, initializing the library if the arena_size is given.³
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִÙ
-EschSystem::EschSystem(ulong arena_size)
+EschSystem::EschSystem(ulong arena_size) :
+    wspace_mbytes(0),
+    wspace_sbytes(0),
+    wspace(0),
+    diag_faces(0),
+    diag_verts(0),
+    diag_ifaces(0),
+    diag_iverts(0),
+    diag_ntxts(0)
 {
     esch_error_codes    err;
 
@@ -68,20 +76,12 @@ EschSystem::EschSystem(ulong arena_size)
 
     EschSysInstance=this;
 
-    //ִִ Init workspace values.
-    wspace=0;
-    wspace_sbytes=0;
-    wspace_mbytes=0;
-
     //ִִ Create workspace, if arena_size given
     if (arena_size)
     {
         err=init(arena_size);
         assert (err == ESCH_ERR_NONE);
     }
-
-    //ִִ Initalize diagnostic information
-    diag_faces=diag_verts=diag_ifaces=diag_iverts=diag_ntxts=0;
 };
 
 

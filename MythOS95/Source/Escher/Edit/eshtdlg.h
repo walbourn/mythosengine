@@ -8,7 +8,7 @@
 //ùùùùù²±²ùùùùùùù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùùùùùù²±²ùùùù²±²ùùùùùù
 //ùùùù²²²²²²²²²²ù²²²²²²²²ùùù²²²²²²²²ùù²²²ùùùù²²²ù²²²²²²²²²²ù²²²ùùùù²²²ùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùCopyrightù(c)ù1994,ù1995ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
+//ùùùùùùùùùùùCopyrightù(c)ù1994-1996ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùù Microsoft Windows '95 Version ùùùùùùùùùùùùùùùùùùùùùùù
@@ -56,46 +56,50 @@
 //
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
+class TerrEditDoc;
+
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //°°°°°°°°°°°°°°°°°°°°°°°° Terrain Properies Dialog °°°°°°°°°°°°°°°°°°°°°°°°°
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
-
-class TerrEditDoc;
-
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// TerrPropDlgA                                                             ³
+// TerrPropGenPage                                                          ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-
-class TerrPropDlgA : public CPropertyPage
+class TerrPropGenPage : public CPropertyPage
 {
-	DECLARE_DYNCREATE(TerrPropDlgA)
+	DECLARE_DYNCREATE(TerrPropGenPage)
 
 // Construction
 public:
-	TerrPropDlgA();   // standard constructor
-    ~TerrPropDlgA();   // standard constructor
+	TerrPropGenPage();   // standard constructor
+    ~TerrPropGenPage();   // standard constructor
 
     int     m_edit;
     UINT    m_surfratio;
 
 // Dialog Data
-	//{{AFX_DATA(TerrPropDlgA)
-	enum { IDD = IDD_TERRPROPA };
+	//{{AFX_DATA(TerrPropGenPage)
+	enum { IDD = IDD_TERRPROP_GEN };
+	CButton	m_autoCenterCtl;
+	CEdit	m_orgzCtl;
+	CEdit	m_orgyCtl;
+	CEdit	m_orgxCtl;
 	CComboBox	m_surfratioCtl;
 	CEdit	m_depthCtl;
 	CEdit	m_widthCtl;
 	UINT	m_width;
 	UINT	m_depth;
-	float	m_dscale;
-	float	m_hscale;
-	float	m_wscale;
 	CString	m_name;
+	UINT	m_scale;
+	float	m_orgx;
+	float	m_orgy;
+	float	m_orgz;
+	BOOL	m_autoCenterOrg;
 	//}}AFX_DATA
 
 // Overrides
 	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(TerrPropDlgA)
+	//{{AFX_VIRTUAL(TerrPropGenPage)
 	protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	//}}AFX_VIRTUAL
@@ -104,38 +108,45 @@ public:
 protected:
 
 	// Generated message map functions
-	//{{AFX_MSG(TerrPropDlgA)
-		// NOTE: the ClassWizard will add member functions here
+	//{{AFX_MSG(TerrPropGenPage)
+	afx_msg void OnAutoCenter();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// TerrPropDlgB                                                             ³
+// TerrPropHColrPage                                                        ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-
-class TerrPropDlgB : public CPropertyPage
+class TerrPropHColrPage : public CPropertyPage
 {
-	DECLARE_DYNCREATE(TerrPropDlgB)
+	DECLARE_DYNCREATE(TerrPropHColrPage)
 
 // Construction
 public:
-	TerrPropDlgB();
-	~TerrPropDlgB();
+	TerrPropHColrPage();
+	~TerrPropHColrPage();
 
 // Dialog Data
-	//{{AFX_DATA(TerrPropDlgB)
-	enum { IDD = IDD_TERRPROPB };
-	CString	m_copy;
-	CString	m_auth;
-	CString	m_desc;
+	//{{AFX_DATA(TerrPropHColrPage)
+	enum { IDD = IDD_TERRPROP_HGTCLR };
+	UINT	m_blue;
+	UINT	m_brown;
+	UINT	m_green;
+	UINT	m_lblue;
+	UINT	m_lbrown;
+	UINT	m_lgreen;
+	UINT	m_lorange;
+	UINT	m_orange;
+	UINT	m_red;
+	UINT	m_white;
+	UINT	m_yellow;
 	//}}AFX_DATA
 
 
 // Overrides
 	// ClassWizard generate virtual function overrides
-	//{{AFX_VIRTUAL(TerrPropDlgB)
+	//{{AFX_VIRTUAL(TerrPropHColrPage)
 	protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	//}}AFX_VIRTUAL
@@ -143,10 +154,179 @@ public:
 // Implementation
 protected:
 	// Generated message map functions
-	//{{AFX_MSG(TerrPropDlgB)
+	//{{AFX_MSG(TerrPropHColrPage)
 		// NOTE: the ClassWizard will add member functions here
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
+
+};
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// TerrPropHTablePage                                                       ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+class TerrPropHTablePage : public CPropertyPage
+{
+	DECLARE_DYNCREATE(TerrPropHTablePage)
+
+// Construction
+public:
+	TerrPropHTablePage();
+	~TerrPropHTablePage();
+
+// Dialog Data
+	//{{AFX_DATA(TerrPropHTablePage)
+	enum { IDD = IDD_TERRPROP_HTBL };
+	CListBox	m_list;
+	//}}AFX_DATA
+
+    Flx16 htable[256];
+
+// Overrides
+	// ClassWizard generate virtual function overrides
+	//{{AFX_VIRTUAL(TerrPropHTablePage)
+	protected:
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	//}}AFX_VIRTUAL
+
+// Implementation
+protected:
+	// Generated message map functions
+	//{{AFX_MSG(TerrPropHTablePage)
+		// NOTE: the ClassWizard will add member functions here
+	//}}AFX_MSG
+	DECLARE_MESSAGE_MAP()
+
+};
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// TerrPropMiscPage                                                         ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+class TerrPropMiscPage : public CPropertyPage
+{
+	DECLARE_DYNCREATE(TerrPropMiscPage)
+
+// Construction
+public:
+	TerrPropMiscPage();
+	~TerrPropMiscPage();
+
+// Dialog Data
+	//{{AFX_DATA(TerrPropMiscPage)
+	enum { IDD = IDD_TERRPROP_MISC };
+	CString	m_copy;
+	CString	m_auth;
+	CString	m_desc;
+	//}}AFX_DATA
+
+// Overrides
+	// ClassWizard generate virtual function overrides
+	//{{AFX_VIRTUAL(TerrPropMiscPage)
+	protected:
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	//}}AFX_VIRTUAL
+
+// Implementation
+protected:
+	// Generated message map functions
+	//{{AFX_MSG(TerrPropMiscPage)
+		// NOTE: the ClassWizard will add member functions here
+	//}}AFX_MSG
+	DECLARE_MESSAGE_MAP()
+};
+
+
+
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°° Light Properties °°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// LightPropGenPage                                                         ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+class LightPropGenPage : public CPropertyPage
+{
+	DECLARE_DYNCREATE(LightPropGenPage)
+
+// Construction
+public:
+	LightPropGenPage();
+	~LightPropGenPage();
+
+    int     m_type;
+    byte    m_intensity;
+
+// Dialog Data
+	//{{AFX_DATA(LightPropGenPage)
+	enum { IDD = IDD_LGTPROP_GEN };
+	CComboBox	m_typeList;
+	CSliderCtrl	m_iSlider;
+	BOOL	m_atten;
+	float	m_xiValue;
+	float	m_yjValue;
+	float	m_zkValue;
+	//}}AFX_DATA
+
+
+// Overrides
+	// ClassWizard generate virtual function overrides
+	//{{AFX_VIRTUAL(LightPropGenPage)
+	protected:
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	//}}AFX_VIRTUAL
+
+// Implementation
+protected:
+	// Generated message map functions
+	//{{AFX_MSG(LightPropGenPage)
+		// NOTE: the ClassWizard will add member functions here
+	//}}AFX_MSG
+	DECLARE_MESSAGE_MAP()
+
+};
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// LightPropExtraPage                                                       ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+class LightPropExtraPage : public CPropertyPage
+{
+	DECLARE_DYNCREATE(LightPropExtraPage)
+
+// Construction
+public:
+	LightPropExtraPage();
+	~LightPropExtraPage();
+
+// Dialog Data
+	//{{AFX_DATA(LightPropExtraPage)
+	enum { IDD = IDD_LGTPROP_EXTRA };
+	float	m_inner;
+	float	m_outer;
+	float	m_hotspot;
+	float	m_diri;
+	float	m_dirj;
+	float	m_dirk;
+	float	m_falloff;
+	//}}AFX_DATA
+
+
+// Overrides
+	// ClassWizard generate virtual function overrides
+	//{{AFX_VIRTUAL(LightPropExtraPage)
+	protected:
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	//}}AFX_VIRTUAL
+
+// Implementation
+protected:
+	// Generated message map functions
+	//{{AFX_MSG(LightPropExtraPage)
+		// NOTE: the ClassWizard will add member functions here
+	//}}AFX_MSG
+	DECLARE_MESSAGE_MAP()
+
 };
 
 
@@ -156,44 +336,185 @@ protected:
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// CameraPropDlg                                                            ³
+// CameraPropGenPage                                                        ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-
-class CameraPropDlg : public CDialog
+class CameraPropGenPage : public CPropertyPage
 {
+	DECLARE_DYNCREATE(CameraPropGenPage)
+
 // Construction
 public:
-	CameraPropDlg(CWnd* pParent = NULL);   // standard constructor
-
-    dword m_bcolor;
+	CameraPropGenPage();
+	~CameraPropGenPage();
 
 // Dialog Data
-	//{{AFX_DATA(CameraPropDlg)
-	enum { IDD = IDD_CAMPROP };
+	//{{AFX_DATA(CameraPropGenPage)
+	enum { IDD = IDD_CAMPROP_GEN };
 	float	m_fov;
-	float	m_hither;
+	float	m_diri;
+	float	m_topi;
+	float	m_dirj;
+	float	m_topj;
+	float	m_dirk;
+	float	m_topk;
 	float	m_xpos;
-	float	m_yon;
 	float	m_ypos;
 	float	m_zpos;
 	//}}AFX_DATA
 
 
 // Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(CameraPropDlg)
+	// ClassWizard generate virtual function overrides
+	//{{AFX_VIRTUAL(CameraPropGenPage)
 	protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	//}}AFX_VIRTUAL
 
 // Implementation
 protected:
+	// Generated message map functions
+	//{{AFX_MSG(CameraPropGenPage)
+		// NOTE: the ClassWizard will add member functions here
+	//}}AFX_MSG
+	DECLARE_MESSAGE_MAP()
+
+};
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// CameraPropLODPage                                                        ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+class CameraPropLODPage : public CPropertyPage
+{
+	DECLARE_DYNCREATE(CameraPropLODPage)
+
+// Construction
+public:
+	CameraPropLODPage();
+	~CameraPropLODPage();
+
+// Dialog Data
+	//{{AFX_DATA(CameraPropLODPage)
+	enum { IDD = IDD_CAMPROP_LOD };
+	CEdit	m_medCtl;
+	CEdit	m_lowCtl;
+	float	m_low;
+	float	m_med;
+	BOOL	m_lod;
+	//}}AFX_DATA
+
+
+// Overrides
+	// ClassWizard generate virtual function overrides
+	//{{AFX_VIRTUAL(CameraPropLODPage)
+	protected:
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	//}}AFX_VIRTUAL
+
+// Implementation
+protected:
+	// Generated message map functions
+	//{{AFX_MSG(CameraPropLODPage)
+	afx_msg void OnLevelOfDetail();
+	//}}AFX_MSG
+	DECLARE_MESSAGE_MAP()
+
+};
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// CameraPropMiscPage                                                       ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+class CameraPropMiscPage : public CPropertyPage
+{
+	DECLARE_DYNCREATE(CameraPropMiscPage)
+
+// Construction
+public:
+	CameraPropMiscPage();
+	~CameraPropMiscPage();
+
+// Dialog Data
+	//{{AFX_DATA(CameraPropMiscPage)
+	enum { IDD = IDD_CAMPROP_MISC };
+	float	m_hither;
+	float	m_yon;
+	float	m_scalef;
+	float	m_hover;
+	//}}AFX_DATA
+
+    dword m_bcolor;
+
+    void setup(TerrEditDoc *pd) { pDoc=pd; }
+
+// Overrides
+	// ClassWizard generate virtual function overrides
+	//{{AFX_VIRTUAL(CameraPropMiscPage)
+	protected:
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	//}}AFX_VIRTUAL
+
+// Implementation
+protected:
+    TerrEditDoc *pDoc;
 
 	// Generated message map functions
-	//{{AFX_MSG(CameraPropDlg)
+	//{{AFX_MSG(CameraPropMiscPage)
 	afx_msg void OnBackgroundColor();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
+
+};
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// CameraPropExPage                                                         ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+class CameraPropExPage : public CPropertyPage
+{
+	DECLARE_DYNCREATE(CameraPropExPage)
+
+// Construction
+public:
+	CameraPropExPage();
+	~CameraPropExPage();
+
+// Dialog Data
+	//{{AFX_DATA(CameraPropExPage)
+	enum { IDD = IDD_CAMPROP_EX };
+	CButton	m_bg_activeCtl;
+	CButton	m_haze_activeCtl;
+	BOOL	m_bg_active;
+	BOOL	m_haze_active;
+	UINT	m_slevels;
+	UINT	m_levels;
+	float	m_bpercent;
+	UINT	m_blevels;
+	//}}AFX_DATA
+
+    XFBitmap *bg_bm;
+    dword    haze_color;
+    BOOL     haze_change;
+    void setup(TerrEditDoc *pd);
+
+// Overrides
+	// ClassWizard generate virtual function overrides
+	//{{AFX_VIRTUAL(CameraPropExPage)
+	protected:
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	//}}AFX_VIRTUAL
+
+// Implementation
+protected:
+    TerrEditDoc *pDoc;
+
+	// Generated message map functions
+	//{{AFX_MSG(CameraPropExPage)
+	afx_msg void OnSelectBitmap();
+	afx_msg void OnHazeColor();
+	//}}AFX_MSG
+	DECLARE_MESSAGE_MAP()
+
 };
 
 
@@ -203,39 +524,53 @@ protected:
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// SurfacePropDlg                                                           ³
+// SurfPropGenPage                                                          ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-
-class SurfacePropDlg : public CDialog
+class SurfPropGenPage : public CPropertyPage
 {
+	DECLARE_DYNCREATE(SurfPropGenPage)
+
 // Construction
 public:
-	SurfacePropDlg(TerrEditDoc *pd, CWnd* pParent = NULL);   // standard constructor
+	SurfPropGenPage();
+	~SurfPropGenPage();
+
+// Dialog Data
+	//{{AFX_DATA(SurfPropGenPage)
+	enum { IDD = IDD_SURFPROP_GEN };
+	CButton	m_notileCtl;
+	CComboBox	m_tileCtl;
+	CComboBox	m_txtList;
+	CButton	m_colorbutton;
+	CButton	m_flipvCtl;
+	CButton	m_flipuCtl;
+	BOOL	m_cbit4;
+	UINT	m_dloc;
+	UINT	m_xloc;
+	BOOL	m_flipu;
+	BOOL	m_flipv;
+	BOOL	m_indistxt;
+    int     m_tile;
+	BOOL	m_cbit11;
+	BOOL	m_cbit12;
+	BOOL	m_hidden;
+	BOOL	m_highonly;
+	BOOL	m_notile;
+	BOOL	m_app0;
+	BOOL	m_app1;
+	BOOL	m_app2;
+	BOOL	m_app3;
+	//}}AFX_DATA
 
     int   m_edit;
     dword m_color;
     int   m_txt;
 
-// Dialog Data
-	//{{AFX_DATA(SurfacePropDlg)
-	enum { IDD = IDD_SURFPROP };
-	CButton	m_colorbutn;
-	CComboBox	m_txtlist;
-	BOOL	m_cbit1;
-	BOOL	m_cbit2;
-	BOOL	m_cbit3;
-	BOOL	m_cbit4;
-	UINT	m_dloc;
-	UINT	m_xloc;
-	int		m_fire;
-	int		m_smoke;
-	int		m_water;
-	//}}AFX_DATA
-
+	void setup(TerrEditDoc *pd) { pDoc=pd; }
 
 // Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(SurfacePropDlg)
+	// ClassWizard generate virtual function overrides
+	//{{AFX_VIRTUAL(SurfPropGenPage)
 	protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	//}}AFX_VIRTUAL
@@ -245,55 +580,183 @@ protected:
     TerrEditDoc *pDoc;
 
 	// Generated message map functions
-	//{{AFX_MSG(SurfacePropDlg)
+	//{{AFX_MSG(SurfPropGenPage)
 	afx_msg void OnColor();
 	afx_msg void OnTextureSelectChange();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
+
 };
 
 
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-//°°°°°°°°°°°°°°°°°°°°°°°°°°°° Texture Properties °°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°° Color Properties Dialog °°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// TexturePropDlg                                                           ³
+// ColorGenPropPage                                                         ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-
-class TexturePropDlg : public CDialog
+class ColorGenPropPage : public CPropertyPage
 {
+	DECLARE_DYNCREATE(ColorGenPropPage)
+
 // Construction
 public:
-	TexturePropDlg(TerrEditDoc *pd, int i=-1, CWnd* pParent = NULL);   // standard constructor
+	ColorGenPropPage();
+	~ColorGenPropPage();
+    void setup(TerrEditDoc *pd) { pDoc = pd;  ASSERT(pDoc); }
 
-    dword m_color;
+    int     colorIndx;
+
+    int     m_isnew;
 
 // Dialog Data
-	//{{AFX_DATA(TexturePropDlg)
-	enum { IDD = IDD_TEXTUREPROP };
+	//{{AFX_DATA(ColorGenPropPage)
+	enum { IDD = IDD_CLRPROP_GEN };
+	CButton	m_resetCtl;
 	CString	m_name;
-	CString	m_fname;
+	BOOL	m_app0;
+	BOOL	m_app1;
+	BOOL	m_app2;
+	BOOL	m_app3;
+	BOOL	m_highonly;
 	//}}AFX_DATA
 
 
 // Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(TexturePropDlg)
+	// ClassWizard generate virtual function overrides
+	//{{AFX_VIRTUAL(ColorGenPropPage)
 	protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	//}}AFX_VIRTUAL
 
 // Implementation
 protected:
-    int iNDex;
     TerrEditDoc *pDoc;
 
 	// Generated message map functions
-	//{{AFX_MSG(TexturePropDlg)
-	afx_msg void OnBrowse();
-	afx_msg void OnColor();
+	//{{AFX_MSG(ColorGenPropPage)
+	afx_msg void OnResetUsage();
+	//}}AFX_MSG
+	DECLARE_MESSAGE_MAP()
+
+};
+
+
+
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°° Color Select Dialog °°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// ColorSelectPropPage                                                      ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+class ColorGenPropPage;
+class ShadeReviewPropPage;
+
+class ColorSelectPropPage : public CPropertyPage
+{
+	DECLARE_DYNCREATE(ColorSelectPropPage)
+
+// Construction
+public:
+	ColorSelectPropPage();
+	~ColorSelectPropPage();
+
+    VngoPal8        *palette;
+    dword           color;
+
+    void setup(ColorGenPropPage *pg,
+               ShadeReviewPropPage *ps) { pCGPage=pg; pSRPage=ps; }
+
+// Dialog Data
+	//{{AFX_DATA(ColorSelectPropPage)
+	enum { IDD = IDD_COLORSELECT };
+		// NOTE - ClassWizard will add data members here.
+		//    DO NOT EDIT what you see in these blocks of generated code !
+	//}}AFX_DATA
+
+// Overrides
+	// ClassWizard generate virtual function overrides
+	//{{AFX_VIRTUAL(ColorSelectPropPage)
+	protected:
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	//}}AFX_VIRTUAL
+
+// Implementation
+protected:
+    HPALETTE            hpal;
+    BITMAPINFO          *bmi;
+    BYTE                *gmap;
+    VngoVportDB8        *gvport;
+    int                 wid, hgt;
+    int                 x_spacing;
+    int                 y_spacing;
+    VngoRect            sel_rect;
+    ColorGenPropPage    *pCGPage;
+    ShadeReviewPropPage *pSRPage;
+
+    void setup_vport(int width, int height);
+    void release_vport();
+
+	// Generated message map functions
+	//{{AFX_MSG(ColorSelectPropPage)
+	afx_msg void OnPaint();
+	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
+	afx_msg void OnSize(UINT nType, int cx, int cy);
+	//}}AFX_MSG
+	DECLARE_MESSAGE_MAP()
+
+};
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// ShadeReviewPropPage                                                      ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+class ShadeReviewPropPage : public CPropertyPage
+{
+	DECLARE_DYNCREATE(ShadeReviewPropPage)
+
+// Construction
+public:
+	ShadeReviewPropPage();
+	~ShadeReviewPropPage();
+
+    VngoPal8        *palette;
+    dword           color;
+
+// Dialog Data
+	//{{AFX_DATA(ShadeReviewPropPage)
+	enum { IDD = IDD_SHADEREVIEW };
+		// NOTE - ClassWizard will add data members here.
+		//    DO NOT EDIT what you see in these blocks of generated code !
+	//}}AFX_DATA
+
+// Overrides
+	// ClassWizard generate virtual function overrides
+	//{{AFX_VIRTUAL(ShadeReviewPropPage)
+	protected:
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	//}}AFX_VIRTUAL
+
+// Implementation
+protected:
+    HPALETTE            hpal;
+    BITMAPINFO          *bmi;
+    BYTE                *gmap;
+    VngoVportDB8        *gvport;
+    int                 wid, hgt;
+    int                 x_spacing;
+    int                 y_spacing;
+
+    void setup_vport(int width, int height);
+    void release_vport();
+
+	// Generated message map functions
+	//{{AFX_MSG(ShadeReviewPropPage)
+	afx_msg void OnPaint();
+	afx_msg void OnSize(UINT nType, int cx, int cy);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };
@@ -301,29 +764,28 @@ protected:
 
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-//°°°°°°°°°°°°°°°°°°°°°°°°°°° Progress Dialogs °°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°°°° Progress Dialog °°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// TerrCNmPrgDlg                                                            ³
+// ProgressDlg                                                              ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-
-class TerrCNmPrgDlg : public CDialog
+class ProgressDlg : public CDialog
 {
 // Construction
 public:
-	TerrCNmPrgDlg(CWnd* pParent = NULL);   // standard constructor
+	ProgressDlg(CWnd* pParent = NULL);   // standard constructor
 
 // Dialog Data
-	//{{AFX_DATA(TerrCNmPrgDlg)
-	enum { IDD = IDD_COMPNRML };
-	CProgressCtrl	m_pBar;
+	//{{AFX_DATA(ProgressDlg)
+	enum { IDD = IDD_PROGRESS };
+	CProgressCtrl	m_pbar;
 	//}}AFX_DATA
 
 
 // Overrides
 	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(TerrCNmPrgDlg)
+	//{{AFX_VIRTUAL(ProgressDlg)
 	protected:
 	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
 	//}}AFX_VIRTUAL
@@ -332,77 +794,7 @@ public:
 protected:
 
 	// Generated message map functions
-	//{{AFX_MSG(TerrCNmPrgDlg)
-		// NOTE: the ClassWizard will add member functions here
-	//}}AFX_MSG
-	DECLARE_MESSAGE_MAP()
-};
-
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// TerrCScPrgDlg                                                            ³
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-
-class TerrCScPrgDlg : public CDialog
-{
-// Construction
-public:
-	TerrCScPrgDlg(CWnd* pParent = NULL);   // standard constructor
-
-// Dialog Data
-	//{{AFX_DATA(TerrCScPrgDlg)
-	enum { IDD = IDD_COMPSCLRS };
-	CProgressCtrl	m_pBar;
-	//}}AFX_DATA
-
-
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(TerrCScPrgDlg)
-	protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-	//}}AFX_VIRTUAL
-
-// Implementation
-protected:
-
-	// Generated message map functions
-	//{{AFX_MSG(TerrCScPrgDlg)
-		// NOTE: the ClassWizard will add member functions here
-	//}}AFX_MSG
-	DECLARE_MESSAGE_MAP()
-};
-
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// TerrSurfPrgDlg                                                           ³
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-
-class TerrSurfPrgDlg : public CDialog
-{
-// Construction
-public:
-	TerrSurfPrgDlg(CWnd* pParent = NULL);   // standard constructor
-
-// Dialog Data
-	//{{AFX_DATA(TerrSurfPrgDlg)
-	enum { IDD = IDD_SCANSURF };
-	CProgressCtrl	m_pBar;
-	//}}AFX_DATA
-
-
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(TerrSurfPrgDlg)
-	protected:
-	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
-	//}}AFX_VIRTUAL
-
-// Implementation
-protected:
-
-	// Generated message map functions
-	//{{AFX_MSG(TerrSurfPrgDlg)
+	//{{AFX_MSG(ProgressDlg)
 		// NOTE: the ClassWizard will add member functions here
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
@@ -417,7 +809,6 @@ protected:
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrExpStatDlg                                                           ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-
 class TerrExpStatDlg : public CDialog
 {
 // Construction
@@ -454,9 +845,204 @@ protected:
 };
 
 
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°°°° Import Dialogs °°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// DEMImportDlg                                                             ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+class DEMImportDlg : public CDialog
+{
+// Construction
+public:
+	DEMImportDlg(CWnd* pParent = NULL);   // standard constructor
+
+// Dialog Data
+	//{{AFX_DATA(DEMImportDlg)
+	enum { IDD = IDD_DEMIMPORT };
+	CEdit	m_lng_secondsCtl;
+	CEdit	m_lng_minutesCtl;
+	CEdit	m_lng_degreesCtl;
+	CEdit	m_lat_secondsCtl;
+	CEdit	m_lat_minutesCtl;
+	CEdit	m_lat_degreesCtl;
+    CButton m_stdCtl;
+    CButton m_uniformCtl;
+    CButton m_avgCtl;
+	CEdit	m_avg_maxdCtl;
+	float	m_avg_maxd;
+	UINT	m_lat_degrees;
+	UINT	m_lat_minutes;
+	UINT	m_lat_seconds;
+	UINT	m_lng_degrees;
+	UINT	m_lng_minutes;
+	UINT	m_lng_seconds;
+    CButton m_lng_east;
+    CButton m_lng_west;
+    CButton m_lat_north;
+    CButton m_lat_south;
+	BOOL	m_normalize;
+	//}}AFX_DATA
+
+    enum
+    {
+        STANDARD=0,
+        UNIFORM=1,
+        AVERAGE=2
+    };
+
+    int option;
+    BOOL isusgs;
+    long longitude;
+    long latitude;
+
+// Overrides
+	// ClassWizard generated virtual function overrides
+	//{{AFX_VIRTUAL(DEMImportDlg)
+	protected:
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	//}}AFX_VIRTUAL
+
+// Implementation
+protected:
+
+	// Generated message map functions
+	//{{AFX_MSG(DEMImportDlg)
+	afx_msg void OnDemAverage();
+	afx_msg void OnDemStd();
+	afx_msg void OnDemUniform();
+	//}}AFX_MSG
+	DECLARE_MESSAGE_MAP()
+};
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// DEMProgressDlg                                                           ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+class USGSFileParseDEM;
+
+class DEMProgressDlg : public CDialog
+{
+// Construction
+public:
+	DEMProgressDlg(USGSFileParseDEM *d, CWnd* pParent = NULL);
+
+// Dialog Data
+	//{{AFX_DATA(DEMProgressDlg)
+	enum { IDD = IDD_DEMPROGRESS };
+	CButton	m_ok;
+	CProgressCtrl	m_pbar;
+	CString	m_comments;
+	CString	m_elv_units;
+	CString	m_fname;
+	CString	m_grnd_units;
+	CString	m_name;
+	UINT	m_profile_cols;
+	UINT	m_profile_rows;
+	UINT	m_quality;
+	CString	m_status;
+	float	m_axisx;
+	float	m_axisy;
+	float	m_axisz;
+	//}}AFX_DATA
+
+    BOOL    okon;
+    long    longitude;
+    long    latitude;
+
+// Overrides
+	// ClassWizard generated virtual function overrides
+	//{{AFX_VIRTUAL(DEMProgressDlg)
+	protected:
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	//}}AFX_VIRTUAL
+
+// Implementation
+protected:
+    USGSFileParseDEM *dem;
+
+	// Generated message map functions
+	//{{AFX_MSG(DEMProgressDlg)
+		// NOTE: the ClassWizard will add member functions here
+	//}}AFX_MSG
+	DECLARE_MESSAGE_MAP()
+};
+
+
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°° Misc Dialogs °°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// LocateDlg                                                                ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+class LocateDlg : public CDialog
+{
+// Construction
+public:
+	LocateDlg(CWnd* pParent = NULL);   // standard constructor
+
+// Dialog Data
+	//{{AFX_DATA(LocateDlg)
+	enum { IDD = IDD_LOCATE };
+	CString	m_fname;
+	//}}AFX_DATA
+
+    CString title;
+    CString typestr;
+
+// Overrides
+	// ClassWizard generated virtual function overrides
+	//{{AFX_VIRTUAL(LocateDlg)
+	protected:
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	//}}AFX_VIRTUAL
+
+// Implementation
+protected:
+
+	// Generated message map functions
+	//{{AFX_MSG(LocateDlg)
+	afx_msg void OnBrowse();
+	//}}AFX_MSG
+	DECLARE_MESSAGE_MAP()
+};
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// SetBaseElvDlg                                                            ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+class SetBaseElvDlg : public CDialog
+{
+// Construction
+public:
+	SetBaseElvDlg(CWnd* pParent = NULL);   // standard constructor
+
+// Dialog Data
+	//{{AFX_DATA(SetBaseElvDlg)
+	enum { IDD = IDD_SETBASEELV };
+	float	m_setbase_elv;
+	float	m_elvmin;
+	float	m_elvmax;
+	//}}AFX_DATA
+
+// Overrides
+	// ClassWizard generated virtual function overrides
+	//{{AFX_VIRTUAL(SetBaseElvDlg)
+	protected:
+	virtual void DoDataExchange(CDataExchange* pDX);    // DDX/DDV support
+	//}}AFX_VIRTUAL
+
+// Implementation
+protected:
+
+	// Generated message map functions
+	//{{AFX_MSG(SetBaseElvDlg)
+		// NOTE: the ClassWizard will add member functions here
+	//}}AFX_MSG
+	DECLARE_MESSAGE_MAP()
+};
 
 //°±² eof - eshtdlg.h ²±°

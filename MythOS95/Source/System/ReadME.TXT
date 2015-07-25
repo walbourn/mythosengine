@@ -38,12 +38,10 @@
                              _Library Status_
 
  Notes by: Chuck Walbourn
- Updated: November 6, 1995
+ Updated: November 14, 1995
 
  Changes for this release --------------------------------------------------
 
-    o Release Version 1.0
-
-    Minor change to support Bozo's set_allocator routine.
+    o Changed tester to use IvoryMFC library.
 
 *** END OF FILE ***

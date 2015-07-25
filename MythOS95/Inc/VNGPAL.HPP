@@ -6,7 +6,7 @@
 //                                                           |. _  .   .|
 //          Microsoft Windows '95 Version                    | / \   .  | 
 //                                                           |_|_|_._._.|
-// Copyright (c) 1994, 1995 by Charybdis Enterprises, Inc.   |.-.-.-.-..|
+// Copyright (c) 1994-1996 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
 //              All rights reserved.                        %\__________/%
 //                                                           %          %
 //
@@ -67,10 +67,9 @@ class VngoHwPal
 public:
     VngoColor24bit  p[VNGO_PAL_SIZE];
 
-    int init(VngoColor24bit pal[],int count,dword flags=0);
-    void read();
-    void write();
+    int init(VngoColor24bit pal[],int count);
 };
+
 
 class VngoShadePal
 {
@@ -97,6 +96,10 @@ class VngoShadePal8 : public VngoShadePal
     //VngoColorShade8 p[VNGO_PAL_SIZE];
 public:
 
+    int get_shaded_index(int color, int shade)
+    {
+        return (p[(color << num_shd_lvl_bits) + (shade >> (8 - num_shd_lvl_bits))]);
+    }
     VngoColorShade8 &operator[] (int i)
     {
         return *(VngoColorShade8 *)(p + (i << num_shd_lvl_bits));
@@ -127,15 +130,87 @@ public:
 };
 
 
-class VngoHazePal8
-{
-public:
-//    VngoColorShade8  p[VNGO_PAL_SIZE];
 
-//   VngoHazePal8() {type = VNGO_8BIT;}
-    void init(VngoPal *mypal);
+class VngoShadePal15 : public VngoShadePal
+{
+    word    *p;
+
+    //VngoColorShade15 p[VNGO_PAL_SIZE];
+public:
+
+    int get_shaded_index(int color, int shade)
+    {
+        return (p[(color << num_shd_lvl_bits) + (shade >> (8 - num_shd_lvl_bits))]);
+    }
+    VngoColorShade15 &operator[] (int i)
+    {
+        return *(VngoColorShade15 *)(p + (i << num_shd_lvl_bits));
+    }
+
+    VngoShadePal15 (int shade_levels)
+    {
+        num_shd_lvl = shade_levels;
+        num_shd_lvl_bits = 0;
+        while (shade_levels > 1)
+        {
+            num_shd_lvl_bits++;
+            shade_levels >>= 1;
+        }
+
+        p = new word[VNGO_PAL_SIZE << num_shd_lvl_bits];
+        ptr = p;
+    }
+
+    ~VngoShadePal15 ()
+    {
+        if (p != 0)
+        {
+            delete [] p;
+            p = 0;
+        }
+    }
 };
 
+
+class VngoShadePal16 : public VngoShadePal
+{
+    word    *p;
+
+    //VngoColorShade16 p[VNGO_PAL_SIZE];
+public:
+
+    int get_shaded_index(int color, int shade)
+    {
+        return (p[(color << num_shd_lvl_bits) + (shade >> (8 - num_shd_lvl_bits))]);
+    }
+    VngoColorShade16 &operator[] (int i)
+    {
+        return *(VngoColorShade16 *)(p + (i << num_shd_lvl_bits));
+    }
+
+    VngoShadePal16 (int shade_levels)
+    {
+        num_shd_lvl = shade_levels;
+        num_shd_lvl_bits = 0;
+        while (shade_levels > 1)
+        {
+            num_shd_lvl_bits++;
+            shade_levels >>= 1;
+        }
+
+        p = new word[VNGO_PAL_SIZE << num_shd_lvl_bits];
+        ptr = p;
+    }
+
+    ~VngoShadePal16 ()
+    {
+        if (p != 0)
+        {
+            delete [] p;
+            p = 0;
+        }
+    }
+};
 
 
 class VngoPal
@@ -150,6 +225,9 @@ public:
 
     VngoPal() {shd_pal=NULL; }
     virtual ~VngoPal();
+
+// Virtual Utility functions.
+    virtual void release();
 
 // Virtual Color based functions.
     virtual dword get_index(VngoColorHLS c) = 0;
@@ -169,7 +247,7 @@ public:
     VngoHwPal       hw_pal;
     VngoClrConvert  convert;
 
-    VngoPal8() {shd_pal=NULL;}
+//    VngoPal8() {shd_pal=NULL;}
 //   ~VngoPal8();
 
 
@@ -177,11 +255,11 @@ public:
 
     dword get_index(VngoColorHLS c) { return (convert.get_index(c));}
     dword get_index(VngoColor24bit c) { return (convert.get_index(c));}
-    int set_hwpal(VngoColor24bit pal[],int count) { return (hw_pal.init(pal,count,0));};
+    int set_hwpal(VngoColor24bit pal[],int count) { return (hw_pal.init(pal,count));};
     VngoColor24bit get_RGB(int indx) { return (hw_pal.p[indx]);}
 
 // Initialization of the palette.
-    int init(dword flags,VngoHwPal *hw=NULL,VngoShadePal8 *sh=NULL,VngoHazePal8 *hz=NULL);
+    int init(dword flags,VngoHwPal *hw=NULL,VngoShadePal8 *sh=NULL);
     int init(dword flags,const char *palfile);
     int init(dword flags,XFParseIFF *palfile);
 };
@@ -192,7 +270,7 @@ class VngoPalIFF
 public:
     VngoPal         *pal;
     char            name[16];
-   
+
 public:
     VngoPalIFF() {};
     VngoPalIFF(VngoPal *p) {pal = p;};

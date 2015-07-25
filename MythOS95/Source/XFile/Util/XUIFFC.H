@@ -6,7 +6,7 @@
 //    (_)       ^          * *     *      *   *    *            (_)
 //             (_)       **   **   *    ***** **** ****
 //
-//            Copyright (c) 1994,1995 by Charybdis Enterprises, Inc.
+//            Copyright (c) 1994-1996 by Charybdis Enterprises, Inc.
 //                              All Rights Reserved.
 //                        Microsoft Windows '95 Version
 //
@@ -47,6 +47,8 @@
 #define FLAGS_QUIET         0x1
 #define FLAGS_RIFF          0x2
 #define FLAGS_NOPAD         0x4
+#define FLAGS_XEB           0x8
+#define FLAGS_EMPTYOK       0x10
 
 #endif
 

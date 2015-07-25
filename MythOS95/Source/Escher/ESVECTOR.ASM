@@ -8,7 +8,7 @@
 ;ששששש²±²ששששששש²±²שששש²±²ש²±²שששש²±²ש²±²שששש²±²ש²±²שששששששש²±²שששש²±²שששששש
 ;שששש²²²²²²²²²²ש²²²²²²²²ששש²²²²²²²²שש²²²שששש²²²ש²²²²²²²²²²ש²²²שששש²²²ששששששש
 ;ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-;ששששששששששCopyrightש(c)ש1994,ש1995שbyשCharybdisשEnterprises,שInc.שששששששששש
+;שששששששששששCopyrightש(c)ש1994-1996שbyשCharybdisשEnterprises,שInc.שששששששששש
 ;ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
 ;ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
 ;ששששששששששששששששששששש Microsoft Windows '95 Version ששששששששששששששששששששששש
@@ -270,11 +270,17 @@ START_PROC      asm_esch_magnitude,     C       vect:DWORD
 ; Edx,Eax now has the 64bit Sum of the squares.
 
         xor     ecx,ecx
+check_again:
         or      edx,edx
-        jz      get_sqrt
-        shrd    eax,edx,16
-        shr     edx,16
-        mov     ecx,8
+        jnz     @f
+        cmp     eax,0
+        jl      @f
+        jmp     short get_sqrt
+@@:
+        shrd    eax,edx,2
+        shr     edx,2
+        inc     ecx
+        jmp     short check_again
 
 get_sqrt:
         push    ecx

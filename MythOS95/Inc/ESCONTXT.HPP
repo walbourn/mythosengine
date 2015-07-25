@@ -8,7 +8,7 @@
 //ששששש²±²ששששששש²±²שששש²±²ש²±²שששש²±²ש²±²שששש²±²ש²±²שששששששש²±²שששש²±²שששששש
 //שששש²²²²²²²²²²ש²²²²²²²²ששש²²²²²²²²שש²²²שששש²²²ש²²²²²²²²²²ש²²²שששש²²²ששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//ששששששששששCopyrightש(c)ש1994,ש1995שbyשCharybdisשEnterprises,שInc.שששששששששש
+//שששששששששששCopyrightש(c)ש1994-1996שbyשCharybdisשEnterprises,שInc.שששששששששש
 //ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
 //ששששששששששששששששששששש Microsoft Windows '95 Version ששששששששששששששששששששששש
@@ -32,14 +32,14 @@
 //
 // escontxt.hpp
 //
-//      The EschContext object provides the current drawing information such
-//      as current camera, light list, and drawable object list.  Contexts
-//      are maintained as a stack of objects for dynamic adjustment of
-//      the drawing context.
+// The EschContext class provides the current drawing information such
+// as current camera, light list, and drawable object list.  Contexts
+// are maintained as a stack of objects for dynamic adjustment of
+// the drawing context.
 //
-//      EschContext objects are used implictly by the various objects, but
-//      can be controlled by the application to provide multiple drawing
-//      contexts.
+// EschContext class are used implictly by the various other classes, but
+// can be controlled by the application to provide multiple drawing
+// contexts.
 //
 //ֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽ
 
@@ -87,6 +87,9 @@ class VngoPoint;
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִÙ
 class EschContext {
 
+    //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ¿
+    // Protected data members                                               ³
+    //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִÙ
     EschContext *prev;
 
 public:
@@ -102,6 +105,8 @@ public:
     
     // Face drawing globals (used internally)
     
+    EschDrawable    *current;
+
     EschVertex      *verts;
     dword           *vflags;
     VngoPoint       *vpoints;
@@ -109,22 +114,18 @@ public:
     EschFace        *faces;
     dword           *fflags;
     
-    EschTexture     *txts;
+    EschTexture     **txts;
     
     //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ¿
     // Constructor/Destructors                                              ³
     //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִÙ
-    EschContext()
-    {
-        camera=0;
-        lights=0;
-        eschs=0;
-    }
+    EschContext() : camera(0), lights(0), eschs(0) {}
     EschContext(EschContext *c)
     {
         if (c)
             *this=*c;
-        else {
+        else
+        {
             camera=0;
             lights=0;
             eschs=0;
@@ -134,7 +135,7 @@ public:
     ~EschContext() {}
     
     //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ¿
-    // Context stack operations.                                            ³
+    // Operations                                                           ³
     //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִÙ
     void push()
     {

@@ -4,7 +4,7 @@
 #
 #                         Microsoft Windows '95 Version
 #
-#               Copyright (c) 1995 by Charybdis Enterprises, Inc.
+#            Copyright (c) 1994-1996 by Charybdis Enterprises, Inc.
 #                            All Rights Reserved.
 #
 #ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -26,7 +26,7 @@
 #
 #
 #      This standard make include file is setup for compling with 
-#      Microsoft Visual C/C++ v2.x and MASM 6.11.
+#      Microsoft Visual C/C++ v4.x and MASM 6.11.
 #
 #      It assumes that INCPATH is setup to be a PATH-style variable of
 #      include paths, DEBUG is set to NO, ASSERT, or YES for debug
@@ -47,7 +47,7 @@
 #°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-# Microsoft Visual C/C++ v2.x                                              ³
+# Microsoft Visual C/C++ v4.x                                              ³
 #ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
 !message ÚÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
@@ -71,9 +71,9 @@ LIBVARS = $(MSVC)\lib;$(MSVC)\mfc\lib
 
 ASM = ml
 !if "$(DEBUG)" == "NO"
-ASMOPTS = /nologo /c /DNDEBUG /Zp1
+ASMOPTS = /nologo /c /DNDEBUG /Zp1 /coff
 !else if "$(DEBUG)" == "ASSERT"
-ASMOPTS = /nologo /c /Zp1
+ASMOPTS = /nologo /c /Zp1 /coff
 !else
 ASMOPTS = /nologo /c /DDEBUG /Zi /Zp1 /Fl /coff
 !endif

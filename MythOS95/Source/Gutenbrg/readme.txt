@@ -11,7 +11,7 @@
  
                            Microsoft Windows '95 Version
 
-                Copyright (c) 1995 by Charybdis Enterprises, Inc.
+             Copyright (c) 1995, 1996 by Charybdis Enterprises, Inc.
                             All Rights Reserved.
 
  ----------------------------------------------------------------------------
@@ -32,16 +32,25 @@
                              _Library Status_
 
  Notes by: Chuck Walbourn
- Updated: Nov 5, 1995
+ Updated: July 15, 1996
 
  Changes for this release ---------------------------------------------------
 
-    o Release Version 1.0
+    o Cleaned up the "const-ness" of a number of parameters, etc.
 
+    o Added out_wrap to allow wrapping a string to a given rectangle
+      (default is the current viewport rectangle);
 
-  Pending changes -----------------------------------------------------------
+    o Minor change for new Van Gogh release
 
-    o gberg_sizec and gberg_sizes not yet implemented.
+    o Changed gberg_select_font/strings to keep old data active if new name
+      is not installed.
+
+    o Added gberg_remove_font/strings() calls.
+
+    o GFONT converter now supports creating a font from bitmap and several
+      fonts are included.
+
 
 
   Proposed changes ----------------------------------------------------------
@@ -49,11 +58,7 @@
     o Faster string 'search' for loadstring by having compiler build a
       binary search tree and having loadstring use it.
 
-    o Text-mode output
-
-    o Color font support
-
-    o Proportional fonts
+    o Four color font support (3x6 font needs this to be readable).
 
 *** END OF FILE ***
 

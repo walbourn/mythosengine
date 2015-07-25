@@ -54,6 +54,7 @@
 #include "maxevt.hpp"
 #include "maxdevs.hpp"
 #include "maxesrc.hpp"
+#include "maxvmap.hpp"
 
 //같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같�
 //

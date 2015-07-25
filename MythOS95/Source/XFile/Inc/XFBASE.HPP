@@ -6,7 +6,7 @@
 //    (_)       ^          * *     *      *   *    *            (_)
 //             (_)       **   **   *    ***** **** ****
 //
-//            Copyright (c) 1994,1995 by Charybdis Enterprises, Inc.
+//            Copyright (c) 1994-1996 by Charybdis Enterprises, Inc.
 //                             All Rights Reserved.
 //                        Microsoft Windows '95 Version
 //
@@ -158,16 +158,18 @@ public:
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// DOS File objects.                                                        ³
+// Disk File objects.                                                       ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-class XFileDOS : public XFile
+#define XFileDOS XFileDisk
+
+class XFileDisk : public XFile
 {
 protected:
     HANDLE  fHandle;
 
 public:
-    XFileDOS();
-    virtual ~XFileDOS();
+    XFileDisk();
+    virtual ~XFileDisk();
 
     virtual xf_error_codes open (const char *name, dword flags);
     virtual xf_error_codes close ();
@@ -187,7 +189,9 @@ public:
     virtual word getftime ();
 };                                                        
 
-class XFileDOSBuff : public XFileDOS
+#define XFileDOSBuff XFileDiskBuf
+
+class XFileDiskBuf : public XFileDisk
 {
 protected:    
     byte    *end;
@@ -196,8 +200,8 @@ protected:
     byte    *data;
 
 public:
-    XFileDOSBuff();
-    virtual ~XFileDOSBuff();
+    XFileDiskBuf();
+    virtual ~XFileDiskBuf();
 
     virtual xf_error_codes open (const char *name, dword flags);
     virtual xf_error_codes close ();

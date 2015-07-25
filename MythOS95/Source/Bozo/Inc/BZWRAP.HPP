@@ -97,15 +97,19 @@ public:
     virtual     ~BozoTask();
 
     // To run the task, we need to initialize it onto a queue.
-    void    init (bz_task_queue * = &ReadyQ);
+    bz_task *init (bz_task_queue * = &ReadyQ);
 
     // This is the member that is executed for the task.
     // Add any user functionality here.
     virtual void run ();
 
-    // Some utility members
+    // Some utility members (hide dangerous globals)
+    void    bz_term ()    { bz_task *t = task; task = 0; ::bz_term (t); }
     void    yield (bz_task_queue *destq = &ReadyQ, bz_task_queue *srcq = &ReadyQ)
             { bz_yield (destq, srcq); }
+
+protected:
+    void    bz_return ()  { task = 0; ::bz_return(); }
 };
 
 

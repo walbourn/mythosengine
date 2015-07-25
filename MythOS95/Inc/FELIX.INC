@@ -49,11 +49,20 @@ __FELIX_INC    equ 1
 ;
 ;같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같�
 
+SAFE_DIVIDE             equ     1
+
+
 FLX16_ONE               equ     010000h ; this is one in 16.16
 FLX_SQRT_BITRES         equ     0ch     ; number of bits resolution in SQRT
                                         ; table.
-FLX_DEGRES_SHIFT        equ     1       ; number of bits resolution in SIN
+if 0
+FLX_DEGREES_SHIFT       equ     1       ; number of bits resolution in SIN
                                         ; table. (ie. .5 degrees)
+else
+FLX_DEGREES_SHIFT	equ	4	; number of bits resolution in SIN
+					; table, (ie. .0625 degrees).
+endif
+
 FLX16_SHIFTS            equ     16      ; this is the shift value for 16.16s
 
 

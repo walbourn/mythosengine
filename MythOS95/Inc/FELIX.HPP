@@ -58,8 +58,17 @@ Flx16 flx_16mul16(Flx16 a,Flx16 b);
 Flx16 flx_16mul30(dword a,dword b);
 Flx16 flx_16div16(Flx16 a,Flx16 b);
 Flx16 flx_sin(const Flx16 degrees);
+Flx16 flx_asin(const Flx16 a);
 Flx16 flx_abs(const Flx16 a);
 Flx16 flx_sqrt(const Flx16 a);
+Flx16 flx_cos(const Flx16 degrees);
+Flx16 flx_acos(const Flx16 a);
+Flx16 flx_tan(const Flx16 a);
+Flx16 flx_atan(const Flx16 a);
+Flx16 flx_cot(const Flx16 a);
+Flx16 flx_sec(const Flx16 a);
+Flx16 flx_csc(const Flx16 a);
+
 
 extern "C" {
 void  flx_srand(long s1,long s2);
@@ -72,6 +81,7 @@ long asm_flx_sin(const Flx16 degrees);
 long asm_flx_abs(const Flx16 a);
 long asm_flx_sqrt(const Flx16 a);
 long asm_flx_16mul30(dword a,dword b);
+
 }
 
 #ifdef __WATCOMC__
@@ -88,8 +98,6 @@ long asm_flx_16mul30(dword a,dword b);
 //
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
-Flx16 flx_cos(const Flx16 degrees);
-Flx16 flx_tan(const Flx16 degrees);
 Flx16 operator + (const Flx16 a, const Flx16 b);
 Flx16 operator - (const Flx16 a, const Flx16 b);
 Flx16 operator - (const Flx16 a);
@@ -137,7 +145,6 @@ public:
    Flx16(const long num, int dummy) {flx = num; dummy=dummy;}
    Flx16(const short num) {flx = ((int)num <<16);}
    Flx16(const char num) {flx = ((int)num << 16);}
-//   Flx16(const Flx16 &r) { flx = r.flx; }
    Flx16(const double num) {flx = (int) (num * 65536.0);}
 
 // Operator.
@@ -147,24 +154,27 @@ public:
 
 // Intrensic functions.
    inline Flx16 sin() const { return (flx_sin(*this));}
-   inline Flx16 cos() const { return (flx_sin(*this+Flx16(90)));}
-   inline Flx16 tan() const { return (flx_sin(*this)/flx_sin(*this+Flx16(90)));}
+   inline Flx16 cos() const { return (flx_cos(*this));}
+   inline Flx16 tan() const { return (flx_sin(*this)/flx_cos(*this));}
+   inline Flx16 cot() const { return (flx_cos(*this)/flx_sin(*this));}
    inline Flx16 sqrt() const { return (flx_sqrt(*this));}
    inline Flx16 abs() const { return (flx_abs(*this));}
+   inline Flx16 asin() const { return (flx_asin(*this));}
+   inline Flx16 acos() const { return (flx_acos(*this));}
+   inline Flx16 sec() const { return (flx_sec(*this));}
+   inline Flx16 csc() const { return (flx_csc(*this));}
+   inline Flx16 atan() const {return (flx_atan(*this));}
 
 #if 0
-   inline Flx16 acos() const {return (flxacos(flx));}
-   inline Flx16 asin() const {return (flxasin(flx));}
-   inline Flx16 tan() const {return (flxtan(flx));}
-   inline Flx16 atan() const {return (flxatan(flx));}
-   inline Flx16 atan2() const {return (flxatan2(flx));}
-   inline Flx16 exp() const {return flxexp(flx));}
-   inline Flx16 pow() const {return flxpow(flx));}
-   inline Flx16 log10() const {return flxlog10(flx));}
-   inline Flx16 log() const {return flxlog(flx));}
+   inline Flx16 atan2() const {return (flx_atan2(flx));}
+   inline Flx16 exp() const {return flx_exp(flx));}
+   inline Flx16 pow() const {return flx_pow(flx));}
+   inline Flx16 log10() const {return flx_log10(flx));}
+   inline Flx16 log() const {return flx_log(flx));}
 #endif
 };
 
+extern "C" Flx16 Flx16_sin_data;
 
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
@@ -172,9 +182,14 @@ public:
 //                                Equates
 //
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+#define SAFE_DIVIDE         1
 
-const Flx16 FLX16_ZERO  = 0;
-const Flx16 FLX16_ONE   = 1;
+const int   FLX_DEGREES_SHIFT   = 4;
+const Flx16 FLX16_ZERO          = 0;
+const Flx16 FLX16_ONE           = 1;
+const int   SIN_TABLE_SIZE      = (90 << FLX_DEGREES_SHIFT);
+
+
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
@@ -187,5 +202,20 @@ const Flx16 FLX16_ONE   = 1;
 #endif         // __FELIX_HPP
 
 //°±² End of header - felix.hpp ²±°
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 

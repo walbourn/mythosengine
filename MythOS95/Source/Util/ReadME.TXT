@@ -36,13 +36,15 @@
                                   _Status_
 
  Notes by: Chuck Walbourn
- Updated: August 21, 1995
+ Updated: April 30, 1996
 
  Changes for this release --------------------------------------------------
 
-    o Ported to Windows 95.  PIC doesn't currently allow the images to
-      be viewed.
+    o Added support for converting 24-bit images to 8-bit images with 
+      transparency.  If it finds (255,0,255) while the -x switch is being
+      used, it makes that index 255 automaticaly.
 
+    o Added support for the Charybdis XEB format.
 
 
 

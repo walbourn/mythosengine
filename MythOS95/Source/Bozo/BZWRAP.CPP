@@ -137,7 +137,7 @@ void BozoTask::iRun (BozoTask *it)
     if (it->task)
     {
         it->task = 0;
-        bz_return ();
+        ::bz_return ();
     }
     // The else case should never happen, since it is illegal to execute
     // this after the task has been destroyed.
@@ -165,7 +165,7 @@ BozoTask::~BozoTask()
         // Since this task is now free, go on a clean it up
         bz_task *tsk = task;
         task = 0;
-        bz_term (tsk);
+        ::bz_term (tsk);
     }
 }
 
@@ -173,24 +173,20 @@ BozoTask::~BozoTask()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 //  API for creating and scheduling a new coroutine                         ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void BozoTask::init (bz_task_queue *q)
+bz_task *BozoTask::init (bz_task_queue *q)
 {
+    assert (q != 0);
+
+    // If there's no task, create one
     if (task == 0)
-    {
         task = bz_create ((bz_task_func)iRun, stack_size, this);
-        if (task != 0)
-            bzqueue_enter (q, task);
-#ifdef DEBUG
-        else
-            assert (task == 0);
-#endif
-    }
-#ifdef DEBUG
-    // Force an error condition during debugging, even though this
-    // is pretty harmless.
-    else
-        assert (task == 0);
-#endif
+
+    // If we now have a task, enter it into the queue and return success
+    if (task != 0)
+        bzqueue_enter (q, task);
+
+    // Return the task pointer (or null if it fails)
+    return task;
 }
 
 

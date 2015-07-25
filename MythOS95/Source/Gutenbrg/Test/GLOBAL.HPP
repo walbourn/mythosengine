@@ -4,7 +4,7 @@
 //
 //                        For Microsoft Windows '95
 //
-//               Copyright (c) 1995 by Charybdis Enterprises, Inc.
+//            Copyright (c) 1995, 1996 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved.
 //
 //컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
@@ -92,7 +92,7 @@ public:     // Construction/Destruction
     enum { MAP_XSIZE = 320, MAP_YSIZE = 200 };
     BITMAPINFO      *bmi;
     BYTE            *gmap;
-    VngoVportDD8    *gvp;
+    VngoVport       *gvp;
     VngoPal         *mypal;
 
     GameState (MaxDevices &);

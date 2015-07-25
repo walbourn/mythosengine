@@ -8,7 +8,7 @@
 //ùùùùù²±²ùùùùùùù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùùùùùù²±²ùùùù²±²ùùùùùù
 //ùùùù²²²²²²²²²²ù²²²²²²²²ùùù²²²²²²²²ùù²²²ùùùù²²²ù²²²²²²²²²²ù²²²ùùùù²²²ùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùCopyrightù(c)ù1994,ù1995ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
+//ùùùùùùùùùùùCopyrightù(c)ù1994-1996ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùù Microsoft Windows '95 Version ùùùùùùùùùùùùùùùùùùùùùùù
@@ -32,13 +32,13 @@
 //
 // eslight.cpp
 //
-//      The EschLight and associated objects are used for implementing the
-//      lighting model.  EschLights affect objects by controlling the
-//      shade level and potentially color of a vertex.  EschLight objects
-//      are maintained in a linked list.
+// The EschLight and associated classes are used for implementing the
+// lighting model.  EschLights affect objects by controlling the
+// shade level and potentially the color of a vertex.  EschLight objects
+// are maintained in a linked list.
 //
-//      The base light object is an ambient light, shining equally in all
-//      areas of 3space.
+// The base light object is an ambient light, shining equally in all
+// areas of 3-space.
 //
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
 
@@ -73,7 +73,6 @@ extern char EschNoName[];
 //
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 
-
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //°°°°°°°°°°°°°°°°°°°°°°±  Constructors/Destructors  ±°°°°°°°°°°°°°°°°°°°°°°°
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
@@ -84,22 +83,33 @@ extern char EschNoName[];
 // Initializes the light object with low itensity and setup as an ambient   ³
 // light.                                                                   ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-EschLight::EschLight(const char *fname, const char *lname)
+EschLight::EschLight(const char *fname, const char *lname) :
+    inext(0),
+    iprev(0),
+    ltyp(ESCH_LGTT_AMBIENT),
+    intensity(16),
+    flags(0)
 {
-    iprev=inext=0;
-    flags=0;
-
-    ltyp = ESCH_LGTT_AMBIENT;
-
-    strcpy(name,lname ? lname : EschNoName);
-
-    intensity = 16;
+    strcpy(name,EschNoName);
 
     if (fname)
     {
         load(fname,lname);
     }
-};
+}
+
+EschLight::EschLight(const EschLight &l) :
+    inext(0),
+    iprev(0),
+    _intensity(l._intensity),
+    _hintensity(l._hintensity),
+    ltyp(l.ltyp),
+    intensity(l.intensity),
+    na(l.na),
+    flags(l.flags)
+{
+    strncpy(name,l.name,ESCH_MAX_NAME);
+}
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
@@ -110,13 +120,33 @@ EschLight::EschLight(const char *fname, const char *lname)
 EschLight::~EschLight()
 {
     remove();
-};
+}
 
 
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°±  Operations  ±°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// EschLight - operator =                                                   ³
+//                                                                          ³
+// Copies data from another light.                                          ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+const EschLight &EschLight::operator = (const EschLight &l)
+{
+    if (this != &l)
+    {
+        _intensity = l._intensity;
+        _hintensity = l._hintensity;
+        intensity = l.intensity;
+        na = l.na;
+        flags = l.flags;
+        strncpy(name,l.name,ESCH_MAX_NAME);
+    }
+    return *this;
+}
+
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // EschLight - sibling                                                      ³
@@ -146,7 +176,7 @@ void EschLight::sibling(EschLight *myprev)
 //                                                                          ³
 // Remove light from light list.                                            ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void EschLight::remove(void)
+void EschLight::remove()
 {
     if (iprev)
     {
@@ -169,9 +199,9 @@ void EschLight::remove(void)
 // Searches the siblings of the given camaera and returns the Light object  ³
 // with the given name, or 0 if not found.                                  ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-EschLight *EschLight::find(const char *lname)
+EschLight *EschLight::find(const char *lname) const
 {
-    EschLight *ptr;
+    const EschLight *ptr;
 
     if (!lname)
         return 0;
@@ -187,7 +217,7 @@ EschLight *EschLight::find(const char *lname)
     for(; ptr != 0; ptr = ptr->inext)
     {
         if (ptr->name && !strncmp(lname,ptr->name,ESCH_MAX_NAME))
-            return ptr;
+            return (EschLight*)ptr;
     }
 
     return 0;
@@ -229,7 +259,7 @@ void EschLight::setup(const EschFrameRef *fr)
 //                                                                          ³
 // Ambient light simply sets a lower bound on the shade value.              ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void EschLight::shine(const EschVertex *v, VngoPoint *vpt) const
+void EschLight::shine(const EschVertex *v, VngoPoint *vpt, int revnrml) const
 {
     if (!(flags & ESCH_LGT_OFF))
     {
@@ -240,7 +270,7 @@ void EschLight::shine(const EschVertex *v, VngoPoint *vpt) const
 
 //ÄÄÄ Chain for true multiple lights
     if (inext)
-        inext->shine(v,vpt);
+        inext->shine(v,vpt,revnrml);
 }
 
 
@@ -254,7 +284,7 @@ void EschLight::shine(const EschVertex *v, VngoPoint *vpt) const
 // the standard intensity, since specular hightlights should occurr due to  ³
 // ambient diffuse light.                                                   ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void EschLight::hishine(const EschVertex *v, VngoPoint *vpt) const
+void EschLight::hishine(const EschVertex *v, VngoPoint *vpt, int revnrml) const
 {
     if (!(flags & ESCH_LGT_OFF))
     {
@@ -265,7 +295,7 @@ void EschLight::hishine(const EschVertex *v, VngoPoint *vpt) const
 
 //ÄÄÄ Chain for true multiple lights
     if (inext)
-        inext->hishine(v,vpt);
+        inext->hishine(v,vpt,revnrml);
 }
 
 

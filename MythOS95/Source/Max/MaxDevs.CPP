@@ -32,14 +32,11 @@
 //      This module defines the physical devices used by the event
 //  system.  Each device has a unique interface, suited to the device.
 //  Only three devices are currently supported.
+//
 //  Keyboard -- The keyboard device.  This is not a serial device, but
 //          rather a matrix of on/off switches corresponding to the
 //          individual keys.  Key indexes are scan codes, and "extended"
 //          keys are the same as their scan codes + 256.
-//          If you require serial access to the keys typed, you can
-//          either install the interrupt-chaining version of this device
-//          or use the MaxKbBuff object to create keyboard buffers on the
-//          fly.
 //  Mouse -- The mouse is a multi-button positional device.  The mouse
 //          can be queried for its button's states, as well as its current
 //          position, and delta movement.
@@ -97,6 +94,89 @@
 //
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 
+// Scan code coversion tables
+
+static unsigned char scan2ascii[128] =
+{
+    0x00, 0x1b, 0x31, 0x32, 0x33, 0x34, 0x35, 0x36,
+    0x37, 0x38, 0x39, 0x30, 0x2d, 0x3d, 0x08, 0x09,
+
+    0x71, 0x77, 0x65, 0x72, 0x74, 0x79, 0x75, 0x69,
+    0x6f, 0x70, 0x5b, 0x5d, 0x0d, 0x00, 0x61, 0x73,
+
+    0x64, 0x66, 0x67, 0x68, 0x6a, 0x6b, 0x6c, 0x3b,
+    0x27, 0x60, 0x00, 0x5c, 0x7a, 0x78, 0x63, 0x76,
+
+    0x62, 0x6e, 0x6d, 0x2c, 0x2e, 0x2f, 0x00, 0x2a,
+    0x00, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x2d, 0x00, 0x00, 0x00, 0x2b, 0x00,
+
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+};
+
+static unsigned char shift2ascii[128] =
+{
+    0x00, 0x1b, 0x21, 0x40, 0x23, 0x24, 0x25, 0x5e,
+    0x26, 0x2a, 0x28, 0x29, 0x5f, 0x2b, 0x08, 0x00,
+
+    0x51, 0x57, 0x45, 0x52, 0x54, 0x59, 0x55, 0x49,
+    0x4f, 0x50, 0x7b, 0x7d, 0x0d, 0x00, 0x41, 0x53,
+
+    0x44, 0x46, 0x47, 0x48, 0x4a, 0x4b, 0x4c, 0x3a,
+    0x22, 0x7e, 0x00, 0x7c, 0x5a, 0x58, 0x43, 0x56,
+
+    0x42, 0x4e, 0x4d, 0x3c, 0x3e, 0x3f, 0x00, 0x2a,
+    0x00, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x37,
+    0x38, 0x39, 0x2d, 0x34, 0x35, 0x36, 0x2b, 0x31,
+
+    0x32, 0x33, 0x30, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00
+};
+
+static unsigned char ctrl2ascii[128] =
+{
+    0x00, 0x1b, 0x00, 0x00, 0x00, 0x00, 0x00, 0x1e,
+    0x00, 0x00, 0x00, 0x00, 0x1f, 0x00, 0x7f, 0x00,
+
+    0x11, 0x17, 0x05, 0x12, 0x14, 0x19, 0x15, 0x09,
+    0x0f, 0x10, 0x1b, 0x1d, 0x0a, 0x00, 0x01, 0x13,
+
+    0x04, 0x06, 0x07, 0x08, 0x0a, 0x0b, 0x0c, 0x00,
+    0x00, 0x00, 0x00, 0x1c, 0x1a, 0x18, 0x03, 0x16,
+
+    0x02, 0x0e, 0x0d, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x20, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+    0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
+};
+
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
@@ -139,6 +219,16 @@ MaxKeyboard::~MaxKeyboard()
 void MaxKeyboard::init ()
 {
     // Do any setup
+    KeyStat[0] = 0;
+    KeyStat[1] = 0;
+    KeyStat[2] = 0;
+    KeyStat[3] = 0;
+    KeyStat[4] = 0;
+    KeyStat[5] = 0;
+    KeyStat[6] = 0;
+    KeyStat[7] = 0;
+
+    clear();
 }     
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
@@ -150,14 +240,105 @@ void MaxKeyboard::uninit ()
     // Do any cleanup
 }
 
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//  clear                                                                   ³
+//      Clear the modal keyposition flags.                                  ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+void MaxKeyboard::clear ()
+{
+    KeyStatHold[0] = KeyStat[0];
+    KeyStatHold[1] = KeyStat[1];
+    KeyStatHold[2] = KeyStat[2];
+    KeyStatHold[3] = KeyStat[3];
+    KeyStatHold[4] = KeyStat[4];
+    KeyStatHold[5] = KeyStat[5];
+    KeyStatHold[6] = KeyStat[6];
+    KeyStatHold[7] = KeyStat[7];
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//  wm_keydown                                                              ³
+//      Notify the model that a key has been pressed.                       ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+void MaxKeyboard::wm_keydown (int vkey)
+{
+    UINT scan_code = MapVirtualKey (vkey, 0);
+
+    ushort cooked_key = ushort (scan_code & 0xff);
+    const dword mask  = 1 << (scan_code & 0x1f);
+    int offset = (scan_code >> 5) & 0x03;
+
+    // Actually mark the key as present
+    KeyStat[offset] |= mask;
+    KeyStatHold[offset] |= mask;
+
+    // Now, we inform any keyboard buffers of the character.
+    // This test allows us to bypass all of this if there are
+    // no buffers.
+    if (BuffList)
+    {
+        // Combine in the state of the shift/alt/control keys.
+        // NOTE: these are inlined versions of the check_key call,
+        //       so if the check_key() implementation changes, so
+        //       should this.  (I'd just call check_key(), but
+        //       we really need the speed here.)
+        //       With constant folding, this reduces to just about nothing.
+
+        // Check the Shift keys (0x2a and 0x36)
+        if (KeyStat[1] & ((1 << 0x0a) | (1 << 0x16)))
+            cooked_key |= 0x100;
+
+        // Check the ALT keys (0x38 and 0x138)
+        if ((KeyStat[1] & (1 << 0x18)) || (KeyStat[5] & (1 << 0x18)))
+            cooked_key |= 0x200;
+
+        // Check the Ctrl keys (0x1d and 0x11d)
+        if ((KeyStat[0] & (1 << 0x1d)) || (KeyStat[4] & (1 << 0x1d)))
+            cooked_key |= 0x400;
+
+        // Add the key to any applicable key buffers
+        for (MaxKbBuffer *l = BuffList; l; l = l->next)
+            l->AddKey (cooked_key);
+    }
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//  wm_keyup                                                                ³
+//      Notify the model that a key has been released.                      ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+void MaxKeyboard::wm_keyup (int vkey)
+{
+    UINT scan_code = MapVirtualKey (vkey, 0);
+
+    const dword mask = 1 << (scan_code & 0x1f);
+    int offset = (scan_code >> 5) & 0x03;
+
+    // Actually mark the key as present
+    KeyStat[offset] &= ~mask;
+}
+
+
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 //  CheckKey                                                                ³
 //      Return the up/down status of the requested key.                     ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 int MaxKeyboard::check_key (int key) const
 {
+    const int offset = (key >> 5) & 0x03 + (key > 0xff ? 4: 0);
+    const dword mask = 1 << (key & 0x1f);
+
+    // If the key has been marked, return true
+    return (KeyStatHold[offset] & mask) != 0;
+
+#if 0
+    // Otherwise, check with Windows
     UINT vkey = MapVirtualKey (key, 1);
-    return (GetAsyncKeyState (vkey) & 0x80000000) != 0;
+    return (GetAsyncKeyState (vkey) & 0x80000001) != 0;
+#endif
 }
 
 
@@ -192,7 +373,6 @@ void MaxKeyboard::scroll_lock (int state)
 //
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
-#if 0
 
 MaxKbBuffer::MaxKbBuffer (MaxKeyboard *_kb):
     kb (_kb), head (0), tail (0)
@@ -263,6 +443,7 @@ int MaxKbBuffer::getch ()
 
     // Convert the result into an ASCII value.
 
+#if 1
     // ALT key modifier (in this case, just return the scan code)
     if (res & 0x200)
     {
@@ -290,6 +471,9 @@ int MaxKbBuffer::getch ()
         return scan2ascii[ch];
     else
         return 0x100 | ch;
+#endif
+
+    return ch;
 }
 
 
@@ -315,6 +499,19 @@ int MaxKbBuffer::getscan ()
     return 0x100 | (res & 0xff);
 }
 
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//  get_ascii                                                               ³
+//      Convert the scan code to an ascii value.  If no conversion          ³
+//  is possible, return 0.                                                  ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+byte MaxKbBuffer::get_ascii (byte scan) const
+{
+    if (scan < 128)
+        return scan2ascii[scan];
+    else
+        return 0;
+}
+
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 //  AddKey                                                                  ³
@@ -334,8 +531,6 @@ void MaxKbBuffer::AddKey (ushort key)
     if (head == tail)
         tail = (tail == BuffSize-1) ? 0: tail + 1;
 }
-
-#endif
 
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
@@ -367,6 +562,16 @@ void MaxMouse::uninit ()
 {
     // currently nothing that needs to be undone before exit.
 }
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//  clear                                                                   ³
+//      Clear the model's state.                                            ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+void MaxMouse::clear ()
+{
+    // currently nothing that needs to be undone before exit.
+}
+
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 //  hide                                                                    ³
@@ -427,7 +632,7 @@ byte MaxMouse::get_buttons () const
 
     return res;
 }     
-      
+
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 //  get_movement                                                            ³
@@ -462,9 +667,14 @@ void MaxMouse::get_movement (short *dx, short *dy)
 //  MaxJoystick Constructor
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-MaxJoystick::MaxJoystick()
+MaxJoystick::MaxJoystick():
+    joy_present (0),
+    auto_polled (0),
+    timer_id (0)
 {
-    joy_present = 0;
+    memset (&caps, 0, sizeof (caps));
+    info.dwSize  = sizeof (JOYINFOEX);
+    info.dwFlags = JOY_RETURNALL | JOY_RETURNCENTERED | JOY_USEDEADZONE;
 }
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -473,18 +683,44 @@ MaxJoystick::MaxJoystick()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 MaxJoystick::~MaxJoystick()
 {
-    // Nothing for now
+    // Make sure that any timer events are dead, dead, dead!
+    if (timer_id)
+    {
+        timeKillEvent (timer_id);
+        timer_id = 0;
+    }
 }
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //  MaxJoystick::init
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-int MaxJoystick::init ()
+short MaxJoystick::init ()
 {
-    joy_present = joyGetNumDevs();
+    joy_present = short (joyGetNumDevs());
+
+    if (joy_present)
+    {
+        // Fill in the capabilities
+        joyGetDevCaps (0, &caps, sizeof (caps));
+
+        JOYINFOEX stat;
+
+        stat.dwSize = sizeof (JOYINFOEX);
+        stat.dwFlags = JOY_RETURNALL | JOY_RETURNCENTERED | JOY_USEDEADZONE;
+        if (joyGetPosEx (0, &stat) != JOYERR_NOERROR)
+            joy_present = 0;
+    }
 
     return joy_present;
+}
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//  MaxJoystick::clear
+//
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+void MaxJoystick::clear()
+{
 }
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -494,6 +730,11 @@ int MaxJoystick::init ()
 void MaxJoystick::uninit()
 {
     joy_present = 0;
+    if (timer_id)
+    {
+        timeKillEvent (timer_id);
+        timer_id = 0;
+    }
 }
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -504,11 +745,59 @@ void MaxJoystick::get_stat (JOYINFOEX *stat) const
 {
     if (joy_present)
     {
-        stat->dwSize = sizeof (JOYINFOEX);
-        stat->dwFlags = JOY_RETURNALL | JOY_USEDEADZONE;
-        joyGetPosEx (0, stat);
+        if (auto_polled)
+        {
+            // Assume that the current info struct has been filled in
+            // by the user
+            *stat = info;
+
+            // This const_cast is needed because this member is only const
+            // while not in auto_poll mode.
+            const_cast<MaxJoystick *>(this)->info.dwButtons = 0;
+        }
+        else
+        {
+            stat->dwSize = sizeof (JOYINFOEX);
+            stat->dwFlags = JOY_RETURNALL | JOY_RETURNCENTERED | JOY_USEDEADZONE;
+            joyGetPosEx (0, stat);
+        }
     }
 }
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// MaxJoystick::auto_poll
+//
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+static void CALLBACK poll_routine (UINT idTimer, UINT msg, DWORD dwUser, DWORD dw1, DWORD dw2)
+{
+    MaxJoystick *p = (MaxJoystick *)dwUser;
+    DWORD old_buttons = p->info.dwButtons;
+    joyGetPosEx (0, &p->info);
+    p->info.dwButtons |= old_buttons;
+}
+
+
+int MaxJoystick::auto_poll (BOOL activate, UINT rate)
+{
+    auto_polled = activate;
+
+    if (activate)
+    {
+        timer_id = timeSetEvent (rate, rate, poll_routine, DWORD (this), TIME_PERIODIC);
+        return timer_id != 0;
+    }
+    else
+    {
+        if (timer_id)
+        {
+            timeKillEvent (timer_id);
+            timer_id = 0;
+        }
+        return 0;
+    }
+}
+
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
@@ -645,6 +934,17 @@ void MaxDevices::update ()
     {
         theJoystick.get_stat (&snapshot_jstat);
     }
+}
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+//  MaxDevices::wm_clear
+//  Clears all devices before processing wm_ members
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+void MaxDevices::wm_clear ()
+{
+    theKeyboard.clear();
+    theMouse.clear();
+    theJoystick.clear();
 }
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ

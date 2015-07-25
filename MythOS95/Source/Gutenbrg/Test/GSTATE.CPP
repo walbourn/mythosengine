@@ -11,7 +11,7 @@
 //                     Text Output and Font Management System
 //                          Microsoft Windows '95 Version
 //
-//               Copyright (c) 1995 by Charybdis Enterprises, Inc.
+//            Copyright (c) 1995, 1996 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved.
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -57,6 +57,8 @@
 const int COLORS = 256;
 
 const int MAXPAGES = 3;
+
+extern MaxDevices Devs;
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
@@ -105,7 +107,7 @@ GameState::GameState (MaxDevices &d):
                 bmi->bmiColors[i].rgbRed    = t->hw_pal.p[i].r;
                 bmi->bmiColors[i].rgbReserved = 0;                
             }
-            gvp = new VngoVportDD8(MAP_XSIZE,MAP_YSIZE,gmap,NULL,mypal,0);
+            gvp = new VngoVportDB8(MAP_XSIZE,MAP_YSIZE,gmap,NULL,mypal,0);
         }
     }
 }
@@ -183,7 +185,9 @@ void GameState::GetEvents()
 BOOL GameState::PumpWindows ()
 {
     MSG msg;
-    if (PeekMessage (&msg, NULL, 0, 0, PM_NOREMOVE))
+
+    Devs.wm_clear();
+    while (PeekMessage (&msg, NULL, 0, 0, PM_NOREMOVE))
     {
     	if (GetMessage (&msg, 0, 0, 0) == 0)
             return FALSE;
@@ -204,19 +208,25 @@ void GameState::ProcessEvents()
     if (events.check (DONE))
         DestroyWindow (hWndClient);
 
-    if (events.check(SELECT_8X13))
-        gberg_select_font("8x13");
+    if (single_events.check(SELECT_3X6))
+        gberg_select_font("3x6");
     
-    if (events.check(SELECT_5X8))
+    if (single_events.check(SELECT_5X8))
         gberg_select_font("5x8");
     
-    if (events.check(SELECT_9X15))
+    if (single_events.check(SELECT_7X12))
+        gberg_select_font("7x12");
+    
+    if (single_events.check(SELECT_8X13))
+        gberg_select_font("8x13");
+    
+    if (single_events.check(SELECT_9X15))
         gberg_select_font("9x15");
 
-    if (events.check(SELECT_12X24))
+    if (single_events.check(SELECT_12X24))
         gberg_select_font("12x24");
 
-    if (events.check(PAGEDN))
+    if (single_events.check(PAGEDN))
     {
         if (page < MAXPAGES-1)
         {
@@ -224,7 +234,7 @@ void GameState::ProcessEvents()
             Sleep(250);
         }
     }
-    else if (events.check(PAGEUP))
+    else if (single_events.check(PAGEUP))
     {
         if (page > 0)
         {

@@ -6,7 +6,7 @@
 //    (_)       ^          * *     *      *   *    *            (_)
 //             (_)       **   **   *    ***** **** ****
 //
-//            Copyright (c) 1994,1995 by Charybdis Enterprises, Inc.
+//            Copyright (c) 1994-1996 by Charybdis Enterprises, Inc.
 //                              All Rights Reserved.
 //                        Microsoft Windows '95 Version
 //
@@ -83,6 +83,7 @@ STATIC void opts(void);
 STATIC void data(void);
 STATIC void merge(void);
 STATIC void include(void);
+STATIC void bitmap(void);
 
 STATIC long integer(void);
 STATIC long expr(void);
@@ -100,13 +101,13 @@ STATIC double rterm(void);
 STATIC double rfactor(void);
 
 STATIC void match(int tok);
-STATIC void error(const char *str);
-STATIC void warning(const char *str);
+extern "C" void error(const char *str);
+extern "C" void warning(const char *str);
 
 STATIC void add_to_work(byte v, ulong repcount);
 STATIC void add_to_work(word v, ulong repcount);
 STATIC void add_to_work(dword v, ulong repcount);
-STATIC void add_to_work(const char *str, ulong slen);
+STATIC void add_to_work(const char *str, ulong slen, ulong maxlen=0);
 STATIC void add_to_work_file(const char *fname);
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
@@ -131,7 +132,8 @@ extern dword        Flags;
 
 //ÄÄ Local         
 STATIC dword        ChunkOpts;
-STATIC ulong        ChunkFsize;
+STATIC ulong        ChunkSize;
+STATIC ulong        ChunkMaxSize;
 STATIC ulong        WorkCurrent;
 
 STATIC int          CurrentToken;
@@ -213,6 +215,7 @@ void compile(void)
 //                 chunk                                                    ³
 //                 merge                                                    ³
 //                 include                                                  ³
+//                 bitmap                                                   ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 STATIC void iff(void)
 {
@@ -230,8 +233,11 @@ STATIC void iff(void)
         case YY_INCLUDE:
             include();
             break;
+        case YY_BITMAP:
+            bitmap();
+            break;
         default:
-            error("Invalid operation, expected a form, chunk, merge, or include block");
+            error("Invalid operation: expected a form, chunk, merge, include, or bitmap");
             break;                  
     }
 }
@@ -358,7 +364,8 @@ STATIC void chunk(void)
 
 //ÄÄÄ Chunk options
     ChunkOpts = CHUNKOPTS_INTEL;
-    ChunkFsize = 0;
+    ChunkSize = 0;
+    ChunkMaxSize = 0;
     while (CurrentToken && CurrentToken != YY_LBRACE)
     {
         opts();
@@ -376,8 +383,10 @@ STATIC void chunk(void)
                 cout << "  intel byte-ordering";
             if (ChunkOpts & CHUNKOPTS_MOTOROLA)
                 cout << "  motorola byte-ordering";
-            if (ChunkFsize)
-                cout << "  size=" << ChunkFsize;
+            if (ChunkSize)
+                cout << "  size=" << ChunkSize;
+            if (ChunkMaxSize)
+                cout << "  maxsize=" << ChunkMaxSize;
         }
         cout << "\n";
     }
@@ -393,22 +402,33 @@ STATIC void chunk(void)
 
     if (WorkCurrent)
     {
-
-        if (ChunkFsize && WorkCurrent != ChunkFsize)
+        if (ChunkSize && WorkCurrent != ChunkSize)
         {
             char    buff[128];
 
             sprintf(buff,
                     "Actual chunk size of %d doesn't match size target of %d",
                     WorkCurrent,
-                    ChunkFsize);
+                    ChunkSize);
+
+            error(buff);
+        }
+
+        if (ChunkMaxSize && WorkCurrent > ChunkMaxSize)
+        {
+            char    buff[128];
+
+            sprintf(buff,
+                    "Actual chunk size of %d exceeds maximum size %d",
+                    WorkCurrent,
+                    ChunkMaxSize);
 
             error(buff);
         }
 
         IFF->write(id,Work,WorkCurrent);
     }
-    else
+    else if (!(Flags & FLAGS_EMPTYOK))
         warning("Empty chunk");
 
     match(YY_RBRACE);
@@ -423,6 +443,7 @@ STATIC void chunk(void)
 //             'motorola'                                                   ³
 //             'littleendian'                                               ³
 //             'size' <uexpr>                                               ³
+//             'maxsize' <uexpr>                                            ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 STATIC void opts(void)
 {
@@ -455,17 +476,33 @@ STATIC void opts(void)
             break;
 
         case YY_SIZE:
+            if (ChunkMaxSize)
+                error("Incompatable chunk options: 'size' and 'maxsize'");
+
             match(YY_SIZE);
 
-            ChunkFsize=uexpr();
+            ChunkSize=uexpr();
 
-            if (!ChunkFsize)
+            if (!ChunkSize)
                 error("Expression after 'size' must be positive and non-zero");
 
             break;
 
+        case YY_MAXSIZE:
+            if (ChunkSize)
+                error("Incompatable chunk options: 'size' and 'maxsize'");
+
+            match(YY_MAXSIZE);
+
+            ChunkMaxSize=uexpr();
+
+            if (!ChunkMaxSize)
+                error("Expression after 'maxsize' must be positive and non-zero");
+
+            break;
+
         default:
-            error("Expected a '{', 'intel', 'motorola', or 'size'");
+            error("Expected a '{', 'intel', 'motorola', 'size', or 'maxsize'");
             break;
     }
 }
@@ -606,7 +643,7 @@ STATIC void data(void)
                 {
                     t=expr();
                     
-                    if (t < (-32767-1) || t > 32767)
+                    if (t < (-32768) || t > 32767)
                         warning("Expression exceeds size of word");
                     
                     repcount=1;
@@ -629,7 +666,7 @@ STATIC void data(void)
             {
                 t=expr();
 
-                if (t < (-32767-1) || t > 32767)
+                if (t < (-32768) || t > 32767)
                     warning("Expression exceeds size of word");
 
                 repcount=1;
@@ -693,8 +730,7 @@ STATIC void data(void)
             break;
 
         case YY_DWORD:
-        case YY_LONG:
-            match(CurrentToken);
+            match(YY_DWORD);
 
             if (CurrentToken == YY_LBRACE)
             {
@@ -736,8 +772,7 @@ STATIC void data(void)
             break;
 
         case YY_UDWORD:
-        case YY_ULONG:
-            match(CurrentToken);
+            match(YY_UDWORD);
 
             if (CurrentToken == YY_LBRACE)
             {
@@ -808,6 +843,62 @@ STATIC void data(void)
                 }
 
                 add_to_work(yytext,yyleng);
+                match(YY_STRING);
+            }
+            break;
+
+        case YY_NTEXT:
+            match(YY_NTEXT);
+
+            if (CurrentToken == YY_LBRACE)
+            {
+                match (YY_LBRACE);
+                for(;;)
+                {
+                    ulong size = uexpr();
+                    if (!size)
+                    {
+                        error("'ntext' requires a positive, non-zero size value.");
+                    }
+
+                    if (CurrentToken != YY_STRING)
+                    {
+                        error("Expected a text string");
+                    }
+
+                    if ((ulong)yyleng > size)
+                    {
+                        warning("String truncated");
+                    }
+
+                    add_to_work(yytext,yyleng,size);
+                    match(YY_STRING);
+
+                    if (CurrentToken == YY_RBRACE)
+                        break;
+                    match(YY_COMMA);
+                }
+                match (YY_RBRACE);
+            }
+            else
+            {
+                ulong size = uexpr();
+                if (!size)
+                {
+                    error("'ntext' requires a positive, non-zero size value.");
+                }
+
+                if (CurrentToken != YY_STRING)
+                {
+                    error("Expected a text string");
+                }
+
+                if ((ulong)yyleng > size)
+                {
+                    warning("'ntext' string truncated");
+                }
+
+                add_to_work(yytext,yyleng,size);
                 match(YY_STRING);
             }
             break;
@@ -889,7 +980,8 @@ STATIC void data(void)
                         add_to_work(rdouble.dqword[0],repcount);
                         add_to_work(rdouble.dqword[1],repcount);
                     }
-                    else {
+                    else
+                    {
                         add_to_work(rdouble.dqword[1],repcount);
                         add_to_work(rdouble.dqword[0],repcount);
                     }
@@ -917,7 +1009,8 @@ STATIC void data(void)
                     add_to_work(rdouble.dqword[0],repcount);
                     add_to_work(rdouble.dqword[1],repcount);
                 }
-                else {
+                else
+                {
                     add_to_work(rdouble.dqword[1],repcount);
                     add_to_work(rdouble.dqword[0],repcount);
                 }
@@ -934,11 +1027,12 @@ STATIC void data(void)
                 {
                     rt=rexpr();
 
-                    if (rt < (-32767.0-1.0) || rt > 32767.0)
+                    if ((rt < -32768.0) || (rt > 32767.0))
                         warning("Expression exceeds size of fixed16");
 
                     repcount=1;
-                    if (CurrentToken == YY_LBRACKET) {
+                    if (CurrentToken == YY_LBRACKET)
+                    {
                         match(YY_LBRACKET);
                         repcount = uexpr();
                         match(YY_RBRACKET);
@@ -954,13 +1048,15 @@ STATIC void data(void)
             }
             else
             {
+
                 rt=rexpr();
 
-                if (rt < (-32767.0-1.0) || rt > 32767.0)
+                if ((rt < -32768.0) || (rt > 32767.0))
                     warning("Expression exceeds size of fixed16");
 
                 repcount=1;
-                if (CurrentToken == YY_LBRACKET) {
+                if (CurrentToken == YY_LBRACKET)
+                {
                     match(YY_LBRACKET);
                     repcount = uexpr();
                     match(YY_RBRACKET);
@@ -1117,13 +1213,139 @@ STATIC void include(void)
 
             CurrentToken = yylex();
 
-//match(YY_STRING);
-
             break;
         default:
             error("Invalid include command, expecting filename of CIF file to include");
             break;
     }
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// bitmap                                                                   ³
+//                                                                          ³
+//     bitmap :- 'bitmap' <string>                                          ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+STATIC void bitmap(void)
+{
+    int err;
+    ulong i;
+
+    YY_esc_allowed=0;
+    match(YY_BITMAP);
+    YY_esc_allowed=1;
+
+    if (CurrentToken !=  YY_STRING)
+        error("Invalid bitmap command, expecting filename of bitmap file to insert");
+
+    if (!(Flags & FLAGS_QUIET))
+    {
+        for(i=0; i < IFF->depth; i++)
+            cout << "  ";
+        cout << "   inserting bitmap '" << yytext << "' as form ";
+        
+        if (Flags & FLAGS_XEB)
+        {
+            cout << "'XFEB'\n";
+        }
+        else
+        {
+            cout << "'ILBM'\n";
+        }
+    }
+
+//ÄÄÄ Determine extender of file
+    char buff[4];
+
+    memset(buff,0,sizeof(buff));
+    for(const char *c=yytext + strlen(yytext) - 1; *c; c--)
+    {
+        if (*c == '.')
+        {
+            strncpy(buff,c+1,3);
+            break;
+        }
+    }
+    strlwr(buff);
+
+//ÄÄÄ Load bitmap, if possible
+    XFBitmap bm;
+
+    if (!strcmp(buff,"bmp"))
+    {
+        XFParseBMP  bmp(&bm);
+
+        if (bmp.nameread(yytext))
+            error("Failed to read file as Windows BMP format");
+    }
+    else if (!strcmp(buff,"pcx"))
+    {
+        XFParsePCX  pcx(&bm);
+
+        if (pcx.nameread(yytext))
+            error("Failed to read file as PCX format");
+    }
+    else if (!strcmp(buff,"lbm"))
+    {
+        XFParseLBM  lbm(&bm);
+
+        if (lbm.nameread(yytext))
+            error("Failed to read file as LBM format");
+    }
+    else if (!strcmp(buff,"cel"))
+    {
+        XFParseCEL  cel(&bm);
+
+        if (cel.nameread(yytext))
+            error("Failed to read file as CEL format");
+    }
+    else if (!strcmp(buff,"tga"))
+    {
+        XFParseTGA  tga(&bm);
+
+        if (tga.nameread(yytext))
+            error("Failed to read file as TGA format");
+    }
+    else if (!strcmp(buff,"xeb"))
+    {
+        XFParseXEB  xeb(&bm);
+
+        if (xeb.nameread(yytext))
+            error("Failed to read file as XEB format");
+    }
+
+//ÄÄÄ Output image info
+    if (!(Flags & FLAGS_QUIET))
+    {
+        for(i=0; i < IFF->depth; i++)
+            cout << "  ";
+        cout << "      " << (int)bm.width << " by " << (int)bm.height
+             << "  " << (int)bm.bpp << " bytes/pixel\n";
+    }
+
+//ÄÄÄ Insert into current IFF
+    if (Flags & FLAGS_XEB)
+    {
+        XFParseXEB  xeb(&bm);
+
+        err=xeb.write(IFF);
+        if (err == XF_ERR_NOTSUPPORTED)
+            error("Image format not supported for write by XFile as XEB");
+        else if (err)
+            error("Failed to insert image as XEB");
+    }
+    else
+    {
+        XFParseLBM  lbm(&bm);
+
+        err=lbm.write(IFF);
+        if (err == XF_ERR_NOTSUPPORTED)
+            error("Image format not supported for write by XFile as LBM");
+        else if (err)
+            error("Failed to insert image as LBM");
+    }
+
+    match(YY_STRING);
 }
 
 
@@ -1362,7 +1584,8 @@ STATIC double rterm(void)
    double  t1, t2;
 
    t1 = rfactor();
-   switch (CurrentToken) {
+   switch (CurrentToken)
+   {
        case YY_MULTIPLY:
            match(YY_MULTIPLY);
            t2 = rterm();
@@ -1454,7 +1677,7 @@ STATIC void match(int tok)
 //                                                                          ³
 // Emits an error and aborts processing.                                    ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-STATIC void error(const char *str)
+extern "C" void error(const char *str)
 {
     cout << " Error(" << YY_lineno << "): " << str << "\n";
     exit(1);
@@ -1466,7 +1689,7 @@ STATIC void error(const char *str)
 //                                                                          ³
 // Emits a warning.                                                         ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-STATIC void warning(const char *str)
+extern "C" void warning(const char *str)
 {
     cout << " Warning(" << YY_lineno << "): " << str << "\n";
 }
@@ -1542,22 +1765,42 @@ STATIC void add_to_work(dword d, ulong repcount)
     }
 }
 
-STATIC void add_to_work(const char *str, ulong slen)
+STATIC void add_to_work(const char *str, ulong slen, ulong maxlen)
 {
-    if ((WorkCurrent+slen+1)>= WorkSize)
+    if (!maxlen)
     {
-        expand_work(WorkCurrent+slen+1);
-    }
+        if ((WorkCurrent+slen+1)>= WorkSize)
+        {
+            expand_work(WorkCurrent+slen+1);
+        }
 
-    memcpy((char*)&Work[WorkCurrent],str,slen);
-    WorkCurrent += slen;
-    Work[WorkCurrent++]=0;
+        memcpy((char*)&Work[WorkCurrent],str,slen);
+        WorkCurrent += slen;
+        Work[WorkCurrent++]=0;
+    }
+    else
+    {
+        if ((WorkCurrent+maxlen)>= WorkSize)
+        {
+            expand_work(WorkCurrent+maxlen);
+        }
+
+        ulong count = (slen < maxlen) ? slen : maxlen;
+
+        memcpy((char*)&Work[WorkCurrent],str,count);
+        WorkCurrent += count;
+        while (count < maxlen)
+        {
+            Work[WorkCurrent++] = 0;
+            count++;
+        }
+    }
 }
 
 STATIC void add_to_work_file(const char *fname)
 {
     ulong       size;
-    XFileDOS    xf;
+    XFileDisk   xf;
 
     if (xf.open(fname,XF_OPEN_READ))
     {

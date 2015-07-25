@@ -93,14 +93,41 @@ _TEXT  SEGMENT PARA PUBLIC USE32 'CODE'
 ;      together and then divides the result by the third and it does so    ³
 ;      without a loss of precision in the intermediate value.              ³
 ;ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-if 1
 START_PROC      asm_flx_muldiv,     C   flx1:DWORD,flx2:DWORD,flx3:DWORD
        mov      edx,flx2
        mov      eax,flx1
        mov      ecx,flx3
        imul     edx
+
+       cmp      ecx,0
+       jge      @f
+       neg      ecx
+@@:
+       push     edx
+       cmp      edx,0
+       jge      @f
+       neg      edx
+@@:
+       shr      ecx,1
+       cmp      edx,ecx
+       jge      error_trap
+       mov      ecx,flx3
+       pop      edx
        idiv     ecx
        ret
+
+error_trap:
+       pop      edx
+       mov      ecx,flx3
+       xor      edx,ecx
+       cmp      edx,0
+       jl       @f
+       mov      eax,07fffffffh
+       ret
+@@:
+       mov      eax,080000000h
+       ret
+        
 END_PROC        asm_flx_muldiv
 
 ;ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
@@ -139,13 +166,38 @@ START_PROC      asm_flx_16div16,    C       flx1:DWORD, flx2:DWORD
         xor     eax,eax
         shrd    eax,edx,16
         sar     edx,16
+if SAFE_DIVIDE
+        mov     ecx,flx2
+        cmp     ecx,0
+        jge     @f
+        neg     ecx
+@@:
+        push    edx
+        cmp      edx,0
+        jge      @f
+        neg      edx
+@@:
+        shr      ecx,1
+        cmp      edx,ecx
+        jge      error_trap
+        pop     edx
+endif
         idiv    flx2
-;        mov     eax,flx1
-;        shld    edx,eax,16
-;        shl     eax,16
-;        movsx   edx,dx
-;        idiv    flx2
         ret
+
+if SAFE_DIVIDE
+error_trap:
+       pop      edx
+       xor      edx,flx2
+       cmp      edx,0
+       jl       @f
+       mov      eax,07fffffffh
+       ret
+@@:
+       mov      eax,080000000h
+       ret
+        
+endif
 END_PROC        asm_flx_16div16
 
 
@@ -156,15 +208,29 @@ END_PROC        asm_flx_16div16
 ;       returns it as a signed 2.30 in a dword.                            ³
 ;ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 START_PROC      asm_flx_recip230,   C   flx1:DWORD
-        mov     edx,08000h
+        push    ecx
+        mov     ecx,flx1
+        mov     eax,010000h
+        cmp     ecx,eax
+        jge     in_range
+        neg     eax
+        cmp     ecx,eax
+        jle     in_range
+        cmp     ecx,0
+        jl      @f
+        neg     eax
+@@:
+        shl     eax,14
+        pop     ecx
+        ret
+in_range:
+        mov     edx,02000h
         xor     eax,eax
-        idiv    flx1
-        shr     eax,1
-        adc     eax,0
+        idiv    ecx
         ; the reciprical is now in eax.
+        pop     ecx
         ret
 END_PROC        asm_flx_recip230
-endif
 
 ;ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 ; flx_sin(flx16 degrees);                                                  ³
@@ -182,23 +248,23 @@ START_PROC      asm_flx_sin,        C       degrees:DWORD
         sub     eax,(360 SHL FLX16_SHIFTS)
         jmp     SHORT @b
 get_val:
-        shr     eax,(FLX16_SHIFTS-FLX_DEGRES_SHIFT)
+        shr     eax,(FLX16_SHIFTS-FLX_DEGREES_SHIFT)
         mov     edx,eax         ; save the degrees. in 31.1
-        cmp     eax,(180 SHL FLX_DEGRES_SHIFT)
+        cmp     eax,(180 SHL FLX_DEGREES_SHIFT)
         jl      @f
-        sub     eax,(180 SHL FLX_DEGRES_SHIFT)
+        sub     eax,(180 SHL FLX_DEGREES_SHIFT)
 @@:
-        cmp     eax,(90 SHL FLX_DEGRES_SHIFT)
+        cmp     eax,(90 SHL FLX_DEGREES_SHIFT)
         jl      all_adjust_done ; is it in the 1st quadrant?
         push    ebx
-        mov     ebx,(180 SHL FLX_DEGRES_SHIFT)
+        mov     ebx,(180 SHL FLX_DEGREES_SHIFT)
         sub     ebx,eax
         mov     eax,ebx
         pop     ebx
 all_adjust_done:
         mov     ecx,offset Flx16_sin_data
         mov     eax,[ecx+eax*4]
-        cmp     edx,(180 SHL FLX_DEGRES_SHIFT)
+        cmp     edx,(180 SHL FLX_DEGREES_SHIFT)
                                 ; is it in quadrant 3 or 4?       
         jle     SHORT done
         neg     eax

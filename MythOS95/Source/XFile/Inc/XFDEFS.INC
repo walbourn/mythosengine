@@ -6,7 +6,7 @@
 ;    (_)       ^          * *     *      *   *    *            (_)
 ;             (_)       **   **   *    ***** **** ****
 ;
-;            Copyright (c) 1994,1995 by Charybdis Enterprises, Inc.
+;            Copyright (c) 1994-1996 by Charybdis Enterprises, Inc.
 ;                              All Rights Reserved.
 ;                        Microsoft Windows '95 Version
 ;
@@ -155,7 +155,7 @@ XF_OPEN_APPEND                 EQU 04h      ; Append to current file, if any
 XF_OPEN_CREATE                 EQU 08h      ; Create new file and set to 0 length
 XF_OPEN_EXCLUSIVE              EQU 010h     ; Fails if creating file already existing
                                            
-XF_OPEN_KILL                   EQU 01000h   ; Kills on close (XFileDOS only)
+XF_OPEN_KILL                   EQU 01000h   ; Kills on close (XFileDisk only)
 
 XF_OPEN_READONLY               EQU 010000h  ; File attributes (server/open)
 XF_OPEN_HIDDEN                 EQU 020000h  ; (low byte of high word)

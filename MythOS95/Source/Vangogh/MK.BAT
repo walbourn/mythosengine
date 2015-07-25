@@ -14,7 +14,7 @@ echo These depend on released libraries                                     �
 echo 컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴켸
 cd paltool
 deltree /Y winrel
-call mk
+call mk release
 cd ..
 if ERRORLEVEL 1 goto error
 echo 같같같굉 Van Gogh Tools - Done 껑같같같같같같같같같같같같같같같같같같같�

@@ -8,7 +8,7 @@
 //ùùùùù²±²ùùùùùùù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùùùùùù²±²ùùùù²±²ùùùùùù
 //ùùùù²²²²²²²²²²ù²²²²²²²²ùùù²²²²²²²²ùù²²²ùùùù²²²ù²²²²²²²²²²ù²²²ùùùù²²²ùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùCopyrightù(c)ù1994,ù1995ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
+//ùùùùùùùùùùùCopyrightù(c)ù1994-1996ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùù Microsoft Windows '95 Version ùùùùùùùùùùùùùùùùùùùùùùù
@@ -51,6 +51,7 @@
 #include "eshtdoc.h"
 #include "eshtview.h"
 #include "eshtdlg.h"
+#include "eshtdlgt.h"
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
@@ -80,6 +81,23 @@ BEGIN_MESSAGE_MAP(TerrMainFrame, CFrameWnd)
 	ON_COMMAND(ID_SURF_DEFINETXT, OnSurfDefineTexture)
 	ON_COMMAND(ID_SURF_EDITTXT, OnSurfEditTexture)
 	ON_COMMAND(ID_SURF_DELETETXT, OnSurfDeleteTexture)
+	ON_COMMAND(ID_APP_HELP, OnAppHelp)
+	ON_COMMAND(ID_SURF_SAVETXT, OnSurfSaveTextures)
+	ON_UPDATE_COMMAND_UI(ID_SURF_SAVETXT, OnUpdateSurfSaveTextures)
+	ON_UPDATE_COMMAND_UI(ID_SURF_DELETETXT, OnUpdateSurfDeleteTexture)
+	ON_UPDATE_COMMAND_UI(ID_SURF_EDITTXT, OnUpdateSurfEditTexture)
+	ON_COMMAND(ID_SURF_LOADTXT, OnSurfLoadTextures)
+	ON_COMMAND(ID_SURF_DEFCLR, OnSurfDefineColor)
+	ON_COMMAND(ID_SURF_DELETECLR, OnSurfDeleteColor)
+	ON_UPDATE_COMMAND_UI(ID_SURF_DELETECLR, OnUpdateSurfDeleteColor)
+	ON_COMMAND(ID_SURF_EDITCLR, OnSurfEditColor)
+	ON_UPDATE_COMMAND_UI(ID_SURF_EDITCLR, OnUpdateSurfEditColor)
+	ON_COMMAND(ID_SURF_LOADCLR, OnSurfLoadColors)
+	ON_COMMAND(ID_SURF_SAVECLR, OnSurfSaveColors)
+	ON_UPDATE_COMMAND_UI(ID_SURF_SAVECLR, OnUpdateSurfSaveColors)
+	ON_COMMAND(ID_TERR_SETBASE, OnTerrSetBaseElevation)
+	ON_COMMAND(ID_SURF_REMTXT, OnSurfRemoveUnusedTxts)
+	ON_UPDATE_COMMAND_UI(ID_SURF_REMTXT, OnUpdateSurfRemoveUnusedTxts)
 	//}}AFX_MSG_MAP
 END_MESSAGE_MAP()
 
@@ -95,11 +113,26 @@ static UINT BASED_CODE buttons[] =
 	ID_FILE_OPEN,
 	ID_FILE_SAVE,
 		ID_SEPARATOR,
-	ID_EDIT_CUT,
-	ID_EDIT_COPY,
-	ID_EDIT_PASTE,
+    ID_TERR_IMPORT,
+    ID_SURF_IMPORT,
+    ID_SURF_PALETTE,
 		ID_SEPARATOR,
-	ID_FILE_PRINT,
+    ID_VIEW_RENDER,
+		ID_SEPARATOR,
+    ID_VIEW_ROTXY,
+    ID_VIEW_MOVEXY,
+    ID_VIEW_ROTMOVEZ,
+    ID_LGT_ADJUSTXY,
+    ID_LGT_ABRIGHT,
+		ID_SEPARATOR,
+    ID_SURF_DEFINETXT,
+    ID_SURF_EDITTXT,
+    ID_SURF_DELETETXT,
+		ID_SEPARATOR,
+    ID_SURF_DEFCLR,
+    ID_SURF_EDITCLR,
+    ID_SURF_DELETECLR,
+		ID_SEPARATOR,
 	ID_APP_ABOUT,
 };
 
@@ -135,6 +168,31 @@ TerrMainFrame::TerrMainFrame()
 TerrMainFrame::~TerrMainFrame()
 {
 }
+
+
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°° Diagnostics °°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+#ifdef _DEBUG
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// TerrMainFrame - AssertValid                                              ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+void TerrMainFrame::AssertValid() const
+{
+	CFrameWnd::AssertValid();
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// TerrMainFrame - Dump                                                     ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+void TerrMainFrame::Dump(CDumpContext& dc) const
+{
+	CFrameWnd::Dump(dc);
+}
+#endif //_DEBUG
+
 
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
@@ -181,30 +239,13 @@ int TerrMainFrame::OnCreate(LPCREATESTRUCT lpCreateStruct)
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// TerrMainFrame - AssertValid                                              ³
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-#ifdef _DEBUG
-void TerrMainFrame::AssertValid() const
-{
-	CFrameWnd::AssertValid();
-}
-
-void TerrMainFrame::Dump(CDumpContext& dc) const
-{
-	CFrameWnd::Dump(dc);
-}
-
-#endif //_DEBUG
-
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrMainFrame - OnFileExport                                             ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 void TerrMainFrame::OnFileExport() 
 {
     CFileDialog dlg(FALSE,
                     "IFF", "EXPORT.IFF",
-                    OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST,
+                    OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST,
                     "Escher Terrain File (*.iff)|*.IFF|All files (*.*)|*.*||",
                     this);
 
@@ -217,6 +258,29 @@ void TerrMainFrame::OnFileExport()
 
         pDoc->ExportToIFF(dlg.GetPathName());
     }
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// TerrMainFrame - OnTerrSetBaseElevation                                   ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+void TerrMainFrame::OnTerrSetBaseElevation() 
+{
+    TerrEditDoc *pDoc = (TerrEditDoc*)GetActiveDocument();
+    ASSERT_VALID(pDoc);
+
+    SetBaseElvDlg   dlg;
+
+    Flx16 elvmin, elvmax;
+    pDoc->GetMinMaxElevations(elvmin,elvmax);
+
+    dlg.m_elvmin = Flx16(elvmin);
+    dlg.m_elvmax = Flx16(elvmax);
+
+    if (dlg.DoModal() == IDCANCEL)
+        return;
+
+    pDoc->SetBaseElevation(Flx16(dlg.m_setbase_elv));
 }
 
 
@@ -238,8 +302,12 @@ void TerrMainFrame::OnTerrProperties()
 void TerrMainFrame::OnTerrImport() 
 {
     CFileDialog dlg(TRUE,
-                    NULL, NULL, OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY,
-                    "Digital Elevation Model files (*.dem)|*.DEM|Bitmap files (*.pcx)|*.PCX|All files (*.*)|*.*||",
+                    NULL, NULL,
+                    OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY,
+                    "Terrain import files (*.dem;*.pcx)|*.DEM;*.PCX|"
+                    "Digital Elevation Model files (*.dem)|*.DEM|"
+                    "Bitmap files (*.pcx)|*.PCX|"
+                    "All files (*.*)|*.*||",
                     this);
 
     dlg.m_ofn.lpstrTitle = "Terrain Import File";
@@ -260,7 +328,8 @@ void TerrMainFrame::OnTerrImport()
 void TerrMainFrame::OnSurfImport() 
 {
     CFileDialog dlg(TRUE,
-                    NULL, NULL, OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY,
+                    NULL, NULL,
+                    OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY,
                     "Bitmap files (*.pcx)|*.PCX|All files (*.*)|*.*||",
                     this);
 
@@ -286,23 +355,62 @@ void TerrMainFrame::OnSurfDefineTexture()
 
     if (pDoc->txtNumb >= 255)
     {
-        MessageBox("No more texture definitions may be added.\n\n(The may be at most 255 texture definitions in a terrain data set)\n",
+        MessageBox("No more texture definitions may be added.\n\n"
+                   "(There may be at most 255 texture definitions in a terrain data set)\n",
                    "Define Texture Error",
                    MB_OK | MB_ICONEXCLAMATION);
         return;
     }
 
-    TexturePropDlg dlg(pDoc);
 
-    if (dlg.DoModal() == IDOK)
+//ÄÄÄ General
+    TxtPropGenPage gdlg;
+    gdlg.setup(pDoc);
+
+    // Generate unique 'default' name.
+    char name[16];
+    for(int c=1; ; c++)
     {
-        pDoc->AddTexture(dlg.m_name,dlg.m_fname,dlg.m_color);
+        sprintf(name,"Texture%02d",c);
+
+        if (pDoc->FindTexture(name) == -1)
+            break;
+    }
+    gdlg.m_name = name;
+
+//ÄÄÄ Surface Flags
+    TxtPropSFlagsPage fdlg;
+    fdlg.setup(pDoc);
+    fdlg.m_isnew=1;
+
+//ÄÄÄ Handle Display
+    CPropertySheet sh("Texture Properties",this);
+    sh.AddPage(&gdlg);      // General
+    sh.AddPage(&fdlg);      // Surface Flags
+
+//ÄÄÄ Store results, if OK
+    if (sh.DoModal() == IDOK)
+    {
+        //ÄÄÄ Surface Flags
+        assert(ESCH_SURF_TILE1 == 0x10 && ESCH_SURF_TILE2 == 0x20 && ESCH_SURF_TILE3 == 0x40);
+        dword flags = ((fdlg.m_flipu) ? ESCH_SURF_FLIPU : 0)
+                      | ((fdlg.m_flipv) ? ESCH_SURF_FLIPV : 0)
+                      | ((fdlg.m_tile << 4) & 0x70)
+                      | ((fdlg.m_notile) ? ESCH_SURF_NOTILE : 0)
+                      | ((fdlg.m_highonly) ? ESCH_SURF_HIGHONLY : 0)
+                      | ((fdlg.m_app0) ? ESCH_SURF_APP0 : 0)
+                      | ((fdlg.m_app1) ? ESCH_SURF_APP1 : 0)
+                      | ((fdlg.m_app2) ? ESCH_SURF_APP2 : 0)
+                      | ((fdlg.m_app3) ? ESCH_SURF_APP3 : 0);
+
+        //ÄÄÄ General
+        pDoc->AddTexture(gdlg.m_name, gdlg.m_fname, gdlg.m_color, flags);
     }
 }
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// TerrMainFrame - OnSurfEditTexture                                        ³
+// TerrMainFrame - On(Update)SurfEditTexture                                ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 void TerrMainFrame::OnSurfEditTexture() 
 {
@@ -313,7 +421,8 @@ void TerrMainFrame::OnSurfEditTexture()
 
     if (i == LB_ERR)
     {
-        MessageBox("Please highlight the texture definition to edit in the Texture Definitions window.",
+        MessageBox("Please highlight the texture definition to edit\n"
+                   "in the Texture Definitions window.",
                    "Edit Texture Error",
                    MB_OK | MB_ICONSTOP);
         return;
@@ -324,21 +433,69 @@ void TerrMainFrame::OnSurfEditTexture()
 
     ASSERT(i < pDoc->txtNumb);
 
-    TexturePropDlg dlg(pDoc,i);
+//ÄÄÄ General
+    TxtPropGenPage gdlg;
+    gdlg.setup(pDoc,i);
 
-    dlg.m_name = pDoc->txtName[i];
-    dlg.m_fname = pDoc->txtFName[i];
-    dlg.m_color = pDoc->txtColr[i];
+    gdlg.m_name = pDoc->txtName[i];
+    gdlg.m_fname = pDoc->txtFName[i];
+    gdlg.m_color = pDoc->txtColr[i];
 
-    if (dlg.DoModal() == IDOK)
+//ÄÄÄ Surface Flags
+    TxtPropSFlagsPage fdlg;
+    fdlg.setup(pDoc,i);
+
+    dword flags = pDoc->txtDFlags[i];
+
+    fdlg.m_flipu = (flags & ESCH_SURF_FLIPU) ? 1 : 0;
+    fdlg.m_flipv = (flags & ESCH_SURF_FLIPV) ? 1 : 0;
+
+    assert(ESCH_SURF_TILE1 == 0x10 && ESCH_SURF_TILE2 == 0x20 && ESCH_SURF_TILE3 == 0x40);
+    fdlg.m_tile  = (flags >> 4) & 0x7;
+
+    fdlg.m_notile = (flags & ESCH_SURF_NOTILE) ? 1 : 0;
+    fdlg.m_highonly = (flags & ESCH_SURF_HIGHONLY) ? 1 : 0;
+
+    fdlg.m_app0 = (flags & ESCH_SURF_APP0) ? 1 : 0;
+    fdlg.m_app1 = (flags & ESCH_SURF_APP1) ? 1 : 0;
+    fdlg.m_app2 = (flags & ESCH_SURF_APP2) ? 1 : 0;
+    fdlg.m_app3 = (flags & ESCH_SURF_APP3) ? 1 : 0;
+
+//ÄÄÄ Handle Display
+    CPropertySheet sh("Texture Properties",this);
+    sh.AddPage(&gdlg);      // General
+    sh.AddPage(&fdlg);      // Surface Flags
+
+//ÄÄÄ Store results, if OK
+    if (sh.DoModal() == IDOK)
     {
-        pDoc->SetTexture(i,dlg.m_name,dlg.m_fname,dlg.m_color);
+        //ÄÄÄ Surface Flags
+        flags = ((fdlg.m_flipu) ? ESCH_SURF_FLIPU : 0)
+                | ((fdlg.m_flipv) ? ESCH_SURF_FLIPV : 0)
+                | ((fdlg.m_tile << 4) & 0x70)
+                | ((fdlg.m_notile) ? ESCH_SURF_NOTILE : 0)
+                | ((fdlg.m_highonly) ? ESCH_SURF_HIGHONLY : 0)
+                | ((fdlg.m_app0) ? ESCH_SURF_APP0 : 0)
+                | ((fdlg.m_app1) ? ESCH_SURF_APP1 : 0)
+                | ((fdlg.m_app2) ? ESCH_SURF_APP2 : 0)
+                | ((fdlg.m_app3) ? ESCH_SURF_APP3 : 0);
+    
+        //ÄÄÄ General
+        pDoc->SetTexture(i,gdlg.m_name,gdlg.m_fname, gdlg.m_color, flags);
     }
+}
+
+void TerrMainFrame::OnUpdateSurfEditTexture(CCmdUI* pCmdUI) 
+{
+    TerrEditDoc *pDoc = (TerrEditDoc*)GetActiveDocument();
+    ASSERT_VALID(pDoc);
+
+    pCmdUI->Enable( (pDoc->txtNumb > 0) ? 1 : 0 );
 }
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// TerrMainFrame - OnSurfDeleteTexture                                      ³
+// TerrMainFrame - On(Update)SurfDeleteTexture                              ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 void TerrMainFrame::OnSurfDeleteTexture() 
 {
@@ -349,7 +506,8 @@ void TerrMainFrame::OnSurfDeleteTexture()
 
     if (i == LB_ERR)
     {
-        MessageBox("Please highlight the texture definition to delete in the Texture Definitions window.",
+        MessageBox("Please highlight the texture definition to delete\n"
+                   "in the Texture Definitions window.",
                    "Delete Texture Error",
                    MB_OK | MB_ICONSTOP);
         return;
@@ -369,6 +527,336 @@ void TerrMainFrame::OnSurfDeleteTexture()
     }
 }
 
+void TerrMainFrame::OnUpdateSurfDeleteTexture(CCmdUI* pCmdUI) 
+{
+    TerrEditDoc *pDoc = (TerrEditDoc*)GetActiveDocument();
+    ASSERT_VALID(pDoc);
+
+    pCmdUI->Enable( (pDoc->txtNumb > 0) ? 1 : 0 );
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// TerrMainFrame - OnSurfRemoveUnusedTxts                                   ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+void TerrMainFrame::OnSurfRemoveUnusedTxts() 
+{
+    TerrEditDoc *pDoc = (TerrEditDoc*)GetActiveDocument();
+    ASSERT_VALID(pDoc);
+
+    if (MessageBox("Are you sure you wish to delete unused texture definitions?",
+                   "Delete Texture",MB_YESNO | MB_ICONQUESTION) == IDYES)
+    {
+        pDoc->RemoveUnusedTxts();
+    }
+}
+
+void TerrMainFrame::OnUpdateSurfRemoveUnusedTxts(CCmdUI* pCmdUI) 
+{
+    TerrEditDoc *pDoc = (TerrEditDoc*)GetActiveDocument();
+    ASSERT_VALID(pDoc);
+
+    pCmdUI->Enable( (pDoc->txtNumb > 0) ? 1 : 0 );
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// TerrMainFrame - OnSurfLoadTextures                                       ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+void TerrMainFrame::OnSurfLoadTextures() 
+{
+    CFileDialog dlg(TRUE,
+                    NULL, NULL,
+                    OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY,
+                    "Escher Edit Texture Sets (*.ts)|*.TS|All files (*.*)|*.*||",
+                    this);
+
+    dlg.m_ofn.lpstrTitle = "Load Textures";
+
+    if (dlg.DoModal() == IDOK)
+    {
+        TerrEditDoc *pDoc = (TerrEditDoc*)GetActiveDocument();
+        ASSERT_VALID(pDoc);
+
+        pDoc->LoadTextures((LPCSTR)dlg.GetPathName());
+    }
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// TerrMainFrame - On(Update)SurfSaveTextures                               ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+void TerrMainFrame::OnSurfSaveTextures() 
+{
+    CFileDialog dlg(FALSE,
+                    "TS", "TxtSet",
+                    OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST,
+                    "Escher Edit Texture Sets (*.ts)|*.TS|All files (*.*)|*.*||",
+                    this);
+
+    dlg.m_ofn.lpstrTitle = "Save Textures";
+
+    if (dlg.DoModal() == IDOK)
+    {
+        TerrEditDoc *pDoc = (TerrEditDoc*)GetActiveDocument();
+        ASSERT_VALID(pDoc);
+
+        pDoc->SaveTextures((LPCSTR)dlg.GetPathName());
+    }
+}
+
+void TerrMainFrame::OnUpdateSurfSaveTextures(CCmdUI* pCmdUI) 
+{
+    TerrEditDoc *pDoc = (TerrEditDoc*)GetActiveDocument();
+    ASSERT_VALID(pDoc);
+
+    pCmdUI->Enable( (pDoc->txtNumb > 0) ? 1 : 0 );
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// TerrMainFrame - On(Update)DefineColor                                    ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+void TerrMainFrame::OnSurfDefineColor() 
+{
+    TerrEditDoc *pDoc = (TerrEditDoc*)GetActiveDocument();
+    ASSERT_VALID(pDoc);
+
+    if (pDoc->colorNumb >= 255)
+    {
+        MessageBox("No more color definitions may be added.\n\n"
+                   "(There may be at most 255 color definitions in a terrain data set)\n",
+                   "Define Color Error",
+                   MB_OK | MB_ICONEXCLAMATION);
+        return;
+    }
+
+    ColorGenPropPage dlga;
+    ColorSelectPropPage dlgb;
+    ShadeReviewPropPage dlgc;
+
+    // Generate unique 'default' name.
+    char name[16];
+    for(int c=1; ; c++)
+    {
+        sprintf(name,"Color%02d",c);
+
+        if (pDoc->FindColor(name) == -1)
+            break;
+    }
+    dlga.m_name = name;
+    dlga.setup(pDoc);
+    dlga.m_isnew=1;
+    dlga.colorIndx = (byte)pDoc->palette.get_index(VngoColor24bit(0,0,0));
+
+    dlgb.palette = &pDoc->palette;
+    dlgb.color = 0;
+
+    dlgc.palette = dlgb.palette;
+    dlgc.color = dlgb.color;
+
+    CPropertySheet sh("Color Select");
+
+    dlgb.setup(&dlga,&dlgc);
+
+    sh.AddPage(&dlga);      // General
+    sh.AddPage(&dlgb);      // Select COlor
+    sh.AddPage(&dlgc);      // Review Shade
+
+    if (sh.DoModal() == IDOK)
+    {
+        VngoColor24bit tclr = dlgb.palette->get_RGB(dlgb.color);
+
+        dword flags = ((dlga.m_highonly) ? ESCH_SURF_HIGHONLY : 0)
+                      | ((dlga.m_app0) ? ESCH_SURF_APP0 : 0)
+                      | ((dlga.m_app1) ? ESCH_SURF_APP1 : 0)
+                      | ((dlga.m_app2) ? ESCH_SURF_APP2 : 0)
+                      | ((dlga.m_app3) ? ESCH_SURF_APP3 : 0);
+
+        pDoc->AddColor(dlga.m_name, ((dword)tclr.b << 16)
+                                    | ((dword)tclr.g << 8)
+                                    | (dword)tclr.r, flags);
+    }
+	
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// TerrMainFrame - On(Update)SurfEditColor                                  ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+void TerrMainFrame::OnSurfEditColor() 
+{
+    TerrEditView *pView = (TerrEditView*)GetActiveView();
+    ASSERT_VALID(pView);
+
+    int i = pView->GetCurrentColorSel();
+
+    if (i == LB_ERR)
+    {
+        MessageBox("Please highlight the color definition to edit\n"
+                   "in the Color Definitions window.",
+                   "Edit Color Error",
+                   MB_OK | MB_ICONSTOP);
+        return;
+    }
+
+    TerrEditDoc *pDoc = (TerrEditDoc*)GetActiveDocument();
+    ASSERT_VALID(pDoc);
+
+    ASSERT(i < pDoc->colorNumb);
+
+    ColorGenPropPage dlga;
+    ColorSelectPropPage dlgb;
+    ShadeReviewPropPage dlgc;
+
+    dlga.colorIndx = pDoc->colorColrIndx[i];
+    dlga.m_name = pDoc->colorName[i];
+    dlga.setup(pDoc);
+
+    dword flags = pDoc->colorDFlags[i];
+    dlga.m_highonly = (flags & ESCH_SURF_HIGHONLY) ? 1 : 0;
+    dlga.m_app0 = (flags & ESCH_SURF_APP0) ? 1 : 0;
+    dlga.m_app1 = (flags & ESCH_SURF_APP1) ? 1 : 0;
+    dlga.m_app2 = (flags & ESCH_SURF_APP2) ? 1 : 0;
+    dlga.m_app3 = (flags & ESCH_SURF_APP3) ? 1 : 0;
+
+    dlgb.palette = &pDoc->palette;
+    dlgb.color = pDoc->colorColrIndx[i];
+
+    dlgc.palette = dlgb.palette;
+    dlgc.color = dlgb.color;
+
+    CPropertySheet sh("Color Select");
+
+    // Save the pointer to the Sheet for use in sharing data between the pages
+    dlgb.setup(&dlga,&dlgc);
+
+    sh.AddPage(&dlga);      // General
+    sh.AddPage(&dlgb);      // Select Color
+    sh.AddPage(&dlgc);      // Shade Review
+
+    if (sh.DoModal() == IDOK)
+    {
+        VngoColor24bit tclr = dlgb.palette->get_RGB(dlgb.color);
+
+        dword flags = ((dlga.m_highonly) ? ESCH_SURF_HIGHONLY : 0)
+                      | ((dlga.m_app0) ? ESCH_SURF_APP0 : 0)
+                      | ((dlga.m_app1) ? ESCH_SURF_APP1 : 0)
+                      | ((dlga.m_app2) ? ESCH_SURF_APP2 : 0)
+                      | ((dlga.m_app3) ? ESCH_SURF_APP3 : 0);
+
+        pDoc->SetColor(i, dlga.m_name, ((dword)tclr.b << 16)
+                                       | ((dword)tclr.g << 8)
+                                       | (dword)tclr.r, flags);
+    }
+	
+}
+
+void TerrMainFrame::OnUpdateSurfEditColor(CCmdUI* pCmdUI) 
+{
+    TerrEditDoc *pDoc = (TerrEditDoc*)GetActiveDocument();
+    ASSERT_VALID(pDoc);
+
+    pCmdUI->Enable( (pDoc->colorNumb > 0) ? 1 : 0 );
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// TerrMainFrame - On(Update)DeleteColor                                    ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+void TerrMainFrame::OnSurfDeleteColor() 
+{
+    TerrEditView *pView = (TerrEditView*)GetActiveView();
+    ASSERT_VALID(pView);
+
+    int i = pView->GetCurrentColorSel();
+
+    if (i == LB_ERR)
+    {
+        MessageBox("Please highlight the color definition to delete\n"
+                   "in the Color Definitions window.",
+                   "Delete Color Error",
+                   MB_OK | MB_ICONSTOP);
+        return;
+    }
+
+    TerrEditDoc *pDoc = (TerrEditDoc*)GetActiveDocument();
+    ASSERT_VALID(pDoc);
+
+    ASSERT(i < pDoc->colorNumb);
+
+    char    str[128];
+
+    sprintf(str,"Are you sure you wish to delete '%s'?",pDoc->colorName[i]);
+    if (MessageBox(str,"Delete Color",MB_YESNO | MB_ICONQUESTION) == IDYES)
+    {
+        pDoc->DeleteColor(i);
+    }
+	
+}
+
+void TerrMainFrame::OnUpdateSurfDeleteColor(CCmdUI* pCmdUI) 
+{
+    TerrEditDoc *pDoc = (TerrEditDoc*)GetActiveDocument();
+    ASSERT_VALID(pDoc);
+
+    pCmdUI->Enable( (pDoc->colorNumb > 0) ? 1 : 0 );
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// TerrMainFrame - OnSurfLoadColors                                         ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+void TerrMainFrame::OnSurfLoadColors() 
+{
+    CFileDialog dlg(TRUE,
+                    NULL, NULL,
+                    OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY,
+                    "Escher Edit Color Sets (*.cs)|*.CS|All files (*.*)|*.*||",
+                    this);
+
+    dlg.m_ofn.lpstrTitle = "Load Colors";
+
+    if (dlg.DoModal() == IDOK)
+    {
+        TerrEditDoc *pDoc = (TerrEditDoc*)GetActiveDocument();
+        ASSERT_VALID(pDoc);
+
+        pDoc->LoadColors((LPCSTR)dlg.GetPathName());
+    }
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// TerrMainFrame - On(Update)SurfSaveColors                                 ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+void TerrMainFrame::OnSurfSaveColors() 
+{
+    CFileDialog dlg(FALSE,
+                    "CS", "ClrSet",
+                    OFN_HIDEREADONLY | OFN_OVERWRITEPROMPT | OFN_PATHMUSTEXIST,
+                    "Escher Edit Color Sets (*.cs)|*.CS|All files (*.*)|*.*||",
+                    this);
+
+    dlg.m_ofn.lpstrTitle = "Save Colors";
+
+    if (dlg.DoModal() == IDOK)
+    {
+        TerrEditDoc *pDoc = (TerrEditDoc*)GetActiveDocument();
+        ASSERT_VALID(pDoc);
+
+        pDoc->SaveColors((LPCSTR)dlg.GetPathName());
+    }
+}
+
+void TerrMainFrame::OnUpdateSurfSaveColors(CCmdUI* pCmdUI) 
+{
+    TerrEditDoc *pDoc = (TerrEditDoc*)GetActiveDocument();
+    ASSERT_VALID(pDoc);
+
+    pCmdUI->Enable( (pDoc->colorNumb > 0) ? 1 : 0 );
+}
+
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrMainFrame - OnSurfPalette                                            ³
@@ -379,9 +867,9 @@ void TerrMainFrame::OnSurfPalette()
     ASSERT_VALID(pDoc);
 
     CFileDialog dlg(TRUE,
-                    "PAL", pDoc->pfname,
+                    "VGP", pDoc->pfname,
                     OFN_FILEMUSTEXIST | OFN_PATHMUSTEXIST | OFN_HIDEREADONLY,
-                    "Van Gogh palette file (*.pal)|*.PAL|All files (*.*)|*.*||",
+                    "Van Gogh palette file (*.vgp;*.pal)|*.VGP;*.PAL|All files (*.*)|*.*||",
                     this);
 
     dlg.m_ofn.lpstrTitle = "Van Gogh Palette File";
@@ -394,6 +882,36 @@ void TerrMainFrame::OnSurfPalette()
             pDoc->LoadPalette(pDoc->pfname);
         }
     }
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// TerrMainFrame - OnAppHelp                                                ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+void TerrMainFrame::OnAppHelp() 
+{
+    int     i;
+    char    *c;
+    char    fname[256];
+  
+    GetModuleFileName(NULL, fname, 256);
+
+    for (i=strlen(fname), c = &fname[i-1]; i > 0; i--, c--)
+    {
+        if (*c == '\\')
+        {
+            strcpy(c+1,"MythOS.HLP");
+
+            if (xf_exist(fname))
+                break;
+        }
+    }
+    if (!i)
+        strcpy(fname,"MythOS.HLP");
+
+    ::WinHelp(GetSafeHwnd(),
+              fname,
+              HELP_CONTEXT, 1001);
 }
 
 //°±² eof - eshtmfrm.cpp ²±°

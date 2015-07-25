@@ -31,7 +31,7 @@
 //
 //      This module defines the physical devices used by the event
 //  system.  Each device has a unique interface, suited to the device.
-//  Only two devices are currently supported.
+//  Only three devices are currently supported.
 //
 //  Keyboard -- The keyboard device.  This is not a serial device, but
 //          rather a matrix of on/off switches corresponding to the
@@ -40,6 +40,8 @@
 //  Mouse -- The mouse is a multi-button positional device.  The mouse
 //          can be queried for its button's states, as well as its current
 //          position, and delta movement.
+//  Joystick -- The standard IBM Joystick.  Like the mouse, this device
+//          can only be queried for its current state.
 //
 //  Additionally, a new class has been added to "contain" those devices, and
 //  maintain a "current state", so that multiple event systems can query
@@ -107,12 +109,22 @@
 class MaxKeyboard
 {
 private:
+        dword   KeyStat[8];         // The Up/Down Status of the keys.
+        dword   KeyStatHold[8];     // The Up/Down Status of the keys.
+        int     KeyStatCount;
+
+        // And now, for the MaxKbBuffer support.
+        // The MaxKbBuffer objects modify this link pointer themselves.
+        // Consequently, we should only read it.
+friend  class MaxKbBuffer;
+        MaxKbBuffer *BuffList;
 
 public:
         MaxKeyboard ();
         ~MaxKeyboard ();
         void    init ();
         void    uninit ();
+        void    clear ();
 
         int     check_key (int key) const;
 
@@ -120,6 +132,13 @@ public:
         void    num_lock (int state);
         void    caps_lock (int state);
         void    scroll_lock (int state);
+
+        // These members allows a Windows application to avoid loosing
+        // characters when the frame rate drops too low for "normal"
+        // responsiveness.  Simply call these members with the WindowProc
+        // on WM_KEYDOWN and WM_KEYUP messages respectively.
+        void    wm_keydown (int);
+        void    wm_keyup (int);
 };
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -141,6 +160,7 @@ public:
 public:
         int     init ();
         void    uninit();
+        void    clear();
 
         void    hide();
         void    show();
@@ -158,18 +178,30 @@ public:
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 class MaxJoystick
 {
+        // Controls the access method for the joystick
+        short   auto_polled;
+        MMRESULT timer_id;
+
 public:
         // Tells which axes are active; bit 1 == Joy1, etc.
-        int     joy_present;
+        short   joy_present;
+
+        // Store capabilities and current snapshot
+        JOYCAPS     caps;
+        JOYINFOEX   info;
 
         MaxJoystick();
         ~MaxJoystick();
 
-        int     init ();
+        short   init ();
         void    uninit ();
+        void    clear();
 
         // Return the entire "joystick gestalt"
         void    get_stat (JOYINFOEX *) const;
+
+        // The polling interface (turns on automatic polling, which increases accuracy)
+        int     auto_poll (BOOL = TRUE, UINT rate = 50);
 };
 
 
@@ -217,6 +249,10 @@ int     enable_joystick (int);
         // Update the internal values for the various devices
 void    update ();
 
+        // Used to clear any special states when using the WM_* pump
+        // Must be called if an wm_ device members are used.
+void    wm_clear ();
+
         // Values for the devices
 void    get_mouse_movement (short *, short *) const;
 void    get_mouse_pos (short *, short *) const;
@@ -230,7 +266,7 @@ int     check_keyboard_key (int) const;
 void    get_joystick (JOYINFOEX *) const;
 };
 
-#if 0
+
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 // MaxKbBuffer
 //  This class provides a character buffer for MaxKeyboard.  This key
@@ -261,6 +297,9 @@ public:
         int     kbhit () const  { return tail != head; }
         void    clear ()        { head = tail = 0; }
 
+        // Translation services
+        byte    get_ascii (byte scan) const;
+
         // Add a key to the keypress buffer
         void    AddKey (ushort);
 
@@ -268,7 +307,6 @@ public:
         void        set_next (MaxKbBuffer *n)   { next = n; }
         MaxKbBuffer *get_next () const          { return next; }
 };
-#endif
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //

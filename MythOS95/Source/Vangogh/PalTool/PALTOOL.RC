@@ -1,4 +1,4 @@
-//Microsoft Visual C++ generated resource script.
+//Microsoft Developer Studio generated resource script.
 //
 #include "resource.h"
 
@@ -12,6 +12,14 @@
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
 
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -38,11 +46,10 @@ BEGIN
     "#define _AFX_NO_OLE_RESOURCES\r\n"
     "#define _AFX_NO_TRACKER_RESOURCES\r\n"
     "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
-    "#include ""afxres.rc""  \011// Standard components\r\n"
+    "#include ""afxres.rc""  \t// Standard components\r\n"
     "\0"
 END
 
-/////////////////////////////////////////////////////////////////////////////
 #endif    // APSTUDIO_INVOKED
 
 
@@ -51,6 +58,8 @@ END
 // Icon
 //
 
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
 IDR_MAINFRAME           ICON    DISCARDABLE     "res\\PalTool.ico"
 IDR_PTOOLTYPE           ICON    DISCARDABLE     "res\\PalTodoc.ico"
 
@@ -75,7 +84,7 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "Recent File",                 ID_FILE_MRU_FILE1, GRAYED
         MENUITEM SEPARATOR
-        MENUITEM "E&xit",                       ID_APP_EXIT
+        MENUITEM "E&xit\tAlt+X",                ID_APP_EXIT
     END
     POPUP "&View"
     BEGIN
@@ -84,7 +93,9 @@ BEGIN
     END
     POPUP "&Help"
     BEGIN
-        MENUITEM "&About PalTool...",           ID_APP_ABOUT
+        MENUITEM "&Help\tShift+F1",             ID_APP_HELP
+        MENUITEM SEPARATOR
+        MENUITEM "&About Palette Tool...\t?",   ID_APP_ABOUT
     END
 END
 
@@ -94,29 +105,43 @@ BEGIN
     BEGIN
         MENUITEM "&New\tCtrl+N",                ID_FILE_NEW
         MENUITEM "&Open...\tCtrl+O",            ID_FILE_OPEN
-        MENUITEM "&Import...\tCtrl+I",          IDM_FILE_IMPORT
         MENUITEM "&Close",                      ID_FILE_CLOSE
         MENUITEM "&Save\tCtrl+S",               ID_FILE_SAVE
-        MENUITEM "Save &As...",                 ID_FILE_SAVE_AS
+        MENUITEM "Save &As...\tF12",            ID_FILE_SAVE_AS
+        MENUITEM SEPARATOR
+        MENUITEM "&Import...\tCtrl+I",          IDM_FILE_IMPORT
         MENUITEM SEPARATOR
         MENUITEM "Sen&d...",                    ID_FILE_SEND_MAIL
         MENUITEM SEPARATOR
         MENUITEM "Recent File",                 ID_FILE_MRU_FILE1, GRAYED
         MENUITEM SEPARATOR
-        MENUITEM "E&xit",                       ID_APP_EXIT
+        MENUITEM "E&xit\tAlt+X",                ID_APP_EXIT
     END
     POPUP "&Edit"
     BEGIN
-        MENUITEM "&Undo\tCtrl+Z",               ID_EDIT_UNDO
+        MENUITEM "&Palette...",                 ID_EDIT_PALETTE
         MENUITEM SEPARATOR
-        MENUITEM "Cu&t\tCtrl+X",                ID_EDIT_CUT
-        MENUITEM "&Copy\tCtrl+C",               ID_EDIT_COPY
-        MENUITEM "&Paste\tCtrl+V",              ID_EDIT_PASTE
+        POPUP "Ne&w..."
+        BEGIN
+            MENUITEM "E&mpty",                      ID_EDIT_NEW_EMPTY
+            MENUITEM SEPARATOR
+            MENUITEM "&General",                    ID_EDIT_NEW_GEN
+            MENUITEM "General (&Old)",              ID_EDIT_NEW_ORIGGEN
+            MENUITEM "Gr&eyscale",                  ID_EDIT_NEW_GREYSCALE
+            MENUITEM "R&3-G3-B2",                   ID_EDIT_NEW_332
+            MENUITEM "&Red/Green/Blue/Grey",        ID_EDIT_NEW_RGBG
+            MENUITEM SEPARATOR
+            MENUITEM "Special Palette &1",          ID_EDIT_NEW_SPC1
+        END
+        MENUITEM SEPARATOR
+        MENUITEM "Pr&operties\tAlt+Enter",      ID_EDIT_PROP
     END
     POPUP "&View"
     BEGIN
         MENUITEM "&Toolbar",                    ID_VIEW_TOOLBAR
         MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
+        MENUITEM SEPARATOR
+        MENUITEM "Re&fresh\t`",                 ID_VIEW_REFRESH
     END
     POPUP "&Window"
     BEGIN
@@ -129,12 +154,14 @@ BEGIN
     BEGIN
         MENUITEM "&Linear",                     IDM_OPTIONS_LINEAR
         MENUITEM "&Bezier",                     IDM_OPTIONS_BEZIER, GRAYED
-        MENUITEM "Quadratic",                   IDM_OPTIONS_QUADRATIC
+        MENUITEM "&Quadratic",                  IDM_OPTIONS_QUADRATIC
         , GRAYED
     END
     POPUP "&Help"
     BEGIN
-        MENUITEM "&About PalTool...",           ID_APP_ABOUT
+        MENUITEM "&Help\tShift+F1",             ID_APP_HELP
+        MENUITEM SEPARATOR
+        MENUITEM "&About Palette Tool...\t?",   ID_APP_ABOUT
     END
 END
 
@@ -146,21 +173,21 @@ END
 
 IDR_MAINFRAME ACCELERATORS PRELOAD MOVEABLE PURE 
 BEGIN
-    "C",            ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
-    "E",            IDM_FILE_EXPORT,        VIRTKEY, CONTROL, NOINVERT
+    "?",            ID_APP_ABOUT,           ASCII,  NOINVERT
     "I",            IDM_FILE_IMPORT,        VIRTKEY, CONTROL, NOINVERT
     "N",            ID_FILE_NEW,            VIRTKEY, CONTROL, NOINVERT
     "O",            ID_FILE_OPEN,           VIRTKEY, CONTROL, NOINVERT
     "S",            ID_FILE_SAVE,           VIRTKEY, CONTROL, NOINVERT
-    "V",            ID_EDIT_PASTE,          VIRTKEY, CONTROL, NOINVERT
-    VK_BACK,        ID_EDIT_UNDO,           VIRTKEY, ALT, NOINVERT
-    VK_DELETE,      ID_EDIT_CUT,            VIRTKEY, SHIFT, NOINVERT
+    VK_F1,          ID_APP_HELP,            VIRTKEY, SHIFT, NOINVERT
+    VK_F12,         ID_FILE_SAVE_AS,        VIRTKEY, NOINVERT
     VK_F6,          ID_NEXT_PANE,           VIRTKEY, NOINVERT
     VK_F6,          ID_PREV_PANE,           VIRTKEY, SHIFT, NOINVERT
     VK_INSERT,      ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
     VK_INSERT,      ID_EDIT_PASTE,          VIRTKEY, SHIFT, NOINVERT
+    VK_RETURN,      ID_EDIT_PROP,           VIRTKEY, ALT, NOINVERT
     "X",            ID_EDIT_CUT,            VIRTKEY, CONTROL, NOINVERT
-    "Z",            ID_EDIT_UNDO,           VIRTKEY, CONTROL, NOINVERT
+    "X",            ID_APP_EXIT,            VIRTKEY, ALT, NOINVERT
+    "`",            ID_VIEW_REFRESH,        ASCII,  NOINVERT
 END
 
 
@@ -168,17 +195,6 @@ END
 //
 // Dialog
 //
-
-IDD_ABOUTBOX DIALOG DISCARDABLE  34, 22, 217, 55
-STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
-CAPTION "About PalTool"
-FONT 8, "MS Sans Serif"
-BEGIN
-    ICON            IDR_MAINFRAME,IDC_STATIC,11,17,20,20
-    LTEXT           "PalTool Version 1.0",IDC_STATIC,40,10,119,8
-    LTEXT           "Copyright \251 1995",IDC_STATIC,40,25,119,8
-    DEFPUSHBUTTON   "OK",IDOK,176,6,32,14,WS_GROUP
-END
 
 IDD_PROGRESS DIALOG DISCARDABLE  0, 0, 122, 30
 STYLE WS_POPUP | WS_CAPTION
@@ -189,7 +205,92 @@ BEGIN
                     8,9,106,12
 END
 
+IDD_ABOUTBOX DIALOG DISCARDABLE  34, 22, 269, 138
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "About Palette Tool"
+FONT 8, "MS Sans Serif"
+BEGIN
+    ICON            IDR_MAINFRAME,IDC_STATIC,11,17,18,20
+    CONTROL         "Van Gogh Palette Tool",IDC_STATIC,"Static",SS_SIMPLE | 
+                    WS_GROUP,55,30,119,8
+    CONTROL         "Version X.X\tMon DD YYYY",IDC_ABOUT_VERSION,"Static",
+                    SS_SIMPLE | WS_GROUP,55,45,111,8
+    CONTROL         "Copyright © 1995, 1996 by Charybdis Enterprises, Inc.",
+                    IDC_STATIC,"Static",SS_SIMPLE | WS_GROUP,55,60,181,8
+    CTEXT           "Van Gogh is a component of the MythOS collection",
+                    IDC_STATIC,45,100,185,11
+    CTEXT           "MythOS is a trademark of Charybdis Enterprises, Inc.",
+                    IDC_STATIC,55,115,175,14
+    DEFPUSHBUTTON   "OK",IDOK,219,11,32,14,WS_GROUP
+END
 
+IDD_PROPA DIALOG DISCARDABLE  0, 0, 270, 130
+STYLE WS_CHILD | WS_VISIBLE | WS_DISABLED | WS_CAPTION
+CAPTION "General"
+FONT 8, "MS Sans Serif"
+BEGIN
+    RTEXT           "Name:",IDC_STATIC,65,17,22,8
+    EDITTEXT        IDC_PROP_NAME,95,15,82,12,ES_AUTOHSCROLL
+    RTEXT           "Midpoint:",IDC_STATIC,55,41,35,8
+    EDITTEXT        IDC_PROP_MIDPOINT,95,39,25,12,ES_AUTOHSCROLL
+    RTEXT           "Shade levels:",IDC_STATIC,45,67,45,8
+    EDITTEXT        IDC_PROP_SHDLVLS,95,65,25,12,ES_AUTOHSCROLL | 
+                    WS_DISABLED
+    GROUPBOX        "Color Depth",IDC_STATIC,55,90,175,25
+    CONTROL         "8-bit",IDC_PROP_8BIT,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,65,100,30,10
+    CONTROL         "15-bit",IDC_PROP_15BIT,"Button",BS_AUTOCHECKBOX | 
+                    WS_DISABLED | WS_TABSTOP,105,100,30,10
+    CONTROL         "16-bit",IDC_PROP_16BIT,"Button",BS_AUTOCHECKBOX | 
+                    WS_DISABLED | WS_TABSTOP,145,100,30,10
+    CONTROL         "24-bit",IDC_PROP_24BIT,"Button",BS_AUTOCHECKBOX | 
+                    WS_DISABLED | WS_TABSTOP,185,100,30,10
+END
+
+IDD_PROPB DIALOG DISCARDABLE  0, 0, 268, 126
+STYLE WS_CHILD | WS_VISIBLE | WS_DISABLED | WS_CAPTION
+CAPTION "Colors"
+FONT 8, "MS Sans Serif"
+BEGIN
+END
+
+IDD_PALETTE DIALOG DISCARDABLE  0, 0, 272, 130
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Palette"
+FONT 8, "MS Sans Serif"
+BEGIN
+    RTEXT           "Index:",IDC_STATIC,15,27,25,8
+    COMBOBOX        IDC_PAL_INDEX,45,25,30,50,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    RTEXT           "Red:",IDC_STATIC,95,27,25,8
+    EDITTEXT        IDC_PAL_RED,125,25,30,12,ES_AUTOHSCROLL
+    SCROLLBAR       IDC_PAL_SRED,160,26,100,10
+    RTEXT           "Green:",IDC_STATIC,95,46,25,8
+    EDITTEXT        IDC_PAL_GREEN,125,44,30,12,ES_AUTOHSCROLL
+    SCROLLBAR       IDC_PAL_SGREEN,160,45,100,10
+    RTEXT           "Blue:",IDC_STATIC,95,66,25,8
+    EDITTEXT        IDC_PAL_BLUE,125,64,30,12,ES_AUTOHSCROLL
+    SCROLLBAR       IDC_PAL_SBLUE,160,65,100,10
+    PUSHBUTTON      "&Color",IDC_COLOR,205,85,50,15
+    DEFPUSHBUTTON   "OK",IDOK,78,109,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,144,109,50,14
+END
+
+IDD_PROPC DIALOG DISCARDABLE  0, 0, 268, 126
+STYLE WS_CHILD | WS_VISIBLE | WS_DISABLED | WS_CAPTION
+CAPTION "Misc"
+FONT 8, "MS Sans Serif"
+BEGIN
+    RTEXT           "Description",IDC_STATIC,10,27,44,8
+    EDITTEXT        IDC_PROP_DESC,60,25,192,12,ES_AUTOHSCROLL
+    RTEXT           "Author",IDC_STATIC,10,52,44,8
+    EDITTEXT        IDC_PROP_AUTH,60,50,192,12,ES_AUTOHSCROLL
+    RTEXT           "Copyright",IDC_STATIC,10,77,44,8
+    EDITTEXT        IDC_PROP_COPY,60,75,192,12,ES_AUTOHSCROLL
+END
+
+
+#ifndef _MAC
 /////////////////////////////////////////////////////////////////////////////
 //
 // Version
@@ -210,16 +311,17 @@ VS_VERSION_INFO VERSIONINFO
 BEGIN
     BLOCK "StringFileInfo"
     BEGIN
-        BLOCK "040904B0"
+        BLOCK "040904b0"
         BEGIN
-            VALUE "CompanyName", "\0"
-            VALUE "FileDescription", "PALTOOL MFC Application\0"
+            VALUE "Comments", "by Dan Higdon and Chuck Walbourn\0"
+            VALUE "CompanyName", "Charybdis Enterprises, Inc.\0"
+            VALUE "FileDescription", "Van Gogh Palette Tool MFC Application\0"
             VALUE "FileVersion", "1, 0, 0, 1\0"
             VALUE "InternalName", "PALTOOL\0"
-            VALUE "LegalCopyright", "Copyright \251 1995\0"
-            VALUE "LegalTrademarks", "\0"
+            VALUE "LegalCopyright", "Copyright © 1995\0"
+            VALUE "LegalTrademarks", "MythOS is a trademark of Charybdis Enterprises, Inc.\0"
             VALUE "OriginalFilename", "PALTOOL.EXE\0"
-            VALUE "ProductName", "PALTOOL Application\0"
+            VALUE "ProductName", "Van Gogh Palette Tool\0"
             VALUE "ProductVersion", "1, 0, 0, 1\0"
         END
     END
@@ -229,6 +331,39 @@ BEGIN
     END
 END
 
+#endif    // !_MAC
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO DISCARDABLE 
+BEGIN
+    IDD_PALETTE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 265
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 123
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog Info
+//
+
+IDD_PALETTE DLGINIT
+BEGIN
+    IDC_PAL_INDEX, 0x403, 2, 0
+0x0030, 
+    0
+END
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -238,8 +373,8 @@ END
 
 STRINGTABLE PRELOAD DISCARDABLE 
 BEGIN
-    IDR_MAINFRAME           "PalTool"
-    IDR_PTOOLTYPE           "\nPTool\nPTool\nPalTool Files (*.vgp)\n.VGP\nMPL\nPalTool Document"
+    IDR_MAINFRAME           "Palette Tool"
+    IDR_PTOOLTYPE           "\n\nPTool\nPalTool Files (*.vgp)\n.VGP\nPalTool.Document\nPalTool Document"
 END
 
 STRINGTABLE PRELOAD DISCARDABLE 
@@ -339,15 +474,30 @@ END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    IDM_LINEAR              "Use a Linear curve for shade generation"
-    IDM_BEZIER              "Use a Bezier curve for color shading."
-    IDM_QUADRATIC           "Use a Quadratic curve for color shading."
-    IDM_OPTIONS_LINEAR      "Linear color spreading"
-    IDM_OPTIONS_BEZIER      "Bezier curve color spreading"
-    IDM_FILE_IMPORT         "Import a palette from a picture"
-    IDM_OPTIONS_QUADRATIC   "Quadratic color spreading"
-    IDM_FILE_EXPORT         "Export the palette"
+    IDM_OPTIONS_LINEAR      "Use a Linear curve for shade generation\nLinear"
+    IDM_OPTIONS_BEZIER      "Use a Bezier curve for color shading\nBezier"
+    IDM_FILE_IMPORT         "Import a palette from a bitmap\nImport"
+    IDM_OPTIONS_QUADRATIC   "Use a Quadratic curve for color shading\nQuadratic"
+    ID_EDIT_PROP            "Edit palette properities\nProperties"
 END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_EDIT_NEW_EMPTY       "Generates an empty (all black) palette\nNew Empty"
+    ID_EDIT_NEW_GEN         "Generates a general color palette\nNew General"
+    ID_EDIT_NEW_ORIGGEN     "Generates a general color palette (old technique)\nNew General (Old)"
+    ID_EDIT_NEW_GREYSCALE   "Generates a greyscale palette\nNew Greyscale"
+    ID_EDIT_NEW_332         "Generates a 3-bit Red/3-bit Green/2-bit Blue palette\nNew 3-3-2"
+    ID_EDIT_NEW_RGBG        "Generates a red, green, blue, and grey palette\n New RGBG"
+    ID_EDIT_PALETTE         "Edits palette color entries\nPalette"
+    ID_EDIT_NEW_SPC1        "Generates a palette consisting of contour map colors\nNew Spc 1"
+    ID_VIEW_REFRESH         "Refreshes the display\nRefresh"
+    ID_APP_HELP             "Displays the help topic for this utility\nHelp"
+END
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
 
 
 #ifndef APSTUDIO_INVOKED

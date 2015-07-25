@@ -8,7 +8,7 @@
 //ùùùùù²±²ùùùùùùù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùùùùùù²±²ùùùù²±²ùùùùùù
 //ùùùù²²²²²²²²²²ù²²²²²²²²ùùù²²²²²²²²ùù²²²ùùùù²²²ù²²²²²²²²²²ù²²²ùùùù²²²ùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùCopyrightù(c)ù1994,ù1995ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
+//ùùùùùùùùùùùCopyrightù(c)ù1994-1996ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùù Microsoft Windows '95 Version ùùùùùùùùùùùùùùùùùùùùùùù
@@ -49,6 +49,7 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include "stdafx.h"
+
 #include "eshtedit.h"
 
 #include "eshtdoc.h"
@@ -56,9 +57,16 @@
 #include "eshtdlg.h"
 
 #include "esfile.hpp"
-#include "dem.h"
 
 #include <math.h>
+
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//             
+//                                Equates
+//                                
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+#define MAGIC   0xffab
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
@@ -70,6 +78,8 @@
 #undef THIS_FILE
 static char BASED_CODE THIS_FILE[] = __FILE__;
 #endif
+
+extern TerrEditApp  theApp;
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrEditDoc                                                              ³
@@ -99,20 +109,28 @@ static int FirstNew=1;                  // Hack to avoid 'New' dialog on startup
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrEditDoc - Constructor                                                ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-TerrEditDoc::TerrEditDoc()
+TerrEditDoc::TerrEditDoc() :
+    width(0),
+    depth(0),
+    surfratio(1),
+    surfshift(0),
+    autocenter(1),
+    hfield(0),
+    htable(0),
+    surfinfo(0),
+    surfcolr(0),
+    hsurfnorml(0),
+    undo_valid(FALSE),
+    undo_surfinfo(0),
+    undo_surfcolr(0),
+    txtNumb(0),
+    colorNumb(0),
+    hpal(0),
+    lights(0),
+    lightsdirty(FALSE)
 {
-    width = depth = 0;
-    surfratio = 1;
-    surfshift = 0;
-
-    hfield=0;
-    surfinfo=0;
-    surfcolr=0;
-    hsurfnorml=0;
-
-    txtNumb=0;
-
-    hpal=0;
+    for(int i=0; i < 256; i++)
+        txtEsch[i] = 0;
 }
 
 
@@ -122,8 +140,34 @@ TerrEditDoc::TerrEditDoc()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 TerrEditDoc::~TerrEditDoc()
 {
-    DeleteContents();
+      DeleteContents();
 }
+
+
+
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°° Diagnostics °°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+#ifdef _DEBUG
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// TerrEditDoc - AssertValid                                                ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+void TerrEditDoc::AssertValid() const
+{
+	CDocument::AssertValid();
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// TerrEditDoc - Dump                                                       ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+void TerrEditDoc::Dump(CDumpContext& dc) const
+{
+	CDocument::Dump(dc);
+}
+#endif //_DEBUG
+
 
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
@@ -135,13 +179,32 @@ TerrEditDoc::~TerrEditDoc()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 void TerrEditDoc::DeleteContents() 
 {
+    for (EschLight *lptr=lights; lptr;)
+    {
+        EschLight   *t=lptr;
+        lptr = lptr->next();
+        delete t;
+    }
+    lights=0;
+
     for(int i=0; i < txtNumb; i++)
     {
         txtName[i].Empty();
         txtFName[i].Empty();
-        txtEsch[i].release();
+        if (txtEsch[i])
+        {
+            delete txtEsch[i];
+            txtEsch[i] = 0;
+        }
+        txtDFlags[i] = 0;
     }
     txtNumb=0;
+
+    for(i=0; i < colorNumb; i++)
+    {
+        colorName[i].Empty();
+        colorDFlags[i] = 0;
+    }
 
     memset(name,0,sizeof(name));
     memset(desc,0,sizeof(desc));
@@ -153,6 +216,11 @@ void TerrEditDoc::DeleteContents()
     {
         delete [] hfield;
         hfield=0;
+    }
+    if (htable)
+    {
+        delete [] htable;
+        htable=0;
     }
     if (surfinfo)
     {
@@ -168,6 +236,18 @@ void TerrEditDoc::DeleteContents()
     if (hsurfnorml)
     {
         ivory_hfree(&hsurfnorml);
+    }
+
+    undo_valid=FALSE;
+    if (undo_surfinfo)
+    {
+        delete [] undo_surfinfo;
+        undo_surfinfo=0;
+    }
+    if (undo_surfcolr)
+    {
+        delete [] undo_surfcolr;
+        undo_surfcolr=0;
     }
 
     if (hpal)
@@ -189,18 +269,16 @@ BOOL TerrEditDoc::LoadPalette(const char *fname, int doupdate)
     VngoPal8        *palptr=&palette;
     VngoPalIFF8     loadpal(palptr);
 
+    undo_valid=FALSE;
+
     palptr->init(0);
     err=loadpal.load(fname);
 
     if (err)
     {
         char    str[512];
-
         sprintf(str,"Error #%x loading Van Gogh palette file:\n\n%s",(int)err,fname);
-                                                  
-        MessageBox(NULL,
-                   str,"Error",MB_OK | MB_ICONEXCLAMATION);
-
+        MessageBox(NULL,str,"Error",MB_OK | MB_ICONEXCLAMATION);
         return FALSE;
     }  
 
@@ -221,7 +299,9 @@ BOOL TerrEditDoc::LoadPalette(const char *fname, int doupdate)
     }
 
     if (hpal)
+    {
         DeleteObject(hpal);
+    }
 
     hpal = CreatePalette(lpal);
 
@@ -230,8 +310,8 @@ BOOL TerrEditDoc::LoadPalette(const char *fname, int doupdate)
     if (!hpal)
     {
         MessageBox(NULL,
-                   "Failed to create a palette from Van Gogh palette file","Error",MB_OK | MB_ICONEXCLAMATION);
-
+                   "Failed to create a palette from Van Gogh palette file",
+                   "Error",MB_OK | MB_ICONEXCLAMATION);
         return FALSE;       
     }
 
@@ -239,18 +319,41 @@ BOOL TerrEditDoc::LoadPalette(const char *fname, int doupdate)
 
     if (txtNumb)
     {
-        TerrSurfPrgDlg   dlg;
-        dlg.m_pBar.SetRange(0, txtNumb-1);
-        dlg.m_pBar.SetPos(0);
+        ProgressDlg dlg;
+        dlg.m_pbar.SetRange(0, txtNumb-1);
+        dlg.m_pbar.SetPos(0);
         dlg.SetWindowText("Recoloring Texture Maps...");
         dlg.ShowWindow(SW_SHOW);
 
         for(int i=0; i < txtNumb; i++)
         {
-            dlg.m_pBar.SetPos(i);
+            dlg.m_pbar.SetPos(i);
+
+            if (!xf_exist(txtFName[i]))
+            {
+                LocateDlg   dlg;
+                dlg.title = "Locate File for Texture '" + txtName[i] + "'";
+                dlg.m_fname = txtFName[i];
+                dlg.typestr = "Bitmap files (*.bmp;*.cel;*.lbm;*.pcx;*.tga)|"
+                              "*.BMP;*.CEL;*.LBM;*.PCX;*.TGA|"
+                              "Windows Bitmap files (*.bmp)|*.BMP|"
+                              "Autodesk CEL files (*.cel)|*.CEL|"
+                              "DPaint/EA LBM files (*.lbm)|*.LBM|"
+                              "Zsoft PCX files (*.pcx)|*.PCX|"
+                              "Targa files (*.tga)|*.TGA|";
+
+                if (dlg.DoModal() == IDOK)
+                {
+                    txtFName[i] = dlg.m_fname;
+                    SetModifiedFlag();
+                }
+            }
+
             load_and_recolor_texture(i,txtFName[i]);
         }
     }
+
+    cam.set_bcolor(palette.get_index((VngoColor24bit)cam_bcolor));
 
     if (doupdate)
         UpdateAllViews(NULL,HINT_UPDATECOLR,NULL);
@@ -260,365 +363,25 @@ BOOL TerrEditDoc::LoadPalette(const char *fname, int doupdate)
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// TerrEditDoc - ImportTerrain                                              ³
+// TerrEditDoc - FindTexture                                                ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrEditDoc::ImportTerrain(const char *fname, int losswarn)
+int TerrEditDoc::FindTexture(const char *name)
 {
-    ASSERT(width && depth && hfield);
-
-    if (losswarn)
+    for(int i=0; i < txtNumb; i++)
     {
-        int i;
-        byte *ptr;
-
-        for(i=0, ptr=hfield; i < (width * depth); i++)
-        {
-            if (*(ptr++))
-                break;
-        }
-
-        if (i < (width*depth))
-        {
-            if (MessageBox(NULL,
-                           "All current terrain height and normal data will be lost.\n\nDo you wish to continue import?",
-                           "Import Terrain Warning", MB_OKCANCEL | MB_ICONEXCLAMATION) == IDCANCEL)
-                return;
-        }
+        if (!txtName[i].CompareNoCase(name))
+            return i;
     }
 
-//ÄÄÄ Import VistaPro DEM File
-    if (strstr(fname,".DEM") || strstr(fname,".dem"))
-    {
-        int                 i;
-        int                 x, y, cx, cy;
-        int                 iwidth, idepth;
-        byte                *dptr;
-        ushort              min;
-        ushort              *sptr, *data=0;
-        XFileDOS            xf;
-        struct DEM_HEADER   demh;
-    
-        //ÄÄÄ Open DEM file for processing.
-        if ((i=xf.open(fname,XF_OPEN_READ))!=0)
-        {
-            char    str[512];
-
-            sprintf(str,"Error #%x opening input terrain file:\n\n%s",(int)i,fname);
-                                                  
-            MessageBox(NULL,
-                       str,"Import Terrain Error",MB_OK | MB_ICONEXCLAMATION);
-            return;
-        }
-
-        //ÄÄÄ Load header of DEM file
-        if (xf.read(&demh,sizeof(struct DEM_HEADER)) != sizeof(struct DEM_HEADER))
-        {
-            char    str[512];
-
-            sprintf(str,"Error #%x reading header from input terrain file:\n\n%s",(int)i,fname);
-                                                  
-            MessageBox(NULL,
-                       str,"Import Terrain Error",MB_OK | MB_ICONEXCLAMATION);
-            return;
-        }
-
-        //ÄÄÄ Verify header
-        if (strncmp(demh.id,"Vista DEM File",32))
-        {
-            MessageBox(NULL,
-                       "The import file is not a VistaPro DEM file",
-                       "Import Terrain Error",MB_OK | MB_ICONEXCLAMATION);
-            return;
-        }
-
-        //ÄÄÄ Check values in header
-        if (demh.compression != 0)
-        {
-            MessageBox(NULL,
-                       "The import file is a compressed VistaPro DEM file, use DECOMP first",
-                       "Import Terrain Error",MB_OK | MB_ICONEXCLAMATION);
-            return;
-        }
-
-        if (demh.header_type != 0 && demh.header_type != 16777216)
-        {
-            MessageBox(NULL,
-                       "The import file contains an unknown series DEM, which is not supported",
-                       "Import Terrain Error",MB_OK | MB_ICONEXCLAMATION);
-            return;
-        }
-
-        //ÄÄÄ Load data from DEM
-        if (demh.header_type == 16777216)
-        {
-            demh.ex_width = ((demh.ex_width & 0xff) << 24) |
-                            ((demh.ex_width & 0xff00) << 8) |
-                            ((demh.ex_width & 0xff0000) >> 8) |
-                            ((demh.ex_width & 0xff000000) >> 24);
-            demh.ex_depth = ((demh.ex_depth & 0xff) << 24) |
-                            ((demh.ex_depth & 0xff00) << 8) |
-                            ((demh.ex_depth & 0xff0000) >> 8) |
-                            ((demh.ex_depth & 0xff000000) >> 24);
-
-            if (!demh.ex_width || !demh.ex_depth)
-            {
-                MessageBox(NULL,
-                       "The import file hsa an invalid field size",
-                       "Import Terrain Error",MB_OK | MB_ICONEXCLAMATION);
-                return;
-            }
-
-            if ((demh.ex_width > 65535) || (demh.ex_depth > 65535))
-            {
-                MessageBox(NULL,
-                       "The import file is too large, it MUST be less than 64k by 64k",
-                       "Import Terrain Error",MB_OK | MB_ICONEXCLAMATION);
-                return;
-            }
-
-            iwidth = (ushort)demh.ex_width;
-            idepth = (ushort)demh.ex_depth;
-        }
-        else
-        {
-            ASSERT(demh.header_type == 0);
-
-            iwidth = 258;
-            idepth = 258;
-        }
-
-        data = new ushort[iwidth * idepth];
-        if (!data)
-        {
-            MessageBox(NULL,
-                 "Failed to allocate enough memory for import",
-                 "Import Terrain Error",MB_OK | MB_ICONEXCLAMATION);
-            return;
-        }
-
-        if (xf.read(data,sizeof(ushort)*iwidth * idepth) != sizeof(ushort)*iwidth * idepth)
-        {
-            MessageBox(NULL,
-                 "Could not load height field from DEM file",
-                 "Import Terrain Error",MB_OK | MB_ICONEXCLAMATION);
-            delete [] data;
-            return;
-        }
-
-        // Find minimum value
-        for(y=0, min=65535, sptr=data;
-            y < idepth; y++)
-        {
-            for(x=0; x < iwidth; x++)
-            {
-                if (*sptr < min)
-                    min = *sptr;
-
-                sptr++;
-            }
-        }
-
-        //ÄÄÄ Copy data from DEM
-
-        memset(name,0,sizeof(name));
-        strncpy(name,demh.name,ESCH_MAX_NAME-1);
-        SetTitle(name);
-
-        memset(desc,0,sizeof(desc));
-        strcpy(desc,demh.comment);
-
-        // Clear buffer
-        memset(hfield,0,width*depth);
-
-        // Copy data
-        for(y=0, cy=0; y < idepth; y++)
-        {
-            for(x=0, cx=0,
-                sptr=data+((depth-1-y)*iwidth), dptr=hfield+(y*width);
-                x < iwidth; x++)
-            {
-                // Perform VistaPro's standard conversion of DEM->PCX
-                // (although VistaPro arbitrarily never uses color 0 for
-                //  PCX output, so we will not do this so we can represent
-                //  height 0)
-                *(dptr++) = (byte)(( ((*sptr++) - min + 15) >> 4 ) & 0xff);
-                if (++cx >= width)
-                    break;
-            }
-
-            if (++cy >= depth)
-                break;
-        }
-
-        //ÄÄÄ Close
-        delete [] data;
-        xf.close();
-
-        //ÄÄÄ Update application
-        ComputeNormals();
-
-        SetModifiedFlag();
-        UpdateAllViews(NULL,HINT_UPDATETERR,NULL);
-
-        return;
-    }
-//ÄÄÄ Import PCX File
-    else if (strstr(fname,".PCX") || strstr(fname,".pcx"))
-    {
-        int         x, y, cx, cy;
-        byte        *dptr, *sptr;
-        XFParsePCX  pcx;
-
-        //ÄÄÄ Load data from PCX
-
-        if (pcx.nameread(fname))
-        {
-            char    str[512];
-
-            sprintf(str,"Error #%x opening input terrain file:\n\n%s",(int)pcx.error(),fname);
-                                                  
-            MessageBox(NULL,
-                       str,"Import Terrain Error",MB_OK | MB_ICONEXCLAMATION);
-            return;
-        }
-
-        //ÄÄÄ Check values in bitmap
-        if (pcx.bm->bpp != 1)
-        {
-            MessageBox(NULL,
-                       "PCX terrain files must be have 8-bit color depth",
-                       "Import Terrain Error",MB_OK | MB_ICONEXCLAMATION);
-            return;
-        }
-
-        //ÄÄÄ Copy data from PCX
-        memset(hfield,0,width*depth);
-
-        // Copy data
-        for(y=0, cy=0; y < pcx.bm->height; y++)
-        {
-            for(x=0, cx=0,
-                sptr=pcx.bm->data+(y*(pcx.bm->width)), dptr=hfield+(y*(width));
-                x < pcx.bm->width; x++)
-            {
-                *(dptr++) = *(sptr++);
-                if (++cx >= width)
-                    break;
-            }
-
-            if (++cy >= depth)
-                break;
-        }
-
-        //ÄÄÄ Update application
-        ComputeNormals();
-
-        SetModifiedFlag();
-        UpdateAllViews(NULL,HINT_UPDATETERR,NULL);
-
-        return;
-    }
-
-    MessageBox(NULL,
-                "Can only import terrain from DEM or PCX files","Error",MB_OK);
-}
-
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// TerrEditDoc - ImportSurface                                              ³
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrEditDoc::ImportSurface(const char *fname, int losswarn)
-{
-    int             x, y, cx, cy;
-    byte            *sptr;
-    dword           *dptr;
-    XFParsePCX      pcx;
-
-    ASSERT(width && depth && surfcolr);
-
-    dword surfsize = (width * depth) >> (surfshift*2);  
-
-    if (losswarn)
-    {
-        dword i;
-        dword *ptr;
-
-        for(i=0, ptr=surfcolr; i < surfsize; i++)
-        {
-            if (*(ptr++))
-                break;
-        }
-
-        if (i < surfsize)
-        {
-            if (MessageBox(NULL,
-                           "All current terrain surface color data will be lost.\n\nDo you wish to continue import?",
-                           "Import Surface Warning", MB_OKCANCEL | MB_ICONEXCLAMATION) == IDCANCEL)
-                return;
-        }
-    }
-
-//ÄÄÄ Load data from PCX
-
-    if (pcx.nameread(fname))
-    {
-        char    str[512];
-
-        sprintf(str,"Error #%x opening input surface file:\n\n%s",(int)pcx.error(),fname);
-                                                
-        MessageBox(NULL,
-                  str,"Import Surface Error",MB_OK | MB_ICONEXCLAMATION);
-        return;
-    }
-
-//ÄÄÄ Check values in bitmap
-    if (pcx.bm->bpp != 1)
-    {
-        MessageBox(NULL,
-                  "PCX surface color files must be have 8-bit color depth",
-                  "Import Surface Error",MB_OK | MB_ICONEXCLAMATION);
-        return;
-    }
-
-//ÄÄÄ Copy data from PCX (converting to RGB)
-    memset(surfcolr,0,surfsize*sizeof(dword));
-
-    // Copy data
-    for(y=0, cy=0; y < pcx.bm->height;)
-    {
-        for(x=0,
-            cx=0,
-            sptr=pcx.bm->data+(y*(pcx.bm->width)),
-            dptr=surfcolr+(cy*(width >> surfshift));
-            x < pcx.bm->width; )
-        {
-            *dptr = pcx.bm->pal[*sptr];
-
-            x += (1 << surfshift);
-            sptr += (1 << surfshift);
-
-            dptr++;
-            if (++cx >= (width >> surfshift))
-                break;
-        }
-
-        y += (1 << surfshift);
-        if (++cy >= (depth >> surfshift))
-            break;
-    }
-
-    map_surfcolor_to_palette();
-
-//ÄÄÄ Update application
-    SetModifiedFlag();
-    UpdateAllViews(NULL,HINT_UPDATECOLR,NULL);
+    return -1;
 }
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrEditDoc - AddTexture                                                 ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-BOOL TerrEditDoc::AddTexture(const char *name, const char *fname, dword color)
+BOOL TerrEditDoc::AddTexture(const char *name, const char *fname, dword color,
+                             dword flags)
 {
     //
     // Assumes name is unique
@@ -628,14 +391,15 @@ BOOL TerrEditDoc::AddTexture(const char *name, const char *fname, dword color)
         return FALSE;
 
     txtNumb++;
-    return SetTexture(txtNumb-1,name,fname,color);
+    return SetTexture(txtNumb-1,name,fname,color,flags);
 }
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrEditDoc - SetTexture                                                 ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-BOOL TerrEditDoc::SetTexture(int ind, const char *name, const char *fname, dword color)
+BOOL TerrEditDoc::SetTexture(int ind, const char *name, const char *fname,
+                             dword color, dword flags)
 {
     //
     // Assumes new name is unique
@@ -660,6 +424,7 @@ BOOL TerrEditDoc::SetTexture(int ind, const char *name, const char *fname, dword
     txtName[ind] = name;
     txtColr[ind] = color;
     txtColrIndx[ind] = (byte)palette.get_index((VngoColor24bit)color);
+    txtDFlags[ind] = flags;
 
     //
     // Update view
@@ -678,7 +443,8 @@ BOOL TerrEditDoc::SetTexture(int ind, const char *name, const char *fname, dword
 void TerrEditDoc::DeleteTexture(int ind)
 {
     //
-    // Remove texture, renumbering all textures afterwards (an updating surface data)
+    // Remove texture, renumbering all textures afterwards
+    // (and updating surface data)
     //
 
     if (ind >= txtNumb)
@@ -688,9 +454,14 @@ void TerrEditDoc::DeleteTexture(int ind)
     // Remove data for current entry
     //
 
-    txtEsch[ind].release();
+    if (txtEsch[ind])
+    {
+        delete txtEsch[ind];
+        txtEsch[ind] = 0;
+    }
     txtName[ind].Empty();
     txtFName[ind].Empty();
+    txtDFlags[ind] = 0;
 
     //
     // Compact array
@@ -703,6 +474,7 @@ void TerrEditDoc::DeleteTexture(int ind)
         txtEsch[i-1] = txtEsch[i];
         txtColr[i-1] = txtColr[i];
         txtColrIndx[i-1] = txtColrIndx[i];
+        txtDFlags[i-1] = txtDFlags[i];
     }
     txtNumb--;
 
@@ -716,14 +488,17 @@ void TerrEditDoc::DeleteTexture(int ind)
     if (!width || !depth || !surfinfo)
         return;
 
-    TerrSurfPrgDlg   dlg;
-    dlg.m_pBar.SetRange(0, (depth >> surfshift));
-    dlg.m_pBar.SetPos(0);
+    undo_valid = FALSE;
+
+    ProgressDlg   dlg;
+    dlg.m_pbar.SetRange(0, (depth >> surfshift));
+    dlg.m_pbar.SetPos(0);
+    dlg.SetWindowText("Scanning Surface Information...");
     dlg.ShowWindow(SW_SHOW);
 
     for(y=0, ptr=surfinfo; y < (depth >> surfshift); y++)
     {
-        dlg.m_pBar.SetPos(y);
+        dlg.m_pbar.SetPos(y);
 
         for(x=0; x < (width >> surfshift); x++)
         {
@@ -731,7 +506,8 @@ void TerrEditDoc::DeleteTexture(int ind)
             {
                 if (ptr->cind == ind+1)
                 {
-                    ptr->cind = (byte)palette.get_index((VngoColor24bit)surfcolr[y*(depth>>surfshift) + x]);
+                    ptr->cind = (byte)palette.get_index((VngoColor24bit)
+                                    surfcolr[y*(depth>>surfshift) + x]);
                     ptr->flags &= ~ESCH_SURF_CINDISTXT;
                 }
                 else if (ptr->cind > ind+1)
@@ -756,6 +532,497 @@ void TerrEditDoc::DeleteTexture(int ind)
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// TerrEditDoc - DeleteTexture                                              ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+void TerrEditDoc::RemoveUnusedTxts()
+{
+    if (txtNumb < 1)
+        return;
+
+    if (!width || !depth || !surfinfo)
+        return;
+
+    ProgressDlg   dlg;
+    dlg.SetWindowText("Scanning for unused textures...");
+    dlg.ShowWindow(SW_SHOW);
+
+    undo_valid = FALSE;
+
+start_over: ;
+    dlg.m_pbar.SetRange(0, txtNumb);
+    dlg.m_pbar.SetPos(0);
+
+    for(int txt=0; txt < txtNumb; txt++)
+    {
+        int             x, y;
+        esch_surf_type  *ptr;
+
+        for(y=0, ptr=surfinfo; y < (depth >> surfshift); y++)
+        {
+            for(x=0; x < (width >> surfshift); x++)
+            {
+                if (ptr->flags & ESCH_SURF_CINDISTXT
+                    && ptr->cind == txt+1)
+                {
+                    goto found;
+                }
+                ptr++;
+            }
+        }
+
+        // Not found
+        DeleteTexture(txt);
+        goto start_over;
+
+found: ;
+        dlg.m_pbar.SetPos(txt);
+    }
+
+    dlg.ShowWindow(SW_HIDE);
+
+    //
+    // Update view
+    //
+    
+    SetModifiedFlag();
+    UpdateAllViews(NULL,HINT_UPDATETXTS | HINT_UPDATECOLR,NULL);
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// TerrEditDoc - SaveTextures                                               ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+void TerrEditDoc::SaveTextures(const char *fname)
+{
+    //
+    // Assumes there are textures defined
+    //
+
+//ÄÄÄÄ Open output file
+    FILE *fptr = fopen (fname, "w");
+    if (!fptr)
+    {
+        MessageBox(NULL,
+                   "Failed to open file",
+                   "Save Textures Error",MB_OK | MB_ICONEXCLAMATION);
+        return;
+    }
+
+//ÄÄÄÄ Write header
+    fprintf(fptr,"; Escher Terrain Editor Texture Set\n\n%d\n",txtNumb);
+
+//ÄÄÄÄ Write each texture definition
+    for(int i=0; i < txtNumb; i++)
+    {
+        fprintf(fptr,"\"%s\" \"%s\" 0x%x 0x%x\n",
+                     txtName[i], txtFName[i], txtColr[i], txtDFlags[i]);
+    }
+
+//ÄÄÄÄ Close up file
+    fprintf(fptr,"\n; eof\n");
+    fclose (fptr);
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// TerrEditDoc - LoadTextures                                               ³
+//                                                                          ³
+// This will merge with the current texture definitions.  If there is a name³
+// conflict, a warning box is generated to ask if the user wants the new    ³
+// version used to overwrite the old.                                       ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+void TerrEditDoc::LoadTextures(const char *fname)
+{
+    BOOL tryadd=TRUE;
+
+//ÄÄÄÄ Open input file
+    FILE *fptr = fopen (fname, "r");
+    if (!fptr)
+    {
+        MessageBox(NULL,
+                   "Failed to open file",
+                   "Load Textures Error",MB_OK | MB_ICONEXCLAMATION);
+        return;
+    }
+
+    int i, t, numb;
+
+//ÄÄÄÄ Read header
+    if (fscanf(fptr,"; Escher Terrain Editor Texture Set\n\n%d\n",&numb) != 1)
+        goto read_error;
+
+//ÄÄÄÄ Read each texture definition
+    for(i=0; i < numb; i++)
+    {
+        char c;
+        char name[16];
+        char fname[256];
+        dword color;
+        dword dflags;
+        
+        // Read texture name
+        c=fgetc(fptr);
+        while (c != EOF && c != '\"')
+            c=fgetc(fptr);
+        if (c == EOF)
+            goto read_error;
+
+        for(t=0; t < sizeof(name); t++)
+        {
+            c=fgetc(fptr);
+            if (c == EOF || c == '\"')
+                break;
+            name[t] = c;
+        }
+        name[t]=0;
+        if (c == EOF)
+            goto read_error;
+
+        while (c != EOF && c != '\"')
+            c=fgetc(fptr);
+        if (c == EOF)
+            goto read_error;
+                     
+        // Read texture filename
+        c=fgetc(fptr);
+        while (c != EOF && c != '\"')
+            c=fgetc(fptr);
+        if (c == EOF)
+            goto read_error;
+
+        for(t=0; t < sizeof(fname); t++)
+        {
+            c=fgetc(fptr);
+            if (c == EOF || c == '\"')
+                break;
+            fname[t] = c;
+        }
+        fname[t]=0;
+        if (c == EOF)
+            goto read_error;
+
+        while (c != EOF && c != '\"')
+            c=fgetc(fptr);
+        if (c == EOF)
+            goto read_error;
+
+        // Read color and flags
+        if (fscanf(fptr," 0x%x 0x%x\n",
+                        &color,&dflags) != 2)
+            goto read_error;
+
+        //
+        // Scan current textures to see if name already in use.
+        //
+
+        int j=FindTexture(name);
+        if (j != -1)
+        {
+            char buff[128];
+            sprintf(buff,
+                    "Texture '%s' already defined, overwrite?",
+                    name);
+
+            int r = MessageBox(NULL,
+                               buff,
+                               "Load Textures Warning",
+                               MB_YESNOCANCEL | MB_ICONQUESTION);
+            if (r == IDYES)
+            {
+                SetTexture(j,name,fname,color,dflags);
+            }
+            else if (r == IDCANCEL)
+                goto leave;
+        }
+        //ÄÄÄÄ Name not in use, so add if possible
+        else if (tryadd)
+        {
+            if (!AddTexture(name,fname,color,dflags))
+            {
+                MessageBox(NULL,
+                           "No more textures may be defined.\n\n"
+                           "Skipping all remaining new textures",
+                           "Load Textures Error", MB_OK | MB_ICONEXCLAMATION);
+                tryadd=FALSE;
+            }
+        }
+    }
+
+//ÄÄÄÄ Close up file
+leave: ;
+    fclose (fptr);
+
+    return;
+
+//ÄÄÄÄ Handle error
+read_error: ;
+
+    MessageBox(NULL,
+               "Failed to read needed data",
+               "Load Textures Error",MB_OK | MB_ICONEXCLAMATION);
+    fclose (fptr);
+}   
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// TerrEditDoc - FindColor                                                  ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+int TerrEditDoc::FindColor(const char *name)
+{
+    for(int i=0; i < colorNumb; i++)
+    {
+        if (!colorName[i].CompareNoCase(name))
+            return i;
+    }
+
+    return -1;
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// TerrEditDoc - AddColor                                                   ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+BOOL TerrEditDoc::AddColor(const char *name, dword color, dword flags)
+{
+    //
+    // Assumes name is unique
+    //
+
+    if (colorNumb >= 255)
+        return FALSE;
+
+    colorNumb++;
+    return SetColor(colorNumb-1,name, color, flags);
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// TerrEditDoc - SetColor                                                   ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+BOOL TerrEditDoc::SetColor(int ind, const char *name, dword color, dword flags)
+{
+    //
+    // Assumes new name is unique
+    //
+ 
+    if (ind >= colorNumb)
+        return FALSE;
+
+    //
+    // Check for change of filename
+    //
+
+    colorName[ind] = name;
+    colorColr[ind] = color;
+    colorColrIndx[ind] = (byte)palette.get_index((VngoColor24bit)color);
+    colorDFlags[ind] = flags;
+
+    //
+    // Update view
+    //
+
+    SetModifiedFlag();
+
+// ----------------------------------------------------
+    UpdateAllViews(NULL,HINT_UPDATETXTS | HINT_UPDATECOLR,NULL);
+// ----------------------------------------------------
+
+    return TRUE;
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// TerrEditDoc - DeleteColor                                                ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+void TerrEditDoc::DeleteColor(int ind)
+{
+    //
+    // Remove color definition
+    //
+
+    if (ind >= colorNumb)
+        return;
+
+    //
+    // Remove data for current entry
+    //
+
+    colorName[ind].Empty();
+
+    //
+    // Compact array
+    //
+
+    for(int i=ind+1; i < colorNumb; i++)
+    {
+        colorName[i-1] = colorName[i];
+        colorColr[i-1] = colorColr[i];
+        colorColrIndx[i-1] = colorColrIndx[i];
+        colorDFlags[i-1] = colorDFlags[i];
+    }
+    colorNumb--;
+
+    //
+    // Update view
+    //
+    
+    SetModifiedFlag();
+    UpdateAllViews(NULL,HINT_UPDATETXTS,NULL);
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// TerrEditDoc - SaveColors                                                 ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+void TerrEditDoc::SaveColors(const char *fname)
+{
+    //
+    // Assumes there are colors defined
+    //
+
+//ÄÄÄÄ Open output file
+    FILE *fptr = fopen (fname, "w");
+    if (!fptr)
+    {
+        MessageBox(NULL,
+                   "Failed to open file",
+                   "Save Colors Error",MB_OK | MB_ICONEXCLAMATION);
+        return;
+    }
+
+//ÄÄÄÄ Write header
+    fprintf(fptr,"; Escher Terrain Editor Color Set\n\n%d\n",colorNumb);
+
+//ÄÄÄÄ Write each color definition
+    for(int i=0; i < colorNumb; i++)
+    {
+        fprintf(fptr,"\"%s\" 0x%x 0x%x\n",
+                     colorName[i], colorColr[i], colorDFlags[i]);
+    }
+
+//ÄÄÄÄ Close up file
+    fprintf(fptr,"\n; eof\n");
+    fclose (fptr);
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// TerrEditDoc - LoadColors                                                 ³
+//                                                                          ³
+// This will merge with the current color definitions.  If there is a name  ³
+// conflict, a warning box is generated to ask if the user wants the new    ³
+// version used to overwrite the old.                                       ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+void TerrEditDoc::LoadColors(const char *fname)
+{
+    BOOL tryadd=TRUE;
+
+//ÄÄÄÄ Open input file
+    FILE *fptr = fopen (fname, "r");
+    if (!fptr)
+    {
+        MessageBox(NULL,
+                   "Failed to open file",
+                   "Load Colors Error",MB_OK | MB_ICONEXCLAMATION);
+        return;
+    }
+
+    int i, t, numb;
+
+//ÄÄÄÄ Read header
+    if (fscanf(fptr,"; Escher Terrain Editor Color Set\n\n%d\n",&numb) != 1)
+        goto read_error;
+
+//ÄÄÄÄ Read each texture definition
+    for(i=0; i < numb; i++)
+    {
+        char c;
+        char name[16];
+        dword color;
+        dword dflags;
+        
+        // Read texture name
+        c=fgetc(fptr);
+        while (c != EOF && c != '\"')
+            c=fgetc(fptr);
+        if (c == EOF)
+            goto read_error;
+
+        for(t=0; t < sizeof(name); t++)
+        {
+            c=fgetc(fptr);
+            if (c == EOF || c == '\"')
+                break;
+            name[t] = c;
+        }
+        name[t]=0;
+        if (c == EOF)
+            goto read_error;
+
+        while (c != EOF && c != '\"')
+            c=fgetc(fptr);
+        if (c == EOF)
+            goto read_error;
+                     
+        // Read color and flags
+        if (fscanf(fptr," 0x%x 0x%x\n",
+                        &color,&dflags) != 2)
+            goto read_error;
+
+        //
+        // Scan current colors to see if name already in use.
+        //
+
+        int j=FindColor(name);
+        if (j != -1)
+        {
+            char buff[128];
+            sprintf(buff,
+                    "Color '%s' already defined, overwrite?",
+                    name);
+
+            int r = MessageBox(NULL,
+                               buff,
+                               "Load Colors Warning",
+                               MB_YESNOCANCEL | MB_ICONQUESTION);
+            if (r == IDYES)
+            {
+                SetColor(j,name,color,dflags);
+            }
+            else if (r == IDCANCEL)
+                goto leave;
+        }
+        //ÄÄÄÄ Name not in use, so add if possible
+        else if (tryadd)
+        {
+            if (!AddColor(name,color,dflags))
+            {
+                MessageBox(NULL,
+                           "No more colors may be defined.\n\n"
+                           "Skipping all remaining new colors",
+                           "Load Colors Error", MB_OK | MB_ICONEXCLAMATION);
+                tryadd=FALSE;
+            }
+        }
+    }
+
+//ÄÄÄÄ Close up file
+leave: ;
+    fclose (fptr);
+
+    return;
+
+//ÄÄÄÄ Handle error
+read_error: ;
+
+    MessageBox(NULL,
+               "Failed to read needed data",
+               "Load Colors Error",MB_OK | MB_ICONEXCLAMATION);
+    fclose (fptr);
+}   
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrEditDoc - ExportToIFF                                                ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 void TerrEditDoc::ExportToIFF(const char *fname)
@@ -763,6 +1030,7 @@ void TerrEditDoc::ExportToIFF(const char *fname)
     dword               status=0;
     XFParseIFF          iff;
     EschFileTerrHDR     header;
+    EschFileTerrHCLR    hcolor;
 
     dword surfsize = (width * depth) >> (surfshift*2);
 
@@ -774,12 +1042,13 @@ void TerrEditDoc::ExportToIFF(const char *fname)
     header.width = width;
     header.depth = depth;
     header.surfratio = surfratio;
-    header.wscale = wscale;
-    header.dscale = dscale;
-    header.hscale = hscale;
+    header.scale = scale;
     header.ntxts = (byte) txtNumb;
+    header.origin_x = orgx;
+    header.origin_y = orgy;
+    header.origin_z = orgz;
 
-    strncpy(header.palname,"Default",16);
+    strncpy(header.palname,palette.name,16);
 
 //ÄÄÄ Setup file
 
@@ -857,6 +1126,29 @@ void TerrEditDoc::ExportToIFF(const char *fname)
         return;
     }
 
+    // Write height-based color table
+    hcolor.blue = color_bands[0];
+    hcolor.lblue = color_bands[1];
+    hcolor.white = color_bands[2];
+    hcolor.green = color_bands[3];
+    hcolor.lgreen = color_bands[4];
+    hcolor.yellow = color_bands[5];
+    hcolor.lorange = color_bands[6];
+    hcolor.orange = color_bands[7];
+    hcolor.lbrown = color_bands[8];
+    hcolor.brown = color_bands[9];
+    hcolor.red = color_bands[10];
+    if (iff.write(iff.makeid('H','C','L','R'),&hcolor,sizeof(EschFileTerrHCLR)))
+    {
+        char    str[64];
+
+        sprintf(str,"Error #%x while trying to write color bands chunk",(int)iff.error());
+                                                  
+        MessageBox((AfxGetMainWnd()) ? AfxGetMainWnd()->GetSafeHwnd() : NULL,
+               str,"Export Error",MB_OK | MB_ICONEXCLAMATION);
+        return;
+    }
+
     // Write height field
     if (hfield)
     {
@@ -873,6 +1165,21 @@ void TerrEditDoc::ExportToIFF(const char *fname)
         status |= EXPSTAT_HGTS;
     }
  
+    // Write height table
+    if (htable)
+    {
+        if (iff.write(iff.makeid('H','T','B','L'),htable,sizeof(Flx16)*256))
+        {
+            char    str[64];
+
+            sprintf(str,"Error #%x while trying to write height table chunk",(int)iff.error());
+                                                  
+            MessageBox((AfxGetMainWnd()) ? AfxGetMainWnd()->GetSafeHwnd() : NULL,
+                   str,"Export Error",MB_OK | MB_ICONEXCLAMATION);
+            return;
+        }
+    }
+
     // Write normals info
     if (hsurfnorml)
     {
@@ -885,16 +1192,81 @@ void TerrEditDoc::ExportToIFF(const char *fname)
         }
         else
         {
+#if 1
+            // Output compressed normals
+            ushort *cnrmls = new ushort[surfsize * 4];
+            if (!cnrmls)
+            {
+                MessageBox((AfxGetMainWnd()) ? AfxGetMainWnd()->GetSafeHwnd() : NULL,
+                           "Out of Memory","Export Error",MB_OK | MB_ICONEXCLAMATION);
+                return;
+            }
+
+            ushort *sptr = cnrmls;
+            EschVector *ptr = nml;
+            for(ulong i=0; i < surfsize; i++, ptr++)
+            {
+                ushort flags=0;
+                Flx16 i=ptr->i;  Flx16 j=ptr->j;  Flx16 k=ptr->k;
+
+                if (i < 0)
+                {
+                    flags |= 0x8;
+                    i = -i;
+                }
+                if (j < 0)
+                {
+                    flags |= 0x10;
+                    j = -j;
+                }
+                if (k < 0)
+                {
+                    flags |= 0x20;
+                    k = -k;
+                }
+
+                *(sptr++) = (ushort)(i.flx & 0xffff);
+                *(sptr++) = (ushort)(j.flx & 0xffff);
+                *(sptr++) = (ushort)(k.flx & 0xffff);
+
+                if (i.flx & 0x00010000)
+                    flags |= 0x1;
+                if (j.flx & 0x00010000)
+                    flags |= 0x2;
+                if (k.flx & 0x00010000)
+                    flags |= 0x4;
+
+                *(sptr++) = flags;
+            }
+
+            if (iff.write(iff.makeid('N','R','M','1'),cnrmls,surfsize*sizeof(ushort)*4))
+            {
+                char    str[64];
+
+                sprintf(str,"Error #%x while trying to write surface normals chunk",
+                            (int)iff.error());
+                                                  
+                MessageBox((AfxGetMainWnd()) ? AfxGetMainWnd()->GetSafeHwnd() : NULL,
+                           str,"Export Error",MB_OK | MB_ICONEXCLAMATION);
+                delete cnrmls;
+                return;
+            }
+
+            delete cnrmls;
+#else
+            // Output uncompressed normals
             if (iff.write(iff.makeid('N','R','M','L'),nml,surfsize*sizeof(EschVector)))
             {
                 char    str[64];
 
-                sprintf(str,"Error #%x while trying to write surface normals chunk",(int)iff.error());
+                sprintf(str,"Error #%x while trying to write surface normals chunk",
+                            (int)iff.error());
                                                   
                 MessageBox((AfxGetMainWnd()) ? AfxGetMainWnd()->GetSafeHwnd() : NULL,
                            str,"Export Error",MB_OK | MB_ICONEXCLAMATION);
                 return;
             }
+#endif
 
             status |= EXPSTAT_NRML;
         }
@@ -907,7 +1279,8 @@ void TerrEditDoc::ExportToIFF(const char *fname)
         {
             char    str[64];
 
-            sprintf(str,"Error #%x while trying to write surface information chunk",(int)iff.error());
+            sprintf(str,"Error #%x while trying to write surface information chunk",
+                        (int)iff.error());
                                                   
             MessageBox((AfxGetMainWnd()) ? AfxGetMainWnd()->GetSafeHwnd() : NULL,
                 str,"Export Error",MB_OK | MB_ICONEXCLAMATION);
@@ -926,7 +1299,8 @@ void TerrEditDoc::ExportToIFF(const char *fname)
         {
             char    str[64];
 
-            sprintf(str,"Error #%x while trying to write texture color information chunk",(int)iff.error());
+            sprintf(str,"Error #%x while trying to write texture color information chunk",
+                        (int)iff.error());
                                                       
             MessageBox(NULL,
                 str,"Export Error",MB_OK | MB_ICONEXCLAMATION);
@@ -939,7 +1313,9 @@ void TerrEditDoc::ExportToIFF(const char *fname)
             {
                 char    str[128];
 
-                sprintf(str,"Error #%x while trying to create new texture form\n\nTexture: %s",(int)iff.error(),
+                sprintf(str,"Error #%x while trying to create new texture form\n\n"
+                            "Texture: %s",
+                            (int)iff.error(),
                             txtName[i]);
 
                 MessageBox(NULL,
@@ -947,8 +1323,10 @@ void TerrEditDoc::ExportToIFF(const char *fname)
                 return;
             }
             
-            txtEsch[i].lock();
-            VngoTexture *ptr = txtEsch[i].ptr;
+            assert(txtEsch[i]);
+
+            txtEsch[i]->lock();
+            VngoTexture *ptr = txtEsch[i]->ptr;
             ASSERT(ptr);
 
             memset(&mhdr,0,sizeof(EschFileMtlMHDR));
@@ -962,12 +1340,14 @@ void TerrEditDoc::ExportToIFF(const char *fname)
             {
                 char    str[128];
 
-                sprintf(str,"Error #%x while trying to write texture header chunk\n\nTexture: %s",(int)iff.error(),
+                sprintf(str,"Error #%x while trying to write texture header chunk\n\n"
+                            "Texture: %s",
+                            (int)iff.error(),
                             txtName[i]);
                                                   
                 MessageBox(NULL,
                            str,"Export Error",MB_OK | MB_ICONEXCLAMATION);
-                txtEsch[i].unlock();
+                txtEsch[i]->unlock();
                 return;
             }
  
@@ -975,16 +1355,18 @@ void TerrEditDoc::ExportToIFF(const char *fname)
             {
                 char    str[128];
 
-                sprintf(str,"Error #%x while trying to write texture body chunk\n\nTexture: %s",(int)iff.error(),txtName[i]);
+                sprintf(str,"Error #%x while trying to write texture body chunk\n\n"
+                            "Texture: %s",
+                            (int)iff.error(),txtName[i]);
                                                   
                 MessageBox(NULL,
                            str,"Export Error",MB_OK | MB_ICONEXCLAMATION);
-                txtEsch[i].unlock();
+                txtEsch[i]->unlock();
                 return;
             }
             
             iff.leaveform();
-            txtEsch[i].unlock();
+            txtEsch[i]->unlock();
         }        
         
         status |= EXPSTAT_TXTS;
@@ -1028,14 +1410,15 @@ void TerrEditDoc::ComputeNormals()
     memset(nml,0,surfsize*sizeof(EschVector));
 
 //ÄÄÄ Compute normals
-    TerrCNmPrgDlg   dlg;
-    dlg.m_pBar.SetRange(0,depth);
-    dlg.m_pBar.SetPos(0);
+    ProgressDlg   dlg;
+    dlg.m_pbar.SetRange(0,depth);
+    dlg.m_pbar.SetPos(0);
+    dlg.SetWindowText("Computing Surface Normals...");
     dlg.ShowWindow(SW_SHOW);
        
     for(y=0, cy=0; y < depth;)
     {
-        dlg.m_pBar.SetPos(y);
+        dlg.m_pbar.SetPos(y);
         for(x=0, cx=0,
             sptr=hfield + (y*width),
             dptr=(nml)+(cy*(width >> surfshift));
@@ -1172,9 +1555,18 @@ void TerrEditDoc::ComputeNormals()
             // Compute & Store final normal
             mag = sqrt(sum[0]*sum[0] + sum[1]*sum[1] + sum[2]*sum[2]);
 
-            dptr->i = (Flx16) (float)(sum[0] / mag);
-            dptr->j = (Flx16) (float)(sum[1] / mag);
-            dptr->k = (Flx16) (float)(sum[2] / mag);
+            if (mag <= 0)
+            {
+                dptr->i = 0;
+                dptr->j = 1;
+                dptr->k = 0;
+            }
+            else
+            {
+                dptr->i = (Flx16) (float)(sum[0] / mag);
+                dptr->j = (Flx16) (float)(sum[1] / mag);
+                dptr->k = (Flx16) (float)(sum[2] / mag);
+            }
 
             // Update counters
             x += (1 << surfshift);
@@ -1192,6 +1584,545 @@ void TerrEditDoc::ComputeNormals()
     ivory_hunlock(hsurfnorml);
 
     SetModifiedFlag();
+    SetLightsModifiedFlag();
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// TerrEditDoc - LightTerrain                                               ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+void TerrEditDoc::LightTerrain()
+{
+    if (!lightsdirty || !lights || !cam.vport)
+        return;
+
+    EschTerrain terr;
+    terr.width = width;
+    terr.depth = depth;
+    terr.surfratio = surfratio;
+    terr.surfshift = surfshift;
+    terr.set_scale(scale);
+    terr.hfield = hfield;
+    terr.htable = htable;
+    terr.surfinfo = surfinfo;
+    terr.hsurfnorml = hsurfnorml;
+    terr.set_origin(orgx, orgy, orgz);
+    terr.compute_shades(&cam,lights);
+
+    lightsdirty = FALSE;
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// TerrEditDoc - GetMinMaxElevations                                        ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+void TerrEditDoc::GetMinMaxElevations(Flx16 &min, Flx16 &max) 
+{
+    if (!htable)
+        return;
+
+    min.flx = 0x7fffffff;
+    max.flx = -0x7fffffff;
+
+    for(int i=0; i < 256; i++)
+    {
+        if (htable[i] < min)
+            min = htable[i];
+        if (htable[i] > max)
+            max = htable[i];
+    }
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// TerrEditDoc - SetBaseElevation                                           ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+void TerrEditDoc::SetBaseElevation(Flx16 newbase)
+{
+    if (!htable)
+        return;
+
+    Flx16 base(0x7fffffff,0);
+    for(int i=0; i < 256; i++)
+    {
+        if (htable[i] < base)
+            base = htable[i];
+    }
+
+    if (base == newbase)
+        return;
+
+    Flx16 adjust = base - newbase;
+
+    for(i=0; i < 256; i++)
+    {
+        htable[i] = htable[i] - adjust;
+    }
+
+    UpdateAllViews(NULL,HINT_UPDATECOLR,NULL);
+    SetModifiedFlag();
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// TerrEditDoc - PushUndo                                                   ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+void TerrEditDoc::PushUndo()
+{
+    dword surfsize = (width * depth) >> (surfshift*2);
+
+    ASSERT(surfinfo != NULL && undo_surfinfo != NULL);
+    memcpy(undo_surfinfo,surfinfo,surfsize * sizeof(esch_surf_type));
+
+    ASSERT(surfcolr != NULL && undo_surfcolr != NULL);
+    memcpy(undo_surfcolr,surfcolr,surfsize * sizeof(dword));
+
+    undo_valid=TRUE;
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// TerrEditDoc - PopUndo                                                    ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+void TerrEditDoc::PopUndo()
+{
+    if (!undo_valid)
+        return;
+
+    dword surfsize = (width * depth) >> (surfshift*2);
+
+    ASSERT(surfinfo != NULL && undo_surfinfo != NULL);
+    memcpy(surfinfo,undo_surfinfo,surfsize * sizeof(esch_surf_type));
+
+    ASSERT(surfcolr != NULL && undo_surfcolr != NULL);
+    memcpy(surfcolr,undo_surfcolr,surfsize * sizeof(dword));
+
+    undo_valid=FALSE;
+
+    UpdateAllViews(NULL,HINT_UPDATECOLR,NULL);
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// TerrEditDoc - Flip                                                       ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+void TerrEditDoc::Flip(BOOL horz)
+{
+    ulong i, j;
+
+    ushort iwidth = width >> surfshift;
+    ushort idepth = depth >> surfshift;
+
+    undo_valid=FALSE;
+
+    ASSERT(hfield && surfinfo && surfcolr && hsurfnorml);
+
+//ÄÄ Flip heights
+    {
+        byte *sptr, *dptr;
+        byte *t = new byte[(horz) ? depth : width];
+        ASSERT(t);
+
+        if (horz)
+        {
+            for(i=0; i < (ulong)(width >> 1); i++)
+            {
+                for(j=0, sptr=hfield+i, dptr=t;
+                    j < depth; j++, sptr += width, dptr++)
+                    *dptr = *sptr;
+
+                for(j=0, sptr=hfield+(width-i-1), dptr=hfield+i;
+                    j < depth; j++, sptr += width, dptr += width)
+                    *dptr = *sptr;
+
+                for(j=0, sptr=t, dptr=hfield+(width-i-1);
+                    j < depth; j++, sptr++, dptr += width)
+                    *dptr = *sptr;
+            }
+        }
+        else
+        {
+            for(i=0; i < (ulong)(depth >> 1); i++)
+            {
+                for(j=0, sptr=hfield+(i*width), dptr=t;
+                    j < width; j++, sptr++, dptr++)
+                    *dptr = *sptr;
+
+                for(j=0, sptr=hfield+((depth-i-1)*width), dptr=hfield+(i*width);
+                    j < width; j++, sptr++, dptr++)
+                    *dptr = *sptr;
+
+                for(j=0, sptr=t, dptr=hfield+((depth-i-1)*width);
+                    j < width; j++, sptr++, dptr++)
+                    *dptr = *sptr;
+            }
+        }
+
+        delete [] t;
+    }
+
+//ÄÄ Flip normals
+    {
+        EschVector *nml = (EschVector*)ivory_hlock(hsurfnorml);
+        if (!nml)
+        {
+            MessageBox((AfxGetMainWnd()) ? AfxGetMainWnd()->GetSafeHwnd() : NULL,
+                      "Could not lock normals memory",
+                      "Flip Error",MB_OK | MB_ICONEXCLAMATION);
+            return;
+        }
+
+        EschVector *sptr, *dptr;
+        EschVector *t = new EschVector[(horz) ? idepth : iwidth];
+        ASSERT(t);
+
+        if (horz)
+        {
+            for(i=0; i < (ulong)(iwidth >> 1); i++)
+            {
+                for(j=0, sptr=nml+i, dptr=t;
+                    j < idepth; j++, sptr += iwidth, dptr++)
+                    *dptr = *sptr;
+
+                for(j=0, sptr=nml+(iwidth-i-1), dptr=nml+i;
+                    j < idepth; j++, sptr += iwidth, dptr += iwidth)
+                    *dptr = *sptr;
+
+                for(j=0, sptr=t, dptr=nml+(iwidth-i-1);
+                    j < idepth; j++, sptr++, dptr += iwidth)
+                    *dptr = *sptr;
+            }
+        }
+        else
+        {
+            for(i=0; i < (ulong)(idepth >> 1); i++)
+            {
+                for(j=0, sptr=nml+(i*iwidth), dptr=t;
+                    j < iwidth; j++, sptr++, dptr++)
+                    *dptr = *sptr;
+
+                for(j=0, sptr=nml+((idepth-i-1)*iwidth), dptr=nml+(i*iwidth);
+                    j < iwidth; j++, sptr++, dptr++)
+                    *dptr = *sptr;
+
+                for(j=0, sptr=t, dptr=nml+((idepth-i-1)*iwidth);
+                    j < iwidth; j++, sptr++, dptr++)
+                    *dptr = *sptr;
+            }
+        }
+
+        delete [] t;
+
+        ivory_hunlock(hsurfnorml);
+    }
+
+//ÄÄ Flip surface info
+    {
+        esch_surf_type *sptr, *dptr;
+        esch_surf_type *t = new esch_surf_type[(horz) ? idepth : iwidth];
+        ASSERT(t);
+
+        if (horz)
+        {
+            for(i=0; i < (ulong)(iwidth >> 1); i++)
+            {
+                for(j=0, sptr=surfinfo+i, dptr=t;
+                    j < idepth; j++, sptr += iwidth, dptr++)
+                    *dptr = *sptr;
+
+                for(j=0, sptr=surfinfo+(iwidth-i-1), dptr=surfinfo+i;
+                    j < idepth; j++, sptr += iwidth, dptr += iwidth)
+                    *dptr = *sptr;
+
+                for(j=0, sptr=t, dptr=surfinfo+(iwidth-i-1);
+                    j < idepth; j++, sptr++, dptr += iwidth)
+                    *dptr = *sptr;
+            }
+        }
+        else
+        {
+            for(i=0; i < (ulong)(idepth >> 1); i++)
+            {
+                for(j=0, sptr=surfinfo+(i*iwidth), dptr=t;
+                    j < iwidth; j++, sptr++, dptr++)
+                    *dptr = *sptr;
+
+                for(j=0, sptr=surfinfo+((idepth-i-1)*iwidth), dptr=surfinfo+(i*iwidth);
+                    j < iwidth; j++, sptr++, dptr++)
+                    *dptr = *sptr;
+
+                for(j=0, sptr=t, dptr=surfinfo+((idepth-i-1)*iwidth);
+                    j < iwidth; j++, sptr++, dptr++)
+                    *dptr = *sptr;
+            }
+        }
+
+        delete [] t;
+    }
+
+//ÄÄ Flip surface colors
+    {
+        dword *sptr, *dptr;
+        dword *t = new dword[(horz) ? idepth : iwidth];
+        ASSERT(t);
+
+        if (horz)
+        {
+            for(i=0; i < (ulong)(iwidth >> 1); i++)
+            {
+                for(j=0, sptr=surfcolr+i, dptr=t;
+                    j < idepth; j++, sptr += iwidth, dptr++)
+                    *dptr = *sptr;
+
+                for(j=0, sptr=surfcolr+(iwidth-i-1), dptr=surfcolr+i;
+                    j < idepth; j++, sptr += iwidth, dptr += iwidth)
+                    *dptr = *sptr;
+
+                for(j=0, sptr=t, dptr=surfcolr+(iwidth-i-1);
+                    j < idepth; j++, sptr++, dptr += iwidth)
+                    *dptr = *sptr;
+            }
+        }
+        else
+        {
+            for(i=0; i < (ulong)(idepth >> 1); i++)
+            {
+                for(j=0, sptr=surfcolr+(i*iwidth), dptr=t;
+                    j < iwidth; j++, sptr++, dptr++)
+                    *dptr = *sptr;
+
+                for(j=0, sptr=surfcolr+((idepth-i-1)*iwidth), dptr=surfcolr+(i*iwidth);
+                    j < iwidth; j++, sptr++, dptr++)
+                    *dptr = *sptr;
+
+                for(j=0, sptr=t, dptr=surfcolr+((idepth-i-1)*iwidth);
+                    j < iwidth; j++, sptr++, dptr++)
+                    *dptr = *sptr;
+            }
+        }
+
+        delete [] t;
+    }
+
+//ÄÄ Update
+    SetModifiedFlag();
+    SetLightsModifiedFlag();
+    UpdateAllViews(NULL,HINT_UPDATETERR|HINT_UPDATECOLR,NULL);
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// TerrEditDoc - Rotate                                                     ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+void TerrEditDoc::Rotate(BOOL right)
+{
+    if (width != depth)
+    {
+        if (MessageBox(NULL,
+                       "The terrain data is not square,\n"
+                       "so this operation may lose data\n\n"
+                       "This operation cannot be undone...\n"
+                       "Do you wish to continue?",
+                       "Escher Terrain Rotate Warning",
+                       MB_YESNO | MB_ICONQUESTION) == IDNO)
+            return;
+    }
+
+    ulong i, j;
+
+    ushort iwidth = width >> surfshift;
+    ushort idepth = depth >> surfshift;
+
+    dword surfsize = (width * depth) >> (surfshift*2);
+
+    undo_valid=FALSE;
+
+    ASSERT(hfield && surfinfo && surfcolr && hsurfnorml);
+
+//ÄÄ Rotate heights
+    {
+        byte *t = new byte[width*depth];
+        ASSERT(t);
+        memset(t,0,width*depth);
+
+        for(j=0; j < (ulong)depth; j++)
+        {
+            byte *sptr=hfield+((depth-j-1)*width);
+
+            if (j >= width)
+                break;
+
+            if (right)
+            {
+                byte *dptr=t+(width-j-1)+(depth-1)*width;
+                for(i=0; i < (ulong)width;
+                    i++, sptr++, dptr -= width)
+                {
+                    if (i >= depth)
+                        break;
+
+                    *dptr = *sptr;
+                }
+            }
+            else
+            {
+                byte *dptr=t+j;
+                for(i=0; i < (ulong)width;
+                    i++, sptr++, dptr += width)
+                {
+                    if (i >= depth)
+                        break;
+
+                    *dptr = *sptr;
+                }
+            }
+        }
+
+        delete [] hfield;
+        hfield=t;
+    }
+
+//ÄÄ Rotate normals
+    {
+        IvoryHandle th = ivory_halloc((ulong)(surfsize * sizeof(EschVector)));
+        ASSERT(th);
+
+        EschVector *t = (EschVector*) ivory_hlock(th);
+        ASSERT(t);
+        memset(t,0,(ulong)(surfsize * sizeof(EschVector)));
+        
+        EschVector *nml = (EschVector*) ivory_hlock(hsurfnorml);
+        ASSERT(nml);
+
+        for(j=0; j < (ulong)idepth; j++)
+        {
+            EschVector *sptr=nml+((idepth-j-1)*iwidth);
+
+            if (j >= iwidth)
+                break;
+
+            if (right)
+            {
+                EschVector *dptr=t+(iwidth-j-1)+(idepth-1)*iwidth;
+                for(i=0; i < (ulong)iwidth;
+                    i++, sptr++, dptr -= iwidth)
+                {
+                    if (i >= idepth)
+                        break;
+
+                    *dptr = *sptr;
+                }
+            }
+            else
+            {
+                EschVector *dptr=t+j;
+                for(i=0; i < (ulong)iwidth;
+                    i++, sptr++, dptr += iwidth)
+                {
+                    if (i >= idepth)
+                        break;
+
+                    *dptr = *sptr;
+                }
+            }
+        }
+
+        ivory_hunlock(hsurfnorml);
+        ivory_hfree(&hsurfnorml);
+        hsurfnorml=th;
+        ivory_hunlock(th);
+    }
+
+//ÄÄ Rotate surface info
+    {
+        esch_surf_type *t = new esch_surf_type[iwidth*idepth];
+        ASSERT(t);
+        memset(t,0,surfsize * sizeof(esch_surf_type));
+
+        for(j=0; j < (ulong)idepth; j++)
+        {
+            esch_surf_type *sptr=surfinfo+((idepth-j-1)*iwidth);
+
+            if (j >= iwidth)
+                break;
+
+            if (right)
+            {
+                esch_surf_type *dptr=t+(iwidth-j-1)+(idepth-1)*iwidth;
+                for(i=0; i < (ulong)iwidth;
+                    i++, sptr++, dptr -= iwidth)
+                {
+                    if (i >= idepth)
+                        break;
+
+                    *dptr = *sptr;
+                }
+            }
+            else
+            {
+                esch_surf_type *dptr=t+j;
+                for(i=0; i < (ulong)iwidth;
+                    i++, sptr++, dptr += iwidth)
+                {
+                    if (i >= idepth)
+                        break;
+
+                    *dptr = *sptr;
+                }
+            }
+        }
+
+        delete [] surfinfo;
+        surfinfo=t;
+    }
+
+//ÄÄ Rotate surface colors
+    {
+        dword *t = new dword[iwidth*idepth];
+        ASSERT(t);
+        memset(t,0,surfsize * sizeof(dword));
+
+        for(j=0; j < (ulong)idepth; j++)
+        {
+            dword *sptr=surfcolr+((idepth-j-1)*iwidth);
+
+            if (j >= iwidth)
+                break;
+
+            if (right)
+            {
+                dword *dptr=t+(iwidth-j-1)+(idepth-1)*iwidth;
+                for(i=0; i < (ulong)iwidth;
+                    i++, sptr++, dptr -= iwidth)
+                {
+                    if (i >= idepth)
+                        break;
+
+                    *dptr = *sptr;
+                }
+            }
+            else
+            {
+                dword *dptr=t+j;
+                for(i=0; i < (ulong)iwidth;
+                    i++, sptr++, dptr += iwidth)
+                {
+                    if (i >= idepth)
+                        break;
+
+                    *dptr = *sptr;
+                }
+            }
+        }
+
+        delete [] surfcolr;
+        surfcolr=t;
+    }
+
+//ÄÄ Update
+    SetModifiedFlag();
+    SetLightsModifiedFlag();
+    UpdateAllViews(NULL,HINT_UPDATETERR|HINT_UPDATECOLR,NULL);
 }
 
 
@@ -1200,42 +2131,68 @@ void TerrEditDoc::ComputeNormals()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 void TerrEditDoc::UITerrainProperities(CWnd *parent, UINT ipage, int edit)
 {
-
 //ÄÄÄ General
-    TerrPropDlgA dlga;
+    TerrPropGenPage gdlg;
 
-    dlga.m_edit = edit;
-    dlga.m_name = name;
-    dlga.m_width = width;
-    dlga.m_depth = depth;
-    dlga.m_surfratio = surfratio;
-    dlga.m_wscale = wscale;
-    dlga.m_dscale = dscale;
-    dlga.m_hscale = hscale;
+    gdlg.m_edit = edit;
+    gdlg.m_name = name;
+    gdlg.m_width = width;
+    gdlg.m_depth = depth;
+    gdlg.m_surfratio = surfratio;
+    gdlg.m_scale = (UINT)(int)scale;
+    gdlg.m_autoCenterOrg = autocenter;
+    gdlg.m_orgx = orgx;
+    gdlg.m_orgy = orgy;
+    gdlg.m_orgz = orgz;
+
+//ÄÄÄ Height-colors
+    TerrPropHColrPage hdlg;
+    hdlg.m_blue = color_bands[0];
+    hdlg.m_lblue = color_bands[1];
+    hdlg.m_white = color_bands[2];
+    hdlg.m_green = color_bands[3];
+    hdlg.m_lgreen = color_bands[4];
+    hdlg.m_yellow = color_bands[5];
+    hdlg.m_lorange = color_bands[6];
+    hdlg.m_orange = color_bands[7];
+    hdlg.m_lbrown = color_bands[8];
+    hdlg.m_brown = color_bands[9];
+    hdlg.m_red = color_bands[10];
+    
+//ÄÄÄ Height-table
+    TerrPropHTablePage  htdlg;
+    if (htable && !edit)
+    {
+        for(long i=0; i < 256; i++)
+            htdlg.htable[i] = htable[i];
+    }
 
 //ÄÄÄ Misc
-    TerrPropDlgB dlgb;
+    TerrPropMiscPage mdlg;
 
-    dlgb.m_desc = desc;
-    dlgb.m_auth = auth;
-    dlgb.m_copy = copy;
+    mdlg.m_desc = desc;
+    mdlg.m_auth = auth;
+    mdlg.m_copy = copy;
 
 //ÄÄÄ Handle Display
     CPropertySheet sh("Terrain Properties",parent,ipage);
 
-    sh.AddPage(&dlga);      // General
-    sh.AddPage(&dlgb);      // Misc
+    sh.AddPage(&gdlg);      // General
+    sh.AddPage(&hdlg);      // Height-colors
+    if (htable && !edit)
+        sh.AddPage(&htdlg); // Height-table
+    sh.AddPage(&mdlg);      // Misc
 
+//ÄÄÄ Store results, if OK
     if (sh.DoModal() == IDOK)
     {
-        //ÄÄÄ Save values from General
+        //ÄÄÄ General
         memset(name,0,sizeof(name));
-        strncpy(name,dlga.m_name,ESCH_MAX_NAME-1);
-        SetTitle(name);
+        strncpy(name,gdlg.m_name,ESCH_MAX_NAME-1);
 
-        width = (ushort)dlga.m_width;
-        depth = (ushort)dlga.m_depth;
-        surfratio = (ushort)dlga.m_surfratio;
+        width = (ushort)gdlg.m_width;
+        depth = (ushort)gdlg.m_depth;
+        surfratio = (ushort)gdlg.m_surfratio;
         switch(surfratio)
         {
             case 1:
@@ -1257,23 +2214,50 @@ void TerrEditDoc::UITerrainProperities(CWnd *parent, UINT ipage, int edit)
                 ASSERT(0);
                 break;
         }
-        wscale = dlga.m_wscale;
-        dscale = dlga.m_dscale;
-        hscale = dlga.m_hscale;      
+        scale = (Flx16)(int)gdlg.m_scale;
         
-        //ÄÄÄ Save values from Misc
+        autocenter = (gdlg.m_autoCenterOrg) ? 1 : 0;
+        if (autocenter)
+        {
+            orgx = -(Flx16)(width/2)*scale;
+            orgy = 0;
+            orgz = -(Flx16)(depth/2)*scale;
+        }
+        else
+        {
+            orgx = gdlg.m_orgx;
+            orgy = gdlg.m_orgy;
+            orgz = gdlg.m_orgz;
+        }
+
+        //ÄÄÄ Height-colors
+        color_bands[0] = hdlg.m_blue;
+        color_bands[1] = hdlg.m_lblue;
+        color_bands[2] = hdlg.m_white;
+        color_bands[3] = hdlg.m_green;
+        color_bands[4] = hdlg.m_lgreen;
+        color_bands[5] = hdlg.m_yellow;
+        color_bands[6] = hdlg.m_lorange;
+        color_bands[7] = hdlg.m_orange;
+        color_bands[8] = hdlg.m_lbrown;
+        color_bands[9] = hdlg.m_brown;
+        color_bands[10] = hdlg.m_red;
+
+        //ÄÄÄ Misc
         memset(desc,0,sizeof(desc));
-        strncpy(desc,dlgb.m_desc,255);
+        strncpy(desc,mdlg.m_desc,255);
 
         memset(auth,0,sizeof(auth));
-        strncpy(auth,dlgb.m_auth,255);
+        strncpy(auth,mdlg.m_auth,255);
 
         memset(copy,0,sizeof(copy));
-        strncpy(copy,dlgb.m_copy,255);
+        strncpy(copy,mdlg.m_copy,255);
 
+        //ÄÄÄ Update views
         SetModifiedFlag();
+        SetLightsModifiedFlag();
         if (!edit)
-            UpdateAllViews(NULL,HINT_UPDATETERR,NULL);
+            UpdateAllViews(NULL,HINT_UPDATETERR|HINT_UPDATECOLR,NULL);
     }  
 }
 
@@ -1281,9 +2265,8 @@ void TerrEditDoc::UITerrainProperities(CWnd *parent, UINT ipage, int edit)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrEditDoc - UISurfProperities                                          ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void TerrEditDoc::UISurfProperties(CWnd *parent, UINT xpos, UINT dpos)
+void TerrEditDoc::UISurfProperties(CWnd *parent, UINT xpos, UINT dpos, UINT ipage)
 {
-    SurfacePropDlg      dlg(this,parent);
     esch_surf_type      *surf;
     dword               *colr;
 
@@ -1300,49 +2283,78 @@ void TerrEditDoc::UISurfProperties(CWnd *parent, UINT xpos, UINT dpos)
     surf = surfinfo + ((dpos * (width >> surfshift)) + xpos);
     colr = surfcolr + ((dpos * (width >> surfshift)) + xpos);
 
-//ÄÄÄ Setup values
-    dlg.m_xloc = xpos;
-    dlg.m_dloc = dpos;
+//ÄÄÄ General
+    SurfPropGenPage gdlg;
+    gdlg.setup(this);
+    gdlg.m_xloc = xpos;
+    gdlg.m_dloc = dpos;
 
-    dlg.m_color = *colr;
+    gdlg.m_color = *colr;
+
     if (surf->flags & ESCH_SURF_CINDISTXT)
     {
-        dlg.m_txt = surf->cind;
+        gdlg.m_txt = surf->cind;
     }
 
-    dlg.m_cbit1 = (surf->flags & ESCH_SURF_CNTRL1) ? 1 : 0;
-    dlg.m_cbit2 = (surf->flags & ESCH_SURF_CNTRL2) ? 1 : 0;
-    dlg.m_cbit3 = (surf->flags & ESCH_SURF_CINDISTXT) ? 1 : 0;
-    dlg.m_cbit4 = (surf->flags & ESCH_SURF_CINDISBLK) ? 1 : 0;
-    dlg.m_water = (surf->flags & (0xf0)) >> 4;
-    dlg.m_fire = (surf->flags & 0xf00) >> 8;
-    dlg.m_smoke = (surf->flags & 0xf000) >> 12;
+    gdlg.m_indistxt = (surf->flags & ESCH_SURF_CINDISTXT) ? 1 : 0;
+    gdlg.m_hidden = (surf->flags & ESCH_SURF_HIDDEN) ? 1 : 0;
+    gdlg.m_cbit4 = (surf->flags & ESCH_SURF_CBIT4) ? 1 : 0;
+    gdlg.m_cbit11 = (surf->flags & ESCH_SURF_CBIT11) ? 1 : 0;
+    gdlg.m_cbit12 = (surf->flags & ESCH_SURF_CBIT12) ? 1 : 0;
+
+    gdlg.m_flipu = (surf->flags & ESCH_SURF_FLIPU) ? 1 : 0;
+    gdlg.m_flipv = (surf->flags & ESCH_SURF_FLIPV) ? 1 : 0;
+
+    assert(ESCH_SURF_TILE1 == 0x10 && ESCH_SURF_TILE2 == 0x20 && ESCH_SURF_TILE3 == 0x40);
+    gdlg.m_tile  = (surf->flags >> 4) & 0x7;
+
+    gdlg.m_notile = (surf->flags & ESCH_SURF_NOTILE) ? 1 : 0;
+    gdlg.m_highonly = (surf->flags & ESCH_SURF_HIGHONLY) ? 1 : 0;
+
+    gdlg.m_app0 = (surf->flags & ESCH_SURF_APP0) ? 1 : 0;
+    gdlg.m_app1 = (surf->flags & ESCH_SURF_APP1) ? 1 : 0;
+    gdlg.m_app2 = (surf->flags & ESCH_SURF_APP2) ? 1 : 0;
+    gdlg.m_app3 = (surf->flags & ESCH_SURF_APP3) ? 1 : 0;
 
 //ÄÄÄ Handle Display
-    if (dlg.DoModal() == IDOK)
-    {
-        //ÄÄÄ Save values
-        *colr = dlg.m_color;
+    CPropertySheet sh("Surface Properties",parent,ipage);
+    sh.AddPage(&gdlg);      // General
 
-        if (dlg.m_txt)
+//ÄÄÄ Store results, if OK
+    if (sh.DoModal() == IDOK)
+    {
+        PushUndo();
+
+        //ÄÄÄ General
+        *colr = gdlg.m_color;
+
+        if (gdlg.m_txt)
         {
-            dlg.m_cbit3 = 1;
-            surf->cind = dlg.m_txt;
+            gdlg.m_indistxt = 1;
+            surf->cind = gdlg.m_txt;
         }
         else
         {
-            dlg.m_cbit3 = 0;
-            surf->cind = (byte)palette.get_index((VngoColor24bit)dlg.m_color);
+            gdlg.m_indistxt = 0;
+            surf->cind = (byte)palette.get_index((VngoColor24bit)gdlg.m_color);
         }
 
-        surf->flags = ((dlg.m_cbit1) ? ESCH_SURF_CNTRL1 : 0)
-                      | ((dlg.m_cbit2) ? ESCH_SURF_CNTRL2 : 0)
-                      | ((dlg.m_cbit3) ? ESCH_SURF_CINDISTXT : 0)
-                      | ((dlg.m_cbit4) ? ESCH_SURF_CINDISBLK : 0)
-                      | ((dlg.m_water << 4) & 0xf0)
-                      | ((dlg.m_fire << 8) & 0xf00)
-                      | ((dlg.m_smoke << 12) * 0xf000);
+        surf->flags = ((gdlg.m_indistxt) ? ESCH_SURF_CINDISTXT : 0)
+                      | ((gdlg.m_hidden) ? ESCH_SURF_HIDDEN : 0)
+                      | ((gdlg.m_cbit4) ? ESCH_SURF_CBIT4 : 0)
+                      | ((gdlg.m_cbit11) ? ESCH_SURF_CBIT11 : 0)
+                      | ((gdlg.m_cbit12) ? ESCH_SURF_CBIT12 : 0)
+                      | ((gdlg.m_flipu) ? ESCH_SURF_FLIPU : 0)
+                      | ((gdlg.m_flipv) ? ESCH_SURF_FLIPV : 0)
+                      | ((gdlg.m_tile << 4) & 0x70)
+                      | ((gdlg.m_notile) ? ESCH_SURF_NOTILE : 0)
+                      | ((gdlg.m_highonly) ? ESCH_SURF_HIGHONLY : 0)
+                      | ((gdlg.m_app0) ? ESCH_SURF_APP0 : 0)
+                      | ((gdlg.m_app1) ? ESCH_SURF_APP1 : 0)
+                      | ((gdlg.m_app2) ? ESCH_SURF_APP2 : 0)
+                      | ((gdlg.m_app3) ? ESCH_SURF_APP3 : 0);
 
+        //ÄÄÄ Update views
         SetModifiedFlag();
         UpdateAllViews(NULL,HINT_UPDATECOLR,NULL);
     }
@@ -1384,12 +2396,278 @@ void TerrEditDoc::UISurfColor(CWnd *parent, UINT xpos, UINT dpos)
 //ÄÄÄ Handle Display
     if (dlg.DoModal() == IDOK)
     {
+        PushUndo();
+
         //ÄÄÄ Save values
         *colr = dlg.GetColor();
         surf->cind = (byte)palette.get_index((VngoColor24bit)dlg.GetColor());
 
         SetModifiedFlag();
         UpdateAllViews(NULL,HINT_UPDATECOLR,NULL);
+    }
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// TerrEditDoc - UILightProperties                                          ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+void TerrEditDoc::UILightProperties(CWnd *parent, UINT ipage)
+{
+    if (!lights)
+        return;
+
+    int old_type;
+
+//ÄÄÄ General
+    LightPropGenPage   gdlg;
+
+    gdlg.m_intensity = lights->get_intensity();
+    switch (lights->get_type())
+    {
+        case ESCH_LGTT_VECTOR:
+            gdlg.m_type = 0;
+            break;
+        case ESCH_LGTT_POINT:
+            gdlg.m_type = 1;
+            break;
+        case ESCH_LGTT_ATTEN:
+            gdlg.m_type = 2;
+            break;
+        case ESCH_LGTT_SPOT:
+            gdlg.m_type = 3;
+            break;
+        default:
+            ASSERT(0);
+    }
+    old_type = gdlg.m_type;
+
+    gdlg.m_atten = (lights->flags & ESCH_LGT_ATTEN) ? 1 : 0;
+    switch (lights->get_type())
+    {
+        case ESCH_LGTT_VECTOR:
+            gdlg.m_xiValue = ((EschVectorLight*)lights)->dir.i;
+            gdlg.m_yjValue = ((EschVectorLight*)lights)->dir.j;
+            gdlg.m_zkValue = ((EschVectorLight*)lights)->dir.k;
+            break;
+        case ESCH_LGTT_POINT:
+        case ESCH_LGTT_ATTEN:
+        case ESCH_LGTT_SPOT:
+            gdlg.m_xiValue = ((EschPointLight*)lights)->pos.x;
+            gdlg.m_yjValue = ((EschPointLight*)lights)->pos.y;
+            gdlg.m_zkValue = ((EschPointLight*)lights)->pos.z;
+            break;
+    }
+
+//ÄÄÄ Extra
+    LightPropExtraPage  xdlg;
+
+    switch (lights->get_type())
+    {
+        case ESCH_LGTT_ATTEN:
+            xdlg.m_inner = ((EschAttenLight*)lights)->inner;
+            xdlg.m_outer = ((EschAttenLight*)lights)->outer;
+            break;
+        case ESCH_LGTT_SPOT:
+            xdlg.m_diri = ((EschSpotLight*)lights)->dir.i;
+            xdlg.m_dirj = ((EschSpotLight*)lights)->dir.j;
+            xdlg.m_dirk = ((EschSpotLight*)lights)->dir.k;
+            xdlg.m_hotspot = ((EschSpotLight*)lights)->hotspot;
+            xdlg.m_falloff = ((EschSpotLight*)lights)->falloff;
+            xdlg.m_inner = ((EschSpotLight*)lights)->inner;
+            xdlg.m_outer = ((EschSpotLight*)lights)->outer;
+            break;
+    }
+
+//ÄÄÄ Handle Display
+    CPropertySheet sh("Render Light Properties",parent,ipage);
+    sh.AddPage(&gdlg);      // General
+    sh.AddPage(&xdlg);      // Extra
+
+//ÄÄÄ Store results, if OK
+    if (sh.DoModal() == IDOK)
+    {
+        if (old_type != gdlg.m_type)
+        {
+            delete (lights);
+            switch (gdlg.m_type)
+            {
+                case 0:     // Vector
+                    lights = new EschVectorLight;
+                    break;
+                case 1:     // Point
+                    lights = new EschPointLight;
+                    break;
+                case 2:     // Atten
+                    lights = new EschAttenLight;
+                    break;
+                case 3:     // Spot
+                    lights = new EschSpotLight;
+                    break;
+                default:
+                    ASSERT(0);
+            }
+        }
+
+        //ÄÄÄ General
+        lights->set_intensity(gdlg.m_intensity);
+        switch (lights->get_type())
+        {
+            case ESCH_LGTT_VECTOR:
+                ((EschVectorLight*)lights)->set_direction((Flx16)gdlg.m_xiValue,
+                                                          (Flx16)gdlg.m_yjValue,
+                                                          (Flx16)gdlg.m_zkValue);
+                break;
+            case ESCH_LGTT_POINT:
+            case ESCH_LGTT_ATTEN:
+            case ESCH_LGTT_SPOT:
+                ((EschPointLight*)lights)->set_position((Flx16)gdlg.m_xiValue,
+                                                        (Flx16)gdlg.m_yjValue,
+                                                        (Flx16)gdlg.m_zkValue);
+                break;
+        }
+
+        dword flags = lights->flags;
+        if (gdlg.m_atten)
+            flags |= ESCH_LGT_ATTEN;
+        else
+            flags &= ~ESCH_LGT_ATTEN;
+        lights->set_flags(flags);
+
+        //ÄÄÄ Extra
+        switch (lights->get_type())
+        {
+            case ESCH_LGTT_ATTEN:
+                ((EschAttenLight*)lights)->set_inner((Flx16)xdlg.m_inner);
+                ((EschAttenLight*)lights)->set_outer((Flx16)xdlg.m_outer);
+                break;
+            case ESCH_LGTT_SPOT:
+                ((EschSpotLight*)lights)->set_direction((Flx16)xdlg.m_diri,
+                                                        (Flx16)xdlg.m_dirj,
+                                                        (Flx16)xdlg.m_dirk);
+                ((EschSpotLight*)lights)->set_hotspot((Flx16)xdlg.m_hotspot);
+                ((EschSpotLight*)lights)->set_falloff((Flx16)xdlg.m_falloff);
+                ((EschSpotLight*)lights)->set_inner((Flx16)xdlg.m_inner);
+                ((EschSpotLight*)lights)->set_outer((Flx16)xdlg.m_outer);
+                break;
+        }
+
+        //ÄÄÄ Update views
+        SetModifiedFlag();
+        SetLightsModifiedFlag();
+        UpdateAllViews(NULL,HINT_UPDATELIGHTS,NULL);
+    }
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// TerrEditDoc - UICameraProperties                                         ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+void TerrEditDoc::UICameraProperties(CWnd *parent, UINT ipage)
+{
+//ÄÄÄ General
+    CameraPropGenPage   gdlg;
+
+    EschPoint       pt;
+    cam.get_position(&pt);    
+    gdlg.m_xpos = pt.x;
+    gdlg.m_ypos = pt.y;
+    gdlg.m_zpos = pt.z;
+
+	gdlg.m_diri = cam.eye.dir.i;
+	gdlg.m_dirj = cam.eye.dir.j;
+	gdlg.m_dirk = cam.eye.dir.k;
+
+	gdlg.m_topi = cam.top.i;
+	gdlg.m_topj = cam.top.j;
+	gdlg.m_topk = cam.top.k;
+
+    gdlg.m_fov = cam.fov;
+
+//ÄÄÄ LOD
+    CameraPropLODPage   ldlg;
+    ldlg.m_lod = (lod_active) ? 1 : 0;
+    ldlg.m_med = lod_medium;
+    ldlg.m_low = lod_low;
+
+//ÄÄÄ Misc
+    CameraPropMiscPage  mdlg;
+    mdlg.setup(this);
+    mdlg.m_bcolor = cam_bcolor;
+    mdlg.m_hither = cam.hither;
+    mdlg.m_yon = cam.yon;
+	mdlg.m_scalef = cam.factor;
+    mdlg.m_hover = hover_offset;
+
+//ÄÄÄ Extended
+    CameraPropExPage        xdlg;
+    xdlg.setup(this);
+    xdlg.m_haze_active = (cam.hz_pal) ? 1 : 0;
+    xdlg.haze_change = FALSE;
+    xdlg.haze_color = cam_bcolor;
+    xdlg.m_bg_active = (cam.bg_bitmap) ? 1 : 0;
+    xdlg.bg_bm = cam.bg_bitmap;
+    cam.set_flags(cam.flags & ~ESCH_CAM_OWNSBITMAP);
+
+//ÄÄÄ Handle Display
+    CPropertySheet sh("Render View Properties",parent,ipage);
+    sh.AddPage(&gdlg);      // General
+    sh.AddPage(&ldlg);      // LOD
+    sh.AddPage(&mdlg);      // Misc
+    sh.AddPage(&xdlg);      // Extended
+
+//ÄÄÄ Store results, if OK
+    if (sh.DoModal() == IDOK)
+    {
+        //ÄÄÄ General
+        cam.set_position((Flx16)gdlg.m_xpos,(Flx16)gdlg.m_ypos,(Flx16)gdlg.m_zpos);
+        cam.set_vects((Flx16)gdlg.m_topi,(Flx16)gdlg.m_topj,(Flx16)gdlg.m_topk,
+                      (Flx16)gdlg.m_diri,(Flx16)gdlg.m_dirj,(Flx16)gdlg.m_dirk);
+        cam.set_fov((Flx16)gdlg.m_fov);
+
+        //ÄÄÄ LOD
+        lod_active = (Flx16)ldlg.m_lod;
+        lod_medium = (Flx16)ldlg.m_med;
+        lod_low = (Flx16)ldlg.m_low;
+
+        //ÄÄÄ Misc
+        cam.set_hither((Flx16)mdlg.m_hither);
+        cam.set_yon((Flx16)mdlg.m_yon);
+        cam.set_factor((Flx16)mdlg.m_scalef);
+        cam_bcolor = mdlg.m_bcolor;
+        hover_offset = (Flx16)mdlg.m_hover;
+
+        //ÄÄÄ Extended
+        if (xdlg.m_haze_active)
+        {
+            if (xdlg.haze_change || !cam.hz_pal)
+            {
+                cam.create_haze(xdlg.m_levels, xdlg.m_slevels,
+                                 xdlg.m_blevels, Flx16(xdlg.m_bpercent / 100.0f),
+                                 VngoColor24bit(xdlg.haze_color));
+            }
+        }
+        else
+            cam.set_haze(0);
+
+        if (xdlg.m_bg_active && xdlg.bg_bm)
+        {
+            if (xdlg.bg_bm != cam.bg_bitmap)
+            {
+                cam.set_bg_bitmap(xdlg.bg_bm);
+            }
+            else 
+                cam.set_flags(cam.flags | ESCH_CAM_OWNSBITMAP);
+        }
+        else
+        {
+            if (xdlg.bg_bm)
+                delete xdlg.bg_bm;
+            cam.set_bg_bitmap(0);
+        }
+
+        //ÄÄÄ Update views
+        cam.set_bcolor(palette.get_index((VngoColor24bit)cam_bcolor));
+        UpdateAllViews(NULL,HINT_UPDATETERR,NULL);
     }
 }
 
@@ -1408,15 +2686,16 @@ void TerrEditDoc::map_surfcolor_to_palette()
     if (!width || !depth || !surfinfo || !surfcolr)
         return;
 
-    TerrCScPrgDlg   dlg;
-    dlg.m_pBar.SetRange(0, (depth >> surfshift));
-    dlg.m_pBar.SetPos(0);
+    ProgressDlg   dlg;
+    dlg.m_pbar.SetRange(0, (depth >> surfshift));
+    dlg.m_pbar.SetPos(0);
+    dlg.SetWindowText("Mapping Surface Colors...");
     dlg.ShowWindow(SW_SHOW);
 
     for(y=0, sptr=surfcolr, dptr=surfinfo;
         y < (depth >> surfshift); y++)
     {
-        dlg.m_pBar.SetPos(y);
+        dlg.m_pbar.SetPos(y);
 
         for(x=0; x < (width >> surfshift); x++)
         {
@@ -1436,7 +2715,12 @@ void TerrEditDoc::map_surfcolor_to_palette()
     for(i=0; i < txtNumb; i++)
     {
         txtColrIndx[i] = (byte)palette.get_index((VngoColor24bit)txtColr[i]);
-    }           
+    }
+     
+    for(i=0; i < colorNumb; i++)
+    {
+        colorColrIndx[i] = (byte)palette.get_index((VngoColor24bit)colorColr[i]);
+    }
 }
 
 
@@ -1449,54 +2733,12 @@ BOOL TerrEditDoc::load_and_recolor_texture(int ind, const char *fname)
     int             i;
 
     // Load bitmap
-
-    XFParseBitmap *b;
-
-    if (strstr(fname,".bmp") || strstr(fname,".BMP"))
-    {
-        b = new XFParseBMP;
-    }
-    else if (strstr(fname,".cel") || strstr(fname,".CEL"))
-    {
-        b = new XFParseCEL;
-    }
-    else if (strstr(fname,".lbm") || strstr(fname,".LBM"))
-    {
-        b = new XFParseLBM;
-    }
-    else if (strstr(fname,".tga") || strstr(fname,".TGA"))
-    {
-        b = new XFParseTGA;
-    }
-    else if (strstr(fname,".pcx") || strstr(fname,".PCX"))
-    {
-        b = new XFParsePCX;
-    }
-    else 
-    {
-        char str[256];
-        sprintf(str,"Cannot read given input file:\n%s",fname);
-        MessageBox(NULL, str, "Texture Load Error", MB_OK | MB_ICONEXCLAMATION);
-        delete b;
+    XFBitmap    bm;
+    if (!theApp.LoadImage(fname,&bm))
         return FALSE;
-    }
-
-    int err;
-
-    if ((err=b->nameread(fname)) != 0)
-    {
-        char    str[256];
-
-        sprintf(str,"Error %x reading input file:\n%s",err,fname);
-        MessageBox(NULL,str, "Texture Load Error",
-                   MB_OK | MB_ICONEXCLAMATION);
-        delete b;
-        return FALSE;                   
-    }
 
     // Check for valid size
-
-    switch (b->bm->width)
+    switch (bm.width)
     {
         case 16:
         case 32:
@@ -1505,13 +2747,14 @@ BOOL TerrEditDoc::load_and_recolor_texture(int ind, const char *fname)
         case 256:
             break;
         default:
-            MessageBox(NULL,"Input bitmap file must be 16, 32, 64, 128, or 256 pixels in width.",
-                      "Texture Load Error", MB_OK | MB_ICONEXCLAMATION);
-            delete b;
+            MessageBox(NULL,
+                       "Input bitmap file must be 16, 32, 64, 128, or 256 pixels in width.",
+                       "Texture Load Error",
+                       MB_OK | MB_ICONEXCLAMATION);
             return FALSE;
     }
 
-    switch (b->bm->height)
+    switch (bm.height)
     {
         case 16:
         case 32:
@@ -1520,9 +2763,10 @@ BOOL TerrEditDoc::load_and_recolor_texture(int ind, const char *fname)
         case 256:
             break;
         default:
-            MessageBox(NULL,"Input bitmap file must be 16, 32, 64, 128, or 256 pixels in height.",
-                       "Texture Load Error", MB_OK | MB_ICONEXCLAMATION);
-            delete b;
+            MessageBox(NULL,
+                       "Input bitmap file must be 16, 32, 64, 128, or 256 pixels in height.",
+                       "Texture Load Error",
+                       MB_OK | MB_ICONEXCLAMATION);
             return FALSE;
     }
 
@@ -1531,45 +2775,56 @@ BOOL TerrEditDoc::load_and_recolor_texture(int ind, const char *fname)
     //
 
     txtFName[ind] = fname;
-    EschTexture *txt = &txtEsch[ind];
-    txt->release();
+
+    EschStaticTexture *txt;
+
+    if (txtEsch[ind])
+    {
+        txt = (EschStaticTexture*)txtEsch[ind];
+        txt->release();
+    }
+    else
+    {
+        txt = new EschStaticTexture;
+        txtEsch[ind] = txt;
+    }
+
+    assert(txt);
       
     // Allocate memory for texture
 
-    if ( ((txt->handle = ivory_halloc(sizeof(VngoTexture) + (b->bm->width*b->bm->height))) == 0)
+    if ( ((txt->handle = ivory_halloc(sizeof(VngoTexture) + (bm.width*bm.height))) == 0)
          || ((txt->ptr = (VngoTexture*)ivory_hlock(txt->handle)) == 0) )
     {
         MessageBox(NULL,"Memory problem loading texture.",
                    "Texture Load Error", MB_OK | MB_ICONEXCLAMATION);
         txt->release();
-        delete b;
         return FALSE;
     }
 
     txt->flags = ESCH_TXT_LOCKED | ESCH_TXT_OWNSDATA;
-    txt->max = 1;
 
-    txt->ptr->tex = (byte*)txt->ptr + sizeof(VngoTexture);
-
-    txt->ptr->width = b->bm->width;
-    txt->ptr->height = b->bm->height;
+    txt->ptr->VngoTexture::VngoTexture(bm.width,
+                                       bm.height,
+                                       (byte*)txt->ptr + sizeof(VngoTexture),
+                                       VNGO_TEXTURE_8BIT);
 
     // Recolor image using current palette
 
-    ASSERT(b->bm->bpp == 1 || b->bm->bpp == 3);
+    ASSERT(bm.bpp == 1 || bm.bpp == 3);
         
-    if (b->bm->bpp == 1)
+    if (bm.bpp == 1)
     {
         int mypal[256];
 
         for(i=0; i < 256; i++)
         {
-            mypal[i] = (byte)palette.get_index((VngoColor24bit)b->bm->pal[i]);
+            mypal[i] = (byte)palette.get_index((VngoColor24bit)bm.pal[i]);
         }
 
-        for(i=0; i < b->bm->width * b->bm->height; i++)
+        for(i=0; i < bm.width * bm.height; i++)
         {
-            txt->ptr->tex[i] = (byte)mypal[b->bm->data[i]];
+            txt->ptr->tex[i] = (byte)mypal[bm.data[i]];
         }
     }
     else // bpp == 3
@@ -1577,7 +2832,7 @@ BOOL TerrEditDoc::load_and_recolor_texture(int ind, const char *fname)
         VngoColor24bit  clr;
         byte            *sptr, *dptr;
 
-        for(i=0, sptr=b->bm->data, dptr=txt->ptr->tex; i < b->bm->width * b->bm->height; i++)
+        for(i=0, sptr=bm.data, dptr=txt->ptr->tex; i < bm.width * bm.height; i++)
         {
             clr.r = *(sptr++);
             clr.g = *(sptr++);
@@ -1610,12 +2865,17 @@ BOOL TerrEditDoc::OnNewDocument()
     surfratio = 1;
     surfshift = 0;
 
-    hscale=16;
-    wscale=dscale=30;
+    scale=32;
+
+    autocenter = 1;
+    orgx = -(Flx16)(width/2)*scale;
+    orgy = 0;
+    orgz = -(Flx16)(depth/2)*scale;
 
     strcpy(name,"NoName");
     *desc = 0;
-    SetTitle(name);
+    *auth = 0;
+    *copy = 0;
 
     if (!FirstNew)
     {
@@ -1631,6 +2891,18 @@ BOOL TerrEditDoc::OnNewDocument()
     if (!hfield)
         return FALSE;
     memset(hfield,0,width * depth);
+
+    htable = new Flx16[256];
+    if (!htable)
+        return FALSE;
+    {
+        Flx16 t=0;
+        for(ulong i=0; i < 256; i++)
+        {
+            htable[i] = t;
+            t += 16;
+        }
+    }
 
     dword surfsize = (width * depth) >> (surfshift*2);
 
@@ -1654,22 +2926,76 @@ BOOL TerrEditDoc::OnNewDocument()
     memset(vptr,0,(ulong)(surfsize * sizeof(EschVector)));
     ivory_hunlock(hsurfnorml);
 
+// Allocate undo buffers
+    undo_valid = FALSE;
+
+    undo_surfinfo = new esch_surf_type[surfsize];
+    if (!undo_surfinfo)
+        return FALSE;
+
+    undo_surfcolr = new dword[surfsize];
+    if (!undo_surfcolr)
+        return FALSE;
+
+// Render view camera default
+    cam.reset();
+    cam.set_position( 0,
+                      64,
+                      0);
+    cam.set_flags(ESCH_CAM_SHADE_WIRE
+                  | ESCH_CAM_SHADE_SOLID
+                  | ESCH_CAM_SHADE_FLAT
+                  | ESCH_CAM_TEXTURED | ESCH_CAM_BACKCULL);
+    cam_bcolor = 0x201414;
+
+// Default light
+    lights = new EschVectorLight(-1,-1,-1);
+    if (!lights)
+        return FALSE;
+
+// Default color bands
+    color_bands[0] = 100;
+    color_bands[1] = 200;
+    color_bands[2] = 300;
+    color_bands[3] = 400;
+    color_bands[4] = 500;
+    color_bands[5] = 600;
+    color_bands[6] = 700;
+    color_bands[7] = 900;
+    color_bands[8] = 1000;
+    color_bands[9] = 1100;
+    color_bands[10] = 1200;
+
+// Misc properties.
+    hover_offset = 64;
+    lod_active = TRUE;
+    lod_medium = 512;
+    lod_low = 1024;
+
+// Find default palette
     int     i;
     char    *c;
     char    fname[256];
   
     GetModuleFileName(NULL, fname, 256);
 
-    for (i=strlen(fname), c = &fname[i-1]; c > 0; i--, c--)
+    for (i=strlen(fname), c = &fname[i-1]; i > 0; i--, c--)
     {
         if (*c == '\\')
         {
+            strcpy(c+1,"DEFAULT.VGP");
+
+            if (xf_exist(fname))
+                break;
+
             strcpy(c+1,"DEFAULT.PAL");
 
             if (xf_exist(fname))
                 break;
         }
     }
+    if (!i)
+        strcpy(fname,"DEFAULT.VGP");
 
     if (!LoadPalette(fname,0))
     {
@@ -1691,15 +3017,29 @@ void TerrEditDoc::Serialize(CArchive& ar)
 
 	if (ar.IsStoring())
 	{
-        // Terrain Properities
+        EschPoint   pnt;
+        EschLight   *lgt;
 
+        // Version tag (not in original)
+        ar << (ushort)MAGIC;                // Added v1.00
+        ar << (ushort)0x117;                // Current version 1.17
+
+        // Terrain Properities
         ar << width;
         ar << depth;
         ar << surfratio;
         ar << surfshift;
-        ar << (float)wscale;
-        ar << (float)dscale;
-        ar << (float)hscale;
+        ar << (float)scale;
+
+        // hscale removed in v1.16
+
+        ar << autocenter;                   // Added in v1.10
+        if (!autocenter)
+        {
+            ar << (float)orgx;              // Added in v1.10
+            ar << (float)orgy;  
+            ar << (float)orgz;
+        }
         ar << CString(name);
         ar << CString(desc);
         ar << CString(auth);
@@ -1707,54 +3047,206 @@ void TerrEditDoc::Serialize(CArchive& ar)
         ar << CString(pfname);
 
         // Height-field
-
         ar.Write(hfield,width*depth);
 
+        // Height table
+        ar.Write(htable,sizeof(Flx16)*256);
+        
         // Surface information
-
         dword surfsize = (width * depth) >> (surfshift*2);
 
         ar.Write(surfinfo,surfsize*sizeof(esch_surf_type));
         ar.Write(surfcolr,surfsize*sizeof(dword));
 
         // Write texture information
-
         ar << (long)txtNumb;
         for(i=0; i < txtNumb; i++)
         {
             ar << txtName[i] << txtFName[i] << txtColr[i];
+            ar << txtDFlags[i];             // Added in 1.11
         }
+
+        // Write color information
+        ar << (long)colorNumb;
+        for(i=0; i < colorNumb; i++)
+        {
+            ar << colorName[i] << colorColr[i];  // Added in 1.15
+            ar << colorDFlags[i];           // Added in 1.17
+        }
+
+        // Write color bands                Added in 1.14
+        for(i=0; i < sizeof(color_bands)/sizeof(ushort); i++)
+            ar << color_bands[i];
+
+        // Write camera info                Added in 1.14
+        cam.get_position(&pnt);
+        ar << (float)pnt.x;
+        ar << (float)pnt.y;
+        ar << (float)pnt.z;
+        ar << (float)cam.eye.dir.i;
+        ar << (float)cam.eye.dir.j;
+        ar << (float)cam.eye.dir.k;
+        ar << (float)cam.top.i;
+        ar << (float)cam.top.j;
+        ar << (float)cam.top.k;
+        ar << (float)cam.factor;
+        ar << (float)cam.hither;
+        ar << (float)cam.yon;
+        ar << (float)cam.fov;
+        ar << cam_bcolor;
+
+        // Write lights info                Added in 1.14
+        for(i=0, lgt=lights; lgt != NULL; lgt=lgt->next(), i++);
+        ar << i;
+
+        for(lgt=lights; lgt != NULL; lgt=lgt->next())
+        {
+            ar << lgt->get_type();
+            ar << CString(lgt->name);
+            ar << lgt->intensity;
+            ar << lgt->flags;
+            switch (lgt->get_type())
+            {
+                case ESCH_LGTT_VECTOR:
+                    ar << (float)((EschVectorLight*)lgt)->dir.i;
+                    ar << (float)((EschVectorLight*)lgt)->dir.j;
+                    ar << (float)((EschVectorLight*)lgt)->dir.k;
+                    break;
+                case ESCH_LGTT_POINT:
+                    ar << (float)((EschPointLight*)lgt)->pos.x;
+                    ar << (float)((EschPointLight*)lgt)->pos.y;
+                    ar << (float)((EschPointLight*)lgt)->pos.z;
+                    break;
+                case ESCH_LGTT_ATTEN:
+                    ar << (float)((EschAttenLight*)lgt)->pos.x;
+                    ar << (float)((EschAttenLight*)lgt)->pos.y;
+                    ar << (float)((EschAttenLight*)lgt)->pos.z;
+                    ar << (float)((EschAttenLight*)lgt)->inner;
+                    ar << (float)((EschAttenLight*)lgt)->outer;
+                    break;
+                case ESCH_LGTT_SPOT:
+                    ar << (float)((EschSpotLight*)lgt)->pos.x;
+                    ar << (float)((EschSpotLight*)lgt)->pos.y;
+                    ar << (float)((EschSpotLight*)lgt)->pos.z;
+                    ar << (float)((EschSpotLight*)lgt)->inner;
+                    ar << (float)((EschSpotLight*)lgt)->outer;
+                    ar << (float)((EschSpotLight*)lgt)->dir.i;
+                    ar << (float)((EschSpotLight*)lgt)->dir.j;
+                    ar << (float)((EschSpotLight*)lgt)->dir.k;
+                    ar << (float)((EschSpotLight*)lgt)->hotspot;
+                    ar << (float)((EschSpotLight*)lgt)->falloff;
+                    break;
+                default:
+                    ASSERT(0);
+                    break;
+            }
+        }
+
+        // Write misc info                  Added in 1.14
+        ar << (float)hover_offset;
+        ar << lod_active;
+        ar << (float)lod_medium;
+        ar << (float)lod_low;
 	}
 	else
 	{
-        float   f;
-        CString str;
+        float       f;
+        ushort      magic;
+        ushort      version;
+        CString     str;
+        EschPoint   pnt;
+        EschVector  vec;
+        EschLight   *lgt;
+        char        palname[256];
 
         // Terrain Properities
 
-        ar >> width;
+        ar >> magic;
+        if (magic != MAGIC)
+        {
+            width = magic;
+            version = 0x000;
+        }
+        else
+        {
+            ar >> version;
+            ar >> width;
+        }
+
         ar >> depth;
         ar >> surfratio;
         ar >> surfshift;
 
-        ar >> f;  wscale = (Flx16)f;
-        ar >> f;  dscale = (Flx16)f;
-        ar >> f;  hscale = (Flx16)f;
+        if (version < 0x100)
+        {
+            ar >> f;
+            ar >> f;
+            scale = 32;
+        }
+        else
+        {
+            ar >> f;  scale = (Flx16)f;
+        }
 
-        ar >> str;  strcpy(name,str);
-        ar >> str;  strcpy(desc,str);
-        ar >> str;  strcpy(auth,str);
-        ar >> str;  strcpy(copy,str);
-        ar >> str;  strcpy(pfname,str);
+        if (version < 0x116)
+        {
+            ar >> f;
+
+            htable = new Flx16[256];
+            ASSERT(htable);
+
+            Flx16 t = 0;
+            for(ulong i=0; i < 256; i++)
+            {
+                htable[i]=t;
+                t += Flx16(f);
+            }
+        }
+
+        if (version >= 0x110)
+        {
+            ar >> autocenter;
+            if (autocenter)
+            {
+                orgx = -(Flx16)(width/2)*scale;
+                orgy = 0;
+                orgz = -(Flx16)(depth/2)*scale;
+            }
+            else
+            {
+                ar >> f;  orgx = (Flx16) f;
+                ar >> f;  orgy = (Flx16) f;
+                ar >> f;  orgz = (Flx16) f;
+            }
+        }
+        else
+        {
+            autocenter = 1;
+            orgx = -(Flx16)(width/2)*scale;
+            orgy = 0;
+            orgz = -(Flx16)(depth/2)*scale;
+        }
+
+        ar >> str;  strncpy(name,str,16);
+        ar >> str;  strncpy(desc,str,256);
+        ar >> str;  strncpy(auth,str,256);
+        ar >> str;  strncpy(copy,str,256);
+        ar >> str;  strncpy(palname,str,256);
 
         // Height-field
- 
         hfield = new byte[width * depth];
         ASSERT(hfield);
         ar.Read(hfield,width*depth);
 
-        // Surface information
+        // Height table
+        if (version >= 0x116)
+        {
+            htable = new Flx16[256];
+            ASSERT(htable);
+            ar.Read(htable,sizeof(Flx16)*256);
+        }
 
+        // Surface information
         dword surfsize = (width * depth) >> (surfshift*2);
 
         surfinfo = new esch_surf_type[surfsize];
@@ -1765,8 +3257,15 @@ void TerrEditDoc::Serialize(CArchive& ar)
         ASSERT(surfcolr);
         ar.Read(surfcolr,surfsize*sizeof(dword));
 
-        // Read texture information
+        // Allocate undo buffers
+        undo_valid=FALSE;
+        undo_surfinfo = new esch_surf_type[surfsize];
+        ASSERT(undo_surfinfo);
 
+        undo_surfcolr = new dword[surfsize];
+        ASSERT(undo_surfcolr);
+
+        // Read texture information
         long l;
 
         ar >> l; txtNumb = l;
@@ -1774,14 +3273,225 @@ void TerrEditDoc::Serialize(CArchive& ar)
         for(i=0; i < txtNumb; i++)
         {
             ar >> txtName[i] >> txtFName[i] >> txtColr[i];
+            if (version >= 0x111)
+            {
+                ar >> txtDFlags[i];
+            }
+            else
+                txtDFlags[i] = 0;
         }
 
-        // Load palette
+        if (version >= 0x115)
+        {
+            ar >> l; colorNumb = l;
 
-        if (!LoadPalette(pfname,0))
+            for(i=0; i < colorNumb; i++)
+            {
+                ar >> colorName[i] >> colorColr[i];
+                if (version >= 0x117)
+                {
+                    ar >> colorDFlags[i];
+                }
+                else
+                    colorDFlags[i] = 0;
+            }
+        }
+        else
+        {
+            colorNumb = 0;
+        }
+
+        // Read color bands
+        if (version >= 0x114)
+        {
+            for(i=0; i < sizeof(color_bands)/sizeof(ushort); i++)
+                ar >> color_bands[i];
+        }
+        else
+        {
+            // Default color bands
+            color_bands[0] = 100;
+            color_bands[1] = 200;
+            color_bands[2] = 300;
+            color_bands[3] = 400;
+            color_bands[4] = 500;
+            color_bands[5] = 600;
+            color_bands[6] = 700;
+            color_bands[7] = 900;
+            color_bands[8] = 1000;
+            color_bands[9] = 1100;
+            color_bands[10] = 1200;
+        }
+
+        // Read camera info
+        if (version >= 0x114)
+        {
+            ar >> f;  pnt.x = (Flx16)f;
+            ar >> f;  pnt.y = (Flx16)f;
+            ar >> f;  pnt.z = (Flx16)f;
+            cam.set_position(&pnt);
+
+            ar >> f;  vec.i = (Flx16)f;  
+            ar >> f;  vec.j = (Flx16)f;  
+            ar >> f;  vec.k = (Flx16)f;  
+            cam.set_dir(&vec);
+
+            ar >> f;  vec.i = (Flx16)f;  
+            ar >> f;  vec.j = (Flx16)f;  
+            ar >> f;  vec.k = (Flx16)f;  
+            cam.set_top(&vec);
+
+            ar >> f;  cam.set_factor((Flx16)f);
+            ar >> f;  cam.set_hither((Flx16)f);
+            ar >> f;  cam.set_yon((Flx16)f);
+            ar >> f;  cam.set_fov((Flx16)f);
+
+            ar >> cam_bcolor;
+        }
+        else
+        {
+            cam.reset();
+            cam.set_position( 0,
+                              64,
+                              0);
+            cam_bcolor = 0x201414;
+        }
+
+        // Read lights info
+        if (version >= 0x114)
+        {
+            ar >> i;
+
+            for(; i > 0; i--)
+            {
+                word    t;
+
+                ar >> t;
+                switch (t)
+                {
+                    case ESCH_LGTT_VECTOR:
+                        lgt = new EschVectorLight;
+                        break;
+                    case ESCH_LGTT_POINT:
+                        lgt = new EschPointLight;
+                        break;
+                    case ESCH_LGTT_ATTEN:
+                        lgt = new EschAttenLight;
+                        break;
+                    case ESCH_LGTT_SPOT:
+                        lgt = new EschSpotLight;
+                        break;
+                    default:
+                        MessageBox(NULL,
+                                   "Unknown light type found in CST file",
+                                   "Load Error",
+                                   MB_OK | MB_ICONEXCLAMATION);
+                        AfxThrowArchiveException(CArchiveException::generic);
+                        break;
+                }
+                ASSERT(lgt);
+
+                ar >> str;  strncpy(lgt->name,str,16);
+
+                byte inten;
+                ar >> inten;  lgt->set_intensity(inten);
+
+                dword flags;
+                ar >> flags;  lgt->set_flags(flags);
+
+                switch (t)
+                {
+                    case ESCH_LGTT_VECTOR:
+                        ar >> f;  vec.i = (Flx16)f;
+                        ar >> f;  vec.j = (Flx16)f;
+                        ar >> f;  vec.k = (Flx16)f;
+                        ((EschVectorLight*)lgt)->set_direction(&vec);
+                        break;
+                    case ESCH_LGTT_POINT:
+                        ar >> f;  pnt.x = (Flx16)f;
+                        ar >> f;  pnt.y = (Flx16)f;
+                        ar >> f;  pnt.z = (Flx16)f;
+                        ((EschPointLight*)lgt)->set_position(&pnt);
+                        break;
+                    case ESCH_LGTT_ATTEN:
+                        ar >> f;  pnt.x = (Flx16)f;
+                        ar >> f;  pnt.y = (Flx16)f;
+                        ar >> f;  pnt.z = (Flx16)f;
+                        ((EschAttenLight*)lgt)->set_position(&pnt);
+
+                        ar >> f;  ((EschAttenLight*)lgt)->set_inner((Flx16)f);
+                        ar >> f;  ((EschAttenLight*)lgt)->set_outer((Flx16)f);
+                        break;
+                    case ESCH_LGTT_SPOT:
+                        ar >> f;  pnt.x = (Flx16)f;
+                        ar >> f;  pnt.y = (Flx16)f;
+                        ar >> f;  pnt.z = (Flx16)f;
+                        ((EschSpotLight*)lgt)->set_position(&pnt);
+
+                        ar >> f;  ((EschSpotLight*)lgt)->set_inner((Flx16)f);
+                        ar >> f;  ((EschSpotLight*)lgt)->set_outer((Flx16)f);
+
+                        ar >> f;  vec.i = (Flx16)f;
+                        ar >> f;  vec.j = (Flx16)f;
+                        ar >> f;  vec.k = (Flx16)f;
+                        ((EschSpotLight*)lgt)->set_direction(&vec);
+
+                        ar >> f;  ((EschSpotLight*)lgt)->set_hotspot((Flx16)f);
+                        ar >> f;  ((EschSpotLight*)lgt)->set_falloff((Flx16)f);
+                        break;
+                    default:
+                        ASSERT(0);
+                        break;
+                }
+
+                if (!lights)
+                    lights = lgt;
+                else
+                    lgt->sibling(lights);
+            }
+        }
+        else
+        {
+            lights = new EschVectorLight(-1,-1,-1);
+            ASSERT(lights);
+        }
+
+        // Read misc info
+        if (version >= 0x114)
+        {
+            ar >> f;  hover_offset = (Flx16)f;
+            ar >> lod_active;
+            ar >> f;  lod_medium = (Flx16)f;
+            ar >> f;  lod_low = (Flx16)f;
+        }
+        else
+        {
+            hover_offset = 64;
+            lod_active = TRUE;
+            lod_medium = 512;
+            lod_low = 1024;
+        }
+
+        // Load palette (which implicitly loads textures)
+        if (!xf_exist(palname))
+        {
+            LocateDlg   dlg;
+            dlg.title = "Locate Palette File";
+            dlg.m_fname = palname;
+            dlg.typestr = "Van Gogh palette file (*.vgp;*.pal)|*.VGP;*.PAL|";
+
+            if (dlg.DoModal() == IDOK)
+            {
+                strcpy(palname,dlg.m_fname);
+                SetModifiedFlag();
+            }
+        }
+
+        if (!LoadPalette(palname,0))
         {
             MessageBox(NULL,
-                       "Failed to load palette in archive","Load Error",MB_OK | MB_ICONEXCLAMATION);
+                       "Failed to load palette in file, retaining old palette",
+                       "Load Error",MB_OK | MB_ICONEXCLAMATION);
         }
 
         // Compute normals
@@ -1796,34 +3506,12 @@ void TerrEditDoc::Serialize(CArchive& ar)
 
         ComputeNormals();
 
-        // Load textures
-
-        for(i=0; i < txtNumb; i++)
-        {
-            if (!load_and_recolor_texture(i,txtFName[i]))
-            {
-                MessageBox(NULL,
-                       "Failed attempting to load texture " + txtFName[i],"Load Error",MB_OK | MB_ICONEXCLAMATION);
-            }
-        }
-
+        // Set default camera flags
+        cam.set_flags(ESCH_CAM_SHADE_WIRE
+                      | ESCH_CAM_SHADE_SOLID
+                      | ESCH_CAM_SHADE_FLAT
+                      | ESCH_CAM_TEXTURED | ESCH_CAM_BACKCULL);
 	}
 }
-
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// TerrEditDoc - AssertValid                                                ³
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-#ifdef _DEBUG
-void TerrEditDoc::AssertValid() const
-{
-	CDocument::AssertValid();
-}
-
-void TerrEditDoc::Dump(CDumpContext& dc) const
-{
-	CDocument::Dump(dc);
-}
-#endif //_DEBUG
 
 //°±² eof - eshtdoc.cpp ²±°

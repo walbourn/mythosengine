@@ -132,6 +132,7 @@ private:
 
         EventBinding    *bindings;
         MaxTrigger      *TRGS;
+        int             ntriggers;
 
 public:
         // This simple struct defines the header type used by
@@ -161,11 +162,14 @@ public:
         void connect    (const MaxTrigger &, MaxEvent);
         void disconnect (const MaxTrigger &, MaxEvent);
 
+        // Enumerate the triggers.
+        void enumerate_triggers (int (*func) (MaxTrigger *));
+
         // Empty the trigger bindings
         void clear ();
 
         // Allow any applicable Events to run, return #events processed.
-MaxEventList process (const MaxEventList & = MaxEventList (1));
+        MaxEventList process (const MaxEventList & = MaxEventList (1));
 
         // Support the virtual devices with physical ones!
         void get_mouse_movement (short *, short *) const;

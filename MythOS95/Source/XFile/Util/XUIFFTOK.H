@@ -6,7 +6,7 @@
 //    (_)       ^          * *     *      *   *    *            (_)
 //             (_)       **   **   *    ***** **** ****
 //
-//            Copyright (c) 1994,1995 by Charybdis Enterprises, Inc.
+//            Copyright (c) 1994-1996 by Charybdis Enterprises, Inc.
 //                              All Rights Reserved.
 //                        Microsoft Windows '95 Version
 //
@@ -60,24 +60,25 @@
 #define YY_FORM                101
 #define YY_CHUNK               102
 #define YY_MERGE               103
-#define YY_INTEL               104
-#define YY_BIGENDIAN           105
-#define YY_MOTOROLA            106
-#define YY_LITTLEENDIAN        107
-#define YY_SIZE                108
-#define YY_BYTE                109
-#define YY_UBYTE               110
-#define YY_WORD                111
-#define YY_UWORD               112
-#define YY_LONG                113
-#define YY_ULONG               114
+#define YY_BITMAP              104 
+#define YY_INTEL               105
+#define YY_BIGENDIAN           106
+#define YY_MOTOROLA            107
+#define YY_LITTLEENDIAN        108
+#define YY_SIZE                109
+#define YY_MAXSIZE             110
+#define YY_BYTE                111
+#define YY_UBYTE               112
+#define YY_WORD                113
+#define YY_UWORD               114
 #define YY_DWORD               115
 #define YY_UDWORD              116
 #define YY_TEXT                117
-#define YY_BINARY              118
-#define YY_FLOAT               119
-#define YY_DOUBLE              120
-#define YY_FIXED16             121
+#define YY_NTEXT               118
+#define YY_BINARY              119
+#define YY_FLOAT               120
+#define YY_DOUBLE              121
+#define YY_FIXED16             122
 
 #define YY_INTEGER             200
 #define YY_REAL                201

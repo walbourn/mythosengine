@@ -157,10 +157,13 @@ mouserange      return(YY_MOUSERANGE);
 #f11            { YY_integer = 0x57; return(YY_INTEGER); }
 #f12            { YY_integer = 0x58; return(YY_INTEGER); }
 
+#alt            { YY_integer = 0x38; return(YY_INTEGER); }
 #lalt           { YY_integer = 0x38; return(YY_INTEGER); }
 #ralt           { YY_integer = 0x138;return(YY_INTEGER); }
+#ctrl           { YY_integer = 0x1d; return(YY_INTEGER); }
 #lctrl          { YY_integer = 0x1d; return(YY_INTEGER); }
 #rctrl          { YY_integer = 0x11d;return(YY_INTEGER); }
+#shift          { YY_integer = 0x2a; return(YY_INTEGER); }
 #lshift         { YY_integer = 0x2a; return(YY_INTEGER); }
 #rshift         { YY_integer = 0x36; return(YY_INTEGER); }
 

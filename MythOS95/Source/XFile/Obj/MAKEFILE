@@ -6,7 +6,7 @@
 #    (_)       ^          * *     *      *   *    *            (_)
 #             (_)       **   **   *    ***** **** ****
 #
-#            Copyright (c) 1994,1995 by Charybdis Enterprises, Inc.
+#            Copyright (c) 1994-1996 by Charybdis Enterprises, Inc.
 #                             All Rights Reserved.
 #
 #ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -58,8 +58,8 @@ xfbase.obj\
 xfbitmap.obj\
 xfbmp.obj\
 xfcel.obj\
-xfdos.obj\
-xfdosbuf.obj\
+xfdisk.obj\
+xfdskbuf.obj\
 xfifchnk.obj\
 xfiff.obj\
 xfifform.obj\
@@ -78,7 +78,8 @@ xfiwrite.obj\
 xflbm.obj\
 xfpcx.obj\
 xfram.obj\
-xftga.obj
+xftga.obj\
+xfxeb.obj
 
 #ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 # First target                                                             ³

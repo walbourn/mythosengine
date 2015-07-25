@@ -54,29 +54,32 @@ LIB = VanGogh
 
 
 OBJS=vngline.obj\
-vngserv.obj\
-vngrect.obj\
-vngpix.obj\
+vngclip.obj\
+vngitrns.obj\
+vngzrect.obj\
+vngpcalc.obj\
 vngpal.obj\
 vngcolor.obj\
 vngtset.obj\
-vngtri.obj\
-vnggtri.obj\
-vngttri.obj\
-vngptri.obj\
+vngcircl.obj\
+vngsmth.obj\
+vngzmap.obj\
+vngserv.obj\
+vnggen.obj\
+vngpix8.obj\
+vngrect8.obj\
+vngitrn8.obj\
 vngtri8.obj\
 vnggtri8.obj\
 vngttri8.obj\
 vngptri8.obj\
-vngpcalc.obj\
-vngitrns.obj\
-vngcircl.obj\
+vngvpdd8.obj\
+vngvpdb8.obj\
 vngvvp8.obj\
-vngvpdd8.obj
+vngrct16.obj\
+vngpix16.obj\
+vngvvp16.obj
 
-#vngfpoly.obj\
-#vnggpoly.obj\
-#vngtpoly.obj\
 
 #ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 # First target                                                             ³
@@ -95,6 +98,42 @@ all: setstden $(LIB).lib
 #                                 Rules
 #
 #°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+# define how we compile a .ASM file
+{..\8bpp\}.asm{}.obj:
+   $(ASM) $(ASMOPTS) $<
+
+# define how we compile a .C file
+{..\8bpp\}.c{}.obj:
+	$(CC) $(CCOPTIONS) $<
+
+# define how we compile a .CPP file
+{..\8bpp}.cpp{}.obj:
+	$(CPP) $(CCOPTIONS) $<
+
+# define how we compile a .ASM file
+{..\16bpp\}.asm{}.obj:
+   $(ASM) $(ASMOPTS) $<
+
+# define how we compile a .C file
+{..\16bpp\}.c{}.obj:
+	$(CC) $(CCOPTIONS) $<
+
+# define how we compile a .CPP file
+{..\16bpp\}.cpp{}.obj:
+	$(CPP) $(CCOPTIONS) $<
+
+# define how we compile a .ASM file
+{..\24bpp\}.asm{}.obj:
+   $(ASM) $(ASMOPTS) $<
+
+# define how we compile a .C file
+{..\24bpp\}.c{}.obj:
+	$(CC) $(CCOPTIONS) $<
+
+# define how we compile a .CPP file
+{..\24bpp\}.cpp{}.obj:
+	$(CPP) $(CCOPTIONS) $<
 
 #±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 #

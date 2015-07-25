@@ -4,7 +4,7 @@
 //
 //                        For Microsoft Windows '95
 //
-//               Copyright (c) 1995 by Charybdis Enterprises, Inc.
+//           Copyright (c) 1995, 1996 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved.
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -30,15 +30,6 @@
 
 #ifndef __LLANDER_HPP
 #define __LLANDER_HPP    1
-
-//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-//             
-//                                Includes
-//                                
-//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-
-#include <global.hpp>
-
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
@@ -99,7 +90,7 @@ public:
 
     void        process_events ();
     void        update_model ();
-    BOOL        load_images (const char *fname);
+    BOOL        load_images ();
     void        draw    (VngoVport *);
 
 public:
@@ -168,7 +159,7 @@ class LunarLander: public GameState
 {
 private:
     BYTE        *backbits;
-    VngoVportDD8    *gvpb;
+    VngoVport       *gvpb;
 
     MaxEventSource  *evt;           // Source of our events
 
@@ -190,7 +181,7 @@ public:
     LunarLander ();
     ~LunarLander ();
 
-    int     init (const char *fname, const char *cname);
+    int     init (const char *cname);
 
     void    draw_terrain ();
 
@@ -215,16 +206,21 @@ private:
     MaxEventList    events;         // Most current event set
     MaxEventList    single_events;  // Most current event set, momentary
 
+    VngoVport       *vport;
+    VngoRect        vp_rect;
+
     EschScene       *scene;
 
 public:
     LanderTitle ();
     ~LanderTitle ();
 
-    int         init (const char *fname, const char *cname);
+    int         init (const char *cname);
 
-    virtual void    render();
-    virtual void    process_events();
+    virtual void    render ();
+    virtual void    process_events ();
+    virtual void    activate ();
+    virtual void    deactivate ();
 };
 
 
@@ -247,7 +243,7 @@ public:
     LanderLanded ();
     ~LanderLanded ();
 
-    int         init (const char *fname, const char *cname);
+    int         init (const char *cname);
 
     virtual void    render();
     virtual void    process_events();

@@ -8,7 +8,7 @@
 //ùùùùù²±²ùùùùùùù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùùùùùù²±²ùùùù²±²ùùùùùù
 //ùùùù²²²²²²²²²²ù²²²²²²²²ùùù²²²²²²²²ùù²²²ùùùù²²²ù²²²²²²²²²²ù²²²ùùùù²²²ùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùCopyrightù(c)ù1994,ù1995ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
+//ùùùùùùùùùùùCopyrightù(c)ù1994-1996ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùù Microsoft Windows '95 Version ùùùùùùùùùùùùùùùùùùùùùùù
@@ -32,10 +32,10 @@
 //
 // esdraw.hpp
 //
-//     Contains the EschDrawable object definition.  EschDrawables form
-//     the basic interface for drawing objects.  EschDrawables are formed
-//     into lists which are drawn via the EschCamera object.  Derived
-//     objects expand on the available operations and organization.
+// Contains the EschDrawable class definition.  EschDrawables form the 
+// basic interface for drawing classes.  EschDrawables are formed into 
+// lists which are drawn via the EschCamera object.  Derived classes
+// expand on the available operations and organization.
 //
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
 
@@ -57,8 +57,142 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #include <portable.h>
+#include <ivory.hpp>
 
 #include "esmath.hpp"
+#include "esexts.hpp"
+
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//
+//                               Structures
+//
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+class EschDrawable;
+class EschCamera;
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// EschDrawList - Control structure for making lists of drawables without   ³
+//                changing internal links for collide/pick operations.      ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+struct EschDrawList
+{
+    EschDrawable    *item;
+    EschDrawList    *next;
+    Flx16           dist;           // Used for picking
+};
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// EschCollision - Communication structure for collision detection.         ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+struct EschCollision
+{
+    dword               flags;      // Control flags
+    ulong               count;      // Number of drawables in results
+    EschDrawList        *result;    // Output list
+    EschDrawable        *ilist;     // Input list
+    IvoryArena          *arena;     // Arena for DrawList structures
+    ulong               maxcount;   // Maximum number of returns (otherwise 1)
+    EschSphereExtents   sphere;     // Test extents (set by setup)
+
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    // Constructor/Destructors                                              ³
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+    EschCollision() { flags=0; }
+    EschCollision(EschDrawable *i, ulong mcount=1)
+    {
+        flags = ESCH_CLSN_ILIST | ESCH_CLSN_MAXCOUNT;
+        ilist = i;
+        maxcount = mcount;
+    }
+};
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// EschPicking - Communication structure for picking.                       ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+struct EschPicking
+{
+    dword           flags;          // Control flags
+    ulong           count;          // Number of drawables in results
+    EschDrawList    *result;        // Output list
+    EschDrawable    *ilist;         // Input list
+    IvoryArena      *arena;         // Arena for DrawList structures
+    ulong           maxcount;       // Maximum number of returns (otherwise 1)
+    long            sx, sy;         // Camera viewport coordinates
+    EschCamera      *camera;        // Camera to use for picking
+    EschPoint       start;          // World start point for picking
+    EschVector      direction;      // World direction vector for picking
+    Flx16           maxdist;        // Maximum distance to check
+
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    // Constructor/Destructors                                              ³
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+    EschPicking() { flags=0; }
+    EschPicking(EschCamera *cam,
+                long x, long y,
+                EschDrawable *i,
+                ulong mcount=1)
+    {
+        flags = ESCH_PICK_ILIST
+                | ESCH_PICK_MAXCOUNT
+                | ESCH_PICK_CAMERA
+                | ESCH_PICK_VPORT;
+        ilist = i;
+        maxcount = mcount;
+        sx = x;
+        sy = y;
+        camera = cam;
+    }
+    EschPicking(EschCamera *cam,
+                long x, long y,
+                EschDrawable *i,
+                Flx16 maxd,
+                ulong mcount=1)
+    {
+        flags = ESCH_PICK_ILIST
+                | ESCH_PICK_MAXCOUNT
+                | ESCH_PICK_CAMERA
+                | ESCH_PICK_VPORT
+                | ESCH_PICK_MAXDIST;
+        ilist = i;
+        maxcount = mcount;
+        sx = x;
+        sy = y;
+        camera = cam;
+        maxdist = maxd;
+    }
+    EschPicking(EschPoint &s,
+                EschVector &dir,
+                EschDrawable *i,
+                ulong mcount=1)
+    {
+        flags = ESCH_PICK_ILIST
+                | ESCH_PICK_MAXCOUNT
+                | ESCH_PICK_WORLD;
+        ilist = i;
+        maxcount = mcount;
+        start = s;
+        direction = dir;
+    }
+    EschPicking(EschPoint &s,
+                EschVector &dir,
+                EschDrawable *i,
+                Flx16 maxd,
+                ulong mcount=1)
+    {
+        flags = ESCH_PICK_ILIST
+                | ESCH_PICK_MAXCOUNT
+                | ESCH_PICK_WORLD
+                | ESCH_PICK_MAXDIST;
+        ilist = i;
+        maxcount = mcount;
+        start = s;
+        direction = dir;
+        maxdist = maxd;
+    }
+};
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
@@ -72,35 +206,66 @@
 class EschDrawable {
 
 protected:
-    EschDrawable    *inext;                 // Linked-list pointers.
-    EschDrawable    *iprev;
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    // Protected data members                                               ³
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+    EschDrawable    *inext;             // Linked-list pointers.
+    EschDrawable    *iprev;             
+
+    word    dtyp;                       // Run-time type.
 
 public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Public data members                                                  ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-    dword   flags;                          // Status flags
-    char    *name;                          // Pointer to obj name, if any
+    word    limits;             // Shading-limit mask
+    dword   flags;              // Status flags
+    char    *name;              // Pointer to obj name, if any
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Constructor/Destructors                                              ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-    EschDrawable();
+    EschDrawable(word t);
+    EschDrawable(const EschDrawable &drw);
 
     virtual ~EschDrawable();
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-    // Operations on EschDrawables.                                         ³
+    // Accessor functions                                                   ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-    EschDrawable *next(void) { return inext; }
-    EschDrawable *prev(void) { return iprev; }
+    word get_type() const { return dtyp; }
+
+    EschDrawable *next() const { return inext; }
+    EschDrawable *prev() const { return iprev; }
+
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    // Operations                                                           ³
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+    const EschDrawable &operator = (const EschDrawable &drw);
 
     virtual void sibling(EschDrawable *myprev);
-    virtual void remove(void);
+    virtual void remove();
 
-    virtual EschDrawable *find(const char *dname);
+    virtual EschDrawable *find(const char *dname) const;
 
-    virtual void draw(void)=0;
+    virtual void draw()=0;
+
+    virtual int get_extents(EschSphereExtents *sp) const;
+
+    virtual Flx16 ray(const EschPoint *pt, const EschVector *v, int coarse=0) const;
+
+    virtual int hit(const EschPoint *pt, const Flx16 r, int coarse=0) const;
+
+    virtual esch_error_codes pick(EschPicking *data) const;
+    virtual esch_error_codes collide(EschCollision *data) const;
+
+    virtual void animate();
+
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    // Utility routines.                                                    ³
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+    void set_flags(dword f) { flags = f; }
+    void set_limits(word l) { limits = l; }
 };
 
 #ifdef __WATCOMC__

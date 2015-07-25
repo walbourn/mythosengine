@@ -6,7 +6,7 @@
 //    (_)       ^          * *     *      *   *    *            (_)
 //             (_)       **   **   *    ***** **** ****
 //
-//            Copyright (c) 1994,1995 by Charybdis Enterprises, Inc.
+//            Copyright (c) 1994-1996 by Charybdis Enterprises, Inc.
 //                             All Rights Reserved.
 //                        Microsoft Windows '95 Version
 //
@@ -75,7 +75,7 @@ const ulong XF_MAX_INIVALUE=1024;  // Maximum size of a value
 //같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같�
 
 class XFParseINI {
-   XFileDOS xfile;
+   XFileDisk xfile;
 
 protected:
    XFile           *xf;

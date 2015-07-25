@@ -7,7 +7,7 @@
  ששששש///ששששששש///שששש///ש///שששש///ש///שששש///ש///שששששששש///שששש///שששששש
  שששש//////////ש////////ששש////////שש///.ששש///.//////////ש///שששש///.שששששש
  ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
- שששששששששששCopyrightש(c)ש1994,ש1995שbyשCharybdisשEnterprises,שInc.ששששששששש
+ שששששששששששCopyrightש(c)ש1994-1996שbyשCharybdisשEnterprises,שInc.שששששששששש
  ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
  ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
  ששששששששששששששששששששש Microsoft Windows '95 Version ששששששששששששששששששששששש
@@ -37,123 +37,143 @@
                              _Library Status_
 
  Notes by: Chuck Walbourn
- Updated: Nov 7, 1995
+ Updated: August 26, 1996
 
  Changes for this release --------------------------------------------------
 
-    o Release Version 1.0
+    o Documentation updated.
+        - Release 1.1 didn't have complete documentation for
+          EschParticleSystem or EschParticleGeometry.
+        - Reorganized a few of the classes in the contents for easier
+          reference.
+        - Updated docs for changes.
 
-    Removed copy constructors to avoid problem with MS VC v2.x.
-
-    o Camera
-
-        - Removed hazing for now, until Van Gogh palette changes are
-          complete.
+    o Directory
+        - Updated for new lights and terrain changes.
 
     o Exporter
+        - See Exporter\ReadME.TXT
 
-        - Moved DOS Exporter over to Windows 95 tree using a mix of 
-          new and old headers (must link with old XFile and has local 
-          copy of Van Gogh palette code).
+    o Editor
+        - See Edit\ReadME.TXT
 
-    o Extents
-
-        - Simplified test API.
+    o Tool
+        - See Tool\ReadME.TXT
 
     o Lights
+        - Added EschFastPointLight for point source approximation with
+          the same lighting cost as vector lights.
+        - Added EschFastAttenLight and EschAttenLight for attenuated
+          point sources.
+        - Added EschFastSpotLight and EschSpotLight for directional
+          point sources with attenuation.
+        - Added copy constructor and operator =.
 
-        - Minor change to lights to use new Van Gogh palettes.
+    o Sprite
+        - A new sprite drawable was added for objects drawn as a 
+          scaled 2D bitmap, including a mode for extremely distant
+          objects.
 
-    o Meshes
+    o Drawable
+        - Fixed problem with picking returning incorrect drawables
+          due to errors in result sorting.
+        - Added copy constructor and operator =.
 
-        - Fixed problem with color assignment for some objects in smooth/
-          specular modes.
+    o MeshDraw
+        - Added use of ESCH_FACE_SELFILUM levels.
+        - Added copy constructor and operator =.
+
+    o Scene
+        - Updated for new lights.
+        - Added ESCH_SCENELD_CAMSEX to create extended camera instances.
 
     o Terrain
+        - Changed height-field to use lookup-table instead of direct
+          linear scale value.
+        - Load has optional parameter to get at 'height-color' assignments
+          used in the terrain editor.
+        - Fixed 'black' triangles along one edge of the High/Medium
+          detail boundary.
+        - Added routine to check for a clear 'line-of-sight' relative
+          to the terrain.
+        - Added support for loading compressed normals.
+        - Redefined some surface bits and added 4 application bits.
+        - Added low level of detail usage.
 
-        - Terrain Editor implemented.
-        - Textures implemented.
-        - compute_shades() now needs a full Camera pointer instead of just
-          the camera flags.
+    o Geometry
+        - 'find' didn't always work correctly.  This has been corrected.
+          This caused problems when loading some models with hierarchial
+          links.
+        - Added copy constructor and operator =.
 
-    o Texture
+    o Clip
+        - Fixed clipping problems for U, V, Z, and shading caused by
+          perspective on long polygons.
+        - Fixed minor edge condition for clip.
+        - Performance enhancement to the backface culling within the
+          clip routine.
 
-        - Added release() and load() members.
+    o Camera
+        - Changed internal interface for render() to use
+          pre_rend(), rend(), and post_rend() internal protected members.
+        - Added render control bits for new render().
+        - Added support for scrolling bitmap backgrounds with offsets.
+        - Added hazing using post-processing software-only solution.
+        - Added usage of update flags for scalar values.
+        - Added copy constructor and operator =.
 
-    Virtualized a number of members in some classes for future extention.
+    o Textures
+        - Added copy constructor and operator =.
 
+    o Misc.
+        - Starfield completed and documented.
+        - Matrix and FrameRef's now have contructors that do not
+          initialize any data members.  These can be used when the
+          instance is a target of a concat operation, but not a source.
+        - Added 'create' member to EschStaticTexture for creating textures
+          directly from XFile bitmaps.
+        - Minor change to texture code for new Van Gogh.
+        - Fixed minor problem with clearing of EschFireTexture.
 
-
+         
+          
  Pending changes -----------------------------------------------------------
-
-    o Camera
-
-        - Need to change to use Van Gogh offset image transfer so that
-          bitmap offsets/size is used.
-
-    o Exporter
- 
-        - May need changes for multiple instances of identical mesh.
-        - Changes for exporting multi-frame/animated textures.
-
-    o Extents
-
-        - Need to do picking.
-        - Need to collision detection.
-
-    o Lights
-
-        - Implement 'fast' multiple-light approximation (reduces all
-          lights to a single vector and ambient term).
-
-    o Scenes
-
-        - Handle multiple instances of identical meshes.
-
-    o Meshes
-
-        - Transform performance.
-        - Level-of-detail control.
-
-    o Particles
-
-        - Needs damage rectangle handling.
-        - Needs depthque (cue?) tested.
-        - Load from external file.
-
-    o Terrain
-
-        - Level-of-detail control.
-        - API calls for querying the height-field database.
-        - Hit detection with height-field.
-        - Textures
 
     o Textures
 
+        - Export/load as 24-bit with alpha channel and map down to
+          palette.
+        - Use XFEB for texture data.
+        - Multi-frame/animated textures loading
         - Van Gogh will need 'handle-based' texture control with
           all management in Escher.
-        - Need to have shared library of materials.
-        - Multi-frame/animated textures
+        - Need to have shared library of bitmaps.
+
+    o Drawable/Partitioning
+
+        - Add Partitioning interface.
+        - Implement QuadTree partitioning scheme.
+
+    o Meshes
+
+        - Add multiple levels of detail.
+
+    o Terrain
+
+        - Reimplementation for faster performance.
+
+    o Camera
+
+        - Once hardware support for hazing/fogging is added to 
+          Van Gogh, the EschCameraEx will need to check for this
+          and disable post-process filtering.
 
     o Other
        
         - Other object format converters.
-        - Post-filtering.
-
-
-
- Known problems ------------------------------------------------------------
-
-    o Inverse, may need to be changed to use 64-bit internal math.
-      Will need to use 64-bit for determinant as well.
-
-    o Dot product, in some cases, is returning a value greater than 1
-      given two normalized vectors...  Possibly only a little greater than
-      1--this is probably in Felix.
-
-    o "More-accurate" Felix sqrt will cause orthonormalize to fail, why?
-
-    o Need to look at center of object in 3D Studio to ensure we are
-      able to position the objects correctly about their center.
+        - EschFireTexture may need some cleanup and updated docs.
+        - EschPlosion may be rewritten or expanded.
+        - EschStarfield could use a load function.
+        - EschSprite may still have some rotation problems.
 
 *** END OF FILE ***

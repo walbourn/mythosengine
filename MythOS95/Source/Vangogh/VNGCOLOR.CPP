@@ -6,7 +6,7 @@
 //                                                           |. _  .   .|
 //          Microsoft Windows '95 Version                    | / \   .  | 
 //                                                           |_|_|_._._.|
-// Copyright (c) 1994, 1995 by Charybdis Enterprises, Inc.   |.-.-.-.-..|
+// Copyright (c) 1994-1996 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
 //              All rights reserved.                        %\__________/%
 //                                                           %          %
 //
@@ -79,7 +79,7 @@
 void VngoClrConvert::init(VngoPal *my_pal,int flags)
 {
     mypal = &((VngoPal8 *)my_pal)->hw_pal;
-    if (flags)
+    if (flags & VNGO_PAL_CALC)
         cvt2_8.init(my_pal);
 }
 

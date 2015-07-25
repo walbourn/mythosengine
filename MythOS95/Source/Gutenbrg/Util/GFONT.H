@@ -10,7 +10,7 @@
 //                                                              '----`
 //                     Text Output and Font Management System
 //
-//               Copyright (c) 1995 by Charybdis Enterprises, Inc.
+//            Copyright (c) 1995, 1996 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved.
 //
 //컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
@@ -63,7 +63,8 @@
 #define YY_STRING               101
 
 
-#define FLAGS_QUIET    0x1
+#define FLAGS_QUIET     0x1
+#define FLAGS_INVERSE   0x2
 
 #endif
 

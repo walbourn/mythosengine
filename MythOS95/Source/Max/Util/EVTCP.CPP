@@ -200,17 +200,24 @@ STATIC void event()
             error ("Expecting an identifier.");
         }
 
-        // store the event number with the specified trigger
-        s << "const MaxEvent "<< ident << "(" << event_id << ");\r\n";
-        header.write (s.str(), s.pcount());
+        if (event_id >= EVENT_MAX_EVENT)
+        {
+            error ("Number of events exceeds internal maximum -- see MaxEvent.HPP");
+        }
+        else
+        {
+            // store the event number with the specified trigger
+            s << "const MaxEvent "<< ident << "(" << event_id << ");\r\n";
+            header.write (s.str(), s.pcount());
 
-        match (YY_LBRACE);
-        while (CurrentToken && CurrentToken != YY_RBRACE)
-            trigger();
-        match (YY_RBRACE);
+            match (YY_LBRACE);
+            while (CurrentToken && CurrentToken != YY_RBRACE)
+                trigger();
+            match (YY_RBRACE);
 
-        // Advance to the next event_id
-        event_id++;
+            // Advance to the next event_id
+            event_id++;
+        }
 
         break;
 

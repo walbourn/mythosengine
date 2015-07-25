@@ -165,8 +165,6 @@ void ivory_initialize (size_t mem_size, ivory_init_codes opt)
     VirtualQuery (main_memory, &mem, sizeof (mem));
     mem_size = mem.RegionSize;
 
-    // Lock the memory so it can't be swapped
-    VirtualLock (main_memory, mem_size);
 #if 1
     VirtualAlloc (main_memory, sizeof (*main_memory), MEM_COMMIT, PAGE_READWRITE);
 #endif
@@ -200,7 +198,6 @@ void ivory_terminate ()
     if (main_memory)
     {
         // Free the block we allocated.
-        VirtualUnlock (main_memory, main_memory->memory_size);
         VirtualFree (main_memory, 0, MEM_RELEASE);
         main_memory = NULL;
     }

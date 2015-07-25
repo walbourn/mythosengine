@@ -10,7 +10,7 @@
 
                           Microsoft Windows '95 Version
   
-              Copyright (c) 1994, 1995 by Charybdis Enterprises, Inc.
+          Copyright (c) 1994, 1995, 1996 by Charybdis Enterprises, Inc.
                              All Rights Reserved.
   
   --------------------------------------------------------------------------
@@ -31,19 +31,33 @@
                               _Library Status_
 
   Notes by: Dan Higdon
-  Updated: November 6, 1995
+  Updated: April 2, 1996
 
   Changes for this release --------------------------------------------------
 
-    o Release Version 1.0
+    o Release Version 1.1
 
-    Network support has been moved to Turner.
+    Added a new member to MaxEventUser that allows enumeration of
+	all defined triggers.
 
+        Added a new member to MaxKbBuffer that converts scan codes
+        to ascii, where possible.
 
+	Also, added a guard to MAXC for too many events, and 
+	added #shift, #alt, and #ctrl synonyms.
+
+        Added a new utility class MaxValueMap which allows flexible
+        interpolation of values across the short integer range.
+
+	Added an automatic polling mode to MaxJoystick which causes
+	the joystick to perform its own polling (on a user-specifed
+	interval), and report the current stick location plus
+	the buttons that have been pressed since the last get_stat().
+
+	Added a capabilites member to MaxJoystick.
 
   Pending changes -----------------------------------------------------------
 
     o LED calls don't do anything!
 
 *** END OF FILE ***
-

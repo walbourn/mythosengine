@@ -8,7 +8,7 @@
 //ùùùùù²±²ùùùùùùù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùùùùùù²±²ùùùù²±²ùùùùùù
 //ùùùù²²²²²²²²²²ù²²²²²²²²ùùù²²²²²²²²ùù²²²ùùùù²²²ù²²²²²²²²²²ù²²²ùùùù²²²ùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùCopyrightù(c)ù1994,ù1995ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
+//ùùùùùùùùùùùCopyrightù(c)ù1994-1996ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùù Microsoft Windows '95 Version ùùùùùùùùùùùùùùùùùùùùùùù
@@ -60,6 +60,8 @@ LRESULT CALLBACK ClientWndProc (HWND, UINT, WPARAM, LPARAM);
 //                                 Data
 //
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+
+extern MaxDevices Devs;
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
@@ -132,7 +134,7 @@ BOOL InitApplication (HINSTANCE hInstance, int nCmdShow)
     hInst = hInstance;
 
     LoadString (hInstance, IDS_TITLE, szTitle, sizeof (szTitle));
-    hWndClient = CreateWindowEx (WS_EX_TOPMOST,
+    hWndClient = CreateWindowEx (0, //WS_EX_TOPMOST,
                                 szAppName, szTitle,
                                 WS_VISIBLE | WS_POPUP,
                                 0, 0, GameState::MAP_XSIZE, 
@@ -168,22 +170,25 @@ LRESULT CALLBACK ClientWndProc (HWND hWnd, UINT message, WPARAM wParam, LPARAM l
 
         case WM_CREATE:
             break;
-#if 0
-        // Don't let these go through!
-        case WM_KEYDOWN:
-        case WM_SYSKEYDOWN:
-        case WM_CHAR:
-        case WM_SYSCHAR:
-            break;
-#endif
 
-        case WM_ACTIVATEAPP:
-//          ShowWindow (hWnd, wParam ? SW_SHOWNORMAL: SW_MINIMIZE);
-            if (wParam && game)
-            {
-                RealizePalette (game->hdc);
-            }
-            break;
+        case WM_SYSKEYDOWN:
+            Devs.theKeyboard.wm_keydown (wParam);
+            return DefWindowProc (hWnd, message, wParam, lParam);
+
+        case WM_KEYDOWN:
+            Devs.theKeyboard.wm_keydown (wParam);
+            return 0;
+
+        case WM_SYSKEYUP:
+        case WM_KEYUP:
+            Devs.theKeyboard.wm_keyup (wParam);
+            return 0;
+
+        case WM_SETFOCUS:
+        case WM_KILLFOCUS:
+            Devs.theKeyboard.init();
+            return 0;
+
         case WM_DESTROY:
             // Get the heck outta here.
             PostQuitMessage (0);

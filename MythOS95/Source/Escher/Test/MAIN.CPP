@@ -8,7 +8,7 @@
 //ששששש²±²ששששששש²±²שששש²±²ש²±²שששש²±²ש²±²שששש²±²ש²±²שששששששש²±²שששש²±²שששששש
 //שששש²²²²²²²²²²ש²²²²²²²²ששש²²²²²²²²שש²²²שששש²²²ש²²²²²²²²²²ש²²²שששש²²²ששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//ששששששששששCopyrightש(c)ש1994,ש1995שbyשCharybdisשEnterprises,שInc.שששששששששש
+//שששששששששששCopyrightש(c)ש1994-1996שbyשCharybdisשEnterprises,שInc.שששששששששש
 //ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
 //ששששששששששששששששששששש Microsoft Windows '95 Version ששששששששששששששששששששששש
@@ -53,6 +53,8 @@
 //
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
+STATIC int load_font(char *f);
+
 // Imported from INIT.CPP
 BOOL    InitApplication (HINSTANCE, int);
 
@@ -67,12 +69,17 @@ HWND        hWndClient;
 const char  szAppName[] = "Escher";
 GameState   *game;
 
+MaxDevices  Devs;
+
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
 //                                 Code
 //
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 
+//ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
+// MythOS provided functions
+//ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
 extern "C" int mythos_atexit (register void (*__func) (void))
 {
     return atexit (__func);
@@ -100,15 +107,27 @@ int APIENTRY WinMain (HINSTANCE hInstance,
     // Initialize game here.
     IvorySystem ivory (8*1024*1024);
     ChronosSystem   chronos;
-    MaxDevices      devs;
+    GBergSystem     gberg;
     EschSystem      *esys;
 
+    if (load_font("8X13.IFF"))
+        return FALSE;
+
+    gberg_select_font("8x13");
+
     esys=new EschSystem;
-    esys->init(262144);
+    if (!esys
+        || esys->init(262144))
+    {
+        MessageBeep(0);
+        MessageBox(hWndClient,
+                   "Failed to initalize Escher",
+                   "Fatal Error",
+                   MB_OK);
+        return FALSE;
+    }
 
-    // Initialize any "DirectX" services
-
-    game = new GameState (devs);
+    game = new GameState (Devs);
     game->LoadEvents ("gframe.iff");
     if (!game->active)
     {
@@ -126,37 +145,98 @@ int APIENTRY WinMain (HINSTANCE hInstance,
     ini.open(".\\ET.INI",XF_OPEN_READ);
     ini.section("Startup");
 
+    if (!ini.read("BackgroundBMP",buff))
+    {
+        game->backgrnd = new XFBitmap;
+        if (!game->backgrnd)
+            return FALSE;
+
+        XFParseBMP  bm(game->backgrnd);
+        
+        if (bm.nameread(buff))
+        {
+            MessageBeep(0);
+            MessageBox(hWndClient,
+                       "Could not load bitmap background",
+                       "Fatal Error",
+                       MB_OK);
+            return FALSE;
+        }
+    }
+
+    if (!ini.read("FireTest",buff))
+    {
+        strlwr(buff);
+        if (strstr(buff,"yes") || strstr(buff,"on"))
+            game->fire_test = TRUE;
+    }
+
     if (!ini.read("SceneFile",buff))
     {
         if (!game->LoadScene(buff))
-        {
             return FALSE;
-        }
-    
     }
-    else if (!ini.read("TerrainFile",buff))
+
+    if (!ini.read("TerrainFile",buff))
     {
         if (!game->LoadTerrain(buff))
-        {
             return FALSE;
-        }
     }
-    else
+
+    if (!ini.read("ParticleSystem",buff))
     {
+        strlwr(buff);
+        if (!game->SetupParticleSystem(buff))
+            return FALSE;
+    }
+
+    if (!ini.read("Starfield",buff))
+    {
+        strlwr(buff);
+        if (strstr(buff,"yes") || strstr(buff,"on"))
+            if (!game->SetupStarfield((strstr(buff,"ftl")) ? TRUE : FALSE,
+                                      (strstr(buff,"brights")) ? TRUE : FALSE))
+                return FALSE;
+    }
+
+    if (!ini.read("Sprite",buff))
+    {
+        strlwr(buff);
+        if (!game->SetupSprite(buff))
+            return FALSE;
+    }
+
+    if (!ini.read("PickTest",buff))
+    {
+        strlwr(buff);
+        if (strstr(buff,"yes") || strstr(buff,"on"))
+            game->pick_test = TRUE;
+    }
+
+    if (!ini.read("CollideTest",buff))
+    {
+        strlwr(buff);
+        if (strstr(buff,"yes") || strstr(buff,"on"))
+            game->collide_test = TRUE;
+    }
+
+    ini.close();
+
+    if (!game->cam)
+    {
+        MessageBeep(0);
         MessageBox(hWndClient,
-                   "ET.INI doesn't have a Scene or Terrain File",
+                   "There is no camera defined",
                    "Fatal Error",
                    MB_OK);
         return FALSE;
     }
 
-    ini.close();
-
 	// Acquire and dispatch messages until a WM_QUIT message is received.
     while (game->PumpWindows())
     {
         // Do per-frame processing here
-        devs.update ();
+        Devs.update ();
         game->GetEvents();
         game->ProcessEvents();
         game->Render();
@@ -173,6 +253,25 @@ int APIENTRY WinMain (HINSTANCE hInstance,
 
     // This shuts up the compiler
     lpCmdLine;
+}
+
+//ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
+// load_font
+//ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
+STATIC int load_font(char *f)
+{
+    int err;
+
+    err=gberg_install_font(f,0);
+    if (err)
+    {
+        char    buff[128];
+        sprintf(buff,"Failed to load font %s, error %d",f,(int)err);
+        MessageBox(hWndClient,
+                   buff,"Error",MB_OK);
+        return 1;
+    }
+    return 0;
 }
 
 //°±² eof - main.cpp ²±°

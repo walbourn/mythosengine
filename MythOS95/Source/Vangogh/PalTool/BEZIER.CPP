@@ -1,11 +1,13 @@
 //อออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออ
 //
-//                                PalTool
+//                                 PalTool
 //
 //                   A Palette extraction/definition tool
 //
-//              Copyright (c) 1995 by Charybdis Enterprises, Inc.
+//           Copyright (c) 1995, 1996 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved
+//
+//                      Microsoft Windows '95 Version
 //
 //ฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤ
 //
@@ -22,12 +24,14 @@
 //
 //ฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤ
 //
-// Bezier.cpp
-//  This is a simple bezier support module.  See the header file for
-//  interface details.
+// Dan Higdon & Chuck Walbourn
+// 
+// bezier.cpp
+//
+// This is a simple bezier support module.  See the header file for
+// interface details.
 //
 //อออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออ
-
 
 //ฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐ
 //
@@ -37,7 +41,6 @@
 
 #include "stdafx.h"
 #include "bezier.h"
-
 
 //ฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑฑ
 //
@@ -67,6 +70,7 @@ static void bezier_recurse (BezierClosure &func, POINT pt0, POINT pt1, POINT pt2
 	}
 }
 
+
 //ฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤ
 // The actual API function
 //ฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤ
@@ -76,4 +80,4 @@ void bezier (BezierClosure &func, POINT pts[4])
 	//bezier_recurse (func, pts[1], pts[2], pts[3]);
 }
 
-// eof - bezier.cpp
+//ฐฑฒ eof - bezier.cpp ฒฑฐ

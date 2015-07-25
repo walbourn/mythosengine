@@ -8,7 +8,7 @@
 //ùùùùù²±²ùùùùùùù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùùùùùù²±²ùùùù²±²ùùùùùù
 //ùùùù²²²²²²²²²²ù²²²²²²²²ùùù²²²²²²²²ùù²²²ùùùù²²²ù²²²²²²²²²²ù²²²ùùùù²²²ùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùCopyrightù(c)ù1994,ù1995ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
+//ùùùùùùùùùùùCopyrightù(c)ù1994-1996ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùù Microsoft Windows '95 Version ùùùùùùùùùùùùùùùùùùùùùùù
@@ -32,7 +32,10 @@
 //
 // esterran.cpp
 //
-// Height-field polygonal terrain drawable.
+// The EschTerrain class is a height-field polygonal terrain system which
+// uses a 2D array of 8-bit height values to create a realistic "outdoor"
+// terrain.  The terrain may have textures and be drawn with multiple
+// levels of detail.
 //
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
 
@@ -47,6 +50,36 @@
 #include "escher.hpp"
 #include "esfile.hpp"
 
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//
+//                                Equates
+//
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+#define FACE_FLAGS  ESCH_FACE_SPECULAR \
+                    | ESCH_FACE_SMOOTH \
+                    | ESCH_FACE_FLAT   \
+                    | ESCH_FACE_SOLID  \
+                    | ESCH_FACE_WIRE   \
+                    | ESCH_FACE_ABLINE \
+                    | ESCH_FACE_BCLINE \
+                    | ESCH_FACE_CALINE
+
+//±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+//
+//                                 Data
+//
+//±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+
+extern char EschNoName[];
+
+static EschFace Face(FACE_FLAGS,
+                     0,0,0, /* A, B, C */
+                     0, /* Txt */
+                     0,0,0,0,0,0, /* U, V */
+                     0, /* color */
+                     0,1,0 /* normal */);
+
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
 //                                 Code
@@ -60,29 +93,35 @@
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // EschTerrain - constructor                                                ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-EschTerrain::EschTerrain(const char *fname, const char *tname)
-{
-//ÄÄ Set initial values
-    width=depth=0;
-
-    hfield=0;
-    surfinfo=0;
-    hsurfnorml=0;
-
-    tmax=0;
-    txtcolor=0;
-    txt=0;
-
-    surfratio=1;                        // 1:1 Height:Surface data ratio
-    origin.x=origin.y=origin.z=0;
+EschTerrain::EschTerrain(const char *fname, const char *tname) :
+    EschDrawable(ESCH_DRWT_TERRAIN),
+    width(0),
+    depth(0),
+    surfratio(1),                       // 1:1 Height:Surface data ratio
+    surfshift(0),
                                         // Assumes world unit is a meter
                                         // and DEM standard is being used
                                         // for data (30 meter per grid, with
                                         // each 8-bit value representing
                                         // 16 meters
-    hscale=16;
-    wscale=dscale=30;
-    lodmedium=lodlow=0;
+    scale(32),
+    scaleshift(5),
+    lodmedium(0),
+    lodlow(0),
+    origin(0,0,0),
+    hfield(0),
+    htable(0),
+    surfinfo(0),
+    hsurfnorml(0),
+    tmax(0),
+    txtcolor(0),
+    txt(0)
+{
+    dtyp = ESCH_DRWT_TERRAIN;
+
+//ÄÄ Set initial values
+    name=iname;
+    strcpy(name,EschNoName);
 
 //ÄÄ Load data set, if requested
     if (fname)
@@ -97,6 +136,7 @@ EschTerrain::~EschTerrain()
 {
     release();
 };
+
 
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
@@ -114,22 +154,26 @@ EschTerrain::~EschTerrain()
 int EschTerrain::compute_area(Flx16 lox, Flx16 loz, Flx16 hix, Flx16 hiz,
                               int *sw, int *ew, int *sd, int *ed, int bits)
 {
-    assertMyth("EschTerrain:compute_area needs positive w/dscale",
-               wscale.flx > 0 && dscale.flx > 0);
+    assertMyth("EschTerrain:compute_area needs positive scale",
+               scale.flx > 0);
 
     //ÄÄÄÄ Adjust to origin
     lox.flx = lox.flx - origin.x.flx;
     loz.flx = loz.flx - origin.z.flx;
     hix.flx = hix.flx - origin.x.flx;
     hiz.flx = hiz.flx - origin.z.flx;
-    
+
     //ÄÄÄÄ Convert to index
+    lox -= scale;
+    loz -= scale;
+    hix += scale;
+    hiz += scale;
 
     // Width start
     if (lox.flx <= 0)  *sw = 0;
     else
     {
-        *sw = (int)flx_16div16(lox,wscale);
+        *sw = (int)lox >> scaleshift;
         if (*sw >= width)
             *sw = width;
     }
@@ -138,7 +182,7 @@ int EschTerrain::compute_area(Flx16 lox, Flx16 loz, Flx16 hix, Flx16 hiz,
     if (loz.flx <= 0)  *sd = 0;
     else
     {
-        *sd = (int)flx_16div16(loz,dscale);
+        *sd = (int)loz >> scaleshift;
         if (*sd >= depth)
             *sd = depth;
     }
@@ -147,7 +191,7 @@ int EschTerrain::compute_area(Flx16 lox, Flx16 loz, Flx16 hix, Flx16 hiz,
     if (hix.flx <= 0)  *ew = 0;
     else
     {
-        *ew = (int)(flx_16div16(hix,wscale) + Flx16(1));
+        *ew = ((int)hix >> scaleshift) + 1;
         if (*ew > width)
             *ew = width;
         assert(*ew >= 0);
@@ -157,7 +201,7 @@ int EschTerrain::compute_area(Flx16 lox, Flx16 loz, Flx16 hix, Flx16 hiz,
     if (hiz.flx <= 0)  *ed = 0;
     else
     {
-        *ed = (int)(flx_16div16(hiz,dscale) + Flx16(1));
+        *ed = ((int)hiz >> scaleshift) + 1;
         if (*ed > depth)
             *ed = depth;
         assert(*ed >= 0);
@@ -191,72 +235,556 @@ int EschTerrain::compute_area(Flx16 lox, Flx16 loz, Flx16 hix, Flx16 hiz,
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//                          °°° Protected °°°                               ³
+// compute_shift_value                                                      ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+int EschTerrain::compute_shift_value(ulong x, ulong *shift)
+{
+    ulong msk = 0x1;
+
+    for(int i=0; i < 16; i++, msk <<= 1)
+    {
+        if (msk == x)
+        {
+            *shift = i;
+            return 1;
+        }
+    }
+
+    return 0;
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//                          °°° Protected °°°                               ³
+// EschTerrain - compute_texture_uv                                         ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+void EschTerrain::compute_texture_uv(Flx16 &u_left, Flx16 &u_right,
+                                     Flx16 &v_top, Flx16 &v_bottom,
+                                     dword flags,
+                                     int w, int d,
+                                     ulong shift)
+{
+    static Flx16 tile_lookup[8] = { 1,
+                                    2,
+                                    4,
+                                    8,
+                                    12,
+                                    16,
+                                    32,
+                                    64
+                                  };
+
+    dword mask = (1 << surfshift) - 1;
+    int doff = d & mask;
+    int woff = w & mask;
+
+    assert(ESCH_SURF_TILE1 == 0x10 && ESCH_SURF_TILE2 == 0x20 && ESCH_SURF_TILE3 == 0x40);
+    Flx16 tile_factor = tile_lookup[(flags & (ESCH_SURF_TILE1 
+                                              | ESCH_SURF_TILE2 
+                                              | ESCH_SURF_TILE3)) >> 4];
+    Flx16 rate(tile_factor.flx >> surfshift,1);
+    Flx16 t((int)mask);
+
+    if (flags & ESCH_SURF_FLIPU)
+    {
+        u_left = tile_factor - (Flx16(woff) * rate);
+        u_right = (t - Flx16(woff)) * rate;
+    }
+    else
+    {
+        u_left = Flx16(woff) * rate;
+        u_right = tile_factor - ((t - Flx16(woff)) * rate);
+    }
+
+    if (flags & ESCH_SURF_FLIPV)
+    {
+        v_top = tile_factor - ((t - Flx16(doff)) * rate);
+        v_bottom = Flx16(doff) * rate;
+    }
+    else
+    {             
+        v_top = tile_factor - (Flx16(doff+1) * rate);
+        v_bottom = tile_factor - (Flx16(doff) * rate);
+    }
+    if (shift)
+    {
+        u_left.flx <<= shift;
+        u_right.flx <<= shift;
+        v_top.flx <<= shift;
+        v_bottom.flx <<= shift;
+    }
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//                          °°° Protected °°°                               ³
+// EschTerrain - draw_block                                                 ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+void EschTerrain::draw_block(int w, int d, int i, int j,
+                             esch_surf_type *sptr, dword ctrlfl,
+                             ulong shift)
+{
+    dword test = (1 << (shift+1)) - 1;
+
+//ÄÄÄ Get texturing parameters
+    Flx16 u_left(0);
+    Flx16 u_right(1);
+    Flx16 v_top(0);
+    Flx16 v_bottom(1);
+    if (sptr->flags & ESCH_SURF_CINDISTXT
+        && (!shift
+            || !(sptr->flags & ESCH_SURF_NOTILE)))
+    {
+        compute_texture_uv(u_left, u_right,
+                        v_top, v_bottom,
+                        sptr->flags,
+                        w, d, shift);
+        Face.txt = sptr->cind;
+        Face.flags = FACE_FLAGS
+                    | ESCH_FACE_TEXTURED
+                    | ((shift) ? 0 : ESCH_FACE_ALLOWPERSP);
+    }
+
+    assert(EschCurrent != 0);
+    VngoPoint *vpt = EschCurrent->vpoints;
+
+//ÄÄÄ Draw face 1
+    if (w & test)
+    {
+        if (d & test)
+        {
+            Face.a = (word)(j-1);
+            Face.b = (word)(i-1);
+            Face.c = (word)i;
+
+            Face.u[0] = u_left;
+            Face.u[1] = u_left;  
+            Face.u[2] = u_right;  
+
+            Face.v[0] = v_bottom;
+            Face.v[1] = v_top;
+            Face.v[2] = v_top;
+        }
+        else
+        {
+            Face.a = (word)(i-1);
+            Face.b = (word)j;
+            Face.c = (word)(j-1);
+
+            Face.u[0] = u_left;
+            Face.u[1] = u_right;
+            Face.u[2] = u_left;
+
+            Face.v[0] = v_top;
+            Face.v[1] = v_bottom;
+            Face.v[2] = v_bottom;
+        }
+    }
+    else
+    {
+        Face.a = (word)((d & test) ? j:i);
+        Face.b = (word)(j-1);
+        Face.c = (word)(i-1);
+
+        Face.u[0] = u_right;  
+        Face.u[1] = u_left;  
+        Face.u[2] = u_left;  
+
+        Face.v[0] = (d & test) ? v_bottom : v_top;
+        Face.v[1] = v_bottom;
+        Face.v[2] = v_top;
+    }
+    vpt[Face.a].clr = (sptr->flags & ESCH_SURF_CINDISTXT)
+                        ? txtcolor[sptr->cind-1] : sptr->cind;
+    esch_clipdraw_face(0,ctrlfl);
+
+//ÄÄÄ Draw face 2
+    if (w & test)
+    {
+        Face.a = (word)((d & test) ? (j-1):(i-1));
+        Face.b = (word)i;
+        Face.c = (word)j;
+
+        Face.u[0] = u_left;  
+        Face.u[1] = u_right;  
+        Face.u[2] = u_right;  
+
+        Face.v[0] = (d & test) ? v_bottom : v_top;
+        Face.v[1] = v_top;
+        Face.v[2] = v_bottom;
+    }
+    else
+    {
+        if (d & test)
+        {
+            Face.a = (word)j;
+            Face.b = (word)(i-1);
+            Face.c = (word)i;
+
+            Face.u[0] = u_right;  
+            Face.u[1] = u_left;  
+            Face.u[2] = u_right;  
+
+            Face.v[0] = v_bottom;
+            Face.v[1] = v_top;
+            Face.v[2] = v_top;
+        }
+        else
+        {
+            Face.a = (word)i;
+            Face.b = (word)j;
+            Face.c = (word)(j-1);
+
+            Face.u[0] = u_right;  
+            Face.u[1] = u_right;  
+            Face.u[2] = u_left;  
+
+            Face.v[0] = v_top;
+            Face.v[1] = v_bottom;
+            Face.v[2] = v_bottom;
+        }
+    }
+    vpt[Face.a].clr = (sptr->flags & ESCH_SURF_CINDISTXT)
+                        ? txtcolor[sptr->cind-1] : sptr->cind;
+    esch_clipdraw_face(0,ctrlfl);
+
+    Face.flags = FACE_FLAGS;
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//                          °°° Protected °°°                               ³
+// EschTerrain - draw_transitions                                           ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+void EschTerrain::draw_transitions(int w, int d, int i, int j,
+                                   esch_surf_type *sptr, dword ctrlfl,
+                                   int id,
+                                   ulong shift)
+{
+    dword test = (1 << (shift+1)) - 1;
+
+//ÄÄÄ Get texturing parameters
+    Flx16 u_left(0);
+    Flx16 u_half(0.5);
+    Flx16 u_right(1);
+    Flx16 v_top(0);
+    Flx16 v_half(0.5);
+    Flx16 v_bottom(1);
+
+    if (sptr->flags & ESCH_SURF_CINDISTXT
+        && (!shift
+            || !(sptr->flags & ESCH_SURF_NOTILE)))
+    {
+        compute_texture_uv(u_left, u_right,
+                           v_top, v_bottom,
+                           sptr->flags,
+                           w, d, shift);
+        u_half.flx = (u_left.flx + u_right.flx) >> 1;
+        v_half.flx = (v_top.flx + v_bottom.flx) >> 1;
+
+        Face.txt = sptr->cind;
+        Face.flags = FACE_FLAGS
+                     | ESCH_FACE_TEXTURED
+                     | ((shift) ? 0 : ESCH_FACE_ALLOWPERSP);
+    }
+
+    assert(EschCurrent != 0);
+    VngoPoint *vpt = EschCurrent->vpoints;
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Draw face 1
+    switch (id)
+    {
+        case BOTTOM:
+            Face.a = (word)(j-2);
+            Face.b = (word)(i-2);
+            Face.c = (word)(i-1);
+
+            Face.u[0] = u_left;
+            Face.u[1] = u_left;
+            Face.u[2] = u_half;
+
+            Face.v[0] = v_bottom;
+            Face.v[1] = v_top;
+            Face.v[2] = v_top;
+            break;
+        case TOP:
+            Face.a = (word)(j-1);
+            Face.b = (word)(i-1);
+            Face.c = (word)j;
+
+            Face.u[0] = u_left;
+            Face.u[1] = u_left;
+            Face.u[2] = u_half;
+
+            Face.v[0] = v_bottom;
+            Face.v[1] = v_top;
+            Face.v[2] = v_bottom;
+            break;
+        case LEFTA:
+            Face.a = (word)(j-1);
+            Face.b = (word)i;
+            Face.c = (word)j;
+
+            Face.u[0] = u_left;
+            Face.u[1] = u_right;
+            Face.u[2] = u_right;
+
+            Face.v[0] = v_bottom;
+            Face.v[1] = v_half;
+            Face.v[2] = v_bottom;
+            break;
+        case LEFTB:
+            Face.a = (word)(j-1);
+            Face.b = (word)(i-1);
+            Face.c = (word)(j);
+
+            Face.u[0] = u_left;
+            Face.u[1] = u_left;
+            Face.u[2] = u_right;
+
+            Face.v[0] = v_bottom;
+            Face.v[1] = v_top;
+            Face.v[2] = v_half;
+            break;
+        case RIGHTA:
+            Face.a = (word)j;
+            Face.b = (word)(j-1);
+            Face.c = (word)(i-1);
+                  
+            Face.u[0] = u_right;
+            Face.u[1] = u_left;
+            Face.u[2] = u_left;
+
+            Face.v[0] = v_bottom;
+            Face.v[1] = v_bottom;
+            Face.v[2] = v_half;
+            break;
+        case RIGHTB:
+            Face.a = (word)i;
+            Face.b = (word)j;
+            Face.c = (word)(j-1);
+
+            Face.u[0] = u_right;
+            Face.u[1] = u_right;
+            Face.u[2] = u_left;
+
+            Face.v[0] = v_top;
+            Face.v[1] = v_bottom;
+            Face.v[2] = v_half;
+            break;
+        case BOTTOM_CORNERS:
+            Face.a = (word)(j-1);
+            Face.b = (word)(i-1);
+            Face.c = (word)i;
+
+            Face.u[0] = u_left;
+            Face.u[1] = u_left;
+            Face.u[2] = u_right;
+
+            Face.v[0] = v_bottom;
+            Face.v[1] = v_top;
+            Face.v[2] = v_top;
+            break;
+        case TOP_CORNERS:
+            Face.a = (word)(j-1);
+            Face.b = (word)(i-1);
+            Face.c = (word)j;
+
+            Face.u[0] = u_left;
+            Face.u[1] = u_left;
+            Face.u[2] = u_right;
+
+            Face.v[0] = v_bottom;
+            Face.v[1] = v_top;
+            Face.v[2] = v_bottom;
+            break;
+        default:
+            assert(FALSE);
+            Face.flags = FACE_FLAGS;
+            return;
+    }
+    vpt[Face.a].clr = (sptr->flags & ESCH_SURF_CINDISTXT)
+                        ? txtcolor[sptr->cind-1] : sptr->cind;
+    esch_clipdraw_face(0,ctrlfl);
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Draw face 2
+    switch (id)
+    {
+        case BOTTOM:
+            Face.a = (word)(j-2);
+            Face.b = (word)(i-1);
+            Face.c = (word)(j-1);
+
+            Face.u[0] = u_left;
+            Face.u[1] = u_half;
+            Face.u[2] = u_right;
+
+            Face.v[0] = v_bottom;
+            Face.v[1] = v_top;
+            Face.v[2] = v_bottom;
+            break;
+        case TOP:
+            Face.a = (word)i;
+            Face.b = (word)j;
+            Face.c = (word)(i-1);
+
+            Face.u[0] = u_right;
+            Face.u[1] = u_half;
+            Face.u[2] = u_left;
+
+            Face.v[0] = v_top;
+            Face.v[1] = v_bottom;
+            Face.v[2] = v_top;
+            break;
+        case LEFTB:
+            Face.a = (word)i;
+            Face.b = (word)j;
+            Face.c = (word)(i-1);
+
+            Face.u[0] = u_right;
+            Face.u[1] = u_right;
+            Face.u[2] = u_left;
+
+            Face.v[0] = v_top;
+            Face.v[1] = v_half;
+            Face.v[2] = v_top;
+            break;
+        case RIGHTB:
+            Face.a = (word)(i-1);
+            Face.b = (word)i;
+            Face.c = (word)(j-1);
+
+            Face.u[0] = u_left;
+            Face.u[1] = u_right;
+            Face.u[2] = u_left;
+
+            Face.v[0] = v_top;
+            Face.v[1] = v_top;
+            Face.v[2] = v_half;
+            break;
+        case BOTTOM_CORNERS:
+            Face.a = (word)(j-1);
+            Face.b = (word)i;   
+            Face.c = (word)j;
+
+            Face.u[0] = u_left;
+            Face.u[1] = u_right;
+            Face.u[2] = u_right;
+
+            Face.v[0] = v_bottom;
+            Face.v[1] = v_top;
+            Face.v[2] = v_bottom;
+            break;
+        case TOP_CORNERS:
+            Face.a = (word)i;   
+            Face.b = (word)j;
+            Face.c = (word)(i-1);
+
+            Face.u[0] = u_right;
+            Face.u[1] = u_right;
+            Face.u[2] = u_left;
+
+            Face.v[0] = v_top;
+            Face.v[1] = v_bottom;
+            Face.v[2] = v_top;
+            break;
+        default:
+            Face.flags = FACE_FLAGS;
+            return;
+    }
+    vpt[Face.a].clr = (sptr->flags & ESCH_SURF_CINDISTXT)
+                        ? txtcolor[sptr->cind-1] : sptr->cind;
+
+    esch_clipdraw_face(0,ctrlfl);
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Draw face 3
+    switch (id)
+    {
+        case BOTTOM:
+            Face.a = (word)i;
+            Face.b = (word)(j-1);
+            Face.c = (word)(i-1);
+
+            Face.u[0] = u_right;
+            Face.u[1] = u_right;
+            Face.u[2] = u_half;
+
+            Face.v[0] = v_top;
+            Face.v[1] = v_bottom;
+            Face.v[2] = v_top;
+            break;
+        case TOP:
+            Face.a = (word)i;
+            Face.b = (word)(j+1);
+            Face.c = (word)j;
+
+            Face.u[0] = u_right;
+            Face.u[1] = u_right;
+            Face.u[2] = u_half;
+
+            Face.v[0] = v_top;
+            Face.v[1] = v_bottom;
+            Face.v[2] = v_bottom;
+            break;
+        default:
+            Face.flags = FACE_FLAGS;
+            return;
+    }
+    vpt[Face.a].clr = (sptr->flags & ESCH_SURF_CINDISTXT)
+                        ? txtcolor[sptr->cind-1] : sptr->cind;
+    esch_clipdraw_face(0,ctrlfl);
+
+    Face.flags = FACE_FLAGS;
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // EschTerrain - draw                                                       ³
 //                                                                          ³
 // Displays the terrain.                                                    ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void EschTerrain::draw(void)
+void EschTerrain::draw()
 {
     int                     i, j, k, w, d;          // Loop variables
     byte                    *ptr;                   // Fast-access pointers
     struct esch_surf_type   *sptr;
     dword                   *vflags;
     VngoPoint               *vpt, *v;
-    EschCamera              *cam;
     int                     sw, ew, sd, ed, rowsz;  // Bound area indecies and values
     int                     swm, ewm, sdm, edm;     // Medium detail indecies
-//  int                     swl, ewl, sdl, edl;     // Low detail indecies
-    dword                   cflags;
+    int                     swl, ewl, sdl, edl;     // Low detail indecies
     ulong                   needed;
     Flx16                   tx, ty;                 // Temp values
     Flx16                   minx, minz, maxx, maxz; // Bounding area (far/yon)
     Flx16                   mlox, mloz, mhix, mhiz; // Medium detail area
     Flx16                   llox, lloz, lhix, lhiz; // Low detail area
-    VngoRect                damage_rect;
     static EschPoint        po, pd, pw;             // Workspace
-    static EschFace         face(ESCH_FACE_ALLOWPERSP
-                                 | ESCH_FACE_SPECULAR
-                                 | ESCH_FACE_SMOOTH
-                                 | ESCH_FACE_FLAT  
-                                 | ESCH_FACE_SOLID
-                                 | ESCH_FACE_WIRE
-                                 | ESCH_FACE_ABLINE
-                                 | ESCH_FACE_BCLINE
-                                 | ESCH_FACE_CALINE,
-                                 0,0,0, /* A, B, C */
-                                 0, /* Txt */
-                                 0,0,0,0,0,0, /* U, V */
-                                 0, /* color */
-                                 0,1,0 /* normal */);
 
     assertMyth("EschTerrain::draw needs height-field information",
-               hfield);
+               hfield && htable);
 
     assertMyth("EschTerrain::draw needs surface information",
                surfinfo);
 
-    if (!hfield || !surfinfo)
+    if (!hfield || !htable || !surfinfo)
         return;
 
 //ÄÄÄ Clear arena
+    assertMyth("EschTerrain needs Escher initialized",EschSysInstance != 0);
     ivory_arena_clear(EschSysInstance->wspace);
 
 //ÄÄÄ Setup local pointers to current camera and Van Gogh viewport.
     assertMyth("EschTerrain::draw needs camera in current context",
                EschCurrent != NULL && EschCurrent->camera != NULL);
 
-    cam=EschCurrent->camera;
+    EschCamera *cam=EschCurrent->camera;
 
     assertMyth("EschTerrain::draw needs a viewport in current context's camera",
                cam->vport != NULL);
 
-    cflags = cam->flags;
-
-//ÄÄÄ Clear the objects damage rectangle
-    damage_rect.x = cam->vport->vbuff.width;
-    damage_rect.y = cam->vport->vbuff.height;
-    damage_rect.dx = 0;
-    damage_rect.dy = 0;
+    dword ctrlfl = ESCH_CDF_CLIP
+                   | ((cam->flags & ESCH_CAM_BACKCULL) ? ESCH_CDF_BFCULL : 0);
 
 //ÄÄÄ Transform view volume into world coords and project onto XZ plane,
 //ÄÄÄ forming min/max bound.  Also, figure medium and low detail areas, if
@@ -266,6 +794,16 @@ void EschTerrain::draw(void)
     EschPoint   pos;
 
     cam->get_position(&pos);
+
+    {
+        EschVector  tvect;
+        tvect = cam->eye.dir;
+        tvect = tvect * scale * Flx16(2);
+
+        pos.x = (pos.x - tvect.i);
+        pos.y = (pos.y - tvect.j);
+        pos.z = (pos.z - tvect.k);
+    }
 
     mlox.flx = llox.flx = minx.flx = pos.x.flx;
     mloz.flx = lloz.flx = minz.flx = pos.z.flx;
@@ -420,7 +958,7 @@ void EschTerrain::draw(void)
 
     //ÄÄÄ Bounding area
     if (!compute_area(minx, minz, maxx, maxz,
-                      &sw, &ew, &sd, &ed, 2))
+                      &sw, &ew, &sd, &ed, 3))
         return;
 
     rowsz = ew - sw;
@@ -431,28 +969,74 @@ void EschTerrain::draw(void)
     {
         //ÄÄÄ Medium LOD
         if (!compute_area(mlox, mloz, mhix, mhiz,
-                          &swm, &ewm, &sdm, &edm, 1))
+                          &swm, &ewm, &sdm, &edm, 2))
         {
-            swm=sw-2;   sdm=sd-2;
-            ewm=width & 0xfffffffe;
-            edm=depth & 0xfffffffe;
+            swm=sw-2;   
+            if (sw < 0)
+                sw = 0;
+            sdm=sd-2;
+            if (sd < 0)
+                sd = 0;
+            ewm=(width + 2) & ~0x1;
+            if (ewm > width)
+                ewm = width;
+            edm=(depth + 2) & ~0x1;
+            if (edm > depth)
+                edm = depth;
         }
 
+        if (swm <= sw)
+            swm = sw-2;
+        if (ewm >= ew)
+            ewm = ew+2;
+
+        if (sdm <= sd)
+            sdm = sd-2;
+        if (edm >= ed)
+            edm = ed+2;
+
         //ÄÄÄ Low LOD
+        if (!compute_area(llox, lloz, lhix, lhiz,
+                          &swl, &ewl, &sdl, &edl, 3))
+        {
+            swl=sw-4;
+            if (sw < 0)
+                sw = 0;
+            sdl=sd-4;
+            if (sd < 0)
+                sd = 0;
+            ewl=(width + 4) & ~0x3;
+            if (ewl > width)
+                ewl = width;
+            edl=(depth + 4) & ~0x3;
+            if (edl > depth)
+                edl = depth;
+        }
+
+        if (swl <= sw)
+            swl = sw-4;
+        if (ewl >= ew)
+            ewl = ew+4;
+
+        if (sdl <= sd)
+            sdl = sd-4;
+        if (edl >= ed)
+            edl = ed+4;
     }
+
 
 //ÄÄÄ Compute orientation factors for terrain grid.  These are used
 //ÄÄÄ during the transform of the height field into the camera's view.
     assertMyth("EschTerrain::draw needs positive scale factors",
-               wscale.flx >= 0 && dscale.flx >= 0 && hscale.flx >= 0);
+               scale.flx > 0 && htable != 0);
 
-    EschVector wvec(wscale,0,0);
+    EschVector wvec(scale,0,0);
     wvec.transform(&cam->eye.iorient);
 
-    EschVector dvec(0,0,dscale);
+    EschVector dvec(0,0,scale);
     dvec.transform(&cam->eye.iorient);
 
-    EschVector hvec(0,hscale,0);
+    EschVector hvec(0,1,0);
     hvec.transform(&cam->eye.iorient);
 
     // Compute position of grid origin
@@ -469,10 +1053,11 @@ void EschTerrain::draw(void)
         EschSysInstance->wspace_mbytes = needed;
 
     EschContext ec(EschCurrent);
+    ec.current = this;
     ec.verts = 0;
     ec.vflags = vflags = (dword*)ivory_arena_zalloc(EschSysInstance->wspace,sizeof(dword)*rowsz*2);
     ec.vpoints = vpt = new (EschSysInstance->wspace) VngoPoint[rowsz*2];
-    ec.faces = &face;
+    ec.faces = &Face;
     ec.fflags = 0;
     ec.txts = txt;
     ec.push();
@@ -493,7 +1078,7 @@ void EschTerrain::draw(void)
         // Determine this row (i) vs. last row (j) counters
         if (k)
         {
-            i=rowsz; 
+            i=rowsz;
             j=0;
         }
         else
@@ -507,24 +1092,46 @@ void EschTerrain::draw(void)
         {
             v=&vpt[i];
 
-            // Test for Medium LOD row skip
-            if (flags & ESCH_TRN_LOD
-                && (d < sdm || d >= edm-1 || w < swm || w >= ewm-1))
+            // Test for Medium/Low LOD row skip
+            if (flags & ESCH_TRN_LOD)
             {
-                if (d & 0x1)
+#if 0
+                if ((d < sdl || d >= edl-3 || w < swl || w >= ewl-3)
+                    && (d & 0x3))
+                { 
+                    // Handle missing triangle for 
+                    if (!(flags & ESCH_TRN_DOTS)
+                        && (w == ewl))
+                    {
+                        sptr = surfinfo;
+                        sptr += ((d >> surfshift) * (width >> surfshift)) + (w >> surfshift);
+
+                        draw_transitions(w, d, i, j, sptr, ctrlfl, RIGHTA, 2);
+                    }
+
+                    *v = vpt[j];
+                    vflags[i] = vflags[j];
+
+                    w += 4;
+                    ptr += 4;
+                    pw.x.flx += wvec.i.flx << 2;
+                    pw.y.flx += wvec.j.flx << 2;
+                    pw.z.flx += wvec.k.flx << 2;
+                    continue;
+                }
+                else
+#endif
+                if ((d < sdm || d >= edm-1 || w < swm || w >= ewm-1)
+                    && (d & 0x1))
                 { 
                     // Handle missing triangle for 
                     if (!(flags & ESCH_TRN_DOTS)
                         && (w == ewm))
                     {
-                        face.a = (word)j;
-                        face.b = (word)(j-1);
-                        face.c = (word)(i-1);
-
                         sptr = surfinfo;
                         sptr += ((d >> surfshift) * (width >> surfshift)) + (w >> surfshift);
-                        vpt[face.a].clr = sptr->cind;
-                        esch_clipdraw_face(0,1,&damage_rect, cflags & ESCH_CAM_BACKCULL);
+
+                        draw_transitions(w, d, i, j, sptr, ctrlfl, RIGHTA, 1);
                     }
 
                     *v = vpt[j];
@@ -540,9 +1147,10 @@ void EschTerrain::draw(void)
             }
 
             // Compute height-field point for current width and depth
-            ((EschPoint*)v)->x.flx = pw.x.flx + ((Flx16)(*ptr) * hvec.i).flx;
-            ((EschPoint*)v)->y.flx = pw.y.flx + ((Flx16)(*ptr) * hvec.j).flx;
-            ((EschPoint*)v)->z.flx = pw.z.flx + ((Flx16)(*ptr) * hvec.k).flx;
+            Flx16 h = htable[*ptr];
+            ((EschPoint*)v)->x.flx = pw.x.flx + (h * hvec.i).flx;
+            ((EschPoint*)v)->y.flx = pw.y.flx + (h * hvec.j).flx;
+            ((EschPoint*)v)->z.flx = pw.z.flx + (h * hvec.k).flx;
 
             // Setup surface colors and lighting
             sptr = surfinfo;
@@ -610,307 +1218,181 @@ void EschTerrain::draw(void)
                 {
                     if (w > sw)
                     {
-                        //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Medium LOD
-                        if (flags & ESCH_TRN_LOD
-                            && (d < sdm || d > edm || w < swm || w > ewm))
+                        //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Use level-of-detail
+                        if (flags & ESCH_TRN_LOD)
                         {
-
-                            // (d is never odd since top case catches that)
-                            assert ((d & 0x1) == 0);
-
-                            if (w & 0x3)
+#if 0
+                            //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Low LOD
+                            if (d < sdl || d > edl || w < swl || w > ewl)
                             {
-                                face.a = (word)((d & 0x3) ? i:j);
-                                face.b = (word)(j-1);
-                                face.c = (word)(i-1);
+                                // (d is never odd since top case catches that)
+                                assert ((d & 0x3) == 0);
+
+                                draw_block(w, d, i, j, sptr, ctrlfl, 2);
                             }
-                            else
+                            else if (d == sdl)
                             {
-                                if (d & 0x3)
+                                if (w == swl || w == ewl)
                                 {
-                                    face.a = (word)(i-1);
-                                    face.b = (word)j;
-                                    face.c = (word)(j-1);
+                                    draw_transitions(w, d, i, j, sptr, ctrlfl, BOTTOM_CORNERS, 2);
                                 }
-                                else
+                                else if ((w & 0x3) == 0)
                                 {
-                                    face.a = (word)(j-1);
-                                    face.b = (word)(i-1);
-                                    face.c = (word)i;
-                                }
-                            }
-                            vpt[face.a].clr = (sptr->flags & ESCH_SURF_CINDISTXT)
-                                              ? txtcolor[sptr->cind-1] : sptr->cind;
-                            esch_clipdraw_face(0,1,&damage_rect, cflags & ESCH_CAM_BACKCULL);
-
-                            if (w & 0x3)
-                            {
-                                if (d & 0x3)
-                                {
-                                    face.a = (word)i;
-                                    face.b = (word)j;
-                                    face.c = (word)(j-1);
-                                }
-                                else
-                                {
-                                    face.a = (word)j;
-                                    face.b = (word)(i-1);
-                                    face.c = (word)i;
-                                }
-                            }
-                            else
-                            {
-                                face.a = (word)((d & 0x3) ? (i-1):(j-1));
-                                face.b = (word)i;
-                                face.c = (word)j;
-                            }
-                            vpt[face.a].clr = (sptr->flags & ESCH_SURF_CINDISTXT)
-                                              ? txtcolor[sptr->cind-1] : sptr->cind;
-                            esch_clipdraw_face(0,1,&damage_rect, cflags & ESCH_CAM_BACKCULL);
-                        }
-                        else if (flags & ESCH_TRN_LOD && (d == sdm))
-                        {
-                            if (w == swm || w == ewm)
-                            {
-                                face.a = (word)(j-1);
-                                face.b = (word)(i-1);
-                                face.c = (word)i;
-                                vpt[face.a].clr = (sptr->flags & ESCH_SURF_CINDISTXT)
-                                                   ? txtcolor[sptr->cind-1] : sptr->cind;
-                                esch_clipdraw_face(0,1,&damage_rect, cflags & ESCH_CAM_BACKCULL);
-
-                                face.a = (word)(j-1);
-                                face.b = (word)i;   
-                                face.c = (word)j;
-                                vpt[face.a].clr = (sptr->flags & ESCH_SURF_CINDISTXT)
-                                                   ? txtcolor[sptr->cind-1] : sptr->cind;
-                                esch_clipdraw_face(0,1,&damage_rect, cflags & ESCH_CAM_BACKCULL);
-                            }
-                            else if ((w & 0x1) == 0)
-                            {
-                                face.a = (word)(j-2);
-                                face.b = (word)(i-2);
-                                face.c = (word)(i-1);
-                                vpt[face.a].clr = (sptr->flags & ESCH_SURF_CINDISTXT)
-                                                   ? txtcolor[sptr->cind-1] : sptr->cind;
-                                esch_clipdraw_face(0,1,&damage_rect, cflags & ESCH_CAM_BACKCULL);
-
-                                face.b = (word)(i-1);
-                                face.c = (word)(j-1);
-                                vpt[face.a].clr = (sptr->flags & ESCH_SURF_CINDISTXT)
-                                                   ? txtcolor[sptr->cind-1] : sptr->cind;
-                                esch_clipdraw_face(0,1,&damage_rect, cflags & ESCH_CAM_BACKCULL);
-
-                                face.a = (word)i;
-                                face.b = (word)(j-1);
-                                face.c = (word)(i-1);
-                                vpt[face.a].clr = (sptr->flags & ESCH_SURF_CINDISTXT)
-                                                   ? txtcolor[sptr->cind-1] : sptr->cind;
-                                esch_clipdraw_face(0,1,&damage_rect, cflags & ESCH_CAM_BACKCULL);
-                                j--;
-                            }
-
-                            // Don't draw in odd case
-                        }
-                        else if (flags & ESCH_TRN_LOD && (d >= edm-1))
-                        {
-                            if (d == edm)
-                            {
-                                if (w == swm || w == ewm)
-                                {
-                                    face.a = (word)(j-1);
-                                    face.b = (word)(i-1);
-                                    face.c = (word)j;
-                                    vpt[face.a].clr = (sptr->flags & ESCH_SURF_CINDISTXT)
-                                                      ? txtcolor[sptr->cind-1] : sptr->cind;
-                                    esch_clipdraw_face(0,1,&damage_rect, cflags & ESCH_CAM_BACKCULL);
-
-                                    face.a = (word)i;   
-                                    face.b = (word)j;
-                                    face.c = (word)(i-1);
-                                    vpt[face.a].clr = (sptr->flags & ESCH_SURF_CINDISTXT)
-                                                      ? txtcolor[sptr->cind-1] : sptr->cind;
-                                    esch_clipdraw_face(0,1,&damage_rect, cflags & ESCH_CAM_BACKCULL);
-                                }
-                                else
-                                {
-                                    face.a = (word)(j-1);
-                                    face.b = (word)(i-1);
-                                    face.c = (word)j;
-                                    vpt[face.a].clr = (sptr->flags & ESCH_SURF_CINDISTXT)
-                                                      ? txtcolor[sptr->cind-1] : sptr->cind;
-                                    esch_clipdraw_face(0,1,&damage_rect, cflags & ESCH_CAM_BACKCULL);
-
-                                    face.a = (word)i;
-                                    face.b = (word)j;
-                                    face.c = (word)(i-1);
-                                    vpt[face.a].clr = (sptr->flags & ESCH_SURF_CINDISTXT)
-                                                      ? txtcolor[sptr->cind-1] : sptr->cind;
-                                    esch_clipdraw_face(0,1,&damage_rect, cflags & ESCH_CAM_BACKCULL);
-
-                                    face.a = (word)i;
-                                    face.b = (word)(j+1);
-                                    face.c = (word)j;
-                                    vpt[face.a].clr = (sptr->flags & ESCH_SURF_CINDISTXT)
-                                                      ? txtcolor[sptr->cind-1] : sptr->cind;
-                                    esch_clipdraw_face(0,1,&damage_rect, cflags & ESCH_CAM_BACKCULL);
-                                    j++;
-                                }
-                            }
-
-                            // Don't draw in edm-1 case
-                        }
-                        else if (flags & ESCH_TRN_LOD && (w == swm))
-                        {
-                            if (d & 0x1)
-                            {
-                                face.a = (word)(j-1);
-                                face.b = (word)i;
-                                face.c = (word)j;
-                                vpt[face.a].clr = (sptr->flags & ESCH_SURF_CINDISTXT)
-                                                  ? txtcolor[sptr->cind-1] : sptr->cind;
-                                esch_clipdraw_face(0,1,&damage_rect, cflags & ESCH_CAM_BACKCULL);
-                            }
-                            else
-                            {
-                                face.a = (word)(j-1);
-                                face.b = (word)(i-1);
-                                face.c = (word)(j);
-                                vpt[face.a].clr = (sptr->flags & ESCH_SURF_CINDISTXT)
-                                                  ? txtcolor[sptr->cind-1] : sptr->cind;
-                                esch_clipdraw_face(0,1,&damage_rect, cflags & ESCH_CAM_BACKCULL);
-
-                                face.a = (word)i;
-                                face.b = (word)j;
-                                face.c = (word)(i-1);
-                                vpt[face.a].clr = (sptr->flags & ESCH_SURF_CINDISTXT)
-                                                  ? txtcolor[sptr->cind-1] : sptr->cind;
-                                esch_clipdraw_face(0,1,&damage_rect, cflags & ESCH_CAM_BACKCULL);
-                            }
-                        }
-                        else if (flags & ESCH_TRN_LOD && (w >= ewm-1))
-                        {
-
-                            // One of the 3 faces points are missing by
-                            // this point... must do this above when we
-                            // skip the row.
-
-                            if (w == ewm)
-                            {
-                                if ((d & 0x1) == 0)
-                                {
-                                    face.a = (word)i;
-                                    face.b = (word)j;
-                                    face.c = (word)(j-1);
-                                    vpt[face.a].clr = (sptr->flags & ESCH_SURF_CINDISTXT)
-                                                      ? txtcolor[sptr->cind-1] : sptr->cind;
-                                    esch_clipdraw_face(0,1,&damage_rect, cflags & ESCH_CAM_BACKCULL);
-
-                                    face.a = (word)(i-1);
-                                    face.b = (word)i;
-                                    face.c = (word)(j-1);
-                                    vpt[face.a].clr = (sptr->flags & ESCH_SURF_CINDISTXT)
-                                                      ? txtcolor[sptr->cind-1] : sptr->cind;
-                                    esch_clipdraw_face(0,1,&damage_rect, cflags & ESCH_CAM_BACKCULL);
+                                    draw_transitions(w, d, i, j, sptr, ctrlfl, BOTTOM, 2);
+                                    j--;
                                 }
 
                                 // Don't draw in odd case
                             }
+                            else if (d >= edl-3)
+                            {
+                                if (d == edl)
+                                {
+                                    if (w == swl || w == ewl)
+                                    {
+                                        draw_transitions(w, d, i, j, sptr, ctrlfl, TOP_CORNERS, 2);
+                                    }
+                                    else
+                                    {
+                                        draw_transitions(w, d, i, j, sptr, ctrlfl, TOP, 2);
+                                        j++;
+                                    }
+                                }
 
-                            // Don't draw in ewm-1 case
+                                // Don't draw in edl-3 case
+                            }
+                            else if (w == swl)
+                            {
+                                if (d & 0x3)
+                                {
+                                    draw_transitions(w, d, i, j, sptr, ctrlfl, LEFTA, 2);
+                                }
+                                else
+                                {
+                                    draw_transitions(w, d, i, j, sptr, ctrlfl, LEFTB, 2);
+                                }
+                            }
+                            else if (w >= ewl-3)
+                            {
+
+                                // One of the 3 faces points are missing by
+                                // this point... must do this above when we
+                                // skip the row.
+
+                                if (w == ewl)
+                                {
+                                    if ((d & 0x3) == 0)
+                                    {
+                                        draw_transitions(w, d, i, j, sptr, ctrlfl, RIGHTB, 2);
+                                    }
+
+                                    // Don't draw in odd case
+                                }
+
+                                // Don't draw in ewl-3 case
+                            }
+
+                            //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Medium LOD
+                            else
+#endif
+                            if (d < sdm || d > edm || w < swm || w > ewm)
+                            {
+                                // (d is never odd since top case catches that)
+                                assert ((d & 0x1) == 0);
+
+                                draw_block(w, d, i, j, sptr, ctrlfl, 1);
+                            }
+                            else if (d == sdm)
+                            {
+                                if (w == swm || w == ewm)
+                                {
+                                    draw_transitions(w, d, i, j, sptr, ctrlfl, BOTTOM_CORNERS, 1);
+                                }
+                                else if ((w & 0x1) == 0)
+                                {
+                                    draw_transitions(w, d, i, j, sptr, ctrlfl, BOTTOM, 1);
+                                    j--;
+                                }
+
+                                // Don't draw in odd case
+                            }
+                            else if (d >= edm-1)
+                            {
+                                if (d == edm)
+                                {
+                                    if (w == swm || w == ewm)
+                                    {
+                                        draw_transitions(w, d, i, j, sptr, ctrlfl, TOP_CORNERS, 1);
+                                    }
+                                    else if ((w & 0x1) == 0)
+                                    {
+                                        draw_transitions(w, d, i, j, sptr, ctrlfl, TOP, 1);
+                                        j++;
+                                    }
+                                }
+
+                                // Don't draw in edm-1 case
+                            }
+                            else if (w == swm)
+                            {
+                                if (d & 0x1)
+                                {
+                                    draw_transitions(w, d, i, j, sptr, ctrlfl, LEFTA, 1);
+                                }
+                                else
+                                {
+                                    draw_transitions(w, d, i, j, sptr, ctrlfl, LEFTB, 1);
+                                }
+                            }
+                            else if (w >= ewm-1)
+                            {
+
+                                // One of the 3 faces points are missing by
+                                // this point... must do this above when we
+                                // skip the row.
+
+                                if (w == ewm)
+                                {
+                                    if ((d & 0x1) == 0)
+                                    {
+                                        draw_transitions(w, d, i, j, sptr, ctrlfl, RIGHTB, 1);
+                                    }
+
+                                    // Don't draw in odd case
+                                }
+
+                                // Don't draw in ewm-1 case
+                            }
+                            //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ High LOD
+                            else
+                            {
+                                draw_block(w, d, i, j, sptr, ctrlfl, 0);
+                            }
                         }
-                        //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ High LOD
+                        //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Always draw as full detail
                         else
                         {
-                            if (sptr->flags & ESCH_SURF_CINDISTXT)
-                            {
-                                face.txt = sptr->cind;
-                                face.flags |= ESCH_FACE_TEXTURED;
-                            }
-
-                            if (w & 0x1)
-                            {
-                                if (d & 0x1)
-                                {
-                                    face.a = (word)(j-1);
-                                    face.b = (word)(i-1);
-                                    face.c = (word)i;
-
-                                    face.u[0] = 0;  face.v[0] = 1;
-                                    face.u[1] = 0;  face.v[1] = 0;
-                                    face.u[2] = 1;  face.v[2] = 0;
-                                }
-                                else
-                                {
-                                    face.a = (word)(i-1);
-                                    face.b = (word)j;
-                                    face.c = (word)(j-1);
-
-                                    face.u[0] = 0;  face.v[0] = 0;
-                                    face.u[1] = 1;  face.v[1] = 1;
-                                    face.u[2] = 0;  face.v[2] = 1;
-                                }
-                            }
-                            else
-                            {
-                                face.a = (word)((d & 0x1) ? j:i);
-                                face.b = (word)(j-1);
-                                face.c = (word)(i-1);
-
-                                face.u[0] = 1;  face.v[0] = (d & 0x1) ? 1 : 0;
-                                face.u[1] = 0;  face.v[1] = 1;
-                                face.u[2] = 0;  face.v[2] = 0;
-                            }
-                            vpt[face.a].clr = (sptr->flags & ESCH_SURF_CINDISTXT)
-                                              ? txtcolor[sptr->cind-1] : sptr->cind;
-                            esch_clipdraw_face(0,1,&damage_rect, cflags & ESCH_CAM_BACKCULL);
-
-                            if (w & 0x1)
-                            {
-                                face.a = (word)((d & 0x1) ? (j-1):(i-1));
-                                face.b = (word)i;
-                                face.c = (word)j;
-
-                                face.u[0] = 0;  face.v[0] = (d & 0x1) ? 1 : 0;
-                                face.u[1] = 1;  face.v[1] = 0;
-                                face.u[2] = 1;  face.v[2] = 1;
-                            }
-                            else
-                            {
-                                if (d & 0x1)
-                                {
-                                    face.a = (word)j;
-                                    face.b = (word)(i-1);
-                                    face.c = (word)i;
-
-                                    face.u[0] = 1;  face.v[0] = 1;
-                                    face.u[1] = 0;  face.v[1] = 0;
-                                    face.u[2] = 1;  face.v[2] = 0;
-                                }
-                                else
-                                {
-                                    face.a = (word)i;
-                                    face.b = (word)j;
-                                    face.c = (word)(j-1);
-
-                                    face.u[0] = 1;  face.v[0] = 0;
-                                    face.u[1] = 1;  face.v[1] = 1;
-                                    face.u[2] = 0;  face.v[2] = 1;
-                                }
-                            }
-                            vpt[face.a].clr = (sptr->flags & ESCH_SURF_CINDISTXT)
-                                              ? txtcolor[sptr->cind-1] : sptr->cind;
-                            esch_clipdraw_face(0,1,&damage_rect, cflags & ESCH_CAM_BACKCULL);
-
-                            face.flags &= ~ESCH_FACE_TEXTURED;
+                            draw_block(w, d, i, j, sptr, ctrlfl, 0);
                         }
                     }
                 }
             }
 
             // Advance walk in width
-            if (flags & ESCH_TRN_LOD 
-                && (d < sdm || d >= edm-1 || w < swm || w >= ewm-2))
+#if 0
+            if (flags & ESCH_TRN_LOD
+                && (d < sdl || d >= edl-3 || w < swl || w >= ewl-5))
+            {
+                w += 4;
+                ptr += 4;
+                pw.x.flx += wvec.i.flx << 2;
+                pw.y.flx += wvec.j.flx << 2;
+                pw.z.flx += wvec.k.flx << 2;
+            }
+            else
+#endif
+            if (flags & ESCH_TRN_LOD
+                     && (d < sdm || d >= edm-1 || w < swm || w >= ewm-2))
             {
                 w += 2;
                 ptr += 2;
@@ -928,60 +1410,74 @@ void EschTerrain::draw(void)
             }
         }
 
-        // Advance walk in depth
-        d++;
-        pd.x.flx += dvec.i.flx;
-        pd.y.flx += dvec.j.flx;
-        pd.z.flx += dvec.k.flx;
+#if 0
+        if (flags & ESCH_TRN_LOD
+            && (d < sdl-3 || d > edl+3))
+        { 
+            d += 4;
+            pd.x.flx += dvec.i.flx << 2;
+            pd.y.flx += dvec.j.flx << 2;
+            pd.z.flx += dvec.k.flx << 2;
+        }
+        else
+#endif
+        if (flags & ESCH_TRN_LOD
+            && (d < sdm-1 || d > edm+1))
+        { 
+            d += 2;
+            pd.x.flx += dvec.i.flx << 1;
+            pd.y.flx += dvec.j.flx << 1;
+            pd.z.flx += dvec.k.flx << 1;
+        }
+        else
+        {
+            d++;
+            pd.x.flx += dvec.i.flx;
+            pd.y.flx += dvec.j.flx;
+            pd.z.flx += dvec.k.flx;
+        }
     }
-
-//ÄÄÄ Ensure damage rect is on a word boundary for both origin and width
-
-    if (damage_rect.dx > 0 && damage_rect.dy > 0)
-    {
-        // Coming in here .dx & .dy are the right edges, not the actual
-        // deltas, we must now derive the delta information.
-        damage_rect.dx = damage_rect.dx - damage_rect.x;
-        damage_rect.dy = damage_rect.dy - damage_rect.y;
-        if (damage_rect.x & 0x1)
-        {
-            // if it is not on an even boundary, put it there.
-            damage_rect.x = damage_rect.x - 1;
-            // you now need to adjust the width to compensate for it.
-            damage_rect.dx++;
-        }
-        // There is no need to align the Y parameters.
-        if (damage_rect.dx & 1)
-        {
-            if ((damage_rect.dx + damage_rect.x) < (cam->vport->vbuff.width -1 ))
-            {
-                damage_rect.dx++;
-            }
-        }
-        if ((damage_rect.dx + damage_rect.x + 2) < (cam->vport->vbuff.width -1))
-        {
-            damage_rect.dx += 2;
-        }
-        if ((damage_rect.dy + damage_rect.y + 1) < (cam->vport->vbuff.height -1))
-        {
-            damage_rect.dy++;
-        }
-        cam->vport->add_hot_rect(new VngoRectList(damage_rect));
-    }
-
+//
 //ÄÄÄ Pop drawing context
     ec.pop();
 }
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// EschTerrain - animate                                                    ³
+//                                                                          ³
+// This call is used to inform the drawable to animate itself for the next  ³
+// frame.  This is called directly by the application when needed.          ³
+// The base behavior for the terrain is to call animate for each texture    ³
+// in the texture list.                                                     ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+void EschTerrain::animate()
+{
+    if (!txt)
+        return;
+
+    for(ulong i=0; i < tmax; i++)
+    {
+        EschTexture *t = txt[i];
+        if (!(t->flags & ESCH_TXT_SKIPANIMATE))
+            t->animate();
+    }
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // EschTerrain - compute_shades                                             ³
+//                                                                          ³
+// Computes the lighting values for the terrain.  Computing the lighting    ³
+// values every frame is extremely expensive, so this routine must be       ³
+// called explicitly to set the terrain shading values.                     ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 void EschTerrain::compute_shades(EschCamera *cam, EschLight *lgts)
 {
     byte            *ptr;
     int             w,d;
     esch_surf_type  *sptr;
+    dword           level;
     EschVector      *nptr=0;
     EschPoint       pd, pw;
     VngoPoint       v;
@@ -990,10 +1486,15 @@ void EschTerrain::compute_shades(EschCamera *cam, EschLight *lgts)
     assertMyth("EschTerrain::compute_shades needs surfinfo",
                surfinfo);
 
+    //ÄÄÄ Figure out shade level (take minimum of shade levels for
+    //ÄÄÄ camera and drawable limits)
+
+    level = cam->flags & limits;
+
 //ÄÄÄ Handle case of 'trivial' shade computation
     if (!lgts
-       || !(cam->flags & (ESCH_CAM_SHADE_FLAT
-                      | ESCH_CAM_SHADE_SMOOTH)))
+       || !(level & (ESCH_CAM_SHADE_FLAT
+                     | ESCH_CAM_SHADE_SMOOTH)))
     {
         assertMyth("EschTerrain::compute_shades needs palette in camera's viewport",
                     cam && cam->vport && cam->vport->vbuff.pal);
@@ -1034,14 +1535,14 @@ void EschTerrain::compute_shades(EschCamera *cam, EschLight *lgts)
 
 //ÄÄÄ Main transform and shade loops
     assertMyth("EschTerrain::compute_shades needs positive scale factors",
-               wscale.flx >= 0 && dscale.flx >= 0 && hscale.flx >= 0);
+               scale.flx > 0 && htable != 0);
 
     pd.x.flx = origin.x.flx;
     pd.y.flx = origin.y.flx;
     pd.z.flx = origin.z.flx;
     for(d=0, sptr=surfinfo;
         d < (depth >> surfshift);
-        d++, pd.z.flx += (dscale * (Flx16)(surfratio)).flx)
+        d++, pd.z.flx += Flx16((long)surfratio << scaleshift).flx)
     {
         ptr = hfield + ((d << surfshift)*width);
 
@@ -1050,11 +1551,11 @@ void EschTerrain::compute_shades(EschCamera *cam, EschLight *lgts)
         pw.z.flx = pd.z.flx;
 
         for(w=0; w < (width >> surfshift);
-            w++, pw.x.flx += (wscale * (Flx16)(surfratio)).flx,
+            w++, pw.x.flx += Flx16((long)surfratio << scaleshift).flx,
             ptr += surfratio)
         {
             vert.x.flx = pw.x.flx;
-            vert.y.flx = pw.y.flx + ((Flx16)(*ptr) * hscale).flx;
+            vert.y.flx = pw.y.flx + htable[*ptr].flx;
             vert.z.flx = pw.z.flx;
 
             vert.normal.i = nptr->i;
@@ -1064,7 +1565,7 @@ void EschTerrain::compute_shades(EschCamera *cam, EschLight *lgts)
 
             v.shade = 0;
 
-            if (cam->flags & ESCH_CAM_SHADE_SPECULAR)
+            if (level & ESCH_CAM_SHADE_SPECULAR)
             {
                 lgts->hishine(&vert,&v);
             }
@@ -1087,8 +1588,10 @@ void EschTerrain::compute_shades(EschCamera *cam, EschLight *lgts)
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // EschTerrain - release                                                    ³
+//                                                                          ³
+// Releases all data associated with the EschTerrain instance.              ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void EschTerrain::release(void)
+void EschTerrain::release()
 {
     if (flags & ESCH_DRW_OWNSDATA)
     {
@@ -1097,6 +1600,11 @@ void EschTerrain::release(void)
         {
             delete [] hfield;
             hfield=0;
+        }
+        if (htable)
+        {
+            delete [] htable;
+            htable=0;
         }
         if (surfinfo)
         {
@@ -1115,6 +1623,11 @@ void EschTerrain::release(void)
         }
         if (txt)
         {
+            for(ulong i=0; i < tmax; i++)
+            {
+                if (txt[i])
+                    delete txt[i];
+            }
             delete [] txt;
             txt=0;
             tmax=0;
@@ -1125,11 +1638,191 @@ void EschTerrain::release(void)
 }
 
 
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// EschTerrain - get_height                                                 ³
+//                                                                          ³
+// Return the world y value on the terrain surface at the givne x,z world   ³
+// location.                                                                ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+Flx16 EschTerrain::get_height(Flx16 x, Flx16 z) const
+{
+    Flx16   x0,y0,z0,a1,a2,b1,b2,c1,c2,t1,t2,y;
+
+    Flx16 _x = x - origin.x;
+    Flx16 _z = z - origin.z;
+
+    assertMyth("EschTerrain::get_height needs height-field information",
+               hfield && htable);
+
+    assertMyth("EschTerrain:get_height needs positive scales",
+               scale.flx > 0);
+
+    int     lx = (int)_x >> scaleshift;
+    int     lz = (int)_z >> scaleshift;
+
+    Flx16   wx = Flx16(lx << scaleshift);
+    Flx16   wz = Flx16(lz << scaleshift);
+
+    x = _x - wx;
+    z = _z - wz;
+
+//ÄÄÄÄ Check that point is on map
+    if ((lx < 0)
+        || (lz < 0)
+        || (lx > width)
+        || (lz > depth))
+        return 0;
+
+    byte *ptr = &hfield[( lz * width ) + lx];
+
+//ÄÄÄÄ Compute parameters t1 and t2, and assign b1/b2
+
+    if (!((lx ^ lz) & 0x1)) // determine which triangle pattern to follow
+    {                       // __
+                            // |/  or /|
+        c2 = scale;        
+        if (x < z)
+        {
+            x0 = 0;
+            y0 = htable[*ptr];
+            z0 = 0;
+            a1 = 0;
+            b1 = htable[*(ptr+width)] - y0;
+            b2 = htable[*(ptr+width+1)] - y0;
+            c1 = scale;
+            a2 = scale;
+
+            t2 = (x0 - x) / -a2;
+
+            t1 = (z0 + (c2 * t2) - z) / -c1;
+        }
+        else
+        {
+            x0 = 0;
+            y0 = htable[*ptr];
+            z0 = 0;
+            a1 = scale;
+            a2 = scale;
+            b1 = htable[*(ptr+width+1)] - y0;
+            b2 = htable[*(ptr+1)] - y0;
+            c1 = scale;
+            c2 = 0;
+
+            t1 = (z0 -z) / -c1;
+
+            t2 = (x0 + (a1 * t1) - x) / -a2;
+        }
+    }
+    else                    
+    {                       // |\
+                            // ---
+        c2 = scale;        
+
+        if ((x+z) > scale)
+        {
+            x0 = scale;
+            y0 = htable[*(ptr+width+1)];
+            z0 = scale;
+            a1 = 0;
+            a2 = -scale;
+            b1 = htable[*(ptr+1)] - y0;
+            b2 = htable[*(ptr+width)] - y0;
+            c1 = -scale;
+            c2 = 0;
+
+            t1 = (z0 -z) / -c1;
+
+            t2 = (x0 + (a1 * t1) - x) / -a2;
+        }
+        else
+        {
+            x0 = 0;
+            y0 = htable[*ptr];
+            z0 = 0;
+            a1 = 0;
+            a2 = scale;
+            b1 = htable[*(ptr+width)] - y0;
+            b2 = htable[*(ptr+1)] - y0;
+            c1 = scale;
+            c2 = 0;
+
+            t1 = (z0 -z) / -c1;
+
+            t2 = (x0 + (a1 * t1) - x) / -a2;
+        }
+    }
+
+//ÄÄÄÄ Compute y
+    y = y0 + (b1 * t1) + (b2 * t2);
+
+    return (y + origin.y);
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// EschTerrain - check_LOS                                                  ³
+//                                                                          ³
+// Check to see if the terrain obstructs the line of sight between two      ³
+// points.                                                                  ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+int EschTerrain::check_LOS (EschPoint *pt1, EschPoint *pt2, int precision) const
+{
+//ÄÄÄ Form vector
+    EschVector  temp (pt1->x - pt2->x, pt1->y - pt2->y, pt1->z - pt2->z);
+    Flx16       dist = temp.magnitude();
+
+//ÄÄÄ Determine step count and size
+    long count;
+    if (precision > 0)
+    {
+        count = (long)(dist / Flx16(precision)) + 1;
+    }
+    else
+    {
+        count = (long)(dist / scale) + 1;
+    }
+
+    Flx16 xstep = (pt2->x - pt1->x) / Flx16(count);
+    Flx16 ystep = (pt2->y - pt1->y) / Flx16(count);
+    Flx16 zstep = (pt2->z - pt1->z) / Flx16(count);
+
+//ÄÄÄ Perform checks
+    Flx16 curx = pt1->x;
+    Flx16 cury = pt1->y;
+    Flx16 curz = pt1->z;
+
+    for (long i=0; i < count; i++)
+    {
+        if (get_height (curx,curz) > cury)
+        {
+            return 0;
+        }
+        curx += xstep;
+        cury += ystep;
+        curz += zstep;
+    }
+    return 1;
+}
+
+
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //°°°°°°°°°°°°°°°°°°°°°°°°°°±  Utility Routines  ±°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// EschTerrain - set_scale                                                  ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+void EschTerrain::set_scale(const Flx16 i)
+{
+    assertMyth("EschTerrain:set_scale requires positive scale value",
+               i.flx > 0);
+
+    if (!compute_shift_value((ulong)(long)i,&scaleshift))
+        return;
+
+    scale = i;
+}
 
 
 
@@ -1140,7 +1833,7 @@ void EschTerrain::release(void)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // EschTerrain - load                                                       ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-esch_error_codes EschTerrain::load(const char *fname, const char *tname)
+esch_error_codes EschTerrain::load(const char *fname, const char *tname, ushort *hclr)
 {
     esch_error_codes    err;
     XFParseIFF          iff;
@@ -1167,7 +1860,7 @@ esch_error_codes EschTerrain::load(const char *fname, const char *tname)
         {
             if (iff.formid == iff.makeid('E','T','E','R'))
             {
-                err=load(&iff,tname);
+                err=load(&iff,tname,hclr);
                 if (!err
                     || err != ESCH_ERR_NOTFOUND)
                     break;
@@ -1186,7 +1879,7 @@ esch_error_codes EschTerrain::load(const char *fname, const char *tname)
     return err;
 }
 
-esch_error_codes EschTerrain::load(XFParseIFF *iff, const char *tname)
+esch_error_codes EschTerrain::load(XFParseIFF *iff, const char *tname, ushort *hclr)
 {
     ulong               nt=0;
     esch_error_codes    err;
@@ -1245,30 +1938,49 @@ esch_error_codes EschTerrain::load(XFParseIFF *iff, const char *tname)
     width = header.width;
     depth = header.depth;
     surfratio = header.surfratio;
-    switch (surfratio)
+    origin.x = header.origin_x;
+    origin.y = header.origin_y;
+    origin.z = header.origin_z;
+
+    if (!compute_shift_value(surfratio,(&surfshift)))
     {
-        case 1:
-            surfshift = 0;
-            break;
-        case 2:
-            surfshift = 1;
-            break;
-        case 4:
-            surfshift = 2;
-            break;
-        case 8:
-            surfshift = 3;
-            break;
-        case 16:
-            surfshift = 4;
-            break;
-        default:
+        iff->leaveform();
+        return ESCH_ERR_NOTSUPPORTED;
+    }
+    if (header.wscale.flx > 0 || header.dscale.flx > 0)
+    {
+        scale = 32;
+        scaleshift = 5;
+    }
+    else
+    {
+        scale = header.scale;
+        if (!compute_shift_value((ulong)(long)scale,&scaleshift))
+        {
             iff->leaveform();
             return ESCH_ERR_NOTSUPPORTED;
+        }
     }
-    wscale = header.wscale;
-    dscale = header.dscale;
-    hscale = header.hscale;
+
+    ulong surfsize = (width*depth) >> (surfshift*2);
+
+    //ÄÄ If height scale is given, must create height table
+    if (header.hscale.flx)
+    {
+        htable = new Flx16[256];
+        if (!htable)
+        {
+            err=ESCH_ERR_NOMEMORY;
+            goto error_exit;
+        }
+
+        Flx16 hs=0;
+        for(ulong i=0; i < 256; i++)
+        {
+            htable[i] = hs;
+            hs += header.hscale;
+        }
+    }
 
     //ÄÄ Scan and load chunks in form
     while (!iff->next())
@@ -1276,7 +1988,8 @@ esch_error_codes EschTerrain::load(XFParseIFF *iff, const char *tname)
         //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Height Field
         if (iff->chunkid == iff->makeid('H','G','T','S'))
         {
-            if (iff->chunkSize != (ulong)(width * depth))
+            if (hfield
+                || iff->chunkSize != (ulong)(width * depth))
             {
                 err=ESCH_ERR_INVALIDHGTDATA;
                 goto error_exit;
@@ -1295,17 +2008,41 @@ esch_error_codes EschTerrain::load(XFParseIFF *iff, const char *tname)
                 goto error_exit;
             }
         }
+        //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Height Table
+        else if (iff->chunkid == iff->makeid('H','T','B','L'))
+        {
+            if (htable
+                || iff->chunkSize != sizeof(Flx16)*256)
+            {
+                err=ESCH_ERR_INVALIDHGTDATA;
+                goto error_exit;
+            }
+
+            htable = new Flx16[256];
+            if (!htable)
+            {
+                err=ESCH_ERR_NOMEMORY;
+                goto error_exit;
+            }
+
+            if (iff->read(htable))
+            {
+                err=ESCH_ERR_FILEERROR;
+                goto error_exit;
+            }
+        }
         //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Surface Info
         else if (iff->chunkid == iff->makeid('S','U','R','F'))
         {
-            if (iff->chunkSize !=
-                (ulong)(((width*depth) >> (surfshift*2)) * sizeof(esch_surf_type)))
+            if (surfinfo
+                || iff->chunkSize != (ulong)(surfsize
+                                             * sizeof(esch_surf_type)))
             {
                 err=ESCH_ERR_INVALIDSRFDATA;
                 goto error_exit;
             }
 
-            surfinfo = new esch_surf_type[(width*depth) >> (surfshift*2)];
+            surfinfo = new esch_surf_type[surfsize];
             if (!surfinfo)
             {
                 err=ESCH_ERR_NOMEMORY;
@@ -1319,17 +2056,16 @@ esch_error_codes EschTerrain::load(XFParseIFF *iff, const char *tname)
             }
         }
         //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Surface Normals
-        else if (iff->chunkid == iff->makeid('N','R','M','L'))
-        {
-            if (iff->chunkSize != 
-                (ulong)(((width*depth) >> (surfshift*2)) * sizeof(EschVector)))
+        else if ((iff->chunkid == iff->makeid('N','R','M','1')
+                 || iff->chunkid == iff->makeid('N','R','M','L')))
+        {   
+            if (hsurfnorml)
             {
                 err=ESCH_ERR_INVALIDSRFDATA;
                 goto error_exit;
             }
 
-            hsurfnorml = ivory_halloc((ulong)
-                   (((width*depth) >> (surfshift*2)) * sizeof(EschVector)));
+            hsurfnorml = ivory_halloc((ulong)(surfsize * sizeof(EschVector)));
             if (!hsurfnorml)
             {
                 err=ESCH_ERR_NOMEMORY;
@@ -1342,18 +2078,107 @@ esch_error_codes EschTerrain::load(XFParseIFF *iff, const char *tname)
                 err=ESCH_ERR_LOCKFAILED;
                 goto error_exit;
             }
-            if (iff->read(ptr))
+
+            if (iff->chunkid == iff->makeid('N','R','M','1'))
+            {
+                //ÄÄÄ Compressed normals
+                if (iff->chunkSize != (ulong)(surfsize * 4 * sizeof(ushort)))
+                {
+                    err=ESCH_ERR_INVALIDSRFDATA;
+                    goto error_exit;
+                }
+
+                ushort *cnrmls = new ushort[surfsize * 4];
+                if (!cnrmls)
+                {
+                    err=ESCH_ERR_NOMEMORY;
+                    goto error_exit;
+                }
+                if (iff->read(cnrmls))
+                {
+                    delete cnrmls;
+                    err=ESCH_ERR_FILEERROR;
+                    goto error_exit;
+                }
+
+                ushort *sptr = cnrmls;
+                for(ulong i=0; i < surfsize; i++, ptr++)
+                {
+                    ptr->i.flx = (ulong)*(sptr++);
+                    ptr->j.flx = (ulong)*(sptr++);
+                    ptr->k.flx = (ulong)*(sptr++);
+
+                    if (*sptr & 0x1)
+                        ptr->i.flx |= 0x00010000;
+                    if (*sptr & 0x2)
+                        ptr->j.flx |= 0x00010000;
+                    if (*sptr & 0x4)
+                        ptr->k.flx |= 0x00010000;
+
+                    if (*sptr & 0x8)
+                        ptr->i.flx = -ptr->i.flx;
+                    if (*sptr & 0x10)
+                        ptr->j.flx = -ptr->j.flx;
+                    if (*sptr & 0x20)
+                        ptr->k.flx = -ptr->k.flx;
+                    sptr++;
+                }
+
+                delete cnrmls;
+            }
+            else
+            {
+                //ÄÄÄ Uncompressed normals
+                if (iff->chunkSize != (ulong)(surfsize * sizeof(EschVector)))
+                {
+                    err=ESCH_ERR_INVALIDSRFDATA;
+                    goto error_exit;
+                }
+                if (iff->read(ptr))
+                {
+                    err=ESCH_ERR_FILEERROR;
+                    goto error_exit;
+                }
+            }
+
+            ivory_hunlock(hsurfnorml);
+        }
+        //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Height colors
+        else if (hclr
+                 && iff->chunkid == iff->makeid('H','C','L','R'))
+        {
+            EschFileTerrHCLR hcolor;
+
+            if (iff->chunkSize != sizeof(EschFileTerrHCLR))
+            {
+                err=ESCH_ERR_INVALIDDATA;
+                goto error_exit;
+            }
+
+            if (iff->read(&hcolor))
             {
                 err=ESCH_ERR_FILEERROR;
                 goto error_exit;
             }
-            ivory_hunlock(hsurfnorml);
+
+            hclr[0] = hcolor.blue;
+            hclr[1] = hcolor.lblue;
+            hclr[2] = hcolor.white;
+            hclr[3] = hcolor.green;
+            hclr[4] = hcolor.lgreen;
+            hclr[5] = hcolor.yellow;
+            hclr[6] = hcolor.lorange;
+            hclr[7] = hcolor.orange;
+            hclr[8] = hcolor.lbrown;
+            hclr[9] = hcolor.brown;
+            hclr[10] = hcolor.red;
         }
         //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Texture Colors
         else if (header.ntxts
                  && (iff->chunkid == iff->makeid('C','O','L','R')))
         {
-            if (iff->chunkSize != header.ntxts)
+            if (txtcolor
+                || iff->chunkSize != header.ntxts)
             {
                 err=ESCH_ERR_INVALIDDATA;
                 goto error_exit;
@@ -1380,7 +2205,7 @@ esch_error_codes EschTerrain::load(XFParseIFF *iff, const char *tname)
             // Allocate texture memory, if not already allocated.
             if (!txt)
             {
-                txt = new EschTexture[header.ntxts];
+                txt = new EschTexture*[header.ntxts];
                 if (!txt)
                 {
                     err=ESCH_ERR_NOMEMORY;
@@ -1391,13 +2216,24 @@ esch_error_codes EschTerrain::load(XFParseIFF *iff, const char *tname)
 
             if (nt < tmax)
             {
-                if (err=txt[nt++].load(iff))
+                EschTexture *t = new EschStaticTexture;
+                if (!t)
+                {
+                    err=ESCH_ERR_NOMEMORY;
                     goto error_exit;
+                }
+                if (err=t->load(iff))
+                {
+                    delete t;
+                    goto error_exit;
+                }
+
+                txt[nt++] = t;
             }
         }
     }
 
-    if (!hfield)
+    if (!hfield || !htable || !surfinfo)
     {
         err=ESCH_ERR_MISSINGDATA;
         goto error_exit;
@@ -1417,6 +2253,11 @@ error_exit : ;
         delete [] hfield;
         hfield=0;
     }
+    if (htable)
+    {
+        delete [] htable;
+        htable=0;
+    }
     if (surfinfo)
     {
         delete [] surfinfo;
@@ -1424,6 +2265,11 @@ error_exit : ;
     }
     if (txt)
     {
+        for(ulong i=0; i < tmax; i++)
+        {
+            if (txt[i])
+                delete txt[i];
+        }
         delete [] txt;
         txt=0;
         tmax=0;

@@ -8,7 +8,7 @@
 ;ששששש²±²ששששששש²±²שששש²±²ש²±²שששש²±²ש²±²שששש²±²ש²±²שששששששש²±²שששש²±²שששששש
 ;שששש²²²²²²²²²²ש²²²²²²²²ששש²²²²²²²²שש²²²שששש²²²ש²²²²²²²²²²ש²²²שששש²²²ששששששש
 ;ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-;שששששששששששCopyrightש(c)ש1994,ש1995שbyשCharybdisשEnterprises,שInc.ששששששששש
+;שששששששששששCopyrightש(c)ש1994-1996שbyשCharybdisשEnterprises,שInc.שששששששששש
 ;ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
 ;ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
 ;ששששששששששששששששששששש Microsoft Windows '95 Version ששששששששששששששששששששששש
@@ -166,7 +166,8 @@ event ALLK
 event OBJECT_ROTATE
 {
     [ key #lshift ]
-    [ key 'W' ]
+    [ key 'W'
+      not key #lshift ]
 }
 
 event OBJECT_MOVE
@@ -211,12 +212,63 @@ event SLOWER
 
 event TERRAIN_DOTS
 {
-    [ key 'D']
+    [ key 'D'
+      not key #lshift ]
 }
 
 event TERRAIN_LOD
 {
-    [ key 'F']
+    [ key 'F'
+      not key #lshift ]
+}
+
+event ADJUST_FOV
+{
+    [ key 'V' ]
+}
+
+event ADJUST_FACTOR
+{
+    [ key 'Z' ]
+}
+
+event ADJUST_BM_OFFSET
+{
+    [ key 'B' ]
+}
+
+event SHOW_EXTENTS
+{
+    [ key 'X' ]
+}
+
+event HAZING
+{
+    [ key 'H' ]
+}
+
+event FIRE_INCREASE
+{
+    [ key 'I'
+      key #lshift ]
+}
+
+event FIRE_DECREASE
+{
+    [ key 'D'
+      key #lshift ]
+}
+
+event FIRE_DOUSE
+{
+    [ key 'W'
+      key #lshift ]
+}
+
+event FIRE_FIREBALL
+{
+    [ key 'F'
+      key #lshift ]
 }
 
 ;ִִִ Quit Demonstation

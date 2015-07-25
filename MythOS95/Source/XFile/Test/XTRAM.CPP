@@ -6,7 +6,7 @@
 //    (_)       ^          * *     *      *   *    *            (_)
 //             (_)       **   **   *    ***** **** ****
 //
-//            Copyright (c) 1994,1995 by Charybdis Enterprises, Inc.
+//            Copyright (c) 1994-1996 by Charybdis Enterprises, Inc.
 //                            All Rights Reserved.
 //                        Microsoft Windows '95 Version
 //
@@ -111,7 +111,7 @@ void ram ()
        print_error(&xf,"Failed to create file");
    }
    else {
-        XFileDOS    xfd;
+        XFileDisk    xfd;
 
         if (xfd.open("BOUNCE.BMP",XF_OPEN_READ))
         {

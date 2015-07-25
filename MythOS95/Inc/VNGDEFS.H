@@ -4,7 +4,7 @@
 //                                                          %/ . .  .   \%
 //           Van Gogh 2D-Display Library                     |  . .  o. | 
 //                                                           |. _  .   .|
-// Copyright (c) 1994, 1995 by Charybdis Enterprises, Inc.   | / \   .  | 
+// Copyright (c) 1994-1996 by Charybdis Enterprises, Inc.    | / \   .  | 
 //              All rights reserved.                         |_|_|_._._.|
 //                                                           |.-.-.-.-..|
 //                                                          %\__________/%
@@ -49,21 +49,20 @@ extern "C" {
 //
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
-                                
-// Flags for the ViewPort.
-#define VNGO_PHYSICAL_DEV       0x1
-#define VNGO_PAL_MAPPED_DEV     0x2
-#define VNGO_ZBUFFER_DEV        0x4
-#define VNGO_ZBUFFER_ACTIVE     0x8
-#define VNGO_INIT_NO_RESET      0x10
-#define VNGO_NOCLEAR_VBUFFER    0x20
-#define VNGO_BACKBUFFER         0x40
-#define VNGO_MYMEM_ZBUFF        0x80
-#define VNGO_MYMEM_VBUFF        0x100
+#define VNGO_PERSP_OFF          2049
+#define VNGO_PERSP_PRECISION    VNGO_PERSP_OFF
+#define VNGO_MAX_VERTCOUNT      12
 
-// Flags for the Palette.
-#define VNGO_PAL_HWINIT         0x1
-#define VNGO_PAL_CALC           0x2
+// Flags for the ViewPort.
+#define VNGO_PAL_MAPPED_DEV     0x1
+#define VNGO_ZBUFFER_DEV        0x2
+#define VNGO_ZBUFFER_ACTIVE     0x4
+#define VNGO_INIT_NO_RESET      0x8
+#define VNGO_NOCLEAR_VBUFFER    0x10
+#define VNGO_MYMEM_ZBUFF        0x20
+#define VNGO_MYMEM_VBUFF        0x40
+#define VNGO_MYMEM_ZMAP         0x80
+#define VNGO_PAL_CALC           0x100
 
 #define VNGO_MYMEM_SHADE        0x10
 #define VNGO_MYMEM_HAZE         0x20
@@ -71,49 +70,30 @@ extern "C" {
 #define VNGO_PAL_SIZE           256
 #define VNGO_SHADE_TABLE_SIZE   32
 #define VNGO_8BIT               0x1
+#define VNGO_15BIT              0x2
+#define VNGO_16BIT              0x4
+#define VNGO_24BIT              0x8
+#define VNGO_32BIT              0x10
 
 // Image transfer flags.
 #define VNGO_TRANSPARENT        0xFF000000
 #define VNGO_TRANSPARENT_COLOR  0xFF
 
-// Mode X defines.
-#define VNGO_M1_X_PAGING        0x1
-#define VNGO_M2_X_PAGING        0x2
-#define VNGO_M3_X_PAGING        0x4
-#define VNGO_M4_X_PAGING        0x8
-
-#define VNGO_X_320x200          1
-#define VNGO_X_320x240          2
-#define VNGO_X_320x400          3
-#define VNGO_X_320x480          4
-#define VNGO_X_360x480          5
-#define VNGO_X_640x400          6
-
-#define VNGO_VESA_640x400x8     0x100
-#define VNGO_VESA_640x480x8     0x101
-#define VNGO_VESA_800x600x4     0x102
-#define VNGO_VESA_800x600x8     0x103
-#define VNGO_VESA_1024x768x4    0x104
-#define VNGO_VESA_1024x768x8    0x105
-#define VNGO_VESA_1280x1024x4   0x106
-#define VNGO_VESA_1280x1024x8   0x107
-
-#define VNGO_VESA_320x200x15    0x10d
-#define VNGO_VESA_320x200x16    0x10e
-#define VNGO_VESA_320x200x24    0x10f
-#define VNGO_VESA_640x480x15    0x110
-#define VNGO_VESA_640x480x16    0x111
-#define VNGO_VESA_640x480x24    0x112
-#define VNGO_VESA_800x600x15    0x113
-#define VNGO_VESA_800x600x16    0x114
-#define VNGO_VESA_800x600x24    0x115
-#define VNGO_VESA_1024x768x15   0x116
-#define VNGO_VESA_1024x768x16   0x117
-#define VNGO_VESA_1024x768x24   0x118
-#define VNGO_VESA_1280x1024x15  0x119
-#define VNGO_VESA_1280x1024x16  0x11a
-#define VNGO_VESA_1280x1024x24  0x11b
-
+// VangoTexture flags.
+#define VNGO_TEXTURE_MONO       0x1
+#define VNGO_TEXTURE_1BIT       0x1
+#define VNGO_TEXTURE_2BIT       0x2     // Not Currently in use 
+#define VNGO_TEXTURE_4BIT       0x4     // Not Currently in use 
+#define VNGO_TEXTURE_8BIT       0x8  
+#define VNGO_TEXTURE_15BIT      0x10    // Not Currently in use 
+#define VNGO_TEXTURE_16BIT      0x20    // Not Currently in use 
+#define VNGO_TEXTURE_24BIT      0x40    // Not Currently in use 
+#define VNGO_TEXTURE_32BIT      0x80    // Not Currently in use 
+// Just in case....:)
+#define VNGO_TEXTURE_SHADOWS    0x100   // Not Currently in use
+#define VNGO_TEXTURE_ALPHA      0x200   // Not Currently in use 
+#define VNGO_TEXTURE_ZMAP       0x400   // Not Currently in use 
+#define VNGO_TEXTURE_SHADE      0x800   // Not Currently in use 
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
@@ -124,16 +104,15 @@ extern "C" {
 enum _vngo_error_codes
 {
    VNGO_NO_ERROR                = 0,
-   VNGO_MODE_NOT_SUPPORTED      = 1,
+   VNGO_NOT_SUPPORTED           = 1,
    VNGO_MEMALLOC_ERROR          = 2,
-   VNGO_RMEMALLOC_ERROR         = 3,
-   VNGO_BIOS_INIT_FAILURE       = 4,
-   VNGO_UNKNOWN_MODE_NUMBER     = 5,
-   VNGO_VESA_NOT_SUPPORTED      = 6,
-   VNGO_VESA_CALL_FAILED        = 7
+   VNGO_WRONG_BITDEPTH          = 3,
+   VNGO_FULLY_CLIPPED           = 4,
+   VNGO_UNSUPPORTED_TEXTURE     = 5,
+   VNGO_MEMORY_ERROR            = 6,
 };
 
-typedef enum _vngo_error_codes vngo_error_codes;
+typedef enum _vngo_error_codes VNGError;
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //

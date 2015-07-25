@@ -56,7 +56,8 @@ OBJS=\
 maxevt.obj\
 maxesrc.obj\
 maxdevs.obj\
-maxetsk.obj
+maxetsk.obj\
+maxvmap.obj
 
 LIBPATH = $(MYTH95ROOT)\lib;
 
@@ -90,6 +91,7 @@ maxevt.obj:  ..\maxevt.cpp  ..\inc\maxevt.hpp  ..\inc\maxdevs.hpp
 maxesrc.obj: ..\maxesrc.cpp ..\inc\maxesrc.hpp ..\inc\maxevt.hpp ..\inc\maxdevs.hpp
 maxdevs.obj: ..\maxdevs.cpp ..\inc\maxdevs.hpp
 maxetsk.obj: ..\maxetsk.cpp ..\inc\maxesrc.hpp ..\inc\maxevt.hpp
+maxvmap.obj: ..\maxvmap.cpp ..\inc\maxvmap.hpp
 
 #ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 # Library                                                                  ³
@@ -115,4 +117,3 @@ clean:
     del *.pdb
 
 #°±² End of makefile ²±°
-

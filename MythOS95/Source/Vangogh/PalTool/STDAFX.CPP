@@ -1,11 +1,13 @@
 //อออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออ
 //
-//                                PalTool
+//                                 PalTool
 //
 //                   A Palette extraction/definition tool
 //
-//              Copyright (c) 1995 by Charybdis Enterprises, Inc.
+//           Copyright (c) 1995, 1996 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved
+//
+//                      Microsoft Windows '95 Version
 //
 //ฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤ
 //
@@ -22,10 +24,14 @@
 //
 //ฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤ
 //
+// Dan Higdon & Chuck Walbourn
+//
 // stdafx.cpp
-// 	source file that includes just the standard includes
-//	PalTool.pch will be the pre-compiled header
-//	stdafx.obj will contain the pre-compiled type information
+// 
+// Source file that includes just the standard includes.
+//
+// paltool.pch will be the pre-compiled header
+// stdafx.obj will contain the pre-compiled type information
 //
 //อออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออ
 
@@ -37,4 +43,4 @@
 
 #include "stdafx.h"
 
-// eof - stdafx.cpp
+//ฐฑฒ eof - stdafx.cpp ฒฑฐ

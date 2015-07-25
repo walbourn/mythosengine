@@ -11,7 +11,7 @@
 //                     Text Output and Font Management System
 //                          Microsoft Windows '95 Version
 //
-//               Copyright (c) 1995 by Charybdis Enterprises, Inc.
+//            Copyright (c) 1995, 1996 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved.
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -67,7 +67,7 @@ extern "C" GBergIData   *GBergInstance;
 // Outputs a single character to the given x,y location using the currently ³
 // active font.                                                             ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void gberg_outc(VngoVport *vp, long x, long y, char c)
+long gberg_outc(VngoVport *vp, long x, long y, char c)
 {
     GBergFontInfo   *fnt;
     VngoRect        r;
@@ -88,16 +88,23 @@ void gberg_outc(VngoVport *vp, long x, long y, char c)
     r.dx = txt.width = fnt->width;
     r.dy = txt.height = fnt->height;
 
-    switch (fnt->type) {
+    switch (fnt->type)
+    {
         case GBERG_FNT_MONOFIXED:
 
             //ÄÄ Monochrome fixed
 
+            txt.flags = VNGO_TEXTURE_MONO;
             txt.tex = (byte *)((byte *)fnt->ptr + (c*fnt->bpc));
 
+            int waslocked = vp->lock();
             vp->image_trans_mono(&r,&txt,GBergInstance->fcol,GBergInstance->bcol);
+            if (!waslocked)
+                vp->unlock();
             break;
     }
+
+    return r.dx;
 }
 
 //°±² End of module - gbrgoutc.cpp ²±°

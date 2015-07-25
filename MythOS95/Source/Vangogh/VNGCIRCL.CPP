@@ -6,7 +6,7 @@
 //                                                           |. _  .   .|
 //          Microsoft Windows '95 Version                    | / \   .  | 
 //                                                           |_|_|_._._.|
-// Copyright (c) 1994, 1995 by Charybdis Enterprises, Inc.   |.-.-.-.-..|
+// Copyright (c) 1994-1996 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
 //              All rights reserved.                        %\__________/%
 //                                                           %          %
 //
@@ -38,11 +38,9 @@
 //                                
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
-#include <string.h>
 #include <assert.h>
 #include "debug.h"
 #include "portable.h"
-#include "ivory.h"
 #include "vangogh.hpp"
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
@@ -63,7 +61,17 @@
 //
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
-STATIC void plot8(VngoVport *vp,long px,long py,long ox,long oy,dword color);
+STATIC void plot8(VngoVport *vp, long px, long py, long ox,
+                  long oy, dword color);
+
+STATIC void wide_plot8(VngoVport *vp, VngoRect *trect, long ox,
+                       long oy, dword color);
+
+STATIC void clip_plot8(VngoVport *vp, long px, long py, long ox,
+                  long oy, dword color);
+
+STATIC void clip_wide_plot8(VngoVport *vp, VngoRect *trect, long ox,
+                       long oy, dword color);
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
@@ -76,6 +84,7 @@ STATIC void plot8(VngoVport *vp,long px,long py,long ox,long oy,dword color);
 //                                 Code
 //
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+
 
 void vngo_circle(VngoVport *vp,long xoffset, long yoffset,long r,dword color)
 {
@@ -101,6 +110,7 @@ void vngo_circle(VngoVport *vp,long xoffset, long yoffset,long r,dword color)
 STATIC void plot8(VngoVport *vp,long px,long py,long ox,long oy,dword color)
 {
     VngoPoint   p1;
+    p1.shade = vp->vbuff.pal->shd_pal->mid_point -1;
     p1.clr = color;
     p1.x = ox+px;
     p1.y = oy+py;
@@ -121,6 +131,162 @@ STATIC void plot8(VngoVport *vp,long px,long py,long ox,long oy,dword color)
     vp->pixel(&p1);
     p1.y = oy+px;
     vp->pixel(&p1);
+}
+
+
+void vngo_circle(VngoVport *vp,long xoffset, long yoffset,
+                 long r, dword color,int width)
+{
+    int         x,y,e, wmod = width >> 1;
+    VngoRect    trect;
+
+    trect.dx = trect.dy = width;
+
+
+    y = r;
+    x = 0;
+    e = -y;
+    while (x <= y)
+    {
+        trect.x = x - wmod;
+        trect.y = y - wmod;
+        wide_plot8(vp,&trect,xoffset,yoffset,color);
+        e +=(x<<1)+1;
+        if (e > 0)
+        {
+            --y;
+            e -= (y << 1);
+        }
+        ++x;
+    }
+}
+
+
+STATIC void wide_plot8(VngoVport *vp, VngoRect *trect,
+                       long ox, long oy, dword color)
+{
+    VngoRect    tr = *trect;
+    tr.x = ox+trect->x;
+    tr.y = oy+trect->y;
+    vp->frect(&tr,color);
+    tr.y = oy-trect->y;
+    vp->frect(&tr,color);
+    tr.x = ox-trect->x;
+    vp->frect(&tr,color);
+    tr.y = oy+trect->y;
+    vp->frect(&tr,color);
+
+    tr.x = ox+trect->y;
+    tr.y = oy+trect->x;
+    vp->frect(&tr,color);
+    tr.y = oy-trect->x;
+    vp->frect(&tr,color);
+    tr.x = ox-trect->y;
+    vp->frect(&tr,color);
+    tr.y = oy+trect->x;
+    vp->frect(&tr,color);
+}
+
+
+void vngo_clip_circle(VngoVport *vp,long xoffset, long yoffset,long r,dword color)
+{
+    int     x,y,e;
+
+    y = r;
+    x = 0;
+    e = -y;
+    while (x <= y)
+    {
+        clip_plot8(vp,x,y,xoffset,yoffset,color);
+        e +=(x<<1)+1;
+        if (e > 0)
+        {
+            --y;
+            e -= (y << 1);
+        }
+        ++x;
+    }
+}
+
+
+STATIC void clip_plot8(VngoVport *vp,long px,long py,long ox,long oy,dword color)
+{
+    VngoPoint   p1;
+    p1.shade = vp->vbuff.pal->shd_pal->mid_point -1;
+    p1.clr = color;
+    p1.x = ox+px;
+    p1.y = oy+py;
+    vp->clip_pixel(&p1);
+    p1.y = oy-py;
+    vp->clip_pixel(&p1);
+    p1.x = ox-px;
+    vp->clip_pixel(&p1);
+    p1.y = oy+py;
+    vp->clip_pixel(&p1);
+
+    p1.x = ox+py;
+    p1.y = oy+px;
+    vp->clip_pixel(&p1);
+    p1.y = oy-px;
+    vp->clip_pixel(&p1);
+    p1.x = ox-py;
+    vp->clip_pixel(&p1);
+    p1.y = oy+px;
+    vp->clip_pixel(&p1);
+}
+
+
+void vngo_clip_circle(VngoVport *vp,long xoffset, long yoffset,
+                 long r, dword color,int width)
+{
+    int         x,y,e, wmod = width >> 1;
+    VngoRect    trect;
+
+    trect.dx = trect.dy = width;
+
+
+    y = r;
+    x = 0;
+    e = -y;
+    while (x <= y)
+    {
+        trect.x = x - wmod;
+        trect.y = y - wmod;
+        clip_wide_plot8(vp,&trect,xoffset,yoffset,color);
+        e +=(x<<1)+1;
+        if (e > 0)
+        {
+            --y;
+            e -= (y << 1);
+        }
+        ++x;
+    }
+}
+
+
+STATIC void clip_wide_plot8(VngoVport *vp, VngoRect *trect,
+                       long ox, long oy, dword color)
+{
+    VngoRect    tr = *trect;
+    tr.x = ox+trect->x;
+    tr.y = oy+trect->y;
+    vp->clip_frect(&tr,color);
+    tr.y = oy-trect->y;
+    vp->clip_frect(&tr,color);
+    tr.x = ox-trect->x;
+    vp->clip_frect(&tr,color);
+    tr.y = oy+trect->y;
+    vp->clip_frect(&tr,color);
+
+    tr.x = ox+trect->y;
+    tr.y = oy+trect->x;
+    vp->clip_frect(&tr,color);
+    tr.y = oy-trect->x;
+    vp->clip_frect(&tr,color);
+    tr.x = ox-trect->y;
+    vp->clip_frect(&tr,color);
+    tr.y = oy+trect->x;
+    vp->clip_frect(&tr,color);
 }
 
 //°±² End of module - vngcircl.cpp ²±°

@@ -6,7 +6,7 @@
 //                                                           |. _  .   .|
 //          Microsoft Windows '95 Version                    | / \   .  | 
 //                                                           |_|_|_._._.|
-// Copyright (c) 1994, 1995 by Charybdis Enterprises, Inc.   |.-.-.-.-..|
+// Copyright (c) 1994-1996 by Charybdis Enterprises, Inc.    |.-.-.-.-..|
 //              All rights reserved.                        %\__________/%
 //                                                           %          %
 //
@@ -35,8 +35,6 @@
 #ifndef __VNGCOLOR_HPP
 #define __VNGCOLOR_HPP 1
 
-
-
 //같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같�
 //             
 //                                Includes
@@ -55,10 +53,12 @@
 typedef dword VngoColorIndex;
 #define VNGO_COLOR_HLS_INVALID  0x1
 #define VNGO_SHADE_FLAT         191
+#define PURE_COLOR_CONVERT      1
+
 // because we need to be able to round up and we are realy (0-255) >> 3 we
 // make this intensionaly small.
 #define VNGO_SHADE_FULL         (30 << 3) // for 5.3 shade levels.
-                                
+
 class VngoHwPal;
 class VngoPal;
 class VngoPal8;
@@ -69,7 +69,7 @@ class Vngo24to8bit
 {
 public:
     byte    colorconvert[32768];
-   
+
     VngoColorIndex get_index(VngoColor24bit clr);
     void init(VngoPal *my_pal);
 };
@@ -139,6 +139,23 @@ public:
         VngoColor24bit clr_24b(clr);
         pcolor = (word) clr_24b.compress16();
     }
+
+    VngoColorHLS to_HLS()
+    {
+        VngoColor24bit  tclr;
+        tclr.r = (pcolor >> 8) & 0xf8;
+        tclr.g = (pcolor >> 3) & 0xfc;
+        tclr.b = (pcolor << 3) & 0xff;
+        return tclr.to_HLS();
+    }
+    VngoColor24bit to_24bit()
+    {
+        VngoColor24bit  tclr;
+        tclr.r = (pcolor >> 8) & 0xf8;
+        tclr.g = (pcolor >> 3) & 0xfc;
+        tclr.b = (pcolor << 3) & 0xf8;
+        return tclr;
+    }
 };
 
 class VngoColor15bit
@@ -160,6 +177,22 @@ public:
     {
         VngoColor24bit clr_24b(clr);
         pcolor = (word) clr_24b.compress();
+    }
+    VngoColorHLS to_HLS()
+    {
+        VngoColor24bit  tclr;
+        tclr.r = (pcolor >> 7) & 0xf8;
+        tclr.g = (pcolor >> 2) & 0xf8;
+        tclr.b = (pcolor << 3) & 0xf8;
+        return tclr.to_HLS();
+    }
+    VngoColor24bit to_24bit()
+    {
+        VngoColor24bit  tclr;
+        tclr.r = (pcolor >> 7) & 0xf8;
+        tclr.g = (pcolor >> 2) & 0xf8;
+        tclr.b = (pcolor << 3) & 0xf8;
+        return tclr;
     }
 };
 
@@ -200,34 +233,37 @@ class VngoColorShade8
     friend class VngoShadePal8;
 
 public:
-    byte    shl[1]; //VNGO_SHADE_TABLE_SIZE];
+    byte    shl[1]; //[VNGO_SHADE_TABLE_SIZE];
 };
 
 
 class VngoColorShade15 : public VngoColorShade 
 {
-public:
-    word    shl[VNGO_SHADE_TABLE_SIZE];
-
     VngoColorShade15() {}
+    friend class VngoShadePal15;
+public:
+    word    shl[1]; //[VNGO_SHADE_TABLE_SIZE];
+
 };
 
 
 class VngoColorShade16 : public VngoColorShade 
 {
-public:
-    word    shl[VNGO_SHADE_TABLE_SIZE];
-
     VngoColorShade16() {}
+    friend class VngoShadePal16;
+public:
+    word    shl[1]; //[VNGO_SHADE_TABLE_SIZE];
+
 };
 
 
 class VngoColorShade24 : public VngoColorShade 
 {
+    VngoColorShade24() {}
+    friend class VngoShadePal24;
 public:
-    dword   shl[VNGO_SHADE_TABLE_SIZE];
+    dword   shl[1]; //[VNGO_SHADE_TABLE_SIZE];
 
-    VngoColorShade24 () {}
 };
 
 

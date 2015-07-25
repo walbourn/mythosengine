@@ -8,7 +8,7 @@
 //ùùùùù²±²ùùùùùùù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùùùùùù²±²ùùùù²±²ùùùùùù
 //ùùùù²²²²²²²²²²ù²²²²²²²²ùùù²²²²²²²²ùù²²²ùùùù²²²ù²²²²²²²²²²ù²²²ùùùù²²²ùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùCopyrightù(c)ù1994,ù1995ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
+//ùùùùùùùùùùùCopyrightù(c)ù1994-1996ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùù Microsoft Windows '95 Version ùùùùùùùùùùùùùùùùùùùùùùù
@@ -32,10 +32,10 @@
 //
 // esfrrot.cpp
 //
-//      Contains the EschFrameRef utility functions.  The EschFrameRef object
-//      is used to provide conversions of one frame-of-reference to another
-//      via transformation, as well as the inverse operation.  Various affine
-//      transformations may be put into frames-of-reference.
+// Contains the EschFrameRef utility functions.  The EschFrameRef class
+// is used to provide conversions of one frame-of-reference to another
+// via transformation, as well as the inverse operation.  Various affine
+// transformations may be put into frames-of-reference.
 //
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
 
@@ -54,7 +54,7 @@
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-//°°°°°°°°°°°°°°°°°°°°°°°°°°°°±  Operations  ±°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°°°±  Utility Routines  ±°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
@@ -62,7 +62,7 @@
 //                                                                          ³
 // Appends a rotation about an arbitrary axis to frame of reference.        ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void EschFrameRef::rotate(const EschVector *v, const Flx16 degrees)
+void EschFrameRef::rotate(const EschVector *v, const Flx16 degrees, dword update)
 {
     Flx16       s,c,t;
     Flx16       j,k,l;
@@ -81,25 +81,31 @@ void EschFrameRef::rotate(const EschVector *v, const Flx16 degrees)
     r0.flx = flx_16mul16(t,flx_16mul16(v->i,v->i)).flx + c.flx;
 
     // r1 = tij + sk
-    r1.flx = flx_16mul16(t,flx_16mul16(v->i,v->j)).flx + flx_16mul16(s,v->k).flx;
+    r1.flx = flx_16mul16(t,flx_16mul16(v->i,v->j)).flx
+             + flx_16mul16(s,v->k).flx;
 
     // r2 = tik - sj
-    r2.flx = flx_16mul16(t,flx_16mul16(v->i,v->k)).flx - flx_16mul16(s,v->j).flx;
+    r2.flx = flx_16mul16(t,flx_16mul16(v->i,v->k)).flx
+             - flx_16mul16(s,v->j).flx;
 
     // r3 = tij - sk
-    r3.flx = flx_16mul16(t,flx_16mul16(v->i,v->j)).flx - flx_16mul16(s,v->k).flx;
+    r3.flx = flx_16mul16(t,flx_16mul16(v->i,v->j)).flx
+             - flx_16mul16(s,v->k).flx;
 
     // r4 = tj^2 + c
     r4.flx = flx_16mul16(t,flx_16mul16(v->j,v->j)).flx + c.flx;
 
     // r5 = tjk + si
-    r5.flx = flx_16mul16(t,flx_16mul16(v->j,v->k)).flx + flx_16mul16(s,v->i).flx;
+    r5.flx = flx_16mul16(t,flx_16mul16(v->j,v->k)).flx
+             + flx_16mul16(s,v->i).flx;
 
     // r6 = tik + sj
-    r6.flx = flx_16mul16(t,flx_16mul16(v->i,v->k)).flx + flx_16mul16(s,v->j).flx;
+    r6.flx = flx_16mul16(t,flx_16mul16(v->i,v->k)).flx
+             + flx_16mul16(s,v->j).flx;
 
     // r7 = tjk - si
-    r7.flx = flx_16mul16(t,flx_16mul16(v->j,v->k)).flx - flx_16mul16(s,v->i).flx;
+    r7.flx = flx_16mul16(t,flx_16mul16(v->j,v->k)).flx
+             - flx_16mul16(s,v->i).flx;
 
     // r8 = tk^2 + c
     r8.flx = flx_16mul16(t,flx_16mul16(v->k,v->k)).flx + c.flx;
@@ -194,12 +200,13 @@ void EschFrameRef::rotate(const EschVector *v, const Flx16 degrees)
     dir.normalize();
 
 //ÄÄÄ Orthogonalize
-    if (++ortho_count > ESCH_MAX_ORTHOCOUNT)
+    if ((++ortho_count > ESCH_MAX_ORTHOCOUNT) && (update & ESCH_UPD_ORTHO))
     {
-        orthogonalize();
+        orthogonalize(update);
         ortho_count=0;
     }
-    else orient.inverse(&iorient);
+    else if (update & ESCH_UPD_INVERSE)
+        orient.inverse(&iorient);
 }
 
 
@@ -208,13 +215,15 @@ void EschFrameRef::rotate(const EschVector *v, const Flx16 degrees)
 //                                                                          ³
 // Appends a rotation about the frame's current I axis.                     ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void EschFrameRef::pitch(const Flx16 degrees)
+void EschFrameRef::pitch(const Flx16 degrees, dword update)
 {
-    EschVector   axis(orient.mtx[ESCH_MTX_A],orient.mtx[ESCH_MTX_B],orient.mtx[ESCH_MTX_C]);
+    EschVector   axis(orient.mtx[ESCH_MTX_A],
+                      orient.mtx[ESCH_MTX_B],
+                      orient.mtx[ESCH_MTX_C]);
 
     axis.normalize();
 
-    rotate(&axis,degrees);
+    rotate(&axis,degrees,update);
 }
 
 
@@ -223,9 +232,9 @@ void EschFrameRef::pitch(const Flx16 degrees)
 //                                                                          ³
 // Appends a rotation about the frame's current K axis.                     ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void EschFrameRef::roll(const Flx16 degrees)
+void EschFrameRef::roll(const Flx16 degrees, dword update)
 {
-    rotate(&dir,degrees);
+    rotate(&dir,degrees,update);
 }
 
 
@@ -234,13 +243,15 @@ void EschFrameRef::roll(const Flx16 degrees)
 //                                                                          ³
 // Appends a rotation about the frame's current J axis.                     ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void EschFrameRef::yaw(const Flx16 degrees)
+void EschFrameRef::yaw(const Flx16 degrees, dword update)
 {
-    EschVector   axis(orient.mtx[ESCH_MTX_D],orient.mtx[ESCH_MTX_E],orient.mtx[ESCH_MTX_F]);
+    EschVector   axis(orient.mtx[ESCH_MTX_D],
+                      orient.mtx[ESCH_MTX_E],
+                      orient.mtx[ESCH_MTX_F]);
 
     axis.normalize();
 
-    rotate(&axis,degrees);
+    rotate(&axis,degrees,update);
 }
 
 //°±² End of module - esfrrot.cpp ²±°

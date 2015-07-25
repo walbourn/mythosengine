@@ -8,7 +8,7 @@
 //ששששש²±²ששששששש²±²שששש²±²ש²±²שששש²±²ש²±²שששש²±²ש²±²שששששששש²±²שששש²±²שששששש
 //שששש²²²²²²²²²²ש²²²²²²²²ששש²²²²²²²²שש²²²שששש²²²ש²²²²²²²²²²ש²²²שששש²²²ששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//ששששששששששCopyrightש(c)ש1994,ש1995שbyשCharybdisשEnterprises,שInc.שששששששששש
+//שששששששששששCopyrightש(c)ש1994-1996שbyשCharybdisשEnterprises,שInc.שששששששששש
 //ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
 //ששששששששששששששששששששש Microsoft Windows '95 Version ששששששששששששששששששששששש
@@ -61,12 +61,20 @@ public:
     ushort          surfratio;              // Surface ratio (height : surface)
     ushort          surfshift;              // Shift value for surf ratio
 
-    Flx16           wscale, dscale, hscale; // Scale factors
+    Flx16           scale;                  // Scale factor
+
+    int             autocenter;             // Autocenter terrain in XZ plane
+    Flx16           orgx, orgy, orgz;       // Terrain origin
     
     byte            *hfield;                // Height field array
+    Flx16           *htable;                // Height table
     esch_surf_type  *surfinfo;              // Surface array
     dword           *surfcolr;              // Surface RGB color array
     IvoryHandle     hsurfnorml;             // Lighting normal array
+
+    BOOL            undo_valid;
+    esch_surf_type  *undo_surfinfo;         // Undo buffers
+    dword           *undo_surfcolr;
 
     char            name[ESCH_MAX_NAME];    // Name, etc.
     char            desc[256];
@@ -76,13 +84,34 @@ public:
     int             txtNumb;                // Texture information
     CString         txtName[256];
     CString         txtFName[256];
-    EschTexture     txtEsch[256];
+    EschTexture     *txtEsch[256];
     dword           txtColr[256];
     byte            txtColrIndx[256];
+    dword           txtDFlags[256];
+
+
+    int             colorNumb;              // Color information
+    CString         colorName[256];
+    dword           colorColr[256];
+    byte            colorColrIndx[256];
+    dword           colorDFlags[256];
 
     char            pfname[256];            // Van Gogh palette
     VngoPal8        palette;
     HPALETTE        hpal;
+
+    EschCameraEx    cam;                    // Render view camera
+    dword           cam_bcolor;
+    EschLight       *lights;                // Light list
+
+    ushort          color_bands[11];        // Height-colors
+
+    Flx16           hover_offset;           // Misc Properties
+    BOOL            lod_active;
+    Flx16           lod_medium;
+    Flx16           lod_low;
+
+    void SetLightsModifiedFlag() { lightsdirty = TRUE; }
 
 // Operations
 public:
@@ -90,17 +119,44 @@ public:
     void ImportTerrain(const char *fname, int losswarn=0);
     void ImportSurface(const char *fname, int losswarn=0);
 
-    BOOL AddTexture(const char *name, const char *fname, dword color);
-    BOOL SetTexture(int ind, const char *name, const char *fname, dword color);
+    int FindTexture(const char *name);
+    BOOL AddTexture(const char *name, const char *fname, dword color,
+                    dword flags);
+    BOOL SetTexture(int ind, const char *name, const char *fname,
+                    dword color, dword flags);
     void DeleteTexture(int ind);
 
+    void RemoveUnusedTxts();
+
+    void SaveTextures(const char *fname);
+    void LoadTextures(const char *fname);
+
+    int FindColor(const char *name);
+    BOOL AddColor(const char *name, dword color, dword flags);
+    BOOL SetColor(int ind, const char *name, dword color, dword flags);
+    void DeleteColor(int ind);
     void ExportToIFF(const char *fname);
 
+    void SaveColors(const char *fname);
+    void LoadColors(const char *fname);
+
     void ComputeNormals();
+    void LightTerrain();
+
+    void GetMinMaxElevations(Flx16 &min, Flx16 &max);
+    void SetBaseElevation(Flx16 newbase);
+
+    void PushUndo();
+    void PopUndo();
+
+    void Flip(BOOL horz);
+    void Rotate(BOOL right);
 
     void UITerrainProperities(CWnd *parent, UINT ipage=0, int edit=0);
-    void UISurfProperties(CWnd *parent, UINT xpos, UINT dpos);
+    void UISurfProperties(CWnd *parent, UINT xpos, UINT dpos, UINT ipage=0);
     void UISurfColor(CWnd *parent, UINT xpos, UINT dpos);
+    void UICameraProperties(CWnd *parent, UINT ipage=0);
+    void UILightProperties(CWnd *parent, UINT ipage=0);
 
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -120,8 +176,27 @@ public:
 #endif
 
 protected:
+    // Display helper routines
+    BOOL lightsdirty;
     void map_surfcolor_to_palette();
     BOOL load_and_recolor_texture(int ind, const char *fname);
+
+    // Import helper routines
+    long find_closest_htable_entry(Flx16 h, long start, long end);
+    long find_entry(Flx16 *heights, Flx16 h, long start, long end);
+
+    void compress_heights_standard(long xs, long ys, long w, long h,
+                                   ushort *data, BOOL normalize);
+    void compress_heights_uniform(long xs, long ys, long w, long h,
+                                  ushort *data, BOOL normalize);
+    void compress_heights_averaged(Flx16 threshold,
+                                  long xs, long ys, long w, long h,
+                                  ushort *data, BOOL normalize);
+
+    // Import routines
+    BOOL import_heights_from_vpdem(const char *fname, BOOL *isvpdem);
+    BOOL import_heights_from_usgsdem(const char *fname);
+    BOOL import_heights_from_pcx(const char *fname);
 
 // Generated message map functions
 protected:

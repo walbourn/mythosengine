@@ -11,7 +11,7 @@
 //                     Text Output and Font Management System
 //                          Microsoft Windows '95 Version
 //
-//               Copyright (c) 1995 by Charybdis Enterprises, Inc.
+//            Copyright (c) 1995, 1996 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved.
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -66,6 +66,11 @@ STATIC void print_help(int full);
 void print_error(XFParseIFF &xp, char *s=0);
 
 extern void compile(char *);
+extern void bitmap(char *, XFBitmap *,
+                   ushort width, ushort height,
+                   ushort startx, ushort starty,
+                   ushort spacer,
+                   char startc, char numc, char cpr);
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
@@ -76,7 +81,7 @@ extern void compile(char *);
 extern "C" FILE *yyin;
 
 STATIC char Util_name[]
-       = "°± Gutenberg Font Utility - (C) 1995 Charybdis Enterprises, Inc. ±°\n";
+       = "°± Gutenberg Font Utility - (C) 1995, 1996 Charybdis Enterprises, Inc. ±°\n";
 
 XFParseIFF     IFF;
 
@@ -98,6 +103,13 @@ void main(int argc, char *argv[])
     int         i;
     char        *ifn, *ofn;
 
+    ushort      width=0, height=0;
+    ushort      startx=0, starty=0;
+    ushort      spacer=0;
+    char        startc=0, numc=0, cpr=0;
+
+    char        fontname[16];
+
     char        path[XF_MAX_PATH];
 
     char        drive[XF_MAX_DRIVE];
@@ -112,6 +124,8 @@ void main(int argc, char *argv[])
         return;
     }
 
+    *fontname=0;
+
 //ÄÄÄ Process arguments
     for(i=1, ifn=0, ofn=0; i < argc; i++)
     {
@@ -122,6 +136,52 @@ void main(int argc, char *argv[])
                 case 'Q':
                 case 'q':
                     Flags |= FLAGS_QUIET;
+                    break;
+                case 'N':
+                case 'n':
+                    i++;
+                    if (i >= argc || *argv[i]=='-' || *argv[i]=='/')
+                    {
+                        cout << "°° Expected a font name\n";
+                        return;
+                    }
+                    strncpy(fontname,argv[i],sizeof(fontname));
+                    break;
+                case 'W':
+                case 'w':
+                    width = (ushort) atoi(&argv[i][2]);
+                    break;
+                case 'H':
+                case 'h':
+                    height = (ushort) atoi(&argv[i][2]);
+                    break;
+                case 'X':
+                case 'x':
+                    startx = (ushort) atoi(&argv[i][2]);
+                    break;
+                case 'Y':
+                case 'y':
+                    starty = (ushort) atoi(&argv[i][2]);
+                    break;
+                case 'P':
+                case 'p':
+                    spacer = (ushort) atoi(&argv[i][2]);
+                    break;
+                case 'S':
+                case 's':
+                    startc = (char) atoi(&argv[i][2]);
+                    break;
+                case 'C':
+                case 'c':
+                    numc = (char) atoi(&argv[i][2]);
+                    break;
+                case 'R':
+                case 'r':
+                    cpr = (char) atoi(&argv[i][2]);
+                    break;
+                case 'I':
+                case 'i':
+                    Flags |= FLAGS_INVERSE;
                     break;
                 case '?':
                     print_help(1);
@@ -156,11 +216,34 @@ void main(int argc, char *argv[])
         return;
     }
 
-//ÄÄÄ Open source file
-    if ((yyin=fopen(ifn,"r"))==NULL)
+//ÄÄÄ Check for valid input file extension
+    if (strstr(ifn,".bdf"))
+    {
+        //ÄÄÄ Open source file
+        if ((yyin=fopen(ifn,"r"))==NULL)
+        {
+            cout << Util_name;
+            cout << "±±± Could not open " << ifn << "\n";
+            return;
+        }
+    }
+    else if (strstr(ifn,".pcx")
+             || strstr(ifn,".lbm")
+             || strstr(ifn,".cel")
+             || strstr(ifn,".bmp")
+             || strstr(ifn,".xeb"))
+    {
+        if (!width || !height || !startc || !numc)
+        {
+            cout << Util_name;
+            cout << "±±±  Must use -w, -h, -s, -c with bitmaps\n";
+            return;
+        }
+    }
+    else
     {
         cout << Util_name;
-        cout << "±±± Could not open " << ifn << "\n";
+        cout << "±±± Input file must be a .BDF, .BMP, .CEL, .LBM, .PCX, or .XEB file\n";
         return;
     }
 
@@ -180,6 +263,9 @@ void main(int argc, char *argv[])
     strcpy(ext,".iff");
     xf_makepath(path,drive,dir,fname,ext);
 
+    if (!*fontname)
+        strncpy(fontname,fname,sizeof(fontname));
+
 //ÄÄÄ Output title and source/output file stats.
     if (!(Flags & FLAGS_QUIET))
     {
@@ -191,16 +277,71 @@ void main(int argc, char *argv[])
     xf_remove(ofn);
 
 //ÄÄÄ Open output file
-    if (IFF.create(ofn,0))
+    if (IFF.create(ofn,0)
+        || IFF.newform(IFF.makeid('G','F','N','T')))
     {
         print_error(IFF,"Failed to open output file");
+        return;
     }
 
-//ÄÄÄ Parse input
+    if (strstr(ifn,".bdf"))
+    {
+        compile(fontname);
+    }
     else
     {
-        IFF.newform(IFF.makeid('G','F','N','T'));
-        compile(fname);
+        int         err=0;
+        XFBitmap    bm;
+        if (strstr(ifn,".pcx"))
+        {
+            XFParsePCX  pcx;
+            err=pcx.nameread(ifn,&bm);
+        }
+        else if (strstr(ifn,".lbm"))
+        {
+            XFParseLBM  lbm;
+            err=lbm.nameread(ifn,&bm);
+        }
+        else if (strstr(ifn,".cel"))
+        {
+            XFParseCEL  cel;
+            err=cel.nameread(ifn,&bm);
+        }
+        else if (strstr(ifn,".bmp"))
+        {
+            XFParseBMP  bmp;
+            err=bmp.nameread(ifn,&bm);
+        }
+        else if (strstr(ifn,".xeb"))
+        {
+            XFParseXEB  xeb;
+            err=xeb.nameread(ifn,&bm);
+        }
+        else
+        {
+            cout << "±±± Unknown input image extender\n";
+            return;
+        }
+     
+        if (err)
+        {
+            cout << "±±± Error " << err << " loading image " << ifn << "\n";
+            return;
+        }
+
+        if (bm.bpp == 1)
+        {
+            bitmap(fontname,&bm,
+                   width,height,
+                   startx,starty,
+                   spacer,
+                   startc, numc, cpr);
+        }
+        else
+        {
+            cout << "±±± Input image must be 8-bit\n";
+            return;
+        }
     }
 }
 
@@ -211,11 +352,25 @@ void main(int argc, char *argv[])
 STATIC void print_help(int full)
 {
     cout << Util_name;
-    cout << "                            " __DATE__ "\n";
-    cout << "   Usage: gfont [-q] <filename.bdf> [<filename>]\n";
+    cout << "                            " __DATE__ "   All Rights Reserved.\n";
+    cout << "   Usage: gfont [-q] [-i] [-n fontname]\n";
+    cout << "                [-x<number>] [-y<number>] [-p<number>]\n";
+    cout << "                [-s<number>] [-c<number>] [-r<number>]\n";
+    cout << "                <filename.xxx> [<filename.iff>]\n";
     if (full)
     {
-        cout << "          -q = Operate quietly.\n";
+        cout << "\n          xxx can be BDF, BMP, CEL, LBM, PCX, or XEB\n\n";
+        cout << "          -q = Quiet mode.\n";
+        cout << "          -i = Inverse font images.\n";
+        cout << "          -n = Font identifer name (defaults to output file name base).\n";
+        cout << "\n";
+        cout << "          These only apply to converting from a bitmap file\n";
+        cout << "          -x = Starting offset in X of font cells\n";
+        cout << "          -y = Starting offset in Y of font cells\n";
+        cout << "          -p = Space between cells (in pixels, defaults to 0)\n";
+        cout << "          -s = Starting character number\n";
+        cout << "          -c = Number of characters defined\n";
+        cout << "          -r = Number of characters per row\n";
     }
 }
 

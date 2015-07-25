@@ -3,7 +3,7 @@
                                                             %/ . .  .   \%
              Van Gogh 2D-Display Library                     |  . .  o. | 
                                                              |. _  .   .|
-   Copyright (c) 1994, 1995 by Charybdis Enterprises, Inc.   | / \   .  | 
+   Copyright (c) 1994-1996 by Charybdis Enterprises, Inc.    | / \   .  | 
                 All rights reserved.                         |_|_|_._._.|
                                                              |.-.-.-.-..|
                                                             %\__________/%
@@ -27,30 +27,26 @@
                             _Library Status_
 
   Notes by:  Tim Little
-  Updated:   Nov. 6, 1995
+  Updated:   August 26, 1996
 
   This library is not yet complete.  It is functional using the DIB engine 
-  present in Win95, but does not yet utilize any of the Direct Draw, or 
-  3D-DDI features of Win95.
+  present in Win95, but does not yet utilize any of the 3D-DDI features
+  of Win95.
 
   
   Changes for this release --------------------------------------------------
+    o All the service routines that subdivide the polygons now also
+      take fractional S not just (u,v).	
+
+    o Direct Draw is now functioning properly.
+
+    o All new directory structure.
+
+    o Fixes a z-buffer bug in the linear flat shadded texture mapper.
+
     
-    o All new faster polygon scan converter, including a perspectively 
-      correct texture mapper.
-
-    o An all new interactive PalTool which allows the use of bi-linear or
-      Bezier curves for the shading dynamics generated.  The base color 
-      location is no longer required to be 3/4 of the way through the shade
-      range.
-
-
   Pending changes -----------------------------------------------------------
   
-    o Add some context management so the application is not responsible for
-      the setup and operational differnces between the Direct Draw, 3D-DDI,
-      and DIB versions of physical output.
-
     o Add support for 15,16,24 bit per pixel display usage.
 
     o Many new features for PalTool.

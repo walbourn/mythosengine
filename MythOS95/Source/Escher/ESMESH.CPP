@@ -8,7 +8,7 @@
 //ùùùùù²±²ùùùùùùù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùùùùùù²±²ùùùù²±²ùùùùùù
 //ùùùù²²²²²²²²²²ù²²²²²²²²ùùù²²²²²²²²ùù²²²ùùùù²²²ù²²²²²²²²²²ù²²²ùùùù²²²ùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùCopyrightù(c)ù1994,ù1995ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
+//ùùùùùùùùùùùCopyrightù(c)ù1994-1996ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùù Microsoft Windows '95 Version ùùùùùùùùùùùùùùùùùùùùùùù
@@ -32,11 +32,10 @@
 //
 // esmesh.cpp
 //
-//      Contains the code for the EschMesh container object.  This object
-//      is used to contain the original polygonal object data and is referred
-//      to and used by one ore more EschMeshDraw objects, thus reducing
-//      memory usage for multiple copies of the same mesh display
-//      simultaneously.
+// Contains the code for the EschMesh container class.  This class is 
+// used to contain the original polygonal object data and is referred to 
+// and used by one ore more EschMeshDraw objects, thus reducing memory 
+// usage for multiple copies of the same mesh display simultaneously.
 //
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
 
@@ -51,6 +50,14 @@
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
+//                                 Data
+//
+//±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+
+extern char EschNoName[];
+
+//±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+//
 //                                 Code
 //
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
@@ -62,17 +69,21 @@
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // EschMesh - Constructor                                                   ³
 //                                                                          ³
-// Initializes the internal data pointers to empty values.                  ³
+// Initializes the internal data pointers to empty values.  If a file name  ³
+// is given, then it attempts to load the mesh.                             ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 EschMesh::EschMesh(const char *fname, const char *oname,
-                   VngoPal *pal, EschMatrix *m, char *pn)
+                   VngoPal *pal, EschMatrix *m, char *pn) :
+    ref_count(0),
+    flags(0),
+    nverts(0),
+    v(0),
+    nfaces(0),
+    f(0),
+    tmax(0),
+    txt(0)
 {
-    ref_count=0;
-    flags=0;
-    nverts=nfaces=tmax=0;
-    v=0;
-    f=0;
-    txt=0;
+    strcpy(name,EschNoName);
 
     if (fname)
         load(fname,oname,pal,m, pn);
@@ -104,7 +115,7 @@ EschMesh::~EschMesh()
 // Frees associated data, if owned by the mesh.  Returns an error if the    ³
 // object is referenced.                                                    ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-esch_error_codes EschMesh::release(void)
+esch_error_codes EschMesh::release()
 {
     if (ref_count)
         return ESCH_ERR_REFERENCED;
@@ -122,6 +133,7 @@ esch_error_codes EschMesh::release(void)
         }
 
         //ÄÄ Update diags
+        assertMyth("EschMesh needs Escher initialized",EschSysInstance != 0);
         EschSysInstance->diag_faces -= nfaces;
         EschSysInstance->diag_verts -= nverts;
 
@@ -130,6 +142,11 @@ esch_error_codes EschMesh::release(void)
 
     if (flags & ESCH_MSH_OWNSTEXTURE)
     {
+        for(ulong i=0; i < tmax; i++)
+        {
+            if (txt[i])
+                delete txt[i];
+        }
         delete [] txt;
         txt=0;
 
@@ -138,6 +155,7 @@ esch_error_codes EschMesh::release(void)
 
     return ESCH_ERR_NONE;
 }
+
 
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
@@ -162,6 +180,8 @@ esch_error_codes EschMesh::load(const char *fname, const char *oname,
 
     assertMyth("EschMesh::load expects that there are no references active",
                !ref_count);
+
+    release();
 
 //ÄÄ Open file
     if (iff.open(fname,XF_OPEN_READ))
@@ -215,6 +235,8 @@ esch_error_codes EschMesh::load(XFParseIFF *iff,
 
     assertMyth("EschMesh::load expects that there are no references active",
                !ref_count);
+
+    release();
 
     assertMyth("EschMesh::load needs a valid iff pointer",
                iff);
@@ -342,17 +364,16 @@ esch_error_codes EschMesh::load(XFParseIFF *iff,
                 goto error_exit;
             }
          
-            exts.flags=0;
-            exts.center.x=extent.cenx;
-            exts.center.y=extent.ceny;
-            exts.center.z=extent.cenz;
-            exts.radius=extent.extent_radius;
-            exts.mins[0]=extent.minx;
-            exts.mins[1]=extent.miny;
-            exts.mins[2]=extent.minz;
-            exts.maxs[0]=extent.maxx;
-            exts.maxs[1]=extent.maxy;
-            exts.maxs[2]=extent.maxz;
+            sphere.center.x=extent.cenx;
+            sphere.center.y=extent.ceny;
+            sphere.center.z=extent.cenz;
+            sphere.radius=extent.extent_radius;
+            box.mins[0]=extent.minx;
+            box.mins[1]=extent.miny;
+            box.mins[2]=extent.minz;
+            box.maxs[0]=extent.maxx;
+            box.maxs[1]=extent.maxy;
+            box.maxs[2]=extent.maxz;
         }
 
         //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Orientation Matrix
@@ -418,10 +439,10 @@ esch_error_codes EschMesh::load(XFParseIFF *iff,
                 goto error_exit;
             }
 
-            // Allocate texture memory, if not already allocated.
+            // Allocate texture array, if not already allocated.
             if (!txt)
             {
-                txt = new EschTexture[header.nmtls];
+                txt = new EschTexture*[header.nmtls];
                 if (!txt)
                 {
                     err=ESCH_ERR_NOMEMORY;
@@ -431,26 +452,30 @@ esch_error_codes EschMesh::load(XFParseIFF *iff,
                 flags |= ESCH_MSH_OWNSTEXTURE;
             }
 
-            EschTexture t;
-
-            if (err=t.load(iff))
+            EschTexture *t = new EschStaticTexture;
+            if (!t)
             {
+                err=ESCH_ERR_NOMEMORY;
+                goto error_exit;
+            }
+            if (err=t->load(iff))
+            {
+                delete t;
                 goto error_exit;
             }
 
             for(i=0; i < header.nmtls; i++)
             {
-                if (!strncmp(t.name,emtl[i].name,ESCH_MAX_NAME))
+                if (t->name && !strncmp(t->name,emtl[i].name,ESCH_MAX_NAME))
                 {
                     txt[i] = t;
-                    t.flags &= ~ESCH_TXT_OWNSDATA;
                     break;
                 }
             }
 
             if (i >= header.nmtls)
             {
-                t.release();
+                delete t;
             }
         }
     }
@@ -459,7 +484,7 @@ esch_error_codes EschMesh::load(XFParseIFF *iff,
     {
         for(i=0; i < header.nmtls; i++)
         {
-            if (!txt[i].handle)
+            if (!txt[i])
             {
                 err=ESCH_ERR_MISSINGDATA;
                 goto error_exit;
@@ -492,6 +517,7 @@ esch_error_codes EschMesh::load(XFParseIFF *iff,
         delete emtl;
 
 //ÄÄ Update diags
+    assertMyth("EschMesh needs Escher initialized",EschSysInstance != 0);
     EschSysInstance->diag_faces += nfaces;
     EschSysInstance->diag_verts += nverts;
 
@@ -522,6 +548,11 @@ error_exit : ;
         ivory_hfree(&v);
     if (f)
         ivory_hfree(&f);
+    for(i=0; i < tmax; i++)
+    {
+        if (txt[i])
+            delete txt[i];
+    }
     delete [] txt;
     txt=0;
 

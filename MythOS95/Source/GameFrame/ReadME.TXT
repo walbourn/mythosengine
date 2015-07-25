@@ -7,7 +7,7 @@
 
   A Framework for Microsoft Windows '95 Entertainment Software Using MythOS
 
-               Copyright (c) 1995 by Charybdis Enterprises, Inc.
+            Copyright (c) 1995, 1996 by Charybdis Enterprises, Inc.
                             All Rights Reserved
 
  ---------------------------------------------------------------------------
@@ -34,14 +34,16 @@
 
                                    _Status_
 
- Notes by: Dan Higdon, Chuck Walbourn
- Updated: November 6, 1995
+ Notes by: Chuck Walbourn
+ Updated: Febuary 28, 1996
 
  Release Notes --------------------------------------------------------------
 
- This is the first release of the GameFrame example application.  This 
- incarnation has minimal example code for the various libraries, but does
- properly initialize the MythOS system and display some of its features.
+ This version of the Game Frame has been updated with a number of 
+ improvements for the basic classes.  The GFScreen class has been
+ expanded into two subclasses.  GFScreenDD is for DirectDraw usage
+ and GFScreenDIB will use GDI's DIB functions, but will use DirectDraw's
+ functions to switch resolutions, if desired.
 
  As the MythOS libraries are developed, any application-side initialization
  will be added to the GameFrame.

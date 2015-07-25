@@ -6,7 +6,7 @@
 //    (_)       ^          * *     *      *   *    *            (_)
 //             (_)       **   **   *    ***** **** ****
 //
-//            Copyright (c) 1994,1995 by Charybdis Enterprises, Inc.
+//            Copyright (c) 1994-1996 by Charybdis Enterprises, Inc.
 //                             All Rights Reserved.
 //                        Microsoft Windows '95 Version
 //
@@ -95,7 +95,7 @@ class XFParseIFF {
    ulong            ilength;
    ulong            ichunkSize;
    struct XFForm    iforms[XF_MAX_IFFDEPTH];
-   XFileDOS         xfile;
+   XFileDisk        xfile;
 
    void initvars(void);
 

@@ -1,7 +1,20 @@
 @echo off
 echo 같같같굉 Escher '95 Terrain Editor 껑같같같같같같같같같같같같같같같같같�
-call nmake /f ESHTEDIT.MAK CFG="Win32 Release"
+if %1.==clean. goto clean
+call nmake /f ESHTEDIT.MAK CFG="eshtedit - Win32 Release"
 if ERRORLEVEL 1 goto error
+if %1.==release. goto rel
+goto cont
+:clean
+deltree /Y winrel
+goto cont
+:rel
+if %MYTH95ROOT%.==. goto def
+copy winrel\*.exe %MYTH95ROOT%\Bin
+goto cont
+:def
+copy winrel\*.exe \MythOS95\Bin
+:cont
 echo 같같같굉 Escher '95 Terrain Editor - Done 껑같같같같같같같같같같같같같같
 goto exit
 :error

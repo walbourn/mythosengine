@@ -8,7 +8,7 @@
 //ùùùùù²±²ùùùùùùù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùùùùùù²±²ùùùù²±²ùùùùùù
 //ùùùù²²²²²²²²²²ù²²²²²²²²ùùù²²²²²²²²ùù²²²ùùùù²²²ù²²²²²²²²²²ù²²²ùùùù²²²ùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùCopyrightù(c)ù1994,ù1995ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
+//ùùùùùùùùùùùCopyrightù(c)ù1994-1996ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùù Microsoft Windows '95 Version ùùùùùùùùùùùùùùùùùùùùùùù
@@ -32,8 +32,7 @@
 //
 // esdrface.cpp
 //
-//      Contains the C++ implementation of the clip/draw function for
-//      faces.
+// Contains the C++ implementation of the clip/draw function for faces
 //
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
 
@@ -64,21 +63,16 @@
 //                                                                          ³
 // Draws a face using the current object information in the context.        ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-extern "C" void esch_clipdraw_face(ulong ind, int doclip, VngoRect *damage_rect,int dobfcul)
+extern "C" void esch_clipdraw_face(ulong ind, dword ctrlfl)
 {
     ulong               i;
-    ulong               edge_count;
     long                x, y;
     Flx16               tx, ty;
-    dword               cflags;
     dword               zflags=0;
     dword               r;
     dword               lclip_flags=0;
-    dword               level;
-    EschFace            *face;
-    EschCamera          *cam;
-    EschTexture         *texture;
-    VngoVport           *vp;
+
+    // Static work-space
     static VngoPoint    *vpt[ES_MAX_VERTS];
     static dword        *vflags[ES_MAX_VERTS];
     static dword        flags[ES_MAX_VERTS];
@@ -87,14 +81,21 @@ extern "C" void esch_clipdraw_face(ulong ind, int doclip, VngoRect *damage_rect,
 
 //ÄÄÄ Setup local pointers to current camera and Van Gogh viewport.
     assertMyth("esch_clipdraw_face needs camera in current context",
-               EschCurrent != NULL && EschCurrent->camera != NULL);
+               EschCurrent != 0 && EschCurrent->camera != 0);
 
-    cam=EschCurrent->camera;
+    EschCamera *cam=EschCurrent->camera;
 
 //ÄÄÄ Setup values/quick references
-    face=&EschCurrent->faces[ind];
+    assertMyth("esch_clipdraw_face needs valid draw data in context",
+               EschCurrent != 0 && EschCurrent->faces != 0
+               && EschCurrent->vpoints != 0 && EschCurrent->vflags != 0
+               && EschCurrent->current != 0);
 
-    cflags = cam->flags;
+    EschDrawable *current=EschCurrent->current;
+
+    EschFace *face=&EschCurrent->faces[ind];
+
+    dword cflags = cam->flags;
 
     vpt[0] = &EschCurrent->vpoints[face->a];
     vpt[1] = &EschCurrent->vpoints[face->b];
@@ -102,10 +103,10 @@ extern "C" void esch_clipdraw_face(ulong ind, int doclip, VngoRect *damage_rect,
 
     vpt[0]->u = face->u[0].flx;
     vpt[0]->v = face->v[0].flx;
-                      
+
     vpt[1]->u = face->u[1].flx;
     vpt[1]->v = face->v[1].flx;
-                      
+
     vpt[2]->u = face->u[2].flx;
     vpt[2]->v = face->v[2].flx;
 
@@ -113,17 +114,19 @@ extern "C" void esch_clipdraw_face(ulong ind, int doclip, VngoRect *damage_rect,
     vflags[1]=&EschCurrent->vflags[face->b];
     vflags[2]=&EschCurrent->vflags[face->c];
 
-    edge_count = 3;
+    ulong edge_count = 3;
 
-    //ÄÄÄ Figure out shade level (take minimum of shade levels for camera/face)
+    //ÄÄÄ Figure out shade level (take minimum of shade levels for
+    //ÄÄÄ camera, drawable limits, and face limits)
 
-    level = cflags & face->flags;
+    dword level = ( (cflags & current->limits)
+                    | ((ctrlfl & ESCH_CDF_MUSTTXT) ? ESCH_CAM_TEXTURED : 0) )
+                  & face->flags;
 
 //ÄÄÄ Clip if needed
-
-    if (doclip)
+    if (ctrlfl & ESCH_CDF_CLIP)
     {
-//ÄÄÄ Clip against view volume
+        //ÄÄÄ Clip against view volume
         Flx16 yon = cam->yon;
         Flx16 hither = cam->hither;
 
@@ -139,7 +142,7 @@ extern "C" void esch_clipdraw_face(ulong ind, int doclip, VngoRect *damage_rect,
             if (z < hither.flx)
                 zflags++;
 
-            if (z > yon.flx)
+            if (z > yon.flx && !(ctrlfl & ESCH_CDF_INFINITEZ))
                 tzflags++;
         }
 
@@ -173,8 +176,11 @@ extern "C" void esch_clipdraw_face(ulong ind, int doclip, VngoRect *damage_rect,
         {
             assertMyth("esch_clipdraw_face Z-clip failed",
                        vpt[i]->wz >= hither.flx);
-            assertMyth("esch_clipdraw_face Z-clip failed",
-                       vpt[i]->wz <= yon.flx);
+            if (!(ctrlfl & ESCH_CDF_INFINITEZ))
+            {
+                assertMyth("esch_clipdraw_face Z-clip failed",
+                        vpt[i]->wz <= yon.flx);
+            }
         }
 #endif
 
@@ -182,7 +188,7 @@ extern "C" void esch_clipdraw_face(ulong ind, int doclip, VngoRect *damage_rect,
 
         for(i=0; i < edge_count; i++)
         {
-        
+
             if (*vflags[i] & ESCH_VVERT_PROJECTED)
             {
                 lclip_flags |= ((*vflags[i] & 0xf0) >> 4) << (4*i);
@@ -219,9 +225,8 @@ extern "C" void esch_clipdraw_face(ulong ind, int doclip, VngoRect *damage_rect,
                 }
             }
         }
-
     }
-    
+
     // if any of the bits are set, then it is off the screen.
     i=0;
     r=0xffffffff;
@@ -235,8 +240,8 @@ extern "C" void esch_clipdraw_face(ulong ind, int doclip, VngoRect *damage_rect,
 
 //ÄÄÄ Setup local copies of frequently used data
     assertMyth("esch_clipdraw_face expects current context's camera to have a viewport",
-               cam->vport != NULL);
-    vp=cam->vport;
+               cam->vport != 0);
+    VngoVport *vp=cam->vport;
 
     Flx16 height = (vp->get_vbuff()->height >> 1);
     Flx16 width = (vp->get_vbuff()->width >> 1);
@@ -249,18 +254,15 @@ extern "C" void esch_clipdraw_face(ulong ind, int doclip, VngoRect *damage_rect,
     {
         if (!(*vflags[i] & ESCH_VVERT_PROJECTED))
         {
-        
+
             Flx16 z= Flx16(vpt[i]->wz,1);
-        
+
             vpt[i]->x = (flx_muldiv(Flx16(vpt[i]->wx,1),tx,z).flx + width.flx)>>16;
-        
+
             vpt[i]->y = (height.flx - flx_muldiv(Flx16(vpt[i]->wy,1),ty,z).flx)>>16;
-        
-            if (cflags & ESCH_CAM_PERSPECTIVE)
-            {
-                vpt[i]->w = flx_recip230(z);
-            }
-        
+
+            vpt[i]->w = flx_recip230(z);
+
             *vflags[i] |= ESCH_VVERT_PROJECTED;
         }
     }
@@ -274,19 +276,31 @@ extern "C" void esch_clipdraw_face(ulong ind, int doclip, VngoRect *damage_rect,
             vpoly[i].shade = EschCurrent->vpoints[face->a].shade;
     }
 
-//ÄÄÄ Back Face Cull  if needed.
-    if (dobfcul)
+//ÄÄÄ Back Face Cull if needed.
+    if (ctrlfl & ESCH_CDF_BFCULL)
     {
         if (!esch_rotate_check(edge_count,vpoly))
             return;
     }
-                  
+
 //ÄÄÄ Draw triangle
     assertMyth ("esch_clipdraw_face has invalid polygon before clipping",
                 (edge_count > 2) && (edge_count < ES_MAX_VERTS));
 
     // If any local clip flags exist, then we need to clip the polygon
     // and move its points into the array to be sent to the scan converter.
+
+    for (i=0;i < edge_count;i++)
+    {
+       if ((vpoly[i].x < 0) 
+           || (vpoly[i].y < 0)
+           || (vpoly[i].x >= cam->vport->vbuff.width)
+           || (vpoly[i].y >= cam->vport->vbuff.height))
+       {
+           lclip_flags = 1;
+       }
+    }
+
     if (lclip_flags)   
     {                  
        esch_clip_poly(vp->get_vbuff(),vpoly,&edge_count);
@@ -298,49 +312,16 @@ extern "C" void esch_clipdraw_face(ulong ind, int doclip, VngoRect *damage_rect,
     assertMyth ("esch_clipdraw_face has invalid polygon post clipping",
                 (edge_count > 2) && (edge_count < ES_MAX_VERTS));
 
-    //ÄÄÄ Scale Z between hither & yon and calc damage_rect.
-    for (i=0;i < edge_count;i++)
+    //ÄÄÄ Scale Z between hither & yon
+    if (ctrlfl & ESCH_CDF_INFINITEZ)
     {
-       // scale Z.
-       vpoly[i].z = flx_16mul16(Flx16(vpoly[i].wz,1),cam->z_factor).flx << 1;
-
-       if (damage_rect != NULL)
-       {
-           // Find the growing bounding box of this mesh.
-           if (damage_rect->x > vpoly[i].x)
-               damage_rect->x = vpoly[i].x;
-           if (damage_rect->y > vpoly[i].y)
-               damage_rect->y = vpoly[i].y;
-
-           if (damage_rect->dx < vpoly[i].x)
-               damage_rect->dx = vpoly[i].x;
-           if (damage_rect->dy < vpoly[i].y)
-               damage_rect->dy = vpoly[i].y;
-       }
-       if (vpoly[i].x < 0)
-       {
-           assertMyth("esch_clipdraw_face found out-of-range point",
-                      vpoly[i].x >= 0);
-           vpoly[i].x = 0;
-       }
-       if (vpoly[i].y < 0)
-       {
-           assertMyth("esch_clipdraw_face found out-of-range point",
-                      vpoly[i].y >= 0);
-           vpoly[i].y = 0;
-       }
-       if (vpoly[i].x >= cam->vport->vbuff.width)
-       {
-           assertMyth("esch_clipdraw_face found out-of-range point",
-                      vpoly[i].x < cam->vport->vbuff.width);
-           vpoly[i].x = cam->vport->vbuff.width;
-       }
-       if (vpoly[i].y >= cam->vport->vbuff.height)
-       {
-           assertMyth("esch_clipdraw_face found out-of-range point",
-                      vpoly[i].y < cam->vport->vbuff.height);
-           vpoly[i].x = cam->vport->vbuff.height;
-       }
+        for (i=0; i < edge_count; i++)
+            vpoly[i].z = 0xfffeffff;
+    }
+    else
+    {
+        for (i=0; i < edge_count; i++)
+            vpoly[i].z = flx_16mul16(Flx16(vpoly[i].wz,1),cam->z_factor).flx << 1;
     }
 
     //ÄÄÄ Need to draw with Gouraud-shading
@@ -351,7 +332,7 @@ extern "C" void esch_clipdraw_face(ulong ind, int doclip, VngoRect *damage_rect,
             assertMyth("esch_clipdraw_face needs textures in current context",
                        EschCurrent->txts);
 
-            texture=&EschCurrent->txts[face->txt-1];
+            EschTexture *texture=EschCurrent->txts[face->txt-1];
 
             texture->lock();
 
@@ -388,7 +369,7 @@ extern "C" void esch_clipdraw_face(ulong ind, int doclip, VngoRect *damage_rect,
             assertMyth("esch_clipdraw_face needs textures in current context",
                        EschCurrent->txts);
 
-            texture=&EschCurrent->txts[face->txt-1];
+            EschTexture *texture=EschCurrent->txts[face->txt-1];
 
             texture->lock();
 
@@ -508,14 +489,15 @@ extern "C" void esch_zclip_poly(Flx16 hither,
       {
          esch_clip_z_line(yon.flx, second, first, work);
          work++;
-		 out++;
+                 out++;
       }
 
       first = second;
    }
    *n_vertices = out;
-    
+
 }
+
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // esch_clip_poly                                                           ³
@@ -596,7 +578,7 @@ extern "C" void esch_clip_poly(VngoVbuffer     *vport,
       {
          esch_clip_y_line(top, second, first, work);
          work++;
-		 out++;
+                 out++;
       }
 
       first = second;
@@ -666,7 +648,6 @@ extern "C" void esch_clip_poly(VngoVbuffer     *vport,
 
    *n_vertices = out;
 }
-
 
 //°±² End of module - esdrface.cpp ²±°
 

@@ -1,36 +1,42 @@
-# Microsoft Visual C++ Generated NMAKE File, Format Version 2.00
+# Microsoft Developer Studio Generated NMAKE File, Format Version 4.20
 # ** DO NOT EDIT **
 
 # TARGTYPE "Win32 (x86) Application" 0x0101
 
 !IF "$(CFG)" == ""
-CFG=Win32 Debug
-!MESSAGE No configuration specified.  Defaulting to Win32 Debug.
+CFG=Paltool - Win32 Debug
+!MESSAGE No configuration specified.  Defaulting to Paltool - Win32 Debug.
 !ENDIF 
 
-!IF "$(CFG)" != "Win32 Debug" && "$(CFG)" != "Win32 Release"
+!IF "$(CFG)" != "Paltool - Win32 Debug" && "$(CFG)" !=\
+ "Paltool - Win32 Release"
 !MESSAGE Invalid configuration "$(CFG)" specified.
 !MESSAGE You can specify a configuration when running NMAKE on this makefile
 !MESSAGE by defining the macro CFG on the command line.  For example:
 !MESSAGE 
-!MESSAGE NMAKE /f "PalTool.mak" CFG="Win32 Debug"
+!MESSAGE NMAKE /f "Paltool.mak" CFG="Paltool - Win32 Debug"
 !MESSAGE 
 !MESSAGE Possible choices for configuration are:
 !MESSAGE 
-!MESSAGE "Win32 Debug" (based on "Win32 (x86) Application")
-!MESSAGE "Win32 Release" (based on "Win32 (x86) Application")
+!MESSAGE "Paltool - Win32 Debug" (based on "Win32 (x86) Application")
+!MESSAGE "Paltool - Win32 Release" (based on "Win32 (x86) Application")
 !MESSAGE 
 !ERROR An invalid configuration is specified.
 !ENDIF 
 
+!IF "$(OS)" == "Windows_NT"
+NULL=
+!ELSE 
+NULL=nul
+!ENDIF 
 ################################################################################
 # Begin Project
-# PROP Target_Last_Scanned "Win32 Debug"
-MTL=MkTypLib.exe
-CPP=cl.exe
+# PROP Target_Last_Scanned "Paltool - Win32 Release"
 RSC=rc.exe
+MTL=mktyplib.exe
+CPP=cl.exe
 
-!IF  "$(CFG)" == "Win32 Debug"
+!IF  "$(CFG)" == "Paltool - Win32 Debug"
 
 # PROP BASE Use_MFC 6
 # PROP BASE Use_Debug_Libraries 1
@@ -43,71 +49,71 @@ RSC=rc.exe
 OUTDIR=.\WinDebug
 INTDIR=.\WinDebug
 
-ALL : $(OUTDIR)/PalTool.exe $(OUTDIR)/PalTool.bsc
+ALL : "$(OUTDIR)\Paltool.exe"
 
-$(OUTDIR) : 
-    if not exist $(OUTDIR)/nul mkdir $(OUTDIR)
+CLEAN : 
+	-@erase "$(INTDIR)\bezier.obj"
+	-@erase "$(INTDIR)\dialog.obj"
+	-@erase "$(INTDIR)\mainfrm.obj"
+	-@erase "$(INTDIR)\paltodoc.obj"
+	-@erase "$(INTDIR)\paltool.obj"
+	-@erase "$(INTDIR)\Paltool.pch"
+	-@erase "$(INTDIR)\paltool.res"
+	-@erase "$(INTDIR)\paltovw.obj"
+	-@erase "$(INTDIR)\stdafx.obj"
+	-@erase "$(INTDIR)\vc40.idb"
+	-@erase "$(INTDIR)\vc40.pdb"
+	-@erase "$(OUTDIR)\Paltool.exe"
+	-@erase "$(OUTDIR)\Paltool.ilk"
+	-@erase "$(OUTDIR)\Paltool.pdb"
+
+"$(OUTDIR)" :
+    if not exist "$(OUTDIR)/$(NULL)" mkdir "$(OUTDIR)"
 
 # ADD BASE CPP /nologo /MD /W3 /GX /Zi /Od /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_AFXDLL" /FR /Yu"stdafx.h" /c
-# ADD CPP /nologo /MD /W3 /GX /Zi /Od /I "..\..\inc" /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_AFXDLL" /FR /Yu"stdafx.h" /c
-CPP_PROJ=/nologo /MD /W3 /GX /Zi /Od /I "..\..\inc" /D "_DEBUG" /D "WIN32" /D\
- "_WINDOWS" /D "_MBCS" /D "_AFXDLL" /FR$(INTDIR)/ /Fp$(OUTDIR)/"PalTool.pch"\
- /Yu"stdafx.h" /Fo$(INTDIR)/ /Fd$(OUTDIR)/"PalTool.pdb" /c 
+# ADD CPP /nologo /MDd /W3 /Gm /GX /Zi /Od /I "..\..\inc" /D "_DEBUG" /D "WIN32" /D "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /Yu"stdafx.h" /c
+# SUBTRACT CPP /Fr
+CPP_PROJ=/nologo /MDd /W3 /Gm /GX /Zi /Od /I "..\..\inc" /D "_DEBUG" /D "WIN32"\
+ /D "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /Fp"$(INTDIR)/Paltool.pch" /Yu"stdafx.h"\
+ /Fo"$(INTDIR)/" /Fd"$(INTDIR)/" /c 
 CPP_OBJS=.\WinDebug/
+CPP_SBRS=.\.
 # ADD BASE RSC /l 0x409 /d "_DEBUG" /d "_AFXDLL"
 # ADD RSC /l 0x409 /d "_DEBUG" /d "_AFXDLL"
-RSC_PROJ=/l 0x409 /fo$(INTDIR)/"PalTool.res" /d "_DEBUG" /d "_AFXDLL" 
+RSC_PROJ=/l 0x409 /fo"$(INTDIR)/paltool.res" /d "_DEBUG" /d "_AFXDLL" 
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
-BSC32_FLAGS=/nologo /o$(OUTDIR)/"PalTool.bsc" 
+BSC32_FLAGS=/nologo /o"$(OUTDIR)/Paltool.bsc" 
 BSC32_SBRS= \
-	$(INTDIR)/stdafx.sbr \
-	$(INTDIR)/PalTool.sbr \
-	$(INTDIR)/mainfrm.sbr \
-	$(INTDIR)/paltodoc.sbr \
-	$(INTDIR)/PalTovw.sbr \
-	$(INTDIR)/bezier.sbr \
-	$(INTDIR)/dialog.sbr
-
-$(OUTDIR)/PalTool.bsc : $(OUTDIR)  $(BSC32_SBRS)
-    $(BSC32) @<<
-  $(BSC32_FLAGS) $(BSC32_SBRS)
-<<
-
+	
 LINK32=link.exe
-# ADD BASE LINK32 /NOLOGO /SUBSYSTEM:windows /DEBUG /MACHINE:I386
-# SUBTRACT BASE LINK32 /PDB:none
-# ADD LINK32 winmm.lib /NOLOGO /VERSION:4,0 /SUBSYSTEM:windows /DEBUG /MACHINE:I386
-# SUBTRACT LINK32 /PDB:none
-LINK32_FLAGS=winmm.lib /NOLOGO /VERSION:4,0 /SUBSYSTEM:windows /INCREMENTAL:yes\
- /PDB:$(OUTDIR)/"PalTool.pdb" /DEBUG /MACHINE:I386 /OUT:$(OUTDIR)/"PalTool.exe" 
-DEF_FILE=
+# ADD BASE LINK32 /nologo /subsystem:windows /debug /machine:I386
+# SUBTRACT BASE LINK32 /pdb:none
+# ADD LINK32 winmm.lib ..\..\lib\mythos.lib ..\..\lib\ivorymfc.lib ..\..\lib\bozo.lib ..\..\lib\xfile.lib ..\..\lib\chronos.lib ..\..\lib\escher.lib ..\..\lib\gutenbrg.lib ..\..\lib\felix.lib ..\..\lib\vangogh.lib /nologo /version:4 /subsystem:windows /debug /machine:I386 /nodefaultlib:"libc" /VERSION:4,0
+# SUBTRACT LINK32 /pdb:none
+LINK32_FLAGS=winmm.lib ..\..\lib\mythos.lib ..\..\lib\ivorymfc.lib\
+ ..\..\lib\bozo.lib ..\..\lib\xfile.lib ..\..\lib\chronos.lib\
+ ..\..\lib\escher.lib ..\..\lib\gutenbrg.lib ..\..\lib\felix.lib\
+ ..\..\lib\vangogh.lib /nologo /version:4 /subsystem:windows /incremental:yes\
+ /pdb:"$(OUTDIR)/Paltool.pdb" /debug /machine:I386 /nodefaultlib:"libc"\
+ /out:"$(OUTDIR)/Paltool.exe" /VERSION:4,0 
 LINK32_OBJS= \
-	$(INTDIR)/stdafx.obj \
-	$(INTDIR)/PalTool.obj \
-	$(INTDIR)/mainfrm.obj \
-	$(INTDIR)/paltodoc.obj \
-	$(INTDIR)/PalTovw.obj \
-	$(INTDIR)/PalTool.res \
-	$(INTDIR)/bezier.obj \
-	$(INTDIR)/dialog.obj \
-	\Charybds\MythOS95\lib\IvoryMFC.lib \
-	\Charybds\MythOS95\lib\VanGogh.lib \
-	\Charybds\MythOS95\lib\gutenbrg.lib \
-	\Charybds\MythOS95\lib\mythos.lib \
-	\Charybds\MythOS95\lib\escher.lib \
-	\Charybds\MythOS95\lib\felix.lib \
-	\Charybds\MythOS95\lib\xfile.lib \
-	\Charybds\MythOS95\lib\chronos.lib \
-	\Charybds\MythOS95\lib\bozo.lib
+	"$(INTDIR)\bezier.obj" \
+	"$(INTDIR)\dialog.obj" \
+	"$(INTDIR)\mainfrm.obj" \
+	"$(INTDIR)\paltodoc.obj" \
+	"$(INTDIR)\paltool.obj" \
+	"$(INTDIR)\paltool.res" \
+	"$(INTDIR)\paltovw.obj" \
+	"$(INTDIR)\stdafx.obj"
 
-$(OUTDIR)/PalTool.exe : $(OUTDIR)  $(DEF_FILE) $(LINK32_OBJS)
+"$(OUTDIR)\Paltool.exe" : "$(OUTDIR)" $(DEF_FILE) $(LINK32_OBJS)
     $(LINK32) @<<
   $(LINK32_FLAGS) $(LINK32_OBJS)
 <<
 
-!ELSEIF  "$(CFG)" == "Win32 Release"
+!ELSEIF  "$(CFG)" == "Paltool - Win32 Release"
 
 # PROP BASE Use_MFC 6
 # PROP BASE Use_Debug_Libraries 0
@@ -120,66 +126,62 @@ $(OUTDIR)/PalTool.exe : $(OUTDIR)  $(DEF_FILE) $(LINK32_OBJS)
 OUTDIR=.\WinRel
 INTDIR=.\WinRel
 
-ALL : $(OUTDIR)/PalTool.exe $(OUTDIR)/PalTool.bsc
+ALL : "$(OUTDIR)\Paltool.exe"
 
-$(OUTDIR) : 
-    if not exist $(OUTDIR)/nul mkdir $(OUTDIR)
+CLEAN : 
+	-@erase "$(INTDIR)\bezier.obj"
+	-@erase "$(INTDIR)\dialog.obj"
+	-@erase "$(INTDIR)\mainfrm.obj"
+	-@erase "$(INTDIR)\paltodoc.obj"
+	-@erase "$(INTDIR)\paltool.obj"
+	-@erase "$(INTDIR)\Paltool.pch"
+	-@erase "$(INTDIR)\paltool.res"
+	-@erase "$(INTDIR)\paltovw.obj"
+	-@erase "$(INTDIR)\stdafx.obj"
+	-@erase "$(OUTDIR)\Paltool.exe"
+
+"$(OUTDIR)" :
+    if not exist "$(OUTDIR)/$(NULL)" mkdir "$(OUTDIR)"
 
 # ADD BASE CPP /nologo /MD /W3 /GX /O2 /D "NDEBUG" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_AFXDLL" /FR /Yu"stdafx.h" /c
-# ADD CPP /nologo /MD /W3 /GX /O2 /I "..\..\inc" /D "NDEBUG" /D "WIN32" /D "_WINDOWS" /D "_MBCS" /D "_AFXDLL" /FR /Yu"stdafx.h" /c
+# ADD CPP /nologo /MD /W3 /GX /O2 /I "..\..\inc" /D "NDEBUG" /D "WIN32" /D "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /Yu"stdafx.h" /c
+# SUBTRACT CPP /Fr
 CPP_PROJ=/nologo /MD /W3 /GX /O2 /I "..\..\inc" /D "NDEBUG" /D "WIN32" /D\
- "_WINDOWS" /D "_MBCS" /D "_AFXDLL" /FR$(INTDIR)/ /Fp$(OUTDIR)/"PalTool.pch"\
- /Yu"stdafx.h" /Fo$(INTDIR)/ /c 
+ "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /Fp"$(INTDIR)/Paltool.pch" /Yu"stdafx.h"\
+ /Fo"$(INTDIR)/" /c 
 CPP_OBJS=.\WinRel/
+CPP_SBRS=.\.
 # ADD BASE RSC /l 0x409 /d "NDEBUG" /d "_AFXDLL"
 # ADD RSC /l 0x409 /d "NDEBUG" /d "_AFXDLL"
-RSC_PROJ=/l 0x409 /fo$(INTDIR)/"PalTool.res" /d "NDEBUG" /d "_AFXDLL" 
+RSC_PROJ=/l 0x409 /fo"$(INTDIR)/paltool.res" /d "NDEBUG" /d "_AFXDLL" 
 BSC32=bscmake.exe
 # ADD BASE BSC32 /nologo
 # ADD BSC32 /nologo
-BSC32_FLAGS=/nologo /o$(OUTDIR)/"PalTool.bsc" 
+BSC32_FLAGS=/nologo /o"$(OUTDIR)/Paltool.bsc" 
 BSC32_SBRS= \
-	$(INTDIR)/stdafx.sbr \
-	$(INTDIR)/PalTool.sbr \
-	$(INTDIR)/mainfrm.sbr \
-	$(INTDIR)/paltodoc.sbr \
-	$(INTDIR)/PalTovw.sbr \
-	$(INTDIR)/bezier.sbr \
-	$(INTDIR)/dialog.sbr
-
-$(OUTDIR)/PalTool.bsc : $(OUTDIR)  $(BSC32_SBRS)
-    $(BSC32) @<<
-  $(BSC32_FLAGS) $(BSC32_SBRS)
-<<
-
+	
 LINK32=link.exe
-# ADD BASE LINK32 /NOLOGO /SUBSYSTEM:windows /MACHINE:I386
-# SUBTRACT BASE LINK32 /PDB:none
-# ADD LINK32 winmm.lib /NOLOGO /VERSION:4,0 /SUBSYSTEM:windows /MACHINE:I386
-# SUBTRACT LINK32 /PDB:none
-LINK32_FLAGS=winmm.lib /NOLOGO /VERSION:4,0 /SUBSYSTEM:windows /INCREMENTAL:no\
- /PDB:$(OUTDIR)/"PalTool.pdb" /MACHINE:I386 /OUT:$(OUTDIR)/"PalTool.exe" 
-DEF_FILE=
+# ADD BASE LINK32 /nologo /subsystem:windows /machine:I386
+# SUBTRACT BASE LINK32 /pdb:none
+# ADD LINK32 winmm.lib ..\..\lib\mythos.lib ..\..\lib\ivorymfc.lib ..\..\lib\bozo.lib ..\..\lib\xfile.lib ..\..\lib\chronos.lib ..\..\lib\escher.lib ..\..\lib\gutenbrg.lib ..\..\lib\felix.lib ..\..\lib\vangogh.lib /nologo /version:4 /subsystem:windows /machine:I386 /nodefaultlib:"libc" /VERSION:4,0
+# SUBTRACT LINK32 /pdb:none
+LINK32_FLAGS=winmm.lib ..\..\lib\mythos.lib ..\..\lib\ivorymfc.lib\
+ ..\..\lib\bozo.lib ..\..\lib\xfile.lib ..\..\lib\chronos.lib\
+ ..\..\lib\escher.lib ..\..\lib\gutenbrg.lib ..\..\lib\felix.lib\
+ ..\..\lib\vangogh.lib /nologo /version:4 /subsystem:windows /incremental:no\
+ /pdb:"$(OUTDIR)/Paltool.pdb" /machine:I386 /nodefaultlib:"libc"\
+ /out:"$(OUTDIR)/Paltool.exe" /VERSION:4,0 
 LINK32_OBJS= \
-	$(INTDIR)/stdafx.obj \
-	$(INTDIR)/PalTool.obj \
-	$(INTDIR)/mainfrm.obj \
-	$(INTDIR)/paltodoc.obj \
-	$(INTDIR)/PalTovw.obj \
-	$(INTDIR)/PalTool.res \
-	$(INTDIR)/bezier.obj \
-	$(INTDIR)/dialog.obj \
-	\Charybds\MythOS95\lib\IvoryMFC.lib \
-	\Charybds\MythOS95\lib\VanGogh.lib \
-	\Charybds\MythOS95\lib\gutenbrg.lib \
-	\Charybds\MythOS95\lib\mythos.lib \
-	\Charybds\MythOS95\lib\escher.lib \
-	\Charybds\MythOS95\lib\felix.lib \
-	\Charybds\MythOS95\lib\xfile.lib \
-	\Charybds\MythOS95\lib\chronos.lib \
-	\Charybds\MythOS95\lib\bozo.lib
+	"$(INTDIR)\bezier.obj" \
+	"$(INTDIR)\dialog.obj" \
+	"$(INTDIR)\mainfrm.obj" \
+	"$(INTDIR)\paltodoc.obj" \
+	"$(INTDIR)\paltool.obj" \
+	"$(INTDIR)\paltool.res" \
+	"$(INTDIR)\paltovw.obj" \
+	"$(INTDIR)\stdafx.obj"
 
-$(OUTDIR)/PalTool.exe : $(OUTDIR)  $(DEF_FILE) $(LINK32_OBJS)
+"$(OUTDIR)\Paltool.exe" : "$(OUTDIR)" $(DEF_FILE) $(LINK32_OBJS)
     $(LINK32) @<<
   $(LINK32_FLAGS) $(LINK32_OBJS)
 <<
@@ -197,89 +199,484 @@ MTL_PROJ=
 .cxx{$(CPP_OBJS)}.obj:
    $(CPP) $(CPP_PROJ) $<  
 
+.c{$(CPP_SBRS)}.sbr:
+   $(CPP) $(CPP_PROJ) $<  
+
+.cpp{$(CPP_SBRS)}.sbr:
+   $(CPP) $(CPP_PROJ) $<  
+
+.cxx{$(CPP_SBRS)}.sbr:
+   $(CPP) $(CPP_PROJ) $<  
+
 ################################################################################
-# Begin Group "Source Files"
+# Begin Target
+
+# Name "Paltool - Win32 Debug"
+# Name "Paltool - Win32 Release"
+
+!IF  "$(CFG)" == "Paltool - Win32 Debug"
+
+!ELSEIF  "$(CFG)" == "Paltool - Win32 Release"
+
+!ENDIF 
 
 ################################################################################
 # Begin Source File
 
-SOURCE=.\stdafx.cpp
-DEP_STDAF=\
-	.\stdafx.h\
-	\Charybds\MythOS95\inc\MYTHOS.HPP\
-	\Charybds\MythOS95\inc\DEBUG.H\
-	\Charybds\MythOS95\inc\PORTABLE.H\
-	\Charybds\MythOS95\inc\Ivory.hpp\
-	\Charybds\MythOS95\inc\CHRONOS.HPP\
-	\Charybds\MythOS95\inc\felix.hpp\
-	\Charybds\MythOS95\inc\XFILE.HPP\
-	\Charybds\MythOS95\inc\BOZO.HPP\
-	\Charybds\MythOS95\inc\Max.HPP\
-	\Charybds\MythOS95\inc\VANGOGH.HPP\
-	\Charybds\MythOS95\inc\GUTENBRG.HPP\
-	\Charybds\MythOS95\inc\ESCHER.HPP\
-	\Charybds\MythOS95\inc\MYTHOS.H\
-	\Charybds\MythOS95\inc\Ivory.h\
-	\Charybds\MythOS95\inc\Ivory.ipp\
-	\Charybds\MythOS95\inc\felix.ipp\
-	\Charybds\MythOS95\inc\XFDEFS.H\
-	\Charybds\MythOS95\inc\XFIO.H\
-	\Charybds\MythOS95\inc\XFBASE.HPP\
-	\Charybds\MythOS95\inc\XFINI.HPP\
-	\Charybds\MythOS95\inc\XFBITMAP.HPP\
-	\Charybds\MythOS95\inc\XFIFF.HPP\
-	\Charybds\MythOS95\inc\BOZO.H\
-	\Charybds\MythOS95\inc\BZWRAP.HPP\
-	\Charybds\MythOS95\inc\MaxEvt.HPP\
-	\Charybds\MythOS95\inc\MaxDevs.HPP\
-	\Charybds\MythOS95\inc\MaxESrc.HPP\
-	\Charybds\MythOS95\inc\VNGDEFS.H\
-	\Charybds\MythOS95\inc\VNGSTRCT.HPP\
-	\Charybds\MythOS95\inc\VNGINLIN.IPP\
-	\Charybds\MythOS95\inc\VNGVP.HPP\
-	\Charybds\MythOS95\inc\VNGVVP8.HPP\
-	\Charybds\MythOS95\inc\VNGVPDD8.HPP\
-	\Charybds\MythOS95\inc\GUTENBRG.H\
-	\Charybds\MythOS95\inc\ESDEFS.H\
-	\Charybds\MythOS95\inc\ESMATH.HPP\
-	\Charybds\MythOS95\inc\ESCONTXT.HPP\
-	\Charybds\MythOS95\inc\ESTXTURE.HPP\
-	\Charybds\MythOS95\inc\ESLIGHT.HPP\
-	\Charybds\MythOS95\inc\ESCAMERA.HPP\
-	\Charybds\MythOS95\inc\ESSYSTEM.HPP\
-	\Charybds\MythOS95\inc\ESDRAW.HPP\
-	\Charybds\MythOS95\inc\ESPARTIK.HPP\
-	\Charybds\MythOS95\inc\ESGEOM.HPP\
-	\Charybds\MythOS95\inc\ESTERRAN.HPP\
-	\Charybds\MythOS95\inc\ESSCENE.HPP\
-	\Charybds\MythOS95\inc\IVMem.h\
-	\Charybds\MythOS95\inc\BZSEMAP.H\
-	\Charybds\MythOS95\inc\VNGPAL.HPP\
-	\Charybds\MythOS95\inc\VNGBD.HPP\
-	\Charybds\MythOS95\inc\BZQUEUE.H\
-	\Charybds\MythOS95\inc\VNGCOLOR.HPP\
-	\Charybds\MythOS95\inc\BZTASK.H\
-	\Charybds\MythOS95\inc\BZARTN.H
+SOURCE=.\bezier.cpp
+DEP_CPP_BEZIE=\
+	"..\..\inc\bozo.h"\
+	"..\..\inc\bozo.hpp"\
+	"..\..\inc\chronos.hpp"\
+	"..\..\inc\escher.hpp"\
+	"..\..\inc\felix.hpp"\
+	"..\..\inc\felix.ipp"\
+	"..\..\inc\gutenbrg.hpp"\
+	"..\..\inc\ivory.h"\
+	"..\..\inc\ivory.hpp"\
+	"..\..\inc\max.hpp"\
+	"..\..\inc\maxvmap.hpp"\
+	"..\..\inc\mythos.hpp"\
+	"..\..\inc\portable.h"\
+	"..\..\inc\vangogh.hpp"\
+	"..\..\inc\vngvvp16.hpp"\
+	"..\..\inc\xfile.hpp"\
+	"..\..\inc\xfio.h"\
+	".\..\..\inc\BZARTN.H"\
+	".\..\..\inc\BZQUEUE.H"\
+	".\..\..\inc\BZSEMAP.H"\
+	".\..\..\inc\BZTASK.H"\
+	".\..\..\inc\BZWRAP.HPP"\
+	".\..\..\inc\DEBUG.H"\
+	".\..\..\inc\esbasic.hpp"\
+	".\..\..\inc\ESCAMERA.HPP"\
+	".\..\..\inc\ESCONTXT.HPP"\
+	".\..\..\inc\ESDEFS.H"\
+	".\..\..\inc\ESDRAW.HPP"\
+	".\..\..\inc\esexts.hpp"\
+	".\..\..\inc\ESGEOM.HPP"\
+	".\..\..\inc\ESLIGHT.HPP"\
+	".\..\..\inc\ESMATH.HPP"\
+	".\..\..\inc\esmisc.hpp"\
+	".\..\..\inc\ESPARTIK.HPP"\
+	".\..\..\inc\ESSCENE.HPP"\
+	".\..\..\inc\ESSYSTEM.HPP"\
+	".\..\..\inc\ESTERRAN.HPP"\
+	".\..\..\inc\ESTXTURE.HPP"\
+	".\..\..\inc\GUTENBRG.H"\
+	".\..\..\inc\IVMem.h"\
+	".\..\..\inc\Ivory.ipp"\
+	".\..\..\inc\MaxDevs.HPP"\
+	".\..\..\inc\MaxESrc.HPP"\
+	".\..\..\inc\MaxEvt.HPP"\
+	".\..\..\inc\MYTHOS.H"\
+	".\..\..\inc\VNGBD.HPP"\
+	".\..\..\inc\VNGCOLOR.HPP"\
+	".\..\..\inc\VNGDEFS.H"\
+	".\..\..\inc\VNGPAL.HPP"\
+	".\..\..\inc\VNGSTRCT.HPP"\
+	".\..\..\inc\VNGVP.HPP"\
+	".\..\..\inc\vngvpdb8.hpp"\
+	".\..\..\inc\VNGVPDD8.HPP"\
+	".\..\..\inc\VNGVVP8.HPP"\
+	".\..\..\inc\XFBASE.HPP"\
+	".\..\..\inc\XFBITMAP.HPP"\
+	".\..\..\inc\XFDEFS.H"\
+	".\..\..\inc\XFIFF.HPP"\
+	".\..\..\inc\XFINI.HPP"\
+	".\bezier.h"\
+	".\stdafx.h"\
+	
 
-!IF  "$(CFG)" == "Win32 Debug"
+"$(INTDIR)\bezier.obj" : $(SOURCE) $(DEP_CPP_BEZIE) "$(INTDIR)"\
+ "$(INTDIR)\Paltool.pch"
 
-# ADD BASE CPP /Yc"stdafx.h"
-# ADD CPP /Yc"stdafx.h"
 
-$(INTDIR)/stdafx.obj :  $(SOURCE)  $(DEP_STDAF) $(INTDIR)
-   $(CPP) /nologo /MD /W3 /GX /Zi /Od /I "..\..\inc" /D "_DEBUG" /D "WIN32" /D\
- "_WINDOWS" /D "_MBCS" /D "_AFXDLL" /FR$(INTDIR)/ /Fp$(OUTDIR)/"PalTool.pch"\
- /Yc"stdafx.h" /Fo$(INTDIR)/ /Fd$(OUTDIR)/"PalTool.pdb" /c  $(SOURCE) 
+# End Source File
+################################################################################
+# Begin Source File
 
-!ELSEIF  "$(CFG)" == "Win32 Release"
+SOURCE=.\dialog.cpp
+DEP_CPP_DIALO=\
+	"..\..\inc\bozo.h"\
+	"..\..\inc\bozo.hpp"\
+	"..\..\inc\chronos.hpp"\
+	"..\..\inc\escher.hpp"\
+	"..\..\inc\felix.hpp"\
+	"..\..\inc\felix.ipp"\
+	"..\..\inc\gutenbrg.hpp"\
+	"..\..\inc\ivory.h"\
+	"..\..\inc\ivory.hpp"\
+	"..\..\inc\max.hpp"\
+	"..\..\inc\maxvmap.hpp"\
+	"..\..\inc\mythos.hpp"\
+	"..\..\inc\portable.h"\
+	"..\..\inc\vangogh.hpp"\
+	"..\..\inc\vngvvp16.hpp"\
+	"..\..\inc\xfile.hpp"\
+	"..\..\inc\xfio.h"\
+	".\..\..\inc\BZARTN.H"\
+	".\..\..\inc\BZQUEUE.H"\
+	".\..\..\inc\BZSEMAP.H"\
+	".\..\..\inc\BZTASK.H"\
+	".\..\..\inc\BZWRAP.HPP"\
+	".\..\..\inc\DEBUG.H"\
+	".\..\..\inc\esbasic.hpp"\
+	".\..\..\inc\ESCAMERA.HPP"\
+	".\..\..\inc\ESCONTXT.HPP"\
+	".\..\..\inc\ESDEFS.H"\
+	".\..\..\inc\ESDRAW.HPP"\
+	".\..\..\inc\esexts.hpp"\
+	".\..\..\inc\ESGEOM.HPP"\
+	".\..\..\inc\ESLIGHT.HPP"\
+	".\..\..\inc\ESMATH.HPP"\
+	".\..\..\inc\esmisc.hpp"\
+	".\..\..\inc\ESPARTIK.HPP"\
+	".\..\..\inc\ESSCENE.HPP"\
+	".\..\..\inc\ESSYSTEM.HPP"\
+	".\..\..\inc\ESTERRAN.HPP"\
+	".\..\..\inc\ESTXTURE.HPP"\
+	".\..\..\inc\GUTENBRG.H"\
+	".\..\..\inc\IVMem.h"\
+	".\..\..\inc\Ivory.ipp"\
+	".\..\..\inc\MaxDevs.HPP"\
+	".\..\..\inc\MaxESrc.HPP"\
+	".\..\..\inc\MaxEvt.HPP"\
+	".\..\..\inc\MYTHOS.H"\
+	".\..\..\inc\VNGBD.HPP"\
+	".\..\..\inc\VNGCOLOR.HPP"\
+	".\..\..\inc\VNGDEFS.H"\
+	".\..\..\inc\VNGPAL.HPP"\
+	".\..\..\inc\VNGSTRCT.HPP"\
+	".\..\..\inc\VNGVP.HPP"\
+	".\..\..\inc\vngvpdb8.hpp"\
+	".\..\..\inc\VNGVPDD8.HPP"\
+	".\..\..\inc\VNGVVP8.HPP"\
+	".\..\..\inc\XFBASE.HPP"\
+	".\..\..\inc\XFBITMAP.HPP"\
+	".\..\..\inc\XFDEFS.H"\
+	".\..\..\inc\XFIFF.HPP"\
+	".\..\..\inc\XFINI.HPP"\
+	".\dialog.h"\
+	".\paltool.h"\
+	".\stdafx.h"\
+	
 
-# ADD BASE CPP /Yc"stdafx.h"
-# ADD CPP /Yc"stdafx.h"
+"$(INTDIR)\dialog.obj" : $(SOURCE) $(DEP_CPP_DIALO) "$(INTDIR)"\
+ "$(INTDIR)\Paltool.pch"
 
-$(INTDIR)/stdafx.obj :  $(SOURCE)  $(DEP_STDAF) $(INTDIR)
-   $(CPP) /nologo /MD /W3 /GX /O2 /I "..\..\inc" /D "NDEBUG" /D "WIN32" /D\
- "_WINDOWS" /D "_MBCS" /D "_AFXDLL" /FR$(INTDIR)/ /Fp$(OUTDIR)/"PalTool.pch"\
- /Yc"stdafx.h" /Fo$(INTDIR)/ /c  $(SOURCE) 
+
+# End Source File
+################################################################################
+# Begin Source File
+
+SOURCE=.\mainfrm.cpp
+DEP_CPP_MAINF=\
+	"..\..\inc\bozo.h"\
+	"..\..\inc\bozo.hpp"\
+	"..\..\inc\chronos.hpp"\
+	"..\..\inc\escher.hpp"\
+	"..\..\inc\felix.hpp"\
+	"..\..\inc\felix.ipp"\
+	"..\..\inc\gutenbrg.hpp"\
+	"..\..\inc\ivory.h"\
+	"..\..\inc\ivory.hpp"\
+	"..\..\inc\max.hpp"\
+	"..\..\inc\maxvmap.hpp"\
+	"..\..\inc\mythos.hpp"\
+	"..\..\inc\portable.h"\
+	"..\..\inc\vangogh.hpp"\
+	"..\..\inc\vngvvp16.hpp"\
+	"..\..\inc\xfile.hpp"\
+	"..\..\inc\xfio.h"\
+	".\..\..\inc\BZARTN.H"\
+	".\..\..\inc\BZQUEUE.H"\
+	".\..\..\inc\BZSEMAP.H"\
+	".\..\..\inc\BZTASK.H"\
+	".\..\..\inc\BZWRAP.HPP"\
+	".\..\..\inc\DEBUG.H"\
+	".\..\..\inc\esbasic.hpp"\
+	".\..\..\inc\ESCAMERA.HPP"\
+	".\..\..\inc\ESCONTXT.HPP"\
+	".\..\..\inc\ESDEFS.H"\
+	".\..\..\inc\ESDRAW.HPP"\
+	".\..\..\inc\esexts.hpp"\
+	".\..\..\inc\ESGEOM.HPP"\
+	".\..\..\inc\ESLIGHT.HPP"\
+	".\..\..\inc\ESMATH.HPP"\
+	".\..\..\inc\esmisc.hpp"\
+	".\..\..\inc\ESPARTIK.HPP"\
+	".\..\..\inc\ESSCENE.HPP"\
+	".\..\..\inc\ESSYSTEM.HPP"\
+	".\..\..\inc\ESTERRAN.HPP"\
+	".\..\..\inc\ESTXTURE.HPP"\
+	".\..\..\inc\GUTENBRG.H"\
+	".\..\..\inc\IVMem.h"\
+	".\..\..\inc\Ivory.ipp"\
+	".\..\..\inc\MaxDevs.HPP"\
+	".\..\..\inc\MaxESrc.HPP"\
+	".\..\..\inc\MaxEvt.HPP"\
+	".\..\..\inc\MYTHOS.H"\
+	".\..\..\inc\VNGBD.HPP"\
+	".\..\..\inc\VNGCOLOR.HPP"\
+	".\..\..\inc\VNGDEFS.H"\
+	".\..\..\inc\VNGPAL.HPP"\
+	".\..\..\inc\VNGSTRCT.HPP"\
+	".\..\..\inc\VNGVP.HPP"\
+	".\..\..\inc\vngvpdb8.hpp"\
+	".\..\..\inc\VNGVPDD8.HPP"\
+	".\..\..\inc\VNGVVP8.HPP"\
+	".\..\..\inc\XFBASE.HPP"\
+	".\..\..\inc\XFBITMAP.HPP"\
+	".\..\..\inc\XFDEFS.H"\
+	".\..\..\inc\XFIFF.HPP"\
+	".\..\..\inc\XFINI.HPP"\
+	".\mainfrm.h"\
+	".\paltool.h"\
+	".\stdafx.h"\
+	
+
+"$(INTDIR)\mainfrm.obj" : $(SOURCE) $(DEP_CPP_MAINF) "$(INTDIR)"\
+ "$(INTDIR)\Paltool.pch"
+
+
+# End Source File
+################################################################################
+# Begin Source File
+
+SOURCE=.\paltodoc.cpp
+DEP_CPP_PALTO=\
+	"..\..\inc\bozo.h"\
+	"..\..\inc\bozo.hpp"\
+	"..\..\inc\chronos.hpp"\
+	"..\..\inc\escher.hpp"\
+	"..\..\inc\felix.hpp"\
+	"..\..\inc\felix.ipp"\
+	"..\..\inc\gutenbrg.hpp"\
+	"..\..\inc\ivory.h"\
+	"..\..\inc\ivory.hpp"\
+	"..\..\inc\max.hpp"\
+	"..\..\inc\maxvmap.hpp"\
+	"..\..\inc\mythos.hpp"\
+	"..\..\inc\portable.h"\
+	"..\..\inc\vangogh.hpp"\
+	"..\..\inc\vngvvp16.hpp"\
+	"..\..\inc\xfile.hpp"\
+	"..\..\inc\xfio.h"\
+	".\..\..\inc\BZARTN.H"\
+	".\..\..\inc\BZQUEUE.H"\
+	".\..\..\inc\BZSEMAP.H"\
+	".\..\..\inc\BZTASK.H"\
+	".\..\..\inc\BZWRAP.HPP"\
+	".\..\..\inc\DEBUG.H"\
+	".\..\..\inc\esbasic.hpp"\
+	".\..\..\inc\ESCAMERA.HPP"\
+	".\..\..\inc\ESCONTXT.HPP"\
+	".\..\..\inc\ESDEFS.H"\
+	".\..\..\inc\ESDRAW.HPP"\
+	".\..\..\inc\esexts.hpp"\
+	".\..\..\inc\ESGEOM.HPP"\
+	".\..\..\inc\ESLIGHT.HPP"\
+	".\..\..\inc\ESMATH.HPP"\
+	".\..\..\inc\esmisc.hpp"\
+	".\..\..\inc\ESPARTIK.HPP"\
+	".\..\..\inc\ESSCENE.HPP"\
+	".\..\..\inc\ESSYSTEM.HPP"\
+	".\..\..\inc\ESTERRAN.HPP"\
+	".\..\..\inc\ESTXTURE.HPP"\
+	".\..\..\inc\GUTENBRG.H"\
+	".\..\..\inc\IVMem.h"\
+	".\..\..\inc\Ivory.ipp"\
+	".\..\..\inc\MaxDevs.HPP"\
+	".\..\..\inc\MaxESrc.HPP"\
+	".\..\..\inc\MaxEvt.HPP"\
+	".\..\..\inc\MYTHOS.H"\
+	".\..\..\inc\VNGBD.HPP"\
+	".\..\..\inc\VNGCOLOR.HPP"\
+	".\..\..\inc\VNGDEFS.H"\
+	".\..\..\inc\VNGPAL.HPP"\
+	".\..\..\inc\VNGSTRCT.HPP"\
+	".\..\..\inc\VNGVP.HPP"\
+	".\..\..\inc\vngvpdb8.hpp"\
+	".\..\..\inc\VNGVPDD8.HPP"\
+	".\..\..\inc\VNGVVP8.HPP"\
+	".\..\..\inc\XFBASE.HPP"\
+	".\..\..\inc\XFBITMAP.HPP"\
+	".\..\..\inc\XFDEFS.H"\
+	".\..\..\inc\XFIFF.HPP"\
+	".\..\..\inc\XFINI.HPP"\
+	".\dialog.h"\
+	".\Paltodoc.h"\
+	".\paltool.h"\
+	".\stdafx.h"\
+	
+
+"$(INTDIR)\paltodoc.obj" : $(SOURCE) $(DEP_CPP_PALTO) "$(INTDIR)"\
+ "$(INTDIR)\Paltool.pch"
+
+
+# End Source File
+################################################################################
+# Begin Source File
+
+SOURCE=.\paltool.cpp
+DEP_CPP_PALTOO=\
+	"..\..\inc\bozo.h"\
+	"..\..\inc\bozo.hpp"\
+	"..\..\inc\chronos.hpp"\
+	"..\..\inc\escher.hpp"\
+	"..\..\inc\felix.hpp"\
+	"..\..\inc\felix.ipp"\
+	"..\..\inc\gutenbrg.hpp"\
+	"..\..\inc\ivory.h"\
+	"..\..\inc\ivory.hpp"\
+	"..\..\inc\max.hpp"\
+	"..\..\inc\maxvmap.hpp"\
+	"..\..\inc\mythos.hpp"\
+	"..\..\inc\portable.h"\
+	"..\..\inc\vangogh.hpp"\
+	"..\..\inc\vngvvp16.hpp"\
+	"..\..\inc\xfile.hpp"\
+	"..\..\inc\xfio.h"\
+	".\..\..\inc\BZARTN.H"\
+	".\..\..\inc\BZQUEUE.H"\
+	".\..\..\inc\BZSEMAP.H"\
+	".\..\..\inc\BZTASK.H"\
+	".\..\..\inc\BZWRAP.HPP"\
+	".\..\..\inc\DEBUG.H"\
+	".\..\..\inc\esbasic.hpp"\
+	".\..\..\inc\ESCAMERA.HPP"\
+	".\..\..\inc\ESCONTXT.HPP"\
+	".\..\..\inc\ESDEFS.H"\
+	".\..\..\inc\ESDRAW.HPP"\
+	".\..\..\inc\esexts.hpp"\
+	".\..\..\inc\ESGEOM.HPP"\
+	".\..\..\inc\ESLIGHT.HPP"\
+	".\..\..\inc\ESMATH.HPP"\
+	".\..\..\inc\esmisc.hpp"\
+	".\..\..\inc\ESPARTIK.HPP"\
+	".\..\..\inc\ESSCENE.HPP"\
+	".\..\..\inc\ESSYSTEM.HPP"\
+	".\..\..\inc\ESTERRAN.HPP"\
+	".\..\..\inc\ESTXTURE.HPP"\
+	".\..\..\inc\GUTENBRG.H"\
+	".\..\..\inc\IVMem.h"\
+	".\..\..\inc\Ivory.ipp"\
+	".\..\..\inc\MaxDevs.HPP"\
+	".\..\..\inc\MaxESrc.HPP"\
+	".\..\..\inc\MaxEvt.HPP"\
+	".\..\..\inc\MYTHOS.H"\
+	".\..\..\inc\VNGBD.HPP"\
+	".\..\..\inc\VNGCOLOR.HPP"\
+	".\..\..\inc\VNGDEFS.H"\
+	".\..\..\inc\VNGPAL.HPP"\
+	".\..\..\inc\VNGSTRCT.HPP"\
+	".\..\..\inc\VNGVP.HPP"\
+	".\..\..\inc\vngvpdb8.hpp"\
+	".\..\..\inc\VNGVPDD8.HPP"\
+	".\..\..\inc\VNGVVP8.HPP"\
+	".\..\..\inc\XFBASE.HPP"\
+	".\..\..\inc\XFBITMAP.HPP"\
+	".\..\..\inc\XFDEFS.H"\
+	".\..\..\inc\XFIFF.HPP"\
+	".\..\..\inc\XFINI.HPP"\
+	".\mainfrm.h"\
+	".\Paltodoc.h"\
+	".\paltool.h"\
+	".\paltovw.h"\
+	".\stdafx.h"\
+	
+
+"$(INTDIR)\paltool.obj" : $(SOURCE) $(DEP_CPP_PALTOO) "$(INTDIR)"\
+ "$(INTDIR)\Paltool.pch"
+
+
+# End Source File
+################################################################################
+# Begin Source File
+
+SOURCE=.\paltovw.cpp
+DEP_CPP_PALTOV=\
+	"..\..\inc\bozo.h"\
+	"..\..\inc\bozo.hpp"\
+	"..\..\inc\chronos.hpp"\
+	"..\..\inc\escher.hpp"\
+	"..\..\inc\felix.hpp"\
+	"..\..\inc\felix.ipp"\
+	"..\..\inc\gutenbrg.hpp"\
+	"..\..\inc\ivory.h"\
+	"..\..\inc\ivory.hpp"\
+	"..\..\inc\max.hpp"\
+	"..\..\inc\maxvmap.hpp"\
+	"..\..\inc\mythos.hpp"\
+	"..\..\inc\portable.h"\
+	"..\..\inc\vangogh.hpp"\
+	"..\..\inc\vngvvp16.hpp"\
+	"..\..\inc\xfile.hpp"\
+	"..\..\inc\xfio.h"\
+	".\..\..\inc\BZARTN.H"\
+	".\..\..\inc\BZQUEUE.H"\
+	".\..\..\inc\BZSEMAP.H"\
+	".\..\..\inc\BZTASK.H"\
+	".\..\..\inc\BZWRAP.HPP"\
+	".\..\..\inc\DEBUG.H"\
+	".\..\..\inc\esbasic.hpp"\
+	".\..\..\inc\ESCAMERA.HPP"\
+	".\..\..\inc\ESCONTXT.HPP"\
+	".\..\..\inc\ESDEFS.H"\
+	".\..\..\inc\ESDRAW.HPP"\
+	".\..\..\inc\esexts.hpp"\
+	".\..\..\inc\ESGEOM.HPP"\
+	".\..\..\inc\ESLIGHT.HPP"\
+	".\..\..\inc\ESMATH.HPP"\
+	".\..\..\inc\esmisc.hpp"\
+	".\..\..\inc\ESPARTIK.HPP"\
+	".\..\..\inc\ESSCENE.HPP"\
+	".\..\..\inc\ESSYSTEM.HPP"\
+	".\..\..\inc\ESTERRAN.HPP"\
+	".\..\..\inc\ESTXTURE.HPP"\
+	".\..\..\inc\GUTENBRG.H"\
+	".\..\..\inc\IVMem.h"\
+	".\..\..\inc\Ivory.ipp"\
+	".\..\..\inc\MaxDevs.HPP"\
+	".\..\..\inc\MaxESrc.HPP"\
+	".\..\..\inc\MaxEvt.HPP"\
+	".\..\..\inc\MYTHOS.H"\
+	".\..\..\inc\VNGBD.HPP"\
+	".\..\..\inc\VNGCOLOR.HPP"\
+	".\..\..\inc\VNGDEFS.H"\
+	".\..\..\inc\VNGPAL.HPP"\
+	".\..\..\inc\VNGSTRCT.HPP"\
+	".\..\..\inc\VNGVP.HPP"\
+	".\..\..\inc\vngvpdb8.hpp"\
+	".\..\..\inc\VNGVPDD8.HPP"\
+	".\..\..\inc\VNGVVP8.HPP"\
+	".\..\..\inc\XFBASE.HPP"\
+	".\..\..\inc\XFBITMAP.HPP"\
+	".\..\..\inc\XFDEFS.H"\
+	".\..\..\inc\XFIFF.HPP"\
+	".\..\..\inc\XFINI.HPP"\
+	".\bezier.h"\
+	".\dialog.h"\
+	".\Paltodoc.h"\
+	".\paltool.h"\
+	".\paltovw.h"\
+	".\stdafx.h"\
+	
+
+"$(INTDIR)\paltovw.obj" : $(SOURCE) $(DEP_CPP_PALTOV) "$(INTDIR)"\
+ "$(INTDIR)\Paltool.pch"
+
+
+# End Source File
+################################################################################
+# Begin Source File
+
+SOURCE=.\readme.txt
+
+!IF  "$(CFG)" == "Paltool - Win32 Debug"
+
+!ELSEIF  "$(CFG)" == "Paltool - Win32 Release"
 
 !ENDIF 
 
@@ -287,469 +684,123 @@ $(INTDIR)/stdafx.obj :  $(SOURCE)  $(DEP_STDAF) $(INTDIR)
 ################################################################################
 # Begin Source File
 
-SOURCE=.\PalTool.cpp
-DEP_PALTO=\
-	.\stdafx.h\
-	.\PalTool.h\
-	.\mainfrm.h\
-	.\PalTodoc.h\
-	.\PalTovw.h\
-	\Charybds\MythOS95\inc\MYTHOS.HPP\
-	\Charybds\MythOS95\inc\DEBUG.H\
-	\Charybds\MythOS95\inc\PORTABLE.H\
-	\Charybds\MythOS95\inc\Ivory.hpp\
-	\Charybds\MythOS95\inc\CHRONOS.HPP\
-	\Charybds\MythOS95\inc\felix.hpp\
-	\Charybds\MythOS95\inc\XFILE.HPP\
-	\Charybds\MythOS95\inc\BOZO.HPP\
-	\Charybds\MythOS95\inc\Max.HPP\
-	\Charybds\MythOS95\inc\VANGOGH.HPP\
-	\Charybds\MythOS95\inc\GUTENBRG.HPP\
-	\Charybds\MythOS95\inc\ESCHER.HPP\
-	\Charybds\MythOS95\inc\MYTHOS.H\
-	\Charybds\MythOS95\inc\Ivory.h\
-	\Charybds\MythOS95\inc\Ivory.ipp\
-	\Charybds\MythOS95\inc\felix.ipp\
-	\Charybds\MythOS95\inc\XFDEFS.H\
-	\Charybds\MythOS95\inc\XFIO.H\
-	\Charybds\MythOS95\inc\XFBASE.HPP\
-	\Charybds\MythOS95\inc\XFINI.HPP\
-	\Charybds\MythOS95\inc\XFBITMAP.HPP\
-	\Charybds\MythOS95\inc\XFIFF.HPP\
-	\Charybds\MythOS95\inc\BOZO.H\
-	\Charybds\MythOS95\inc\BZWRAP.HPP\
-	\Charybds\MythOS95\inc\MaxEvt.HPP\
-	\Charybds\MythOS95\inc\MaxDevs.HPP\
-	\Charybds\MythOS95\inc\MaxESrc.HPP\
-	\Charybds\MythOS95\inc\VNGDEFS.H\
-	\Charybds\MythOS95\inc\VNGSTRCT.HPP\
-	\Charybds\MythOS95\inc\VNGINLIN.IPP\
-	\Charybds\MythOS95\inc\VNGVP.HPP\
-	\Charybds\MythOS95\inc\VNGVVP8.HPP\
-	\Charybds\MythOS95\inc\VNGVPDD8.HPP\
-	\Charybds\MythOS95\inc\GUTENBRG.H\
-	\Charybds\MythOS95\inc\ESDEFS.H\
-	\Charybds\MythOS95\inc\ESMATH.HPP\
-	\Charybds\MythOS95\inc\ESCONTXT.HPP\
-	\Charybds\MythOS95\inc\ESTXTURE.HPP\
-	\Charybds\MythOS95\inc\ESLIGHT.HPP\
-	\Charybds\MythOS95\inc\ESCAMERA.HPP\
-	\Charybds\MythOS95\inc\ESSYSTEM.HPP\
-	\Charybds\MythOS95\inc\ESDRAW.HPP\
-	\Charybds\MythOS95\inc\ESPARTIK.HPP\
-	\Charybds\MythOS95\inc\ESGEOM.HPP\
-	\Charybds\MythOS95\inc\ESTERRAN.HPP\
-	\Charybds\MythOS95\inc\ESSCENE.HPP\
-	\Charybds\MythOS95\inc\IVMem.h\
-	\Charybds\MythOS95\inc\BZSEMAP.H\
-	\Charybds\MythOS95\inc\VNGPAL.HPP\
-	\Charybds\MythOS95\inc\VNGBD.HPP\
-	\Charybds\MythOS95\inc\BZQUEUE.H\
-	\Charybds\MythOS95\inc\VNGCOLOR.HPP\
-	\Charybds\MythOS95\inc\BZTASK.H\
-	\Charybds\MythOS95\inc\BZARTN.H
+SOURCE=.\paltool.rc
+DEP_RSC_PALTOOL=\
+	".\res\PalTodoc.ico"\
+	".\res\PalTool.ico"\
+	".\res\PalTool.rc2"\
+	".\res\toolbar.bmp"\
+	
 
-$(INTDIR)/PalTool.obj :  $(SOURCE)  $(DEP_PALTO) $(INTDIR) $(INTDIR)/stdafx.obj
+"$(INTDIR)\paltool.res" : $(SOURCE) $(DEP_RSC_PALTOOL) "$(INTDIR)"
+   $(RSC) $(RSC_PROJ) $(SOURCE)
+
 
 # End Source File
 ################################################################################
 # Begin Source File
 
-SOURCE=.\mainfrm.cpp
-DEP_MAINF=\
-	.\stdafx.h\
-	.\PalTool.h\
-	.\mainfrm.h\
-	\Charybds\MythOS95\inc\MYTHOS.HPP\
-	\Charybds\MythOS95\inc\DEBUG.H\
-	\Charybds\MythOS95\inc\PORTABLE.H\
-	\Charybds\MythOS95\inc\Ivory.hpp\
-	\Charybds\MythOS95\inc\CHRONOS.HPP\
-	\Charybds\MythOS95\inc\felix.hpp\
-	\Charybds\MythOS95\inc\XFILE.HPP\
-	\Charybds\MythOS95\inc\BOZO.HPP\
-	\Charybds\MythOS95\inc\Max.HPP\
-	\Charybds\MythOS95\inc\VANGOGH.HPP\
-	\Charybds\MythOS95\inc\GUTENBRG.HPP\
-	\Charybds\MythOS95\inc\ESCHER.HPP\
-	\Charybds\MythOS95\inc\MYTHOS.H\
-	\Charybds\MythOS95\inc\Ivory.h\
-	\Charybds\MythOS95\inc\Ivory.ipp\
-	\Charybds\MythOS95\inc\felix.ipp\
-	\Charybds\MythOS95\inc\XFDEFS.H\
-	\Charybds\MythOS95\inc\XFIO.H\
-	\Charybds\MythOS95\inc\XFBASE.HPP\
-	\Charybds\MythOS95\inc\XFINI.HPP\
-	\Charybds\MythOS95\inc\XFBITMAP.HPP\
-	\Charybds\MythOS95\inc\XFIFF.HPP\
-	\Charybds\MythOS95\inc\BOZO.H\
-	\Charybds\MythOS95\inc\BZWRAP.HPP\
-	\Charybds\MythOS95\inc\MaxEvt.HPP\
-	\Charybds\MythOS95\inc\MaxDevs.HPP\
-	\Charybds\MythOS95\inc\MaxESrc.HPP\
-	\Charybds\MythOS95\inc\VNGDEFS.H\
-	\Charybds\MythOS95\inc\VNGSTRCT.HPP\
-	\Charybds\MythOS95\inc\VNGINLIN.IPP\
-	\Charybds\MythOS95\inc\VNGVP.HPP\
-	\Charybds\MythOS95\inc\VNGVVP8.HPP\
-	\Charybds\MythOS95\inc\VNGVPDD8.HPP\
-	\Charybds\MythOS95\inc\GUTENBRG.H\
-	\Charybds\MythOS95\inc\ESDEFS.H\
-	\Charybds\MythOS95\inc\ESMATH.HPP\
-	\Charybds\MythOS95\inc\ESCONTXT.HPP\
-	\Charybds\MythOS95\inc\ESTXTURE.HPP\
-	\Charybds\MythOS95\inc\ESLIGHT.HPP\
-	\Charybds\MythOS95\inc\ESCAMERA.HPP\
-	\Charybds\MythOS95\inc\ESSYSTEM.HPP\
-	\Charybds\MythOS95\inc\ESDRAW.HPP\
-	\Charybds\MythOS95\inc\ESPARTIK.HPP\
-	\Charybds\MythOS95\inc\ESGEOM.HPP\
-	\Charybds\MythOS95\inc\ESTERRAN.HPP\
-	\Charybds\MythOS95\inc\ESSCENE.HPP\
-	\Charybds\MythOS95\inc\IVMem.h\
-	\Charybds\MythOS95\inc\BZSEMAP.H\
-	\Charybds\MythOS95\inc\VNGPAL.HPP\
-	\Charybds\MythOS95\inc\VNGBD.HPP\
-	\Charybds\MythOS95\inc\BZQUEUE.H\
-	\Charybds\MythOS95\inc\VNGCOLOR.HPP\
-	\Charybds\MythOS95\inc\BZTASK.H\
-	\Charybds\MythOS95\inc\BZARTN.H
+SOURCE=.\stdafx.cpp
+DEP_CPP_STDAF=\
+	"..\..\inc\bozo.h"\
+	"..\..\inc\bozo.hpp"\
+	"..\..\inc\chronos.hpp"\
+	"..\..\inc\escher.hpp"\
+	"..\..\inc\felix.hpp"\
+	"..\..\inc\felix.ipp"\
+	"..\..\inc\gutenbrg.hpp"\
+	"..\..\inc\ivory.h"\
+	"..\..\inc\ivory.hpp"\
+	"..\..\inc\max.hpp"\
+	"..\..\inc\maxvmap.hpp"\
+	"..\..\inc\mythos.hpp"\
+	"..\..\inc\portable.h"\
+	"..\..\inc\vangogh.hpp"\
+	"..\..\inc\vngvvp16.hpp"\
+	"..\..\inc\xfile.hpp"\
+	"..\..\inc\xfio.h"\
+	".\..\..\inc\BZARTN.H"\
+	".\..\..\inc\BZQUEUE.H"\
+	".\..\..\inc\BZSEMAP.H"\
+	".\..\..\inc\BZTASK.H"\
+	".\..\..\inc\BZWRAP.HPP"\
+	".\..\..\inc\DEBUG.H"\
+	".\..\..\inc\esbasic.hpp"\
+	".\..\..\inc\ESCAMERA.HPP"\
+	".\..\..\inc\ESCONTXT.HPP"\
+	".\..\..\inc\ESDEFS.H"\
+	".\..\..\inc\ESDRAW.HPP"\
+	".\..\..\inc\esexts.hpp"\
+	".\..\..\inc\ESGEOM.HPP"\
+	".\..\..\inc\ESLIGHT.HPP"\
+	".\..\..\inc\ESMATH.HPP"\
+	".\..\..\inc\esmisc.hpp"\
+	".\..\..\inc\ESPARTIK.HPP"\
+	".\..\..\inc\ESSCENE.HPP"\
+	".\..\..\inc\ESSYSTEM.HPP"\
+	".\..\..\inc\ESTERRAN.HPP"\
+	".\..\..\inc\ESTXTURE.HPP"\
+	".\..\..\inc\GUTENBRG.H"\
+	".\..\..\inc\IVMem.h"\
+	".\..\..\inc\Ivory.ipp"\
+	".\..\..\inc\MaxDevs.HPP"\
+	".\..\..\inc\MaxESrc.HPP"\
+	".\..\..\inc\MaxEvt.HPP"\
+	".\..\..\inc\MYTHOS.H"\
+	".\..\..\inc\VNGBD.HPP"\
+	".\..\..\inc\VNGCOLOR.HPP"\
+	".\..\..\inc\VNGDEFS.H"\
+	".\..\..\inc\VNGPAL.HPP"\
+	".\..\..\inc\VNGSTRCT.HPP"\
+	".\..\..\inc\VNGVP.HPP"\
+	".\..\..\inc\vngvpdb8.hpp"\
+	".\..\..\inc\VNGVPDD8.HPP"\
+	".\..\..\inc\VNGVVP8.HPP"\
+	".\..\..\inc\XFBASE.HPP"\
+	".\..\..\inc\XFBITMAP.HPP"\
+	".\..\..\inc\XFDEFS.H"\
+	".\..\..\inc\XFIFF.HPP"\
+	".\..\..\inc\XFINI.HPP"\
+	".\stdafx.h"\
+	
 
-$(INTDIR)/mainfrm.obj :  $(SOURCE)  $(DEP_MAINF) $(INTDIR) $(INTDIR)/stdafx.obj
+!IF  "$(CFG)" == "Paltool - Win32 Debug"
 
-# End Source File
-################################################################################
-# Begin Source File
+# ADD BASE CPP /Yc"stdafx.h"
+# ADD CPP /Yc"stdafx.h"
 
-SOURCE=.\paltodoc.cpp
-DEP_PALTOD=\
-	.\stdafx.h\
-	.\PalTool.h\
-	.\dialog.h\
-	.\PalTodoc.h\
-	\Charybds\MythOS95\inc\MYTHOS.HPP\
-	\Charybds\MythOS95\inc\DEBUG.H\
-	\Charybds\MythOS95\inc\PORTABLE.H\
-	\Charybds\MythOS95\inc\Ivory.hpp\
-	\Charybds\MythOS95\inc\CHRONOS.HPP\
-	\Charybds\MythOS95\inc\felix.hpp\
-	\Charybds\MythOS95\inc\XFILE.HPP\
-	\Charybds\MythOS95\inc\BOZO.HPP\
-	\Charybds\MythOS95\inc\Max.HPP\
-	\Charybds\MythOS95\inc\VANGOGH.HPP\
-	\Charybds\MythOS95\inc\GUTENBRG.HPP\
-	\Charybds\MythOS95\inc\ESCHER.HPP\
-	\Charybds\MythOS95\inc\MYTHOS.H\
-	\Charybds\MythOS95\inc\Ivory.h\
-	\Charybds\MythOS95\inc\Ivory.ipp\
-	\Charybds\MythOS95\inc\felix.ipp\
-	\Charybds\MythOS95\inc\XFDEFS.H\
-	\Charybds\MythOS95\inc\XFIO.H\
-	\Charybds\MythOS95\inc\XFBASE.HPP\
-	\Charybds\MythOS95\inc\XFINI.HPP\
-	\Charybds\MythOS95\inc\XFBITMAP.HPP\
-	\Charybds\MythOS95\inc\XFIFF.HPP\
-	\Charybds\MythOS95\inc\BOZO.H\
-	\Charybds\MythOS95\inc\BZWRAP.HPP\
-	\Charybds\MythOS95\inc\MaxEvt.HPP\
-	\Charybds\MythOS95\inc\MaxDevs.HPP\
-	\Charybds\MythOS95\inc\MaxESrc.HPP\
-	\Charybds\MythOS95\inc\VNGDEFS.H\
-	\Charybds\MythOS95\inc\VNGSTRCT.HPP\
-	\Charybds\MythOS95\inc\VNGINLIN.IPP\
-	\Charybds\MythOS95\inc\VNGVP.HPP\
-	\Charybds\MythOS95\inc\VNGVVP8.HPP\
-	\Charybds\MythOS95\inc\VNGVPDD8.HPP\
-	\Charybds\MythOS95\inc\GUTENBRG.H\
-	\Charybds\MythOS95\inc\ESDEFS.H\
-	\Charybds\MythOS95\inc\ESMATH.HPP\
-	\Charybds\MythOS95\inc\ESCONTXT.HPP\
-	\Charybds\MythOS95\inc\ESTXTURE.HPP\
-	\Charybds\MythOS95\inc\ESLIGHT.HPP\
-	\Charybds\MythOS95\inc\ESCAMERA.HPP\
-	\Charybds\MythOS95\inc\ESSYSTEM.HPP\
-	\Charybds\MythOS95\inc\ESDRAW.HPP\
-	\Charybds\MythOS95\inc\ESPARTIK.HPP\
-	\Charybds\MythOS95\inc\ESGEOM.HPP\
-	\Charybds\MythOS95\inc\ESTERRAN.HPP\
-	\Charybds\MythOS95\inc\ESSCENE.HPP\
-	\Charybds\MythOS95\inc\IVMem.h\
-	\Charybds\MythOS95\inc\BZSEMAP.H\
-	\Charybds\MythOS95\inc\VNGPAL.HPP\
-	\Charybds\MythOS95\inc\VNGBD.HPP\
-	\Charybds\MythOS95\inc\BZQUEUE.H\
-	\Charybds\MythOS95\inc\VNGCOLOR.HPP\
-	\Charybds\MythOS95\inc\BZTASK.H\
-	\Charybds\MythOS95\inc\BZARTN.H
+BuildCmds= \
+	$(CPP) /nologo /MDd /W3 /Gm /GX /Zi /Od /I "..\..\inc" /D "_DEBUG" /D "WIN32"\
+ /D "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /Fp"$(INTDIR)/Paltool.pch" /Yc"stdafx.h"\
+ /Fo"$(INTDIR)/" /Fd"$(INTDIR)/" /c $(SOURCE) \
+	
 
-$(INTDIR)/paltodoc.obj :  $(SOURCE)  $(DEP_PALTOD) $(INTDIR)\
- $(INTDIR)/stdafx.obj
+"$(INTDIR)\stdafx.obj" : $(SOURCE) $(DEP_CPP_STDAF) "$(INTDIR)"
+   $(BuildCmds)
+
+"$(INTDIR)\Paltool.pch" : $(SOURCE) $(DEP_CPP_STDAF) "$(INTDIR)"
+   $(BuildCmds)
+
+!ELSEIF  "$(CFG)" == "Paltool - Win32 Release"
+
+# ADD BASE CPP /Yc"stdafx.h"
+# ADD CPP /Yc"stdafx.h"
+
+BuildCmds= \
+	$(CPP) /nologo /MD /W3 /GX /O2 /I "..\..\inc" /D "NDEBUG" /D "WIN32" /D\
+ "_WINDOWS" /D "_AFXDLL" /D "_MBCS" /Fp"$(INTDIR)/Paltool.pch" /Yc"stdafx.h"\
+ /Fo"$(INTDIR)/" /c $(SOURCE) \
+	
+
+"$(INTDIR)\stdafx.obj" : $(SOURCE) $(DEP_CPP_STDAF) "$(INTDIR)"
+   $(BuildCmds)
+
+"$(INTDIR)\Paltool.pch" : $(SOURCE) $(DEP_CPP_STDAF) "$(INTDIR)"
+   $(BuildCmds)
+
+!ENDIF 
 
 # End Source File
-################################################################################
-# Begin Source File
-
-SOURCE=.\PalTovw.cpp
-DEP_PALTOV=\
-	.\stdafx.h\
-	.\PalTool.h\
-	.\PalTodoc.h\
-	.\PalTovw.h\
-	.\bezier.h\
-	\Charybds\MythOS95\inc\MYTHOS.HPP\
-	\Charybds\MythOS95\inc\DEBUG.H\
-	\Charybds\MythOS95\inc\PORTABLE.H\
-	\Charybds\MythOS95\inc\Ivory.hpp\
-	\Charybds\MythOS95\inc\CHRONOS.HPP\
-	\Charybds\MythOS95\inc\felix.hpp\
-	\Charybds\MythOS95\inc\XFILE.HPP\
-	\Charybds\MythOS95\inc\BOZO.HPP\
-	\Charybds\MythOS95\inc\Max.HPP\
-	\Charybds\MythOS95\inc\VANGOGH.HPP\
-	\Charybds\MythOS95\inc\GUTENBRG.HPP\
-	\Charybds\MythOS95\inc\ESCHER.HPP\
-	\Charybds\MythOS95\inc\MYTHOS.H\
-	\Charybds\MythOS95\inc\Ivory.h\
-	\Charybds\MythOS95\inc\Ivory.ipp\
-	\Charybds\MythOS95\inc\felix.ipp\
-	\Charybds\MythOS95\inc\XFDEFS.H\
-	\Charybds\MythOS95\inc\XFIO.H\
-	\Charybds\MythOS95\inc\XFBASE.HPP\
-	\Charybds\MythOS95\inc\XFINI.HPP\
-	\Charybds\MythOS95\inc\XFBITMAP.HPP\
-	\Charybds\MythOS95\inc\XFIFF.HPP\
-	\Charybds\MythOS95\inc\BOZO.H\
-	\Charybds\MythOS95\inc\BZWRAP.HPP\
-	\Charybds\MythOS95\inc\MaxEvt.HPP\
-	\Charybds\MythOS95\inc\MaxDevs.HPP\
-	\Charybds\MythOS95\inc\MaxESrc.HPP\
-	\Charybds\MythOS95\inc\VNGDEFS.H\
-	\Charybds\MythOS95\inc\VNGSTRCT.HPP\
-	\Charybds\MythOS95\inc\VNGINLIN.IPP\
-	\Charybds\MythOS95\inc\VNGVP.HPP\
-	\Charybds\MythOS95\inc\VNGVVP8.HPP\
-	\Charybds\MythOS95\inc\VNGVPDD8.HPP\
-	\Charybds\MythOS95\inc\GUTENBRG.H\
-	\Charybds\MythOS95\inc\ESDEFS.H\
-	\Charybds\MythOS95\inc\ESMATH.HPP\
-	\Charybds\MythOS95\inc\ESCONTXT.HPP\
-	\Charybds\MythOS95\inc\ESTXTURE.HPP\
-	\Charybds\MythOS95\inc\ESLIGHT.HPP\
-	\Charybds\MythOS95\inc\ESCAMERA.HPP\
-	\Charybds\MythOS95\inc\ESSYSTEM.HPP\
-	\Charybds\MythOS95\inc\ESDRAW.HPP\
-	\Charybds\MythOS95\inc\ESPARTIK.HPP\
-	\Charybds\MythOS95\inc\ESGEOM.HPP\
-	\Charybds\MythOS95\inc\ESTERRAN.HPP\
-	\Charybds\MythOS95\inc\ESSCENE.HPP\
-	\Charybds\MythOS95\inc\IVMem.h\
-	\Charybds\MythOS95\inc\BZSEMAP.H\
-	\Charybds\MythOS95\inc\VNGPAL.HPP\
-	\Charybds\MythOS95\inc\VNGBD.HPP\
-	\Charybds\MythOS95\inc\BZQUEUE.H\
-	\Charybds\MythOS95\inc\VNGCOLOR.HPP\
-	\Charybds\MythOS95\inc\BZTASK.H\
-	\Charybds\MythOS95\inc\BZARTN.H
-
-$(INTDIR)/PalTovw.obj :  $(SOURCE)  $(DEP_PALTOV) $(INTDIR)\
- $(INTDIR)/stdafx.obj
-
-# End Source File
-################################################################################
-# Begin Source File
-
-SOURCE=.\PalTool.rc
-DEP_PALTOO=\
-	.\res\PalTool.ico\
-	.\res\PalTodoc.ico\
-	.\res\toolbar.bmp\
-	.\res\PalTool.rc2
-
-$(INTDIR)/PalTool.res :  $(SOURCE)  $(DEP_PALTOO) $(INTDIR)
-   $(RSC) $(RSC_PROJ)  $(SOURCE) 
-
-# End Source File
-################################################################################
-# Begin Source File
-
-SOURCE=.\readme.txt
-# End Source File
-################################################################################
-# Begin Source File
-
-SOURCE=.\bezier.cpp
-DEP_BEZIE=\
-	.\stdafx.h\
-	.\bezier.h\
-	\Charybds\MythOS95\inc\MYTHOS.HPP\
-	\Charybds\MythOS95\inc\DEBUG.H\
-	\Charybds\MythOS95\inc\PORTABLE.H\
-	\Charybds\MythOS95\inc\Ivory.hpp\
-	\Charybds\MythOS95\inc\CHRONOS.HPP\
-	\Charybds\MythOS95\inc\felix.hpp\
-	\Charybds\MythOS95\inc\XFILE.HPP\
-	\Charybds\MythOS95\inc\BOZO.HPP\
-	\Charybds\MythOS95\inc\Max.HPP\
-	\Charybds\MythOS95\inc\VANGOGH.HPP\
-	\Charybds\MythOS95\inc\GUTENBRG.HPP\
-	\Charybds\MythOS95\inc\ESCHER.HPP\
-	\Charybds\MythOS95\inc\MYTHOS.H\
-	\Charybds\MythOS95\inc\Ivory.h\
-	\Charybds\MythOS95\inc\Ivory.ipp\
-	\Charybds\MythOS95\inc\felix.ipp\
-	\Charybds\MythOS95\inc\XFDEFS.H\
-	\Charybds\MythOS95\inc\XFIO.H\
-	\Charybds\MythOS95\inc\XFBASE.HPP\
-	\Charybds\MythOS95\inc\XFINI.HPP\
-	\Charybds\MythOS95\inc\XFBITMAP.HPP\
-	\Charybds\MythOS95\inc\XFIFF.HPP\
-	\Charybds\MythOS95\inc\BOZO.H\
-	\Charybds\MythOS95\inc\BZWRAP.HPP\
-	\Charybds\MythOS95\inc\MaxEvt.HPP\
-	\Charybds\MythOS95\inc\MaxDevs.HPP\
-	\Charybds\MythOS95\inc\MaxESrc.HPP\
-	\Charybds\MythOS95\inc\VNGDEFS.H\
-	\Charybds\MythOS95\inc\VNGSTRCT.HPP\
-	\Charybds\MythOS95\inc\VNGINLIN.IPP\
-	\Charybds\MythOS95\inc\VNGVP.HPP\
-	\Charybds\MythOS95\inc\VNGVVP8.HPP\
-	\Charybds\MythOS95\inc\VNGVPDD8.HPP\
-	\Charybds\MythOS95\inc\GUTENBRG.H\
-	\Charybds\MythOS95\inc\ESDEFS.H\
-	\Charybds\MythOS95\inc\ESMATH.HPP\
-	\Charybds\MythOS95\inc\ESCONTXT.HPP\
-	\Charybds\MythOS95\inc\ESTXTURE.HPP\
-	\Charybds\MythOS95\inc\ESLIGHT.HPP\
-	\Charybds\MythOS95\inc\ESCAMERA.HPP\
-	\Charybds\MythOS95\inc\ESSYSTEM.HPP\
-	\Charybds\MythOS95\inc\ESDRAW.HPP\
-	\Charybds\MythOS95\inc\ESPARTIK.HPP\
-	\Charybds\MythOS95\inc\ESGEOM.HPP\
-	\Charybds\MythOS95\inc\ESTERRAN.HPP\
-	\Charybds\MythOS95\inc\ESSCENE.HPP\
-	\Charybds\MythOS95\inc\IVMem.h\
-	\Charybds\MythOS95\inc\BZSEMAP.H\
-	\Charybds\MythOS95\inc\VNGPAL.HPP\
-	\Charybds\MythOS95\inc\VNGBD.HPP\
-	\Charybds\MythOS95\inc\BZQUEUE.H\
-	\Charybds\MythOS95\inc\VNGCOLOR.HPP\
-	\Charybds\MythOS95\inc\BZTASK.H\
-	\Charybds\MythOS95\inc\BZARTN.H
-
-$(INTDIR)/bezier.obj :  $(SOURCE)  $(DEP_BEZIE) $(INTDIR) $(INTDIR)/stdafx.obj
-
-# End Source File
-################################################################################
-# Begin Source File
-
-SOURCE=.\dialog.cpp
-DEP_DIALO=\
-	.\stdafx.h\
-	.\PalTool.h\
-	.\dialog.h\
-	\Charybds\MythOS95\inc\MYTHOS.HPP\
-	\Charybds\MythOS95\inc\DEBUG.H\
-	\Charybds\MythOS95\inc\PORTABLE.H\
-	\Charybds\MythOS95\inc\Ivory.hpp\
-	\Charybds\MythOS95\inc\CHRONOS.HPP\
-	\Charybds\MythOS95\inc\felix.hpp\
-	\Charybds\MythOS95\inc\XFILE.HPP\
-	\Charybds\MythOS95\inc\BOZO.HPP\
-	\Charybds\MythOS95\inc\Max.HPP\
-	\Charybds\MythOS95\inc\VANGOGH.HPP\
-	\Charybds\MythOS95\inc\GUTENBRG.HPP\
-	\Charybds\MythOS95\inc\ESCHER.HPP\
-	\Charybds\MythOS95\inc\MYTHOS.H\
-	\Charybds\MythOS95\inc\Ivory.h\
-	\Charybds\MythOS95\inc\Ivory.ipp\
-	\Charybds\MythOS95\inc\felix.ipp\
-	\Charybds\MythOS95\inc\XFDEFS.H\
-	\Charybds\MythOS95\inc\XFIO.H\
-	\Charybds\MythOS95\inc\XFBASE.HPP\
-	\Charybds\MythOS95\inc\XFINI.HPP\
-	\Charybds\MythOS95\inc\XFBITMAP.HPP\
-	\Charybds\MythOS95\inc\XFIFF.HPP\
-	\Charybds\MythOS95\inc\BOZO.H\
-	\Charybds\MythOS95\inc\BZWRAP.HPP\
-	\Charybds\MythOS95\inc\MaxEvt.HPP\
-	\Charybds\MythOS95\inc\MaxDevs.HPP\
-	\Charybds\MythOS95\inc\MaxESrc.HPP\
-	\Charybds\MythOS95\inc\VNGDEFS.H\
-	\Charybds\MythOS95\inc\VNGSTRCT.HPP\
-	\Charybds\MythOS95\inc\VNGINLIN.IPP\
-	\Charybds\MythOS95\inc\VNGVP.HPP\
-	\Charybds\MythOS95\inc\VNGVVP8.HPP\
-	\Charybds\MythOS95\inc\VNGVPDD8.HPP\
-	\Charybds\MythOS95\inc\GUTENBRG.H\
-	\Charybds\MythOS95\inc\ESDEFS.H\
-	\Charybds\MythOS95\inc\ESMATH.HPP\
-	\Charybds\MythOS95\inc\ESCONTXT.HPP\
-	\Charybds\MythOS95\inc\ESTXTURE.HPP\
-	\Charybds\MythOS95\inc\ESLIGHT.HPP\
-	\Charybds\MythOS95\inc\ESCAMERA.HPP\
-	\Charybds\MythOS95\inc\ESSYSTEM.HPP\
-	\Charybds\MythOS95\inc\ESDRAW.HPP\
-	\Charybds\MythOS95\inc\ESPARTIK.HPP\
-	\Charybds\MythOS95\inc\ESGEOM.HPP\
-	\Charybds\MythOS95\inc\ESTERRAN.HPP\
-	\Charybds\MythOS95\inc\ESSCENE.HPP\
-	\Charybds\MythOS95\inc\IVMem.h\
-	\Charybds\MythOS95\inc\BZSEMAP.H\
-	\Charybds\MythOS95\inc\VNGPAL.HPP\
-	\Charybds\MythOS95\inc\VNGBD.HPP\
-	\Charybds\MythOS95\inc\BZQUEUE.H\
-	\Charybds\MythOS95\inc\VNGCOLOR.HPP\
-	\Charybds\MythOS95\inc\BZTASK.H\
-	\Charybds\MythOS95\inc\BZARTN.H
-
-$(INTDIR)/dialog.obj :  $(SOURCE)  $(DEP_DIALO) $(INTDIR) $(INTDIR)/stdafx.obj
-
-# End Source File
-################################################################################
-# Begin Source File
-
-SOURCE=\Charybds\MythOS95\lib\IvoryMFC.lib
-# End Source File
-################################################################################
-# Begin Source File
-
-SOURCE=\Charybds\MythOS95\lib\VanGogh.lib
-# End Source File
-################################################################################
-# Begin Source File
-
-SOURCE=\Charybds\MythOS95\lib\gutenbrg.lib
-# End Source File
-################################################################################
-# Begin Source File
-
-SOURCE=\Charybds\MythOS95\lib\mythos.lib
-# End Source File
-################################################################################
-# Begin Source File
-
-SOURCE=\Charybds\MythOS95\lib\escher.lib
-# End Source File
-################################################################################
-# Begin Source File
-
-SOURCE=\Charybds\MythOS95\lib\felix.lib
-# End Source File
-################################################################################
-# Begin Source File
-
-SOURCE=\Charybds\MythOS95\lib\xfile.lib
-# End Source File
-################################################################################
-# Begin Source File
-
-SOURCE=\Charybds\MythOS95\lib\chronos.lib
-# End Source File
-################################################################################
-# Begin Source File
-
-SOURCE=\Charybds\MythOS95\lib\bozo.lib
-# End Source File
-# End Group
+# End Target
 # End Project
 ################################################################################

@@ -24,14 +24,16 @@
                               _Library Status_
 
   Notes by: Dan Higdon
-  Updated: Nov 6, 1995
+  Updated:  May 12, 1996
 
   Changes for this release --------------------------------------------------
 
-    o Release Version 1.0
+	- Added CreateEvent() to allow DirectPlay to more efficiently tell
+	  us when a new message is ready.  The receive() member uses this
+	  event, if present, instead of waiting for DirectPlay's Receive()
+	  to timeout.
 
-    Move network from Max into this seperate library.
-
+	- Discovered that DPSEND_GUARANTEE does not currently work.
+	  The application will have to implement resending for now.
 
 *** END OF FILE ***
-

@@ -1,4 +1,4 @@
-//Microsoft Visual C++ generated resource script.
+//Microsoft Developer Studio generated resource script.
 //
 #include "resource.h"
 
@@ -12,6 +12,14 @@
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
 
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
 
 #ifdef APSTUDIO_INVOKED
 /////////////////////////////////////////////////////////////////////////////
@@ -38,11 +46,10 @@ BEGIN
     "#define _AFX_NO_OLE_RESOURCES\r\n"
     "#define _AFX_NO_TRACKER_RESOURCES\r\n"
     "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
-    "#include ""afxres.rc""  \011// Standard components\r\n"
+    "#include ""afxres.rc""  \t// Standard components\r\n"
     "\0"
 END
 
-/////////////////////////////////////////////////////////////////////////////
 #endif    // APSTUDIO_INVOKED
 
 
@@ -51,7 +58,10 @@ END
 // Icon
 //
 
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
 IDR_MAINFRAME           ICON    DISCARDABLE     "res\\eshtedit.ico"
+IDR_ESCHERTYPE          ICON    DISCARDABLE     "res\\eshtdoc.ico"
 
 /////////////////////////////////////////////////////////////////////////////
 //
@@ -80,11 +90,24 @@ BEGIN
         MENUITEM SEPARATOR
         MENUITEM "E&xit\tAlt+X",                ID_APP_EXIT
     END
+    POPUP "&Edit"
+    BEGIN
+        MENUITEM "&Undo\tCtrl+Z",               ID_EDIT_UNDO
+        MENUITEM SEPARATOR
+        MENUITEM "Flip &Horizontal\tShift+X",   ID_EDIT_FLIPH
+        MENUITEM "Flip &Vertical\tShift+Y",     ID_EDIT_FLIPV
+        MENUITEM "Rotate &90°\tShift+Z",        ID_EDIT_ROT90
+        MENUITEM "Rotate -9&0°\tShift+A",       ID_EDIT_ROTN90
+        MENUITEM SEPARATOR
+        MENUITEM "Assign by H&eight...\tShift+H", ID_EDIT_ASSIGN_HEIGHT
+        MENUITEM "Assign by &Random Roll...\tShift+R", ID_EDIT_ASSIGN_ROLL
+        MENUITEM "Assign by &Angle...\tShift+G", ID_EDIT_ASSIGN_ANGLE
+    END
     POPUP "&View"
     BEGIN
         MENUITEM "&Toolbar",                    ID_VIEW_TOOLBAR
         MENUITEM "&Status Bar",                 ID_VIEW_STATUS_BAR
-        MENUITEM "R&ender View",                ID_VIEW_RENDER
+        MENUITEM "R&ender View\tR",             ID_VIEW_RENDER
         MENUITEM SEPARATOR
         POPUP "Z&oom"
         BEGIN
@@ -94,7 +117,15 @@ BEGIN
             MENUITEM "E&xtra Large Size\t4",        ID_VIEW_ZOOM_XLARGE
             MENUITEM "M&ega Size\t5",               ID_VIEW_ZOOM_MEGA
         END
-        MENUITEM "Re&fresh",                    ID_VIEW_REFRESH
+        POPUP "Sho&w"
+        BEGIN
+            MENUITEM "Surface &Colors\tShift+1",    ID_VIEW_SHOW_COLORS
+            MENUITEM "&Shaded Colors\tShift+2",     ID_VIEW_SHOW_SHADED
+            MENUITEM "&Height-based Color\tShift+3", ID_VIEW_SHOW_HGT
+            MENUITEM "&Textures Only\tShift+4",     ID_VIEW_SHOW_TXTONLY
+            MENUITEM "&Application Bits\tShift+5",  ID_VIEW_SHOW_APP
+        END
+        MENUITEM "Re&fresh\t~",                 ID_VIEW_REFRESH
         MENUITEM SEPARATOR
         POPUP "Re&nder"
         BEGIN
@@ -110,15 +141,18 @@ BEGIN
             MENUITEM "Perspecti&ve\tF10",           ID_VIEW_RND_PERSPECTIVE
         END
         MENUITEM SEPARATOR
+        MENUITEM "&Hover\tH",                   ID_VIEW_HOVER
         MENUITEM "&Rotate X/Y\tQ",              ID_VIEW_ROTXY
         MENUITEM "&Move X/Y\tA",                ID_VIEW_MOVEXY
         MENUITEM "Rotate &Z/Move Z\tZ",         ID_VIEW_ROTMOVEZ
         MENUITEM SEPARATOR
-        MENUITEM "Properties...\tCtrl+Enter",   ID_VIEW_PROP
+        MENUITEM "&Properties...\tCtrl+Enter",  ID_VIEW_PROP
     END
     POPUP "&Terrain"
     BEGIN
         MENUITEM "&Import...\tShift+T",         ID_TERR_IMPORT
+        MENUITEM SEPARATOR
+        MENUITEM "&Set Base Elevation...",      ID_TERR_SETBASE
         MENUITEM SEPARATOR
         MENUITEM "&Properties...\tAlt+Enter",   ID_TERR_PROP
     END
@@ -129,6 +163,17 @@ BEGIN
         MENUITEM "De&fine Texture...\tKeypad +", ID_SURF_DEFINETXT
         MENUITEM "&Edit Texture...\tKeypad /",  ID_SURF_EDITTXT
         MENUITEM "&Delete Texture\tKeypad -",   ID_SURF_DELETETXT
+        MENUITEM "Remove Unused Definitions",   ID_SURF_REMTXT
+        MENUITEM SEPARATOR
+        MENUITEM "&Load Textures...",           ID_SURF_LOADTXT
+        MENUITEM "&Save Textures...",           ID_SURF_SAVETXT
+        MENUITEM SEPARATOR
+        MENUITEM "Define &Color...\tShift+Keypad +", ID_SURF_DEFCLR
+        MENUITEM "Edi&t Color...\tShift+Keypad /", ID_SURF_EDITCLR
+        MENUITEM "Delete Colo&r\tShift+Keypad -", ID_SURF_DELETECLR
+        MENUITEM SEPARATOR
+        MENUITEM "L&oad Colors...",             ID_SURF_LOADCLR
+        MENUITEM "S&ave Colors...",             ID_SURF_SAVECLR
         MENUITEM SEPARATOR
         MENUITEM "&Palette...\tShift+P",        ID_SURF_PALETTE
     END
@@ -136,9 +181,13 @@ BEGIN
     BEGIN
         MENUITEM "&Adjust X/Y\tE",              ID_LGT_ADJUSTXY
         MENUITEM "Adjust &Intensity\tI",        ID_LGT_ABRIGHT
+        MENUITEM SEPARATOR
+        MENUITEM "&Properties...\tShift+Enter", ID_LGT_PROP
     END
     POPUP "&Help"
     BEGIN
+        MENUITEM "&Help...\tShift+F1",          ID_APP_HELP
+        MENUITEM SEPARATOR
         MENUITEM "&About Terrain Editor...\t?", ID_APP_ABOUT
     END
 END
@@ -152,29 +201,43 @@ END
 IDR_MAINFRAME ACCELERATORS PRELOAD MOVEABLE PURE 
 BEGIN
     "1",            ID_VIEW_ZOOM_NORM,      VIRTKEY, NOINVERT
+    "1",            ID_VIEW_SHOW_COLORS,    VIRTKEY, SHIFT, NOINVERT
     "2",            ID_VIEW_ZOOM_MED,       VIRTKEY, NOINVERT
+    "2",            ID_VIEW_SHOW_SHADED,    VIRTKEY, SHIFT, NOINVERT
     "3",            ID_VIEW_ZOOM_LARGE,     VIRTKEY, NOINVERT
+    "3",            ID_VIEW_SHOW_HGT,       VIRTKEY, SHIFT, NOINVERT
     "4",            ID_VIEW_ZOOM_XLARGE,    VIRTKEY, NOINVERT
+    "4",            ID_VIEW_SHOW_TXTONLY,   VIRTKEY, SHIFT, NOINVERT
     "5",            ID_VIEW_ZOOM_MEGA,      VIRTKEY, NOINVERT
+    "5",            ID_VIEW_SHOW_APP,       VIRTKEY, SHIFT, NOINVERT
     "?",            ID_APP_ABOUT,           ASCII,  NOINVERT
     "A",            ID_VIEW_MOVEXY,         VIRTKEY, NOINVERT
+    "A",            ID_EDIT_ROTN90,         VIRTKEY, SHIFT, NOINVERT
     "C",            ID_EDIT_COPY,           VIRTKEY, CONTROL, NOINVERT
     "D",            ID_VIEW_RND_DOTS,       VIRTKEY, NOINVERT
     "E",            ID_LGT_ADJUSTXY,        VIRTKEY, NOINVERT
     "E",            ID_FILE_EXPORT,         VIRTKEY, SHIFT, NOINVERT
+    "G",            ID_EDIT_ASSIGN_ANGLE,   VIRTKEY, SHIFT, NOINVERT
+    "H",            ID_VIEW_HOVER,          VIRTKEY, NOINVERT
+    "H",            ID_EDIT_ASSIGN_HEIGHT,  VIRTKEY, SHIFT, NOINVERT
     "I",            ID_LGT_ABRIGHT,         VIRTKEY, NOINVERT
     "N",            ID_FILE_NEW,            VIRTKEY, CONTROL, NOINVERT
     "O",            ID_FILE_OPEN,           VIRTKEY, CONTROL, NOINVERT
     "P",            ID_SURF_PALETTE,        VIRTKEY, SHIFT, NOINVERT
     "Q",            ID_VIEW_ROTXY,          VIRTKEY, NOINVERT
+    "R",            ID_VIEW_RENDER,         VIRTKEY, NOINVERT
+    "R",            ID_EDIT_ASSIGN_ROLL,    VIRTKEY, SHIFT, NOINVERT
     "S",            ID_FILE_SAVE,           VIRTKEY, CONTROL, NOINVERT
     "S",            ID_SURF_IMPORT,         VIRTKEY, SHIFT, NOINVERT
     "T",            ID_TERR_IMPORT,         VIRTKEY, SHIFT, NOINVERT
     "V",            ID_EDIT_PASTE,          VIRTKEY, CONTROL, NOINVERT
     VK_ADD,         ID_SURF_DEFINETXT,      VIRTKEY, NOINVERT
+    VK_ADD,         ID_SURF_DEFCLR,         VIRTKEY, SHIFT, NOINVERT
     VK_BACK,        ID_EDIT_UNDO,           VIRTKEY, ALT, NOINVERT
     VK_DELETE,      ID_EDIT_CUT,            VIRTKEY, SHIFT, NOINVERT
     VK_DIVIDE,      ID_SURF_EDITTXT,        VIRTKEY, NOINVERT
+    VK_DIVIDE,      ID_SURF_EDITCLR,        VIRTKEY, SHIFT, NOINVERT
+    VK_F1,          ID_APP_HELP,            VIRTKEY, SHIFT, NOINVERT
     VK_F10,         ID_VIEW_RND_PERSPECTIVE, VIRTKEY, NOINVERT
     VK_F12,         ID_FILE_SAVE_AS,        VIRTKEY, NOINVERT
     VK_F3,          ID_VIEW_RND_BACKFACE,   VIRTKEY, NOINVERT
@@ -188,11 +251,17 @@ BEGIN
     VK_INSERT,      ID_EDIT_PASTE,          VIRTKEY, SHIFT, NOINVERT
     VK_RETURN,      ID_VIEW_PROP,           VIRTKEY, CONTROL, NOINVERT
     VK_RETURN,      ID_TERR_PROP,           VIRTKEY, ALT, NOINVERT
+    VK_RETURN,      ID_LGT_PROP,            VIRTKEY, SHIFT, NOINVERT
     VK_SUBTRACT,    ID_SURF_DELETETXT,      VIRTKEY, NOINVERT
+    VK_SUBTRACT,    ID_SURF_DELETECLR,      VIRTKEY, SHIFT, NOINVERT
     "X",            ID_EDIT_CUT,            VIRTKEY, CONTROL, NOINVERT
     "X",            ID_APP_EXIT,            VIRTKEY, ALT, NOINVERT
+    "X",            ID_EDIT_FLIPH,          VIRTKEY, SHIFT, NOINVERT
+    "Y",            ID_EDIT_FLIPV,          VIRTKEY, SHIFT, NOINVERT
     "Z",            ID_VIEW_ROTMOVEZ,       VIRTKEY, NOINVERT
     "Z",            ID_EDIT_UNDO,           VIRTKEY, CONTROL, NOINVERT
+    "Z",            ID_EDIT_ROT90,          VIRTKEY, SHIFT, NOINVERT
+    "`",            ID_VIEW_REFRESH,        ASCII,  NOINVERT
 END
 
 
@@ -206,13 +275,13 @@ STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
 CAPTION "About Terrain Editor"
 FONT 8, "MS Sans Serif"
 BEGIN
-    ICON            IDR_MAINFRAME,IDC_STATIC,11,17,19,20
+    ICON            IDR_MAINFRAME,IDC_STATIC,11,17,18,20
     CONTROL         "Escher Terrain Editor",IDC_STATIC,"Static",SS_SIMPLE | 
                     WS_GROUP,55,30,119,8
-    CONTROL         "Copyright \251 1995 by Charybdis Enterprises, Inc.",
+    CONTROL         "Copyright © 1995, 1996 by Charybdis Enterprises, Inc.",
                     IDC_STATIC,"Static",SS_SIMPLE | WS_GROUP,55,60,181,8
     DEFPUSHBUTTON   "OK",IDOK,219,11,32,14,WS_GROUP
-    CONTROL         "Version X.X\tMon DD YYYY",IDC_ABOUT_VERSION,"Static",
+    CONTROL         "Version X.X.X\tMon DD YYYY",IDC_ABOUT_VERSION,"Static",
                     SS_SIMPLE | WS_GROUP,55,45,111,8
     CTEXT           "Escher is a component of the MythOS collection",
                     IDC_STATIC,50,100,185,11
@@ -220,53 +289,49 @@ BEGIN
                     IDC_STATIC,55,115,175,14
 END
 
-IDD_TERRPROPA DIALOG DISCARDABLE  0, 0, 270, 128
+IDD_TERRPROP_GEN DIALOG DISCARDABLE  0, 0, 272, 130
 STYLE WS_CHILD | WS_VISIBLE | WS_DISABLED | WS_CAPTION
 CAPTION "General"
 FONT 8, "MS Sans Serif"
 BEGIN
-    RTEXT           "Name",IDC_STATIC,50,10,44,8
+    RTEXT           "Name",IDC_STATIC,50,12,44,8
     EDITTEXT        IDC_TPROP_NAME,100,10,82,12,ES_AUTOHSCROLL
-    RTEXT           "Width",IDC_STATIC,20,52,29,8
-    EDITTEXT        IDC_TPROP_WIDTH,53,50,32,12,ES_AUTOHSCROLL
-    RTEXT           "Depth",IDC_STATIC,104,52,29,8
-    EDITTEXT        IDC_TPROP_DEPTH,137,50,32,12,ES_AUTOHSCROLL
-    RTEXT           "Surface Ratio",IDC_STATIC,179,52,44,8
-    COMBOBOX        IDC_TPROP_SURFRATIO,230,50,32,35,CBS_DROPDOWNLIST | 
+    RTEXT           "Width",IDC_STATIC,15,37,29,8
+    EDITTEXT        IDC_TPROP_WIDTH,49,35,32,12,ES_AUTOHSCROLL
+    RTEXT           "Depth",IDC_STATIC,99,37,29,8
+    EDITTEXT        IDC_TPROP_DEPTH,133,35,32,12,ES_AUTOHSCROLL
+    RTEXT           "Surface Ratio",IDC_STATIC,175,37,44,8
+    COMBOBOX        IDC_TPROP_SURFRATIO,225,35,32,35,CBS_DROPDOWNLIST | 
                     WS_VSCROLL | WS_TABSTOP
-    RTEXT           "Width Scale",IDC_STATIC,5,92,44,8
-    EDITTEXT        IDC_TPROP_WSCALE,53,90,32,12,ES_AUTOHSCROLL
-    RTEXT           "Depth Scale",IDC_STATIC,90,93,44,8
-    EDITTEXT        IDC_TPROP_DSCALE,138,90,32,12,ES_AUTOHSCROLL
-    RTEXT           "Height Scale",IDC_STATIC,180,92,44,8
-    EDITTEXT        IDC_TPROP_HSCALE,228,90,32,12,ES_AUTOHSCROLL
+    RTEXT           "Width/Depth Scale",IDC_STATIC,35,67,62,8
+    EDITTEXT        IDC_TPROP_SCALE,103,65,32,12,ES_AUTOHSCROLL
+    GROUPBOX        "Origin",IDC_STATIC,10,80,250,45
+    RTEXT           "X",IDC_STATIC,30,91,10,10
+    EDITTEXT        IDC_TPROP_ORGX,50,90,50,12,ES_AUTOHSCROLL
+    LTEXT           "Y",IDC_STATIC,110,91,8,10
+    EDITTEXT        IDC_TPROP_ORGY,120,90,50,12,ES_AUTOHSCROLL
+    LTEXT           "Z",IDC_STATIC,180,91,8,10
+    EDITTEXT        IDC_TPROP_ORGZ,190,90,50,12,ES_AUTOHSCROLL
+    CONTROL         "Automatic centering in XZ plane",IDC_TPROP_AUTOORG,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,75,110,130,10
 END
 
-IDD_TERRPROPB DIALOG DISCARDABLE  0, 0, 268, 126
+IDD_TERRPROP_MISC DIALOG DISCARDABLE  0, 0, 272, 130
 STYLE WS_CHILD | WS_VISIBLE | WS_DISABLED | WS_CAPTION
 CAPTION "Misc"
 FONT 8, "MS Sans Serif"
 BEGIN
-    RTEXT           "Description",IDC_STATIC,10,25,44,8
+    RTEXT           "Description",IDC_STATIC,10,27,44,8
     EDITTEXT        IDC_TPROP_DESC,60,25,192,12,ES_AUTOHSCROLL
-    RTEXT           "Author",IDC_STATIC,10,50,44,8
+    RTEXT           "Author",IDC_STATIC,10,52,44,8
     EDITTEXT        IDC_TPROP_AUTH,60,50,192,12,ES_AUTOHSCROLL
-    RTEXT           "Copyright",IDC_STATIC,10,75,44,8
+    RTEXT           "Copyright",IDC_STATIC,10,77,44,8
     EDITTEXT        IDC_TPROP_COPY,60,75,192,12,ES_AUTOHSCROLL
 END
 
-IDD_COMPNRML DIALOG DISCARDABLE  0, 0, 188, 29
+IDD_PROGRESS DIALOG DISCARDABLE  0, 0, 188, 31
 STYLE WS_POPUP | WS_CAPTION
-CAPTION "Computing Normals"
-FONT 8, "MS Sans Serif"
-BEGIN
-    CONTROL         "Generic1",IDC_CNRML_PROG,"msctls_progress32",WS_BORDER,
-                    15,5,160,15
-END
-
-IDD_COMPSCLRS DIALOG DISCARDABLE  0, 0, 188, 31
-STYLE WS_POPUP | WS_CAPTION
-CAPTION "Computing surface colors"
+CAPTION "Please Wait"
 FONT 8, "MS Sans Serif"
 BEGIN
     CONTROL         "Generic1",IDC_CSURF_PROG,"msctls_progress32",WS_BORDER,
@@ -278,7 +343,9 @@ STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
 CAPTION "Export Status"
 FONT 8, "MS Sans Serif"
 BEGIN
-    DEFPUSHBUTTON   "OK",IDOK,91,126,50,14
+    CTEXT           "Export process complete",IDC_STATIC,10,5,210,10
+    CTEXT           "The following data chunks have been output:",IDC_STATIC,
+                    10,20,210,10
     LTEXT           "Header information",IDC_EST_HDR,25,40,190,10,
                     WS_DISABLED
     LTEXT           "Height field terrain data",IDC_EST_HGTS,25,57,190,10,
@@ -287,100 +354,643 @@ BEGIN
                     WS_DISABLED
     LTEXT           "Surface normals",IDC_EST_NRML,25,91,190,10,WS_DISABLED
     LTEXT           "Texture bitmaps",IDC_EST_TXTS,25,108,190,10,WS_DISABLED
-    CTEXT           "Export process complete",IDC_STATIC,10,5,210,10
-    CTEXT           "The following data chunks have been output:",IDC_STATIC,
-                    10,20,210,10
+    DEFPUSHBUTTON   "OK",IDOK,91,126,50,14
 END
 
-IDD_SURFPROP DIALOG DISCARDABLE  0, 0, 287, 126
-STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
-CAPTION "Surface Information Properities"
+IDD_SURFPROP_GEN DIALOG DISCARDABLE  0, 0, 272, 130
+STYLE WS_CHILD | WS_VISIBLE | WS_CAPTION
+CAPTION "General"
 FONT 8, "MS Sans Serif"
 BEGIN
-    RTEXT           "Surface Grid Location:",IDC_STATIC,60,10,75,10
-    EDITTEXT        IDC_SPROP_XLOC,140,10,25,12,ES_AUTOHSCROLL | WS_DISABLED
-    LTEXT           "by",IDC_STATIC,170,10,10,10
-    EDITTEXT        IDC_SPROP_DLOC,185,10,25,12,ES_AUTOHSCROLL | WS_DISABLED
-    CONTROL         "Control bit 1",IDC_SPROP_CBIT1,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,25,35,55,10
-    CONTROL         "Control bit 2",IDC_SPROP_CBIT2,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,25,50,55,10
-    CONTROL         "Index is texture",IDC_SPROP_CBIT3,"Button",
-                    BS_AUTOCHECKBOX | WS_DISABLED | WS_TABSTOP,25,65,60,10
+    RTEXT           "Surface Grid Location:",IDC_STATIC,5,6,75,10
+    EDITTEXT        IDC_SPROP_XLOC,85,5,25,12,ES_AUTOHSCROLL | ES_READONLY | 
+                    NOT WS_TABSTOP
+    LTEXT           "by",IDC_STATIC,115,6,10,10
+    EDITTEXT        IDC_SPROP_DLOC,131,5,25,12,ES_AUTOHSCROLL | ES_READONLY | 
+                    NOT WS_TABSTOP
+    PUSHBUTTON      "&Color...",IDC_SPROP_COLR,210,5,50,15
+    CONTROL         "Index is texture",IDC_SPROP_INDISTXT,"Button",
+                    BS_AUTOCHECKBOX | WS_DISABLED | WS_TABSTOP,25,35,60,10
+    CONTROL         "Hidden",IDC_SPROP_HIDDEN,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,25,50,60,10
     CONTROL         "Control bit 4",IDC_SPROP_CBIT4,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,25,80,55,10
-    RTEXT           "Water Bits:",IDC_STATIC,101,35,45,10
-    COMBOBOX        IDC_SPROP_WATER,151,35,35,35,CBS_DROPDOWNLIST | 
-                    WS_VSCROLL | WS_TABSTOP
-    RTEXT           "Fire Bits:",IDC_STATIC,101,55,45,10
-    COMBOBOX        IDC_SPROP_FIRE,151,55,35,35,CBS_DROPDOWNLIST | 
-                    WS_VSCROLL | WS_TABSTOP
-    RTEXT           "Smoke Bits:",IDC_STATIC,101,75,45,10
-    COMBOBOX        IDC_SPROP_SMOKE,151,75,35,35,CBS_DROPDOWNLIST | 
-                    WS_VSCROLL | WS_TABSTOP
-    CTEXT           "Texture",IDC_STATIC,200,40,80,8
-    COMBOBOX        IDC_SPROP_TXT,200,50,80,40,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_DISABLED | WS_TABSTOP,25,65,60,10
+    CONTROL         "Control bit 11",IDC_SPROP_CBIT11,"Button",
+                    BS_AUTOCHECKBOX | WS_DISABLED | WS_TABSTOP,25,80,60,10
+    CONTROL         "Control bit 12",IDC_SPROP_CBIT12,"Button",
+                    BS_AUTOCHECKBOX | WS_DISABLED | WS_TABSTOP,25,95,60,10
+    GROUPBOX        "Texture",IDC_STATIC,105,25,160,100
+    CONTROL         "Flip U",IDC_SPROP_FLIPU,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,115,35,55,10
+    CONTROL         "Flip V",IDC_SPROP_FLIPV,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,115,49,55,10
+    RTEXT           "Tile Factor:",IDC_STATIC,175,36,40,10
+    COMBOBOX        IDC_SPROP_TILE,221,35,35,35,CBS_DROPDOWN | WS_VSCROLL | 
                     WS_TABSTOP
-    PUSHBUTTON      "&Color...",IDC_SPROP_COLR,215,80,50,15
-    DEFPUSHBUTTON   "OK",IDOK,85,106,50,14
-    PUSHBUTTON      "Cancel",IDCANCEL,151,106,50,14
+    COMBOBOX        IDC_SPROP_TXT,180,50,80,40,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    CONTROL         "Not tileable",IDC_SPROP_NOTILE,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,115,75,55,10
+    CONTROL         "High detail only",IDC_SPROP_HIGHONLY,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,115,90,65,10
+    CONTROL         "Application bit 0",IDC_SPROP_APP0,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,190,75,65,10
+    CONTROL         "Application bit 1",IDC_SPROP_APP1,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,190,85,65,10
+    CONTROL         "Application bit 2",IDC_SPROP_APP2,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,190,95,65,10
+    CONTROL         "Application bit 3",IDC_SPROP_APP3,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,190,105,65,10
 END
 
-IDD_CAMPROP DIALOG DISCARDABLE  0, 0, 257, 101
-STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
-CAPTION "Camera Properties"
+IDD_TXTPROP_GEN DIALOG DISCARDABLE  0, 0, 272, 130
+STYLE WS_CHILD | WS_VISIBLE | WS_CAPTION
+CAPTION "General"
 FONT 8, "MS Sans Serif"
 BEGIN
-    RTEXT           "Position:  X ",IDC_STATIC,5,5,45,10
-    EDITTEXT        IDC_CPROP_XPOS,55,5,50,12,ES_AUTOHSCROLL
-    LTEXT           "Y",IDC_STATIC,115,5,8,10
-    EDITTEXT        IDC_CPROP_YPOS,125,5,50,12,ES_AUTOHSCROLL
-    LTEXT           "Z",IDC_STATIC,185,5,8,10
-    EDITTEXT        IDC_CPROP_ZPOS,195,5,50,12,ES_AUTOHSCROLL
-    RTEXT           "Hither Plane:",IDC_STATIC,15,30,45,10
-    EDITTEXT        IDC_CPROP_HITHER,65,30,50,12,ES_AUTOHSCROLL
-    RTEXT           "Yon Plane:",IDC_STATIC,120,30,45,10
-    EDITTEXT        IDC_CPROP_YON,170,30,50,12,ES_AUTOHSCROLL
-    RTEXT           "Field-of-view:",IDC_STATIC,15,55,45,10
-    EDITTEXT        IDC_CPROP_FOV,65,55,50,12,ES_AUTOHSCROLL
-    PUSHBUTTON      "&Background Color...",IDC_CPROP_COLR,155,55,80,15
-    DEFPUSHBUTTON   "OK",IDOK,70,81,50,14
-    PUSHBUTTON      "Cancel",IDCANCEL,136,81,50,14
+    RTEXT           "Name:",IDC_STATIC,15,11,20,10
+    EDITTEXT        IDC_TXPRP_NAME,40,10,70,12,ES_AUTOHSCROLL
+    RTEXT           "File:",IDC_STATIC,20,36,15,10
+    EDITTEXT        IDC_TXTPRP_FILE,40,35,210,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "&Browse...",IDC_TXTPRP_BROWSE,155,60,50,15
+    PUSHBUTTON      "&View",IDC_TXTPRP_VIEW,215,60,50,15
+    PUSHBUTTON      "&Color...",IDC_TXTPRP_COLR,40,80,50,15
+    PUSHBUTTON      "Create &New Texture...",IDC_TXTPRP_MAKENEW,160,100,100,
+                    15
 END
 
-IDD_TEXTUREPROP DIALOG DISCARDABLE  0, 0, 322, 90
-STYLE DS_MODALFRAME | WS_POPUP | WS_VISIBLE | WS_CAPTION | WS_SYSMENU
-CAPTION "Texture Properties"
+IDD_CAMPROP_MISC DIALOG DISCARDABLE  0, 0, 258, 141
+STYLE WS_CHILD | WS_VISIBLE | WS_DISABLED | WS_CAPTION
+CAPTION "Misc"
 FONT 8, "MS Sans Serif"
 BEGIN
-    RTEXT           "Name:",IDC_STATIC,15,5,20,10
-    EDITTEXT        IDC_TXPRP_NAME,40,5,70,12,ES_AUTOHSCROLL
-    RTEXT           "File:",IDC_STATIC,20,25,15,10
-    EDITTEXT        IDC_TXTPRP_FILE,40,25,210,12,ES_AUTOHSCROLL
-    PUSHBUTTON      "&Browse...",IDC_TXTPRP_BROWSE,265,25,50,15
-    PUSHBUTTON      "&Color...",IDC_TXTPRP_COLR,40,45,50,15
-    DEFPUSHBUTTON   "OK",IDOK,103,70,50,14
-    PUSHBUTTON      "Cancel",IDCANCEL,169,70,50,14
+    RTEXT           "Hither Plane:",ID_STATIC,35,20,45,10
+    EDITTEXT        IDC_CPROP_HITHER,85,20,50,12,ES_AUTOHSCROLL
+    RTEXT           "Yon Plane:",ID_STATIC,35,45,45,10
+    EDITTEXT        IDC_CPROP_YON,85,45,50,12,ES_AUTOHSCROLL
+    RTEXT           "Scale Factor:",ID_STATIC,35,70,45,10
+    EDITTEXT        IDC_CPROP_SCALEF,85,70,50,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "&Background Color...",IDC_CPROP_BCOLR,170,85,80,15
+    RTEXT           "'Hover' mode offset:",ID_STATIC,5,116,70,10
+    EDITTEXT        IDC_CPROP_HOVER,85,115,50,12,ES_AUTOHSCROLL
 END
 
-IDD_SCANSURF DIALOG DISCARDABLE  0, 0, 188, 31
+IDD_CAMPROP_GEN DIALOG DISCARDABLE  0, 0, 258, 141
+STYLE WS_CHILD | WS_VISIBLE | WS_DISABLED | WS_CAPTION
+CAPTION "General"
+FONT 8, "MS Sans Serif"
+BEGIN
+    RTEXT           "Position:  X ",ID_STATIC,5,11,45,10
+    EDITTEXT        IDC_CPROP_XPOS,55,10,50,12,ES_AUTOHSCROLL
+    LTEXT           "Y",ID_STATIC,115,11,8,10
+    EDITTEXT        IDC_CPROP_YPOS,125,10,50,12,ES_AUTOHSCROLL
+    LTEXT           "Z",ID_STATIC,185,10,8,10
+    EDITTEXT        IDC_CPROP_ZPOS,195,10,50,12,ES_AUTOHSCROLL
+    RTEXT           "Top: I ",ID_STATIC,25,41,25,10
+    EDITTEXT        IDC_CPROP_ITOP,55,40,50,12,ES_AUTOHSCROLL
+    LTEXT           "J",ID_STATIC,115,41,8,10
+    EDITTEXT        IDC_CPROP_JTOP,125,40,50,12,ES_AUTOHSCROLL
+    LTEXT           "K",ID_STATIC,185,41,8,10
+    EDITTEXT        IDC_CPROP_KTOP,195,40,50,12,ES_AUTOHSCROLL
+    RTEXT           "Direction: I ",ID_STATIC,10,62,40,10
+    EDITTEXT        IDC_CPROP_IDIR,55,61,50,12,ES_AUTOHSCROLL
+    LTEXT           "J",ID_STATIC,115,62,8,10
+    EDITTEXT        IDC_CPROP_JDIR,125,61,50,12,ES_AUTOHSCROLL
+    LTEXT           "K",ID_STATIC,185,62,8,10
+    EDITTEXT        IDC_CPROP_KDIR,195,61,50,12,ES_AUTOHSCROLL
+    RTEXT           "Field-of-view:",ID_STATIC,5,111,45,10
+    EDITTEXT        IDC_CPROP_FOV,55,110,50,12,ES_AUTOHSCROLL
+END
+
+IDD_TXTVIEW DIALOG DISCARDABLE  0, 0, 272, 261
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Texture View"
+FONT 8, "MS Sans Serif"
+BEGIN
+    CONTROL         "",IDC_BITMAP,"Static",SS_BITMAP | SS_CENTERIMAGE | 
+                    WS_BORDER,25,5,220,225
+    RTEXT           "Width:",IDC_STATIC,25,242,30,8
+    EDITTEXT        IDC_TVIEW_WIDTH,61,240,25,12,ES_AUTOHSCROLL | 
+                    ES_READONLY | NOT WS_TABSTOP
+    RTEXT           "Height:",IDC_STATIC,95,242,25,8
+    EDITTEXT        IDC_TVIEW_HEIGHT,125,240,25,12,ES_AUTOHSCROLL | 
+                    ES_READONLY | NOT WS_TABSTOP
+    DEFPUSHBUTTON   "OK",IDOK,195,240,50,14
+END
+
+IDD_CAMPROP_LOD DIALOG DISCARDABLE  0, 0, 258, 141
+STYLE WS_CHILD | WS_VISIBLE | WS_DISABLED | WS_CAPTION
+CAPTION "Level of Detail"
+FONT 8, "MS Sans Serif"
+BEGIN
+    CONTROL         "Use level-of-detail",IDC_LOD,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,35,20,100,10
+    RTEXT           "Medium:",IDC_STATIC,25,56,35,10
+    EDITTEXT        IDC_CPROP_MED,65,55,50,12,ES_AUTOHSCROLL
+    RTEXT           "Low:",IDC_STATIC,145,56,20,10
+    EDITTEXT        IDC_CPROP_LOW,175,55,50,12,ES_AUTOHSCROLL
+    CTEXT           "This is subject to change with updates to the terrain system.",
+                    IDC_STATIC,15,120,230,10
+END
+
+IDD_LGTPROP_GEN DIALOG DISCARDABLE  0, 0, 258, 141
+STYLE WS_CHILD | WS_VISIBLE | WS_DISABLED | WS_CAPTION
+CAPTION "General"
+FONT 8, "MS Sans Serif"
+BEGIN
+    RTEXT           "Type:",ID_STATIC,25,15,20,10
+    COMBOBOX        IDC_LPROP_TYPE,51,15,55,50,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    RTEXT           "Intensity:",ID_STATIC,15,52,30,10
+    CONTROL         "Generic2",IDC_LPROP_INTENSITY,"msctls_trackbar32",
+                    TBS_BOTH | TBS_NOTICKS | WS_TABSTOP,45,50,110,15
+    CONTROL         "Attenuate",IDC_LPROP_ATTEN,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,190,55,47,10
+    RTEXT           "Position/",ID_STATIC,5,90,30,10
+    RTEXT           "Vector:",ID_STATIC,5,100,30,10
+    LTEXT           "X/I",ID_STATIC,41,100,15,10
+    EDITTEXT        IDC_LPROP_XI,55,100,50,12,ES_AUTOHSCROLL
+    LTEXT           "Y/J",ID_STATIC,111,100,15,10
+    EDITTEXT        IDC_LPROP_YJ,125,100,50,12,ES_AUTOHSCROLL
+    LTEXT           "Z/K",ID_STATIC,181,100,15,10
+    EDITTEXT        IDC_LPROP_ZK,195,100,50,12,ES_AUTOHSCROLL
+END
+
+IDD_LGTPROP_EXTRA DIALOG DISCARDABLE  0, 0, 258, 141
+STYLE WS_CHILD | WS_VISIBLE | WS_DISABLED | WS_CAPTION
+CAPTION "Extra"
+FONT 8, "MS Sans Serif"
+BEGIN
+    GROUPBOX        "Attenuation",ID_STATIC,15,10,230,40
+    RTEXT           "Inner Range:",ID_STATIC,25,26,45,10
+    EDITTEXT        IDC_LPROP_INNER,75,25,50,12,ES_AUTOHSCROLL
+    RTEXT           "Outer Range:",ID_STATIC,135,26,45,10
+    EDITTEXT        IDC_LPROP_OUTER,185,25,50,12,ES_AUTOHSCROLL
+    GROUPBOX        "Spot",ID_STATIC,15,60,230,70
+    CTEXT           "I",ID_STATIC,30,81,15,10
+    EDITTEXT        IDC_LPROP_XI,44,80,50,12,ES_AUTOHSCROLL
+    CTEXT           "J",ID_STATIC,100,81,15,10
+    EDITTEXT        IDC_LPROP_YJ,114,80,50,12,ES_AUTOHSCROLL
+    CTEXT           "K",ID_STATIC,170,81,15,10
+    EDITTEXT        IDC_LPROP_ZK,184,80,50,12,ES_AUTOHSCROLL
+    RTEXT           "Hotspot:",ID_STATIC,25,106,45,10
+    EDITTEXT        IDC_LPROP_HOTSPOT,75,105,50,12,ES_AUTOHSCROLL
+    RTEXT           "Falloff:",ID_STATIC,135,106,45,10
+    EDITTEXT        IDC_LPROP_FALLOFF,185,105,50,12,ES_AUTOHSCROLL
+END
+
+IDD_TERRPROP_HGTCLR DIALOG DISCARDABLE  0, 0, 272, 130
+STYLE WS_CHILD | WS_VISIBLE | WS_CAPTION
+CAPTION "Height-based Colors"
+FONT 8, "MS Sans Serif"
+BEGIN
+    GROUPBOX        "Below Sea-Level",IDC_STATIC,5,5,130,60
+    RTEXT           "Purple:",IDC_STATIC,11,15,30,8
+    LTEXT           "(below Blue)",IDC_STATIC,49,15,55,8
+    RTEXT           "Blue:",IDC_STATIC,11,31,30,8
+    EDITTEXT        IDC_TPROP_BLUE,45,30,45,15,ES_AUTOHSCROLL
+    LTEXT           "(to next)",IDC_STATIC,95,33,35,8
+    RTEXT           "L. Blue:",IDC_STATIC,11,47,30,8
+    EDITTEXT        IDC_TPROP_LBLUE,45,45,45,15,ES_AUTOHSCROLL
+    LTEXT           "(to White)",IDC_STATIC,95,48,35,8
+    GROUPBOX        "Sea-Level",IDC_STATIC,5,85,130,30
+    RTEXT           "White",IDC_STATIC,11,98,30,8
+    EDITTEXT        IDC_TPROP_WHITE,45,95,45,15,ES_AUTOHSCROLL
+    LTEXT           "(to Green)",IDC_STATIC,95,98,35,8
+    RTEXT           "Green:",IDC_STATIC,145,8,30,8
+    EDITTEXT        IDC_TPROP_GREEN,180,5,45,15,ES_AUTOHSCROLL
+    LTEXT           "(to next)",IDC_STATIC,230,8,35,8
+    RTEXT           "L. Green:",IDC_STATIC,145,23,30,8
+    EDITTEXT        IDC_TPROP_LGREEN,180,20,45,15,ES_AUTOHSCROLL
+    LTEXT           "(to next)",IDC_STATIC,230,23,35,8
+    RTEXT           "Yellow:",IDC_STATIC,145,38,30,8
+    EDITTEXT        IDC_TPROP_YELLOW,180,35,45,15,ES_AUTOHSCROLL
+    LTEXT           "(to next)",IDC_STATIC,230,38,35,8
+    RTEXT           "L. Orange:",IDC_STATIC,140,53,35,8
+    EDITTEXT        IDC_TPROP_LORANGE,180,50,45,15,ES_AUTOHSCROLL
+    LTEXT           "(to next)",IDC_STATIC,230,53,35,8
+    RTEXT           "Orange:",IDC_STATIC,145,68,30,8
+    EDITTEXT        IDC_TPROP_ORANGE,180,65,45,15,ES_AUTOHSCROLL
+    LTEXT           "(to next)",IDC_STATIC,230,68,35,8
+    RTEXT           "L. Brown:",IDC_STATIC,145,83,30,8
+    EDITTEXT        IDC_TPROP_LBROWN,180,80,45,15,ES_AUTOHSCROLL
+    LTEXT           "(to next)",IDC_STATIC,230,83,35,8
+    RTEXT           "Brown:",IDC_STATIC,145,98,30,8
+    EDITTEXT        IDC_TPROP_BROWN,180,95,45,15,ES_AUTOHSCROLL
+    LTEXT           "(to next)",IDC_STATIC,230,98,35,8
+    RTEXT           "Red:",IDC_STATIC,145,113,30,8
+    EDITTEXT        IDC_TPROP_RED,180,110,45,15,ES_AUTOHSCROLL
+    LTEXT           "(or above)",IDC_STATIC,230,113,35,8
+END
+
+IDD_COLORSELECT DIALOG DISCARDABLE  0, 0, 302, 210
+STYLE WS_CHILD | WS_CAPTION
+CAPTION "Color"
+FONT 8, "MS Sans Serif"
+BEGIN
+END
+
+IDD_CLRPROP_GEN DIALOG DISCARDABLE  0, 0, 272, 130
+STYLE WS_CHILD | WS_VISIBLE | WS_CAPTION
+CAPTION "General"
+FONT 8, "MS Sans Serif"
+BEGIN
+    RTEXT           "Name:",-1,15,16,20,10
+    EDITTEXT        IDC_CLRPRP_NAME,40,15,70,12,ES_AUTOHSCROLL
+    CONTROL         "High detail only",IDC_CLRPRP_HIGHONLY,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,40,40,65,10
+    CONTROL         "Application bit 0",IDC_CLRPRP_APP0,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,165,40,65,10
+    CONTROL         "Application bit 1",IDC_CLRPRP_APP1,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,165,55,65,10
+    CONTROL         "Application bit 2",IDC_CLRPRP_APP2,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,165,70,65,10
+    CONTROL         "Application bit 3",IDC_CLRPRP_APP3,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,165,85,65,10
+    PUSHBUTTON      "Reset Color Usage To These Defaults",
+                    IDC_CLRPRP_RESETUSAGE,65,105,135,15
+END
+
+IDD_TXTCREATE_NEW DIALOG DISCARDABLE  0, 0, 272, 281
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Texture Create"
+FONT 8, "MS Sans Serif"
+BEGIN
+    CONTROL         "",IDC_BITMAP2,"Static",SS_BITMAP | SS_CENTERIMAGE | 
+                    WS_BORDER,25,5,220,225
+    RTEXT           "Width:",IDC_STATIC,10,242,30,8
+    EDITTEXT        IDC_TVIEW_WIDTH,46,240,25,12,ES_AUTOHSCROLL | 
+                    ES_READONLY | NOT WS_TABSTOP
+    RTEXT           "Height:",IDC_STATIC,80,242,25,8
+    EDITTEXT        IDC_TVIEW_HEIGHT,110,240,25,12,ES_AUTOHSCROLL | 
+                    ES_READONLY | NOT WS_TABSTOP
+    DEFPUSHBUTTON   "Save &As...",IDC_TVIEW_SAVEAS,205,240,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,205,260,50,14
+    PUSHBUTTON      "&Load Background Texture...",IDC_TVIEW_LOADBKTXT,20,260,
+                    115,14
+END
+
+IDD_CLRCREATE_NEWTXT DIALOG DISCARDABLE  0, 0, 272, 281
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Create New Texture from a Color"
+FONT 8, "MS Sans Serif"
+BEGIN
+    CONTROL         "",IDC_BITMAP2,"Static",SS_BITMAP | SS_CENTERIMAGE | 
+                    WS_BORDER,25,5,220,225
+    RTEXT           "Width:",IDC_STATIC,10,242,30,8
+    EDITTEXT        IDC_TVIEW_WIDTH,46,240,25,12,ES_AUTOHSCROLL | 
+                    ES_READONLY | NOT WS_TABSTOP
+    RTEXT           "Height:",IDC_STATIC,15,262,25,8
+    EDITTEXT        IDC_TVIEW_HEIGHT,45,260,25,12,ES_AUTOHSCROLL | 
+                    ES_READONLY | NOT WS_TABSTOP
+    DEFPUSHBUTTON   "Save &As...",IDC_SAVECLR,205,240,50,14
+    DEFPUSHBUTTON   "Close",IDCANCEL,205,260,50,14
+    COMBOBOX        IDC_SAVECLR_SIZELIST,110,240,45,35,CBS_DROPDOWN | 
+                    WS_VSCROLL | WS_TABSTOP
+    RTEXT           "Size",IDC_STATIC,90,242,14,8
+    DEFPUSHBUTTON   "&Solid Color",ID_MATCH_ALL_CLRS,90,260,65,14
+END
+
+IDD_TXTCREATE_ASK DIALOG DISCARDABLE  0, 0, 232, 55
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Texture Create"
+FONT 8, "MS Sans Serif"
+BEGIN
+    DEFPUSHBUTTON   "a &File ...",ID_CREATE_FROM_FILE,20,35,50,14
+    DEFPUSHBUTTON   "Cancel",IDCANCEL,160,35,50,14
+    PUSHBUTTON      "a &Color ...",ID_CREATE_FROM_COLOR,90,35,50,14
+    CTEXT           "Create a new texture from ...",IDC_STATIC,15,15,195,10
+END
+
+IDD_SHADEREVIEW DIALOG DISCARDABLE  0, 0, 302, 210
+STYLE WS_CHILD | WS_CAPTION
+CAPTION "Shading"
+FONT 8, "MS Sans Serif"
+BEGIN
+END
+
+IDD_DEMIMPORT DIALOG DISCARDABLE  0, 0, 292, 156
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "DEM Import Options"
+FONT 8, "MS Sans Serif"
+BEGIN
+    CONTROL         "Standard compression to 16 meter elevations",
+                    IDC_DEM_STD,"Button",BS_AUTORADIOBUTTON | WS_GROUP,21,5,
+                    160,10
+    CONTROL         "Uniform height distribution",IDC_DEM_UNIFORM,"Button",
+                    BS_AUTORADIOBUTTON,21,20,100,10
+    CONTROL         "Average-compressed height table",IDC_DEM_AVERAGE,
+                    "Button",BS_AUTORADIOBUTTON,21,42,120,10
+    GROUPBOX        "",IDC_STATIC,15,30,135,45
+    LTEXT           "Max distance:",IDC_STATIC,40,58,45,8
+    EDITTEXT        IDC_DEM_AVGMAXD,90,55,40,15,ES_AUTOHSCROLL
+    CONTROL         "Normalize heights",IDC_DEM_NORMALIZE,"Button",
+                    BS_AUTOCHECKBOX | WS_GROUP | WS_TABSTOP,190,55,75,10
+    GROUPBOX        "USGS DEM",IDC_STATIC,15,80,265,70
+    CTEXT           "Degrees",IDC_STATIC,73,90,35,10
+    CTEXT           "Minutes",IDC_STATIC,113,90,35,10
+    CTEXT           "Seconds",IDC_STATIC,153,90,35,10
+    RTEXT           "Longitude (X):",IDC_STATIC,23,108,45,10
+    RTEXT           "Latitude (Y):",IDC_STATIC,23,129,45,10
+    EDITTEXT        IDC_DEM_LNG_DEGREES,73,105,35,15,ES_AUTOHSCROLL
+    EDITTEXT        IDC_DEM_LNG_MINUTES,113,105,35,15,ES_AUTOHSCROLL
+    EDITTEXT        IDC_DEM_LNG_SECONDS,153,105,35,15,ES_AUTOHSCROLL
+    CONTROL         "West",IDC_LNG_WEST,"Button",BS_AUTORADIOBUTTON | 
+                    WS_GROUP,198,105,35,15
+    CONTROL         "East",IDC_LNG_EAST,"Button",BS_AUTORADIOBUTTON,238,105,
+                    35,15
+    EDITTEXT        IDC_DEM_LAT_DEGREES,73,126,35,15,ES_AUTOHSCROLL
+    EDITTEXT        IDC_DEM_LAT_MINUTES,113,126,35,15,ES_AUTOHSCROLL
+    EDITTEXT        IDC_DEM_LAT_SECONDS,153,126,35,15,ES_AUTOHSCROLL
+    CONTROL         "North",IDC_LAT_NORTH,"Button",BS_AUTORADIOBUTTON | 
+                    WS_GROUP,198,125,35,15
+    CONTROL         "South",IDC_LAT_SOUTH,"Button",BS_AUTORADIOBUTTON,235,
+                    125,35,15
+    DEFPUSHBUTTON   "OK",IDOK,235,7,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,235,24,50,14
+END
+
+IDD_DEMPROGRESS DIALOG DISCARDABLE  0, 0, 242, 175
 STYLE WS_POPUP | WS_CAPTION
-CAPTION "Scanning surface information"
+CAPTION "USGS DEM Import"
 FONT 8, "MS Sans Serif"
 BEGIN
-    CONTROL         "Generic1",IDC_SSCAN_PROG,"msctls_progress32",WS_BORDER,
-                    15,5,160,15
+    RTEXT           "Filename:",IDC_STATIC,5,7,30,10
+    EDITTEXT        IDC_DPRG_FNAME,40,5,160,15,ES_AUTOHSCROLL | ES_READONLY | 
+                    NOT WS_TABSTOP
+    DEFPUSHBUTTON   "OK",IDOK,205,5,32,14,WS_DISABLED | WS_GROUP
+    CTEXT           "Status",IDC_STATUS,10,30,220,10
+    CONTROL         "Progress1",IDC_DPRG_BAR,"msctls_progress32",WS_BORDER,5,
+                    45,230,14
+    RTEXT           "DEM Quality Level:",IDC_STATIC,5,67,65,10
+    EDITTEXT        IDC_DPRG_QUALITY,75,65,30,15,ES_AUTOHSCROLL | 
+                    ES_READONLY | NOT WS_TABSTOP
+    RTEXT           "Ground Units:",IDC_STATIC,10,87,60,10
+    EDITTEXT        IDC_DPRG_GUNITS,75,85,45,15,ES_AUTOHSCROLL | ES_READONLY | 
+                    NOT WS_TABSTOP
+    RTEXT           "Elevation Units:",IDC_STATIC,10,107,60,10
+    EDITTEXT        IDC_DPRG_EUNITS,75,105,45,15,ES_AUTOHSCROLL | 
+                    ES_READONLY | NOT WS_TABSTOP
+    RTEXT           "Axis:",IDC_STATIC,110,67,20,10
+    EDITTEXT        IDC_DPRG_AXISX,135,65,35,15,ES_AUTOHSCROLL | ES_READONLY | 
+                    NOT WS_TABSTOP
+    EDITTEXT        IDC_DPRG_AXISY,170,65,35,15,ES_AUTOHSCROLL | ES_READONLY | 
+                    NOT WS_TABSTOP
+    EDITTEXT        IDC_DPRG_AXISZ,205,65,35,15,ES_AUTOHSCROLL | ES_READONLY | 
+                    NOT WS_TABSTOP
+    RTEXT           "Profile Rows:",IDC_STATIC,135,87,60,10
+    EDITTEXT        IDC_DPRG_PROWS,201,85,30,15,ES_AUTOHSCROLL | ES_READONLY | 
+                    NOT WS_TABSTOP
+    RTEXT           "Profile Columns:",IDC_STATIC,135,108,60,10
+    EDITTEXT        IDC_DPRG_PCOLS,201,106,30,15,ES_AUTOHSCROLL | 
+                    ES_READONLY | NOT WS_TABSTOP
+    RTEXT           "Name:",IDC_STATIC,10,133,22,8
+    EDITTEXT        IDC_DPRG_NAME,35,130,205,15,ES_AUTOHSCROLL | ES_READONLY | 
+                    NOT WS_TABSTOP
+    RTEXT           "Comment:",IDC_STATIC,10,158,32,8
+    EDITTEXT        IDC_DPRG_COMMENT,45,154,195,15,ES_AUTOHSCROLL | 
+                    ES_READONLY | NOT WS_TABSTOP
+END
+
+IDD_TERRPROP_HTBL DIALOG DISCARDABLE  0, 0, 272, 130
+STYLE WS_CHILD | WS_VISIBLE | WS_DISABLED | WS_CAPTION
+CAPTION "Height-table"
+FONT 8, "MS Sans Serif"
+BEGIN
+    LISTBOX         IDC_TROP_HGTS,5,2,130,125,NOT LBS_NOTIFY | LBS_NOSEL | 
+                    WS_VSCROLL | WS_TABSTOP
+    CTEXT           "Height data is not editable",IDC_STATIC,140,110,130,10
+END
+
+IDD_TOOL_HEIGHT DIALOG DISCARDABLE  0, 0, 277, 201
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Height-based Tool"
+FONT 8, "MS Sans Serif"
+BEGIN
+    CONTROL         "All Areas of Map",IDC_TOOL_ALL,"Button",
+                    BS_AUTORADIOBUTTON | WS_GROUP,15,5,75,15
+    CONTROL         "Selected Map Region",IDC_TOOL_SELECTED,"Button",
+                    BS_AUTORADIOBUTTON,100,5,90,15
+    CONTROL         "Preserve textures already assigned",IDC_TOOL_PRESERVE,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,15,20,130,10
+    GROUPBOX        "Elevation to Texture/Color Mappings",IDC_STATIC,5,35,
+                    205,145
+    COMBOBOX        IDC_TOOL_TC0,25,45,80,45,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    EDITTEXT        IDC_TOOL_HEIGHT0,130,44,55,15,ES_AUTOHSCROLL
+    COMBOBOX        IDC_TOOL_TC1,25,62,80,48,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    EDITTEXT        IDC_TOOL_HEIGHT1,130,61,55,15,ES_AUTOHSCROLL
+    COMBOBOX        IDC_TOOL_TC2,25,80,80,50,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    EDITTEXT        IDC_TOOL_HEIGHT2,130,79,55,15,ES_AUTOHSCROLL
+    COMBOBOX        IDC_TOOL_TC3,25,96,80,44,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    EDITTEXT        IDC_TOOL_HEIGHT3,130,95,55,15,ES_AUTOHSCROLL
+    COMBOBOX        IDC_TOOL_TC4,25,113,80,47,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    EDITTEXT        IDC_TOOL_HEIGHT4,130,112,55,15,ES_AUTOHSCROLL
+    COMBOBOX        IDC_TOOL_TC5,25,130,80,45,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    EDITTEXT        IDC_TOOL_HEIGHT5,130,129,55,15,ES_AUTOHSCROLL
+    COMBOBOX        IDC_TOOL_TC6,25,147,80,48,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    EDITTEXT        IDC_TOOL_HEIGHT6,130,146,55,15,ES_AUTOHSCROLL
+    COMBOBOX        IDC_TOOL_TC7,25,164,80,41,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    EDITTEXT        IDC_TOOL_HEIGHT7,130,163,55,15,ES_AUTOHSCROLL
+    RTEXT           "Stop elevation:",IDC_STATIC,75,187,50,10
+    EDITTEXT        IDC_TOOL_HEIGHT_STOP,130,185,55,15,ES_AUTOHSCROLL
+    DEFPUSHBUTTON   "OK",IDOK,220,7,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,220,24,50,14
+END
+
+IDD_TOOL_RANDOM DIALOG DISCARDABLE  0, 0, 297, 186
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Random Roll Tool"
+FONT 8, "MS Sans Serif"
+BEGIN
+    CONTROL         "All Areas of Map",IDC_TOOL_ALL,"Button",
+                    BS_AUTORADIOBUTTON | WS_GROUP,15,5,75,15
+    CONTROL         "Selected Map Region",IDC_TOOL_SELECTED,"Button",
+                    BS_AUTORADIOBUTTON,100,5,90,15
+    CONTROL         "Preserve textures already assigned",IDC_TOOL_PRESERVE,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,15,20,130,10
+    GROUPBOX        "Percentange to Texture/Color Mappings",IDC_STATIC,5,35,
+                    205,145
+    COMBOBOX        IDC_TOOL_TC0,25,45,80,50,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    EDITTEXT        IDC_TOOL_RANGE0,130,45,55,15,ES_AUTOHSCROLL
+    COMBOBOX        IDC_TOOL_TC1,25,61,80,48,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    EDITTEXT        IDC_TOOL_RANGE1,130,62,55,15,ES_AUTOHSCROLL
+    COMBOBOX        IDC_TOOL_TC2,25,80,80,45,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    EDITTEXT        IDC_TOOL_RANGE2,130,79,55,15,ES_AUTOHSCROLL
+    COMBOBOX        IDC_TOOL_TC3,25,96,80,49,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    EDITTEXT        IDC_TOOL_RANGE3,130,97,55,15,ES_AUTOHSCROLL
+    COMBOBOX        IDC_TOOL_TC4,25,114,80,46,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    EDITTEXT        IDC_TOOL_RANGE4,130,113,55,15,ES_AUTOHSCROLL
+    COMBOBOX        IDC_TOOL_TC5,25,130,80,45,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    EDITTEXT        IDC_TOOL_RANGE5,130,130,55,15,ES_AUTOHSCROLL
+    COMBOBOX        IDC_TOOL_TC6,25,147,80,53,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    EDITTEXT        IDC_TOOL_RANGE6,130,146,55,15,ES_AUTOHSCROLL
+    COMBOBOX        IDC_TOOL_TC7,25,164,80,51,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    EDITTEXT        IDC_TOOL_RANGE7,130,163,55,15,ES_AUTOHSCROLL
+    DEFPUSHBUTTON   "OK",IDOK,240,7,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,240,24,50,14
+    GROUPBOX        "Elevation-based Cutoff",IDC_STATIC,215,65,80,90
+    CONTROL         "Active",IDC_TOOL_ELVCUTOFF,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,225,75,35,10
+    CTEXT           "Lowest elevation:",IDC_STATIC,225,90,55,10
+    EDITTEXT        IDC_TOOL_ELVLOW,225,100,55,15,ES_AUTOHSCROLL
+    CTEXT           "Highest elevation:",IDC_STATIC,220,125,65,10
+    EDITTEXT        IDC_TOOL_ELVHIGH,225,135,55,15,ES_AUTOHSCROLL
+END
+
+IDD_CAMPROP_EX DIALOG DISCARDABLE  0, 0, 258, 141
+STYLE WS_CHILD | WS_VISIBLE | WS_DISABLED | WS_CAPTION
+CAPTION "Extended"
+FONT 8, "MS Sans Serif"
+BEGIN
+    GROUPBOX        "Background",-1,10,15,235,30
+    CONTROL         "Active",IDC_CPROP_BMBACK,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,25,25,45,15
+    PUSHBUTTON      "Select &Bitmap",IDC_CPROP_BITMAP,160,25,60,15
+    GROUPBOX        "Hazing/Fogging",-1,10,60,235,65
+    CONTROL         "Active",IDC_CPROP_HAZE,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,25,70,45,15
+    PUSHBUTTON      "&Hazing Target Color",IDC_CPROP_HCOLR,150,70,80,15
+    RTEXT           "Shade-levels:",-1,15,92,60,10
+    EDITTEXT        IDC_CPROP_LEVEL,75,90,40,15,ES_AUTOHSCROLL
+    RTEXT           "Unaffected level:",-1,120,92,70,10
+    EDITTEXT        IDC_CPROP_SLEVEL,195,90,41,15,ES_AUTOHSCROLL
+    RTEXT           "'Break-point' level:",-1,15,107,60,10
+    EDITTEXT        IDC_CPROP_BLEVEL,75,105,40,15,ES_AUTOHSCROLL
+    RTEXT           "'Break-point' precent:",-1,120,107,70,10
+    EDITTEXT        IDC_CPROP_BPERC,195,105,41,15,ES_AUTOHSCROLL
+END
+
+IDD_TXTPROP_SFLAGS DIALOG DISCARDABLE  0, 0, 272, 130
+STYLE WS_CHILD | WS_VISIBLE | WS_CAPTION
+CAPTION "Surface Flags"
+FONT 8, "MS Sans Serif"
+BEGIN
+    CONTROL         "Flip U",IDC_TXPRP_FLIPU,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,40,15,34,10
+    CONTROL         "Flip V",IDC_TXPRP_FLIPV,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,40,30,34,10
+    RTEXT           "Tile Factor:",IDC_STATIC,125,16,35,10
+    COMBOBOX        IDC_TXPRP_TILE,167,15,35,35,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    CONTROL         "Not tileable",IDC_TXPROP_NOTILE,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,40,65,55,10
+    CONTROL         "High detail only",IDC_TXPROP_HIGHONLY,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,40,80,65,10
+    CONTROL         "Application bit 0",IDC_TXPROP_APP0,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,170,45,65,10
+    CONTROL         "Application bit 1",IDC_TXPROP_APP1,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,170,60,65,10
+    CONTROL         "Application bit 2",IDC_TXPROP_APP2,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,170,75,65,10
+    CONTROL         "Application bit 3",IDC_TXPROP_APP3,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,170,90,65,10
+    PUSHBUTTON      "Reset Texture Usage To These Defaults",
+                    IDC_TXTPRP_RESETUSAGE,70,110,135,15
+END
+
+IDD_TOOL_ANGLE DIALOG DISCARDABLE  0, 0, 297, 202
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Angle-based Tool"
+FONT 8, "MS Sans Serif"
+BEGIN
+    CONTROL         "All Areas of Map",IDC_TOOL_ALL,"Button",
+                    BS_AUTORADIOBUTTON | WS_GROUP,15,5,75,15
+    CONTROL         "Selected Map Region",IDC_TOOL_SELECTED,"Button",
+                    BS_AUTORADIOBUTTON,100,5,90,15
+    CONTROL         "Preserve textures already assigned",IDC_TOOL_PRESERVE,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,15,20,130,10
+    GROUPBOX        "Angle to Texture/Color Mappings",IDC_STATIC,5,35,205,
+                    145
+    COMBOBOX        IDC_TOOL_TC0,25,45,80,45,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    EDITTEXT        IDC_TOOL_ANGLE0,130,44,55,15,ES_AUTOHSCROLL
+    COMBOBOX        IDC_TOOL_TC1,25,62,80,48,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    EDITTEXT        IDC_TOOL_ANGLE1,130,61,55,15,ES_AUTOHSCROLL
+    COMBOBOX        IDC_TOOL_TC2,25,80,80,50,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    EDITTEXT        IDC_TOOL_ANGLE2,130,79,55,15,ES_AUTOHSCROLL
+    COMBOBOX        IDC_TOOL_TC3,25,96,80,44,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    EDITTEXT        IDC_TOOL_ANGLE3,130,95,55,15,ES_AUTOHSCROLL
+    COMBOBOX        IDC_TOOL_TC4,25,113,80,47,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    EDITTEXT        IDC_TOOL_ANGLE4,130,112,55,15,ES_AUTOHSCROLL
+    COMBOBOX        IDC_TOOL_TC5,25,130,80,45,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    EDITTEXT        IDC_TOOL_ANGLE5,130,129,55,15,ES_AUTOHSCROLL
+    COMBOBOX        IDC_TOOL_TC6,25,147,80,48,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    EDITTEXT        IDC_TOOL_ANGLE6,130,146,55,15,ES_AUTOHSCROLL
+    COMBOBOX        IDC_TOOL_TC7,25,164,80,41,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    EDITTEXT        IDC_TOOL_ANGLE7,130,163,55,15,ES_AUTOHSCROLL
+    RTEXT           "Stop angle:",IDC_STATIC,75,187,50,10
+    EDITTEXT        IDC_TOOL_ANGLE_STOP,130,185,55,15,ES_AUTOHSCROLL
+    GROUPBOX        "Elevation-based Cutoff",IDC_STATIC,215,65,80,90
+    CONTROL         "Active",IDC_TOOL_ELVCUTOFF,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,225,75,35,10
+    CTEXT           "Lowest elevation:",IDC_STATIC,225,90,55,10
+    EDITTEXT        IDC_TOOL_ELVLOW,225,100,55,15,ES_AUTOHSCROLL
+    CTEXT           "Highest elevation:",IDC_STATIC,220,125,65,10
+    EDITTEXT        IDC_TOOL_ELVHIGH,225,135,55,15,ES_AUTOHSCROLL
+    DEFPUSHBUTTON   "OK",IDOK,240,7,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,240,24,50,14
+END
+
+IDD_LOCATE DIALOG DISCARDABLE  0, 0, 257, 41
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Locate File"
+FONT 8, "MS Sans Serif"
+BEGIN
+    RTEXT           "File:",IDC_STATIC,5,6,15,10
+    EDITTEXT        IDC_LOCATE_FILE,25,5,225,12,ES_AUTOHSCROLL
+    PUSHBUTTON      "&Browse...",IDC_LOCATE_BROWSE,195,20,50,15
+    DEFPUSHBUTTON   "OK",IDOK,70,25,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,135,25,50,14
+END
+
+IDD_SETBASEELV DIALOG DISCARDABLE  0, 0, 186, 111
+STYLE DS_MODALFRAME | WS_POPUP | WS_CAPTION | WS_SYSMENU
+CAPTION "Set Base Elevation"
+FONT 8, "MS Sans Serif"
+BEGIN
+    RTEXT           "Base Elevation:",IDC_STATIC,35,12,50,10
+    EDITTEXT        IDC_SETBASE_ELV,90,10,65,15,ES_AUTOHSCROLL
+    RTEXT           "Minimum Elevation:",IDC_STATIC,20,42,65,10
+    EDITTEXT        IDC_SETBASE_MIN,90,40,65,15,ES_AUTOHSCROLL | ES_READONLY
+    RTEXT           "Maximum Elevation:",IDC_STATIC,20,57,65,10
+    EDITTEXT        IDC_SETBASE_MAX,90,55,65,15,ES_AUTOHSCROLL | ES_READONLY
+    DEFPUSHBUTTON   "OK",IDOK,35,90,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,101,90,50,14
 END
 
 
+#ifndef _MAC
 /////////////////////////////////////////////////////////////////////////////
 //
 // Version
 //
 
 VS_VERSION_INFO VERSIONINFO
- FILEVERSION 1,0,0,1
- PRODUCTVERSION 1,0,0,1
+ FILEVERSION 1,3,1,0
+ PRODUCTVERSION 1,3,1,0
  FILEFLAGSMASK 0x3fL
 #ifdef _DEBUG
  FILEFLAGS 0x1L
@@ -398,13 +1008,13 @@ BEGIN
             VALUE "Comments", "by Chuck Walbourn\0"
             VALUE "CompanyName", "Charybdis Enterprises, Inc.\0"
             VALUE "FileDescription", "Escher Terrain Editor MFC Application\0"
-            VALUE "FileVersion", "1, 0, 0, 1\0"
+            VALUE "FileVersion", "1.31\0"
             VALUE "InternalName", "Terrain Edit\0"
-            VALUE "LegalCopyright", "Copyright \251 1995\0"
+            VALUE "LegalCopyright", "Copyright © 1995, 1996\0"
             VALUE "LegalTrademarks", "MythOS is a trademark of Charybdis Enterprises, Inc.\0"
             VALUE "OriginalFilename", "ESHTEDIT.EXE\0"
             VALUE "ProductName", "Escher Terrain Editor\0"
-            VALUE "ProductVersion", "1, 0, 0, 1\0"
+            VALUE "ProductVersion", "1.31\0"
         END
     END
     BLOCK "VarFileInfo"
@@ -413,6 +1023,7 @@ BEGIN
     END
 END
 
+#endif    // !_MAC
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -420,121 +1031,268 @@ END
 // Dialog Info
 //
 
-IDD_TERRPROPA DLGINIT
+IDD_TERRPROP_GEN DLGINIT
 BEGIN
-    1010, 0x403, 4, 0
+    IDC_TPROP_SURFRATIO, 0x403, 4, 0
 0x3a31, 0x0031, 
-    1010, 0x403, 4, 0
+    IDC_TPROP_SURFRATIO, 0x403, 4, 0
 0x3a32, 0x0031, 
-    1010, 0x403, 4, 0
+    IDC_TPROP_SURFRATIO, 0x403, 4, 0
 0x3a34, 0x0031, 
-    1010, 0x403, 4, 0
+    IDC_TPROP_SURFRATIO, 0x403, 4, 0
 0x3a38, 0x0031, 
-    1010, 0x403, 5, 0
+    IDC_TPROP_SURFRATIO, 0x403, 5, 0
 0x3631, 0x313a, "\000" 
     0
 END
 
-IDD_SURFPROP DLGINIT
+IDD_SURFPROP_GEN DLGINIT
 BEGIN
-    1021, 0x403, 2, 0
-0x0030, 
-    1021, 0x403, 2, 0
+    IDC_SPROP_TILE, 0x403, 2, 0
 0x0031, 
-    1021, 0x403, 2, 0
+    IDC_SPROP_TILE, 0x403, 2, 0
 0x0032, 
-    1021, 0x403, 2, 0
-0x0033, 
-    1021, 0x403, 2, 0
+    IDC_SPROP_TILE, 0x403, 2, 0
 0x0034, 
-    1021, 0x403, 2, 0
-0x0035, 
-    1021, 0x403, 2, 0
-0x0036, 
-    1021, 0x403, 2, 0
-0x0037, 
-    1021, 0x403, 2, 0
+    IDC_SPROP_TILE, 0x403, 2, 0
 0x0038, 
-    1021, 0x403, 2, 0
-0x0039, 
-    1021, 0x403, 2, 0
-0x0041, 
-    1021, 0x403, 2, 0
-0x0042, 
-    1021, 0x403, 2, 0
-0x0043, 
-    1021, 0x403, 2, 0
-0x0044, 
-    1021, 0x403, 2, 0
-0x0045, 
-    1021, 0x403, 2, 0
-0x0046, 
-    1025, 0x403, 2, 0
-0x0030, 
-    1025, 0x403, 2, 0
-0x0031, 
-    1025, 0x403, 2, 0
-0x0032, 
-    1025, 0x403, 2, 0
-0x0033, 
-    1025, 0x403, 2, 0
-0x0034, 
-    1025, 0x403, 2, 0
-0x0035, 
-    1025, 0x403, 2, 0
-0x0036, 
-    1025, 0x403, 2, 0
-0x0037, 
-    1025, 0x403, 2, 0
-0x0038, 
-    1025, 0x403, 2, 0
-0x0039, 
-    1025, 0x403, 2, 0
-0x0041, 
-    1025, 0x403, 2, 0
-0x0042, 
-    1025, 0x403, 2, 0
-0x0043, 
-    1025, 0x403, 2, 0
-0x0044, 
-    1025, 0x403, 2, 0
-0x0045, 
-    1025, 0x403, 2, 0
-0x0046, 
-    1026, 0x403, 2, 0
-0x0030, 
-    1026, 0x403, 2, 0
-0x0031, 
-    1026, 0x403, 2, 0
-0x0032, 
-    1026, 0x403, 2, 0
-0x0033, 
-    1026, 0x403, 2, 0
-0x0034, 
-    1026, 0x403, 2, 0
-0x0035, 
-    1026, 0x403, 2, 0
-0x0036, 
-    1026, 0x403, 2, 0
-0x0037, 
-    1026, 0x403, 2, 0
-0x0038, 
-    1026, 0x403, 2, 0
-0x0039, 
-    1026, 0x403, 2, 0
-0x0041, 
-    1026, 0x403, 2, 0
-0x0042, 
-    1026, 0x403, 2, 0
-0x0043, 
-    1026, 0x403, 2, 0
-0x0044, 
-    1026, 0x403, 2, 0
-0x0045, 
-    1026, 0x403, 2, 0
-0x0046, 
+    IDC_SPROP_TILE, 0x403, 3, 0
+0x3231, "\000" 
+    IDC_SPROP_TILE, 0x403, 3, 0
+0x3631, "\000" 
+    IDC_SPROP_TILE, 0x403, 3, 0
+0x3233, "\000" 
+    IDC_SPROP_TILE, 0x403, 3, 0
+0x3436, "\000" 
     0
 END
+
+IDD_LGTPROP_GEN DLGINIT
+BEGIN
+    IDC_LPROP_TYPE, 0x403, 7, 0
+0x6556, 0x7463, 0x726f, "\000" 
+    IDC_LPROP_TYPE, 0x403, 6, 0
+0x6f50, 0x6e69, 0x0074, 
+    IDC_LPROP_TYPE, 0x403, 11, 0
+0x7441, 0x6574, 0x756e, 0x7461, 0x6465, "\000" 
+    IDC_LPROP_TYPE, 0x403, 5, 0
+0x7053, 0x746f, "\000" 
+    0
+END
+
+IDD_CLRCREATE_NEWTXT DLGINIT
+BEGIN
+    IDC_SAVECLR_SIZELIST, 0x403, 6, 0
+0x3631, 0x3178, 0x0036, 
+    IDC_SAVECLR_SIZELIST, 0x403, 6, 0
+0x3233, 0x3378, 0x0032, 
+    IDC_SAVECLR_SIZELIST, 0x403, 6, 0
+0x3436, 0x3678, 0x0034, 
+    IDC_SAVECLR_SIZELIST, 0x403, 8, 0
+0x3231, 0x7838, 0x3231, 0x0038, 
+    IDC_SAVECLR_SIZELIST, 0x403, 8, 0
+0x3532, 0x7836, 0x3532, 0x0036, 
+    0
+END
+
+IDD_TOOL_HEIGHT DLGINIT
+BEGIN
+    IDC_TOOL_TC0, 0x403, 5, 0
+0x6f4e, 0x656e, "\000" 
+    IDC_TOOL_TC1, 0x403, 5, 0
+0x6f4e, 0x656e, "\000" 
+    IDC_TOOL_TC2, 0x403, 5, 0
+0x6f4e, 0x656e, "\000" 
+    IDC_TOOL_TC3, 0x403, 5, 0
+0x6f4e, 0x656e, "\000" 
+    IDC_TOOL_TC4, 0x403, 5, 0
+0x6f4e, 0x656e, "\000" 
+    IDC_TOOL_TC5, 0x403, 5, 0
+0x6f4e, 0x656e, "\000" 
+    IDC_TOOL_TC6, 0x403, 5, 0
+0x6f4e, 0x656e, "\000" 
+    IDC_TOOL_TC7, 0x403, 5, 0
+0x6f4e, 0x656e, "\000" 
+    0
+END
+
+IDD_TOOL_RANDOM DLGINIT
+BEGIN
+    IDC_TOOL_TC0, 0x403, 5, 0
+0x6f4e, 0x656e, "\000" 
+    IDC_TOOL_TC1, 0x403, 5, 0
+0x6f4e, 0x656e, "\000" 
+    IDC_TOOL_TC2, 0x403, 5, 0
+0x6f4e, 0x656e, "\000" 
+    IDC_TOOL_TC3, 0x403, 5, 0
+0x6f4e, 0x656e, "\000" 
+    IDC_TOOL_TC4, 0x403, 5, 0
+0x6f4e, 0x656e, "\000" 
+    IDC_TOOL_TC5, 0x403, 5, 0
+0x6f4e, 0x656e, "\000" 
+    IDC_TOOL_TC6, 0x403, 5, 0
+0x6f4e, 0x656e, "\000" 
+    IDC_TOOL_TC7, 0x403, 5, 0
+0x6f4e, 0x656e, "\000" 
+    0
+END
+
+IDD_TXTPROP_SFLAGS DLGINIT
+BEGIN
+    IDC_TXPRP_TILE, 0x403, 2, 0
+0x0031, 
+    IDC_TXPRP_TILE, 0x403, 2, 0
+0x0032, 
+    IDC_TXPRP_TILE, 0x403, 2, 0
+0x0034, 
+    IDC_TXPRP_TILE, 0x403, 2, 0
+0x0038, 
+    IDC_TXPRP_TILE, 0x403, 3, 0
+0x3231, "\000" 
+    IDC_TXPRP_TILE, 0x403, 3, 0
+0x3631, "\000" 
+    IDC_TXPRP_TILE, 0x403, 3, 0
+0x3233, "\000" 
+    IDC_TXPRP_TILE, 0x403, 3, 0
+0x3436, "\000" 
+    0
+END
+
+IDD_TOOL_ANGLE DLGINIT
+BEGIN
+    IDC_TOOL_TC0, 0x403, 5, 0
+0x6f4e, 0x656e, "\000" 
+    IDC_TOOL_TC1, 0x403, 5, 0
+0x6f4e, 0x656e, "\000" 
+    IDC_TOOL_TC2, 0x403, 5, 0
+0x6f4e, 0x656e, "\000" 
+    IDC_TOOL_TC3, 0x403, 5, 0
+0x6f4e, 0x656e, "\000" 
+    IDC_TOOL_TC4, 0x403, 5, 0
+0x6f4e, 0x656e, "\000" 
+    IDC_TOOL_TC5, 0x403, 5, 0
+0x6f4e, 0x656e, "\000" 
+    IDC_TOOL_TC6, 0x403, 5, 0
+0x6f4e, 0x656e, "\000" 
+    IDC_TOOL_TC7, 0x403, 5, 0
+0x6f4e, 0x656e, "\000" 
+    0
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO DISCARDABLE 
+BEGIN
+    IDD_TXTVIEW, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 265
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 254
+    END
+
+    IDD_COLORSELECT, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 295
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 203
+    END
+
+    IDD_TXTCREATE_NEW, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 265
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 274
+    END
+
+    IDD_CLRCREATE_NEWTXT, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 265
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 274
+    END
+
+    IDD_TXTCREATE_ASK, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 225
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 48
+    END
+
+    IDD_SHADEREVIEW, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 295
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 203
+    END
+
+    IDD_DEMIMPORT, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 285
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 149
+    END
+
+    IDD_DEMPROGRESS, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 235
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 168
+    END
+
+    IDD_TOOL_HEIGHT, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 270
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 194
+    END
+
+    IDD_TOOL_RANDOM, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 290
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 179
+    END
+
+    IDD_TOOL_ANGLE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 290
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 195
+    END
+
+    IDD_LOCATE, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 250
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 34
+    END
+
+    IDD_SETBASEELV, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 179
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 104
+    END
+END
+#endif    // APSTUDIO_INVOKED
 
 
 /////////////////////////////////////////////////////////////////////////////
@@ -608,7 +1366,7 @@ BEGIN
     ID_EDIT_REPEAT          "Repeat the last action\nRepeat"
     ID_EDIT_REPLACE         "Replace specific text with different text\nReplace"
     ID_EDIT_SELECT_ALL      "Select the entire document\nSelect All"
-    ID_EDIT_UNDO            "Undo the last action\nUndo"
+    ID_EDIT_UNDO            "Undo the last surface information change\nUndo"
     ID_EDIT_REDO            "Redo the previously undone action\nRedo"
 END
 
@@ -672,19 +1430,55 @@ BEGIN
     ID_VIEW_RND_PERSPECTIVE "Render using true persepective texture mapping\nPerspective"
     ID_VIEW_ROTXY           "Render view scroll bars control rotation about X and Y\nRotate X/Y"
     ID_VIEW_MOVEXY          "Render view scroll bars control translation in X and Y\nMove X/Y"
-    ID_VIEW_ROTMOVEZ        "Render view scroll bars control rotation about and translation in Z\nRotZ/MoveZ"
+    ID_VIEW_ROTMOVEZ        "Render view scroll bars control rotation about and translation in Z\nRotate Z/Move Z"
 END
 
 STRINGTABLE DISCARDABLE 
 BEGIN
-    ID_LGT_ADJUSTXY         "Render view scroll bars adjust the light source in X and Y\nAdjust X/Y"
-    ID_LGT_ABRIGHT          "Render view scroll bars adjust the light source intensity value\nAdjust Intensity"
+    ID_LGT_ADJUSTXY         "Render view scroll bars adjust the light source in X and Y\nAdjust Light X/Y"
+    ID_LGT_ABRIGHT          "Render view scroll bars adjust the light source intensity value\nAdjust Light Intensity"
     ID_VIEW_ZOOM_LARGE      "Zooms the surface information grid image to 400%\nZoom Large"
     ID_VIEW_ZOOM_MED        "Zooms the surface information grid image to 200%\nZoom Medium"
     ID_VIEW_ZOOM_XLARGE     "Zooms the surface information grid image to 800%\nZoom XLarge"
     ID_VIEW_PROP            "Edit render view camera properities\nView Properties"
     ID_VIEW_ZOOM_MEGA       "Zooms the surface information grid image to 1600%\nZoom Mega"
+    ID_APP_HELP             "Displays the help topic for this editor\nHelp"
+    ID_SURF_LOADTXT         "Loads a texture set from an external file\nLoad Textures"
+    ID_SURF_SAVETXT         "Saves the texture set to an external file\nSave Textures"
 END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_VIEW_HOVER           "Render view scroll bars control translation in X and Z\nHover"
+    ID_LGT_PROP             "Edit render view light properties\nLight Properties"
+    ID_VIEW_SHOW_COLORS     "Shows surface information as basic surface/texture color\nSurface Colors"
+    ID_VIEW_SHOW_SHADED     "Shows surface information as shaded surface/texture color\nShaded Colors"
+    ID_VIEW_SHOW_TXTONLY    "Shows surface information as basic texture color or black for no texture\nTextures Only"
+    ID_VIEW_SHOW_HGT        "Shows surface information as shaded colors based on the height\nHeight-based"
+    ID_SURF_DEFCLR          "Define a new color"
+    ID_SURF_EDITCLR         "Edit a color definition"
+    ID_SURF_DELETECLR       "Delete a color definition"
+    ID_EDIT_FLIPH           "Flips the terrain heights and surface information horizontally\nFlip Horiz"
+    ID_EDIT_FLIPV           "Flips the terrain heights and surface information vertically\nFlip Vert"
+    ID_EDIT_ROT90           "Rotates the terrain heights and surface information by 90 degrees to the right\nRotate Right"
+    ID_EDIT_ROTN90          "Rotates the terrain heights and surface information by 90 degrees to the left\nRotate Left"
+    ID_EDIT_ASSIGN_HEIGHT   "Assign textures/colors based on elevations\nHeight-based"
+END
+
+STRINGTABLE DISCARDABLE 
+BEGIN
+    ID_EDIT_ASSIGN_ROLL     "Assign textures/colors based on random roll\nRandom Roll"
+    ID_VIEW_SHOW_APP        "Shows surface information with colors for application bits or black for no application bits\nApplication Bits"
+    ID_SURF_LOADCLR         "Loads a color set from an external file\nLoad Colors"
+    ID_SURF_SAVECLR         "Saves the color set to an external file\nSave Colors"
+    ID_EDIT_ASSIGN_ANGLE    "Assign textures/colors based on surface angles\nAngle-based"
+    ID_TERR_SETBASE         "Sets a new base elevation value for the heights table\nSet Base"
+    ID_SURF_REMTXT          "Removes the texture definition for any texture that hasn't been applied to the terrain\nRemove Unused"
+END
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
 
 
 #ifndef APSTUDIO_INVOKED

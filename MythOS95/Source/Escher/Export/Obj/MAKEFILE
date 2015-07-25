@@ -8,7 +8,7 @@
 #ששששש²±²ששששששש²±²שששש²±²ש²±²שששש²±²ש²±²שששש²±²ש²±²שששששששש²±²שששש²±²שששששש
 #שששש²²²²²²²²²²ש²²²²²²²²ששש²²²²²²²²שש²²²שששש²²²ש²²²²²²²²²²ש²²²שששש²²²ששששששש
 #ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-#ששששששששששCopyrightש(c)ש1994,ש1995שbyשCharybdisשEnterprises,שInc.שששששששששש
+#שששששששששששCopyrightש(c)ש1994-1996שbyשCharybdisשEnterprises,שInc.שששששששששש
 #ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
 #ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
 #ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
@@ -81,7 +81,9 @@ init.obj\
 pxp.obj\
 support.obj\
 ui.obj\
+uilight.obj\
 uimtl.obj\
+uiquery.obj\
 vngcolor.obj\
 vngpal.obj
 
@@ -100,7 +102,7 @@ all: setstden setexten $(PXP).pxp
 
 !include make.inc
 
-CCOPTIONS = -5s -ze -zp1 -zq -w3 -oatx -s -j -ez -fpi87 -DNDEBUG  
+CCOPTIONS = -5s -ze -zp1 -zq -w1 -oatx -s -j -ez -fpi87 -DNDEBUG  
 
 LINKOPTS = op q libp $(LIBPATH)
 
@@ -146,7 +148,11 @@ clean:
 
 ui.obj: ..\escher.3de
 
+uilight.obj: ..\eschlgt.3de
+
 uimtl.obj: ..\eschmtl.3de
+
+uiquery.obj: ..\eschqry.3de
 
 #°±² End of makefile ²±°
 

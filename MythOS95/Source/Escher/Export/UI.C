@@ -8,7 +8,7 @@
 //ùùùùù²±²ùùùùùùù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùùùùùù²±²ùùùù²±²ùùùùùù
 //ùùùù²²²²²²²²²²ù²²²²²²²²ùùù²²²²²²²²ùù²²²ùùùù²²²ù²²²²²²²²²²ù²²²ùùùù²²²ùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùCopyrightù(c)ù1994,ù1995ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
+//ùùùùùùùùùùùCopyrightù(c)ù1994-1996ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -78,10 +78,12 @@ static void feel_ok(Dialog *d, int mouse);
 static void feel_cancel(Dialog *d, int mouse);
 static void feel_about(Dialog *d, int mouse);
 static void feel_target(Dialog *d, int mouse);
+static void feel_lights(Dialog *d, int mouse);
 static void feel_complete(Dialog *d, int mouse);
 //static void feel_nyi(Dialog *d, int mouse);
 
 //ÄÄÄ Functions in other modules
+void do_light();
 void do_mtl();
 void export();
 void load_from_ini(char *inifname);
@@ -114,6 +116,8 @@ static FeelSub Escher_feel[] =
     CANCEL,     feel_cancel,
     ABOUT,      feel_about,
     TARGET,     feel_target,
+    INC_LGTS,   feel_lights, 
+
     -1, FNULL
 };
 
@@ -171,17 +175,19 @@ extern char mtl_palname[];
 //                                                                          ³
 // Display product's about information.                                     ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void about(void) {
+void about(void)
+{
     int x;
 
     gfx_alert(0,
        "[                  Escher Data Exporter|"
        "                    for 3D Studio R4|"
        "|"
-       " Copyright (C) 1994, 1995 by Charybdis Enterprises, Inc.|"
+       " Copyright (C) 1994-1996 by Charybdis Enterprises, Inc.|"
        "                      " __DATE__ "]"
        "[ OK ]", x);
 }
+
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // do_user_interaction                                                      ³
@@ -206,13 +212,13 @@ void do_user_interaction()
     gfx_prompt("");
     gfx_prompt("");
 
-    // Force mtl_pathname to point to process directory with ESPORT.PAL
+    // Force mtl_pathname to point to process directory with ESPORT.VGP
     // as the filename.
 
     gfx_get_paths(GFX_PROCESS_PATH,0,path,file);
     
     strcpy(mtl_palpath,path);
-    strcpy(mtl_palname,"ESPORT.PAL");
+    strcpy(mtl_palname,"ESPORT.VGP");
 
     if (! inited)
     {
@@ -229,7 +235,8 @@ void do_user_interaction()
     do_export=loop_done=0;
 
     gfx_get_paths(GFX_3DS_PATH,0,path,file);
-    if (strstr(file,".3DS")) {
+    if (strstr(file,".3DS"))
+    {
         *strstr(file,".3DS")=0;
         strcpy(scene_name,file);
         strcat(file,".IFF");
@@ -272,18 +279,21 @@ void do_user_interaction()
 
 startover: ;
 
-    while (!loop_done) {
+    while (!loop_done)
+    {
         center_dialog(Escher);
         save_under_dialog(Escher);
         draw_dialog(Escher);
         do_dialog(Escher, -1);
     }
 
-    if (do_export) {
+    if (do_export)
+    {
 
         e=(Editable*)Escher[SCAL_3DS].text;
         t1=atof(e->string);
-        if (t1 <= 0.0) {
+        if (t1 <= 0.0)
+        {
             gfx_continu_line("Scale values must be positive and non-zero");
             loop_done=0;
             goto startover;
@@ -291,7 +301,8 @@ startover: ;
 
         e=(Editable*)Escher[SCAL_ESH].text;
         t2=atof(e->string);
-        if (t2 <= 0.0) {
+        if (t2 <= 0.0)
+        {
             gfx_continu_line("Scale values must be positive and non-zero");
             loop_done=0;
             goto startover;
@@ -379,7 +390,8 @@ static void feel_cancel(Dialog *d, int mouse)
     restore_under_dialog();
 
     gfx_yes_no_line("Exit without exporting?", status);
-    if(status) {
+    if(status)
+    {
         loop_done=1;
         do_export=0;
     }
@@ -416,7 +428,8 @@ static void feel_target(Dialog *d, int mouse)
     dialog_done=1;
     restore_under_dialog();
 
-    for(;;) {
+    for(;;)
+    {
         if (output_path[strlen(output_path)-1]=='\\')
             output_path[strlen(output_path)-1]=0;
 
@@ -429,7 +442,8 @@ static void feel_target(Dialog *d, int mouse)
         if (!*buff)
             return;
 
-        if (access(buff,0)==0) {
+        if (access(buff,0)==0)
+        {
             gfx_yes_no_line("File exists, overwrite?",status);
             if (status)
                 break;
@@ -447,25 +461,24 @@ static void feel_target(Dialog *d, int mouse)
     strcat(output_name,ext);
 }
 
+static void feel_lights(Dialog *d, int mouse)
+{
+    dialog_done=1;
+    restore_under_dialog();
+    do_light();
+    d->radio = (lights_flag) ? 1 : 0;
+}
+
 static void feel_complete(Dialog *d, int mouse)
 {
     feel_radio(d,mouse);
 
-    dialog_done=1;
-    restore_under_dialog();
-
-    if (d->radio) {
+    if (d->radio)
+    {
+        dialog_done=1;
+        restore_under_dialog();
         do_mtl();
     }
 }
-
-//static void feel_nyi(Dialog *d, int mouse)
-//{
-//    if(mouse)
-//        if(!(press_button(d)))
-//            return;
-//
-//    gfx_continu_line(" Not Yet Implemented ");
-//}
 
 //°±² End of module - ui.c ²±°

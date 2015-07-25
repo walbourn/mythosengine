@@ -6,7 +6,7 @@
 //    (_)       ^          * *     *      *   *    *            (_)
 //             (_)       **   **   *    ***** **** ****
 //
-//            Copyright (c) 1994,1995 by Charybdis Enterprises, Inc.
+//            Copyright (c) 1994-1996 by Charybdis Enterprises, Inc.
 //                              All Rights Reserved.
 //                        Microsoft Windows '95 Version
 //
@@ -83,7 +83,7 @@ STATIC ulong   Line=0;
 STATIC ulong   Maxline=24;
 
 STATIC char Util_name[]
-       = "°± IFF Directory - (C) 1994, 1995 Charybdis Enterprises, Inc. ±°\n"
+       = "°± IFF Directory - (C) 1994-1996 Charybdis Enterprises, Inc. ±°\n"
          "                   All Rights Reserved.  " __DATE__ "\n";
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±

@@ -8,7 +8,7 @@
 //ùùùùù²±²ùùùùùùù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùùùùùù²±²ùùùù²±²ùùùùùù
 //ùùùù²²²²²²²²²²ù²²²²²²²²ùùù²²²²²²²²ùù²²²ùùùù²²²ù²²²²²²²²²²ù²²²ùùùù²²²ùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùCopyrightù(c)ù1994,ù1995ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
+//ùùùùùùùùùùùCopyrightù(c)ù1994-1996ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùù Microsoft Windows '95 Version ùùùùùùùùùùùùùùùùùùùùùùù
@@ -60,7 +60,7 @@
 //
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
-#define VERSION "0.1"
+#define VERSION "1.31"
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
@@ -147,7 +147,7 @@ BOOL TerrEditApp::InitInstance()
 
 	// Enable DDE Execute open
 	EnableShellOpen();
-	RegisterShellFileTypes();
+	RegisterShellFileTypes(TRUE);
 
 	// simple command line parsing
 	if (m_lpCmdLine[0] == '\0')
@@ -181,6 +181,135 @@ int TerrEditApp::ExitInstance()
 
     return CWinApp::ExitInstance();
 }
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// TerrEditApp - LoadImage                                                  ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+BOOL TerrEditApp::LoadImage(const char *fname, XFBitmap *bm)
+{
+    ASSERT(fname != NULL && bm != NULL);
+
+    // Create parser for input bitmap filename type
+    XFParseBitmap *b;
+    if (strstr(fname,".bmp") || strstr(fname,".BMP"))
+    {
+        b = new XFParseBMP(bm);
+    }
+    else if (strstr(fname,".cel") || strstr(fname,".CEL"))
+    {
+        b = new XFParseCEL(bm);
+    }
+    else if (strstr(fname,".lbm") || strstr(fname,".LBM"))
+    {
+        b = new XFParseLBM(bm);
+    }
+    else if (strstr(fname,".tga") || strstr(fname,".TGA"))
+    {
+        b = new XFParseTGA(bm);
+    }
+    else if (strstr(fname,".pcx") || strstr(fname,".PCX"))
+    {
+        b = new XFParsePCX(bm);
+    }
+    else 
+    {
+        char str[256];
+        sprintf(str,"Cannot read given input file:\n%s",fname);
+        MessageBox(NULL, str, "Bitmap Load Error", MB_OK | MB_ICONEXCLAMATION);
+        return FALSE;
+    }
+
+    // Read bitmap
+    ASSERT(b);
+    int err;
+    if ((err=b->nameread(fname)) != 0)
+    {
+        char    str[256];
+
+        sprintf(str,"Error %x reading input file:\n%s",err,fname);
+        MessageBox(NULL,str, "Bitmap Load Error",
+                   MB_OK | MB_ICONEXCLAMATION);
+        delete b;
+        return FALSE;                   
+    }
+
+    delete b;
+    return TRUE;
+}
+
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// TerrEditApp - SaveImage                                                  ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+BOOL TerrEditApp::SaveImage(const char *fname, XFBitmap *bm)
+{
+    ASSERT(fname != NULL && bm != NULL);
+
+
+    char tname[256];
+    strcpy(tname, fname);
+    char *tempname;
+
+    tempname = tname;
+
+    // Create parser for input bitmap filename type
+    XFParseBitmap *b;
+    if (strstr(fname,".bmp") || strstr(fname,".BMP"))
+    {
+        b = new XFParseBMP(bm);
+    }
+    else if ((strstr(fname,".cel") || strstr(fname,".CEL")) && bm->bpp == 1)
+    {
+        b = new XFParseCEL(bm);
+    }
+    else if ((strstr(fname,".lbm") || strstr(fname,".LBM")) && bm->bpp == 1)
+    {
+        b = new XFParseLBM(bm);
+    }
+    else if ((strstr(fname,".tga") || strstr(fname,".TGA")) && bm->bpp == 3)
+    {
+        b = new XFParseTGA(bm);
+        
+    }
+    else if ((strstr(fname,".pcx") || strstr(fname,".PCX")) && bm->bpp == 1)
+    {
+        b = new XFParsePCX(bm);
+    }
+    else if (strstr(fname,"."))
+    {
+        char str[256];
+        sprintf(str,"Cannot write given input file:\n%s",fname);
+        MessageBox(NULL, str, "Bitmap Write Error", MB_OK | MB_ICONEXCLAMATION);
+        return FALSE;
+    }
+    else
+    {
+        strcat(tname, ".BMP");
+        b = new XFParseBMP(bm);
+    }
+
+    // Read bitmap
+    ASSERT(b);
+    int err;
+    if ((err=b->namewrite(tempname)) != 0)
+    {
+        char    str[256];
+
+        sprintf(str,"Error %x reading input file:\n%s",err,tempname);
+        MessageBox(NULL,str, "Bitmap Load Error",
+                   MB_OK | MB_ICONEXCLAMATION);
+        delete b;
+        return FALSE;                   
+    }
+
+    delete b;
+    return TRUE;
+}
+
+
+
 
 
 

@@ -73,47 +73,6 @@
 //
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
-#if 0
-#pragma aux flx_16mul16 =      \
-   "imul   edx"                \
-   "shrd   eax,edx,16"         \
-   parm caller [eax][edx] nomemory \
-   value [eax]                 \
-   modify [eax edx] nomemory;
-
-#pragma aux flx_16mul30 =      \
-   "imul   edx"                \
-   "shrd   eax,edx,30"         \
-   parm caller [eax][edx] nomemory \
-   value [eax]                 \
-   modify [eax edx] nomemory;
-
-
-#pragma aux flx_16div16 =      \
-   "xor    eax,eax"            \
-   "shrd   eax,edx,16"         \
-   "sar    edx,16"             \
-   "idiv   ecx"                \
-   parm caller [edx][ecx] nomemory \
-   value   [eax]               \
-   modify  [eax edx] nomemory;
-
-#pragma aux flx_muldiv =       \
-   "imul   edx"                \
-   "idiv   ecx"                \
-   parm caller [eax][edx][ecx] nomemory \
-   value   [eax]               \
-   modify  [eax edx] nomemory;
-
-#pragma aux flx_recip230 =     \
-   "mov    edx,04000h"         \
-   "xor    eax,eax"            \
-   "idiv   ecx"                \
-   parm caller [ecx] nomemory  \
-   value   [eax]               \
-   modify  [eax edx] nomemory; 
-
-#endif
 
 // These are the rapper functions to make the C++ functions return correctly.
 inline Flx16 flx_rand()
@@ -137,7 +96,35 @@ inline Flx16 flx_muldiv(Flx16 a,Flx16 b, Flx16 c)
         mov     edx,b.flx       
         mov     ecx,c.flx       
         imul    edx             
+
+        cmp     ecx,0
+        jge     t2
+        neg     ecx
+t2:
+        push    edx
+        cmp     edx,0
+        jge     t1
+        neg     edx
+t1:
+        shr     ecx,1
+        cmp     edx,ecx
+        jge     error_trap
+        mov     ecx,c.flx
+        pop     edx
         idiv    ecx             
+        jmp     done
+
+error_trap:
+        pop     edx
+        mov     ecx,c.flx
+        xor     edx,ecx
+        jl      t3
+        mov     eax,0x7fffffff
+        jmp     done
+t3:
+        mov     eax,0x80000000
+
+done:
         mov     ret_val.flx,eax 
     };
 
@@ -166,16 +153,45 @@ inline Flx16 flx_16mul16(Flx16 a,Flx16 b)
 
 inline Flx16 flx_16div16(Flx16 a,Flx16 b)
 {
-#ifdef INLINE_FELIX
     Flx16   ret_val;
+#ifdef INLINE_FELIX
 
     _asm {
-        xor     eax,eax
-        mov     edx,a.flx
-        shrd    eax,edx,16
-        sar     edx,16
-        idiv    b.flx
-        mov     ret_val.flx,eax
+	mov	edx,a.flx
+	xor	eax,eax
+	shrd	eax,edx,16
+	sar	edx,16
+#ifdef SAFE_DIVIDE
+	mov	ecx,b.flx
+	cmp	ecx,0
+	jge	jump_1
+	neg	ecx
+jump_1:
+	push	edx
+	cmp	edx,0
+	jge	jump_2
+	neg	edx
+jump_2:
+	shr	ecx,1
+	cmp	edx,ecx
+	jge	error_trap
+	pop	edx
+#endif
+	idiv	b.flx
+	mov	ret_val.flx,eax
+	jmp	_done
+#ifdef SAFE_DIVIDE
+error_trap:
+	pop	edx
+	xor	edx,b.flx
+	cmp	edx,0
+	jl	jump_3
+	mov	ret_val.flx,0x7fffffff
+	jmp	_done
+jump_3:
+	mov	ret_val.flx,0x80000000
+#endif
+_done:
     }
     return (ret_val);
 #else
@@ -183,14 +199,17 @@ inline Flx16 flx_16div16(Flx16 a,Flx16 b)
 #endif
 }
 
-inline Flx16 flx_sin(const Flx16 degrees)
-{
-    return(Flx16(asm_flx_sin(degrees),0));
-}
 
 inline Flx16 flx_abs(const Flx16 a)
 {
+#ifdef INLINE_FELIX
+    if (a.flx < 0)
+        return (-a);
+    else
+        return (a);
+#else
     return(Flx16(asm_flx_abs(a),0));
+#endif
 }
 
 inline Flx16 flx_sqrt(const Flx16 a)
@@ -203,16 +222,49 @@ inline dword flx_recip230(Flx16 a)
     return (asm_flx_recip230(a));
 }
 
-// Intrinsic functions.
-inline Flx16 flx_tan(const Flx16 degrees)
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// Intrinsic functions are defined here.                                    ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+inline Flx16 flx_sin(const Flx16 degrees)
 {
-   return (flx_sin(degrees)/flx_cos(degrees));
+    return(Flx16(asm_flx_sin(degrees),0));
 }
 
 inline Flx16 flx_cos(const Flx16 degrees)
 {
    return (flx_sin(degrees+Flx16(90)));
 }
+
+inline Flx16 flx_acos (const Flx16  a)
+{
+    return (flx_abs(Flx16(90) - flx_asin(a)));
+}
+
+inline Flx16 flx_tan(const Flx16 degrees)
+{
+   return (flx_sin(degrees)/flx_cos(degrees));
+}
+
+inline Flx16 flx_cot (const Flx16 a)
+{
+    return (flx_cos(a)/flx_sin(a));
+}
+
+inline Flx16 flx_sec (const Flx16 a)
+{
+    return (Flx16(1)/flx_cos(a));
+}
+
+inline Flx16 flx_csc (const Flx16 a)
+{
+    return (Flx16(1)/flx_sin(a));
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// Operator overloads are defined here.                                     ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
 inline Flx16 operator + (const Flx16 a, const Flx16 b)
 {
@@ -361,6 +413,21 @@ inline Flx16 operator *= (Flx16 &a, Flx16 b)
 
 inline Flx16 operator /= (Flx16 &a, const Flx16 b)
 {
+#ifdef SAFE_DIVIDE
+    Flx16   ret_val;
+    int t;
+    t = flx_abs(a);
+    if (t > (flx_abs(b).flx >> 1))
+    {
+        if ((a.flx ^ b.flx) < 0)
+            ret_val.flx = 0x8000000;
+        else
+            ret_val.flx = 0x7ffffff;
+
+        return (ret_val);
+    }
+#endif
+
 #ifdef INLINE_FELIX
     long l = a.flx;
     _asm {

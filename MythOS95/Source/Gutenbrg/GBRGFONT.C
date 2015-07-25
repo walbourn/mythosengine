@@ -11,7 +11,7 @@
 //                     Text Output and Font Management System
 //                          Microsoft Windows '95 Version
 //
-//               Copyright (c) 1995 by Charybdis Enterprises, Inc.
+//            Copyright (c) 1995, 1996 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved.
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -62,7 +62,7 @@
 //
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
-GBergFontInfo *igberg_empty_font();
+extern GBergFontInfo *igberg_empty_font();
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
@@ -100,10 +100,10 @@ gberg_error_codes gberg_color(dword fcol, dword bcol)
 //                                                                          ³
 // Makes the given font active, locking it's handle.                        ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-gberg_error_codes gberg_select_font(char *fntname)
+gberg_error_codes gberg_select_font(const char *fntname)
 {
     ulong               i;
-    GBergFontInfo       *fnt;
+    GBergFontInfo       *fnt, *nfnt;
 
     assertMyth("Gutenberg must be initialized",GBergInstance);
 
@@ -113,29 +113,20 @@ gberg_error_codes gberg_select_font(char *fntname)
     fnt=GBergInstance->font_active;
     if (fnt)
     {
-
 //ÄÄ Check to see if already active
         if (*fntname == *fnt->name)
         {
             if (!strcmp(fntname,fnt->name))
                 return GBERG_ERR_NONE;
         }
-
-//ÄÄ Unlock active
-        assertMyth("gberg_select_font assumes active font has valid data",
-                   fnt->data);
-
-        ivory_hunlock(fnt->data);
-        fnt->ptr=0;
-
-        GBergInstance->font_active=0;
     }
 
 //ÄÄ Search for given font name
-    for(i=0, fnt=&GBergInstance->fonts[0]; i < GBergInstance->fonts_hi; i++, fnt++)
+    for(i=0, nfnt=&GBergInstance->fonts[0]; i < GBergInstance->fonts_hi; i++, nfnt++)
     {
-        if (*fntname == *fnt->name) {
-            if (!strcmp(fntname,fnt->name))
+        if (*fntname == *nfnt->name)
+        {
+            if (!strcmp(fntname,nfnt->name))
                 break;
         }
     }
@@ -145,18 +136,29 @@ gberg_error_codes gberg_select_font(char *fntname)
         return GBERG_ERR_FONTNOTINSTALLED;
     }
 
-//ÄÄ Lock font
-    assertMyth("gberg_select_font assumes font not already locked",
-               !fnt->ptr);
+//ÄÄ Unlock old font, if active
+    if (fnt)
+    {
+        assertMyth("gberg_select_font assumes active font has valid data",
+                   fnt->data);
 
-    fnt->ptr=ivory_hlock(fnt->data);
-    if (!fnt->ptr)
+        ivory_hunlock(fnt->data);
+        fnt->ptr=0;
+
+        GBergInstance->font_active=0;
+    }
+
+//ÄÄ Lock new font
+    assertMyth("gberg_select_font assumes font not already locked",
+               !nfnt->ptr);
+
+    nfnt->ptr=ivory_hlock(nfnt->data);
+    if (!nfnt->ptr)
         return GBERG_ERR_LOCKFAILED;
 
-    GBergInstance->font_active=fnt;
+    GBergInstance->font_active=nfnt;
     
     return GBERG_ERR_NONE;
 }
 
 //°±² End of module - gbrgfont.c ²±°
-

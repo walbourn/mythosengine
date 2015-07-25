@@ -7,7 +7,7 @@
  ששששש///ששששששש///שששש///ש///שששש///ש///שששש///ש///שששששששש///שששש///שששששש
  שששש//////////ש////////ששש////////שש///.ששש///.//////////ש///שששש///.שששששש
  ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
- שששששששששששCopyrightש(c)ש1994,ש1995שbyשCharybdisשEnterprises,שInc.ששששששששש
+ שששששששששששCopyrightש(c)ש1994-1996שbyשCharybdisשEnterprises,שInc.שששששששששש
  ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
  ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
  ששששששששששששששששששששש Microsoft Windows '95 Version ששששששששששששששששששששששש
@@ -38,42 +38,122 @@
 
  Notes by: Chuck Walbourn
 
- Last Updated: Nov 7, 1995
+ Last Updated: August 16, 1996
 
  Escher Terrain Editor - MFC Application
 
  Changes for this release --------------------------------------------------
 
- o Created MFC application for editing terrain data sets.
+ Version 1.31
+
+ o The shift left-click shortcut for assigning textures now supports a
+   rectangle area set.  Colors may be set by selecting a color in the
+   Color Definitions listbox instead of a texture.
+
+ o Added new bits for applications and for new terrain system--dropping
+   water/fire/smoke bits from terrain data--to surface, texture, and color
+   flags property sheets.  A new view mode displays the application bits
+   on shaded terrain.
+
+ o Added Load and Save Textures commands to read and write the texture
+   definitions to an ASCII file and two similar commands for color
+   definitions.
+
+ o The texture definition dialog now includes a View button to view the
+   currently selected bitmap file as it would appear in the current palette.
+   Also includes a 'Create New Texture' button for generating a new texture
+   from a 'transparent' master texture or from base colors or another
+   bitmap.
+
+ o Added one-level undo for the surface information grid (surface colors,
+   attributes, and texture assignments).
+
+ o Terrain level-of-detail controls have been added to the View Properties
+   dialog.
+
+ o Added 'hover' mode which causes the camera to maintain a fixed height
+   above the terran and can be moved in X and Z.  The hover height can be
+   set in the view properites dialog.
+
+ o Added light properties dialog and support for Point, Attenuated, and Spot
+   lights to the render view (Ambient and fast lights are not allowed since
+   do not work well with terrain drawables).
+
+ o Added option to display surface information as basic colors, shaded
+   colors, textures only, height-based colors, or based on application bits.
+
+ o Surface information display has been 'flipped' to allow easier setup
+   of texture bitmaps.
+
+ o Added terrain properties page for assignment of heights to color bands. 
+   Data is included in the terrain export.
+
+ o CST file now includes camera and lights data, height-color bands
+   information, and other misc. settings.
+
+ o Custom color dialog picker is now in use.
+
+ o Cleaned up dialogs.
+
+ o Added compressed normals output for export.
+
+ o Automatic use of the VR Labs DECOMP utility when importing a compressed
+   VistaPro DEM file.
+
+ o Added new methods for converting VistaPro DEMs to Escher terrain using
+   a height table instead of a direct scale value.  Fixed problem with
+   inversing of DEM data on import.
+
+ o Added USGS DEM terrain import for height data.
+
+ o Added Edit/Flip Horizontal, Edit/Flip Vertical, and Edit Rotate 90
+   commands.
+
+ o Added Edit/Assign by commands for assiging textures/colors based
+   on elevations, random roll, and surface angle.
+
+ o Added Terrain/Set base elevation option to control height-table values.
+
+ o Added support for extended camera features including bitmap backgrounds
+   and hazing.
 
 
 
- Pending changes -----------------------------------------------------------
+ Proposed changes ----------------------------------------------------------
 
- o The render view camera's location should be indicated on the
+ o Multiple light sources for complex 'pre-lighting' to take advantage
+   of the saving of shade values into the export.  Lighting information
+   should be exportable to the IFF for loading assoicated lights as Fast
+   lights into Escher.
+
+ o The render view camera's location (and lights) should be indicated on the
    surface grid.
 
- o A method for setting an area of the surface grid to a specified color
-   and/or flags combination is needed for large editing changes.
+ o Perhaps need a 'Reset' button for Camera properties.
 
  o A zoom to rectangle option would be convient.
 
- o Export to IFF currently exports the current lighting values.
-   Option for clearing this should be included.
-
- o Display using the level-of-detail control should be added to the
-   render view.
+ o Texturing tools for assigning textures by elevation, by picking from
+   a random roll, and based on slope.
 
 
 
  Known problems ------------------------------------------------------------
 
- o A number of menu items are being sent messages to disable themselves
-   when the render view is disabled.  Windows 95 or MFC is not properly
-   setting thier new states, and they therefore remain active even while
-   the render view is disabled.
+ o There are some problems with the render view locking up on occasion when
+   using non-DOTS mode.  You are strongly advised to SAVE BEFORE USING THE
+   RENDER VIEW.  The problem seems to occur most often when in Hover mode.
 
-   Also, the 'Perspective' render mode option is supposed to be disabled
-   when 'Textures' mode is off.
+ o If the render mode is set to Wire or Solid, then the 'shaded' version of
+   the Surface Information Grid will appear the same as the 'colors' version
+   since all shades are set to the palette's mid-point.
+
+ o If the same bitmap is used for multiple textures, it will be exported
+   and subsequently loaded multiple times.  Any unused bitmaps defined
+   during export will also be exported.  The Surface/Remove Unused Definitions
+   option may be used to remove these unreferenced textures.
+
+ o If you move a child window accidentially, you can resize the main window
+   to restore the original window locations.
 
  *** END OF FILE ***

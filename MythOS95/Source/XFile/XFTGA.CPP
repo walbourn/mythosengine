@@ -6,7 +6,7 @@
 //    (_)       ^          * *     *      *   *    *            (_)
 //             (_)       **   **   *    ***** **** ****
 //
-//            Copyright (c) 1994,1995 by Charybdis Enterprises, Inc.
+//            Copyright (c) 1994-1996 by Charybdis Enterprises, Inc.
 //                              All Rights Reserved.
 //                        Microsoft Windows '95 Version
 //
@@ -210,7 +210,7 @@ xf_error_codes XFParseTGA::write(XFBitmap *b)
     ulong               lsize;
     byte                *sptr, *dptr;
     byte                *work;
-    int                 locked;
+    int                 locked=0;
     struct TGA_header   header;
 
     if (!b)

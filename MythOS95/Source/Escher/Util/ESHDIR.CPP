@@ -8,7 +8,7 @@
 //ששששש²±²ששששששש²±²שששש²±²ש²±²שששש²±²ש²±²שששש²±²ש²±²שששששששש²±²שששש²±²שששששש
 //שששש²²²²²²²²²²ש²²²²²²²²ששש²²²²²²²²שש²²²שששש²²²ש²²²²²²²²²²ש²²²שששש²²²ששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//ששששששששששCopyrightש(c)ש1994,ש1995שbyשCharybdisשEnterprises,שInc.שששששששששש
+//שששששששששששCopyrightש(c)ש1994-1996שbyשCharybdisשEnterprises,שInc.שששששששששש
 //ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
 //ששששששששששששששששששששש Microsoft Windows '95 Version ששששששששששששששששששששששש
@@ -45,6 +45,7 @@
 #include <conio.h>
 #include <iostream.h>
 #include <stdlib.h>
+#include <stdio.h>
 
 #include "debug.h"
 #include "xfile.hpp"
@@ -152,7 +153,7 @@ void main(int argc, char *argv[])
     }
    
 //ִִִ Print outline of file contents
-    cout << "°± Escher Directory - (C) 1994, 1995 Charybdis Enterprises, Inc. ±°\n";
+    cout << "°± Escher Directory - (C) 1994-1996 Charybdis Enterprises, Inc. ±°\n";
     cout << "   File: " << fn << "\n";
     Line=2;
     directory(iff);
@@ -167,7 +168,7 @@ void main(int argc, char *argv[])
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִÙ
 STATIC void print_help(int full)
 {
-    cout << "°± Escher Directory - (C) 1994, 1995 Charybdis Enterprises, Inc. ±°\n";
+    cout << "°± Escher Directory - (C) 1994-1996 Charybdis Enterprises, Inc. ±°\n";
     cout << "                      " __DATE__ "\n";
     cout << "   Usage: eshdir [-p] <filename.iff>\n";
     if (full)
@@ -240,25 +241,18 @@ STATIC void print_error(XFParseIFF &xp, char *s)
 STATIC void directory(XFParseIFF &iff)
 {
     ulong               i;
-    EschFileSceneHDR    sheader;
     EschFileMeshHDR     mheader;
     EschFileMeshEXNT    mextents;
     EschFileMeshMTL     *emtls;
     EschFileMtlMHDR     mtlhdr;
-    EschMatrix          mtx;
-    EschFileCamera      cdata;
-    EschFileLightAmbi   adata;
-    EschFileLightPoint  pdata;
-    EschFileLightVect   vdata;
     EschFileMeshHIER    ehier;
-    EschFileTerrHDR     theader;
     
     memset(&mheader,0,sizeof(EschFileMeshHDR));
 
 //ִִ Loop through current level
     while (iff.next() == XF_ERR_NONE)
     {
-
+        //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ Scenes
         if ((iff.makeid('F','O','R','M') == iff.chunkid)
              && (iff.makeid('E','S','E','N') == iff.formid))
         {
@@ -268,6 +262,8 @@ STATIC void directory(XFParseIFF &iff)
             }
             else
             {
+                EschFileSceneHDR    sheader;
+
                 cout << "Scene";
                 for(i=sizeof("Object")-1; i < MAXCOLUMN; i++)
                     cout << "ֽ";
@@ -296,7 +292,17 @@ STATIC void directory(XFParseIFF &iff)
                     pause();
                     cout << "       # VLights: " << sheader.nvectorlights << "\n";
                     pause();
+                    cout << "     # FP Lights: " << sheader.nfpointlights << "\n";
+                    pause();
+                    cout << " # FAtten Lights: " << sheader.nfattenlights << "\n";
+                    pause();
+                    cout << "  # FSpot Lights: " << sheader.nfspotlights << "\n";
+                    pause();
                     cout << "       # PLights: " << sheader.npointlights << "\n";
+                    pause();
+                    cout << "  # Atten Lights: " << sheader.nattenlights << "\n";
+                    pause();
+                    cout << "   # Spot Lights: " << sheader.nspotlights << "\n";
                     pause();
                 }
 
@@ -308,8 +314,51 @@ STATIC void directory(XFParseIFF &iff)
             }
             
         }
+        //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ Misc data
+        else if (iff.makeid('D','E','S','C') == iff.chunkid)
+        {
+            char    buff[256];
 
-        if ((iff.makeid('F','O','R','M') == iff.chunkid)
+            if (iff.read(buff))
+            {
+                print_error(iff,"Problem reading scene description");
+            }
+            else 
+            {
+                cout << "   Desc: " <<  buff << endl;
+                pause();
+            }
+        }
+        else if (iff.makeid('A','U','T','H') == iff.chunkid)
+        {
+            char    buff[256];
+
+            if (iff.read(buff))
+            {
+                print_error(iff,"Problem reading scene author string");
+            }
+            else 
+            {
+                cout << " Author: " <<  buff << endl;
+                pause();
+            }                         
+        }
+        else if (iff.makeid('(','C',')',' ') == iff.chunkid)
+        {
+            char    buff[256];
+
+            if (iff.read(buff))
+            {
+                print_error(iff,"Problem reading scene copyright notice");
+            }
+            else 
+            {
+                cout << " Notice: " <<  buff << endl;
+                pause();
+            }
+        }
+        //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ Mesh
+        else if ((iff.makeid('F','O','R','M') == iff.chunkid)
             && (iff.makeid('E','M','S','H') == iff.formid))
         {
 
@@ -379,6 +428,8 @@ STATIC void directory(XFParseIFF &iff)
                     }
                     else if (iff.makeid('M','T','R','X') == iff.chunkid)
                     {
+                        EschMatrix          mtx;
+
                         if (iff.chunkSize != sizeof(EschMatrix))
                         {
                             print_error(iff,"Matrix chunk not valid, incorrect size");
@@ -516,8 +567,10 @@ STATIC void directory(XFParseIFF &iff)
                 iff.leaveform();
             }
         }
+        //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ Camera
         else if (iff.makeid('E','C','A','M') == iff.chunkid)
         {
+            EschFileCamera      cdata;
 
             if (iff.chunkSize != sizeof(EschFileCamera))
             {
@@ -559,12 +612,14 @@ STATIC void directory(XFParseIFF &iff)
                 pause();
             }
         }
+        //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ Ambient Light
         else if (iff.makeid('E','A','M','B') == iff.chunkid)
         {
+            EschFileLightAmbi   adata;
 
             if (iff.chunkSize != sizeof(EschFileLightAmbi))
             {
-                print_error(iff,"Ambient chunk not valid, incorrect size");
+                print_error(iff,"Ambient light chunk not valid, incorrect size");
             }
             else if (iff.read(&adata))
             {
@@ -594,12 +649,14 @@ STATIC void directory(XFParseIFF &iff)
                 pause();
             }
         }
+        //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ Vector Light
         else if (iff.makeid('E','V','E','C') == iff.chunkid)
         {
+            EschFileLightVect   vdata;
 
             if (iff.chunkSize != sizeof(EschFileLightVect))
             {
-                print_error(iff,"Vector chunk not valid, incorrect size");
+                print_error(iff,"Vector light chunk not valid, incorrect size");
             }
             else if (iff.read(&vdata))
             {
@@ -633,12 +690,15 @@ STATIC void directory(XFParseIFF &iff)
                 pause();
             }
         }
-        else if (iff.makeid('E','P','N','T') == iff.chunkid)
+        //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ (Fast) Point Light
+        else if (iff.makeid('E','P','N','T') == iff.chunkid
+                 || iff.makeid('E','F','P','T') == iff.chunkid)
         {
+            EschFileLightPoint  pdata;
 
             if (iff.chunkSize != sizeof(EschFileLightPoint))
             {
-                print_error(iff,"Point chunk not valid, incorrect size");
+                print_error(iff,"Point light chunk not valid, incorrect size");
             }
             else if (iff.read(&pdata))
             {
@@ -646,9 +706,18 @@ STATIC void directory(XFParseIFF &iff)
             }
             else
             {
-                cout << "Point Light";
-                for(i=sizeof("Point Light")-1; i < MAXCOLUMN; i++)
-                    cout << "ִ";
+                if (iff.makeid('E','F','P','T') == iff.chunkid)
+                {
+                    cout << "Fast Point Light";
+                    for(i=sizeof("Fast Point Light")-1; i < MAXCOLUMN; i++)
+                        cout << "ִ";
+                }
+                else
+                {
+                    cout << "Point Light";
+                    for(i=sizeof("Point Light")-1; i < MAXCOLUMN; i++)
+                        cout << "ִ";
+                }
                 cout << "\n";
                 pause();
                
@@ -672,9 +741,127 @@ STATIC void directory(XFParseIFF &iff)
                 pause();
             }
         }
+        //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ (Fast) Attenuated Light
+        else if (iff.makeid('E','A','T','N') == iff.chunkid
+                 || iff.makeid('E','F','A','T') == iff.chunkid)
+        {
+            EschFileLightAtten  adata;
+
+            if (iff.chunkSize != sizeof(EschFileLightAtten))
+            {
+                print_error(iff,"Attenuated light chunk not valid, incorrect size");
+            }
+            else if (iff.read(&adata))
+            {
+                print_error(iff,"Problem reading attenuated light chunk");
+            }
+            else
+            {
+                if (iff.makeid('E','F','A','T') == iff.chunkid)
+                {
+                    cout << "Fast Atten Light";
+                    for(i=sizeof("Fast Atten Light")-1; i < MAXCOLUMN; i++)
+                        cout << "ִ";
+                }
+                else
+                {
+                    cout << "Atten Light";
+                    for(i=sizeof("Atten Light")-1; i < MAXCOLUMN; i++)
+                        cout << "ִ";
+                }
+                cout << "\n";
+                pause();
+               
+                cout << "³" << adata.name;
+                cout.flush();
+                printf( "\tFLAGS: %x\n",adata.flags);
+                pause();
+                cout << "³COLOR: " << (adata.color & 0xff) << " "
+                                   << ((adata.color >> 8) & 0xff) << " "
+                                   << ((adata.color >> 16) & 0xff) << "\n";
+                pause();
+                cout << "³  POS: " << (float)adata.x << " ";
+                cout << (float)adata.y << " ";
+                cout << (float)adata.z << "\n";
+                pause();
+                cout << "³ RNGS: " << (float)adata.inner << " ";
+                cout << (float)adata.outer << "\n";
+                pause();
+               
+                cout << "ְ";
+                for(i=1; i < MAXCOLUMN; i++)
+                    cout << "ִ";
+                cout << "\n";
+                pause();
+            }
+        }
+        //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ Spot Light
+        else if (iff.makeid('E','S','P','T') == iff.chunkid
+                 || iff.makeid('E','F','S','P') == iff.chunkid)
+        {
+            EschFileLightSpot   sdata;
+
+            if (iff.chunkSize != sizeof(EschFileLightSpot))
+            {
+                print_error(iff,"Spot light chunk not valid, incorrect size");
+            }
+            else if (iff.read(&sdata))
+            {
+                print_error(iff,"Problem reading spot light chunk");
+            }
+            else
+            {
+                if (iff.makeid('E','F','S','P') == iff.chunkid)
+                {
+                    cout << "Fast Spot Light";
+                    for(i=sizeof("Fast Spot Light")-1; i < MAXCOLUMN; i++)
+                        cout << "ִ";
+                }
+                else
+                {
+                    cout << "Spot Light";
+                    for(i=sizeof("Spot Light")-1; i < MAXCOLUMN; i++)
+                        cout << "ִ";
+                }
+                cout << "\n";
+                pause();
+               
+                cout << "³" << sdata.name;
+                cout.flush();
+                printf( "\tFLAGS: %x\n",sdata.flags);
+                pause();
+                cout << "³COLOR: " << (sdata.color & 0xff) << " "
+                                   << ((sdata.color >> 8) & 0xff) << " "
+                                   << ((sdata.color >> 16) & 0xff) << "\n";
+                pause();
+                cout << "³  POS: " << (float)sdata.x << " ";
+                cout << (float)sdata.y << " ";
+                cout << (float)sdata.z << "\n";
+                pause();
+                cout << "³  DIR: " << (float)sdata.i << " ";
+                cout << (float)sdata.j << " ";
+                cout << (float)sdata.k << "\n";
+                pause();
+                cout << "³HSPOT: " << (float)sdata.hotspot;
+                cout << "\tFALLOFF: " << (float)sdata.falloff << "\n";
+                pause();
+                cout << "³ RNGS: " << (float)sdata.inner << " ";
+                cout << (float)sdata.outer << "\n";
+                pause();
+               
+                cout << "ְ";
+                for(i=1; i < MAXCOLUMN; i++)
+                    cout << "ִ";
+                cout << "\n";
+                pause();
+            }
+        }
+        //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ Terrain
         else if ((iff.makeid('F','O','R','M') == iff.chunkid)
                  && (iff.makeid('E','T','E','R') == iff.formid))
         {
+            EschFileTerrHDR     theader;
+            EschFileTerrHCLR    thcolor;
 
             if (iff.enterform() != XF_ERR_NONE)
             {
@@ -693,7 +880,6 @@ STATIC void directory(XFParseIFF &iff)
 
                     if (iff.makeid('H','D','R',' ') == iff.chunkid)
                     {
-
                         if (iff.chunkSize != sizeof(EschFileTerrHDR))
                         {
                             print_error(iff,"Terrain header chunk not valid, incorrect size");
@@ -730,6 +916,7 @@ STATIC void directory(XFParseIFF &iff)
                         else 
                         {
                             cout << "³  DESC: " <<  buff << endl;
+                            pause();
                         }
                     }
                     else if (iff.makeid('A','U','T','H') == iff.chunkid)
@@ -743,6 +930,7 @@ STATIC void directory(XFParseIFF &iff)
                         else 
                         {
                             cout << "³  AUTH: " <<  buff << endl;
+                            pause();
                         }
                     }
                     else if (iff.makeid('(','C',')',' ') == iff.chunkid)
@@ -756,7 +944,50 @@ STATIC void directory(XFParseIFF &iff)
                         else 
                         {
                             cout << "³   (C): " <<  buff << endl;
+                            pause();
                         }
+                    }
+                    else if (iff.makeid('H','C','L','R') == iff.chunkid)
+                    {
+                        if (iff.chunkSize != sizeof(EschFileTerrHCLR))
+                        {
+                            print_error(iff,"Terrain color bands chunk not valid, incorrect size");
+                        }
+                        else if (iff.read(&thcolor))
+                        {
+                            print_error(iff,"Problem reading terrain color bands chunk");
+                        }
+                        else 
+                        {  
+                            cout << "³  Height-based color bands present:" << thcolor.blue << endl;
+                            pause();
+                            cout << "³  \tBlue:" << thcolor.blue << endl;
+                            pause();
+                            cout << "³  \tL. Blue:" << thcolor.lblue << endl;
+                            pause();
+                            cout << "³  \tWhite:" << thcolor.white << endl;
+                            pause();
+                            cout << "³  \tGreen:" << thcolor.green << endl;
+                            pause();
+                            cout << "³  \tL. Green:" << thcolor.lgreen << endl;
+                            pause();
+                            cout << "³  \tYellow:" << thcolor.yellow << endl;
+                            pause();
+                            cout << "³  \tL. Orange:" << thcolor.lorange << endl;
+                            pause();
+                            cout << "³  \tOrange:" << thcolor.orange << endl;
+                            pause();
+                            cout << "³  \tL. Brown:" << thcolor.lbrown << endl;
+                            pause();
+                            cout << "³  \tBrown:" << thcolor.brown << endl;
+                            pause();
+                            cout << "³  \tRed:" << thcolor.red << endl;
+                            pause();
+                        }
+                    }
+                    else if (iff.makeid('H','T','B','L') == iff.chunkid)
+                    {
+                        cout << "³ Contains height-table" << endl;
                     }
                     else if (iff.makeid('S','U','R','F') == iff.chunkid)
                     {
@@ -765,6 +996,10 @@ STATIC void directory(XFParseIFF &iff)
                     else if (iff.makeid('N','R','M','L') == iff.chunkid)
                     {
                         cout << "³ Contains normals" << endl;
+                    }
+                    else if (iff.makeid('N','R','M','1') == iff.chunkid)
+                    {
+                        cout << "³ Contains normals (compressed)" << endl;
                     }
                     else if ((iff.makeid('F','O','R','M') == iff.chunkid)
                             && (iff.makeid('E','M','T','L') == iff.formid))

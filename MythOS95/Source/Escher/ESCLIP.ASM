@@ -126,42 +126,6 @@ START_PROC esch_clip_x_line,    C  p:dword, s:dword, f:dword, out_point:dword
         mov     (VNGO_POINT PTR [ecx]).pt_y,eax
 
 
-;; Calculate the new shade.
-        mov     eax,t                   ; get the multiplier again.
-        mov     ebx,(VNGO_POINT PTR [esi]).pt_shade
-        sub     ebx,(VNGO_POINT PTR [edi]).pt_shade
-        imul    ebx
-        shrd    eax,edx,30
-        add     eax,(VNGO_POINT PTR [edi]).pt_shade
-        mov     (VNGO_POINT PTR [ecx]).pt_shade,eax
-
-;; Calculate the new U.
-        mov     eax,t
-        mov     ebx,(VNGO_POINT PTR [esi]).pt_u
-        sub     ebx,(VNGO_POINT PTR [edi]).pt_u
-        imul    ebx
-        shrd    eax,edx,30
-        add     eax,(VNGO_POINT PTR [edi]).pt_u
-        mov     (VNGO_POINT PTR [ecx]).pt_u,eax
-
-;; Calculate the new V.
-        mov     eax,t
-        mov     ebx,(VNGO_POINT PTR [esi]).pt_v
-        sub     ebx,(VNGO_POINT PTR [edi]).pt_v
-        imul    ebx
-        shrd    eax,edx,30
-        add     eax,(VNGO_POINT PTR [edi]).pt_v
-        mov     (VNGO_POINT PTR [ecx]).pt_v,eax
-
-;; Calculate the new Z.
-        mov     eax,t
-        mov     ebx,(VNGO_POINT PTR [esi]).pt_z
-        sub     ebx,(VNGO_POINT PTR [edi]).pt_z
-        imul    ebx
-        shrd    eax,edx,30
-        add     eax,(VNGO_POINT PTR [edi]).pt_z
-        mov     (VNGO_POINT PTR [ecx]).pt_z,eax
-
 ;; Calculate the new W.
         mov     eax,t
         mov     ebx,(VNGO_POINT PTR [esi]).pt_w
@@ -171,6 +135,171 @@ START_PROC esch_clip_x_line,    C  p:dword, s:dword, f:dword, out_point:dword
         add     eax,(VNGO_POINT PTR [edi]).pt_w
         mov     (VNGO_POINT PTR [ecx]).pt_w,eax
 
+;; Calculate the new shade.
+if 1    ;; This is the perspective clip, it gets applied whether doing
+        ;; perspective texture maping or not!
+        push    ecx
+        mov     eax,(VNGO_POINT PTR [esi]).pt_w
+        mov     ebx,(VNGO_POINT PTR [esi]).pt_shade
+	shl	ebx,13
+        imul    ebx
+        shld    edx,eax,2
+        mov     ecx,edx
+
+        mov     ebx,(VNGO_POINT PTR [edi]).pt_shade
+        mov     eax,(VNGO_POINT PTR [edi]).pt_w
+	shl	ebx,13
+        imul    ebx
+        shld    edx,eax,2
+        push    edx
+        sub     ecx,edx
+        mov     eax,t
+        imul    ecx
+        shld    edx,eax,2
+        pop     eax
+        add     edx,eax
+        xor     eax,eax
+        shrd    eax,edx,2
+        sar     edx,2
+        pop     ecx
+        idiv    (VNGO_POINT PTR [ecx]).pt_w
+	shr	eax,13
+	adc	eax,0
+        mov     (VNGO_POINT PTR [ecx]).pt_shade,eax
+else
+        mov     eax,t                   ; get the multiplier again.
+        mov     ebx,(VNGO_POINT PTR [esi]).pt_shade
+        sub     ebx,(VNGO_POINT PTR [edi]).pt_shade
+        imul    ebx
+        shrd    eax,edx,30
+        add     eax,(VNGO_POINT PTR [edi]).pt_shade
+        mov     (VNGO_POINT PTR [ecx]).pt_shade,eax
+endif
+
+;; Calculate the new U.
+if 1    ;; This is the perspective clip, it gets applied whether doing
+        ;; perspective texture maping or not!
+        push    ecx
+        mov     eax,(VNGO_POINT PTR [esi]).pt_w
+        mov     ebx,(VNGO_POINT PTR [esi]).pt_u
+        imul    ebx
+        shld    edx,eax,2
+        mov     ecx,edx
+
+        mov     ebx,(VNGO_POINT PTR [edi]).pt_u
+        mov     eax,(VNGO_POINT PTR [edi]).pt_w
+        imul    ebx
+        shld    edx,eax,2
+        push    edx
+        sub     ecx,edx
+        mov     eax,t
+        imul    ecx
+        shld    edx,eax,2
+        pop     eax
+        add     edx,eax
+        xor     eax,eax
+        shrd    eax,edx,2
+        sar     edx,2
+        pop     ecx
+        idiv    (VNGO_POINT PTR [ecx]).pt_w
+	shl	edx,1
+	cmp	edx,(VNGO_POINT PTR [ecx]).pt_w
+	jl	@f
+	inc	eax
+@@:
+        mov     (VNGO_POINT PTR [ecx]).pt_u,eax
+else
+        mov     eax,t
+        mov     ebx,(VNGO_POINT PTR [esi]).pt_u
+        sub     ebx,(VNGO_POINT PTR [edi]).pt_u
+        imul    ebx
+        shrd    eax,edx,30                 
+        add     eax,(VNGO_POINT PTR [edi]).pt_u
+        mov     (VNGO_POINT PTR [ecx]).pt_u,eax
+endif
+;; Calculate the new V.
+if 1    ;; This is the perspective clip, it gets applied whether doing   
+        ;; perspective texture maping or not!
+
+        push    ecx
+        mov     eax,(VNGO_POINT PTR [esi]).pt_w
+        mov     ebx,(VNGO_POINT PTR [esi]).pt_v
+        imul    ebx
+        shld    edx,eax,2
+        mov     ecx,edx
+
+        mov     ebx,(VNGO_POINT PTR [edi]).pt_v
+        mov     eax,(VNGO_POINT PTR [edi]).pt_w
+        imul    ebx
+        shld    edx,eax,2
+        push    edx
+        sub     ecx,edx
+        mov     eax,t
+        imul    ecx
+        shld    edx,eax,2
+        pop     eax
+        add     edx,eax
+        xor     eax,eax
+        shrd    eax,edx,2
+        sar     edx,2
+        pop     ecx
+        idiv    (VNGO_POINT PTR [ecx]).pt_w
+	shl	edx,1
+	cmp	edx,(VNGO_POINT PTR [ecx]).pt_w
+	jl	@f
+	inc	eax
+@@:
+        mov     (VNGO_POINT PTR [ecx]).pt_v,eax
+else
+        mov     eax,t
+        mov     ebx,(VNGO_POINT PTR [esi]).pt_v
+        sub     ebx,(VNGO_POINT PTR [edi]).pt_v
+        imul    ebx
+        shrd    eax,edx,30                 
+        add     eax,(VNGO_POINT PTR [edi]).pt_v
+        mov     (VNGO_POINT PTR [ecx]).pt_v,eax
+endif
+;; Calculate the new Z.
+if 1    ;; This is the perspective clip, it gets applied whether doing   
+        ;; perspective texture maping or not!
+        push    ecx			      
+        mov     eax,(VNGO_POINT PTR [esi]).pt_w
+        mov     ebx,(VNGO_POINT PTR [esi]).pt_wz
+        imul    ebx
+        shld    edx,eax,2
+        mov     ecx,edx
+
+        mov     ebx,(VNGO_POINT PTR [edi]).pt_wz
+        mov     eax,(VNGO_POINT PTR [edi]).pt_w
+        imul    ebx
+        shld    edx,eax,2
+        push    edx
+        sub     ecx,edx
+        mov     eax,t
+        imul    ecx
+        shld    edx,eax,2
+        pop     eax
+        add     edx,eax
+        xor     eax,eax
+        shrd    eax,edx,2
+        sar     edx,2
+        pop     ecx
+        idiv    (VNGO_POINT PTR [ecx]).pt_w
+	shl	edx,1
+	cmp	edx,(VNGO_POINT PTR [ecx]).pt_w
+	jl	@f
+	inc	eax
+@@:
+        mov     (VNGO_POINT PTR [ecx]).pt_wz,eax
+else
+        mov     eax,t
+        mov     ebx,(VNGO_POINT PTR [esi]).pt_wz
+        sub     ebx,(VNGO_POINT PTR [edi]).pt_wz
+        imul    ebx
+        shrd    eax,edx,30
+        add     eax,(VNGO_POINT PTR [edi]).pt_wz
+        mov     (VNGO_POINT PTR [ecx]).pt_wz,eax
+endif
         pop     edi
         pop     esi
         pop     ebx
@@ -229,42 +358,6 @@ START_PROC esch_clip_y_line,    C  p:dword, s:dword, f:dword, out_point:dword
         mov     (VNGO_POINT PTR [ecx]).pt_x,eax
 
 
-;; Calculate the new shade.
-        mov     eax,t                   ; get the multiplier again.
-        mov     ebx,(VNGO_POINT PTR [esi]).pt_shade
-        sub     ebx,(VNGO_POINT PTR [edi]).pt_shade
-        imul    ebx
-        shrd    eax,edx,30
-        add     eax,(VNGO_POINT PTR [edi]).pt_shade
-        mov     (VNGO_POINT PTR [ecx]).pt_shade,eax
-
-;; Calculate the new U.
-        mov     eax,t
-        mov     ebx,(VNGO_POINT PTR [esi]).pt_u
-        sub     ebx,(VNGO_POINT PTR [edi]).pt_u
-        imul    ebx
-        shrd    eax,edx,30
-        add     eax,(VNGO_POINT PTR [edi]).pt_u
-        mov     (VNGO_POINT PTR [ecx]).pt_u,eax
-
-;; Calculate the new V.
-        mov     eax,t
-        mov     ebx,(VNGO_POINT PTR [esi]).pt_v
-        sub     ebx,(VNGO_POINT PTR [edi]).pt_v
-        imul    ebx
-        shrd    eax,edx,30
-        add     eax,(VNGO_POINT PTR [edi]).pt_v
-        mov     (VNGO_POINT PTR [ecx]).pt_v,eax
-
-;; Calculate the new Z.
-        mov     eax,t
-        mov     ebx,(VNGO_POINT PTR [esi]).pt_z
-        sub     ebx,(VNGO_POINT PTR [edi]).pt_z
-        imul    ebx
-        shrd    eax,edx,30
-        add     eax,(VNGO_POINT PTR [edi]).pt_z
-        mov     (VNGO_POINT PTR [ecx]).pt_z,eax
-
 ;; Calculate the new W.
         mov     eax,t
         mov     ebx,(VNGO_POINT PTR [esi]).pt_w
@@ -273,6 +366,178 @@ START_PROC esch_clip_y_line,    C  p:dword, s:dword, f:dword, out_point:dword
         shrd    eax,edx,30
         add     eax,(VNGO_POINT PTR [edi]).pt_w
         mov     (VNGO_POINT PTR [ecx]).pt_w,eax
+
+
+;; Calculate the new shade.
+if 1    ;; This is the perspective clip, it gets applied whether doing
+        ;; perspective texture maping or not!
+
+        push    ecx
+        mov     eax,(VNGO_POINT PTR [esi]).pt_w
+        mov     ebx,(VNGO_POINT PTR [esi]).pt_shade
+	shl	ebx,13
+        imul    ebx
+        shld    edx,eax,2
+        mov     ecx,edx
+
+        mov     ebx,(VNGO_POINT PTR [edi]).pt_shade
+        mov     eax,(VNGO_POINT PTR [edi]).pt_w
+	shl	ebx,13
+        imul    ebx
+        shld    edx,eax,2
+        push    edx
+        sub     ecx,edx
+        mov     eax,t
+        imul    ecx
+        shld    edx,eax,2
+        pop     eax
+        add     edx,eax
+        xor     eax,eax
+        shrd    eax,edx,2
+        sar     edx,2
+        pop     ecx
+        idiv    (VNGO_POINT PTR [ecx]).pt_w
+	shr	eax,13
+	adc	eax,0
+        mov     (VNGO_POINT PTR [ecx]).pt_shade,eax
+else
+        mov     eax,t                   ; get the multiplier again.
+        mov     ebx,(VNGO_POINT PTR [esi]).pt_shade
+        sub     ebx,(VNGO_POINT PTR [edi]).pt_shade
+        imul    ebx
+        shrd    eax,edx,30
+        add     eax,(VNGO_POINT PTR [edi]).pt_shade
+        mov     (VNGO_POINT PTR [ecx]).pt_shade,eax
+endif
+
+;; Calculate the new U.
+if 1    ;; This is the perspective clip, it gets applied whether doing
+        ;; perspective texture maping or not!
+
+        push    ecx
+        mov     eax,(VNGO_POINT PTR [esi]).pt_w
+        mov     ebx,(VNGO_POINT PTR [esi]).pt_u
+        imul    ebx
+        shld    edx,eax,2
+        mov     ecx,edx
+
+        mov     ebx,(VNGO_POINT PTR [edi]).pt_u
+        mov     eax,(VNGO_POINT PTR [edi]).pt_w
+        imul    ebx
+        shld    edx,eax,2
+        push    edx
+        sub     ecx,edx
+        mov     eax,t
+        imul    ecx
+        shld    edx,eax,2
+        pop     eax
+        add     edx,eax
+        xor     eax,eax
+        shrd    eax,edx,2
+        sar     edx,2
+        pop     ecx
+        idiv    (VNGO_POINT PTR [ecx]).pt_w
+	shl	edx,1
+	cmp	edx,(VNGO_POINT PTR [ecx]).pt_w
+	jl	@f
+	inc	eax
+@@:
+        mov     (VNGO_POINT PTR [ecx]).pt_u,eax
+else
+        mov     eax,t
+        mov     ebx,(VNGO_POINT PTR [esi]).pt_u
+        sub     ebx,(VNGO_POINT PTR [edi]).pt_u
+        imul    ebx
+        shrd    eax,edx,30
+        add     eax,(VNGO_POINT PTR [edi]).pt_u
+        mov     (VNGO_POINT PTR [ecx]).pt_u,eax
+endif
+;; Calculate the new V.
+if 1    ;; This is the perspective clip, it gets applied whether doing
+        ;; perspective texture maping or not!
+
+        push    ecx
+        mov     eax,(VNGO_POINT PTR [esi]).pt_w
+        mov     ebx,(VNGO_POINT PTR [esi]).pt_v
+        imul    ebx
+        shld    edx,eax,2
+        mov     ecx,edx
+
+        mov     ebx,(VNGO_POINT PTR [edi]).pt_v
+        mov     eax,(VNGO_POINT PTR [edi]).pt_w
+        imul    ebx
+        shld    edx,eax,2
+        push    edx
+        sub     ecx,edx
+        mov     eax,t
+        imul    ecx
+        shld    edx,eax,2
+        pop     eax
+        add     edx,eax
+        xor     eax,eax
+        shrd    eax,edx,2
+        sar     edx,2
+        pop     ecx
+        idiv    (VNGO_POINT PTR [ecx]).pt_w
+	shl	edx,1
+	cmp	edx,(VNGO_POINT PTR [ecx]).pt_w
+	jl	@f
+	inc	eax
+@@:
+        mov     (VNGO_POINT PTR [ecx]).pt_v,eax
+else
+        mov     eax,t
+        mov     ebx,(VNGO_POINT PTR [esi]).pt_v
+        sub     ebx,(VNGO_POINT PTR [edi]).pt_v
+        imul    ebx
+        shrd    eax,edx,30
+        add     eax,(VNGO_POINT PTR [edi]).pt_v
+        mov     (VNGO_POINT PTR [ecx]).pt_v,eax
+endif
+
+;; Calculate the new Z.
+if 1    ;; This is the perspective clip, it gets applied whether doing
+        ;; perspective texture maping or not!
+
+        push    ecx
+        mov     eax,(VNGO_POINT PTR [esi]).pt_w
+        mov     ebx,(VNGO_POINT PTR [esi]).pt_wz
+        imul    ebx
+        shld    edx,eax,2
+        mov     ecx,edx
+
+        mov     ebx,(VNGO_POINT PTR [edi]).pt_wz
+        mov     eax,(VNGO_POINT PTR [edi]).pt_w
+        imul    ebx
+        shld    edx,eax,2
+        push    edx
+        sub     ecx,edx
+        mov     eax,t
+        imul    ecx
+        shld    edx,eax,2
+        pop     eax
+        add     edx,eax
+        xor     eax,eax
+        shrd    eax,edx,2
+        sar     edx,2
+        pop     ecx
+        idiv    (VNGO_POINT PTR [ecx]).pt_w
+	shl	edx,1
+	cmp	edx,(VNGO_POINT PTR [ecx]).pt_w
+	jl	@f
+	inc	eax
+@@:
+        mov     (VNGO_POINT PTR [ecx]).pt_wz,eax
+else
+        mov     eax,t
+        mov     ebx,(VNGO_POINT PTR [esi]).pt_wz
+        sub     ebx,(VNGO_POINT PTR [edi]).pt_wz
+        imul    ebx
+        shrd    eax,edx,30
+        add     eax,(VNGO_POINT PTR [edi]).pt_wz
+        mov     (VNGO_POINT PTR [ecx]).pt_wz,eax
+endif
+
 
         pop     edi
         pop     esi
@@ -388,7 +653,49 @@ END_PROC        esch_clip_z_line
 
         ALIGN   16
 START_PROC      esch_rotate_check, C    count:DWORD, pts:DWORD
+if 1	
+	LOCAL	hival
+	LOCAL	loval
+	push	esi
+	push	ebx
 
+	mov	eax,count
+	cmp	eax,3
+	jge	@f
+	mov	eax,0
+	jmp	SHORT done
+@@:
+	mov	ebx,SIZEOF VNGO_POINT
+	mov	esi,pts
+	mov	edx,(VNGO_POINT PTR [esi]).pt_y
+	sub	edx,(VNGO_POINT PTR [esi + ebx]).pt_y
+	mov	eax,(VNGO_POINT PTR [esi + (ebx*2)]).pt_x
+	sub	eax,(VNGO_POINT PTR [esi + ebx]).pt_x
+	imul	edx
+
+	mov	hival,edx
+	mov	loval,eax
+
+	mov	edx,(VNGO_POINT PTR [esi]).pt_x
+	sub	edx,(VNGO_POINT PTR [esi + ebx]).pt_x
+	mov	eax,(VNGO_POINT PTR [esi + (ebx*2)]).pt_y
+	sub	eax,(VNGO_POINT PTR [esi + ebx]).pt_y
+	imul    edx
+	sub	eax,loval
+	sbb	edx,hival
+
+	mov	eax,0
+	cmp	edx,0
+	jg	done
+	mov	eax,1
+
+
+
+done:
+	pop	ebx
+	pop	esi
+	ret
+else
         LOCAL   lvert:DWORD
         LOCAL   lnvert:DWORD
         LOCAL   rvert:DWORD
@@ -462,6 +769,10 @@ sort_loop:
         sub     ecx,ebx
         cmp     ecx,0
         jle     test_done
+        cmp     ecx,0
+        jne     @f
+        jmp     test_done
+@@:
         inc     ecx                     ; dy+1
         mov     ycount,ecx              ; save the number of Y lines to do.
 
@@ -471,7 +782,8 @@ sort_loop:
 
         mov     eax,(VNGO_POINT PTR [edx]).pt_y
         mov     cur_y,eax
-
+        push    ecx
+        mov     ecx,count
 find_first_cclock:
         mov     eax,(VNGO_POINT PTR [edx]).pt_y
         mov     ebx,edx
@@ -483,12 +795,17 @@ find_first_cclock:
         cmp     (VNGO_POINT PTR [ebx]).pt_y,eax
         jne     @f
         mov     edx,ebx
+        dec     ecx
+        jz      @f
         jmp     SHORT find_first_cclock
 
 @@:
+        pop     ecx
         mov     lvert,edx
         mov     lnvert,ebx
         mov     edx,rvert
+        push    ecx
+        mov     ecx,count
 
 find_first_clock:
         mov     eax,(VNGO_POINT PTR [edx]).pt_y
@@ -501,8 +818,11 @@ find_first_clock:
         cmp     (VNGO_POINT PTR [ebx]).pt_y,eax
         jne     @f
         mov     edx,ebx
+        dec     ecx
+        jz      @f
         jmp     SHORT find_first_clock
 @@:
+        pop     ecx
         mov     rvert,edx
         mov     rnvert,ebx
 
@@ -530,6 +850,11 @@ simple_check:
         mov     esi,lnvert
         mov     edi,(VNGO_POINT PTR [esi]).pt_y
         sub     edi,(VNGO_POINT PTR [ebx]).pt_y ; calculate the dy.
+        cmp     edi,0
+        jne     @f
+        mov     clock_flag,1
+        jmp     test_done
+@@:
         mov     lcnt,edi                ; this is the number of steps to take.
         inc     lcnt                    ; try dy + 1.
         ; calc. 1/dy.
@@ -554,6 +879,11 @@ simple_check:
         mov     esi,rnvert
         mov     edi,(VNGO_POINT PTR [esi]).pt_y
         sub     edi,(VNGO_POINT PTR [ebx]).pt_y
+        cmp     edi,0
+        jne     @f
+        mov     clock_flag,1
+        jmp     test_done
+@@:
         mov     rcnt,edi
         inc     rcnt                    ; try dy + 1.
 
@@ -590,6 +920,7 @@ test_done:
         mov     eax,clock_flag          ; set it up as the return value.
 
         ret
+endif
 END_PROC        esch_rotate_check
 
 _text   ends

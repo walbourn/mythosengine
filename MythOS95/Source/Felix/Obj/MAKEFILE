@@ -55,6 +55,7 @@ INCPATH = ;..\inc;$(MYTH95ROOT)\inc;
 LIB = felix
 
 OBJS = flxdata.obj\
+flxitns.obj\
 flxsqrt.obj\
 flxrand.obj\
 flx16ops.obj

@@ -6,7 +6,7 @@
 #    (_)       ^          * *     *      *   *    *            (_)
 #             (_)       **   **   *    ***** **** ****
 #
-#            Copyright (c) 1994,1995 by Charybdis Enterprises, Inc.
+#            Copyright (c) 1994-1996 by Charybdis Enterprises, Inc.
 #                            All Rights Reserved.
 #
 #ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -47,7 +47,7 @@ MYTH95ROOT = \MythOS95
 !endif
 
 INCPATH = ;..\..\inc;$(MYTH95ROOT)\inc;
-LIBPATH = $(MYTH95ROOT)\lib;
+LIBPATH = ..\..\obj;$(MYTH95ROOT)\lib;
 
 #ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 # File specific variables                                                  ³
@@ -66,7 +66,7 @@ xtram.obj
 
 LIBS=\
 xfile.lib\
-ivory.lib
+ivorymfc.lib
 
 all: setstden $(EXE).exe
 

@@ -8,7 +8,7 @@
 //
 // A Framework for Microsoft Windows '95 Entertainment Software Using MythOS
 //
-//              Copyright (c) 1995 by Charybdis Enterprises, Inc.
+//           Copyright (c) 1995, 1996 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved
 //
 //ддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд
@@ -43,19 +43,37 @@
 
 #define IDC_STATIC          -1
 
+//дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+// String Table                                                             Ё
+//дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
+
 #define IDS_TITLE           1
+
+//ддд Errors
+#define IDS_ERR_NOMEMORY            1000
+#define IDS_ERR_MYTHOSFAIL          1001
+#define IDS_ERR_SCREENFAIL          1002
+#define IDS_ERR_GAMEINITFAIL        1003
+#define IDS_ERR_LOADFONTFAIL        1004
+#define IDS_ERR_MULTINSTANCE        1005
+#define IDS_ERR_INTERNAL            1006
+
+#define IDS_ERR_PALETTELOADFAILED   3001
+#define IDS_ERR_CREATEVPORTFAILED   3002
+
+//дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддд©
+// Dialogs                                                                  Ё
+//дддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддддды
 
 #define IDC_MAXNETWORK_LIST1           100
 #define IDC_MAXNETWORK_LB_SESSION      100
 #define IDC_MAXNETWORK_CREATE          100
 #define IDC_MAXNETWORK_CONNECT         101
 
-
 #define IDD_MAXNETWORK_REMCONNABORTDLG 1
 #define IDD_MAXNETWORK_CHOOSEPROVIDER  2
 #define IDD_MAXNETWORK_SELSESSION      3
 #define IDD_MAXNETWORK_Q_CREATE        4
-
 
 #endif
 

@@ -8,7 +8,7 @@
 //ששששש²±²ששששששש²±²שששש²±²ש²±²שששש²±²ש²±²שששש²±²ש²±²שששששששש²±²שששש²±²שששששש
 //שששש²²²²²²²²²²ש²²²²²²²²ששש²²²²²²²²שש²²²שששש²²²ש²²²²²²²²²²ש²²²שששש²²²ששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//ששששששששששCopyrightש(c)ש1994,ש1995שbyשCharybdisשEnterprises,שInc.שששששששששש
+//שששששששששששCopyrightש(c)ש1994-1996שbyשCharybdisשEnterprises,שInc.שששששששששש
 //ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
 //ששששששששששששששששששששש Microsoft Windows '95 Version ששששששששששששששששששששששש
@@ -85,6 +85,23 @@ protected:
 	afx_msg void OnSurfDefineTexture();
 	afx_msg void OnSurfEditTexture();
 	afx_msg void OnSurfDeleteTexture();
+	afx_msg void OnAppHelp();
+	afx_msg void OnSurfSaveTextures();
+	afx_msg void OnUpdateSurfSaveTextures(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateSurfDeleteTexture(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateSurfEditTexture(CCmdUI* pCmdUI);
+	afx_msg void OnSurfLoadTextures();
+	afx_msg void OnSurfDefineColor();
+	afx_msg void OnSurfDeleteColor();
+	afx_msg void OnUpdateSurfDeleteColor(CCmdUI* pCmdUI);
+	afx_msg void OnSurfEditColor();
+	afx_msg void OnUpdateSurfEditColor(CCmdUI* pCmdUI);
+	afx_msg void OnSurfLoadColors();
+	afx_msg void OnSurfSaveColors();
+	afx_msg void OnUpdateSurfSaveColors(CCmdUI* pCmdUI);
+	afx_msg void OnTerrSetBaseElevation();
+	afx_msg void OnSurfRemoveUnusedTxts();
+	afx_msg void OnUpdateSurfRemoveUnusedTxts(CCmdUI* pCmdUI);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

@@ -158,6 +158,9 @@ public:
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // DOS File objects.                                                        ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+
+#define XFileDisk XFileDOS
+
 class XFileDOS : public XFile {
 protected:
     int     fHandle;
@@ -185,6 +188,8 @@ public:
     virtual xf_error_codes setfdate(word date);
     virtual xf_error_codes setftime(word time);
 };                                                        
+
+#define XFileDiskBuf XFileDOSBuff
 
 class XFileDOSBuff : public XFileDOS {
 protected:    

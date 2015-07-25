@@ -6,7 +6,7 @@
 //    (_)       ^          * *     *      *   *    *            (_)
 //             (_)       **   **   *    ***** **** ****
 //
-//            Copyright (c) 1994,1995 by Charybdis Enterprises, Inc.
+//            Copyright (c) 1994-1996 by Charybdis Enterprises, Inc.
 //                              All Rights Reserved.
 //                        Microsoft Windows '95 Version
 //
@@ -46,6 +46,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include <ivory.hpp>
+
 #include "debug.h"
 #include "xfile.hpp"
 
@@ -78,10 +80,12 @@ extern void compile(void);
 //
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 
+IvorySystem     Ivory;
+
 extern "C" FILE *yyin;
 
 STATIC char Util_name[]
-        = "°± IFF Compiler - (C) 1994, 1995 Charybdis Enterprises, Inc. ±°\n"
+        = "°± IFF Compiler - (C) 1994-1996 Charybdis Enterprises, Inc. ±°\n"
           "                  All Rights Reserved.  " __DATE__ "\n";
 
 XFParseIFF      *IFF=NULL;
@@ -131,17 +135,25 @@ void main(int argc, char *argv[])
                 case '?':
                     print_help(1);
                     return;
-                case 'r':
-                case 'R':
-                    Flags |= FLAGS_RIFF;
-                    break;
                 case 'q':
                 case 'Q':
                     Flags |= FLAGS_QUIET;
                     break;
+                case 'e':
+                case 'E':
+                    Flags |= FLAGS_EMPTYOK;
+                    break;
+                case 'r':
+                case 'R':
+                    Flags |= FLAGS_RIFF;
+                    break;
                 case 'z':
                 case 'Z':
                     Flags |= FLAGS_NOPAD;
+                    break;
+                case 'x':
+                case 'X':
+                    Flags |= FLAGS_XEB;
                     break;
                 default:
                     cout << "Unknown option " << argv[i] << " ignored\n";
@@ -279,12 +291,14 @@ STATIC void cleanup(void)
 STATIC void print_help(int full)
 {
     cout << Util_name;
-    cout << "   Usage: iffc [-r] [-z] [-q] <filename.cif> [<filename.iff>]\n";
+    cout << "   Usage: iffc [ -q | -e | -r | -z | -x] <filename.cif> [<filename.iff>]\n";
     if (full)
     {
         cout << "          -q = Operate quietly.\n";
+        cout << "          -e = Do not warn if empty chunk encountered\n";
         cout << "          -r = Use Microsoft RIFF instead of EA IFF\n";
         cout << "          -z = Don't assume even byte padding (MID files)\n";
+        cout << "          -x = Insert bitmaps using XFEB form instead of ILBM.\n";
     }
 }
 

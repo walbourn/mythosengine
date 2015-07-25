@@ -76,7 +76,9 @@
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 TurnerNetwork::TurnerNetwork (GUID _guid, const char *_name, int _players):
-    is_opened (FALSE), pIDP (0)
+    is_opened (FALSE),
+    hMessageEvent (NULL),
+    pIDP (0)
 {
     // Fill in the common fields of the session descriptor.
     memset (&session, 0, sizeof (session));
@@ -103,114 +105,6 @@ TurnerNetwork::TurnerNetwork (const TurnerNetwork &m):
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-// TurnerNetwork - active
-//  returns whether or not this network connection is active
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-BOOL TurnerNetwork::active () const
-{
-    return pIDP != 0 && is_opened;
-}
-
-
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-// TurnerNetwork - select_provider
-//  Create a DirectPlay interface to the specified DP provider.
-//  (Usually this value will be selected by the UI)
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-int TurnerNetwork::select_provider (LPGUID provider_guid)
-{
-    return DirectPlayCreate (provider_guid, &pIDP, NULL);
-}
-
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-// TurnerNetwork - create_game
-//  Create a new game of the type specified during construction.
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-int TurnerNetwork::create_game ()
-{
-    assertMyth ("TurnerNetwork::create_game - A service provider must have been chosen", pIDP);
-
-    // Fill in the rest of the session flags
-    session.dwFlags = DPOPEN_CREATESESSION;
-
-    HRESULT res = pIDP->Open (&session);
-
-    is_opened = (res == DP_OK);
-
-    return res;
-}
-
-
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-// TurnerNetwork - create_player
-//  Creates a new player ID, given short and long names.
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-DPID TurnerNetwork::create_player (const char *short_name, const char *long_name)
-{
-    assertMyth ("TurnerNetwork::create_player - A service provider must have been chosen", pIDP);
-
-    DPID id = 0;
-
-    pIDP->CreatePlayer (&id, (char *)short_name, (char *)long_name, NULL);
-
-    return id;
-}
-
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-// TurnerNetwork - destroy_player
-//  Creates a new player ID, given short and long names.
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-void TurnerNetwork::destroy_player (DPID id)
-{
-    assertMyth ("TurnerNetwork::destroy_player - A service provider must have been chosen", pIDP);
-    pIDP->DestroyPlayer (id);
-}
-
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-// TurnerNetwork - static _player_callback
-//  This is the enumeration function for TurnerNetwork::connect_game
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-BOOL CALLBACK _player_callback (DPID id, char *short_name, char *long_name, DWORD flags, LPVOID context)
-{
-    // Add the player to the internal list of players
-    TurnerNetwork  *net = (TurnerNetwork *)context;
-
-    net->sys_newplayer (id, short_name, long_name);
-
-    return TRUE;
-}
-
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-// TurnerNetwork - connect_game
-//  Open a connection to the specified session of the 
-//  game specified during construction.
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-int TurnerNetwork::connect_game (DWORD dwSession)
-{
-    // Fill in the rest of the session flags
-    session.dwFlags     = DPOPEN_OPENSESSION;
-    session.dwSession   = dwSession;
-
-    HRESULT res = pIDP->Open (&session);
-
-    is_opened = (res == DP_OK);
-
-    // Populate our existing player tables
-    if (res == DP_OK)
-        pIDP->EnumPlayers (dwSession, _player_callback, this, DPENUMPLAYERS_REMOTE);
-
-    return res;
-}
-
-
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 // TurnerNetwork - operator =
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -230,14 +124,227 @@ TurnerNetwork &TurnerNetwork::operator = (const TurnerNetwork &m)
 TurnerNetwork::~TurnerNetwork()
 {
     assertMyth ("TurnerNetwork Destructor: Must have DPlay connection", pIDP != 0);
+    close ();
+}
 
-    if (pIDP)
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// TurnerNetwork - active
+//  returns whether or not this network connection is active
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+BOOL TurnerNetwork::active () const
+{
+    return pIDP != 0 && is_opened;
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// TurnerNetwork - packet_ready
+//  returns whether or not a packet is available for the current player.
+//  It is more efficient to check with this method than to call Recieve
+//  and check for an error condition.
+//
+//  This method will always return FALSE if a message event was not
+//  created during game create/connect.
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+BOOL TurnerNetwork::packet_ready ()
+{
+    return hMessageEvent == NULL
+           || WaitForSingleObject (&hMessageEvent, 0) != WAIT_TIMEOUT;
+}
+
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// TurnerNetwork - select_provider
+//  Create a DirectPlay interface to the specified DP provider.
+//  (Usually this value will be selected by the UI)
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+int TurnerNetwork::select_provider (LPGUID provider_guid)
+{
+    return DirectPlayCreate (provider_guid, &pIDP, NULL);
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// TurnerNetwork - create_game
+//  Create a new game of the type specified during construction.
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+int TurnerNetwork::create_game (BOOL bCreateEvent)
+{
+    assertMyth ("TurnerNetwork::create_game - A service provider must have been chosen", pIDP);
+
+    // Fill in the rest of the session flags
+    session.dwFlags = DPOPEN_CREATESESSION;
+
+    HRESULT res = pIDP->Open (&session);
+
+    is_opened = (res == DP_OK);
+
+    // Allow for an event to signal packet arrival (more efficient, but possibly undesirable)
+    if (bCreateEvent)
     {
-        is_opened = FALSE;
-        pIDP->Close();
-        pIDP->Release();
-        pIDP = 0;
+        hMessageEvent = CreateEvent (NULL, FALSE, FALSE, NULL);
+        if (hMessageEvent == NULL)
+            return -1;
     }
+
+    return res;
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// TurnerNetwork - allow_players
+//  Allows or disallows new players to join the game.  By default,
+//  new players are allowed to join.
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+int TurnerNetwork::allow_players (BOOL bEnable)
+{
+    assertMyth ("TurnerNetwork::allow_player - A service provider must have been chosen", pIDP);
+
+    return pIDP->EnableNewPlayers (bEnable);
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// TurnerNetwork - create_player
+//  Creates a new player ID, given short and long names.
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+DPID TurnerNetwork::create_player (const char *short_name, const char *long_name)
+{
+    assertMyth ("TurnerNetwork::create_player - A service provider must have been chosen", pIDP);
+
+    DPID id = 0;
+
+    pIDP->CreatePlayer (&id, (char *)short_name, (char *)long_name, &hMessageEvent);
+
+    return id;
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// TurnerNetwork - destroy_player
+//  Creates a new player ID, given short and long names.
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+void TurnerNetwork::destroy_player (DPID id)
+{
+    assertMyth ("TurnerNetwork::destroy_player - A service provider must have been chosen", pIDP);
+    pIDP->DestroyPlayer (id);
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// TurnerNetwork - create_group
+//  Creates a new group ID, given short and long names.
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+DPID TurnerNetwork::create_group (const char *short_name, const char *long_name)
+{
+    assertMyth ("TurnerNetwork::create_group - A service provider must have been chosen", pIDP);
+
+    DPID id = 0;
+
+    pIDP->CreateGroup (&id, (char *)short_name, (char *)long_name);
+
+    return id;
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// TurnerNetwork - destroy_group
+//  Creates a new group ID, given short and long names.
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+void TurnerNetwork::destroy_group (DPID id)
+{
+    assertMyth ("TurnerNetwork::destroy_group - A service provider must have been chosen", pIDP);
+    pIDP->DestroyGroup (id);
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// TurnerNetwork - static _player_callback
+//  This is the enumeration function for TurnerNetwork::connect_game
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+BOOL CALLBACK _player_callback (DPID id, char *short_name, char *long_name, DWORD flags, LPVOID context)
+{
+    // Add the player to the internal list of players
+    TurnerNetwork  *net = (TurnerNetwork *)context;
+
+    net->sys_newplayer (id, short_name, long_name);
+
+    return TRUE;
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// TurnerNetwork - static _group_callback
+//  This is the enumeration function for TurnerNetwork::connect_game
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+BOOL CALLBACK _group_callback (DPID id, char *short_name, char *long_name, DWORD flags, LPVOID context)
+{
+    // Add the player to the internal list of players
+    TurnerNetwork  *net = (TurnerNetwork *)context;
+
+    net->sys_newgroup (id, short_name, long_name);
+
+    return TRUE;
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// TurnerNetwork - connect_game
+//  Open a connection to the specified session of the 
+//  game specified during construction.
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+int TurnerNetwork::connect_game (DWORD dwSession, BOOL bCreateEvent)
+{
+    assertMyth ("TurnerNetwork receive: Must have DPlay connection", pIDP != 0);
+
+    // Fill in the rest of the session flags
+    session.dwFlags     = DPOPEN_OPENSESSION;
+    session.dwSession   = dwSession;
+
+    HRESULT res = pIDP->Open (&session);
+
+    is_opened = (res == DP_OK);
+
+    // Allow for an event to signal packet arrival (more efficient, but possibly undesirable)
+    if (bCreateEvent)
+    {
+        hMessageEvent = CreateEvent (NULL, FALSE, FALSE, NULL);
+        if (hMessageEvent == NULL)
+            return -1;
+    }
+
+    // Populate our existing group and player tables
+    if (res == DP_OK)
+    {
+        pIDP->EnumGroups  (dwSession, _group_callback,  this, DPENUMPLAYERS_REMOTE);
+        pIDP->EnumPlayers (dwSession, _player_callback, this, DPENUMPLAYERS_REMOTE);
+    }
+
+    return res;
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// TurnerNetwork - join_group
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+int TurnerNetwork::join_group  (DPID group, DPID player)
+{
+    assertMyth ("TurnerNetwork receive: Must have DPlay connection", pIDP != 0);
+
+    return pIDP->AddPlayerToGroup (group, player);
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// TurnerNetwork - leave_group
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+int TurnerNetwork::leave_group (DPID group, DPID player)
+{
+    assertMyth ("TurnerNetwork receive: Must have DPlay connection", pIDP != 0);
+
+    return pIDP->DeletePlayerFromGroup (group, player);
 }
 
 
@@ -254,6 +361,12 @@ void TurnerNetwork::close ()
         pIDP->Release ();
         pIDP = 0;
     }
+
+    if (hMessageEvent)
+    {
+        CloseHandle (hMessageEvent);
+        hMessageEvent = NULL;
+    }
 }
 
 
@@ -269,6 +382,11 @@ int TurnerNetwork::receive (void *ptr, size_t sz)
     DPID    to;
     HRESULT res;
 
+    // If there is an event handle, use it instead of relying on Receive()
+    // (This is supposedly more efficient)
+    if (!packet_ready ())
+        return DPERR_NOMESSAGES;
+
     res = pIDP->Receive (&from, &to,
                          DPRECEIVE_ALL,
                          ptr, (LPDWORD)&sz);
@@ -276,7 +394,7 @@ int TurnerNetwork::receive (void *ptr, size_t sz)
     switch (res)
     {
     case DPERR_NOMESSAGES:
-        // This is just fine
+        // This is just fine, but unlikely if you have a message event defined
         break;
 
     case DP_OK:
@@ -298,7 +416,7 @@ int TurnerNetwork::send (DPID player, DPID dest, void *ptr, size_t sz)
 {
     assertMyth ("TurnerNetwork send: Must have DPlay connection", pIDP != 0);
 
-    return pIDP->Send (player, dest, 0, ptr, sz);
+    return pIDP->Send (player, dest, DPSEND_GUARANTEE, ptr, sz);
 }
 
 
@@ -458,6 +576,5 @@ int TurnerNetwork::sys_remove_player_from_group (DPID group, DPID player)
     return 0;
 }
 
-z
 //°±² End of module - turner.cpp ²±°
 

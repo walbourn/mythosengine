@@ -91,7 +91,9 @@
 
 class TurnerNetwork
 {
+protected:
         BOOL    is_opened;
+        HANDLE  hMessageEvent;
 
 public:
         // DirectPlay objects
@@ -116,13 +118,20 @@ virtual ~TurnerNetwork();
 
         // Information
         BOOL    active () const;
+        BOOL    packet_ready ();    // not const because of DP restriction.
 
         // Initialize and connect to the game
 virtual int     select_provider (LPGUID);
-virtual int     create_game ();
-virtual int     connect_game (DWORD);
+virtual int     create_game (BOOL bCreateEvent = TRUE);
+virtual int     connect_game (DWORD, BOOL bCreateEvent = TRUE);
+virtual int     allow_players (BOOL = TRUE);
+
 virtual DPID    create_player (const char *, const char *);
 virtual void    destroy_player (DPID);
+virtual DPID    create_group (const char *, const char *);
+virtual void    destroy_group (DPID);
+virtual int     join_group  (DPID group, DPID player);
+virtual int     leave_group (DPID group, DPID player);
 
 
         // Handle communication tasks.

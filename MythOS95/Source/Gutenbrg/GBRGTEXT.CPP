@@ -11,7 +11,7 @@
 //                     Text Output and Font Management System
 //                          Microsoft Windows '95 Version
 //
-//               Copyright (c) 1995 by Charybdis Enterprises, Inc.
+//            Copyright (c) 1995, 1996 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved.
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -86,8 +86,7 @@ void GBergText::outc(char c)
 
 //ÄÄ Output character and update cursor position
 
-    gberg_outc(vport, curx, cury, c);
-    curx += GBergInstance->font_active->width;
+    curx += gberg_outc(vport, curx, cury, c);
 }
 
 
@@ -96,11 +95,11 @@ void GBergText::outc(char c)
 //                                                                          ³
 // Outputs a string or long value as string.                                ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void GBergText::out(char *str)
+void GBergText::out(const char *str)
 {
     assertMyth("GBergText assumes Gutenberg is initalized and has an active font",
                GBergInstance && GBergInstance->font_active);
-    
+
     while (*str != 0)
     {
         outc(*(str++));
@@ -111,9 +110,119 @@ void GBergText::out(long num)
 {
     char    buff[16];
 
+#ifdef WIN32
+    wsprintf(buff,"%li",num);
+#else
     sprintf(buff,"%li",num);
+#endif
     out(buff);
 }
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// GBergText - outf                                                         ³
+//                                                                          ³
+// Outputs a string formatted with wsprintf.                                ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+void GBergText::outf (const char *fmt, ...)
+{
+    char buff[256];
+
+    // Perform a printf
+    va_list parms;
+    va_start (parms, fmt);
+#ifdef WIN32
+    int len = wvsprintf (buff, fmt, parms);
+#else
+    int len = vsprintf (buff, fmt, parms);
+#endif
+    va_end (parms);
+
+    assert (len < sizeof (buff));
+    out (buff);
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// GBergText - out_wrap                                                     ³
+//                                                                          ³
+// Outputs a string wrapped to the given rectangle.                         ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+void GBergText::out_wrap (const char *text, const VngoRect *rct)
+{
+    VngoRect trct;
+
+    // If we have no rectangle, default to the viewport rectangle
+    if (rct == 0)
+    {
+        trct.x  = vport->vbuff.left;
+        trct.y  = vport->vbuff.top;
+        trct.dx = vport->vbuff.width;
+        trct.dy = vport->vbuff.height;
+        rct = &trct;
+    }
+
+    // Some parameter validation
+    assert (rct != 0);
+    assert (rct->dx > 0);
+    assert (rct->dy > 0);
+
+    // Calculate some bounds information
+    const int right  = rct->x + rct->dx;
+    const int bottom = rct->y + rct->dy;
+
+    // Clip cursor to the rectangle
+    if (cury < rct->y)
+        cury = rct->y;
+
+    if (curx < rct->x)
+        curx = rct->x;
+
+    // Define loop variables
+    const char *last_word = text;
+    int col = rct->x;
+
+    while (*text != '\0' && cury < bottom)
+    {
+        // The proposed character
+        const char ch = *text;
+
+        // Advance the proposed point by one character
+        col += gberg_widthc (ch);
+
+        // If we have left the rectangle, move to the next line
+        if (col >= right)
+        {
+            if (curx == rct->x)
+            {
+                // If the word is too long for one line, write
+                // as much as we can on this line, splitting the word
+                for (; last_word != text; ++last_word)
+                    outc (*last_word);
+            }
+
+            col = curx = rct->x;
+            cury += GBergInstance->font_active->height;
+        }
+
+        // If we have reached a space, it is now safe to
+        // write the current word (including the trailing space)
+        if (isspace (ch))
+        {
+            for (; last_word != text; ++last_word)
+                outc (*last_word);
+            outc (ch);
+            last_word = text + 1;
+        }
+
+        ++text;
+    }
+
+    // Output the trailer of the string
+    while (last_word != text)
+        outc (*last_word++);
+}
+
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
@@ -138,7 +247,7 @@ void GBergText::setpos(byte row, byte col)
 // Gets the position of the curx, cury cursor using the size of the         ³
 // font to determine rows and columns.                                      ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void GBergText::getpos(byte *row, byte *col)
+void GBergText::getpos(byte *row, byte *col) const
 {
     assertMyth("GBergText assumes Gutenberg is initalized and has an active font",
                GBergInstance && GBergInstance->font_active);
@@ -147,8 +256,8 @@ void GBergText::getpos(byte *row, byte *col)
                GBergInstance->font_active->width
                && GBergInstance->font_active->height);
 
-    *col = (byte)(curx / GBergInstance->font_active->width);
-    *row = (byte)(cury / GBergInstance->font_active->height);
+    *col = byte (curx / GBergInstance->font_active->width);
+    *row = byte (cury / GBergInstance->font_active->height);
 }
 
 //°±² End of module - gbrgtext.cpp ²±°

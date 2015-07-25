@@ -6,7 +6,7 @@
 //    (_)       ^          * *     *      *   *    *            (_)
 //             (_)       **   **   *    ***** **** ****
 //
-//            Copyright (c) 1994,1995 by Charybdis Enterprises, Inc.
+//            Copyright (c) 1994-1996 by Charybdis Enterprises, Inc.
 //                              All Rights Reserved.
 //                        Microsoft Windows '95 Version
 //
@@ -219,6 +219,7 @@ xf_error_codes XFParsePCX::read(XFBitmap *b)
             *(ptr++) = work[i*3+2];
             *(ptr++) = 0;
         }
+        b->clrinuse=255;
     }
 
     return XF_ERR_NONE;
@@ -234,7 +235,7 @@ xf_error_codes XFParsePCX::write(XFBitmap *b)
 {
     int                 i, j;
     int                 y;
-    int                 locked;
+    int                 locked=0;
     byte                *s;
     byte                *ptr;
     byte                work[768];

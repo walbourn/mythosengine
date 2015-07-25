@@ -51,7 +51,11 @@ cd turner
 call mk %1
 if ERRORLEVEL 1 goto error
 cd ..
-goto exit
+rem ÄÄÄÄ Newton '95 ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+cd newton
+call mk %1
+if ERRORLEVEL 1 goto error
+cd ..
 rem ÄÄÄÄ System '95 ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 cd system
 call mk %1
@@ -134,11 +138,6 @@ call mk
 if ERRORLEVEL 1 goto error
 cd ..\..
 rem ÄÄÄÄ Van Gogh '95 ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-rem rem cd vangogh
-rem call mk clean
-rem call mk
-rem rem if ERRORLEVEL 1 goto error
-rem cd ..      
 rem ÄÄÄÄ Escher '95 ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 cd escher\test
 call mk clean
@@ -152,12 +151,8 @@ call mk
 if ERRORLEVEL 1 goto error
 cd ..\..
 rem ÄÄÄÄ Turner '95 ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-rem cd turner
-rem call mk clean
-rem call mk
-rem rem if ERRORLEVEL 1 goto error
-rem cd ..
-ÄÄÄÄ Gameframe '95 ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+rem ÄÄÄÄ Newton '95 ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+rem ÄÄÄÄ Gameframe '95 ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 cd gameframe
 call mk clean
 call mk

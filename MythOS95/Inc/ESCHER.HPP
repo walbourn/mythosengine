@@ -8,7 +8,7 @@
 //ששששש²±²ששששששש²±²שששש²±²ש²±²שששש²±²ש²±²שששש²±²ש²±²שששששששש²±²שששש²±²שששששש
 //שששש²²²²²²²²²²ש²²²²²²²²ששש²²²²²²²²שש²²²שששש²²²ש²²²²²²²²²²ש²²²שששש²²²ששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-//ששששששששששCopyrightש(c)ש1994,ש1995שbyשCharybdisשEnterprises,שInc.שששששששששש
+//שששששששששששCopyrightש(c)ש1994-1996שbyשCharybdisשEnterprises,שInc.שששששששששש
 //ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
 //ששששששששששששששששששששש Microsoft Windows '95 Version ששששששששששששששששששששששש
@@ -32,9 +32,9 @@
 //
 // escher.hpp
 //
-//      Esch C++ include header for the Escher library.  This includes all
-//      objects defined in the Escher library and associated functions and
-//      types, as well as some standard headers needed by the Escher library.
+// Escher's C++ include header for the Escher library.  This includes all
+// classes defined in the Escher library and associated functions and
+// types, as well as some standard headers needed by the Escher library.
 //
 //ֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽֽ
 
@@ -51,9 +51,6 @@
 #include <assert.h>
 #include <string.h>
 
-#include <stdio.h>                      // These are used only for debugging
-#include <conio.h>
-
 #include <portable.h>
 
 //ִִ Supporting library includes
@@ -66,20 +63,22 @@
 #include "esmath.hpp"                   // EschPoint, EschVector, EschVertex,
                                         // EschMatrix, EschFrameRef
 #include "escontxt.hpp"                 // EschContext
-#include "estxture.hpp"                 // EschTexture
-#include "eslight.hpp"                  // EschLight, EschVectorLight,
-                                        // EschPointLight
-#include "escamera.hpp"                 // EschCamera, EschCameraEx
+#include "estxture.hpp"                 // EschTexture and derived classes
+#include "eslight.hpp"                  // EschLight and derived classes
+#include "escamera.hpp"                 // EschCamera and derived classes
 
 #include "essystem.hpp"                 // EschSystem
 
 #include "esdraw.hpp"                   // EschDrawable
-#include "espartik.hpp"                 // EschParticle and associated objects
-#include "esgeom.hpp"                   // EschGeometry and associated objects
+#include "esbasic.hpp"                  // EschPointDraw
+#include "espartik.hpp"                 // EschParticle and associated classes
+#include "esgeom.hpp"                   // EschGeometry and associated classes
 
 #include "esterran.hpp"                 // EschTerrain
 
 #include "esscene.hpp"                  // EschScene
+
+#include "esmisc.hpp"                   // Misc. Escher classes.
 
 #endif
 

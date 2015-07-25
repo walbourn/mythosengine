@@ -6,7 +6,7 @@
 //    (_)       ^          * *     *      *   *    *            (_)
 //             (_)       **   **   *    ***** **** ****
 //
-//            Copyright (c) 1994,1995 by Charybdis Enterprises, Inc.
+//            Copyright (c) 1994-1996 by Charybdis Enterprises, Inc.
 //                            All Rights Reserved.
 //                        Microsoft Windows '95 Version
 //
@@ -71,27 +71,32 @@ void bitmap(void);
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 void print_error(char *s)
 {
-   cout << "ÍÍÍÍ Error " << (int)xf_error() << " " << s << "\n";
+    cout.flush();
+    printf("ÍÍÍÍ Error %x %s\n",xf_error(),s);
 }
 
 void print_error(class XFile *xf, char *s)
 {
-   cout << "ÍÍÍÍ Error " << (int)xf->error() << " " << s << "\n";
+    cout.flush();
+    printf("ÍÍÍÍ Error %x %s\n",xf->error(),s);
 }
 
 void print_error(class XFParseINI *xp, char *s)
 {
-   cout << "ÍÍÍÍ Error " << (int)xp->error() << " " << s << "\n";
+    cout.flush();
+    printf("ÍÍÍÍ Error %x %s\n",xp->error(),s);
 }
 
 void print_error(class XFParseBitmap *bp, char *s)
 {
-   cout << "ÍÍÍÍ Error " << (int)bp->error() << " " << s << "\n";
+    cout.flush();
+    printf("ÍÍÍÍ Error %x %s\n",bp->error(),s);
 }
 
 void print_error(class XFParseIFF *xp, char *s)
 {
-   cout << "ÍÍÍÍ Error " << (int)xp->error() << " " << s << "\n";
+    cout.flush();
+    printf("ÍÍÍÍ Error %x %s\n",xp->error(),s);
 }
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
@@ -104,7 +109,7 @@ void main(int argc, char *argv[])
     IvorySystem ivory;
 
 //ÄÄÄÄ Print welcome banner ÄÄÄÄ
-    cout << "°± XFile Tester - (C) 1994, 1995 Charybdis Enterprises, Inc. ±°\n"
+    cout << "°± XFile Tester - (C) 1994-1996 Charybdis Enterprises, Inc. ±°\n"
             "                  All Rights Reserved.  "  __DATE__ "\n";
 
     if (argc > 1
@@ -112,12 +117,12 @@ void main(int argc, char *argv[])
         && argv[1][1] == '?')
     {
 
-        cout << "   Usage:  xt [l | i | b | f]\n";
+        cout << "   Usage:  xt [l | u | r | i | b | f]\n";
         cout << "           l = Low-level file tests\n";
         cout << "           u = Buffered file tests\n";
         cout << "           r = RAM file tests\n";
         cout << "           i = INI file tests\n";
-//        cout << "           b = Bitmap file tests\n";
+        cout << "           b = Bitmap file tests\n";
         cout << "           f = IFF file tests\n";
         return;
     }

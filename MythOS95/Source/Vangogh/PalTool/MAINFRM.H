@@ -1,6 +1,42 @@
-// mainfrm.h : interface of the CMainFrame class
+//อออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออ
 //
-/////////////////////////////////////////////////////////////////////////////
+//                                 PalTool
+//
+//                   A Palette extraction/definition tool
+//
+//           Copyright (c) 1995, 1996 by Charybdis Enterprises, Inc.
+//                           All Rights Reserved
+//
+//                      Microsoft Windows '95 Version
+//
+//ฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤ
+//
+//           *** Charybdis Enterprises, Inc. Company Confidential ***
+//
+//  This file and all associated files are the company proprietary property
+//        of Charybdis Enterprises, Inc.  Unauthorized use prohibited.
+//
+// CHARYBDIS ENTERPRISES, INC. MAKES NO WARRANTIES, EXPRESS OR IMPLIED, AS
+// TO THE CORRECTNESS OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE
+// IT.  CHARYBDIS ENTERPRISES, INC. PROVIDES THE CODE ON AN "AS-IS" BASIS
+// AND EXPLICITLY DISCLAIMS ANY LIABILITY, INCLUDING CONSEQUENTIAL AND
+// INCIDENTAL DAMAGES FOR ERRORS, OMISSIONS, AND OTHER PROBLEMS IN THE CODE.
+//
+//ฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤ
+//
+// Dan Higdon & Chuck Walbourn
+// 
+// mainfrm.h
+//
+// Main window frame class.
+//
+//อออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออ
+
+//ฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐ
+//
+//                                Classes
+//
+//ฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐฐ
 
 class CMainFrame : public CMDIFrameWnd
 {
@@ -35,10 +71,9 @@ protected:  // control bar embedded members
 protected:
 	//{{AFX_MSG(CMainFrame)
 	afx_msg int OnCreate(LPCREATESTRUCT lpCreateStruct);
-		// NOTE - the ClassWizard will add and remove member functions here.
-		//    DO NOT EDIT what you see in these blocks of generated code!
+	afx_msg void OnAppHelp();
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };
 
-/////////////////////////////////////////////////////////////////////////////
+//ฐฑฒ eof - mainfrm.h ฒฑฐ

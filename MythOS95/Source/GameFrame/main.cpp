@@ -8,7 +8,7 @@
 //
 // A Framework for Microsoft Windows '95 Entertainment Software Using MythOS
 //
-//              Copyright (c) 1995 by Charybdis Enterprises, Inc.
+//           Copyright (c) 1995, 1996 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -41,7 +41,11 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 #define WIN32_LEAN_AND_MEAN
-#include "llander.hpp"
+#include <global.hpp>
+#include <resource.h>
+
+// Lander example header
+#include <llander.hpp>
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
@@ -50,6 +54,8 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 BOOL InitApplication (HINSTANCE, int, int, int);
+void fatal_error(ulong id, char *file, int line);
+
 STATIC int load_font(char *f);
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
@@ -58,20 +64,30 @@ STATIC int load_font(char *f);
 //
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 
+//ÄÄÄ Global Windows data
 HINSTANCE       hInst;
 HWND            hWndClient;
-const char      szAppName[] = "LunarLander";
+const char      szAppName[]     = "LunarLander";
 
+//ÄÄÄ Support file names
+char            szMasterIFF[]   = "LLander.IFF";
+char            szINI[]         = "LLander.INI";
+
+//ÄÄÄ Command Line Parse Results
+dword           CmdFlags = 0;
+
+//ÄÄÄ Global data
 MythosSystem    *MythOS = 0;
 MaxDevices      *Devs   = 0;
 GFScreen        *Screen = 0;
+TurnerNetwork   *Net    = 0;
+GameState       *Mode   = 0;
+
+//ÄÄÄ Game States
 
 LanderTitle     *TitleMode  = 0;
 LunarLander     *SimMode    = 0;
 LanderLanded    *LandMode   = 0;
-
-GameState       *Mode       = 0;
-TurnerNetwork   *net        = 0;
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
@@ -89,97 +105,177 @@ int APIENTRY WinMain (HINSTANCE hInstance,
                       LPSTR     lpCmdLine,
                       int       nCmdShow)
 {
-    // This is a special hack initialization of Ivory so that we can
-    // create the stackspace that Bozo needs to be initialized.
-    // This needs to be revisited.
+    CmdFlags = CMDFLAGS_JOYSTICK | CMDFLAGS_DIBSWITCH;
+
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Process INI
+    {
+        XFParseINI ini;
+        if (!ini.open(szINI,XF_OPEN_READ))
+        {
+            char buff[256];
+
+            //ÄÄÄ StartUp parameters
+            if (!ini.section("StartUp"))
+            {
+                if (!ini.read("DirectDraw",buff))
+                {
+                    strlwr(buff);
+                    if (strstr(buff,"yes") || strstr(buff,"on"))
+                        CmdFlags |= CMDFLAGS_DIRECTDRAW;
+                }
+
+                if (!ini.read("DIBModeSwitch",buff))
+                {
+                    strlwr(buff);
+                    if (strstr(buff,"no") || strstr(buff,"off"))
+                        CmdFlags &= ~CMDFLAGS_DIBSWITCH;
+                }
+
+                if (!ini.read("Joystick",buff))
+                {
+                    strlwr(buff);
+                    if (strstr(buff,"no") || strstr(buff,"off"))
+                        CmdFlags &= ~CMDFLAGS_JOYSTICK;
+                }
+            }
+        }
+    }
+
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Parse Command Line
+    char *c = lpCmdLine;
+    for (;;)
+    {
+        for (;*c != 0 && *c == ' '; c++);       // Skip past whitespace
+        
+        if (*c == '-')
+        {
+            c++;
+
+            //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Direct Draw
+            if (!strncmp(c,"dd",sizeof("dd")-1))
+            {
+                CmdFlags |= CMDFLAGS_DIRECTDRAW;
+            }
+            else if (!strncmp(c,"nodd",sizeof("nodd")-1))
+            {
+                CmdFlags &= ~CMDFLAGS_DIRECTDRAW;
+            }
+            //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ DIB Mode Switch
+            if (!strncmp(c,"dibswitch",sizeof("dibswitch")-1))
+            {
+                CmdFlags |= CMDFLAGS_DIBSWITCH;
+            }
+            else if (!strncmp(c,"nodibswitch",sizeof("nodibswitch")-1))
+            {
+                CmdFlags &= ~CMDFLAGS_DIBSWITCH;
+            }
+            //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Joystick Control
+            if (!strncmp(c,"joy",sizeof("joy")-1))
+            {
+                CmdFlags |= CMDFLAGS_JOYSTICK;
+            }
+            else if (!strncmp(c,"nojoy",sizeof("nojoy")-1))
+            {
+                CmdFlags &= ~CMDFLAGS_JOYSTICK;
+            }
+        }
+
+        for (;*c != 0 && *c != ' '; c++);       // Skip over parameter
+
+                                                // Check for end of command line
+        if (!*c)
+            break;
+    }
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Initialize
 
-    // Set up desired screen size
-    int width  = GetSystemMetrics (SM_CXSCREEN);
-    int height = GetSystemMetrics (SM_CYSCREEN);
+    //ÄÄÄ Set up desired screen size
+    int width  = 640;
+    int height = 480;
 
-#ifdef DEBUG
-    width /= 4;
-    height /= 4;
-#endif
-
-    // If we are already running, this routine will reactivate the older
-    // application and return failure.
+    //ÄÄÄ If we are already running, this routine will reactivate the older
+    //ÄÄÄ application and return failure.
 	if (!InitApplication (hInstance, nCmdShow, width, height))
 		return 1;
 
-    // Initialize the MythOS system
-    MythOS = new MythosSystem (4*1024*1024);
+    //ÄÄÄ Initialize the MythOS system
+    MythOS = new MythosSystem (MYTHOS_MEM_SIZE);
 
-    // Create the devices, etc.
+    //ÄÄÄ Create the devices, etc.
     Devs   = new MaxDevices;
     if (MythOS == 0 || Devs == 0)
     {
-        MessageBox (NULL, "Unable to allocate memory for MythOS, exiting", "Error", MB_OK);
+        fatal_error(IDS_ERR_NOMEMORY, __FILE__, __LINE__);
         return 1;
     }
 
-    // Create a stack space for Bozo (so tasks can call Win32 APIs)
-    char    bozo_stackspace[16*1024];
+    //ÄÄÄ Create a stack space for Bozo (so tasks can call Win32 APIs)
+    //ÄÄÄ Notice that this MUST reside on the stack!
+    char    bozo_stackspace[MYTHOS_TASK_STACK_SIZE];
+
     IvorySubAlloc *bozo_alloc = (IvorySubAlloc *)bozo_stackspace;
     ivory_sub_initialize (bozo_alloc, sizeof (bozo_stackspace));
 
-    // Finish MythOS initialization
-    if (MythOS->init (128*1024, bozo_alloc))
+    //ÄÄÄ Finish MythOS initialization
+    if (MythOS->init (MYTHOS_ESCHER_ARENA_SIZE, bozo_alloc))
     {
-        MessageBox (NULL, "Unable to initialize MythOS, exiting", "Error", MB_OK);
+        fatal_error(IDS_ERR_MYTHOSFAIL, __FILE__, __LINE__);
         return 1;
     }
 
-    // Install Gutenberg Fonts
-    if (load_font("9X15.IFF")
-        || load_font("12X24.IFF"))
+    //ÄÄÄ Install Gutenberg Fonts
+    if (load_font("9x15")
+        || load_font("12x24"))
         return 1;
 
-    // Initialize the Screen object
-    Screen = new GFScreen;
+    //ÄÄÄ Initialize the Screen object
+    if (CmdFlags & CMDFLAGS_DIRECTDRAW)
+        Screen = new GFScreenDD;
+    else
+        Screen = new GFScreenDIB((CmdFlags & CMDFLAGS_DIBSWITCH) ? TRUE : FALSE);
+
     if (Screen == 0 ||
         Screen->init (width, height) != 0 ||
         Screen->load_palette ("Default.VGP") != 0)
     {
-        MessageBox (NULL, "Unable to initialize GFScreen module, exiting", "Error", MB_OK);
+        fatal_error(IDS_ERR_SCREENFAIL, __FILE__, __LINE__);
         return 1;
     }
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Initialize Game Specifics
     TitleMode = new LanderTitle ();
     if (TitleMode == 0 ||
-        TitleMode->init ("llander.iff", "landevt") != 0)
+        TitleMode->init ("landevt") != 0)
     {
-        MessageBox (NULL, "Unable to start Lunar Lander Title, exiting", "Error", MB_OK);
+        fatal_error(IDS_ERR_GAMEINITFAIL, __FILE__, __LINE__);
         return 1;
     }
 
     SimMode = new LunarLander;
     if (SimMode == 0 ||
-        SimMode->init ("llander.iff", "landevt") != 0)
+        SimMode->init ("landevt") != 0)
     {
-        MessageBox (NULL, "Unable to start Lunar Lander Simulator, exiting", "Error", MB_OK);
+        fatal_error(IDS_ERR_GAMEINITFAIL, __FILE__, __LINE__);
         return 1;
     }
 
     LandMode = new LanderLanded;
     if (LandMode == 0 ||
-        LandMode->init ("llander.iff", "landevt") != 0)
+        LandMode->init ("landevt") != 0)
     {
-        MessageBox (NULL, "Unable to start Lunar Lander Landed Mode, exiting", "Error", MB_OK);
+        fatal_error(IDS_ERR_GAMEINITFAIL, __FILE__, __LINE__);
         return 1;
     }
 
-    // Now, get the first mode preped and ready to roll.
+    //ÄÄÄ Start initial mode
     Mode = TitleMode;
-    Mode->activate();
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Main Loop
     assertMyth ("WinMain needs a valid Start Mode", Mode != 0);
+    Mode->activate();
     while (Mode->pump_windows ())
     {
+        bz_yield(&ReadyQ, &ReadyQ);
         assertMyth ("WinMain needs a valid Mode", Mode != 0);
 
         Devs->update();
@@ -187,11 +283,9 @@ int APIENTRY WinMain (HINSTANCE hInstance,
         Mode->render();
         Mode->display();
     }
+    Mode->deactivate();
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Termination
-
-    // Clean up the game here
-    // (destructors get most of it)
     delete TitleMode;
     delete SimMode;
     delete LandMode;
@@ -201,22 +295,26 @@ int APIENTRY WinMain (HINSTANCE hInstance,
     delete MythOS;
 
 	return 0;
-
-    // This shuts up the compiler
-    lpCmdLine;
 }
 
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// load_font
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 STATIC int load_font(char *f)
 {
     int err;
 
-    err=gberg_install_font(f,0);
+    err = gberg_install_font (szMasterIFF, f);
+
     if (err)
     {
-        char    buff[128];
-        wsprintf (buff,"Failed to load font %s, error %d",f,(int)err);
-        MessageBox(hWndClient,
-                   buff,"Error",MB_OK);
+        char    buff[1024];
+
+        LoadString(hInst, IDS_ERR_LOADFONTFAIL, buff, sizeof(buff));
+        MessageBox (hWndClient,
+                    buff,
+                    szAppName, MB_OK);
         return 1;
     }
     return 0;

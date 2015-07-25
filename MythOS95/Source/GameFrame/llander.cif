@@ -4,7 +4,7 @@
 ;
 ;                         For Microsoft Windows '95
 ;
-;               Copyright (c) 1995 by Charybdis Enterprises, Inc.
+;           Copyright (c) 1995, 1996 by Charybdis Enterprises, Inc.
 ;                           All Rights Reserved.
 ;
 ;ฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤฤ
@@ -24,16 +24,20 @@
 ;
 ; llander.cif
 ;
-; Contains the sprite data for the lander
+; Contains all data for the Lander example, including sprite data, except
+; the palette file.
 ;
 ;อออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออออ
 
 ; --- Merge in the lander events
-merge "..\\landevt.iff"
+merge "..\landevt.iff"
+
+; --- Merge in fonts
+merge "..\Data\9x15.iff"
+merge "..\Data\12x24.iff"
 
 ; --- Merge in the title screen Escher data
-merge "..\\lltitle.iff"
-
+merge "..\Data\lltitle.iff"
 
 ; --- Lander Data Form
 form "LLND"
@@ -44,7 +48,7 @@ form "LLND"
     }
     chunk "(C) "
     {
-        text "Copyright (C) 1995 by Charybdis Enterprises, Inc.  All Rights Reserved."
+        text "Copyright (C) 1995, 1996 by Charybdis Enterprises, Inc.  All Rights Reserved."
     }
 
     ; -------------------------------------------------------- Lander Sprites

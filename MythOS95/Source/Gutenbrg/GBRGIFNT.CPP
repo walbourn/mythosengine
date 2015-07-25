@@ -11,7 +11,7 @@
 //                     Text Output and Font Management System
 //                          Microsoft Windows '95 Version
 //
-//               Copyright (c) 1995 by Charybdis Enterprises, Inc.
+//            Copyright (c) 1995, 1996 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved.
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -60,7 +60,7 @@
 
 extern "C" GBergFontInfo *igberg_empty_font();
 
-STATIC gberg_error_codes igberg_install_font(XFParseIFF *iff, char *fntname);
+STATIC gberg_error_codes igberg_install_font(XFParseIFF *iff, const char *fntname);
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
@@ -82,7 +82,7 @@ extern "C" GBergIData   *GBergInstance;
 // This installs a new font, loading the data into the handle area and      ³
 // setting up for a later select.                                           ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-extern "C" gberg_error_codes gberg_install_font(char *fname, char *fntname)
+extern "C" gberg_error_codes gberg_install_font (const char *fname, const char *fntname)
 {
     gberg_error_codes   err;
     GBergFontInfo       *fnt;
@@ -122,13 +122,17 @@ extern "C" gberg_error_codes gberg_install_font(char *fname, char *fntname)
 //ÄÄ Loop until a header with the correct name is found
     err=GBERG_ERR_NONE;
 
-    for(;;) {
-        if (iff.next() != XF_ERR_NONE) {
+    for(;;)
+    {
+        if (iff.next() != XF_ERR_NONE)
+        {
             return GBERG_ERR_FONTNOTFOUND;
         }
 
-        if (iff.chunkid == iff.makeid('F','O','R','M')) {
-            if (iff.formid == iff.makeid('G','F','N','T')) {
+        if (iff.chunkid == iff.makeid('F','O','R','M'))
+        {
+            if (iff.formid == iff.makeid('G','F','N','T'))
+            {
                 err=igberg_install_font(&iff,fntname);
                 if (!err
                     || err != GBERG_ERR_FONTNOTFOUND)
@@ -150,7 +154,7 @@ extern "C" gberg_error_codes gberg_install_font(char *fname, char *fntname)
 // This installs the new font, assuming that the IFF is pointing to the     ³
 // correct form.                                                            ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-STATIC gberg_error_codes igberg_install_font(XFParseIFF *iff, char *fntname)
+STATIC gberg_error_codes igberg_install_font(XFParseIFF *iff, const char *fntname)
 {
     gberg_error_codes   err;
     GBergFontInfo       *fnt;
@@ -168,17 +172,20 @@ STATIC gberg_error_codes igberg_install_font(XFParseIFF *iff, char *fntname)
     iff->enterform();
 
     if (iff->seekchunk(iff->makeid('H','D','R',' '))
-        || iff->chunkSize != sizeof(GBergFileFontHDR)) {
+        || iff->chunkSize != sizeof(GBergFileFontHDR))
+    {
         iff->leaveform();
         return GBERG_ERR_INVALIDDATA;
     }
 
-    if (iff->read(&header)) {
+    if (iff->read(&header))
+    {
         iff->leaveform();
         return GBERG_ERR_FILEERROR;
     }
 
-    if (fntname && strncmp(fntname,header.name,GBERG_MAX_NAME)) {
+    if (fntname && strncmp(fntname,header.name,GBERG_MAX_NAME))
+    {
         iff->leaveform();
         return GBERG_ERR_FONTNOTFOUND;
     }
@@ -188,7 +195,6 @@ STATIC gberg_error_codes igberg_install_font(XFParseIFF *iff, char *fntname)
     fnt=igberg_empty_font();
     if (!fnt)
         return GBERG_ERR_NOMEMORY;
-
 
 //ÄÄ Verify header
     if ( (header.type != GBERG_FNT_MONOFIXED 
@@ -217,7 +223,7 @@ STATIC gberg_error_codes igberg_install_font(XFParseIFF *iff, char *fntname)
         iff->leaveform();
         return GBERG_ERR_NOMEMORY;
     }
-    
+
     fnt->ptr=(byte*)ivory_hlock(fnt->data);
     if (!fnt->ptr)
     {
@@ -266,10 +272,12 @@ error_exit:;
         }
         ivory_hfree(&fnt->data);
     }
+    memset(fnt,0,sizeof(GBergFontInfo));
 
     iff->leaveform();
     return err;
 }
+
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // gberg_info_font                                                          ³
@@ -277,35 +285,73 @@ error_exit:;
 // Returns information about the given font.  If fntname is empty, it will  ³
 // return information for any current font.                                 ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-extern "C" gberg_error_codes gberg_info_font(char *fntname, GBergFontInfo *info)
+extern "C" gberg_error_codes gberg_info_font(const char *fntname, GBergFontInfo *info)
 {
     ulong           i;
     GBergFontInfo   *fnt;
 
     assertMyth("Gutenberg must be initialized",GBergInstance);
 
-    if (!fntname || !*fntname) {
-        fnt=GBergInstance->font_active;
-        if (!fnt)
-        {
-            return GBERG_ERR_FONTNOTINSTALLED;
-        }
-
-        memcpy(info,fnt,sizeof(GBergFontInfo));
-        return GBERG_ERR_NONE;
-    }
-
-//ÄÄ Search for given font name
-    for(i=0, fnt=&GBergInstance->fonts[0]; i < GBergInstance->fonts_hi; i++, fnt++)
+    if (!fntname || !*fntname)
     {
-        if (*fntname == *fnt->name) {
-            if (!strcmp(fntname,fnt->name)) {
-                break;
+    //ÄÄ No name means use the active font
+        if ((fnt = GBergInstance->font_active) != 0)
+        {
+            *info = *fnt;
+            return GBERG_ERR_NONE;
+        }
+    }
+    else
+    {
+    //ÄÄ Search for given font name
+        for (i = 0, fnt = &GBergInstance->fonts[0]; i < GBergInstance->fonts_hi; i++, fnt++)
+        {
+            if (*fntname == *fnt->name)
+            {
+                if (!strcmp (fntname, fnt->name))
+                {
+                    *info = *fnt;
+                    return GBERG_ERR_NONE;
+                }
             }
         }
     }
+
     return GBERG_ERR_FONTNOTINSTALLED;
 }
 
-//°±² End of module - gbrgifnt.c ²±°
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// gberg_widthc                                                             ³
+//                                                                          ³
+// Returns the width of the given character in the current font, or 0 if    ³
+// no font is selected.                                                     ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+long gberg_widthc(char c)
+{
+    assertMyth("Gutenberg must be initialized",GBergInstance);
+
+    return (GBergInstance->font_active) ?
+                            GBergInstance->font_active->width
+                            : 0;
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// gberg_heightc                                                            ³
+//                                                                          ³
+// Returns the height of the given character in the current font, or 0 if   ³
+// no font is selected.                                                     ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+long gberg_heightc(char c)
+{
+    assertMyth("Gutenberg must be initialized",GBergInstance);
+
+    return (GBergInstance->font_active) ?
+                            GBergInstance->font_active->height
+                            : 0;
+}
+
+//°±² End of module - gbrgifnt.cpp ²±°
+
 

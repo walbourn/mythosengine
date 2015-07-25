@@ -6,7 +6,7 @@
 //    (_)       ^          * *     *      *   *    *            (_)
 //             (_)       **   **   *    ***** **** ****
 //
-//            Copyright (c) 1994,1995 by Charybdis Enterprises, Inc.
+//            Copyright (c) 1994-1996 by Charybdis Enterprises, Inc.
 //                            All Rights Reserved.
 //                        Microsoft Windows '95 Version
 //
@@ -180,8 +180,8 @@ void low_level()
        xf_remove(fname);
    }
 
-   cout << "\n°°° Using XFileDOS object °°°\n";
-   XFileDOS   xf;
+   cout << "\n°°° Using XFileDisk object °°°\n";
+   XFileDisk   xf;
 
    if (xf.create("TESTFIL2.DAT",0))
    {

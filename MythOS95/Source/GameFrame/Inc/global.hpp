@@ -8,7 +8,7 @@
 //
 // A Framework for Microsoft Windows '95 Entertainment Software Using MythOS
 //
-//              Copyright (c) 1995 by Charybdis Enterprises, Inc.
+//           Copyright (c) 1995, 1996 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -28,8 +28,7 @@
 //
 // global.hpp
 //
-// This the global includes, external references, and class definitions
-// for the GameFrame.
+// This the global includes, external references, and class definitions.
 //
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
 
@@ -46,6 +45,7 @@
 // NOTE: the including file must define any Windows control defines
 #include <windows.h>
 #include <stdlib.h>
+#include <ddraw.h>
 #include "resource.h"
 
 #include "dplay.h"
@@ -57,40 +57,30 @@
 #include <mythos.hpp>
 #include <turner.hpp>
 
+#include <newton.hpp>
+
+//ÄÄÄ GameFrame header
+#include "screen.hpp"
+
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//
+//                                Equates
+//
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+#define MYTHOS_MEM_SIZE             4*1024*1024
+#define MYTHOS_TASK_STACK_SIZE      16*1024
+#define MYTHOS_ESCHER_ARENA_SIZE    256*1024
+
+#define CMDFLAGS_DIRECTDRAW     0x1     // Use DirectDraw instead of GDI
+#define CMDFLAGS_DIBSWITCH      0x2     // Allow mode switch for DIB mode
+#define CMDFLAGS_JOYSTICK       0x4     // Allow joystick usage
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
 //                                Classes
 //
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-// GFScreen
-//
-// This class is the basic screen management class.  Since games typically
-// have a single 'screen', this manages a single window with a memory
-// DIB which is used for all drawing operations.
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-class GFScreen
-{
-public:
-    HDC             hdc;
-    LPBITMAPINFO    bmi;
-    HPALETTE        hpal;
-
-    BYTE            *bits;
-    VngoVportDD8    *gvport;
-    VngoPal8        *pal;
-
-    int             height;
-    int             width;
-
-    GFScreen ();
-    ~GFScreen ();
-
-    int init(int w, int h);
-    int load_palette(const char *);
-};
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 // GameState
@@ -102,8 +92,8 @@ public:
 class GameState
 {
 public:
-    GameState ()    { }
-    virtual ~GameState () { }
+    GameState ();
+    virtual ~GameState ();
 
     // These members control the "grungy windows code", and won't generally
     // need to be overridden.
@@ -115,12 +105,19 @@ public:
     virtual void    render() = 0;
 
     // Members that notify each game state when it is being activated
-    virtual void    activate ()     { }
-    virtual void    deactivate ()   { }
+    virtual void    activate ();
+    virtual void    deactivate ();
+
+    // Fatal error handler
+    virtual void panic (ulong id, const char *str=0);
 
     // A utility member to make mode switching easier
     void switch_to (GameState *);
 };
+
+class LunarLander;
+class LanderTitle;
+class LanderLanded;
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
@@ -129,21 +126,25 @@ public:
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 //ÄÄÄ Standard Windows data
-extern HINSTANCE    hInst;          // current instance
-extern HWND         hWndClient;     // Main window handle
-extern const char   szAppName[];
+extern HINSTANCE        hInst;          // current instance
+extern HWND             hWndClient;     // Main window handle
+extern const char       szAppName[];
+
+//ÄÄÄ Command Line Parse Results
+extern dword            CmdFlags;
+extern char             CmdMission[];
 
 //ÄÄÄ GameFrame and MythOS data
-extern GFScreen     *Screen;
-extern MythosSystem *MythOS;
-extern MaxDevices   *Devs;
-extern GameState    *Mode;
-extern TurnerNetwork *net;
+extern GFScreen         *Screen;
+extern MythosSystem     *MythOS;
+extern MaxDevices       *Devs;
+extern GameState        *Mode;
+extern TurnerNetwork    *Net;
 
-//ÄÄÄ Lander example data
-class LunarLander;
-class LanderTitle;
-class LanderLanded;
+//ÄÄÄ Lander data
+extern char szMasterIFF[];
+extern char szINI[];
+
 extern LanderTitle  *TitleMode;
 extern LunarLander  *SimMode;
 extern LanderLanded *LandMode;
@@ -160,10 +161,10 @@ extern LanderLanded *LandMode;
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 inline void GameState::switch_to (GameState *next)
 {
-    assertMyth ("Switch_to can switch to NULL", next != 0);
+    assertMyth ("Switch_to cannot switch to NULL", next != 0);
     deactivate();
-    next->activate();
     Mode = next;
+    Mode->activate();
 }
 
 #endif

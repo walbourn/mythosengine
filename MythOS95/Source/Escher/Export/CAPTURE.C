@@ -8,7 +8,7 @@
 //ùùùùù²±²ùùùùùùù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùùùùùù²±²ùùùù²±²ùùùùùù
 //ùùùù²²²²²²²²²²ù²²²²²²²²ùùù²²²²²²²²ùù²²²ùùùù²²²ù²²²²²²²²²²ù²²²ùùùù²²²ùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùCopyrightù(c)ù1994,ù1995ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
+//ùùùùùùùùùùùCopyrightù(c)ù1994-1996ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -127,6 +127,10 @@ typedef struct mtl
 int inverse_mtx(float *m, float *inv);
 void concat_mtx(float *ina, float *b, float *res);
 
+void do_query(char *image, int orgxsize, int orgysize);
+
+STATIC char *locate_map(char *fname, char *fullname);
+
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
 //                                 Data
@@ -144,12 +148,21 @@ extern int lights_flag;
 
 extern int mtl_sizemode;                    // 1=just to power of 2,
                                             // 2=force to mtl_sizex/y
+                                            // 3=query for size
 extern int mtl_sizex;
 extern int mtl_sizey;
 
+extern int query_xsize;                     // Query dialog
+extern int query_ysize;
+
 int count_camera=0;
 int count_vectlights=0;
+int count_fpointlights=0;
+int count_fattenlights=0;
+int count_fspotlights=0;
 int count_pointlights=0;
+int count_attenlights=0;
+int count_spotlights=0;
 int count_objects=0;
 
 STATIC int         capture_numb=0;
@@ -163,6 +176,13 @@ STATIC struct MtlCapture
     Mtl _far    *ptr;
 } *capture_mtl=NULL;
        
+// Light export information
+
+extern int lgt_omnias;
+extern int lgt_spotas;
+extern int lgt_ambient;
+extern int lgt_atten;
+
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
 //                                 Code
@@ -188,12 +208,18 @@ int capture_setup()
 //ÄÄ Get object information
     pxp_get_item_count(count);
 
-    if (!count)
+    // Always have an ambient light in the system
+    if (count <= 1)
         return 1;
 
     count_camera=0;
     count_vectlights=0;
+    count_fpointlights=0;
+    count_fattenlights=0;
+    count_fspotlights=0;
     count_pointlights=0;
+    count_attenlights=0;
+    count_spotlights=0;
     count_objects=0;
 
 //ÄÄ Count numbers of desired tri-mesh objects
@@ -220,13 +246,37 @@ int capture_setup()
                 break;
 
             case PXPLIGHT:
-                if (lights_flag && (idata.item.l.flags & LIGHT_ON))
+                if (lights_flag)
                 {
                     capture_numb++;
-                    if (idata.item.l.hotsize != 360.0 || idata.item.l.fallsize != 360.0 )
-                        count_vectlights++;
+                    if (idata.item.l.hotsize != 360.0
+                        || idata.item.l.fallsize != 360.0 )
+                    {
+                        if (lgt_spotas == 3)
+                            count_vectlights++;
+                        else if (lgt_spotas == 2)
+                            count_spotlights++;
+                        else
+                            count_fspotlights++;
+                    }
                     else
-                        count_pointlights++;
+                    {
+                        if (lgt_atten
+                            && idata.item.l.flags & LIGHT_ATTEN)
+                        {
+                            if (lgt_omnias == 2)
+                                count_attenlights++;
+                            else
+                                count_fattenlights++;
+                        }
+                        else
+                        {   
+                            if (lgt_omnias == 2)
+                                count_pointlights++;
+                            else // lgt_omnias == 1
+                               count_fpointlights++;
+                        }
+                    }
                 }
                 break;
 
@@ -277,7 +327,7 @@ int capture_setup()
                     break;
                
                 case PXPLIGHT:
-                    if (lights_flag && (idata.item.l.flags & LIGHT_ON))
+                    if (lights_flag)
                     {
                         memcpy(&capture_idata[capture_numb++],&idata,sizeof(ItemData));
                     }
@@ -402,6 +452,60 @@ error_exit :;
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// capture_getpivot                                                         ³
+//                                                                          ³
+// Returns the pivot point, if there is one defined or 0 if no pivot.       ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+int capture_getpivot(ItemData *idata, float *px, float *py, float *pz)
+{
+    int     i, t;
+    Pivot   p;
+    float   mtx[4][3];
+
+//ÄÄÄ Get node ID for object
+    kxp_get_node_number(idata->name,i,t);
+
+    if (t != OBJECT_NODE)
+        return 0;
+
+//ÄÄÄ Get pivot for ID
+    kxp_get_pivot(i, p, t);
+    if (t < 0)
+        return 0;
+
+//ÄÄÄ Return values
+    *px = p.x;
+    *py = p.y;
+    *pz = p.z;
+
+//ÄÄÄ Convert to world coords (no translation)
+//
+//                0 1 2
+//
+//             0 [A B C 0]   [ Ai+Dj+Gk ]   [ 0,0*x + 1,0*y + 2,0*z ]
+// [x y z 1] * 1 [D E F 0] = [ Bi+Ej+Hk ] = [ 0,1*x + 1,1*y + 2,1*z ]
+//             2 [G H I 0]   [ Ci+Fj+Ik ]   [ 0,2*x + 1,2*y + 2,2*z ]
+//             3 [0 0 0 1]   [      1   ]   [          1            ]
+//
+    kxp_get_xform(i, 0, mtx);
+
+    *px = mtx[0][0]*p.x
+          + mtx[1][0]*p.y
+          + mtx[2][0]*p.z;
+
+    *py = mtx[0][1]*p.x
+          + mtx[1][1]*p.y
+          + mtx[2][1]*p.z;
+    
+    *pz = mtx[0][2]*p.x
+          + mtx[1][2]*p.y
+          + mtx[2][2]*p.z;
+    
+    return 1;
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // capture_gethier                                                          ³
 //                                                                          ³
 // Returns information on parent of object in hiearchy, if any.             ³
@@ -412,6 +516,7 @@ error_exit :;
 int capture_gethier(ItemData *idata, char *name, float *m)
 {
     int     i, t;
+    float   tx, ty, tz;
     float   pm[4][3];
     float   mtx[4][3];
 
@@ -431,6 +536,14 @@ int capture_gethier(ItemData *idata, char *name, float *m)
     mtx[2][0] = 0.0;
     mtx[2][1] = 0.0;
     mtx[2][2] = 1.0;
+
+    if (coord_mode == 1
+        && capture_getpivot(idata, &tx, &ty, &tz))
+    {
+        mtx[3][0] += tx;
+        mtx[3][1] += ty;
+        mtx[3][2] += tz;
+    }
 
 //ÄÄÄ Get node ID for parent of object
     kxp_get_parent(i,t);
@@ -471,6 +584,14 @@ int capture_gethier(ItemData *idata, char *name, float *m)
             pm[2][0] = 0.0;
             pm[2][1] = 0.0;
             pm[2][2] = 1.0;
+
+            if (coord_mode == 1
+                && capture_getpivot(&capture_idata[i], &tx, &ty, &tz))
+            {
+                pm[3][0] += tx;
+                pm[3][1] += ty;
+                pm[3][2] += tz;
+            }
             break;
         }
     }
@@ -502,10 +623,15 @@ int capture_gethier(ItemData *idata, char *name, float *m)
 //                                                                          ³
 // Returns information on materials captureb before.                        ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-MtlData *capture_mtlget(int ind)
+MtlData *capture_mtlget(int ind, ushort *selfi)
 {
-    if (!capture_mtl || ind < 0 || ind > 255)
+    if (!capture_mtl || ind < 0 || ind >= 255)
         return NULL;
+
+    if (selfi)
+    {
+        *selfi = capture_mtl[ind].ptr->selfipct;
+    }
 
     return &capture_mtl[ind].mtl;
 }
@@ -525,7 +651,7 @@ int capture_mtlfile(int ind, char *fname, char *tfname)
     int             ret=0;
     Mapping _far    *map;
 
-    if (!capture_mtl || ind < 0 || ind > 255)
+    if (!capture_mtl || ind < 0 || ind >= 255)
         return 0;
 
     if (fname)
@@ -589,21 +715,33 @@ int capture_mtlfile(int ind, char *fname, char *tfname)
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// capture_mtlbitmap                                                        ³
+//                              *** Static ***                              ³
+// locate_map                                                               ³
 //                                                                          ³
-// Attempts to locate and load the map bitmap file given.                   ³
+// Attempts to locate a map file.                                           ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-BXPColor *capture_mtlbitmap(char *fname, ushort *xs, ushort *ys, ushort *nf,
-                            int forcesize)
+STATIC char *locate_map(char *fname, char *fullname)
 {
-    int         i;
-    int         desirex;
-    int         desirey;
-    BXPColor    *bm;
-    BXPColor    *tbm;
-    BitmapInfo  binfo;
-    char        path[128];
-    char        fullname[128];
+    int     i;
+    char    path[128];
+
+    if (!fname || !fullname)
+        return 0;
+
+    // Search map paths
+    for(i=0; i < 250; i++)
+    {
+        gfx_get_paths(GFX_MAP_PATH,i,path,fullname);
+        if (!*path)
+            continue;
+
+        strcpy(fullname,path);
+        strcat(fullname,"\\");
+        strcat(fullname,fname);
+
+        if (access(fullname,0) == 0)
+            return fullname;
+    }
 
     // Search image path
     gfx_get_paths(GFX_IMG_PATH,0,path,fullname);
@@ -612,29 +750,32 @@ BXPColor *capture_mtlbitmap(char *fname, ushort *xs, ushort *ys, ushort *nf,
     strcat(fullname,fname);
 
     if (access(fullname,0) == 0)
-        goto found;
+        return fullname;
 
-    // Search map paths
-    for(i=0; i < 250; i++)
-    {
-        gfx_get_paths(GFX_MAP_PATH,i,path,fullname);
-        if (!*path)
-            return NULL;
+    return 0;
+}
 
-        strcpy(fullname,path);
-        strcat(fullname,"\\");
-        strcat(fullname,fname);
 
-        if (access(fullname,0) == 0)
-            goto found;
-    }
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// capture_mtlbitmap                                                        ³
+//                                                                          ³
+// Attempts to locate and load the map bitmap file given.                   ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+BXPColor *capture_mtlbitmap(char *fname, ushort *xs, ushort *ys, int forcesize)
+{
+    int         i;
+    int         desirex;
+    int         desirey;
+    BXPColor    *bm;
+    BXPColor    *tbm;
+    BitmapInfo  binfo;
+    char        fullname[256];
 
-    return NULL;
+    if (!locate_map(fname,fullname))
+        return NULL;
 
-    // Load image
-found: ;
+//ÄÄÄ Load image
     gfx_bitmap_info(fullname,&binfo, i);
-
     if (i != 1)
         return NULL;
 
@@ -649,12 +790,18 @@ found: ;
         return NULL;
     }
 
-    // Resize, if needed
-
+//ÄÄÄ Check for resize
     if (forcesize)
     {
         desirex = *xs;
         desirey = *ys;
+    }
+    else if (mtl_sizemode == 3)
+    {
+        do_query(fname,binfo.width,binfo.height);
+
+        desirex = query_xsize;
+        desirey = query_ysize;
     }
     else if (mtl_sizemode == 2)
     {
@@ -689,6 +836,7 @@ found: ;
             desirey=256;
     }
     
+//ÄÄÄ Perform resize
     if (desirex != binfo.width
         || desirey != binfo.height)
     {
@@ -712,14 +860,9 @@ found: ;
         }
     }
 
-    // Return final image
+//ÄÄÄ Return final image
     *xs = desirex;
     *ys = desirey;
-
-    if (nf)
-    {
-        *nf = 1;
-    }
 
     return bm;
 }

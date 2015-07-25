@@ -107,14 +107,55 @@ void main()
 
 
    printf("\n\nDIV Section-------\n");
+   a.flx = 0xfffc153b;
+   b.flx = 0xfffffff9;
+   c = 4;
+   c = flx_16div16(a,b);
+
+//   c = b / a;
+   printf ("%f / %f = %f\n",(float)a,(float)b,(float)c);
+
+
+   printf("\n\nSIN Section-------\n");
    a = 17;
    b = 128;
-   c = 4;
+   c = 234;
 
-   c = b / a;
-   printf ("%f / %f = %f\n",(float)b,(float)a,(float)c);
+   printf ("SIN of %f is %f \n",(float)a,(float)a.sin());
+   printf ("ASIN of %f is %f \n",(float)flx_sin(a),(float)flx_asin(flx_sin(a)));
+   printf ("SIN of %f is %f \n",(float)b,(float)flx_sin(b));
+   printf ("ASIN of %f is %f \n",(float)flx_sin(b),(float)flx_asin(flx_sin(b)));
+   printf ("SIN of %f is %f \n",(float)c,(float)flx_sin(c));
+   printf ("ASIN of %f is %f \n",(float)flx_sin(c),(float)flx_asin(flx_sin(c)));
 
-   ticks=0;
+
+   printf("\n\nCOS Section-------\n");
+   a = 17;
+   b = 128;
+   c = 234;
+
+   printf ("COS of %f is %f \n",(float)a,(float)flx_cos(a));
+   printf ("ACOS of %f is %f \n",(float)flx_cos(a),(float)flx_acos(flx_cos(a)));
+   printf ("COS of %f is %f \n",(float)b,(float)flx_cos(b));
+   printf ("ACOS of %f is %f \n",(float)flx_cos(b),(float)flx_acos(flx_cos(b)));
+   printf ("COS of %f is %f \n",(float)c,(float)flx_cos(c));
+   printf ("ACOS of %f is %f \n",(float)flx_cos(c),(float)flx_acos(flx_cos(c)));
+
+   printf("\n\nTAN Section-------\n");
+   a = 17;
+   b = 128;
+   c = 234;
+
+   printf ("TAN of %f is %f \n",(float)a,(float)flx_tan(a));
+   printf ("COT of %f is %f \n",(float)a,(float)flx_cot(a));
+   printf ("TAN of %f is %f \n",(float)b,(float)flx_tan(b));
+   printf ("COT of %f is %f \n",(float)b,(float)flx_cot(b));
+   printf ("TAN of %f is %f \n",(float)c,(float)flx_tan(c));
+   printf ("COT of %f is %f \n",(float)c,(float)flx_cot(c));
+
+
+
+
 
    printf("\n\nSQRT Section-------\n");
 
@@ -123,6 +164,7 @@ void main()
    getch();
    start=clock();
    int i,j;
+   ticks=0;
    for (j=0;j < 50;j++)
    {
        for (i=0;i < 20000;i++)
@@ -141,10 +183,11 @@ void main()
    time = ((Flx16)((long)ticks)/(Flx16)CLOCKS_PER_SEC);
    printf("It took %f seconds to do %d sqrt operations!\n",(float)time,i*j*3);
    printf("That is %f sqrt operations per second.\n",(float)(i*j*3)/(float)time);
-   start=clock();
    double fa,fb,fc;
 
 #if 0
+   start=clock();
+   ticks = 0;
    for (j=0;j < 50;j++)
    {
        for (i=0;i < 20000;i++)

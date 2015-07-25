@@ -11,7 +11,7 @@
 //                     Text Output and Font Management System
 //                          Microsoft Windows '95 Version
 //
-//               Copyright (c) 1995 by Charybdis Enterprises, Inc.
+//            Copyright (c) 1995, 1996 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved.
 //
 //컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
@@ -213,7 +213,7 @@ void compile(char *name)
             if (CurrentToken != YY_STRING)
                 error("COPYRIGHT should be followed by a non-empty string");
 
-            if (IFF.write(IFF.makeid('C','O','P','Y'),yytext,strlen(yytext)))
+            if (IFF.write(IFF.makeid('(','C',')',' '),yytext,strlen(yytext)))
             {
                 print_error(IFF,"Failed to write copyright chunk");
                 exit(1);
@@ -371,6 +371,9 @@ void compile(char *name)
                             dw = ((YY_integer << 8) & 0xff00);
                         }
                     }
+
+                    if (Flags & FLAGS_INVERSE)
+                        dw ^= 0xffffffff;
 
                     // Store dword
 

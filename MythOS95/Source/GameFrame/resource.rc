@@ -8,7 +8,7 @@
 //
 // A Framework for Microsoft Windows '95 Entertainment Software Using MythOS
 //
-//              Copyright (c) 1995 by Charybdis Enterprises, Inc.
+//           Copyright (c) 1995, 1996 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -56,16 +56,48 @@
 // String Table                                                             ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
-STRINGTABLE
+STRINGTABLE DISCARDABLE
 BEGIN
-    IDS_TITLE,      "Lunar Lander"
+    IDS_TITLE,      "Lander"
+
+    //ÄÄÄ Errors
+    IDS_ERR_NOMEMORY "\
+Out Of Memory\n\nA memory allocation failed, exiting..."
+    IDS_ERR_MYTHOSFAIL "\
+MythOS Development Library Failed to Initialize\
+\n\nAttempt to setup system failed, exiting..."
+    IDS_ERR_SCREENFAIL "\
+Screen Failed to Initialize\
+\n\nAttempt to setup system failed, exiting..."
+    IDS_ERR_GAMEINITFAIL "\
+Game Module Failed to Initialize\
+\n\nAttempt to initialize game modules failed, exiting..."
+    IDS_ERR_LOADFONTFAIL "\
+Loading Font Data Failed\
+\n\nFailed to load required font data, exiting..."
+    IDS_ERR_MULTINSTANCE "\
+Application Already Executing\
+\n\nMultiple instances of this application are not allowed, exiting..."
+    IDS_ERR_INTERNAL "\
+Internal Error\
+\n\nAn unexpected internal error was encountered, exiting..."
+
+    IDS_ERR_PALETTELOADFAILED "\
+Loading of Needed Palette Data Failed"
+    IDS_ERR_CREATEVPORTFAILED "\
+Viewport Allocation Failed\n\nFailed to create needed rendering viewport"
+
 END
+
+
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // Icons (Large and Small)                                                  ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 
 GENERIC ICON "lcharyb.ico"
+
+
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // Dialogs                                                                  ³
@@ -103,6 +135,7 @@ BEGIN
 END
 
 
+
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // Version Information                                                      ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
@@ -130,15 +163,15 @@ BEGIN
             VALUE "InternalName", "Game Frame LLander\0"
             VALUE "FileDescription", "The MythOS '95 Game Framework Example\0"
 
-            VALUE "ProductVersion", "1.0\0"
-            VALUE "FileVersion", "0.1\0"
+            VALUE "ProductVersion", "1.1\0"
+            VALUE "FileVersion", "0.2\0"
 
-            VALUE "Comments", "By Dan Higdon and Chuck Walbourn\0"
+            VALUE "Comments", "CHARYBDIS ENTERPRISES, INC. COMPANY CONFIDENTIAL\0"
 
             VALUE "CompanyName", "Charybdis Enterprises, Inc.\0"
 
             VALUE "LegalCopyright",
-"Copyright \251 1995 by Charybdis Enterprises, Inc.\0"
+"Copyright \251 1995, 1996 by Charybdis Enterprises, Inc.\0"
 
             VALUE "LegalTrademarks",
 "MythOS is a trademark of Charybdis Enterprises, Inc.\n\

@@ -11,7 +11,7 @@
 ;                     Text Output and Font Management System
 ;                          Microsoft Windows '95 Version
 ;
-;               Copyright (c) 1995 by Charybdis Enterprises, Inc.
+;            Copyright (c) 1995, 1996 by Charybdis Enterprises, Inc.
 ;                           All Rights Reserved.
 ;
 ;컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
@@ -40,7 +40,7 @@ event DONE
     [ key #esc ]
 }
 
-event SELECT_8X13
+event SELECT_3X6
 {
     [ key '1']
 }
@@ -50,14 +50,24 @@ event SELECT_5X8
     [ key '2']
 }
 
-event SELECT_9X15
+event SELECT_7X12
 {
     [ key '3']
 }
 
-event SELECT_12X24
+event SELECT_8X13
 {
     [ key '4']
+}
+
+event SELECT_9X15
+{
+    [ key '5']
+}
+
+event SELECT_12X24
+{
+    [ key '6']
 }
 
 event PAGEUP

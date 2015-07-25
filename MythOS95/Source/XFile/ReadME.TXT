@@ -7,7 +7,7 @@
 
                           Microsoft Windows '95 Version
  
-             Copyright (c) 1994,1995 by Charybdis Enterprises, Inc.
+             Copyright (c) 1994-1996 by Charybdis Enterprises, Inc.
                                All Rights Reserved.
  
  ---------------------------------------------------------------------------
@@ -35,31 +35,39 @@
                              _Library Status_
 
  Notes by: Chuck Walbourn
- Updated: November 5, 1995
+ Updated: July 1, 1996
 
  Changes for this release --------------------------------------------------
 
-    o Release Version 1.0
+   o XFBitmap now has a 'create' helper routine to properly allocate and
+     lock data space.
 
-    o XFParseIFF now supports variations of the EA IFF format, including
-      Microsoft RIFF and MIDI SMF files.  IFFC and IFFDIR have command-line
-      options to utilize these options.
+     Added 'generate_mono' helper routine to create a Van Gogh compatable
+     monochrome bitmap from an 8-bit image.
 
-      
-      
- Pending changes -----------------------------------------------------------
+   o XFParseLBM can now be used with XFParseIFF instances configured for
+     Microsoft's RIFF format.
 
-   o XFileX file-system-in-a-file class plus associated compactor and
-     directory tools
+   o XFParseXEB implemented and documented.
+   
+   o IFFC updated to support XEB format and added -e option to prevent
+     'Empty Chunk' warnings.
 
-   o XFParse classes will need changes to take advantage of XFileX classes,
-     but they will only require that all code be recompiled.
+     Added new keywords 'maxsize' and 'ntext'.
+     
+     Added alias names for common data types: 'char', 'short', and 'ushort'
 
 
 
  Proposed changes ----------------------------------------------------------
 
     ° NOTE:  Due to the Unisys patent, XFileGIF will not be implemented. °
+
+   o XFileX file-system-in-a-file class plus associated compactor and
+     directory tools
+
+   o XFParse classes will need changes to take advantage of XFileX classes,
+     but they will only require that all code be recompiled.
 
    o XFileCD direct CD control and input class, as well as local disk
      caching

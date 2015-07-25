@@ -8,7 +8,7 @@
 //ùùùùù²±²ùùùùùùù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùùùùùù²±²ùùùù²±²ùùùùùù
 //ùùùù²²²²²²²²²²ù²²²²²²²²ùùù²²²²²²²²ùù²²²ùùùù²²²ù²²²²²²²²²²ù²²²ùùùù²²²ùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùCopyrightù(c)ù1994,ù1995ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
+//ùùùùùùùùùùùCopyrightù(c)ù1994-1996ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùù Microsoft Windows '95 Version ùùùùùùùùùùùùùùùùùùùùùùù
@@ -32,7 +32,10 @@
 //
 // estxture.cpp
 //
-//      EschTexture is the texture container and mangement object.
+// EschTexture is the interface defining class for the texture container
+// object.  The EschTexture class contains a VngoTexture pointer and a
+// number of standard interface members used to control the texture
+// usage.
 //
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
 
@@ -66,17 +69,25 @@ extern char EschNoName[];
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // EschTexture - Constructor                                                ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-EschTexture::EschTexture()
+EschTexture::EschTexture() :
+    flags(0),
+    name(EschNoName),
+    ptr(0)
 {
-    flags=0;
-    index=max=0;
-    ptr=0;
-    handle=0;
-
-    name=EschNoName;
-
+    //ÄÄ Update diags
+    assertMyth("EschTexture needs Escher initialized",EschSysInstance != 0);
     EschSysInstance->diag_ntxts++;
-};
+}
+
+EschTexture::EschTexture(const EschTexture &txt) :
+    flags(txt.flags & ~ESCH_TXT_OWNSDATA),
+    name(txt.name),
+    ptr(txt.ptr)
+{
+    //ÄÄ Update diags
+    assertMyth("EschTexture needs Escher initialized",EschSysInstance != 0);
+    EschSysInstance->diag_ntxts++;
+}
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
@@ -87,9 +98,9 @@ EschTexture::~EschTexture()
     release();
 
     //ÄÄ Update diags
+    assertMyth("EschTexture needs Escher initialized",EschSysInstance != 0);
     EschSysInstance->diag_ntxts--;
-};
-
+}
 
 
 
@@ -98,25 +109,47 @@ EschTexture::~EschTexture()
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// EschTexture - operator =                                                 ³
+//                                                                          ³
+// Copies the data from another texture.                                    ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+const EschTexture &EschTexture::operator = (const EschTexture &txt)
+{
+    if (this != &txt)
+    {
+        release();
+
+        flags = txt.flags & ~ESCH_TXT_OWNSDATA;
+        name = txt.name;
+        ptr = txt.ptr;
+    }
+    return *this;
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // EschTexture - release                                                    ³
 //                                                                          ³
-// Removes the texture data from memory.                                    ³
+// This first unlocks the texture, then it releases name and ptr.           ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void EschTexture::release(void)
+void EschTexture::release()
 {
+    if (flags & ESCH_TXT_LOCKED)
+        unlock();
+
     if (flags & ESCH_TXT_OWNSDATA)
     {
-        if (flags & ESCH_TXT_LOCKED)
-            unlock();
-
         if (name && name != EschNoName)
         {
             delete [] name;
         }
         name=EschNoName;
 
-        if (handle)
-            ivory_hfree(&handle);
+        if (ptr)
+        {
+            delete [] ptr;
+        }
+        ptr=0;
     }
 
     flags &= ~(ESCH_TXT_OWNSDATA | ESCH_TXT_LOCKED);
@@ -129,62 +162,35 @@ void EschTexture::release(void)
 // Locks the texture, making the 'ptr' member a valid pointer to a Van Gogh ³
 // texture object.                                                          ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void EschTexture::lock(void)
+void EschTexture::lock()
 {
-    assertMyth("EschTexture::lock needs a valid handle",
-               handle);
+    // Just ensures LOCKED bit is maintained.
 
     if (flags & ESCH_TXT_LOCKED)
         return;
-
-    ptr = (VngoTexture*) ivory_hlock(handle);
-
-    assertMyth("EschTexture::lock couldn't lock memory",
-               ptr);
 
     if (!ptr)
         return;
 
     flags |= ESCH_TXT_LOCKED;
-
-    assertMyth("EschTexture::lock expects index less than max",
-               index < max);
-
-    ptr = &ptr[index];
 }
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // EschTexture - unlock                                                     ³
 //                                                                          ³
-// Unlocks the texture, invalidating the 'ptr' member.                      ³
+// Unlocks the texture.                                                     ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void EschTexture::unlock(void)
+void EschTexture::unlock()
 {
+    // Just ensures LOCKED bit is maintained.
+
     if (flags & ESCH_TXT_LOCKED)
     {
         assertMyth("EschTexture::unlock expects ptr to be non-zero",
                    ptr);
 
-        ivory_hunlock(handle);
-
         flags &= ~ESCH_TXT_LOCKED;
-
-        ptr=0;
-    }
-}
-
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// EschTexture - nextframe                                                  ³
-//                                                                          ³
-// Advances to the next frame for multi-frame textures.                     ³
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void EschTexture::nextframe(void)
-{
-    if (flags & ESCH_TXT_MULTIFRAME)
-    {
-        ++index %= max;
     }
 }
 
@@ -192,12 +198,11 @@ void EschTexture::nextframe(void)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // EschTexture - animate                                                    ³
 //                                                                          ³
-// Performs nextframe on each call if animated.                             ³
+// Performs per-frame updating to animate the texture.                      ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void EschTexture::animate(void)
+void EschTexture::animate()
 {
-    if (flags & ESCH_TXT_ANIMATED)
-        nextframe();
+    // Performs no action
 }
 
 
@@ -267,100 +272,7 @@ esch_error_codes EschTexture::load(const char *fname, const char *tname)
 
 esch_error_codes EschTexture::load(XFParseIFF *iff, const char *tname)
 {
-    EschFileMtlMHDR header;
-
-    assertMyth("EschTexture::load needs iff pointer",
-               iff);
-
-    release();
-
-//ÄÄ Verify correct form name
-    if (iff->chunkid != iff->makeid('F','O','R','M')
-        || iff->formid != iff->makeid('E','M','T','L'))
-        return ESCH_ERR_NOTFOUND;
-
-//ÄÄ Enter FORM, find header, verify name if any.
-    iff->enterform();
-
-    if (iff->seekchunk(iff->makeid('M','H','D','R'))
-        || iff->chunkSize != sizeof(EschFileMtlMHDR))
-    {
-        iff->leaveform();
-        return ESCH_ERR_INVALIDDATA;
-    }
-
-    if (iff->read(&header))
-    {
-        iff->leaveform();
-        return ESCH_ERR_FILEERROR;
-    }
-
-    if (tname && strncmp(tname,header.name,ESCH_MAX_NAME))
-    {
-        iff->leaveform();
-        return ESCH_ERR_NOTFOUND;
-    }
-
-//ÄÄ Verify header
-    if (header.nframes != 1
-        || (header.type != 1 && header.type != 2))
-    {
-        iff->leaveform();
-        return ESCH_ERR_NOTSUPPORTED;
-    }
-
-//ÄÄ Found, so load
-
-    name = new char[ESCH_MAX_NAME];
-    if (!name)
-    {
-        iff->leaveform();
-        return ESCH_ERR_NOMEMORY;
-    }
-    strncpy(name,header.name,ESCH_MAX_NAME);
-    
-    // Process material body
-    if (iff->seekchunk(iff->makeid('B','O','D','Y'))
-        || iff->chunkSize != (ulong)(header.xsize*header.ysize))
-    {
-        iff->leaveform();
-        return ESCH_ERR_INVALIDDATA;
-    }
-
-    // Allocate memory for texture data
-    handle = ivory_halloc(sizeof(VngoTexture) + (header.xsize*header.ysize));
-    if (!handle)
-    {
-        iff->leaveform();
-        return ESCH_ERR_NOMEMORY;
-    }
-
-    ptr = (VngoTexture*)ivory_hlock(handle);
-    if (!ptr)
-    {
-        iff->leaveform();
-        return ESCH_ERR_LOCKFAILED;
-    }
-
-    flags = ESCH_TXT_LOCKED | ESCH_TXT_OWNSDATA;
-    max = 1;
-
-    // Load texture data
-    ptr->width = header.xsize;
-    ptr->height = header.ysize;
-    ptr->flags = (header.type == 2) ? VNGO_TRANSPARENT : 0;
-    ptr->tex = (byte*)ptr + sizeof(VngoTexture);
-    if (iff->read(ptr->tex))
-    {
-        iff->leaveform();
-        return ESCH_ERR_FILEERROR;
-    }
-    unlock();
-
-    // Exit with no error.
-
-    iff->leaveform();
-    return ESCH_ERR_NONE;
+    return ESCH_ERR_NOTSUPPORTED;
 }
 
 //°±² End of module - estxture.cpp ²±°

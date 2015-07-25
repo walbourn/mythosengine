@@ -6,7 +6,7 @@
 //    (_)       ^          * *     *      *   *    *            (_)
 //             (_)       **   **   *    ***** **** ****
 //
-//            Copyright (c) 1994,1995 by Charybdis Enterprises, Inc.
+//            Copyright (c) 1994-1996 by Charybdis Enterprises, Inc.
 //                             All Rights Reserved.
 //                        Microsoft Windows '95 Version
 //
@@ -64,6 +64,21 @@ const ulong    XF_MAX_HEIGHT   =65535;
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
+//                               Structures
+//
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+struct XFXEBHeader
+{
+    ushort  version;
+    ushort  width;
+    ushort  height;
+    byte    bpp;
+    char    na[9];
+};
+
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//
 //                                Classes
 //
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
@@ -93,6 +108,10 @@ public:
 
     xf_error_codes lock();
     void unlock();
+
+    xf_error_codes create(ushort w, ushort h, byte _bpp=1, int clear=1);
+
+    byte *generate_mono(dword bgcolor);
 };
 
 
@@ -100,7 +119,7 @@ public:
 // Abstract base object for reading/writing bitmap files.                   ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 class XFParseBitmap {
-    XFileDOSBuff    xfile;
+    XFileDiskBuf    xfile;
     XFBitmap        bitmap;
 
 protected:
@@ -143,6 +162,11 @@ public:
 //ÄÄ Windows BMP
 class XFParseBMP : public XFParseBitmap {
 public:
+    XFParseBMP() {};
+    XFParseBMP(XFile *f) : XFParseBitmap(f) {};
+    XFParseBMP(XFBitmap *b) : XFParseBitmap(b) {};
+    XFParseBMP(XFile *f, XFBitmap *b) : XFParseBitmap(f,b) {};
+
     virtual xf_error_codes read(XFBitmap *b=0);
     virtual xf_error_codes write(XFBitmap *b=0);
 };
@@ -150,6 +174,11 @@ public:
 //ÄÄ Autodesk's CEL
 class XFParseCEL : public XFParseBitmap {
 public:
+    XFParseCEL() {};
+    XFParseCEL(XFile *f) : XFParseBitmap(f) {};
+    XFParseCEL(XFBitmap *b) : XFParseBitmap(b) {};
+    XFParseCEL(XFile *f, XFBitmap *b) : XFParseBitmap(f,b) {};
+
     virtual xf_error_codes read(XFBitmap *b=0);
     virtual xf_error_codes write(XFBitmap *b=0);
 };
@@ -157,6 +186,11 @@ public:
 //ÄÄ IFF Standard ILBM
 class XFParseLBM : public XFParseBitmap {
 public:
+    XFParseLBM() {};
+    XFParseLBM(XFile *f) : XFParseBitmap(f) {};
+    XFParseLBM(XFBitmap *b) : XFParseBitmap(b) {};
+    XFParseLBM(XFile *f, XFBitmap *b) : XFParseBitmap(f,b) {};
+
     virtual xf_error_codes read(XFBitmap *b=0);
     virtual xf_error_codes write(XFBitmap *b=0);
 
@@ -167,6 +201,11 @@ public:
 //ÄÄ Zsoft's PCX
 class XFParsePCX : public XFParseBitmap {
 public:
+    XFParsePCX() {};
+    XFParsePCX(XFile *f) : XFParseBitmap(f) {};
+    XFParsePCX(XFBitmap *b) : XFParseBitmap(b) {};
+    XFParsePCX(XFile *f, XFBitmap *b) : XFParseBitmap(f,b) {};
+
     virtual xf_error_codes read(XFBitmap *b=0);
     virtual xf_error_codes write(XFBitmap *b=0);
 };
@@ -174,8 +213,28 @@ public:
 //ÄÄ Targa TrueVision TGA
 class XFParseTGA : public XFParseBitmap {
 public:
+    XFParseTGA() {};
+    XFParseTGA(XFile *f) : XFParseBitmap(f) {};
+    XFParseTGA(XFBitmap *b) : XFParseBitmap(b) {};
+    XFParseTGA(XFile *f, XFBitmap *b) : XFParseBitmap(f,b) {};
+
     virtual xf_error_codes read(XFBitmap *b=0);
     virtual xf_error_codes write(XFBitmap *b=0);
+};
+
+//ÄÄ Charybdis' XEB format
+class XFParseXEB : public XFParseBitmap {
+public:
+    XFParseXEB() {};
+    XFParseXEB(XFile *f) : XFParseBitmap(f) {};
+    XFParseXEB(XFBitmap *b) : XFParseBitmap(b) {};
+    XFParseXEB(XFile *f, XFBitmap *b) : XFParseBitmap(f,b) {};
+
+    virtual xf_error_codes read(XFBitmap *b=0);
+    virtual xf_error_codes write(XFBitmap *b=0);
+
+    xf_error_codes read(XFParseIFF *iff, XFBitmap *b=0);
+    xf_error_codes write(XFParseIFF *iff, XFBitmap *b=0);
 };
 
 #ifdef __WATCOMC__

@@ -8,7 +8,7 @@
 //ùùùùù²±²ùùùùùùù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùùùùùù²±²ùùùù²±²ùùùùùù
 //ùùùù²²²²²²²²²²ù²²²²²²²²ùùù²²²²²²²²ùù²²²ùùùù²²²ù²²²²²²²²²²ù²²²ùùùù²²²ùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùCopyrightù(c)ù1994,ù1995ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
+//ùùùùùùùùùùùCopyrightù(c)ù1994-1996ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùù Microsoft Windows '95 Version ùùùùùùùùùùùùùùùùùùùùùùù
@@ -32,10 +32,10 @@
 //
 // esmeshdr.cpp
 //
-//      Contains the code for the EschMeshDraw object.  This object is
-//      associated with an EschMesh object in order to define a drawable
-//      instance of the mesh data--this reduces the data requirements for
-//      having multiple copies of the same mesh displayed simultaneously.
+// Contains the code for the EschMeshDraw class.  This class is
+// associated with an EschMesh object in order to define a drawable
+// instance of the mesh data--this reduces the data requirements for
+// having multiple copies of the same mesh displayed simultaneously.
 //
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
 
@@ -70,23 +70,37 @@ extern char EschNoName[];
 //                                                                          ³
 // Initializes the class instance.                                          ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-EschMeshDraw::EschMeshDraw(EschMesh *mdata) : EschGeometry()
+EschMeshDraw::EschMeshDraw(EschMesh *mdata) :
+    EschGeometry(),
+    mesh(0),
+    tmax(0),
+    txt(0)
 {
-    mesh=0;
-    tmax=0;
-    txt=0;
+    dtyp = ESCH_DRWT_MESH;
+
     if (mdata)
         attach(mdata);
 }
 
 EschMeshDraw::EschMeshDraw(const char *fname, const char *oname,
-                           VngoPal *pal, EschMesh *msh, char *pn)
-             : EschGeometry()
+                           VngoPal *pal, EschMesh *msh, char *pn) :
+    EschGeometry(),
+    mesh(0),
+    tmax(0),
+    txt(0)
 {
-    mesh=0;
-    tmax=0;
-    txt=0;
+    dtyp = ESCH_DRWT_MESH;
+
     load(fname,oname,pal,msh,pn);
+}
+
+EschMeshDraw::EschMeshDraw(const EschMeshDraw &mshd) :
+    EschGeometry(mshd),
+    mesh (mshd.mesh),
+    tmax (mshd.tmax),
+    txt (mshd.txt)
+{
+    flags &= ~ESCH_MSHD_OWNSTEXTURE;
 }
 
 
@@ -107,38 +121,59 @@ EschMeshDraw:: ~EschMeshDraw()
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// EschMeshDraw - operator =                                                ³
+//                                                                          ³
+// Copies the data from another mesh draw.                                  ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+const EschMeshDraw &EschMeshDraw::operator = (const EschMeshDraw &mshd)
+{
+    if (this != &mshd)
+    {
+        detach();
+
+        EschGeometry::operator = (mshd);
+
+        flags &= ~ESCH_MSHD_OWNSTEXTURE;
+
+        attach(mshd.mesh);
+
+        tmax = mshd.tmax;
+        txt = mshd.txt;
+    }
+    return *this;
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // EschMeshDraw - draw                                                      ³
 //                                                                          ³
 // Draws the mesh object from the associated mesh's data using local        ³
 // object storage.                                                          ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void EschMeshDraw::draw(void)
+void EschMeshDraw::draw()
 {
     ulong           i;
-    int             output_face=0;
-    int             doclip;
+    dword           ctrlfl;
     dword           cflags;
     dword           level;
+    dword           fflags;
     dword           *vflags;
-    dword           *fflags;
     VngoPoint       *vpt;
     EschFace        *face;
     EschVertex      *vn;
     EschCamera      *cam;
     EschLight       *lights;
-    VngoRect        damage_rect;
-    EschPoint       p;
     EschPoint       eyep(0,0,0);
-    EschFrameRef    frame;
+    EschFrameRef    frame(0);
 
     assertMyth("EschMeshDraw::draw needs an attached mesh",
                mesh && mesh->ref_count);
 
-//ÄÄÄ Clear arena
+    //ÄÄÄ Clear arena
+    assertMyth("EschMeshDraw needs Escher initialized",EschSysInstance != 0);
     ivory_arena_clear(EschSysInstance->wspace);
 
-
-//ÄÄÄ Setup local pointers to current camera and Van Gogh viewport.
+    //ÄÄÄ Setup local pointers to current camera and Van Gogh viewport.
     assertMyth("EschMeshDraw::draw needs camera in current context",
                EschCurrent != NULL && EschCurrent->camera != NULL);
 
@@ -154,15 +189,10 @@ void EschMeshDraw::draw(void)
 
     int mp = cam->vport->vbuff.pal->shd_pal->mid_point;
 
-//ÄÄÄ Clear the objects damage rectangle
-    damage_rect.x = cam->vport->vbuff.width;
-    damage_rect.y = cam->vport->vbuff.height;
-    damage_rect.dx = 0;
-    damage_rect.dy = 0;
-
-//ÄÄÄ Perform object radial extents check
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Perform object radial extents check
     if (!(flags & ESCH_MSHD_NOEXTENTSCHK))
     {
+        EschPoint   p;
 
         // Transform center into view
         exts.center.transform(&world,&p);
@@ -184,7 +214,8 @@ void EschMeshDraw::draw(void)
         if ( ((p.z.flx + r.flx) < hither.flx)
              || ((p.z.flx - r.flx) > yon.flx) )
         {
-            EschGeometry::draw();
+            // Since the extents are inclusive of children, don't
+            // need to do anything for children meshes.
             return;
         }
         
@@ -207,67 +238,74 @@ void EschMeshDraw::draw(void)
             }
             
             // See if fully visible or needs clipping
-            doclip = ( ((p.z.flx - r.flx) > hither.flx)
+            ctrlfl = ( ((p.z.flx - r.flx) > hither.flx)
                         && ((p.z.flx + r.flx) < yon.flx)
                         && ((p.x.flx - r.flx) > -tx.flx)
                         && ((p.x.flx + r.flx) < tx.flx)
                         && ((p.y.flx - r.flx) > -ty.flx)
-                        && ((p.y.flx + r.flx) < ty.flx) ) ? 0 : 1;
+                        && ((p.y.flx + r.flx) < ty.flx) ) ? 0 : ESCH_CDF_CLIP;
 
         }
-        else doclip = 1;
+        else ctrlfl = ESCH_CDF_CLIP;
     }
-    else doclip = 1;
+    else ctrlfl = ESCH_CDF_CLIP;
         
-//ÄÄÄ Push drawing context
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Setup Context
     EschContext ec(EschCurrent);
+    ec.current = this;
+
     ec.verts = (EschVertex*)ivory_hlock(mesh->v);
     assertMyth("EschMeshDraw:draw lock on verticies failed",
-               ec.verts);
+               ec.verts != 0);
+
     ec.vflags = vflags = (dword*)ivory_arena_zalloc(EschSysInstance->wspace,sizeof(dword) * mesh->nverts);
     ec.vpoints = vpt = new (EschSysInstance->wspace) VngoPoint[mesh->nverts];
+
     ec.faces = (EschFace*)ivory_hlock(mesh->f);
     assertMyth("EschMeshDraw:draw lock on faces failed",
-               ec.faces);
-    ec.fflags = fflags = (dword*)ivory_arena_zalloc(EschSysInstance->wspace,sizeof(dword) * mesh->nfaces);
+               ec.faces != 0);
+
+    ec.fflags = 0;
     ec.txts = txt;
     ec.push();
 
-//ÄÄÄ Workspace for shadeing values, if not shading in modelspace.
+    //ÄÄÄ Workspace for shadeing values, if not shading in modelspace.
     if (!(cflags & ESCH_CAM_MODELSPACE)
-        && (cflags & ESCH_CAM_SHADE_SMOOTH))
+        && (cflags & (ESCH_CAM_SHADE_SMOOTH|ESCH_CAM_SHADE_SPECULAR)))
     {
         vn = (EschVertex*) new (EschSysInstance->wspace) EschVertex[mesh->nverts];
     }
 
-//ÄÄÄ Create local->world->eye transform
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Misc Setup
+    //ÄÄÄ Create local->world->eye transform
     world.orient.concat(&cam->eye.iorient,&frame.orient);
     cam->eye.orient.concat(&world.iorient,&frame.iorient);
 
-//ÄÄÄ Get camera into object coords if needed for backculling.
+    //ÄÄÄ Get camera into object coords if needed for backculling.
     if (cflags & ESCH_CAM_BACKCULL)
     {
         eyep.transform(&frame.iorient);
     }
 
-//ÄÄÄ Setup lights, if any
+    //ÄÄÄ Setup lights, if any
     lights = EschCurrent->lights;
     if (lights)
     {
         lights->setup(&world);
     }
 
-//ÄÄÄ Main face loop
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Main Face Loop
     for(i=0, face=ec.faces; i < mesh->nfaces; i++, face++)
     {
+        fflags = face->flags;
 
-        //ÄÄÄ Figure out shade level (take minimum of shade levels for camera/face)
-        level = cflags & face->flags;
+        //ÄÄÄ Figure out shade level (take minimum of shade levels for 
+        //ÄÄÄ camera, drawable shade limits, and face)
+        level = cflags & fflags & limits;
 
-        //ÄÄÄ Perform backface culling, if allowed, in object space.
+        //ÄÄÄÄÄÄÄÄÄÄÄÄ Perform backface culling, if allowed, in object space.
         if (level & ESCH_CAM_BACKCULL)
         {
-
             EschVector fview;
             fview.i.flx = ec.verts[face->a].x.flx - eyep.x.flx;
             fview.j.flx = ec.verts[face->a].y.flx - eyep.y.flx;
@@ -277,7 +315,7 @@ void EschMeshDraw::draw(void)
                 continue;
         }
 
-        //ÄÄÄ Transform face's verts
+        //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Transform face's verts
         if (!(vflags[face->a] & ESCH_VVERT_TRANSFORMED))
         {
             ec.verts[face->a].transform(&frame,(EschPoint*)&vpt[face->a]);
@@ -285,7 +323,7 @@ void EschMeshDraw::draw(void)
 
             // Transform vertex to world, if needed, for shading
             if (!(cflags & ESCH_CAM_MODELSPACE)
-                && (level & ESCH_CAM_SHADE_SMOOTH))
+                && (level & (ESCH_CAM_SHADE_SMOOTH|ESCH_CAM_SHADE_SPECULAR)))
             {
                 ec.verts[face->a].transform(&world,&vn[face->a]);
                 ec.verts[face->a].normal.transform(&world,&vn[face->a].normal);
@@ -301,7 +339,7 @@ void EschMeshDraw::draw(void)
 
             // Transform vertex to world, if needed, for shading
             if (!(cflags & ESCH_CAM_MODELSPACE)
-                && (level & ESCH_CAM_SHADE_SMOOTH))
+                && (level & (ESCH_CAM_SHADE_SMOOTH|ESCH_CAM_SHADE_SPECULAR)))
             {
                 ec.verts[face->b].transform(&world,&vn[face->b]);
                 ec.verts[face->b].normal.transform(&world,&vn[face->b].normal);
@@ -317,7 +355,7 @@ void EschMeshDraw::draw(void)
 
             // Transform vertex to world, if needed, for shading
             if (!(cflags & ESCH_CAM_MODELSPACE)
-                && (level & ESCH_CAM_SHADE_SMOOTH))
+                && (level & (ESCH_CAM_SHADE_SMOOTH|ESCH_CAM_SHADE_SPECULAR)))
             {
                 ec.verts[face->c].transform(&world,&vn[face->c]);
                 ec.verts[face->c].normal.transform(&world,&vn[face->c].normal);
@@ -326,195 +364,235 @@ void EschMeshDraw::draw(void)
             }
         }
 
+        //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Compute shading 
 
+        //ÄÄÄ Sets color (assumes draw face copies into face->b and face->c)
+        vpt[face->a].clr=face->color;
 
-        //ÄÄÄ Compute shading and clip/draw
+        //ÄÄÄ Sets shade value
         if (lights)
         {
+            assert(ESCH_FACE_SELFILUM_MASK == 0xf00000);
 
-            if (cflags & ESCH_CAM_MODELSPACE)
+            dword base_shade = (fflags & ESCH_FACE_SELFILUM_MASK)
+                               ? ( (mp*(((fflags & ESCH_FACE_SELFILUM_MASK) >> 20)+1) ) >> 4)
+                               : 0;
+
+            //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Smooth/Specular shading
+            if (level & (ESCH_CAM_SHADE_SPECULAR|ESCH_CAM_SHADE_SMOOTH))
             {
-                if (level & ESCH_CAM_SHADE_SPECULAR)
+                if (!(vflags[face->a] & ESCH_VVERT_LIT))
                 {
+                    vpt[face->a].shade=base_shade;
 
-                    if (!(vflags[face->a] & ESCH_VVERT_LIT))
+                    if (level & ESCH_CAM_SHADE_SPECULAR)
                     {
-                        vpt[face->a].shade=0;
-                        lights->hishine(&ec.verts[face->a],&vpt[face->a]);
-                        vflags[face->a] |= ESCH_VVERT_LIT;
+                        lights->hishine((cflags & ESCH_CAM_MODELSPACE) ?
+                                        &ec.verts[face->a]
+                                        : &vn[face->a],&vpt[face->a],
+                                        !(fflags & ESCH_FACE_ONESIDED));
                     }
-                    if (!(vflags[face->b] & ESCH_VVERT_LIT))
+                    else
                     {
-                        vpt[face->b].shade=0;
-                        lights->hishine(&ec.verts[face->b],&vpt[face->b]);
-                        vflags[face->b] |= ESCH_VVERT_LIT;
+                        lights->shine((cflags & ESCH_CAM_MODELSPACE) ?
+                                      &ec.verts[face->a]
+                                      : &vn[face->a],&vpt[face->a],
+                                      !(fflags & ESCH_FACE_ONESIDED));
                     }
-                    if (!(vflags[face->c] & ESCH_VVERT_LIT))
-                    {
-                        vpt[face->c].shade=0;
-                        lights->hishine(&ec.verts[face->c],&vpt[face->c]);
-                        vflags[face->c] |= ESCH_VVERT_LIT;
-                    }
-    
-                    vpt[face->a].clr=face->color;
-                    esch_clipdraw_face(i,doclip,&damage_rect);
-                    output_face++;
-                    continue;
+                    vflags[face->a] |= ESCH_VVERT_LIT;
                 }
-                else if (level & ESCH_CAM_SHADE_SMOOTH)
-                {
-    
-                    if (!(vflags[face->a] & ESCH_VVERT_LIT))
-                    {
-                        vpt[face->a].shade=0;
-                        lights->shine(&ec.verts[face->a],&vpt[face->a]);
-                        vflags[face->a] |= ESCH_VVERT_LIT;
-                    }
-                    if (!(vflags[face->b] & ESCH_VVERT_LIT))
-                    {
-                        vpt[face->b].shade=0;
-                        lights->shine(&ec.verts[face->b],&vpt[face->b]);
-                        vflags[face->b] |= ESCH_VVERT_LIT;
-                    }
-                    if (!(vflags[face->c] & ESCH_VVERT_LIT))
-                    {
-                        vpt[face->c].shade=0;
-                        lights->shine(&ec.verts[face->c],&vpt[face->c]);
-                        vflags[face->c] |= ESCH_VVERT_LIT;
-                    }
 
-                    vpt[face->a].clr=face->color;
-                    esch_clipdraw_face(i,doclip,&damage_rect);
-                    continue;
+                if (!(vflags[face->b] & ESCH_VVERT_LIT))
+                {
+                    vpt[face->b].shade=base_shade;
+
+                    if (level & ESCH_CAM_SHADE_SPECULAR)
+                    {
+                        lights->hishine((cflags & ESCH_CAM_MODELSPACE) ?
+                                        &ec.verts[face->b]
+                                        : &vn[face->b],&vpt[face->b],
+                                        !(fflags & ESCH_FACE_ONESIDED));
+                    }
+                    else
+                    {
+                        lights->shine((cflags & ESCH_CAM_MODELSPACE) ?
+                                      &ec.verts[face->b]
+                                      : &vn[face->b],&vpt[face->b],
+                                      !(fflags & ESCH_FACE_ONESIDED));
+                    }
+                    vflags[face->b] |= ESCH_VVERT_LIT;
                 }
-                else if (level & ESCH_CAM_SHADE_FLAT)
-                {
-                    EschVertex fnormal(ec.verts[face->a].x,
-                                       ec.verts[face->a].y,
-                                       ec.verts[face->a].z,
-                                       &face->normal);
-                    vpt[face->a].clr=face->color;
-                    vpt[face->a].shade=0;
-                    lights->shine(&fnormal,&vpt[face->a]);
 
-                    esch_clipdraw_face(i,doclip,&damage_rect);
-                    continue;
+                if (!(vflags[face->c] & ESCH_VVERT_LIT))
+                {
+                    vpt[face->c].shade=base_shade;
+
+                    if (level & ESCH_CAM_SHADE_SPECULAR)
+                    {
+                        lights->hishine((cflags & ESCH_CAM_MODELSPACE) ?
+                                        &ec.verts[face->c]
+                                        : &vn[face->c],&vpt[face->c],
+                                        !(fflags & ESCH_FACE_ONESIDED));
+                    }
+                    else
+                    {
+                        lights->shine((cflags & ESCH_CAM_MODELSPACE) ?
+                                      &ec.verts[face->c]
+                                      : &vn[face->c],&vpt[face->c],
+                                      !(fflags & ESCH_FACE_ONESIDED));
+                    }
+                    vflags[face->c] |= ESCH_VVERT_LIT;
                 }
             }
-            else
+            //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Flat shading
+            else if (level & ESCH_CAM_SHADE_FLAT)
             {
-                if (level & ESCH_CAM_SHADE_SPECULAR)
-                {
+                EschVertex  fnormal;
 
-                    if (!(vflags[face->a] & ESCH_VVERT_LIT))
-                    {
-                        vpt[face->a].shade=0;
-                        lights->hishine(&vn[face->a],&vpt[face->a]);
-                        vflags[face->a] |= ESCH_VVERT_LIT;
-                    }
-                    if (!(vflags[face->b] & ESCH_VVERT_LIT))
-                    {
-                        vpt[face->b].shade=0;
-                        lights->hishine(&vn[face->b],&vpt[face->b]);
-                        vflags[face->b] |= ESCH_VVERT_LIT;
-                    }
-                    if (!(vflags[face->c] & ESCH_VVERT_LIT))
-                    {
-                        vpt[face->c].shade=0;
-                        lights->hishine(&vn[face->c],&vpt[face->c]);
-                        vflags[face->c] |= ESCH_VVERT_LIT;
-                    }
-    
-                    vpt[face->a].clr=face->color;
-                    esch_clipdraw_face(i,doclip,&damage_rect);
-                    continue;
-                }
-                if (level & ESCH_CAM_SHADE_SMOOTH)
+                if (cflags & ESCH_CAM_MODELSPACE)
                 {
-                    if (!(vflags[face->a] & ESCH_VVERT_LIT))
-                    {
-                        vpt[face->a].shade=0;
-                        lights->shine(&vn[face->a],&vpt[face->a]);
-                        vflags[face->a] |= ESCH_VVERT_LIT;
-                    }
-                    if (!(vflags[face->b] & ESCH_VVERT_LIT))
-                    {
-                        vpt[face->b].shade=0;
-                        lights->shine(&vn[face->b],&vpt[face->b]);
-                        vflags[face->b] |= ESCH_VVERT_LIT;
-                    }
-                    if (!(vflags[face->c] & ESCH_VVERT_LIT))
-                    {
-                        vpt[face->c].shade=0;
-                        lights->shine(&vn[face->c],&vpt[face->c]);
-                        vflags[face->c] |= ESCH_VVERT_LIT;
-                    }
-    
-                    vpt[face->a].clr=face->color;
-                    esch_clipdraw_face(i,doclip,&damage_rect);
-                    continue;
+                    fnormal.x = ec.verts[face->a].x;
+                    fnormal.y = ec.verts[face->a].y;
+                    fnormal.z = ec.verts[face->a].z;
+                    fnormal.normal.i = face->normal.i;
+                    fnormal.normal.j = face->normal.j;
+                    fnormal.normal.k = face->normal.k;
                 }
-                else if (level & ESCH_CAM_SHADE_FLAT)
+                else
                 {
-                    EschVertex  fnormal;
-
                     ec.verts[face->a].transform(&world,&fnormal);
                     face->normal.transform(&world,&fnormal.normal);
-                    vpt[face->a].clr=face->color;
-                    vpt[face->a].shade=0;
-                    lights->shine(&fnormal,&vpt[face->a]);
-
-                    esch_clipdraw_face(i,doclip,&damage_rect);
-                    continue;
                 }
+
+                vpt[face->a].shade=0;
+                lights->shine(&fnormal,&vpt[face->a],
+                              !(fflags & ESCH_FACE_ONESIDED));
+            }
+            //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ No shading
+            else
+            {
+                vpt[face->a].shade=mp;
             }
         }
+        //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ No lights, so no shading
+        else
+        {
+            vpt[face->a].shade=mp;
+            vpt[face->b].shade=mp;
+            vpt[face->c].shade=mp;
+        }
 
-        vpt[face->a].clr=face->color;
-        vpt[face->a].shade=mp;
-        esch_clipdraw_face(i,doclip,&damage_rect);
+        //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Call clip draw
+        esch_clipdraw_face(i,ctrlfl);
     }
 
-//ÄÄÄ Ensure damage rect is on a word boundary for both origin and width
-
-    if (damage_rect.dx > 0 && damage_rect.dy > 0)
-    {
-        // Coming in here .dx & .dy are the right edges, not the actual
-        // deltas, we must now derive the delta information.
-        damage_rect.dx = damage_rect.dx - damage_rect.x;
-        damage_rect.dy = damage_rect.dy - damage_rect.y;
-        if (damage_rect.x & 0x1)
-        {
-           // if it is not on an even boundary, put it there.
-           damage_rect.x = damage_rect.x - 1;
-           // you now need to adjust the width to compensate for it.
-           damage_rect.dx++;
-        }
-        // There is no need to align the Y parameters.
-        if (damage_rect.dx & 1)
-        {
-           if ((damage_rect.dx + damage_rect.x) < (cam->vport->vbuff.width -1 ))
-           {
-               damage_rect.dx++;
-           }
-        }
-        if ((damage_rect.dx + damage_rect.x + 2) < (cam->vport->vbuff.width -1))
-        {
-            damage_rect.dx += 2;
-        }
-        if ((damage_rect.dy + damage_rect.y + 1) < (cam->vport->vbuff.height -1))
-        {
-            damage_rect.dy++;
-        }
-        cam->vport->add_hot_rect(new VngoRectList(damage_rect));
-    }
-
-//ÄÄÄ Pop drawing context
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Cleanup
     ec.pop();
     ivory_hunlock(mesh->v);
     ivory_hunlock(mesh->f);
 
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Call onto base
     EschGeometry::draw();
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// EschMeshDraw - ray                                                       ³
+//                                                                          ³
+// Performs a ray intersection test with the object (or its extents),       ³
+// returning the distance along the ray for the intersection.               ³
+// It returns a zero if it missed the object, a positive distance along the ³
+// ray if it hit, or -1 if the intersection is not supported.               ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+Flx16 EschMeshDraw::ray(const EschPoint *pt, const EschVector *v, int coarse) const
+{
+    Flx16   dist;
+
+    assertMyth("EschMeshDraw::ray needs an attached mesh",
+               mesh && mesh->ref_count);
+
+    assertMyth("EschMeshDraw::ray assumes original extents in 'sphere'",
+               sphere != 0 && sphere->radius >= 0);
+
+//ÄÄÄ Transform ray into local coordinates
+    EschPoint   point;
+    pt->transform(&world.iorient,&point);
+
+    EschVector  ray;
+    v->transform(&world.iorient,&ray);
+    ray.normalize();
+
+//ÄÄÄ Perform coarse check, returning if coarse fails to detect a hit
+//ÄÄÄ (Ray/Sphere intersection)
+    dist=sphere->ray(&point,&ray);
+
+    if (dist <= 0)
+        return 0;
+
+    //ÄÄÄ If doing coarse only, return result now
+    if (coarse)
+        return (dist * world.scalef);
+
+//ÄÄÄ Perform fine check (Ray/Box intersection)
+    dist=mesh->box.ray(&point,&ray);
+
+    if (dist <= 0)
+        return 0;
+
+    return (dist * world.scalef);
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// EschMeshDraw - hit                                                       ³
+//                                                                          ³
+// Performs a sphere intersection test with the object (or its extents),    ³
+// returning 1 if it hit, 0 if it missed, -1 if not supported.              ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+int EschMeshDraw::hit(const EschPoint *pt, const Flx16 r, int coarse) const
+{
+    assertMyth("EschMeshDraw::hit needs point and radius",
+               pt != 0 && r >= 0);
+
+    assertMyth("EschMeshDraw::hit needs an attached mesh",
+               mesh && mesh->ref_count);
+
+    assertMyth("EschMeshDraw::hit assumes original extents in 'sphere'",
+               sphere != 0 && sphere->radius >= 0);
+
+    EschPoint   center;
+    pt->transform(&world.iorient,&center);
+
+    Flx16 radius = flx_16div16(r,world.scalef);
+
+    int h = sphere->hit(&center,radius);
+
+    if (!h || coarse)
+        return h;
+
+    return mesh->box.hit(&center,radius);
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// EschMeshDraw - animate                                                   ³
+//                                                                          ³
+// This call is used to inform the drawable to animate itself for the next  ³
+// frame.  This is called directly by the application when needed.          ³
+// The base behavior for a mesh draw is to call animate for each texture    ³
+// in the texture list.                                                     ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+void EschMeshDraw::animate()
+{
+    if (!txt)
+        return;
+
+    for(ulong i=0; i < tmax; i++)
+    {
+        EschTexture *t = txt[i];
+        if (!(t->flags & ESCH_TXT_SKIPANIMATE))
+            t->animate();
+    }
 }
 
 
@@ -525,7 +603,7 @@ void EschMeshDraw::draw(void)
 //                                                                          ³
 // Returns 0 on success, non-zero otherwise.                                ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-esch_error_codes  EschMeshDraw::attach(EschMesh *mdata)
+esch_error_codes  EschMeshDraw::attach(EschMesh *mdata, dword update)
 {
     ulong   needed;
 
@@ -547,7 +625,7 @@ esch_error_codes  EschMeshDraw::attach(EschMesh *mdata)
 
     //ÄÄ Get initial information from mesh data.
     name = mesh->name;
-    exts = mesh->exts;
+    sphere = &mesh->sphere;
 
     tmax = mesh->tmax;
     txt = mesh->txt;
@@ -555,18 +633,24 @@ esch_error_codes  EschMeshDraw::attach(EschMesh *mdata)
     flags &= ~ESCH_MSHD_OWNSTEXTURE;
 
     //ÄÄ Update diags
+    assertMyth("EschMeshDraw needs Escher initialized",EschSysInstance != 0);
     EschSysInstance->diag_ifaces += mesh->nfaces;
     EschSysInstance->diag_iverts += mesh->nverts;
 
     //ÄÄ Update wspace_mbytes diags
-    needed = (sizeof(VngoPoint)+sizeof(dword)+sizeof(EschVertex))*mesh->nverts
-             + (sizeof(dword))*mesh->nfaces;
+    needed = (sizeof(VngoPoint)+sizeof(dword)+sizeof(EschVertex))*mesh->nverts;
 
     assertMyth("EschMeshDraw::attach needs more workspace than is available",
                needed <= EschSysInstance->wspace_sbytes);
 
     if (needed > EschSysInstance->wspace_mbytes)
         EschSysInstance->wspace_mbytes = needed;
+
+//ÄÄ Our extents probably changed, so rebuild if requested
+    if (update & ESCH_UPD_EXTENTS)
+    {
+        compute_extents();
+    }
 
 //ÄÄ Return success
     return ESCH_ERR_NONE;
@@ -591,6 +675,7 @@ void EschMeshDraw::detach()
                mesh->ref_count);
 
     //ÄÄ Update diags
+    assertMyth("EschMeshDraw needs Escher initialized",EschSysInstance != 0);
     EschSysInstance->diag_ifaces -= mesh->nfaces;
     EschSysInstance->diag_iverts -= mesh->nverts;
 
@@ -607,7 +692,12 @@ void EschMeshDraw::detach()
 
     if (flags & ESCH_MSHD_OWNSTEXTURE)
     {
-        delete txt;
+        for(ulong i=0; i < tmax; i++)
+        {
+            if (txt[i])
+                delete txt[i];
+        }
+        delete [] txt;
         flags &= ~ESCH_MSHD_OWNSTEXTURE;
     }
     tmax=0;

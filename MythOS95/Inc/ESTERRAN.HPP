@@ -8,7 +8,7 @@
 //ùùùùù²±²ùùùùùùù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùùùùùù²±²ùùùù²±²ùùùùùù
 //ùùùù²²²²²²²²²²ù²²²²²²²²ùùù²²²²²²²²ùù²²²ùùùù²²²ù²²²²²²²²²²ù²²²ùùùù²²²ùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùCopyrightù(c)ù1994,ù1995ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
+//ùùùùùùùùùùùCopyrightù(c)ù1994-1996ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùù Microsoft Windows '95 Version ùùùùùùùùùùùùùùùùùùùùùùù
@@ -32,7 +32,10 @@
 //
 // esterran.hpp
 //
-// Height-field polygonal terrain drawable.
+// The EschTerrain class is a height-field polygonal terrain system which
+// uses a 2D array of 8-bit height values to create a realistic "outdoor"
+// terrain.  The terrain may have textures and be drawn with multiple
+// levels of detail.
 //
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
 
@@ -85,9 +88,44 @@ struct esch_surf_type
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 class EschTerrain : public EschDrawable {
 protected:
-    
-	int compute_area(Flx16 lox, Flx16 loz, Flx16 hix, Flx16 hiz,
+
+    int compute_area(Flx16 lox, Flx16 loz, Flx16 hix, Flx16 hiz,
                      int *sw, int *ew, int *sd, int *ed, int bits);
+
+    int compute_shift_value(ulong x, ulong *shift);
+
+    void compute_texture_uv(Flx16 &u_left, Flx16 &u_right,
+                            Flx16 &v_top, Flx16 &v_bottom,
+                            dword flags,
+                            int w, int d,
+                            ulong shift=0);
+
+    void draw_block(int w, int d, int i, int j,
+                    esch_surf_type *sptr, dword ctrlfl,
+                    ulong shift=0);
+
+
+    enum
+    {
+        BOTTOM          =0,
+        TOP             =1,
+        LEFTA           =2,
+        LEFTB           =3,
+        RIGHTA          =4,
+        RIGHTB          =5,
+        BOTTOM_CORNERS  =6,
+        TOP_CORNERS     =7,
+    };
+
+    void draw_transitions(int w, int d, int i, int j,
+                          esch_surf_type *sptr, dword ctrlfl,
+                          int id,
+                          ulong shift=0);
+
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    // Protected data members                                               ³
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+    char            iname[ESCH_MAX_NAME];
 
 public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
@@ -95,20 +133,20 @@ public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
     ushort          width;                  // Width of height field
     ushort          depth;                  // Depth of height field
-    ushort          surfratio;              // Surface ratio (height : surface)
-    ushort          surfshift;              // Shift value for surf ratio
-    Flx16           wscale;                 // World space per unit in width
-    Flx16           dscale;                 // World space per unit in depth
-    Flx16           hscale;                 // World space per unit in height
+    ulong           surfratio;              // Surface ratio (height : surface)
+    ulong           surfshift;              // Shift value for surf ratio
+    Flx16           scale;                  // World space per unit in width/depth
+    ulong           scaleshift;             // Shift value for scale
     Flx16           lodmedium;              // Eye distance for medium LOD
     Flx16           lodlow;                 // Eye distance for low LOD
     EschPoint       origin;                 // Origin of height field
     byte            *hfield;                // 2D array of heights
+    Flx16           *htable;                // Array of world height values
     esch_surf_type  *surfinfo;              // 2D array of surface information
     IvoryHandle     hsurfnorml;             // 2D array of surface normals
     ulong           tmax;                   // Number of textures
     byte            *txtcolor;              // Array of colors to use for texture entries
-    EschTexture     *txt;                   // Array of textures
+    EschTexture     **txt;                  // Array of textures
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Constructor/Destructors                                              ³
@@ -118,15 +156,22 @@ public:
     virtual ~EschTerrain();
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-    // Operations on EschTerrain                                            ³
+    // Operations                                                           ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-    virtual void draw(void);
+    virtual void draw();
+    virtual void animate();
+
     virtual void compute_shades(EschCamera *cam, EschLight *lgts);
 
     virtual void release();
 
+    virtual Flx16 get_height(Flx16 x, Flx16 z) const;
+    Flx16 get_height(const EschPoint *pt) const { return get_height(pt->x, pt->z);}
+
+    virtual int check_LOS(EschPoint *pt1, EschPoint *pt2, int precision=-1) const;
+
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-    // Utility functions for changing settings for terrain.                 ³
+    // Utility functions.                                                   ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
     void set_origin(const EschPoint *pt)
     {
@@ -139,12 +184,7 @@ public:
         origin.z = iz;
     }
 
-    void set_scale(const Flx16 iw, const Flx16 id, const Flx16 ih)
-    {
-        wscale = iw;
-        dscale = id;
-        hscale = ih;
-    }
+    void set_scale(const Flx16 i);
 
     void set_lod(const Flx16 lodm, const Flx16 lodl)
     {
@@ -156,8 +196,8 @@ public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // I/O routines                                                         ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-    virtual esch_error_codes load(const char *fname, const char *tname=0);
-    virtual esch_error_codes load(XFParseIFF *iff, const char *tname=0);
+    virtual esch_error_codes load(const char *fname, const char *tname=0, ushort *hclr=0);
+    virtual esch_error_codes load(XFParseIFF *iff, const char *tname=0, ushort *hclr=0);
 };
 
 #ifdef __WATCOMC__

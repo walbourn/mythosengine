@@ -8,7 +8,7 @@
 //ùùùùù²±²ùùùùùùù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùùùùùù²±²ùùùù²±²ùùùùùù
 //ùùùù²²²²²²²²²²ù²²²²²²²²ùùù²²²²²²²²ùù²²²ùùùù²²²ù²²²²²²²²²²ù²²²ùùùù²²²ùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùCopyrightù(c)ù1994,ù1995ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
+//ùùùùùùùùùùùCopyrightù(c)ù1994-1996ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùù Microsoft Windows '95 Version ùùùùùùùùùùùùùùùùùùùùùùù
@@ -32,9 +32,9 @@
 //
 // esscene.cpp
 //
-//      The EschScene object is used to load and manage a collection of
-//      cameras, lights, and objects all defined together.  Scenes can
-//      be loaded from files with their object relations intact.
+// The EschScene class is used to load and manage a collection of
+// cameras, lights, and objects all defined together.  Scenes can
+// be loaded from files with their object relations intact.
 //
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
 
@@ -85,14 +85,16 @@ extern char EschNoName[];
 // given.                                                                   ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 EschScene::EschScene(const char *fname, const char *sname,
-                     VngoPal *pal, dword flgs)
+                     VngoPal *pal, dword flgs) :
+    flags(0),
+    ncameras(0),
+    cameras(0),
+    nlights(0),
+    lights(0),
+    nmeshes(0),
+    meshes(0)
 {
     strcpy(name,EschNoName);
-    flags=0;
-    cameras=0;
-    lights=0;
-    meshes=0;
-    ncameras=nlights=nmeshes=0;
 
     if (fname)
         load(fname,sname,pal,flgs);
@@ -110,6 +112,7 @@ EschScene::~EschScene()
 }
 
 
+
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°±  Operations  ±°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
@@ -119,7 +122,7 @@ EschScene::~EschScene()
 //                                                                          ³
 // Frees any data owned by the scene.                                       ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void EschScene::release(void)
+void EschScene::release()
 {
     if (flags & ESCH_SCENE_OWNSDATA)
     {
@@ -155,6 +158,8 @@ void EschScene::release(void)
 
     strcpy(name,EschNoName);
 }
+
+
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°±  I/O Routines  ±°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
@@ -276,9 +281,15 @@ esch_error_codes EschScene::load(XFParseIFF *iff, const char *sname,
         ncameras = header.ncameras;
     }
 
-    if (flgs & ESCH_SCENELD_LIGHTS && (header.nvectorlights || header.npointlights))
+    if (flgs & ESCH_SCENELD_LIGHTS)
     {
-        nlights = header.nvectorlights + header.npointlights;
+        nlights = header.nvectorlights
+                  + header.npointlights
+                  + header.nfpointlights
+                  + header.nattenlights
+                  + header.nfattenlights
+                  + header.nspotlights
+                  + header.nfspotlights;
     }
 
     //ÄÄ Scan and load chunks in form
@@ -332,7 +343,10 @@ esch_error_codes EschScene::load(XFParseIFF *iff, const char *sname,
         {
             EschCamera  *c;
             
-            c = new EschCamera;
+            if (flgs & ESCH_SCENELD_CAMSEX)
+                c = new EschCameraEx;
+            else
+                c = new EschCamera;
             if (!c)
             {
                 err=ESCH_ERR_NOMEMORY;
@@ -353,65 +367,36 @@ esch_error_codes EschScene::load(XFParseIFF *iff, const char *sname,
             ncams++;
         }
 
-        //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Lights: Ambient
-        else if (iff->chunkid == iff->makeid('E','A','M','B')
+        //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Lights
+        else if (( iff->chunkid == iff->makeid('E','A','M','B')
+                   || iff->chunkid == iff->makeid('E','V','E','C')
+                   || iff->chunkid == iff->makeid('E','F','P','T')
+                   || iff->chunkid == iff->makeid('E','F','A','T')
+                   || iff->chunkid == iff->makeid('E','F','S','P')
+                   || iff->chunkid == iff->makeid('E','P','N','T')
+                   || iff->chunkid == iff->makeid('E','A','T','N')
+                   || iff->chunkid == iff->makeid('E','S','P','T') )
                  && flgs & ESCH_SCENELD_LIGHTS)
         {
-            EschLight   *l;
+            EschLight   *l=0;
             
-            l = new EschLight;
-            if (!l)
-            {
-                err=ESCH_ERR_NOMEMORY;
-                goto error_exit;
-            }
+            if (iff->chunkid == iff->makeid('E','A','M','B'))
+                l = new EschLight;
+            else if (iff->chunkid == iff->makeid('E','V','E','C'))
+                l = (EschLight*)new EschVectorLight;
+            else if (iff->chunkid == iff->makeid('E','F','P','T'))
+                l = (EschLight*)new EschFastPointLight;
+            else if (iff->chunkid == iff->makeid('E','F','A','T'))
+                l = (EschLight*)new EschFastAttenLight;
+            else if (iff->chunkid == iff->makeid('E','F','S','P'))
+               l = (EschLight*)new EschFastSpotLight;
+            else if (iff->chunkid == iff->makeid('E','P','N','T'))
+                l = (EschLight*)new EschPointLight;
+            else if (iff->chunkid == iff->makeid('E','A','T','N'))
+                l = (EschLight*)new EschAttenLight;
+            else if (iff->chunkid == iff->makeid('E','S','P','T'))
+                l = (EschLight*)new EschSpotLight;
 
-            if ((err=l->load(iff))!=0)
-            {
-                delete l;
-                goto error_exit;
-            }
-
-            if (lights)
-                l->sibling(lights);
-            else
-                lights = l;
-        }
-
-        //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Lights: Vector
-        else if (iff->chunkid == iff->makeid('E','V','E','C')
-                 && flgs & ESCH_SCENELD_LIGHTS)
-        {
-            EschVectorLight *l;
-            
-            l = new EschVectorLight;
-            if (!l)
-            {
-                err=ESCH_ERR_NOMEMORY;
-                goto error_exit;
-            }
-
-            if ((err=l->load(iff))!=0)
-            {
-                delete l;
-                goto error_exit;
-            }
-
-            if (lights)
-                l->sibling(lights);
-            else
-                lights = l;
-
-            nlgts++;
-        }
-
-        //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ Lights: Point
-        else if (iff->chunkid == iff->makeid('E','P','N','T')
-                 && flgs & ESCH_SCENELD_LIGHTS)
-        {
-            EschPointLight  *l;
-            
-            l = new EschPointLight;
             if (!l)
             {
                 err=ESCH_ERR_NOMEMORY;
@@ -429,9 +414,9 @@ esch_error_codes EschScene::load(XFParseIFF *iff, const char *sname,
             else
                 lights = l;
 
-            nlgts++;
+            if (iff->chunkid != iff->makeid('E','A','M','B'))
+                nlgts++;
         }
-
     }
 
     iff->leaveform();

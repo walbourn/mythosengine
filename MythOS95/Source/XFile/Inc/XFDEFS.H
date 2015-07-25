@@ -6,7 +6,7 @@
 //    (_)       ^          * *     *      *   *    *            (_)
 //             (_)       **   **   *    ***** **** ****
 //
-//            Copyright (c) 1994,1995 by Charybdis Enterprises, Inc.
+//            Copyright (c) 1994-1996 by Charybdis Enterprises, Inc.
 //                             All Rights Reserved.
 //                        Microsoft Windows '95 Version
 //
@@ -180,7 +180,7 @@ typedef enum _xf_error_codes {
 #define XF_OPEN_CREATE          0x8         // Create new file and set to 0 length
 #define XF_OPEN_EXCLUSIVE       0x10        // Fails if creating file already existing
 
-#define XF_OPEN_KILL            0x1000      // Kills on close (XFileDOS only)
+#define XF_OPEN_KILL            0x1000      // Kills on close (XFileDisk only)
 
 #define XF_OPEN_READONLY        0x10000     // File attributes (server/open)
 #define XF_OPEN_HIDDEN          0x20000     // (low byte of high word)
@@ -244,6 +244,9 @@ const ulong XF_MAX_NAME        =256;    // maximum length of file name (with ext
 #pragma on(unreferenced);
 #endif
 #endif
+
+//--- Misc
+#define XFEB_VERSION    0x001
 
 #endif
 

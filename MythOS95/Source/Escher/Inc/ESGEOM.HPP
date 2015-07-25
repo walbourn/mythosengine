@@ -8,7 +8,7 @@
 //ùùùùù²±²ùùùùùùù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùùùùùù²±²ùùùù²±²ùùùùùù
 //ùùùù²²²²²²²²²²ù²²²²²²²²ùùù²²²²²²²²ùù²²²ùùùù²²²ù²²²²²²²²²²ù²²²ùùùù²²²ùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùCopyrightù(c)ù1994,ù1995ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
+//ùùùùùùùùùùùCopyrightù(c)ù1994-1996ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùù Microsoft Windows '95 Version ùùùùùùùùùùùùùùùùùùùùùùù
@@ -32,11 +32,20 @@
 //
 // esgeom.hpp
 //
-//      Contains the EschGeometry objects for drawing 3D objects.
+// Contains the EschGeometry, derived, and support classes for drawing 3D
+// objects.
 //
-//      EschGeometry is the abstract base class for the 3D objects which
-//      includes the tree connections, frame of reference, extents, and
-//      various object operations.
+// EschGeometry is the abstract base class for the 3D objects which includes 
+// the tree connections, frame of reference, extents, and various object
+// operations.
+//
+// EschFace is the container type for triangular face data.
+//
+// EschMesh is the container type for polygonal mesh data used by the
+// EschMeshDraw class.
+//
+// EschMeshDraw is the drawable type which displays polygonal mesh objects.
+// It includes the EschGeometry interface.
 //
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
 
@@ -57,11 +66,10 @@
 //                                
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
-#include <portable.h>
-#include <felix.hpp>
 #include <xfile.hpp>
 
 #include "esdraw.hpp"
+#include "esexts.hpp"
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
@@ -70,193 +78,182 @@
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// EschExtents - Object extent class for 3D objects.                        ³
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-class EschExtents {
-
-public:
-    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-    // Public data members                                                  ³
-    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-    dword           flags;
-    EschPoint       center;                 // Radial extents
-    Flx16           radius;
-    Flx16           mins[3];                // Box extents
-    Flx16           maxs[3];
-
-    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-    // Constructor/Destructors                                              ³
-    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-    EschExtents() { flags=0; }
-    // EschExtents(EschExtents *e) { *this=*e; }
-
-    ~EschExtents() {}
-
-    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-    // Operations on extents objects.                                       ³
-    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-    void draw(const EschFrameRef *fr, dword clr, int box=0) const;
-
-    int hit(const EschPoint *pt, int box=0) const;
-    int hit(const EschPoint *pt, const Flx16 r) const;
-};
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // EschGeometry - Abstract base class for 3D drawable objects.              ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 class EschGeometry : public EschDrawable {
 
 protected:
-    EschGeometry    *iparent;               // Geometry tree pointers.
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    // Protected data members                                               ³
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+    EschGeometry    *iparent;               // Geometry tree pointers
     EschGeometry    *ichild;
     
 public:
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Public data members                                                  ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-    EschFrameRef    local;
-    EschFrameRef    world;
+    EschFrameRef    local;                  // Local to parent frame-of-ref
+    EschFrameRef    world;                  // Local to world frame-of-ref
 
-    EschExtents     exts;                   // Object extents.
+    EschSphereExtents   *sphere;            // Object extents
+    EschSphereExtents   exts;               // Extents inclusive of children
     
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Constructor/Destructors                                              ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-    EschGeometry() { iparent=ichild=0; };
+    EschGeometry();
+    EschGeometry(const EschGeometry &g);
     
     virtual ~EschGeometry();
     
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-    // Operations on geometry objects.                                      ³
+    // Accessor functions                                                   ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-    virtual void draw(void);
-    
-    EschGeometry *next(void) { return (EschGeometry*)inext; }
-    EschGeometry *prev(void) { return (EschGeometry*)iprev; }
-    EschGeometry *parent(void) { return iparent; }
-    EschGeometry *child(void) { return ichild; }
-    
-    virtual void sibling(EschGeometry *myprev);
-    virtual void adopt(EschGeometry *myparent);
-    virtual void remove(int delchild=0);
-
-    virtual EschDrawable *find(const char *dname);
-
-    int hit(const EschPoint *pt, int box=0) const
-    {
-        EschPoint   p;
-        pt->transform(&world.iorient,&p);
-        return exts.hit(&p,box);
-    }
-    int hit(const EschPoint *pt, const Flx16 r) const
-    {
-        EschPoint   p;
-        pt->transform(&world.iorient,&p);
-        return exts.hit(&p,flx_16div16(r,world.scalef));
-    }
-    void draw_extents(dword clr, int box=0) const { exts.draw(&world,clr,box); }
+    EschGeometry *next() const { return (EschGeometry*)inext; }
+    EschGeometry *prev() const { return (EschGeometry*)iprev; }
+    EschGeometry *parent() const { return iparent; }
+    EschGeometry *child() const { return ichild; }
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-    // Utility functions for working with frame of reference.               ³
+    // Operations                                                           ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+    const EschGeometry &operator = (const EschGeometry &geom);
+
+    virtual void draw();
+    
+    virtual void sibling(EschGeometry *myprev, dword update=ESCH_UPD_ALL);
+    virtual void adopt(EschGeometry *myparent, dword update=ESCH_UPD_ALL);
+    virtual void remove(int delchild=0, dword update=ESCH_UPD_ALL);
+
+    virtual EschDrawable *find(const char *dname) const;
+
+    virtual int get_extents(EschSphereExtents *sp) const;
+
+    virtual Flx16 ray(const EschPoint *pt, const EschVector *v, int coarse=0) const;
+
+    virtual int hit(const EschPoint *pt, const Flx16 r, int coarse=0) const;
+
+    virtual esch_error_codes pick(EschPicking *data) const;
+    virtual esch_error_codes collide(EschCollision *data) const;
+
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    // Utility functions                                                    ³
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+    void draw_extents(dword clr) const
+    {
+        exts.draw(&world,clr);
+    }
+
     void get_position(EschPoint *pt) const
     {
         local.get_position(pt);
     }
     
-    void set_position(const EschPoint *pt)
+    void set_position(const EschPoint *pt, dword update=ESCH_UPD_ALL)
     {
-        local.set_position(pt);
-        compute_world();
+        local.set_position(pt,update);
+        if (update & ESCH_UPD_WORLD)  compute_world(update);
     }
-    void set_position(const Flx16 ix, const Flx16 iy, const Flx16 iz)
+    void set_position(const Flx16 ix, const Flx16 iy, const Flx16 iz, dword update=ESCH_UPD_ALL)
     {
-        local.set_position(ix,iy,iz);
-        compute_world();
-    }
-    
-    void rotatex(const Flx16 degrees)
-    {
-        local.rotatex(degrees);
-        compute_world();
-    }
-    void rotatey(const Flx16 degrees)
-    {
-        local.rotatey(degrees);
-        compute_world();
-    }
-    void rotatez(const Flx16 degrees)
-    {
-        local.rotatez(degrees);
-        compute_world();
+        local.set_position(ix,iy,iz,update);
+        if (update & ESCH_UPD_WORLD)  compute_world(update);
     }
     
-    void rotate(const EschVector *v, const Flx16 degrees)
+    void rotatex(const Flx16 degrees, dword update=ESCH_UPD_ALL)
     {
-        local.rotate(v,degrees);
-        compute_world();
+        local.rotatex(degrees,update);
+        if (update & ESCH_UPD_WORLD)  compute_world(update);
+    }
+    void rotatey(const Flx16 degrees, dword update=ESCH_UPD_ALL)
+    {
+        local.rotatey(degrees,update);
+        if (update & ESCH_UPD_WORLD)  compute_world(update);
+    }
+    void rotatez(const Flx16 degrees, dword update=ESCH_UPD_ALL)
+    {
+        local.rotatez(degrees,update);
+        if (update & ESCH_UPD_WORLD)  compute_world(update);
     }
     
-    void pitch(const Flx16 degrees)
+    void rotate(const EschVector *v, const Flx16 degrees, dword update=ESCH_UPD_ALL)
     {
-        local.pitch(degrees);
-        compute_world();
-    }
-    void roll(const Flx16 degrees)
-    {
-        local.roll(degrees);
-        compute_world();
-    }
-    void yaw(const Flx16 degrees)
-    {
-        local.yaw(degrees);
-        compute_world();
+        local.rotate(v,degrees,update);
+        if (update & ESCH_UPD_WORLD)  compute_world(update);
     }
     
-    void translate(const Flx16 idx, const Flx16 idy, const Flx16 idz)
+    void pitch(const Flx16 degrees, dword update=ESCH_UPD_ALL)
     {
-        local.translate(idx,idy,idz);
-        compute_world();
+        local.pitch(degrees,update);
+        if (update & ESCH_UPD_WORLD)  compute_world(update);
     }
-    void translate(const EschVector *v)
+    void roll(const Flx16 degrees, dword update=ESCH_UPD_ALL)
     {
-        local.translate(v);
-        compute_world();
+        local.roll(degrees,update);
+        if (update & ESCH_UPD_WORLD)  compute_world(update);
     }
-    
-    void move(const Flx16 idx, const Flx16 idy, const Flx16 idz)
+    void yaw(const Flx16 degrees, dword update=ESCH_UPD_ALL)
     {
-        local.move(idx,idy,idz);
-        compute_world();
-    }
-    void move(const EschVector *v)
-    {
-        local.move(v);
-        compute_world();
+        local.yaw(degrees,update);
+        if (update & ESCH_UPD_WORLD)  compute_world(update);
     }
     
-    void scale(const Flx16 is)
+    void translate(const Flx16 idx, const Flx16 idy, const Flx16 idz, dword update=ESCH_UPD_ALL)
     {
-        local.scale(is);
-        compute_world();
+        local.translate(idx,idy,idz,update);
+        if (update & ESCH_UPD_WORLD)  compute_world(update);
+    }
+    void translate(const EschVector *v, dword update=ESCH_UPD_ALL)
+    {
+        local.translate(v,update);
+        if (update & ESCH_UPD_WORLD)  compute_world(update);
     }
     
-    void orthogonalize(void)
+    void move(const Flx16 idx, const Flx16 idy, const Flx16 idz, dword update=ESCH_UPD_ALL)
     {
-        local.orthogonalize();
-        compute_world();
+        local.move(idx,idy,idz,update);
+        if (update & ESCH_UPD_WORLD)  compute_world(update);
+    }
+    void move(const EschVector *v, dword update=ESCH_UPD_ALL)
+    {
+        local.move(v,update);
+        if (update & ESCH_UPD_WORLD)  compute_world(update);
+    }
+    
+    void scale(const Flx16 is, dword update=ESCH_UPD_ALL)
+    {
+        local.scale(is,update);
+        if (update & ESCH_UPD_WORLD)  compute_world(update);
+    }
+    
+    void orthogonalize(dword update=ESCH_UPD_ALL)
+    {
+        local.orthogonalize(update);
+        if (update & ESCH_UPD_WORLD)  compute_world(update);
+    }
+    void orthogonalize_top(dword update=ESCH_UPD_ALL)
+    {
+        local.orthogonalize_top(update);
+        if (update & ESCH_UPD_WORLD)  compute_world(update);
+    }
+    void orthogonalize_right(dword update=ESCH_UPD_ALL)
+    {
+        local.orthogonalize_right(update);
+        if (update & ESCH_UPD_WORLD)  compute_world(update);
     }
 
-    void reset(void)
+    void reset(dword update=ESCH_UPD_ALL)
     {
         local.reset();
-        compute_world();
+        if (update & ESCH_UPD_WORLD)  compute_world(update);
     }
     
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-    // Compute function for updating world frame of reference.              ³
+    // Compute functions                                                    ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-    void compute_world(void);
+    void compute_world(dword update=ESCH_UPD_ALL);
+    void compute_extents(int partialfix=0, int doparent=1);
 };
 
 
@@ -286,29 +283,24 @@ public:
     EschFace(dword _f, word _a, word _b, word _c, word _txt,
              Flx16 _u0, Flx16 _u1, Flx16 _u2,
              Flx16 _v0, Flx16 _v1, Flx16 _v2,
-             dword _clr, Flx16 _i, Flx16 _j, Flx16 _k)
+             dword _clr, Flx16 _i, Flx16 _j, Flx16 _k) :
+        flags(_f),
+        a(_a), b(_b), c(_c),
+        txt(_txt),
+        color(_clr),
+        normal(_i,_j,_k)
+
     {
-        flags = _f;
-        a = _a;
-        b = _b;
-        c = _c;
-        txt = _txt;
         u[0] = _u0;
         u[1] = _u1;
         u[2] = _u2;
         v[0] = _v0;
         v[1] = _v1;
         v[2] = _v2;
-        color = _clr;
-        normal.i = _i;
-        normal.j = _j;
-        normal.k = _k;
     }
-              
 
     ~EschFace() {}
 };
-
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
@@ -325,7 +317,8 @@ public:
     dword           flags;
     char            name[ESCH_MAX_NAME];
 
-    EschExtents     exts;                   // Object extents.
+    EschSphereExtents   sphere;             // Object extents.
+    EschBoxExtents      box;
 
     ulong           nverts;                 // Vertex data.
     IvoryHandle     v;
@@ -334,7 +327,7 @@ public:
     IvoryHandle     f;
 
     ulong           tmax;                   // Original texture data.
-    EschTexture     *txt;
+    EschTexture     **txt;
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Constructor/Destructors                                              ³
@@ -345,9 +338,14 @@ public:
     virtual ~EschMesh();
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-    // Operations on mesh objects.                                          ³
+    // Operations                                                           ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-    esch_error_codes release(void);
+    virtual esch_error_codes release();
+
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+    // Utility routines.                                                    ³
+    //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+    void set_flags(dword f) { flags = f; }
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // I/O Routines.                                                        ³
@@ -371,7 +369,7 @@ public:
     EschMesh        *mesh;                  // Attached EschMesh object
 
     ulong           tmax;                   // Instance texture data.
-    EschTexture     *txt;
+    EschTexture     **txt;
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
     // Constructor/Destructors                                              ³
@@ -379,21 +377,45 @@ public:
     EschMeshDraw(EschMesh *mdata=0);
     EschMeshDraw(const char *fname, const char *oname=0,
                  VngoPal *pal=0, EschMesh *msh=0, char *pn=0);
+    EschMeshDraw(const EschMeshDraw &msdh);
 
     virtual ~EschMeshDraw();
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-    // Operations on MeshDraw objects.                                      ³
+    // Operations                                                           ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-    virtual void draw(void);
+    const EschMeshDraw &operator = (const EschMeshDraw &mshd);
+
+    virtual void draw();
     
+    virtual Flx16 ray(const EschPoint *pt, const EschVector *v, int coarse=0) const;
+
+    virtual int hit(const EschPoint *pt, const Flx16 r, int coarse=0) const;
+
+    virtual void animate();
+
     // Attaches/detatches an EschMesh object to the mesh
-    esch_error_codes attach(EschMesh *mdata);
-    void detach(void);
+    esch_error_codes attach(EschMesh *mdata, dword update=ESCH_UPD_ALL);
+    void detach();
 
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-    // Utilities functions for loading EschMeshDraw and associated EschMesh.³
+    // Utility functions                                                    ³
     //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+    void draw_extents(dword clr, int box=0) const
+    {
+        if (box)
+        {
+#ifdef assertMyth
+            assertMyth("EschMeshDraw::draw_extents assumes attached mesh",
+                       mesh != 0 && mesh->ref_count);
+#endif
+            if (mesh)
+                mesh->box.draw(&world,clr);
+        }
+        else
+            exts.draw(&world,clr);
+    }
+
     virtual esch_error_codes load(const char *fname, const char *oname=0,
                                   VngoPal *pal=0, EschMesh *msh=0, char *pn=0);
     virtual esch_error_codes load(XFParseIFF *iff, const char *oname=0,
@@ -406,7 +428,7 @@ public:
 //
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
-extern "C" void esch_clipdraw_face(ulong ind, int doclip=1, VngoRect *drect=0,int dobfcul=0);
+extern "C" void esch_clipdraw_face(ulong ind, dword ctrlfl=ESCH_CDF_CLIP);
 extern "C" void esch_clip_poly(VngoVbuffer *vport,VngoPoint *points, ulong *n_vertices);
 extern "C" void esch_zclip_poly(Flx16 hither, Flx16 yon,VngoPoint *points, ulong *n_vertices);
 extern "C" void esch_clip_x_line(long p,VngoPoint *s, VngoPoint *f, VngoPoint *out_put);

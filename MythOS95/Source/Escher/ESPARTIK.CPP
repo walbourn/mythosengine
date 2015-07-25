@@ -8,7 +8,7 @@
 //ùùùùù²±²ùùùùùùù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùùùùùù²±²ùùùù²±²ùùùùùù
 //ùùùù²²²²²²²²²²ù²²²²²²²²ùùù²²²²²²²²ùù²²²ùùùù²²²ù²²²²²²²²²²ù²²²ùùùù²²²ùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùCopyrightù(c)ù1994,ù1995ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
+//ùùùùùùùùùùùCopyrightù(c)ù1994-1996ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùù Microsoft Windows '95 Version ùùùùùùùùùùùùùùùùùùùùùùù
@@ -32,8 +32,8 @@
 //
 // espartik.cpp
 //
-//      Contains the code for the EschParticle object which is colored
-//      point in 3-space with various control attributes.
+// Contains the code for the EschParticle class which is a colored point 
+// in 3-space with various control attributes.
 //
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
 
@@ -47,9 +47,64 @@
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
+//                                 Data
+//
+//±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+
+extern EschPoint EschTempPoint;
+extern VngoPoint EschTempVPoint;
+
+//±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+//
 //                                 Code
 //
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°±  Constructors/Destructors  ±°°°°°°°°°°°°°°°°°°°°°°°
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// EschParticle - Constructor                                               ³
+//                                                                          ³
+// Initializes the particle.                                                ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+EschParticle::EschParticle(Flx16 ix, Flx16 iy, Flx16 iz,
+                           dword c, ulong l) :
+    EschDrawable(ESCH_DRWT_PARTICLE),
+    pos(ix,iy,iz),
+    color(c),
+    life(l),
+    velocity(0,0,0),
+    acceleration(0,0,0)
+{
+}
+
+EschParticle::EschParticle(Flx16 ix, Flx16 iy, Flx16 iz,
+                           Flx16 ii, Flx16 ij, Flx16 ik,
+                           dword c, ulong l) :
+    EschDrawable(ESCH_DRWT_PARTICLE),
+    pos(ix,iy,iz),
+    color(c),
+    life(l),
+    velocity(ii,ij,ik),
+    acceleration(0,0,0)
+{
+}
+
+EschParticle::EschParticle(const EschPoint *p,
+                           const EschVector *v,
+                           dword c, ulong l) :
+    EschDrawable(ESCH_DRWT_PARTICLE),
+    pos(p->x,p->y,p->z),
+    color(c),
+    life(l),
+    velocity(v->i,v->j,v->k),
+    acceleration(0,0,0)
+{
+}
+
+
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°±  Operations  ±°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
@@ -58,14 +113,12 @@
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // EschParticle - draw                                                      ³
 //                                                                          ³
-// Draws the given particle using the current drawing context and the given ³
-// frame of reference.                                                      ³
+// Draws the given particle using the current drawing context at the        ³
+// current position.                                                        ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void EschParticle::draw(void)
+void EschParticle::draw()
 {
     EschCamera          *cam;
-    static EschPoint    p;
-    static VngoPoint    vpt;
 
 //ÄÄÄ Setup local pointers to current camera and Van Gogh viewport.
     assertMyth("EschParticle::draw needs camera in current context",
@@ -77,67 +130,55 @@ void EschParticle::draw(void)
                cam->vport != NULL);
 
 //ÄÄÄ Transform into copy of point
-    if (flags & ESCH_PRT_CAMRELATIVE)
-    {
-        ((EschVector*)&pos)->transform(&cam->eye.iorient,(EschVector*)&p);
-    }
-    else
-    {
-        pos.transform(&cam->eye.iorient,&p);
-    }
+    pos.transform(&cam->eye.iorient,&EschTempPoint);
 
 //ÄÄÄ Clip against view volume
 
     // Near/far clipping
-    if (p.z.flx > cam->yon.flx
-        || p.z.flx < cam->hither.flx)
+    if (EschTempPoint.z.flx > cam->yon.flx
+        || EschTempPoint.z.flx < cam->hither.flx)
         return;
 
     // Left/right/top/bottom plane clipping
-    Flx16 zx = flx_16mul16(p.z,cam->xsize);
-    Flx16 zy = flx_16mul16(p.z,cam->ysize);
+    Flx16 zx = flx_16mul16(EschTempPoint.z,cam->xsize);
+    Flx16 zy = flx_16mul16(EschTempPoint.z,cam->ysize);
 
-    if (p.x.flx < -zx.flx || p.x.flx > zx.flx
-        || p.y.flx < -zy.flx || p.y.flx > zy.flx)
+    if (EschTempPoint.x.flx < -zx.flx 
+        || EschTempPoint.x.flx > zx.flx
+        || EschTempPoint.y.flx < -zy.flx
+        || EschTempPoint.y.flx > zy.flx)
         return;
 
 //ÄÄÄ Project pixel
-    vpt.x = (flx_muldiv(p.x, cam->xscalar, p.z).flx
-             + (cam->vport->vbuff.width<<15)) >> 16;
-    vpt.y = ((cam->vport->vbuff.height<<15)
-             - flx_muldiv(p.y, cam->yscalar, p.z).flx) >> 16;
-    vpt.z = flx_16mul16(p.z,cam->z_factor).flx << 1;
-    vpt.clr = color;
+    EschTempVPoint.x = (flx_muldiv(EschTempPoint.x,
+                                   cam->xscalar,
+                                   EschTempPoint.z).flx
+                        + (cam->vport->vbuff.width<<15)) >> 16;
+    EschTempVPoint.y = ((cam->vport->vbuff.height<<15)
+                        - flx_muldiv(EschTempPoint.y,
+                                     cam->yscalar,
+                                     EschTempPoint.z).flx) >> 16;
+    EschTempVPoint.z = flx_16mul16(EschTempPoint.z,cam->z_factor).flx << 1;
+    EschTempVPoint.clr = color;
 
-    if ((flags & ESCH_PRT_ALLOW_PERSP)
-        && (cam->flags & ESCH_CAM_PERSPECTIVE))
-    {
-        vpt.w = flx_recip230(p.z);
-    }
+    VngoVport *vport = cam->vport;
 
-    if (flags & ESCH_PRT_DEPTHCUE)
-    {
-        assertMyth("EschParticle::draw needs a palette in current context's camera",
-                    cam->vport->vbuff.pal != NULL);
-
-        Flx16 mp = cam->vport->vbuff.pal->shd_pal->mid_point;
-
-        vpt.shade = (long)  ( mp - ((p.z * mp)
-                              / (cam->yon - cam->hither)) );
-    }
+    assertMyth("EschParticle::draw needs palette in viewport",
+               vport->vbuff.pal != 0);
+    EschTempVPoint.shade = vport->vbuff.pal->shd_pal->mid_point;
 
 //ÄÄÄ Draw pixel
-    cam->vport->pixel(&vpt);
+    vport->pixel(&EschTempVPoint);
 }
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// EschParticle - nextframe                                                 ³
+// EschParticle - animate                                                   ³
 //                                                                          ³
 // Performs any operations needed to move the particle to the next frame,   ³
 // including life tests for death of the particle.                          ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void EschParticle::nextframe(void)
+void EschParticle::animate()
 {
 //ÄÄ Perform life test, if not unlimited
     if (life)
@@ -145,6 +186,20 @@ void EschParticle::nextframe(void)
         if (!(--life))
             flags |= ESCH_DRW_SKIP;
     }
+
+//ÄÄ Compute next position (if we have a valid time interval)
+    if (interval == 0)
+        return;
+
+//ÄÄ Calculate the new velocity (based on acceleration)
+    velocity.i += acceleration.i * interval;
+    velocity.j += acceleration.j * interval;
+    velocity.k += acceleration.k * interval;
+
+//ÄÄ Calculate the new position (based on velocity)
+    pos.x += velocity.i * interval;
+    pos.y += velocity.j * interval;
+    pos.z += velocity.k * interval;
 }
 
 //°±² End of module - espartik.cpp ²±°

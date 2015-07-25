@@ -11,7 +11,7 @@
 //                     Text Output and Font Management System
 //                          Microsoft Windows '95 Version
 //
-//               Copyright (c) 1995 by Charybdis Enterprises, Inc.
+//            Copyright (c) 1995, 1996 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved.
 //
 //컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
@@ -86,7 +86,7 @@ extern void compile(void);
 extern "C" FILE *yyin;
 
 STATIC char Util_name[]
-       = "갚 Gutenberg String Utility - (C) 1995 Charybdis Enterprises, Inc. 굅\n"
+       = "갚 Gutenberg String Utility - (C) 1995, 1996 Charybdis Enterprises, Inc. 굅\n"
          "                              All Rights Reserved.  " __DATE__ "\n";
 
 XFParseIFF      IFF;

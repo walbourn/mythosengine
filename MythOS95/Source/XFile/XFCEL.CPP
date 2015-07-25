@@ -6,7 +6,7 @@
 //    (_)       ^          * *     *      *   *    *            (_)
 //             (_)       **   **   *    ***** **** ****
 //
-//            Copyright (c) 1994,1995 by Charybdis Enterprises, Inc.
+//            Copyright (c) 1994-1996 by Charybdis Enterprises, Inc.
 //                              All Rights Reserved.
 //                        Microsoft Windows '95 Version
 //
@@ -104,7 +104,7 @@ xf_error_codes XFParseCEL::read(XFBitmap *b)
     b->release();
 
     b->flags=0;
-    b->clrinuse=0;
+    b->clrinuse=255;
     b->width = (ushort) header.width;
     b->height = (ushort) header.height;
     b->bpp = 1;
@@ -181,7 +181,7 @@ xf_error_codes XFParseCEL::write(XFBitmap *b)
 {
     int             i;
     byte            *ptr;
-    int             locked;
+    int             locked=0;
     struct  Header  header;
     byte            work[3*256];
 

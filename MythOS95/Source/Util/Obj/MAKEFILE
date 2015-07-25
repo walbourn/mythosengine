@@ -64,7 +64,7 @@ PICOBJS = pic.obj
 LIBS = felix.lib\
 xfile.lib\
 vangogh.lib\
-ivory.lib
+ivorymfc.lib
 
 #컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
 # First target                                                             �

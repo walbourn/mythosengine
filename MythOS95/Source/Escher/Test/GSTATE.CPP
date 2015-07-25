@@ -8,7 +8,7 @@
 //ùùùùù²±²ùùùùùùù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùùùùùù²±²ùùùù²±²ùùùùùù
 //ùùùù²²²²²²²²²²ù²²²²²²²²ùùù²²²²²²²²ùù²²²ùùùù²²²ù²²²²²²²²²²ù²²²ùùùù²²²ùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùCopyrightù(c)ù1994,ù1995ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
+//ùùùùùùùùùùùCopyrightù(c)ù1994-1996ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùù Microsoft Windows '95 Version ùùùùùùùùùùùùùùùùùùùùùùù
@@ -56,6 +56,8 @@ const int COLORS = 256;
 
 const int MAXPAGES = 3;
 
+extern MaxDevices Devs;
+
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
 //                                 Code
@@ -64,20 +66,33 @@ const int MAXPAGES = 3;
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //  GameState Constructor
-//
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 GameState::GameState (MaxDevices &d):
-    devs (d), evt (0), active (FALSE)
+    devs (d),
+    evt (0),
+    hpal (0),
+    active (FALSE),
+    pick_test(FALSE),
+    collide_test(FALSE),
+    fire_test(FALSE),
+    cam(0),
+    light(0),
+    draws(0),
+    scene(0),
+    terrain(0),
+    prtsystem(0),
+    starfield(0),
+    sprite(0),
+    curmesh(0),
+    fire(0),
+    drawexts(0),
+    RotateDegrees(1),
+    ScriptRotateDegrees(3),
+    kind_of_particles(0),
+    backgrnd (0),
+    ticks (0),
+    frames (0)
 {
-    cam=0;
-    light=0;
-    scene=0;
-    curmesh=0;
-    terrain=0;
-    hpal=0;
-
-    ticks=frames=0;
-
     hdc = GetDC (hWndClient);
 
     bmi = (LPBITMAPINFO)ivory_alloc (sizeof (BITMAPINFOHEADER) + COLORS*sizeof(WORD));
@@ -130,19 +145,20 @@ GameState::GameState (MaxDevices &d):
 
             ivory_free ((void **)&lpal);
 
-            gvp = new VngoVportDD8(MAP_XSIZE,MAP_YSIZE,gmap,NULL,mypal,
-                                   VNGO_ZBUFFER_DEV | VNGO_BACKBUFFER);
+            gvp = new VngoVportDB8(MAP_XSIZE,MAP_YSIZE,gmap,NULL,mypal,
+                                   VNGO_ZBUFFER_DEV);
+
+            exts_color = mypal->get_index(VngoColor24bit(0,0,0));
+
+            gberg_color(gvp->vbuff.pal->get_index(VngoColor24bit(255,255,255)),
+                        VNGO_TRANSPARENT);
         }
     }
-
-    RotateDegrees=1;
-    ScriptRotateDegrees=3;
 }
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //  GameState Destructor
-//
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 GameState::~GameState ()
 {
@@ -170,17 +186,16 @@ GameState::~GameState ()
         delete evt;
     }
 
-    if (terrain)
-        delete terrain;
+    if (fire)
+        delete fire;
 
-    if (scene)
-        delete scene;
+    if (backgrnd)
+        delete backgrnd;
 }
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //  GameState::LoadEvents
-//
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 void GameState::LoadEvents (LPCSTR lpszFile)
 {
@@ -212,7 +227,7 @@ BOOL GameState::LoadScene(char *fn)
 {
     int err;
 
-    if (scene || terrain)
+    if (scene)
         return FALSE;
 
     scene = new EschScene;
@@ -231,27 +246,61 @@ BOOL GameState::LoadScene(char *fn)
         return FALSE;
     }
 
-    for(cam=scene->cameras; cam != NULL; cam = cam->next())
+    if (!cam && scene->cameras)
     {
-        VngoColor24bit c(0,0,128);
-        
+        cam = new EschCameraEx(*scene->cameras);
         cam->attach(gvp);
-        cam->set_flags(cam->flags | ESCH_CAM_SHADE_SPECULAR
-                                  | ESCH_CAM_SHADE_SMOOTH
-                                  | ESCH_CAM_SHADE_FLAT
-                                  | ESCH_CAM_SHADE_WIRE
-                                  | ESCH_CAM_TEXTURED
-                                  | ESCH_CAM_BACKCULL
-                                  | ESCH_CAM_MODELSPACE);
-        cam->set_bcolor(mypal->get_index(c));
+        cam->set_flags(cam->flags | ESCH_CAM_SHADE_SMOOTH
+                                | ESCH_CAM_SHADE_FLAT
+                                | ESCH_CAM_SHADE_SOLID
+                                | ESCH_CAM_SHADE_WIRE
+                                | ESCH_CAM_BACKCULL
+                                | ESCH_CAM_MODELSPACE
+                                | ESCH_CAM_TEXTURED);
+
+        cam->set_bcolor(mypal->get_index(VngoColor24bit(0,0,128)));
         cam->set_yon(500);
+        cam->set_bg_bitmap(backgrnd);
     }
 
-    cam=scene->cameras;
+    if (!light)
+        light=scene->lights;
 
-    light=scene->lights;
+    if (scene->meshes)
+    {
+        curmesh=scene->meshes;
 
-    curmesh=scene->meshes;
+        if (fire_test)
+        {
+            fire = new EschFireTexture(128,128,mypal);
+            if (!fire)
+            {
+                MessageBeep (0);
+                MessageBox(hWndClient,
+                        "Couldn't create fire texture",
+                        "Fatal Error",
+                        MB_OK);
+                return FALSE;
+            }
+
+            if (curmesh && curmesh->txt)
+            {
+                curmesh->txt[0] = fire;
+            }
+            else
+            {
+                MessageBox(hWndClient,
+                        "Couldn't put fire texture on first object",
+                        "Error",
+                        MB_OK);
+            }
+        }
+
+        if (draws)
+            ((EschDrawable*)scene->meshes)->sibling(draws);
+        else
+            draws = scene->meshes;
+    }
 
     return TRUE;
 }
@@ -264,7 +313,7 @@ BOOL GameState::LoadTerrain(char *fn)
 {
     int err;
 
-    if (scene || terrain)
+    if (terrain)
         return FALSE;
 
     terrain = new EschTerrain;
@@ -282,30 +331,198 @@ BOOL GameState::LoadTerrain(char *fn)
                    MB_OK);
         return FALSE;
     }
-    terrain->set_origin(-(Flx16)(terrain->width/2+10)*terrain->wscale,
-                        -(Flx16)4*terrain->hscale - (Flx16)20,
-                        -(Flx16)(terrain->depth/2-40)*terrain->dscale);
-    terrain->set_lod(500,1000);
+    terrain->set_lod(500,800);
 
-    cam = new EschCamera(gvp);
-
-    cam->set_position(0,0,0);
+    if (!cam)
+    {
+        cam = new EschCameraEx(gvp);
+        cam->set_position(0,terrain->get_height(0,0) + Flx16(2),0);
+        cam->set_flags(cam->flags | ESCH_CAM_SHADE_SMOOTH
+                                | ESCH_CAM_SHADE_FLAT
+                                | ESCH_CAM_SHADE_SOLID
+                                | ESCH_CAM_SHADE_WIRE
+                                | ESCH_CAM_BACKCULL
+                                | ESCH_CAM_MODELSPACE
+                                | ESCH_CAM_TEXTURED);
+        cam->set_bcolor(mypal->get_index(VngoColor24bit(0,0,128)));
+        cam->set_bg_bitmap(backgrnd);
+    }
     cam->set_yon(2000);
-    cam->rotatey(-90);
 
-    cam->set_flags(cam->flags | ESCH_CAM_SHADE_SMOOTH
-                              | ESCH_CAM_SHADE_FLAT
-                              | ESCH_CAM_SHADE_SOLID
-                              | ESCH_CAM_SHADE_WIRE
-                              | ESCH_CAM_BACKCULL
-                              | ESCH_CAM_MODELSPACE);
-
-    VngoColor24bit c(0,0,128);
-    cam->set_bcolor(mypal->get_index(c));
-
-    light = new EschVectorLight(-1,-1,-1);
+    if (!light)
+        light = new EschVectorLight(-1,-1,-1);
 
     terrain->compute_shades(cam, light);
+
+    if (draws)
+        terrain->sibling(draws);
+    else
+        draws = terrain;
+
+    return TRUE;
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// GameState - SetupParticleSystem
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+BOOL GameState::SetupParticleSystem(const char *name)
+{
+    if (prtsystem)
+        return FALSE;
+
+    prtsystem = new EschParticleSystem;
+    if (!prtsystem
+        || prtsystem->init(0xff))
+    {
+        MessageBeep (0);
+        MessageBox(hWndClient,
+                   "Could not create particle system",
+                   "Fatal Error",
+                   MB_OK);
+        return FALSE;
+    }
+
+    prtsystem->set_acceleration(0,-8,0);
+    prtsystem->set_interval(0.1);
+
+    if (!cam)
+    {
+        cam = new EschCameraEx(gvp);
+        cam->set_position(0,0,-100);
+        cam->set_flags(cam->flags | ESCH_CAM_SHADE_SMOOTH
+                                | ESCH_CAM_SHADE_FLAT
+                                | ESCH_CAM_SHADE_SOLID
+                                | ESCH_CAM_SHADE_WIRE
+                                | ESCH_CAM_BACKCULL
+                                | ESCH_CAM_MODELSPACE
+                                | ESCH_CAM_TEXTURED);
+        cam->set_bcolor(mypal->get_index(VngoColor24bit(0,0,128)));
+        cam->set_bg_bitmap(backgrnd);
+    }
+
+    if (!light)
+        light = new EschVectorLight(-1,-1,-1);
+
+    if (strstr(name,"pyramids"))
+        kind_of_particles=1;
+
+    if (draws)
+        prtsystem->sibling(draws);
+    else
+        draws = prtsystem;
+
+    return TRUE;
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// GameState - SetupStarfield
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+BOOL GameState::SetupStarfield(BOOL fixed, BOOL brights)
+{
+    if (starfield)
+        return FALSE;
+
+    starfield = new EschStarfield;
+    if (!starfield
+        || starfield->create_stars(1000,(brights) ? 1 : 0))
+    {
+        MessageBeep (0);
+        MessageBox(hWndClient,
+                   "Could not create starfield",
+                   "Fatal Error",
+                   MB_OK);
+        return FALSE;
+    }
+
+    starfield->set_color(mypal->get_index(VngoColor24bit(255,255,255)));
+
+    if (fixed)
+        starfield->set_flags(starfield->flags | ESCH_SFLD_FTL);
+
+    if (!cam)
+    {
+        cam = new EschCameraEx(gvp);
+        cam->set_position(0,0,-300);
+        cam->set_flags(cam->flags | ESCH_CAM_SHADE_SMOOTH
+                                | ESCH_CAM_SHADE_FLAT
+                                | ESCH_CAM_SHADE_SOLID
+                                | ESCH_CAM_SHADE_WIRE
+                                | ESCH_CAM_BACKCULL
+                                | ESCH_CAM_MODELSPACE
+                                | ESCH_CAM_TEXTURED);
+        cam->set_bg_bitmap(backgrnd);
+    }
+
+    cam->set_bcolor(mypal->get_index(VngoColor24bit(0,0,0)));
+
+    if (draws)
+        starfield->sibling(draws);
+    else
+        draws = starfield;
+
+    return TRUE;
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// GameState - SetupSprite
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+BOOL GameState::SetupSprite(const char *name)
+{
+    if (sprite)
+        return FALSE;
+
+    XFParseBMP bmp;
+    if (bmp.nameread((strstr(name,",")) ? strstr(name,",")+1 : name))
+    {
+        MessageBeep (0);
+        MessageBox(hWndClient,
+                   (strstr(name,",")) ? strstr(name,",")+1 : name,
+                   "Fatal Error",
+                   MB_OK);
+        return FALSE;
+    }
+
+    sprite = new EschSprite;
+    if (!sprite
+        || sprite->create(bmp.bm,10,10))
+    {
+        MessageBeep (0);
+        MessageBox(hWndClient,
+                   "Could not create sprite",
+                   "Fatal Error",
+                   MB_OK);
+        return FALSE;
+    }
+
+    if (strstr(name,"infinite"))
+    {
+        sprite->set_position(0,0,100);
+        sprite->set_flags(sprite->flags | ESCH_SPRITE_INFINITE);
+    }
+
+    if (!cam)
+    {
+        cam = new EschCameraEx(gvp);
+        cam->set_position(0,0,-100);
+        cam->set_flags(cam->flags | ESCH_CAM_SHADE_SMOOTH
+                                | ESCH_CAM_SHADE_FLAT
+                                | ESCH_CAM_SHADE_SOLID
+                                | ESCH_CAM_SHADE_WIRE
+                                | ESCH_CAM_BACKCULL
+                                | ESCH_CAM_MODELSPACE
+                                | ESCH_CAM_TEXTURED);
+        cam->set_bg_bitmap(backgrnd);
+    }
+
+    cam->set_bcolor(mypal->get_index(VngoColor24bit(0,0,128)));
+
+    if (draws)
+        sprite->sibling(draws);
+    else
+        draws = sprite;
 
     return TRUE;
 }
@@ -343,6 +560,7 @@ BOOL GameState::PumpWindows ()
 {
     MSG msg;
 
+    Devs.wm_clear();
     while (PeekMessage (&msg, NULL, 0, 0, PM_NOREMOVE))
     {
     	if (GetMessage (&msg, 0, 0, 0) == 0)
@@ -541,6 +759,68 @@ void GameState::ProcessEvents()
         }
     }
 
+    if (events.check (ADJUST_FOV))
+    {
+        if (events.check (MOVEXY))
+        {
+            Flx16 fov = cam->fov;
+
+            fov.flx += dy << 16;
+
+            if (fov < Flx16(1))
+                fov = Flx16(1);
+
+            if (fov > Flx16(175))
+                fov = Flx16(175);
+
+            cam->set_fov(fov);
+        }
+    }
+
+    if (events.check (ADJUST_FACTOR))
+    {
+        if (events.check (MOVEXY))
+        {
+            Flx16 factor = cam->factor;
+
+            factor.flx += dy << 16;
+
+            if (factor < Flx16(1))
+                factor = Flx16(1);
+
+            if (factor > Flx16(12))
+                factor = Flx16(12);
+
+            cam->set_factor(factor);
+        }
+    }
+
+    if (backgrnd && events.check (ADJUST_BM_OFFSET))
+    {
+        if (events.check (MOVEXY))
+        {
+            long offx = cam->bg_offx;
+            long offy = cam->bg_offy;
+
+            offx -= dx;
+            offy -= dy;
+            
+            if (offx < -(backgrnd->width+cam->vport->vbuff.width))
+                offx = -((short)backgrnd->width+cam->vport->vbuff.width);
+
+            if (offx > backgrnd->width)
+                offx = backgrnd->width;
+
+            if (offy < -(backgrnd->height+cam->vport->vbuff.height))
+                offy = -((short)backgrnd->height+cam->vport->vbuff.height);
+
+            if (offy > backgrnd->height)
+                offy = backgrnd->height;
+
+            cam->set_bg_offset((short)offx, (short)offy);
+        }
+    }
+
     // Get the camera flags so we can change 'em!
     cam_flags = cam->flags;
 
@@ -621,14 +901,33 @@ void GameState::ProcessEvents()
     if (single_events.check (TERRAIN_LOD) && terrain)
         terrain->flags ^= ESCH_TRN_LOD;
 
+    if (single_events.check (SHOW_EXTENTS))
+    {
+        drawexts++;
+        if (drawexts > 3)
+            drawexts=0;
+    }
+
+    if (single_events.check (HAZING))
+    {
+        if (cam->flags & ESCH_CAM_HAZE)
+        {
+            cam->set_haze(0);
+        }
+        else
+        {
+            cam->create_haze(64, 16, 48, Flx16(0.5), VngoColor24bit(0,0,128));
+        }
+    }
+
     if (light)
     {
         EschLight   *l;
 
-        // Moving a Point or Vector source is more interesting...
+        // Can't move 'ambients'
         for(l=light; l != NULL; l = l->next())
         {
-            if (l->ltyp == ESCH_LGTT_VECTOR || l->ltyp == ESCH_LGTT_POINT)
+            if (l->get_type() != ESCH_LGTT_AMBIENT)
                 break;
         }
         if (l == NULL)
@@ -649,7 +948,7 @@ void GameState::ProcessEvents()
 
         if (events.check (LIGHT_POSITION))
         {
-            if (l->ltyp == ESCH_LGTT_VECTOR)
+            if (l->get_type() == ESCH_LGTT_VECTOR)
             {
             
                 if (events.check (MOVEXY))
@@ -670,7 +969,33 @@ void GameState::ProcessEvents()
                 if (events.check (RIGHT))
                     ((EschVectorLight*)l)->rotatey (-RotateDegrees);
             }
-            else if (l->ltyp == ESCH_LGTT_POINT)
+            else if (l->get_type() == ESCH_LGTT_FPOINT
+                     || l->get_type() == ESCH_LGTT_FATTEN
+                     || l->get_type() == ESCH_LGTT_FSPOT)
+            {
+                
+                if (events.check (MOVEXY))
+                    ((EschFastPointLight*)l)->translate (dx, -dy, FLX16_ZERO);
+
+                if (events.check (MOVEZ))
+                    ((EschFastPointLight*)l)->translate (FLX16_ZERO, FLX16_ZERO, -dx);
+
+                if (events.check (UP))
+                    ((EschFastPointLight*)l)->translate (FLX16_ZERO, 1, FLX16_ZERO);
+
+                if (events.check (DOWN))
+                    ((EschFastPointLight*)l)->translate (FLX16_ZERO, -1, FLX16_ZERO);
+
+                if (events.check (LEFT))
+                    ((EschFastPointLight*)l)->translate (-1, FLX16_ZERO, FLX16_ZERO);
+
+                if (events.check (RIGHT))
+                    ((EschFastPointLight*)l)->translate (1, FLX16_ZERO, FLX16_ZERO);
+
+            }
+            else if (l->get_type() == ESCH_LGTT_POINT
+                     || l->get_type() == ESCH_LGTT_ATTEN
+                     || l->get_type() == ESCH_LGTT_SPOT)
             {
                 
                 if (events.check (MOVEXY))
@@ -721,6 +1046,60 @@ void GameState::ProcessEvents()
         if (doreshade)
             terrain->compute_shades(cam, light);
     }
+
+    if (prtsystem)
+    {
+        ulong num;
+
+        if (kind_of_particles)
+            num = flx_rand().flx & 0x7;
+        else
+            num = flx_rand().flx & 0x7f;
+
+        for(ulong c=0; c < num; c++)
+        {
+            EschParticle    *particle;
+
+            if (kind_of_particles)
+            {
+                particle = new EschParticlePyramid(1 + (flx_rand().flx & 0x3),
+                                                   0,0,0,
+                                                   mypal->get_index(VngoColor24bit((byte)(255 - (c*2)),0,0)),
+                                                   10 + (flx_rand().flx & 0x4f));
+
+                ((EschParticlePyramid*)particle)->set_rotate_i(Flx16(flx_rand().flx >> 24));
+                ((EschParticlePyramid*)particle)->set_rotate_j(Flx16(flx_rand().flx >> 24));
+                ((EschParticlePyramid*)particle)->set_rotate_k(Flx16(flx_rand().flx >> 24));
+            }
+            else
+            {
+                particle = new EschParticle(0,0,0,
+                                            mypal->get_index(VngoColor24bit((byte)(255 - (c*2)),0,0)),
+                                            20 + (flx_rand().flx & 0x4f));
+            }
+
+            particle->set_velocity(Flx16(flx_rand().flx >> 12,0),
+                                   Flx16(flx_rand().flx & 0x1fffff,0),
+                                   Flx16(flx_rand().flx >> 12,0));
+
+            if (particle)
+                prtsystem->add(particle);
+        }
+    }
+
+    if (fire)
+    {
+        if (events.check(FIRE_INCREASE))
+            fire->increase();
+        else if (events.check(FIRE_DECREASE))
+            fire->decrease();
+
+        if (events.check(FIRE_DOUSE))
+            fire->douse();
+
+        if (toggle_events.check(FIRE_FIREBALL))
+            fire->fireball();
+    }
 }
 
 
@@ -731,24 +1110,141 @@ void GameState::ProcessEvents()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 void GameState::Render()
 {
-    Chronometer render_timer;
-
-    if (!cam)
-        return;
-
     render_timer.clear();
 
-    if (terrain)
+    if (!cam || !draws)
+        return;
+
+    char        buff[256];
+    GBergText   gt(gvp);
+
+    EschContext ec(EschCurrent);
+    ec.camera = cam;
+    ec.lights = light;
+    ec.eschs = draws;
+    ec.push();
+
+    cam->render();
+
+    if (scene)
     {
-        cam->render(terrain,light);
-    }
-    else if (scene)
-    {
-        cam->render(scene->meshes,light);
+        if (drawexts)
+        {
+            for(EschMeshDraw *ptr=scene->meshes;
+                ptr != NULL;
+                ptr = (EschMeshDraw*)ptr->next())
+            {
+                if (!(ptr->flags & ESCH_DRW_SKIP))
+                {
+                    if (drawexts & 0x2)
+                    {
+                        ptr->mesh->box.draw(&ptr->world,exts_color);
+                    }
+                    if (drawexts & 0x1)
+                    {
+                        ptr->draw_extents(exts_color);
+                    }
+                }
+            }
+        }
     }
 
-    ticks += render_timer.check();
-    frames++;
+    if (pick_test)
+    {
+        //ÄÄÄ Pick Test
+        short x, y;
+        evt->get_mouse_pos(&x,&y);
+
+        wsprintf(buff,"Mouse: %d, %d\n",(int)x,(int)y);
+        gt.out(buff);
+
+        EschPicking pick(cam, x, y, draws, 16);
+
+        esch_error_codes err;
+        err=draws->pick(&pick);
+        if (err)
+        {
+            wsprintf(buff,"Pick returned error %d\n",(int)err);
+            gt.out(buff);
+        }
+        if (pick.count)
+        {
+            wsprintf(buff,"Picks: %d (of %d max)\n",pick.count,pick.maxcount);
+            gt.out(buff);
+
+            if (!pick.result)
+                gt.out("Error, no result pointer\n");
+            else
+            {
+                int c=1;
+                for(EschDrawList *r = pick.result;
+                    r != 0;
+                    r = r->next, c++)
+                {
+                    if (!r->item)
+                        wsprintf(buff,"(%d) = No item pointer!\n",c);
+                    else
+                        sprintf(buff,"(%d) = '%s' @ %6.2f\n",c,
+                                (r->item->name) ? r->item->name : "NoName",
+                                (float)r->dist);
+                    gt.out(buff);
+                }
+            }
+        }
+        else
+        {
+            gt.out("No Picks\n");
+        }
+    }
+
+    if (collide_test)
+    {
+        //ÄÄÄ Collision Test
+        EschCollision collide(draws, 16);
+
+        esch_error_codes err;
+        err=draws->collide(&collide);
+        if (err)
+        {
+            wsprintf(buff,"Collide returned error %d\n",(int)err);
+            gt.out(buff);
+        }
+        if (collide.count)
+        {
+            wsprintf(buff,"Collisions:\n"
+                        "'%s' hit %d (of %d max)\n",draws->name,
+                                                    collide.count,
+                                                    collide.maxcount);
+            gt.out(buff);
+
+            if (!collide.result)
+                gt.out("Error, no result pointer\n");
+            else
+            {
+                int c=1;
+                for(EschDrawList *r = collide.result;
+                    r != 0;
+                    r = r->next, c++)
+                {
+                    if (!r->item)
+                        wsprintf(buff,"(%d) = No item pointer!\n",c);
+                    else
+                        wsprintf(buff,"(%d) = '%s'\n",c,
+                                (r->item->name) ? r->item->name : "NoName");
+                    gt.out(buff);
+                }
+            }
+        }
+        else
+        {
+            gt.out("No collides\n");
+        }
+    }
+
+    ec.pop();
+
+    for(EschDrawable *dptr = draws; dptr != NULL; dptr = dptr->next())
+        dptr->animate();
 }
 
 
@@ -760,8 +1256,10 @@ void GameState::Display()
 {
     SetDIBitsToDevice (hdc, 0, 0, MAP_XSIZE, MAP_YSIZE, 0, 0, 0, MAP_YSIZE,
                        gmap, bmi, DIB_PAL_COLORS);
-}
 
+    ticks += render_timer.check();
+    frames++;
+}
 
 //°±² eof - GState.cpp ²±°
 

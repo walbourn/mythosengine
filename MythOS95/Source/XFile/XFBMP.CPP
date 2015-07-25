@@ -6,7 +6,7 @@
 //    (_)       ^          * *     *      *   *    *            (_)
 //             (_)       **   **   *    ***** **** ****
 //
-//            Copyright (c) 1994,1995 by Charybdis Enterprises, Inc.
+//            Copyright (c) 1994-1996 by Charybdis Enterprises, Inc.
 //                              All Rights Reserved.
 //                        Microsoft Windows '95 Version
 //
@@ -52,7 +52,8 @@
 //
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
-struct File_header {
+struct File_header
+{
     char    bfType[2];              // 'BM' in ASCII
     ulong   bfSize;                 // Size in longwords of file
     word    bfReserved1;
@@ -60,7 +61,8 @@ struct File_header {
     ulong   bfOffBits;              // Offset for image data
 };
 
-struct Info_header {
+struct Info_header
+{
     ulong   biSize;                 // 40 bytes for Windows
     ulong   biWidth;                // Image width in pixels
     ulong   biHeight;               // Image height in pixels
@@ -200,6 +202,8 @@ xf_error_codes XFParseBMP::read(XFBitmap *b)
             *(ptr++) = work[i*4];       // blue
             *(ptr++) = 0;               // na to make dword
         }
+
+        b->clrinuse=ncolors-1;
     }
 
 //ÄÄÄ Load image data ÄÄÄ
@@ -533,7 +537,7 @@ xf_error_codes XFParseBMP::write(XFBitmap *b)
     byte            *tmp;
     ulong           headerpos;
     ulong           pos;
-    int             locked;
+    int             locked=0;
     File_header     fheader;
     Info_header     iheader;
     byte            work[4*256];

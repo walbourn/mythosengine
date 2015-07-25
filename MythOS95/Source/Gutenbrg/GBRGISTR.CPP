@@ -11,7 +11,7 @@
 //                     Text Output and Font Management System
 //                          Microsoft Windows '95 Version
 //
-//               Copyright (c) 1995 by Charybdis Enterprises, Inc.
+//            Copyright (c) 1995, 1996 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved.
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -60,7 +60,7 @@
 
 extern "C" GBergTextInfo *igberg_empty_strings();
 
-STATIC gberg_error_codes igberg_install_strings(XFParseIFF *iff, char *txtname);
+STATIC gberg_error_codes igberg_install_strings(XFParseIFF *iff, const char *txtname);
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
@@ -82,7 +82,7 @@ extern "C" GBergIData   *GBergInstance;
 // This installs a new text block, loading the data into the handlea area   ³
 // and setting up for a later select.                                       ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-extern "C" gberg_error_codes gberg_install_strings(char *fname, char *txtname)
+extern "C" gberg_error_codes gberg_install_strings(const char *fname, const char *txtname)
 {
     gberg_error_codes   err;
     GBergTextInfo       *txt;
@@ -115,16 +115,17 @@ extern "C" gberg_error_codes gberg_install_strings(char *fname, char *txtname)
 //ÄÄ Loop until a header with the correct name is found
     err=GBERG_ERR_NONE;
 
-    for(;;) {
-        if (iff.next() != XF_ERR_NONE) {
+    for (;;)
+    {
+        if (iff.next() != XF_ERR_NONE)
             return GBERG_ERR_TEXTNOTFOUND;
-        }
 
-        if (iff.chunkid == iff.makeid('F','O','R','M')) {
-            if (iff.formid == iff.makeid('G','T','X','T')) {
-                err=igberg_install_strings(&iff,txtname);
-                if (!err
-                    || err != GBERG_ERR_TEXTNOTFOUND)
+        if (iff.chunkid == iff.makeid('F','O','R','M'))
+        {
+            if (iff.formid == iff.makeid('G','T','X','T'))
+            {
+                err = igberg_install_strings(&iff,txtname);
+                if (!err || err != GBERG_ERR_TEXTNOTFOUND)
                     break;
             }
         }
@@ -143,7 +144,7 @@ extern "C" gberg_error_codes gberg_install_strings(char *fname, char *txtname)
 // This installs the new text, assuming that the IFF is pointing to the     ³
 // correct form.                                                            ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-STATIC gberg_error_codes igberg_install_strings(XFParseIFF *iff, char *txtname)
+STATIC gberg_error_codes igberg_install_strings(XFParseIFF *iff, const char *txtname)
 {
     byte                *ptr=0;
     gberg_error_codes   err;
@@ -162,17 +163,20 @@ STATIC gberg_error_codes igberg_install_strings(XFParseIFF *iff, char *txtname)
     iff->enterform();
 
     if (iff->seekchunk(iff->makeid('H','D','R',' '))
-        || iff->chunkSize != sizeof(GBergFileTextHDR)) {
+        || iff->chunkSize != sizeof(GBergFileTextHDR))
+    {
         iff->leaveform();
         return GBERG_ERR_INVALIDDATA;
     }
 
-    if (iff->read(&header)) {
+    if (iff->read(&header))
+    {
         iff->leaveform();
         return GBERG_ERR_FILEERROR;
     }
 
-    if (txtname && strncmp(txtname,header.name,GBERG_MAX_NAME)) {
+    if (txtname && strncmp(txtname,header.name,GBERG_MAX_NAME))
+    {
         iff->leaveform();
         return GBERG_ERR_TEXTNOTFOUND;
     }
@@ -182,7 +186,6 @@ STATIC gberg_error_codes igberg_install_strings(XFParseIFF *iff, char *txtname)
     txt=igberg_empty_strings();
     if (!txt)
         return GBERG_ERR_NOMEMORY;
-
 
 //ÄÄ Verify header
     if (header.compression)
@@ -210,7 +213,7 @@ STATIC gberg_error_codes igberg_install_strings(XFParseIFF *iff, char *txtname)
             {
                 return GBERG_ERR_NOMEMORY;
             }
-    
+
             ptr=(byte*)ivory_hlock(txt->data);
             if (!ptr)
             {
@@ -246,6 +249,7 @@ error_exit:;
         }
         ivory_hfree(&txt->data);
     }
+    memset(txt,0,sizeof(GBergTextInfo));
 
     iff->leaveform();
     return err;
@@ -257,14 +261,15 @@ error_exit:;
 // Returns information about the given text.  If txtname is empty, it will  ³
 // return information for any current text.                                 ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-extern "C" gberg_error_codes gberg_info_strings(char *txtname, GBergTextInfo *info)
+extern "C" gberg_error_codes gberg_info_strings(const char *txtname, GBergTextInfo *info)
 {
     ulong           i;
     GBergTextInfo   *txt;
 
     assertMyth("Gutenberg must be initialized",GBergInstance);
 
-    if (!txtname || !*txtname) {
+    if (!txtname || !*txtname)
+    {
         txt=GBergInstance->text_active;
         if (!txt)
         {
@@ -278,14 +283,14 @@ extern "C" gberg_error_codes gberg_info_strings(char *txtname, GBergTextInfo *in
 //ÄÄ Search for given text name
     for(i=0, txt=&GBergInstance->text[0]; i < GBergInstance->text_hi; i++, txt++)
     {
-        if (*txtname == *txt->name) {
-            if (!strcmp(txtname,txt->name)) {
+        if (*txtname == *txt->name)
+        {
+            if (!strcmp(txtname,txt->name))
                 break;
-            }
         }
     }
     return GBERG_ERR_TEXTNOTINSTALLED;
 }
 
-//°±² End of module - gbrgitxt.c ²±°
+//°±² End of module - gbrgitxt.cpp ²±°
 

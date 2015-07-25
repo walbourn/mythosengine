@@ -8,7 +8,7 @@
                            /  /            \  \
                           /__/              \__\
  
-             Copyright (c) 1994,1995 by Charybdis Enterprises, Inc.
+             Copyright (c) 1994-1996 by Charybdis Enterprises, Inc.
                             All Rights Reserved.
 
                             Windows '95 Version
@@ -33,6 +33,7 @@
                              Echelon IV, Suite 302
                                Austin, TX  78759
                                 (512) 343-7224
+                              FAX: (512) 343-6310
 
                   Direct e-mail inquires to: tim@charybdis.com
 
@@ -40,11 +41,11 @@
 
  ---------------------------------------------------------------------------
 
-                         *** Version 1.0 Release ***
+                         *** Version 1.2 Release ***
 
-                              November 7, 1995
+                                August 27, 1996
 
- This is the first full release of the MythOS collection.  Usage of this 
+ This is the third full release of the MythOS collection.  Usage of this 
  library is subject to your license agreement.  All materials herein 
  should be treated as confidential information.
 
@@ -94,6 +95,8 @@
     |  +--Inc (source only)
     |  |
     |  +--Edit
+    |  |
+    |  +--Tool
     |  |
     |  +--Obj (source only)
     |  |
@@ -153,6 +156,11 @@
     |  +--Util
     |     +--Obj
     |
+    +--Newton                       Newton (Physics system)
+    |  +--Inc (source only)
+    |  |
+    |  +--Obj (source only)
+    |
     +--System                       MythOS System (Full Source)
     |  +--Inc
     |  |
@@ -162,15 +170,19 @@
     |     +--Obj
     |
     +--Turner                       Turner (Network system)
-    |  +--Inc
+    |  +--Inc (source only)
     |  |
-    |  +--Obj
+    |  +--Obj (source only)
     |
     +--Util                         MythOS General Utilities (Source)
     |  +--Obj
     |
     +--VanGogh                      Van Gogh (2D Graphics System)
     |  +--Inc (source only)
+    |  |
+    |  +--8BPP (source only)
+    |  |
+    |  +--16BPP (source only)
     |  |
     |  +--PalTool
     |  |
@@ -204,11 +216,17 @@
     README.TXT's are in each of the library component directories with
     current status and work notes.
 
-    This version of MythOS was built with Microsoft Visual C++ v2.2.
-    
+    This version of MythOS was built with Microsoft Visual C++ v4.1.  The
+    MFC-based tools will therefore not compile with v2.x MSVC.
+
     Note: The Escher Exporter must be built using Watcom v10 and the 
           Autodesk IPAS4 Toolkit, since it is a 3D Studio Plug-In module.
 
+    MFC Version 4.x support DLLs are installed as part of the MythOS
+    installation procedure since they are required by the MFC-based tools.
+
+    The Van Gogh library documentation is not yet complete.
+    
     Several of the utilities require a PD utility, Flex, which must be 
     located in C:\FLEX in order to build the executable.  Unzip the FLEX.ZIP
     contained in the root directory of the installed tree structure into

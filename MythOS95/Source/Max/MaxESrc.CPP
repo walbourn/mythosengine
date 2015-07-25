@@ -90,6 +90,7 @@ MaxEventUser::MaxEventUser (MaxDevices &devs, const char *iff_file, const char *
     MaxEventSource (),
     bindings    (0),
     TRGS        (0),
+    ntriggers   (0),
     theDevices  (devs)
 {
     assert (iff_file ? evt_chunk != 0: (evt_chunk == 0));
@@ -169,8 +170,10 @@ int MaxEventUser::load (XFParseIFF *iffp, const char *ename)
             // Start with a clean slate.
             clear();
 
-            TRGS = new MaxTrigger[hdr.num_trigs];
-            EVTS = new dword[hdr.num_trigs];
+            ntriggers = hdr.num_trigs;
+
+            TRGS = new MaxTrigger[ntriggers];
+            EVTS = new dword[ntriggers];
 
             if (!TRGS || !EVTS)
             {
@@ -239,7 +242,7 @@ void MaxEventUser::install ()
     theDevices.enable_mouse    (use_mou);
     theDevices.enable_keyboard (use_key);
     theDevices.enable_joystick (use_joy);
-    
+
     // Get the current set of events.
     theDevices.update();
     process();
@@ -265,6 +268,7 @@ void MaxEventUser::connect (const MaxTrigger &et, MaxEvent evt)
     bindings = new EventBinding (et, evt, bindings);
     assert (bindings);
 }
+
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // Remove the trigger/event pair from the EventSource.                      ³
@@ -301,6 +305,22 @@ void MaxEventUser::disconnect (const MaxTrigger &et, MaxEvent evt)
 }
 
 
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+//  Enumerate all of the triggers.                                          ³
+//  The function can modify the triggers if it wants.  The function         ³
+//  May return TRUE in order to halt the enumeration.                       ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+void MaxEventUser::enumerate_triggers (int (*func) (MaxTrigger *))
+{
+    for (int i = 0; i < ntriggers; i++)
+    {
+        if (!func (&TRGS[i]))
+            break;
+    }
+}
+
+
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 //  Clear the event/trigger bindings.                                       ³
 //  Additionally, remove the TRGS buffer, if one exists.                    ³
@@ -321,6 +341,7 @@ void MaxEventUser::clear ()
 
     TRGS = 0;
     bindings = 0;
+    ntriggers = 0;
 }
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿

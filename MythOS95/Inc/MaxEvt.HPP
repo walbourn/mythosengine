@@ -88,7 +88,7 @@
 //같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같같�
 
 
-const int EVENT_MAX_EVENT = 128;
+const int EVENT_MAX_EVENT = 256;
 
 //컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
 // The notion of a unique event.

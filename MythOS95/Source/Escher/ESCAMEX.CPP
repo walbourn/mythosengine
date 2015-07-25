@@ -8,7 +8,7 @@
 //ùùùùù²±²ùùùùùùù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùùùùùù²±²ùùùù²±²ùùùùùù
 //ùùùù²²²²²²²²²²ù²²²²²²²²ùùù²²²²²²²²ùù²²²ùùùù²²²ù²²²²²²²²²²ù²²²ùùùù²²²ùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùCopyrightù(c)ù1994,ù1995ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
+//ùùùùùùùùùùùCopyrightù(c)ù1994-1996ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùù Microsoft Windows '95 Version ùùùùùùùùùùùùùùùùùùùùùùù
@@ -32,8 +32,8 @@
 //
 // escamex.cpp
 //
-//      The EschCameraEx object is an extended camera which handles
-//      bitmap backgrounds and other special effects.
+// The EschCameraEx class is an extended camera which handles
+// bitmap backgrounds and hazing.
 //
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
 
@@ -60,25 +60,34 @@
 //                                                                          ³
 // Initializes the camera object                                            ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-EschCameraEx::EschCameraEx(VngoVport *vp)
-                          :EschCamera(vp)
+EschCameraEx::EschCameraEx(VngoVport *vp) :
+    EschCamera(vp),
+    bg_bitmap(0),
+    hz_pal(0)
 {
-    bg_bitmap=0;
-    hz_pal=0;
-
-#if 0
-    set_hz_range(hither,yon);
-#endif
 };
 
-EschCameraEx::EschCameraEx(const char *fname, const char *cname)
-                          :EschCamera(fname,cname)
+EschCameraEx::EschCameraEx(const char *fname, const char *cname) :
+    EschCamera(fname,cname),
+    bg_bitmap(0),
+    hz_pal(0)
 {
-    bg_bitmap=0;
-    hz_pal=0;
-#if 0
-    set_hz_range(hither,yon);
-#endif
+};
+
+EschCameraEx::EschCameraEx(const EschCamera &cam) :
+    EschCamera(cam),
+    bg_bitmap(0),
+    hz_pal(0)
+{
+};
+
+EschCameraEx::EschCameraEx(const EschCameraEx &cam) :
+    EschCamera(cam),
+    bg_bitmap(cam.bg_bitmap),
+    hz_pal(cam.hz_pal)
+
+{
+    flags &= ~(ESCH_CAM_OWNSBITMAP | ESCH_CAM_OWNSHAZE);
 };
 
 
@@ -89,12 +98,7 @@ EschCameraEx::EschCameraEx(const char *fname, const char *cname)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
 EschCameraEx::~EschCameraEx()
 {
-    if ((flags & ESCH_CAM_OWNSBITMAP) && bg_bitmap)
-    {
-        bg_bitmap->release();
-        delete bg_bitmap;
-    }
-    bg_bitmap=0;
+    release();
 };
 
 
@@ -104,47 +108,116 @@ EschCameraEx::~EschCameraEx()
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// EschCameraEx - rend                                                      ³
+// EschCameraEx - operator =                                                ³
 //                                                                          ³
-// Renders the current context to the camera.                               ³
+// Copies the data from another camera.                                     ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void EschCameraEx::rend(void)
+const EschCameraEx &EschCameraEx::operator = (const EschCamera &cam)
 {
-    EschDrawable    *ptr;
+    if (this != &cam)
+    {
+        release();
+
+        EschCamera::operator = (cam);
+    }
+    return *this;
+}
+
+const EschCameraEx &EschCameraEx::operator = (const EschCameraEx &cam)
+{
+    if (this != &cam)
+    {
+        release();
+
+        EschCamera::operator = (cam);
+
+        bg_bitmap = cam.bg_bitmap;
+        hz_pal = cam.hz_pal;
+        flags &= ~(ESCH_CAM_OWNSBITMAP | ESCH_CAM_OWNSHAZE);
+    }
+    return *this;
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// EschCameraEx - release                                                   ³
+//                                                                          ³
+// Release any data owned by the camera.                                    ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+void EschCameraEx::release()
+{
+//ÄÄÄ Release bitmap background
+    if ((flags & ESCH_CAM_OWNSBITMAP) && bg_bitmap)
+    {
+        bg_bitmap->release();
+        delete bg_bitmap;
+    }
+    bg_bitmap=0;
+
+//ÄÄÄ Release haze palette
+    if ((flags & ESCH_CAM_OWNSHAZE) && hz_pal)
+    {
+        delete hz_pal;
+    }
+    hz_pal=0;
+
+//ÄÄÄ Clear any owns bits
+    flags &= ~(ESCH_CAM_OWNSBITMAP | ESCH_CAM_OWNSHAZE);
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// EschCameraEx - pre_rend                                                  ³
+//                                                                          ³
+// Prepares a render, returning a 0 on success or non-zero otherwise.       ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+int EschCameraEx::pre_rend()
+{
+    flags &= ~ESCH_CAM_VPWASLOCKED;
 
     if (!vport)
-        return;
+        return 1;
 
-//ÄÄÄ Clear viewport/reset background bitmap
+//ÄÄÄ Lock viewport (save old state)
+    int waslocked = vport->lock();
+
+	if (waslocked == -1)
+		return 1;
+
+    if (waslocked)
+        flags |= ESCH_CAM_VPWASLOCKED;
+
+//ÄÄÄ Clear viewport/reset z-buffer
     if (!(flags & ESCH_CAM_NOCLEAR))
     {
-
         if ( (!(flags & ESCH_CAM_IGNORE_BMAP)) && bg_bitmap)
         {
-            VngoRect    rect;
-            VngoTexture txt;
-
-            rect.x = 0;
-            rect.y = 0;
-            rect.dx = vport->get_vbuff()->width;
-            rect.dy = vport->get_vbuff()->height;
-
-            if ((bg_w >= vport->get_vbuff()->width)
-                && (bg_h >= vport->get_vbuff()->height))
-                vport->clear_screen_off();
-            else
-                vport->clear_screen_on();
-
-            flags &= ~ESCH_CAM_DIRTY_BMAP;
-
-            vport->reset();
+            VngoRect rect(-bg_offx,
+                          -bg_offy,
+                          bg_bitmap->width,
+                          bg_bitmap->height);
 
             bg_bitmap->lock();
-            txt.width = bg_w;
-            txt.height = bg_h;
-            txt.tex = bg_bitmap->data;
+            assert(bg_bitmap->data != 0 && bg_bitmap->bpp == 1);
+
+            VngoTexture txt((short)rect.dx,
+                            (short)rect.dy,
+                            bg_bitmap->data,
+                            VNGO_TEXTURE_8BIT);
+
+            //ÄÄÄ Don't clear screen if the image covers entire viewport
+            if (bg_offx < 0
+                || bg_offy < 0
+                || (rect.dx-bg_offx) < vport->vbuff.width
+                || (rect.dy-bg_offy) < vport->vbuff.height)
+                vport->clear_screen_on();
+            else
+                vport->clear_screen_off();
+
+            vport->reset(bcolor);
 
             vport->image_trans(&rect,&txt);
+
             bg_bitmap->unlock();
         }
         else
@@ -152,56 +225,58 @@ void EschCameraEx::rend(void)
             vport->clear_screen_on();
             vport->reset(bcolor);
         }
-
     }
 
-//ÄÄÄ Draw list of EschDrawables
-    for(ptr=EschCurrent->eschs; ptr != NULL; ptr = ptr->next())
-    {
-        if (!(ptr->flags & ESCH_DRW_SKIP))
-            ptr->draw();
-    }
+    return 0;
+}
 
-#if 0
-//ÄÄÄ Perform hazing lookup
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
+// EschCameraEx - post_rend                                                 ³
+//                                                                          ³
+// Performs post render processing.                                         ³
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
+void EschCameraEx::post_rend()
+{
+//ÄÄÄ Handle hazing postprocessing
     if ((flags & ESCH_CAM_HAZE) && hz_pal)
     {
-        long    x, y;
-        dword   r;
-        byte    *cptr;
-        ushort  *zptr;
-
-        assertMyth("EschCameraEx::rend needs screen and zbuffer pointers to haze",
+        assertMyth("EschCameraEx::post_rend needs screen and zbuffer pointers to haze",
                    vport->get_vbuff()->zbuff_ptr && vport->get_vbuff()->scrn_ptr);
 
-        for(y=0; y < vport->get_vbuff()->height; y++)
-        {
-            cptr = vport->get_vbuff()->scrn_ptr 
-                   + vport->get_vbuff()->ytable[y];
-            zptr = (ushort*)((byte*)vport->get_vbuff()->zbuff_ptr 
-                   + (vport->get_vbuff()->ytable[y]<<1));   // 16-bit Zbuffer
+        long h = vport->get_vbuff()->height;
+        long w = vport->get_vbuff()->width;
 
-            for(x=0; x < vport->get_vbuff()->width; x++)
+        assert(hz_pal->num_shd_lvl_bits <= 16);
+        int lvl_bits = 16 - hz_pal->num_shd_lvl_bits;
+
+        for(long y=0; y < h; y++)
+        {
+            byte *cptr = vport->get_vbuff()->scrn_ptr 
+                         + vport->get_vbuff()->ytable[y];
+
+            // 16-bit Zbuffer
+            ushort *zptr = (ushort*)((byte*)vport->get_vbuff()->zbuff_ptr 
+                                     + vport->get_vbuff()->ztable[y]);
+
+            for(long x=0; x < w; x++, cptr++)
             {
-                r = *(zptr++) << 16;                        // 16-bit Zbuffer
-                if (r >= hz_near)
+                // 16-bit Zbuffer
+                ushort r = *(zptr++);
+                
+                if (r < 0xfffe)
                 {
-                    if (r < hz_far)
-                    {
-                        r = (r - hz_near) / hz_factor;
-                        assert(r < 24);
-                        *cptr = hz_pal->p[*cptr].shl[23-r];
-                    }
-                    else
-                    {
-                        *cptr = hz_pal->p[*cptr].shl[0];
-                    }
+                    *cptr = (*((VngoShadePal8*)hz_pal))[*cptr].shl[r >> lvl_bits];
                 }
-                cptr++;
             }
         }
     }
-#endif
+
+//ÄÄÄ Unlock (if old state was unlocked)
+    if (!(flags & ESCH_CAM_VPWASLOCKED))
+        vport->unlock();
+
+    flags &= ~ESCH_CAM_VPWASLOCKED;
 }
 
 
@@ -211,45 +286,12 @@ void EschCameraEx::rend(void)
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// EschCameraEx - set_bg_offset                                             ³
-//                                                                          ³
-// Sets the offset for the bitmap background map window.                    ³
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void EschCameraEx::set_bg_offset(short x, short y)
-{
-    if (!bg_bitmap)
-        return;
-
-    flags |= ESCH_CAM_DIRTY_BMAP;
-
-    bg_offx = x;
-    bg_offy = y;
-}
-
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// EschCameraEx - set_bg_size                                               ³
-//                                                                          ³
-// Sets the size for the bitmap background map window                       ³
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void EschCameraEx::set_bg_size(short w, short h)
-{
-    if (!bg_bitmap)
-        return;
-
-    flags |= ESCH_CAM_DIRTY_BMAP;
-
-    bg_w = w;
-    bg_h = h;
-}
-
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // EschCameraEx - set_bg_bitmap                                             ³
 //                                                                          ³
 // Sets up the bitmap background, freeing the old one if owned by the camera³
+// returning 0 on success, or 1 if setting the bitmap failed.               ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void EschCameraEx::set_bg_bitmap(XFBitmap *bm, int owns)
+int EschCameraEx::set_bg_bitmap(XFBitmap *bm, int owns)
 {
 //ÄÄÄ Free old bitmap, if owned by Camera
     if ((flags & ESCH_CAM_OWNSBITMAP) && bg_bitmap)
@@ -261,59 +303,170 @@ void EschCameraEx::set_bg_bitmap(XFBitmap *bm, int owns)
 
 //ÄÄÄ Clear flag & reset offset.
     flags &= ~ESCH_CAM_OWNSBITMAP;
+
     bg_offx=bg_offy=0;
 
+//ÄÄÄ Test for valid bitmap
     if (!bm || !bm->handle || (bm->bpp != 1))
-        return;
+        return 1;
 
 //ÄÄÄ Setup bitmap, if valid.
     bg_bitmap = bm;
     if (owns)
         flags |= ESCH_CAM_OWNSBITMAP;
 
-    flags |= ESCH_CAM_DIRTY_BMAP;
-
-    bg_w = bm->width;
-    bg_h = bm->height;
+    return 0;
 }
 
 
-#if 0
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// EschCameraEx - set_hz_palette                                            ³
+// EschCameraEx - set_haze                                                  ³
 //                                                                          ³
-// Sets up a hazing palette for the camera to use.                          ³
+// Sets up the haze palette, freeing the old one if owned by the camera,    ³
+// returning 0 on success, or 1 if setting the bitmap failed.               ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void EschCameraEx::set_hz_palette(VngoHazePal8 *hp, int owns)
+int EschCameraEx::set_haze(VngoShadePal *hzp, int owns)
 {
-    if (flags & ESCH_CAM_OWNSHAZE)
+//ÄÄÄ Free old haze palette, if owned by Camera
+    if ((flags & ESCH_CAM_OWNSHAZE) && hz_pal)
     {
         delete hz_pal;
     }
     hz_pal=0;
-    flags &= ~(ESCH_CAM_HAZE|ESCH_CAM_OWNSHAZE);
 
-    if (!hp)
-        return;
+    flags &= ~(ESCH_CAM_OWNSHAZE|ESCH_CAM_HAZE);
 
-    hz_pal = hp;
-    flags |= ESCH_CAM_HAZE | ((owns) ? ESCH_CAM_OWNSHAZE : 0);
+//ÄÄÄ Test for valid palette
+    if (!hzp)
+        return 1;
+
+//ÄÄÄ Setup palette, if valid
+    hz_pal = hzp;
+    if (owns)
+        flags |= ESCH_CAM_OWNSHAZE;
+
+    flags |= ESCH_CAM_HAZE;
+
+    return 0;
 }
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// EschCameraEx - set_hz_range                                              ³
+// EschCameraEx - set_haze                                                  ³
 //                                                                          ³
-// Computes z scaling factor based on near and far ranges.                  ³
+// Generates a new hazing shade palette given shade levels, number of       ³
+// 'pristine' levels, break-point level, break-point percentage, and        ³
+// target color.                                                            ³
+//                                                                          ³
+// Note: This ramps in RGB space which gives better results that ramping in ³
+//       HLS space, which results in 'strange' changes in hues.             ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void EschCameraEx::set_hz_range(Flx16 n, Flx16 f)
+esch_error_codes EschCameraEx::create_haze(ushort levels, ushort slevel,
+                                           ushort blevel, Flx16 bpercent,
+                                           VngoColor24bit tcolor)
 {
-    assertMyth("EschCameraEx::set_hz_range needs hither <= n and f <= yon",
-               (n.flx >= hither.flx) && (f.flx <= yon.flx));
-    hz_near = flx_16mul16(n,z_factor).flx << 1;
-    hz_far = flx_16mul16(f,z_factor).flx << 1;
-    hz_factor = (hz_far - hz_near) / 24;
+//ÄÄÄ Verify input
+    if (!vport || !vport->vbuff.pal)
+        return ESCH_ERR_NEEDVPORT;
+
+    switch (levels)
+    {
+        case 8:
+        case 16:
+        case 32:
+        case 64:
+        case 128:
+        case 256:
+            break;
+        return ESCH_ERR_INVALIDPARMS;
+    }
+
+    if (slevel >= levels
+        || blevel >= levels
+        || blevel <= slevel
+        || bpercent <= 0
+        || bpercent >= Flx16(1.0))
+        return ESCH_ERR_INVALIDPARMS;
+
+//ÄÄÄ Free old haze palette, if owned by Camera
+    if ((flags & ESCH_CAM_OWNSHAZE) && hz_pal)
+    {
+        delete hz_pal;
+    }
+    hz_pal=0;
+
+    flags &= ~(ESCH_CAM_OWNSHAZE|ESCH_CAM_HAZE);
+
+//ÄÄÄ Create new haze table
+    hz_pal = new VngoShadePal8 (levels);
+    if (!hz_pal)
+        return ESCH_ERR_NOMEMORY;
+
+    flags |= ESCH_CAM_OWNSHAZE | ESCH_CAM_HAZE;
+
+    //ÄÄÄ Setup each color
+    VngoPal *pal = vport->vbuff.pal;
+
+    for (ulong qt=0; qt < VNGO_PAL_SIZE; qt++)
+    {
+        byte *shl = &(*((VngoShadePal8*)hz_pal))[qt].shl[0];
+
+        //ÄÄÄ Unaffected haze range
+        for(int lvl = 0; lvl < slevel; lvl++)
+        {
+            shl[lvl] = (byte)qt;
+        }
+
+        VngoColor24bit color = pal->get_RGB(qt);
+        Flx16 colorr = Flx16(color.r);
+        Flx16 colorg = Flx16(color.g);
+        Flx16 colorb = Flx16(color.b);
+
+        VngoColor24bit bcolor
+            ((byte)(long)(colorr + (Flx16(tcolor.r - color.r) * bpercent)),
+             (byte)(long)(colorg + (Flx16(tcolor.g - color.g) * bpercent)),
+             (byte)(long)(colorb + (Flx16(tcolor.b - color.b) * bpercent)));
+
+        //ÄÄÄ Haze out to break point
+        {
+            Flx16 rstep = Flx16(bcolor.r - color.r) / Flx16(blevel - slevel);
+            Flx16 gstep = Flx16(bcolor.g - color.g) / Flx16(blevel - slevel);
+            Flx16 bstep = Flx16(bcolor.b - color.b) / Flx16(blevel - slevel);
+
+            for(; lvl < blevel; lvl++)
+            {
+                shl[lvl] = (byte)pal->get_index(VngoColor24bit
+                                                 ((byte)(long)colorr,
+                                                  (byte)(long)colorg,
+                                                  (byte)(long)colorb));
+
+                colorr += rstep;
+                colorg += gstep;
+                colorb += bstep;
+            }
+        }
+
+        //ÄÄÄ Haze out to target color
+        {
+            Flx16 rstep = Flx16(tcolor.r - bcolor.r) / Flx16(levels - blevel);
+            Flx16 gstep = Flx16(tcolor.g - bcolor.g) / Flx16(levels - blevel);
+            Flx16 bstep = Flx16(tcolor.b - bcolor.b) / Flx16(levels - blevel);
+
+            for(; lvl < levels; lvl++)
+            {
+                shl[lvl] = (byte)pal->get_index(VngoColor24bit
+                                                 ((byte)(long)colorr,
+                                                  (byte)(long)colorg,
+                                                  (byte)(long)colorb));
+
+                colorr += rstep;
+                colorg += gstep;
+                colorb += bstep;
+            }
+        }
+    }
+
+    return ESCH_ERR_NONE;
 }
-#endif
 
 //°±² End of module - escamex.cpp ²±°

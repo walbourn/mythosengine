@@ -8,7 +8,7 @@
 ;ששששש²±²ששששששש²±²שששש²±²ש²±²שששש²±²ש²±²שששש²±²ש²±²שששששששש²±²שששש²±²שששששש
 ;שששש²²²²²²²²²²ש²²²²²²²²ששש²²²²²²²²שש²²²שששש²²²ש²²²²²²²²²²ש²²²שששש²²²ששששששש
 ;ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
-;ששששששששששCopyrightש(c)ש1994,ש1995שbyשCharybdisשEnterprises,שInc.שששששששששש
+;שששששששששששCopyrightש(c)ש1994-1996שbyשCharybdisשEnterprises,שInc.שששששששששש
 ;ששששששששששששששששששששששששששAllשRightsשReserved.ששששששששששששששששששששששששששששש
 ;ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
 ;ששששששששששששששששששששש Microsoft Windows '95 Version ששששששששששששששששששששששש
@@ -58,6 +58,7 @@
 ;°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 include macros.inc
+include felix.inc
 include esmath.inc
 
 ;±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
@@ -513,6 +514,10 @@ END_PROC        asm_esch_detmatrix
 ;    |D E F| = det
 ;    |G H I|
 ;
+
+if SAFE_DIVIDE
+EXTERN  asm_flx_16div16:NEAR
+endif
          
         ALIGN   16
 START_PROC      esch_inversematrix,      C source:DWORD, dest:DWORD
@@ -562,10 +567,17 @@ START_PROC      esch_inversematrix,      C source:DWORD, dest:DWORD
         shrd    eax,edx,16
         neg     eax
         add     eax,ecx
+if SAFE_DIVIDE
+        push    det
+        push    eax
+        call    asm_flx_16div16
+        add     esp,8
+else
         shld    edx,eax,16
         shl     eax,16
         movsx   edx,dx
         idiv    det
+endif
         mov     DM1.mtx_a,eax
 
 ; <D>
@@ -582,10 +594,17 @@ START_PROC      esch_inversematrix,      C source:DWORD, dest:DWORD
         shrd    eax,edx,16
         neg     eax
         add     eax,ecx
+if SAFE_DIVIDE
+        push    det
+        push    eax
+        call    asm_flx_16div16
+        add     esp,8
+else
         shld    edx,eax,16
         shl     eax,16
         movsx   edx,dx
         idiv    det
+endif
         mov     DM1.mtx_d,eax
 
 ; <G>
@@ -602,10 +621,17 @@ START_PROC      esch_inversematrix,      C source:DWORD, dest:DWORD
         shrd    eax,edx,16
         neg     eax
         add     eax,ecx
+if SAFE_DIVIDE
+        push    det
+        push    eax
+        call    asm_flx_16div16
+        add     esp,8
+else
         shld    edx,eax,16
         shl     eax,16
         movsx   edx,dx
         idiv    det
+endif
         mov     DM1.mtx_g,eax
 ; <J>
 ;     1      |D E F|       <IV1>      <IV2>      <IV3>
@@ -655,10 +681,17 @@ START_PROC      esch_inversematrix,      C source:DWORD, dest:DWORD
         neg     eax
         add     eax,ebx                     ; Use accumulation in EBX
 
+if SAFE_DIVIDE
+        push    det
+        push    eax
+        call    asm_flx_16div16
+        add     esp,8
+else
         shld    edx,eax,16
         shl     eax,16
         movsx   edx,dx
         idiv    det
+endif
         mov     DM1.mtx_j,eax
 
 ; <B>
@@ -675,10 +708,17 @@ START_PROC      esch_inversematrix,      C source:DWORD, dest:DWORD
         shrd    eax,edx,16
         neg     eax
         add     eax,ecx
+if SAFE_DIVIDE
+        push    det
+        push    eax
+        call    asm_flx_16div16
+        add     esp,8
+else
         shld    edx,eax,16
         shl     eax,16
         movsx   edx,dx
         idiv    det
+endif
         mov     DM1.mtx_b,eax
 
 ; <E>
@@ -695,10 +735,17 @@ START_PROC      esch_inversematrix,      C source:DWORD, dest:DWORD
         shrd    eax,edx,16
         neg     eax
         add     eax,ecx
+if SAFE_DIVIDE
+        push    det
+        push    eax
+        call    asm_flx_16div16
+        add     esp,8
+else
         shld    edx,eax,16
         shl     eax,16
         movsx   edx,dx
         idiv    det
+endif
         mov     DM1.mtx_e,eax
 
 ; <H>          
@@ -715,10 +762,17 @@ START_PROC      esch_inversematrix,      C source:DWORD, dest:DWORD
         shrd    eax,edx,16
         neg     eax
         add     eax,ecx
+if SAFE_DIVIDE
+        push    det
+        push    eax
+        call    asm_flx_16div16
+        add     esp,8
+else
         shld    edx,eax,16
         shl     eax,16
         movsx   edx,dx
         idiv    det
+endif
         mov     DM1.mtx_h,eax
 
 ; <K>          
@@ -741,10 +795,17 @@ START_PROC      esch_inversematrix,      C source:DWORD, dest:DWORD
         shrd    eax,edx,16
         add     eax,ebx                     ; Use accumulation in EBX
 
+if SAFE_DIVIDE
+        push    det
+        push    eax
+        call    asm_flx_16div16
+        add     esp,8
+else
         shld    edx,eax,16
         shl     eax,16
         movsx   edx,dx
         idiv    det
+endif
         mov     DM1.mtx_k,eax
 
 ; <C>
@@ -761,10 +822,17 @@ START_PROC      esch_inversematrix,      C source:DWORD, dest:DWORD
         shrd    eax,edx,16
         neg     eax
         add     eax,ecx
+if SAFE_DIVIDE
+        push    det
+        push    eax
+        call    asm_flx_16div16
+        add     esp,8
+else
         shld    edx,eax,16
         shl     eax,16
         movsx   edx,dx
         idiv    det
+endif
         mov     DM1.mtx_c,eax
 
 ; <F>
@@ -781,10 +849,17 @@ START_PROC      esch_inversematrix,      C source:DWORD, dest:DWORD
         shrd    eax,edx,16
         neg     eax
         add     eax,ecx
+if SAFE_DIVIDE
+        push    det
+        push    eax
+        call    asm_flx_16div16
+        add     esp,8
+else
         shld    edx,eax,16
         shl     eax,16
         movsx   edx,dx
         idiv    det
+endif
         mov     DM1.mtx_f,eax
 
 ; <I>
@@ -801,10 +876,17 @@ START_PROC      esch_inversematrix,      C source:DWORD, dest:DWORD
         shrd    eax,edx,16
         neg     eax
         add     eax,ecx
+if SAFE_DIVIDE
+        push    det
+        push    eax
+        call    asm_flx_16div16
+        add     esp,8
+else
         shld    edx,eax,16
         shl     eax,16
         movsx   edx,dx
         idiv    det
+endif
         mov     DM1.mtx_i,eax
 
 ; <L>
@@ -853,10 +935,17 @@ START_PROC      esch_inversematrix,      C source:DWORD, dest:DWORD
         neg     eax
         add     eax,ebx                     ; Use accumulation in EBX
 
+if SAFE_DIVIDE
+        push    det
+        push    eax
+        call    asm_flx_16div16
+        add     esp,8
+else
         shld    edx,eax,16
         shl     eax,16
         movsx   edx,dx
         idiv    det
+endif
         mov     DM1.mtx_l,eax
 
 ; Exit

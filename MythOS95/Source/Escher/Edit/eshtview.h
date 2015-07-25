@@ -8,7 +8,7 @@
 //ùùùùù²±²ùùùùùùù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùùùùùù²±²ùùùù²±²ùùùùùù
 //ùùùù²²²²²²²²²²ù²²²²²²²²ùùù²²²²²²²²ùù²²²ùùùù²²²ù²²²²²²²²²²ù²²²ùùùù²²²ùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùCopyrightù(c)ù1994,ù1995ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
+//ùùùùùùùùùùùCopyrightù(c)ù1994-1996ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùù Microsoft Windows '95 Version ùùùùùùùùùùùùùùùùùùùùùùù
@@ -34,12 +34,22 @@
 //
 // eshtview.h
 //
-// Terrain View and supporting classes.
+// Terrain View class
 //
 // The view class handles the display of the data contained in an
 // TerrEditDoc class.
 //
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
+
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//
+//                                Includes
+//                                
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+
+#include "eshtlist.h"
+#include "eshtgrid.h"
+#include "eshtrend.h"
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
@@ -50,16 +60,9 @@
 #define HINT_UPDATETXTS     0x1
 #define HINT_UPDATETERR     0x2
 #define HINT_UPDATECOLR     0x4
-
-typedef enum _rndctrl_mode_type
-{
-    RNDCTRL_NONE            =0,
-    RNDCTRL_ROTATEXY        =1,
-    RNDCTRL_MOVEXY          =2,
-    RNDCTRL_ROTMOVEZ        =3,
-    RNDCTRL_LIGHTXY         =4,
-    RNDCTRL_LIGHTBRIGHT     =5,
-} rnd_ctrl_mode_type;
+#define HINT_UPDATELIGHTS   0x8
+#define HINT_UPDATECLRLIST  0x10
+#define HINT_UPDATETXTLIST  0x20
 
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
@@ -67,163 +70,6 @@ typedef enum _rndctrl_mode_type
 //                                Classes
 //
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// TerrEditList                                                             ³
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-
-class TerrEditList : public CListBox
-{
-// Construction
-public:
-	TerrEditList();
-
-// Attributes
-public:
-
-// Operations
-public:
-
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(TerrEditList)
-	//}}AFX_VIRTUAL
-
-// Implementation
-public:
-	virtual ~TerrEditList();
-
-	// Generated message map functions
-protected:
-	//{{AFX_MSG(TerrEditList)
-	afx_msg void OnRButtonDown(UINT nFlags, CPoint point);
-	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
-	afx_msg void OnLButtonDblClk(UINT nFlags, CPoint point);
-	//}}AFX_MSG
-
-	DECLARE_MESSAGE_MAP()
-};
-
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// TerrEditGrid                                                             ³
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-
-class TerrEditGrid : public CWnd
-{
-// Construction
-public:
-	TerrEditGrid();
-
-// Attributes
-public:
-    VngoPal             *pal;
-    ushort              width, depth;
-
-// Operations
-public:
-    void SetSurfaceSize(int w, int d);
-    void UpdateSurfaceColors();
-    void SetZoomLevel(dword zshft);
-    dword GetZoomLevel() { return zoomshift; };
-    void SetPosition(int x, int y, int upscroll=1);
-    void GetPosition(int *x, int *y) { if (x) *x=xpos; if (y) *y=ypos; }
-
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(TerrEditGrid)
-	//}}AFX_VIRTUAL
-
-// Implementation
-public:  
-	virtual ~TerrEditGrid();
-
-protected:
-    int                 xpos, ypos;
-    dword               zoomshift;
-    BITMAPINFO          *bmi;
-    BYTE                *gmap;
-
-    void setup_vport(int width, int height);
-    void release_vport();
-
-	// Generated message map functions
-protected:
-	//{{AFX_MSG(TerrEditGrid)
-	afx_msg void OnPaint();
-	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
-	afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
-	afx_msg void OnRButtonDown(UINT nFlags, CPoint point);
-	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
-	afx_msg void OnSize(UINT nType, int cx, int cy);
-	afx_msg void OnLButtonDown(UINT nFlags, CPoint point);
-	//}}AFX_MSG
-	DECLARE_MESSAGE_MAP()
-};
-
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
-// TerrEditRender                                                           ³
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-
-class TerrEditRender : public CWnd
-{
-// Construction
-public:
-	TerrEditRender();
-
-// Attributes
-public:
-    dword               bcolor;
-    EschTerrain         terr;
-    EschCamera          cam;
-    EschVectorLight     light;
-    VngoPal             *pal;
-
-// Operations
-public:
-    void UpdateRender();
-    void MustRelight() { mustlight=1; }
-    void UpdateBColor();
-
-    void SetMode(rnd_ctrl_mode_type m);
-    rnd_ctrl_mode_type GetMode() { return mode; }
-
-    void UICameraProperties();
-    
-// Overrides
-	// ClassWizard generated virtual function overrides
-	//{{AFX_VIRTUAL(TerrEditRender)
-	//}}AFX_VIRTUAL
-
-// Implementation
-public:
-	virtual ~TerrEditRender();
-
-protected:
-    rnd_ctrl_mode_type  mode;
-    int                 mustlight;
-    BITMAPINFO          *bmi;
-    BYTE                *gmap;
-    VngoVportDD8        *gvp;
-
-    void setup_vport(int width, int height);
-    void release_vport();
-
-	// Generated message map functions
-protected:
-	//{{AFX_MSG(TerrEditRender)
-	afx_msg void OnMouseMove(UINT nFlags, CPoint point);
-	afx_msg void OnRButtonDown(UINT nFlags, CPoint point);
-	afx_msg void OnPaint();
-	afx_msg void OnHScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
-	afx_msg void OnVScroll(UINT nSBCode, UINT nPos, CScrollBar* pScrollBar);
-	afx_msg void OnSize(UINT nType, int cx, int cy);
-	afx_msg void OnNcRButtonDown(UINT nHitTest, CPoint point);
-	//}}AFX_MSG
-	DECLARE_MESSAGE_MAP()
-};
-
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // TerrEditView                                                             ³
@@ -241,8 +87,8 @@ public:
 
 // Operations
 public:
-    void UpdateMenuStatus();
     int  GetCurrentTextureSel() { return txtList.GetCurSel(); }
+    int  GetCurrentColorSel() { return colorList.GetCurSel(); }
 
 // Overrides
 	// ClassWizard generated virtual function overrides
@@ -266,7 +112,9 @@ public:
 protected:
     UINT                gridright;
     UINT                rendertop;
+    UINT                textureright;
 
+    TerrColorList       colorList;
     TerrEditList        txtList;
     TerrEditGrid        grid;
     TerrEditRender      rend;
@@ -299,6 +147,53 @@ protected:
 	afx_msg void OnViewZoomExLarge();
 	afx_msg void OnViewProperties();
 	afx_msg void OnViewZoomMega();
+	afx_msg void OnUpdateViewRender(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateViewRotateXY(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateViewMoveXY(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateViewRotateMoveZ(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateViewProperties(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateViewZoomNormal(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateViewZoomMedium(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateViewZoomLarge(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateViewZoomExLarge(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateViewZoomMega(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateViewRndDots(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateViewRndWireframe(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateViewRndSolid(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateViewRndFlat(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateViewRndSmooth(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateViewRndSpecular(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateViewRndBackface(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateViewRndTextures(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateViewRndPerspective(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateLightAdjustIntensity(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateLightAdjustXY(CCmdUI* pCmdUI);
+	afx_msg void OnEditUndo();
+	afx_msg void OnUpdateEditUndo(CCmdUI* pCmdUI);
+	afx_msg void OnViewHover();
+	afx_msg void OnUpdateViewHover(CCmdUI* pCmdUI);
+	afx_msg void OnLightProperties();
+	afx_msg void OnUpdateLightProperties(CCmdUI* pCmdUI);
+	afx_msg void OnUpdateViewShowColors(CCmdUI* pCmdUI);
+	afx_msg void OnViewShowColors();
+	afx_msg void OnUpdateViewShowShaded(CCmdUI* pCmdUI);
+	afx_msg void OnViewShowShaded();
+	afx_msg void OnUpdateViewShowTexturesOnly(CCmdUI* pCmdUI);
+	afx_msg void OnViewShowTexturesOnly();
+	afx_msg void OnUpdateViewShowHeight(CCmdUI* pCmdUI);
+	afx_msg void OnViewShowHeight();
+	afx_msg void OnEditFlipHorizontal();
+	afx_msg void OnEditFlipVertical();
+	afx_msg void OnEditRotate90();
+	afx_msg void OnEditRotateNegative90();
+	afx_msg void OnEditAssignByHeight();
+	afx_msg void OnUpdateEditAssignByHeight(CCmdUI* pCmdUI);
+	afx_msg void OnEditAssignByRandomRoll();
+	afx_msg void OnUpdateEditAssignByRandomRoll(CCmdUI* pCmdUI);
+	afx_msg void OnViewShowAppBits();
+	afx_msg void OnUpdateViewShowAppBits(CCmdUI* pCmdUI);
+	afx_msg void OnEditAssignByAngle();
+	afx_msg void OnUpdateEditAssignByAngle(CCmdUI* pCmdUI);
 	//}}AFX_MSG
 	DECLARE_MESSAGE_MAP()
 };

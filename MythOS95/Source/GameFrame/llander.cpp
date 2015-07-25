@@ -4,7 +4,7 @@
 //      
 //                        For Microsoft Windows '95
 //      
-//               Copyright (c) 1995 by Charybdis Enterprises, Inc.
+//           Copyright (c) 1995, 1996 by Charybdis Enterprises, Inc.
 //                           All Rights Reserved.
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -38,21 +38,27 @@
 #define WIN32_LEAN_AND_MEAN
 #include <stdlib.h>
 #include <assert.h>
-#include <chronos.hpp>
+
+#include <global.hpp>
 
 #include "llander.hpp"
 #include "landevt.hpp"
 
-//±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //
-//                                 Data
+//                                Equates
 //
-//±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
-const int lander_isize  = 16;
-const int lander_size   = 10;
-const int lander_xoffset = 3;
+const int LANDER_ISIZE  = 16;
+const int LANDER_SIZE   = 10;
+const int LANDER_XOFFSET = 3;
 
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
+//
+//                               Structures
+//
+//°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 // The basic network data packet
@@ -125,16 +131,14 @@ struct GenericData: public PacketData
     }
 };
 
-
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 //
 //                                 Code
 //
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 
-
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-//  LanderNetwork - Constructor
+// LanderNetwork - Constructor
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 LanderNetwork::LanderNetwork (int players):
     TurnerNetwork (LANDER_GUID, "Lander Mania!", players)
@@ -143,7 +147,7 @@ LanderNetwork::LanderNetwork (int players):
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-//  LanderNetwork - handle_msg
+// LanderNetwork - handle_msg
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 int LanderNetwork::handle_msg (DPID from, DPID to, void *msg, size_t msg_len)
 {
@@ -151,17 +155,17 @@ int LanderNetwork::handle_msg (DPID from, DPID to, void *msg, size_t msg_len)
 
     switch (pkt->type)
     {
-    case LanderPositionData::LANDER_POSITION:
-        // there is only one other possible player, so it must be them.
-        // The message is just a point (the lander location)
-        ((LanderPositionData *)msg)->stuff_into (SimMode->get_lander (from));
-        break;
+        case LanderPositionData::LANDER_POSITION:
+            // there is only one other possible player, so it must be them.
+            // The message is just a point (the lander location)
+            ((LanderPositionData *)msg)->stuff_into (SimMode->get_lander (from));
+            break;
 
-    case LanderPositionData::TERRAIN_DATA:
-        // Set the terrain data.
-        memcpy (SimMode->terrain.aHeights, &pkt->data, SimMode->terrain.cHeights);
-        SimMode->draw_terrain ();
-        break;
+        case LanderPositionData::TERRAIN_DATA:
+            // Set the terrain data.
+            memcpy (SimMode->terrain.aHeights, &pkt->data, SimMode->terrain.cHeights);
+            SimMode->draw_terrain ();
+            break;
     }
 
     return 0;
@@ -169,7 +173,7 @@ int LanderNetwork::handle_msg (DPID from, DPID to, void *msg, size_t msg_len)
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-//  LanderNetwork - sys_newplayer
+// LanderNetwork - sys_newplayer
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 int LanderNetwork::sys_newplayer (DPID id, LPCSTR short_name, LPCSTR long_name)
 {
@@ -181,17 +185,20 @@ int LanderNetwork::sys_newplayer (DPID id, LPCSTR short_name, LPCSTR long_name)
     // Make it taskable
     lander->init ();
 
-    if (net->is_creator ())
+    if (Net->is_creator ())
     {
         // Inform the other player of the terrain they will be flying over
         int buf_len = sizeof (*SimMode->terrain.aHeights) * SimMode->terrain.cHeights
                     + sizeof (PacketData::data_types);
         void *buf = new char [buf_len];
+        if (!buf)
+            return 1;
+
         ((GenericData *)buf)->type = LanderPositionData::TERRAIN_DATA;
         memcpy (&((GenericData *)buf)->data,
                 SimMode->terrain.aHeights,
                 SimMode->terrain.cHeights);
-        net->send (SimMode->aLanders[0]->player_id, id, buf, buf_len);
+        Net->send (SimMode->aLanders[0]->player_id, id, buf, buf_len);
         delete [] buf;
     }
 
@@ -200,7 +207,7 @@ int LanderNetwork::sys_newplayer (DPID id, LPCSTR short_name, LPCSTR long_name)
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-//  LanderNetwork - sys_delplayer
+// LanderNetwork - sys_delplayer
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 int LanderNetwork::sys_delplayer (DPID id)
 {
@@ -208,6 +215,7 @@ int LanderNetwork::sys_delplayer (DPID id)
 
     return 0;
 }
+
 
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
@@ -262,10 +270,10 @@ void Lander::run ()
             update_model ();
 
             // If we're on the network, let everyone know our new position
-            if (net && net->active())
+            if (Net && Net->active())
             {
                 LanderPositionData pd (*this);
-                net->broadcast (player_id, &pd, sizeof (pd));
+                Net->broadcast (player_id, &pd, sizeof (pd));
             }
         }
         yield ();
@@ -296,7 +304,8 @@ void Lander::reset (Flx16 x, Flx16 y)
 	{
     	// Adjust for joystick position
 
-        if (Devs->theJoystick.joy_present)
+        if ((CmdFlags & CMDFLAGS_JOYSTICK)
+            && Devs->theJoystick.joy_present)
         {
         	JOYINFOEX   j;
         	evt->get_joystick (&j);
@@ -327,14 +336,17 @@ void Lander::process_events ()
         JOYINFOEX   j;
 
         // Adjust for joystick position
-        if (Devs->theJoystick.joy_present)
+        if ((CmdFlags & CMDFLAGS_JOYSTICK)
+            && Devs->theJoystick.joy_present)
             evt->get_joystick (&j);
         
         if (evts.check (UP))
             yacceleration = -25;
         else if (evts.check (DOWN))
             yacceleration = -40;
-        else if (Devs->theJoystick.joy_present && j.dwYpos < jcentery - 2048)
+        else if ((CmdFlags & CMDFLAGS_JOYSTICK)
+                 && Devs->theJoystick.joy_present
+                 && j.dwYpos < jcentery - 2048)
             yacceleration = Flx16 (long (j.dwYpos - jcenterx) / 512);
         else
             yacceleration = 0;
@@ -343,7 +355,9 @@ void Lander::process_events ()
             xacceleration = -10;
         else if (evts.check (RIGHT))
             xacceleration = 10;
-        else if (Devs->theJoystick.joy_present && abs (j.dwXpos - jcenterx) > 4096)
+        else if ((CmdFlags & CMDFLAGS_JOYSTICK)
+                 && Devs->theJoystick.joy_present
+                 && abs (j.dwXpos - jcenterx) > 4096)
             xacceleration = long (j.dwXpos - jcenterx) / 2048;
         else
             xacceleration = 0;
@@ -379,8 +393,8 @@ void Lander::update_model ()
             ypos = 0;
 
         if (xpos < 0)
-            xpos = Flx16 (Screen->width - lander_isize);
-        else if (xpos > Screen->width - lander_isize)
+            xpos = Flx16 (Screen->width - LANDER_ISIZE);
+        else if (xpos > Screen->width - LANDER_ISIZE)
             xpos = 0;
     }
 }
@@ -389,13 +403,13 @@ void Lander::update_model ()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 // Lander - load_images
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-BOOL Lander::load_images (const char *fname)
+BOOL Lander::load_images ()
 {
     byte        *data;
     XFParseIFF  iff;
     char        name[16];
 
-    if (iff.open (fname, XF_OPEN_READ))
+    if (iff.open (szMasterIFF, XF_OPEN_READ))
         return FALSE;
 
     if (iff.seekform (iff.makeid ('L','L','N','D'))
@@ -413,10 +427,10 @@ BOOL Lander::load_images (const char *fname)
             return FALSE;
 
         if (iff.seekchunk (iff.makeid ('D','A','T','A'))
-            || iff.chunkSize != (lander_isize * (lander_isize / 8)))
+            || iff.chunkSize != (LANDER_ISIZE * (LANDER_ISIZE / 8)))
             return FALSE;
 
-        data = new BYTE[lander_isize * (lander_isize / 8)];
+        data = new BYTE[LANDER_ISIZE * (LANDER_ISIZE / 8)];
         if (!data)
             return FALSE;
 
@@ -480,49 +494,44 @@ void Lander::draw (VngoVport *vp)
     VngoRect r;
     r.x  = int (xpos);
     r.y  = int (ypos);
-    r.dx = lander_isize;
-    r.dy = lander_isize;
+    r.dx = LANDER_ISIZE;
+    r.dy = LANDER_ISIZE;
 
     VngoTexture mtex;
-    mtex.width  = lander_isize;
-    mtex.height = lander_isize;
+    mtex.width  = LANDER_ISIZE;
+    mtex.height = LANDER_ISIZE;
 
     // Draw the basic lander
     mtex.tex = lander_image;
-    //vp->image_trans (&r, &mtex, VNGO_TRANSPARENT);
     vp->image_trans_mono (&r, &mtex, lander_color);
 
     if (xacceleration < 0)
     {
         mtex.tex = lander_image_rightburn;
-        //vp->image_trans (&r, &mtex, VNGO_TRANSPARENT);
         vp->image_trans_mono (&r, &mtex, flame_color);
     }
     else if (xacceleration > 0)
     {
         mtex.tex = lander_image_leftburn;
-        //vp->image_trans (&r, &mtex, VNGO_TRANSPARENT);
         vp->image_trans_mono (&r, &mtex, flame_color);
     }
 
     if (yacceleration <= -30)
     {
         mtex.tex = lander_image_highburn;
-        //vp->image_trans (&r, &mtex, VNGO_TRANSPARENT);
         vp->image_trans_mono (&r, &mtex, flame_color);
     }
     else if (yacceleration < 0)
     {
         mtex.tex = lander_image_lowburn;
-        //vp->image_trans (&r, &mtex, VNGO_TRANSPARENT);
         vp->image_trans_mono (&r, &mtex, flame_color);
     }
 
     // Record the damage rectangle
     damage.left   = int (xpos);
     damage.top    = int (ypos);
-    damage.right  = int (xpos) + lander_isize;
-    damage.bottom = int (ypos) + lander_isize;
+    damage.right  = int (xpos) + LANDER_ISIZE;
+    damage.bottom = int (ypos) + LANDER_ISIZE;
 }
 
 
@@ -533,10 +542,10 @@ BOOL Lander::landed (Terrain *terrain)
 {
     // First, determine which "column" we're on
     const int colw = terrain->col_size (Screen->width);
-    const int col  = (int (xpos) + lander_xoffset) / colw;
+    const int col  = (int (xpos) + LANDER_XOFFSET) / colw;
 
     // Now, check our altitude
-    return int (ypos) + lander_size > Screen->height - terrain->aHeights[col];
+    return int (ypos) + LANDER_SIZE > Screen->height - terrain->aHeights[col];
 }
 
 
@@ -547,16 +556,16 @@ BOOL Lander::collided (Terrain *terrain)
 {
     // Get columns we're over
     const int colw = terrain->col_size (Screen->width);
-    const int lcol = (int (xpos) + lander_xoffset) / colw;
-    const int rcol = (int (xpos) + lander_size + lander_xoffset) / colw;
+    const int lcol = (int (xpos) + LANDER_XOFFSET) / colw;
+    const int rcol = (int (xpos) + LANDER_SIZE + LANDER_XOFFSET) / colw;
 
     // If it's the same column, we're not colliding
     if (lcol == rcol)
         return FALSE;
 
     // get our left/right "landing" states
-    BOOL lland = int (ypos) + lander_size > Screen->height - terrain->aHeights[lcol];
-    BOOL rland = int (ypos) + lander_size > Screen->height - terrain->aHeights[rcol];
+    BOOL lland = int (ypos) + LANDER_SIZE > Screen->height - terrain->aHeights[lcol];
+    BOOL rland = int (ypos) + LANDER_SIZE > Screen->height - terrain->aHeights[rcol];
 
     // If one side and not the other has landed, we have crashed!
     return lland != rland;
@@ -576,8 +585,12 @@ Terrain::Terrain (int num)
     // Allocate terrain storage
     cHeights = num;
     aHeights = new WORD[cHeights];
-
-    assert (aHeights);
+    if (!aHeights)
+    {
+        if (Mode)
+            Mode->panic(IDS_ERR_NOMEMORY,"Terrain");
+        return;
+    }
 
     // Load up the terrain with values
     const int hscale = Screen->height / 4;
@@ -599,7 +612,8 @@ Terrain::Terrain (int num)
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 Terrain::~Terrain ()
 {
-    delete aHeights;
+    if (aHeights)
+        delete aHeights;
 }
 
 
@@ -639,19 +653,30 @@ LunarLander::LunarLander ():
 {
     // Allocate a back buffer
     backbits = new BYTE [Screen->width * Screen->height];
+    if (!backbits)
+    {
+        panic(IDS_ERR_NOMEMORY,"LunarLander");
+        return;
+    }
 
     // Initialize the viewport
-    gvpb = new VngoVportDD8 (Screen->width, Screen->height, backbits, NULL, 
-                             Screen->pal, VNGO_PHYSICAL_DEV);
+    gvpb = new VngoVportDB8 (Screen->width, Screen->height, backbits, NULL, 
+                             Screen->pal, 0);
+    if (!gvpb)
+    {
+        panic(IDS_ERR_CREATEVPORTFAILED,"LunarLander");
+        return;
+    }
 
-    net = new LanderNetwork (NUM_LANDERS);
-
-    assertMyth ("LunarLander constructor failed on memory allocation",
-                backbits != 0 || gvpb != 0 || net != 0);
+    Net = new LanderNetwork (NUM_LANDERS);
+    if (!Net)
+    {
+        panic(IDS_ERR_NOMEMORY,"LunarNetwork");
+        return;
+    }
 
     for (int i = 0; i < NUM_LANDERS; i++)
         aLanders[i] = 0;
-
 
     // Set up the Gutenbrg text color
     gberg_color (Screen->pal->get_index (VngoColor24bit (128,128,128)),
@@ -675,21 +700,23 @@ LunarLander::~LunarLander()
         if (aLanders[i])
             delete aLanders[i];
 
-    delete backbits;
-    delete gvpb;
+    if (backbits)
+        delete backbits;
+    if (gvpb)
+        delete gvpb;
 }
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 // LunarLander - init
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-int LunarLander::init (const char *fname, const char *cname)
+int LunarLander::init (const char *cname)
 {
     assertMyth ("LunarLander can only be inited once", evt == 0);
 
     evt = new MaxEventUser (*Devs);
 
-    if (evt == 0 || ((MaxEventUser *)evt)->load (fname, cname) != 0)
+    if (evt == 0 || ((MaxEventUser *)evt)->load (szMasterIFF, cname) != 0)
         return 1;
 
     // Now, let 'er rip!
@@ -697,13 +724,74 @@ int LunarLander::init (const char *fname, const char *cname)
 
     // Create the first lander (the player's lander)
     aLanders[0] = new Lander (evt, FALSE);
+    if (!aLanders[0])
+    {
+        return 1;
+    }
 
-    if (!aLanders[0]->load_images (fname))
+    if (!aLanders[0]->load_images ())
         return 1;
 
     aLanders[0]->init ();
 
     return 0;
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// LunarLander - activate
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+void LunarLander::activate ()
+{
+    // Connect to the network, where appropriate
+    TurnerNetworkUI net_ui (hWndClient, Net);
+
+    if (net_ui.connect ())
+    {
+        // We're on line!
+        if (Net->is_creator ())
+        {
+            // OutputDebugString ("We are the creator\n");
+        }
+        else
+        {
+            // OutputDebugString ("We are joining an existing game\n");
+            // Get the terrain from another session
+        }
+
+        // Lander #0 is your lander!
+        aLanders[0]->player_id = Net->create_player (Net->is_creator () ? 
+                                                     "Veteran": "Newbie",
+                                                     "Lunar Lander Pilot");
+    }
+    else
+    {
+        // Solo play
+    }
+
+    // Initialize the terrain image
+    draw_terrain ();
+
+    // Reset the landers
+    for (int i = 0; i < NUM_LANDERS; i++)
+        if (aLanders[i])
+            aLanders[i]->reset();
+
+    // Initialize the time and frame count
+    timer.clear();
+    frame = 0;
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// LunarLander - deactivate
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+void LunarLander::deactivate ()
+{
+    if (Net)
+    {
+        Net->close();
+    }
 }
 
 
@@ -750,7 +838,7 @@ Lander *LunarLander::init_lander (DPID player)
                 l->player_id = player;
                 l->init();
                 l->reset ();
-                if (!l->load_images ("llander.iff"))
+                if (!l->load_images ())
                     delete l;
                 else
                     aLanders[i] = l;
@@ -781,64 +869,6 @@ void LunarLander::kill_lander (DPID player)
 }
 
 
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-// LunarLander - activate
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-void LunarLander::activate ()
-{
-    // Connect to the network, where appropriate
-    TurnerNetworkUI net_ui (hWndClient, net);
-
-    if (net_ui.connect ())
-    {
-        // We're on line!
-        if (net->is_creator ())
-        {
-            // OutputDebugString ("We are the creator\n");
-        }
-        else
-        {
-            // OutputDebugString ("We are joining an existing game\n");
-            // Get the terrain from another session
-        }
-
-        // Lander #0 is your lander!
-        aLanders[0]->player_id = net->create_player (net->is_creator () ? 
-                                                     "Veteran": "Newbie",
-                                                     "Lunar Lander Pilot");
-    }
-    else
-    {
-        // Solo play
-    }
-
-    // Initialize the terrain image
-    draw_terrain ();
-
-    // Reset the landers
-    for (int i = 0; i < NUM_LANDERS; i++)
-        if (aLanders[i])
-            aLanders[i]->reset();
-
-    // Initialize the time and frame count
-    timer.clear();
-    frame = 0;
-}
-
-
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-// LunarLander - deactivate
-//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-void LunarLander::deactivate ()
-{
-    if (net)
-    {
-        net->close();
-    }
-}
-
-
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //  LunarLander - draw_terain
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
@@ -847,7 +877,20 @@ void LunarLander::draw_terrain ()
     // Initialize the terrain image
     memset (backbits, 0, Screen->width * Screen->height);
     terrain.draw (gvpb);
-    memcpy (Screen->bits, backbits, Screen->width * Screen->height);
+
+    VngoRect rect;
+    rect.x = 0;
+    rect.y = 0;
+    rect.dx = Screen->width;
+    rect.dy = Screen->height;
+
+    VngoTexture txt;
+    txt.width = Screen->width;
+    txt.height = Screen->height;
+    txt.tex = backbits;
+
+    Screen->gvport->image_trans(&rect,&txt);
+    Screen->invalidate(rect);
 }
 
 
@@ -860,9 +903,9 @@ void LunarLander::process_events()
     char    buf[4096];
 
     // Only network stuff needs to be processed
-    if (net && net->active ())
+    if (Net && Net->active ())
     {
-        while (net->receive (buf, sizeof (buf)) != DPERR_NOMESSAGES)
+        while (Net->receive (buf, sizeof (buf)) != DPERR_NOMESSAGES)
             ;
     }
 }
@@ -876,7 +919,7 @@ void LunarLander::render()
     char    buff[32];
 
     assertMyth ("LunarLander::render needs Screen instance",
-                Screen != 0 && Screen->bits != 0);
+                Screen != 0 && Screen->gvport != 0);
 
     ++frame;
 
@@ -936,6 +979,13 @@ void LunarLander::render()
             gt.out ("---------\n");
         }
     }
+
+    VngoRect    rect;
+    rect.x = 0;
+    rect.y = 0;
+    rect.dx = Screen->width;
+    rect.dy = Screen->height;
+    Screen->invalidate(rect);
 }
 
 
@@ -944,15 +994,21 @@ void LunarLander::render()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 void LunarLander::restore (LPRECT lpr)
 {
-    const UINT  start = Screen->gvport->vbuff.ytable[lpr->top];
-    const UINT  stop  = Screen->gvport->vbuff.ytable[lpr->bottom];
-    const UINT  width = lpr->right - lpr->left;
-	const UINT	scrwid= Screen->gvport->vbuff.width;
-    BYTE  *bits  = Screen->bits;
+    VngoRect    rect;
 
-    for (UINT y = start + lpr->left; y < stop; y += scrwid)
-        memcpy (bits + y, backbits + y, width);
+    rect.x = lpr->left;
+    rect.y = lpr->top;
+    rect.dx = lpr->right - lpr->left + 1;
+    rect.dy = lpr->bottom - lpr->top + 1;
+
+    VngoTexture txt;
+    txt.width = Screen->width;
+    txt.height = short (rect.dy);
+    txt.tex = backbits + rect.y * txt.width + rect.x;
+
+    Screen->gvport->image_trans(&rect,&txt);
 }
+
 
 
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
@@ -963,9 +1019,18 @@ void LunarLander::restore (LPRECT lpr)
 // LanderTitle - Constructor
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 LanderTitle::LanderTitle ():
-    GameState (), evt (0), scene(0)
+    GameState (), 
+    evt (0),
+    scene(0),
+    vport (0)
 {
-    
+    assertMyth("LanderTitle needs valid Screen instance",
+               Screen != 0);
+
+    vp_rect.x = 0;
+    vp_rect.y = 0;
+    vp_rect.dx = Screen->width;
+    vp_rect.dy = Screen->height;
 }
 
 
@@ -989,7 +1054,7 @@ LanderTitle::~LanderTitle()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 // LanderTitle - init
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-int LanderTitle::init (const char *fname, const char *cname)
+int LanderTitle::init (const char *cname)
 {
     assertMyth ("LanderTitle can only be inited once", evt == 0);
 
@@ -997,7 +1062,7 @@ int LanderTitle::init (const char *fname, const char *cname)
     evt = new MaxEventUser (*Devs);
 
     if (evt == 0 ||
-        ((MaxEventUser *)evt)->load (fname, cname) != 0)
+        ((MaxEventUser *)evt)->load (szMasterIFF, cname) != 0)
     {
         return 1;
     }
@@ -1015,7 +1080,7 @@ int LanderTitle::init (const char *fname, const char *cname)
 
     assertMyth ("LanderTitle init needs valid Screen", Screen != 0);
 
-    if ((scene->load (fname, 0, Screen->pal)) != 0
+    if ((scene->load (szMasterIFF, 0, Screen->pal)) != 0
         || scene->cameras == 0
         || scene->meshes == 0
         || scene->lights == 0)
@@ -1023,9 +1088,39 @@ int LanderTitle::init (const char *fname, const char *cname)
         return 1;
     }
 
+    return 0;
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// LanderTitle - activate
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+void LanderTitle::activate ()
+{
+    assertMyth("LanderTitle::activate needs valid Screen instance",
+               Screen != 0 && Screen->gvport != 0 && Screen->pal != 0);
+
+//ÄÄ Remove cursor
+    Screen->cursor_off();
+
+//ÄÄ Create render vport
+    assert(vport == 0);
+    vport = new VngoVportDB8 (vp_rect.dx, vp_rect.dy,
+                              Screen->gvport->vbuff.scrn_ptr + vp_rect.x + (vp_rect.y * Screen->gvport->vbuff.pitch),
+                              NULL,
+                              Screen->pal, 
+                              VNGO_ZBUFFER_DEV,
+                              Screen->gvport->vbuff.pitch);
+    if (!vport || vport->get_init_state())
+    {
+        panic(IDS_ERR_CREATEVPORTFAILED,"Lander Title");
+        return;
+    }
+
+//ÄÄ Setup cameras
     for (EschCamera *cam = scene->cameras; cam != NULL; cam = cam->next ())
     {
-        cam->attach (Screen->gvport);
+        cam->attach (vport);
         cam->set_flags (cam->flags | ESCH_CAM_SHADE_SPECULAR
                                    | ESCH_CAM_SHADE_SMOOTH
                                    | ESCH_CAM_SHADE_FLAT
@@ -1033,33 +1128,23 @@ int LanderTitle::init (const char *fname, const char *cname)
                                    | ESCH_CAM_TEXTURED
                                    | ESCH_CAM_BACKCULL
                                    | ESCH_CAM_MODELSPACE);
-        //cam->set_yon (250);
     }
-
-    return 0;
 }
 
 
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-// LanderTitle - process_events
+// LanderTitle - deactivate
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-void LanderTitle::process_events()
+void LanderTitle::deactivate ()
 {
-    if (!evt)
+//ÄÄ Restore cursor
+    Screen->cursor_on();
+
+    if (vport)
     {
-        events = MaxEventList (0);
-        return;
+        delete vport;
+        vport=0;
     }
-
-    // Otherwise, strobe the devices and get our events (and oneshots)
-    events = evt->process ();
-    single_events = oneshot.process (events);
-
-    if (single_events.check (QUIT))
-        DestroyWindow (hWndClient);
-
-    if (single_events.check (FIRE))
-        switch_to (SimMode);
 }
 
 
@@ -1089,6 +1174,42 @@ void LanderTitle::render()
 
     gberg_select_font ("9x15");
     gt.out ("An example of using the GameFrame with MythOS");
+
+    VngoRect    rect;
+    rect.x = 0;
+    rect.y = 0;
+    rect.dx = Screen->width;
+    rect.dy = Screen->height;
+    Screen->invalidate(rect);
+}
+
+
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+// LanderTitle - process_events
+//ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
+void LanderTitle::process_events()
+{
+    if (!evt)
+    {
+        events = MaxEventList (0);
+        return;
+    }
+
+    // Otherwise, strobe the devices and get our events (and oneshots)
+    events = evt->process ();
+    single_events = oneshot.process (events);
+
+    if (single_events.check (QUIT))
+    {
+        if (MessageBox(hWndClient,
+                       "Are you sure you wish to exit?",
+                       szAppName,
+                       MB_YESNO | MB_ICONQUESTION) == IDYES)
+            DestroyWindow (hWndClient);
+    }
+
+    if (single_events.check (FIRE))
+        switch_to (SimMode);
 }
 
 
@@ -1124,14 +1245,14 @@ LanderLanded::~LanderLanded()
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 // LanderLanded - init
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-int LanderLanded::init (const char *fname, const char *cname)
+int LanderLanded::init (const char *cname)
 {
     assertMyth ("LanderLanded can only be inited once", evt == 0);
 
     // Create a new system
     evt = new MaxEventUser (*Devs);
 
-    if (evt == 0 || ((MaxEventUser *)evt)->load (fname, cname) != 0)
+    if (evt == 0 || ((MaxEventUser *)evt)->load (szMasterIFF, cname) != 0)
         return 1;
 
     // Now, let 'er rip!
@@ -1167,6 +1288,13 @@ void LanderLanded::activate ()
 
     gt.out (buf);
     gt.out ("Press <SPACE> to play again, or <ESC> to exit");
+
+    VngoRect    rect;
+    rect.x = 0;
+    rect.y = 0;
+    rect.dx = Screen->width;
+    rect.dy = Screen->height;
+    Screen->invalidate(rect);
 }
 
 
@@ -1195,6 +1323,5 @@ void LanderLanded::render()
 {
     // All drawing done in the activate() call.
 }
-
 
 //°±² eof - llander.cpp ²±°

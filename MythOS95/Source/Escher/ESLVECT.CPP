@@ -8,7 +8,7 @@
 //ùùùùù²±²ùùùùùùù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùù²±²ù²±²ùùùùùùùù²±²ùùùù²±²ùùùùùù
 //ùùùù²²²²²²²²²²ù²²²²²²²²ùùù²²²²²²²²ùù²²²ùùùù²²²ù²²²²²²²²²²ù²²²ùùùù²²²ùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
-//ùùùùùùùùùùCopyrightù(c)ù1994,ù1995ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
+//ùùùùùùùùùùùCopyrightù(c)ù1994-1996ùbyùCharybdisùEnterprises,ùInc.ùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùAllùRightsùReserved.ùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ùùùùùùùùùùùùùùùùùùùùù Microsoft Windows '95 Version ùùùùùùùùùùùùùùùùùùùùùùù
@@ -32,13 +32,13 @@
 //
 // esllvect.cpp
 //
-//      The EschLight and associated objects are used for implementing the
-//      lighting model.  EschLights affect objects by controlling the
-//      shade level and potentially color of a vertex.  EschLight objects
-//      are maintained in a linked list.
+// The EschLight and associated classes are used for implementing the
+// lighting model.  EschLights affect objects by controlling the
+// shade level and potentially color of a vertex.  EschLight objects
+// are maintained in a linked list.
 //
-//      An EschVectorLight shines in a specific direction, but has no
-//      definition location in 3space.
+// An EschVectorLight shines in a specific direction, but has no
+// definitive location in 3-space.
 //
 //ÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍÍ
 
@@ -65,7 +65,6 @@
 //
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 
-
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //°°°°°°°°°°°°°°°°°°°°°°±  Constructors/Destructors  ±°°°°°°°°°°°°°°°°°°°°°°°
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
@@ -75,15 +74,12 @@
 //                                                                          ³
 // Initializes the light object with full intesity and sets type.           ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-EschVectorLight::EschVectorLight(const char *fname, const char *lname) : EschLight(0,lname)
+EschVectorLight::EschVectorLight(const char *fname, const char *lname) :
+    EschLight(),
+    dir(0,0,1)
 {
     ltyp = ESCH_LGTT_VECTOR;
-
     intensity = 255;
-
-    dir.i = 0;
-    dir.j = 0;
-    dir.k = 1;
 
     if (fname)
     {
@@ -91,27 +87,26 @@ EschVectorLight::EschVectorLight(const char *fname, const char *lname) : EschLig
     }
 };
 
-EschVectorLight::EschVectorLight(EschVector *vec) : EschLight()
+EschVectorLight::EschVectorLight(const EschVector *vec) :
+    EschLight(),
+    dir(*vec)
 {
+    ltyp = ESCH_LGTT_VECTOR;
     intensity = 255;
 
-    ltyp = ESCH_LGTT_VECTOR;
-
-    dir = *vec;
     dir.normalize();
 };
 
-EschVectorLight::EschVectorLight(Flx16 ii, Flx16 ij, Flx16 ik) : EschLight()
+EschVectorLight::EschVectorLight(Flx16 ii, Flx16 ij, Flx16 ik) :
+    EschLight(),
+    dir(ii,ij,ik)
 {
+    ltyp = ESCH_LGTT_VECTOR;
     intensity = 255;
 
-    ltyp = ESCH_LGTT_VECTOR;
-
-    dir.i = ii;
-    dir.j = ij;
-    dir.k = ik;
     dir.normalize();
 };
+
 
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
@@ -131,7 +126,6 @@ void EschVectorLight::setup(const EschFrameRef *fr)
         && EschCurrent->camera->flags & ESCH_CAM_MODELSPACE)
     {
         dir.transform(&fr->iorient,&tdir);
-        tdir.normalize();
         tdir = -tdir;
     }
     else
@@ -139,23 +133,7 @@ void EschVectorLight::setup(const EschFrameRef *fr)
         tdir = -dir;
     }
 
-//ÄÄÄ Compute internal intensity scales from intensity and 
-//ÄÄÄ current palette's midpoint value.
-
-    assertMyth("EschLight::setup needs camera in current context",
-               EschCurrent != NULL && EschCurrent->camera != NULL && EschCurrent->camera->vport != NULL);
-
-    assertMyth("EschLight::setup needs current context's camera to have a palette",
-               EschCurrent->camera->vport->vbuff.pal);
-
-    int mp = EschCurrent->camera->vport->vbuff.pal->shd_pal->mid_point;
-
-    _hintensity = (Flx16)((intensity * VNGO_SHADE_FULL) / 255);
-    _intensity = (Flx16)((intensity * mp) / 255);
-
-//ÄÄÄ Chain for true multiple lights
-    if (inext)
-        inext->setup(fr);
+    EschLight::setup(fr);
 }
 
 
@@ -167,29 +145,30 @@ void EschVectorLight::setup(const EschFrameRef *fr)
 //                                                                          ³
 // The vector light source computes a dot product.                          ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void EschVectorLight::shine(const EschVertex *v, VngoPoint *vpt) const 
+void EschVectorLight::shine(const EschVertex *v, VngoPoint *vpt, int revnrml) const 
 {                                                          
     if (!(flags & ESCH_LGT_OFF))
     {
-
+        // Compute dot product
         Flx16 dot = v->normal DOT tdir;
 
-        if (dot.flx >= 0)
+        if (dot.flx < 0)
         {
-
-            // Hack:  Two normalized vectors are resulting in dots greater than one!?
-            if (dot.flx > (1<<16))
-                dot.flx = (1<<16);
-            
-            long i = (dot.flx * (_intensity.flx>>16)) >> 16;
-            if (vpt->shade < i)
-                vpt->shade = i;
+            dot.flx = (revnrml) ? -dot.flx : 0;
         }
+
+        if (dot.flx > (1<<16))
+            dot.flx = (1<<16);
+        
+        // Compute shade level
+        long i = (dot.flx * (_intensity.flx >> 16)) >> 16;
+        if (vpt->shade < i)
+            vpt->shade = i;
     }
 
 //ÄÄÄ Chain for true multiple lights
     if (inext)
-        inext->shine(v,vpt);
+        inext->shine(v,vpt,revnrml);
 }
 
 
@@ -201,30 +180,33 @@ void EschVectorLight::shine(const EschVertex *v, VngoPoint *vpt) const
 //                                                                          ³
 // The vector light source computes a dot product.                          ³
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÙ
-void EschVectorLight::hishine(const EschVertex *v, VngoPoint *vpt) const 
+void EschVectorLight::hishine(const EschVertex *v, VngoPoint *vpt, int revnrml) const 
 {
     if (!(flags & ESCH_LGT_OFF))
     {
-
+        // Compute shade value
         Flx16 dot = v->normal DOT tdir;
 
-        if (dot.flx >= 0)
+        if (dot.flx < 0)
         {
-
-            // Hack:  Two normalized vectors are resulting in dots greater than one!?
-            if (dot.flx > (1<<16))
-                dot.flx = (1<<16);
-            
-            long i = (dot.flx * (_hintensity.flx>>16)) >> 16;
-            if (vpt->shade < i)
-                vpt->shade = i;
+            dot.flx = (revnrml) ? -dot.flx : 0;
         }
+
+        if (dot.flx > (1<<16))
+            dot.flx = (1<<16);
+        
+        // Compute shade level
+        long i = (dot.flx * (_hintensity.flx >> 16)) >> 16;
+        if (vpt->shade < i)
+            vpt->shade = i;
     }
 
 //ÄÄÄ Chain for true multiple lights
     if (inext)
-        inext->hishine(v,vpt);
+        inext->hishine(v,vpt,revnrml);
 }
+
+
 
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
 //°°°°°°°°°°°°°°°°°°°°°°°°°°°°±  I/O Routines  ±°°°°°°°°°°°°°°°°°°°°°°°°°°°°°
@@ -233,7 +215,7 @@ void EschVectorLight::hishine(const EschVertex *v, VngoPoint *vpt) const
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ¿
 // EschVectorLight - load                                                   ³
 //                                                                          ³
-// Loads the position and other data of the ambient light from an IFF file. ³
+// Loads the position and other data of the vector light from an IFF file.  ³
 //                                                                          ³
 // The IFF version assumes that the IFF is open and Vectoring at the proper ³
 // chunk.  If a 'lname' is given and the name doesn't match that in the     ³

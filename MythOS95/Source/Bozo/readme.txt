@@ -33,25 +33,16 @@
                             _Library Status_
 
   Notes by: Dan Higdon
-  Updated: November 6, 1995
+  Updated: June 20, 1996
 
   Changes for this release --------------------------------------------------
 
-    o Release Version 1.0
+	o The BozoTask::init member now returns an error code in the form
+	  of a bozo_task pointer.  A null result means that the task
+	  failed to initialize.
 
-    o Bozo may now be initialized with an IvorySubAlloc object, from
-      which bozo tasks and their stacks will be allocated.  In the case
-      of Win32, it is necessary to allocate all Bozo stacks from the
-      "main" stack, because of some over-zealous stack checking in
-      the Win32 kernel.  The proper way to initialize Bozo for Win32
-      is:
-      WinMain (...)
-      {
-        char stack[STACK_SIZE];
-        ivory_sub_initialize ((IvorySubAlloc *)stack, STACK_SIZE);
-        BozoSystem bozo ((IvorySubAlloc *)stack);
-        ...
-      }
+    o Added bz_term and bz_return to the BozoTask to correct a rather
+	  subtle bug.
 
   Pending changes ------------------------------------------------------------
 
