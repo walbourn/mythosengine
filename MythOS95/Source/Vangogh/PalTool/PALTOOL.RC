@@ -316,7 +316,7 @@ BEGIN
         BLOCK "040904b0"
         BEGIN
             VALUE "Authors", "Dan Higdon, Tim Little, and Chuck Walbourn\0"
-            VALUE "Comments", "This file is subject to the GNU LGPL\0"
+            VALUE "Comments", "This file is subject to the MIT license\0"
             VALUE "FileDescription", "Van Gogh Palette Tool MFC Application\0"
             VALUE "FileVersion", "1.1\0"
             VALUE "InternalName", "VanGogh\0"

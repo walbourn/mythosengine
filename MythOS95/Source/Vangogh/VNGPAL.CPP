@@ -14,12 +14,6 @@
 //
 //컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
 //
-// This file and all associated files are subject to the terms of the
-// GNU Lesser General Public License version 2 as published by the
-// Free Software Foundation (http://www.gnu.org).   They remain the
-// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
-// See LICENSE.TXT in the distribution for a copy of this license.
-//
 // THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
 // OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
 // PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
@@ -776,7 +770,7 @@ STATIC void calc_linear_colors15 (word *colors, int steps,
     gstep = (255.f - tg) / float(steps - break_point);
     bstep = (255.f - tb) / float(steps - break_point);
 
-    for (i = break_point+1; i < steps; i++)
+    for (int i = break_point+1; i < steps; i++)
     {
         tr += rstep;
         tg += gstep;
@@ -802,11 +796,11 @@ void MakePal15fromPal8(VngoPal15 *p15, VngoPal8 *p8)
         calc_linear_colors15(&data15[i <<5],32,p8->get_RGB(i),
                              p8->shd_pal->mid_point >> (8 - p8->shd_pal->num_shd_lvl_bits));
     }
-    for (i=0;i < 256;i++)
+    for (int i=0;i < 256;i++)
     {
         p15->hw_pal.p[i] = p8->hw_pal.p[i];
     }
-    for (i=0;i < 32768; i++)
+    for (int i=0;i < 32768; i++)
     {
         p15->convert.cvt2_8.colorconvert[i] = p8->convert.cvt2_8.colorconvert[i];
     }
@@ -1287,7 +1281,7 @@ STATIC void calc_linear_colors16 (word *colors, int steps,
     gstep = (255.f - tg) / float(steps - break_point);
     bstep = (255.f - tb) / float(steps - break_point);
 
-    for (i = break_point+1; i < steps; i++)
+    for (int i = break_point+1; i < steps; i++)
     {
         tr += rstep;
         tg += gstep;
@@ -1356,11 +1350,11 @@ void MakePal16fromPal8(VngoPal16 *p16, VngoPal8 *p8)
         calc_linear_colors16(&data16[i <<5],32,p8->get_RGB(i),
                              p8->shd_pal->mid_point >> (8 - p8->shd_pal->num_shd_lvl_bits));
     }
-    for (i=0;i < 256;i++)
+    for (int i=0;i < 256;i++)
     {
         p16->hw_pal.p[i] = p8->hw_pal.p[i];
     }
-    for (i=0;i < 32768; i++)
+    for (int i=0;i < 32768; i++)
     {
         p16->convert.cvt2_8.colorconvert[i] = p8->convert.cvt2_8.colorconvert[i];
     }

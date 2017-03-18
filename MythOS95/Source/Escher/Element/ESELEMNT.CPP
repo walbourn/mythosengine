@@ -14,12 +14,6 @@
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
 //
-// This file and all associated files are subject to the terms of the
-// GNU Lesser General Public License version 2 as published by the
-// Free Software Foundation (http://www.gnu.org).   They remain the
-// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
-// See LICENSE.TXT in the distribution for a copy of this license.
-//
 // THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
 // OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
 // PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
@@ -87,7 +81,8 @@ void EschElement::insert()
     }
 
 //ִִִ Walk down until we can insert as left or right leaf
-    for(ulong depth=1;; depth++)
+    ulong depth=1;
+    for(depth=1;; depth++)
     {
         //ִִִ Insert by maximum z
         if (maxz <= elm->maxz)
@@ -181,7 +176,8 @@ EschElement *EschElement::link_tree(EschElement *elm)
 
     if (right)
     {
-        for(EschElement *e = right; e->right != 0; e = e->right);
+        EschElement *e=NULL;
+        for(e = right; e->right != 0; e = e->right);
 
         e->right = elm;
         elm->left = e;
@@ -229,7 +225,8 @@ void EschElement::flush_truesort()
         assert(head != 0);
 
         //ִִִ Start from end of list
-        for(EschElement *elm=head; elm->right != 0; elm = elm->right);
+        EschElement *elm=NULL;
+        for(elm=head; elm->right != 0; elm = elm->right);
 
         //ִִִ Process each polygon from back to front
         while(elm != 0)

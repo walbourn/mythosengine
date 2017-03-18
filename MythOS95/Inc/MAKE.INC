@@ -8,12 +8,6 @@
 #
 #컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
 #
-# This file and all associated files are subject to the terms of the
-# GNU Lesser General Public License version 2 as published by the
-# Free Software Foundation (http://www.gnu.org).   They remain the
-# property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
-# See LICENSE.TXT in the distribution for a copy of this license.
-#
 # THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
 # OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
 # PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
@@ -109,11 +103,11 @@ CCRTOPT = /MT
 !endif
 
 !if "$(DEBUG)" == "NO"
-CCOPTIONS = /c /G5 -Ze -Zp1 $(CCRTOPT) /nologo -W3 /Ox -DNDEBUG /DWIN32 /D_WINDOWS
+CCOPTIONS = /c -Zp1 $(CCRTOPT) /nologo -W3 /wd4530 /Ox -DNDEBUG /DWIN32 /D_WINDOWS /D_CRT_SECURE_NO_WARNINGS
 !else if "$(DEBUG)" == "ASSERT"
-CCOPTIONS = /c /G5 -Ze -Zp1 $(CCRTOPT) /nologo -W3 /Ox /DWIN32 /D_WINDOWS
+CCOPTIONS = /c -Zp1 $(CCRTOPT) /nologo -W3 /wd4530 /Ox /DWIN32 /D_WINDOWS /D_CRT_SECURE_NO_WARNINGS
 !else
-CCOPTIONS = /c /G5 -Ze -Zp1 $(CCRTOPT)d /nologo -W3 /Zi /Od -DDEBUG /DWIN32 /D_WINDOWS
+CCOPTIONS = /c -Zp1 $(CCRTOPT)d /nologo -W3 /wd4530 /Zi /Od -DDEBUG /DWIN32 /D_WINDOWS /D_CRT_SECURE_NO_WARNINGS
 !endif
 
 #컴� Librarian

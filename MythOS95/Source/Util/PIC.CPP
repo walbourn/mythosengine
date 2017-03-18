@@ -15,12 +15,6 @@
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
-// This file and all associated files are subject to the terms of the
-// GNU Lesser General Public License version 2 as published by the
-// Free Software Foundation (http://www.gnu.org).   They remain the
-// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
-// See LICENSE.TXT in the distribution for a copy of this license.
-//
 // THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
 // OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
 // PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
@@ -50,7 +44,7 @@
 #include <conio.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include <iostream.h>
+#include <iostream>
 #include <string.h>
 
 #include <ivory.hpp>
@@ -72,6 +66,8 @@
 #define FLAGS_COMPRESS  0x80    // Compress transparent images to monochrome.
 #define FLAGS_2BPP      0x100   // Convert to 2 bytes/pixel
 #define FLAGS_3BPP      0x200   // Convert to 3 bytes/pixel
+
+using namespace std;
 
 //--- Error values ---
 typedef enum _pic_err_codes {
@@ -123,7 +119,7 @@ STATIC int load_pal(VngoPal *pal,char *infile);
 //±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±±
 
 char Util_name[] = "°± MythOS Pic Image Utility - (C) 1994-1999 by D. Higdon, T. Little, and C. Walbourn ±°\n"
-                   "                              Subject to terms of GNU LGPL " __DATE__ "\n";
+                   "                              Subject to terms of MIT License " __DATE__ "\n";
 
 
 

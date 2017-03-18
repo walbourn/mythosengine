@@ -14,12 +14,6 @@
 //ùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùùù
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
-// This file and all associated files are subject to the terms of the
-// GNU Lesser General Public License version 2 as published by the
-// Free Software Foundation (http://www.gnu.org).   They remain the
-// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
-// See LICENSE.TXT in the distribution for a copy of this license.
-//
 // THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
 // OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
 // PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
@@ -211,7 +205,7 @@ int ToolApp::Run()
     for (;;)
     {
         // phase1: check to see if we can do idle work
-        while (!::PeekMessage(&m_msgCur, NULL, NULL, NULL, PM_NOREMOVE))
+        while (!::PeekMessage(&(AfxGetThreadState()->m_msgCur), NULL, NULL, NULL, PM_NOREMOVE))
         {
             ((ToolFrame*)AfxGetMainWnd())->OnIdle();
 
@@ -226,12 +220,12 @@ int ToolApp::Run()
                 return ExitInstance();
 
             // reset "no idle" state after pumping "normal" message
-            if (IsIdleMessage(&m_msgCur))
+            if (IsIdleMessage(&(AfxGetThreadState()->m_msgCur)))
             {
                 lIdleCount = 0;
             }
 
-        } while (::PeekMessage(&m_msgCur, NULL, NULL, NULL, PM_NOREMOVE));
+        } while (::PeekMessage(&(AfxGetThreadState()->m_msgCur), NULL, NULL, NULL, PM_NOREMOVE));
     }
 
     ASSERT(FALSE);  // not reachable

@@ -12,12 +12,6 @@
 //
 //ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 //
-// This file and all associated files are subject to the terms of the
-// GNU Lesser General Public License version 2 as published by the
-// Free Software Foundation (http://www.gnu.org).   They remain the
-// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
-// See LICENSE.TXT in the distribution for a copy of this license.
-//
 // THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
 // OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
 // PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
@@ -566,7 +560,8 @@ ulong XFParseXEB::compress_rle_mono(ushort w, ushort h,
         {
             //ÄÄÄ Scan for run
             byte *s=ptr;
-            for(int j=0;
+            int j=0;
+            for(j=0;
                 (j < 127) && ((j+i+1) < rsize) && (*s == *(ptr+1));
                 j++)
             {
@@ -699,7 +694,8 @@ ulong XFParseXEB::compress_rle_8bpp(ushort w, ushort h,
         {
             //ÄÄÄ Scan for run
             byte *s=ptr;
-            for(int j=0;
+            int j=0;
+            for(j=0;
                 (j < 127) && ((j+i+1) < w) && (*s == *(ptr+1));
                 j++)
             {
@@ -832,7 +828,8 @@ ulong XFParseXEB::compress_rle_16bpp(ushort w, ushort h,
         {
             //ÄÄÄ Scan for run
             byte *s=ptr;
-            for(int j=0;
+            int j=0;
+            for(j=0;
                 (j < 127) && ((j+i+1) < w)
                 && (*s == *(ptr+2))
                 && (*(s+1) == *(ptr+3));
@@ -972,7 +969,8 @@ ulong XFParseXEB::compress_rle_24bpp(ushort w, ushort h,
         {
             //ÄÄÄ Scan for run
             byte *s=ptr;
-            for(int j=0;
+            int j=0;
+            for(j=0;
                 (j < 127) && ((j+i+1) < w)
                 && (*s == *(ptr+3))
                 && (*(s+1) == *(ptr+4))
@@ -1117,7 +1115,8 @@ ulong XFParseXEB::compress_rle_32bpp(ushort w, ushort h,
         {
             //ÄÄÄ Scan for run
             dword *s=ptr;
-            for(int j=0;
+            int j=0;
+            for(j=0;
                 (j < 127) && ((j+i+1) < w)
                 && (*s == *(ptr+1));
                 j++)

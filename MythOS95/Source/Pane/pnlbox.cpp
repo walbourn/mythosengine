@@ -15,12 +15,6 @@
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
 //
-// This file and all associated files are subject to the terms of the
-// GNU Lesser General Public License version 2 as published by the
-// Free Software Foundation (http://www.gnu.org).   They remain the
-// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
-// See LICENSE.TXT in the distribution for a copy of this license.
-//
 // THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
 // OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
 // PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
@@ -135,7 +129,7 @@ BOOL PaneListBox::init(short sx, short sy, ushort maxlen, ushort maxentries,
     memset(strings, 0, sizeof(BYTE)* max_string_len * max_string_entries);
 
 //ִִִ get the number of rows visible based on the font size
-    num_visible = vrc.dy / row_height;
+    num_visible = ushort(vrc.dy / row_height);
 
 //ִִִ Handle external data
     if (sizeof_edata)
@@ -352,7 +346,7 @@ ushort PaneListBox::set_font(const char *font)
     row_height = fi.height + (spacing*2);
     font_width = fi.width;
 
-    num_visible = vrc.dy / row_height;
+    num_visible = ushort(vrc.dy / row_height);
 
     strcpy(font_type, font);
 

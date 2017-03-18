@@ -841,7 +841,7 @@ BEGIN
         BLOCK "040904b0"
         BEGIN
             VALUE "Authors", "Dan Higdon, Tim Little, and Chuck Walbourn\0"
-            VALUE "Comments", "This file is subject to the GNU LGPL\0"
+            VALUE "Comments", "This file is subject to the MIT License\0"
             VALUE "FileDescription", "Escher Tool MFC Application\0"
             VALUE "FileVersion", "2.06\0"
             VALUE "InternalName", "Escher\0"

@@ -15,3 +15,11 @@
 *.lastbuildstate
 *.ilk
 /wiki
+*.pch
+*.obj
+*.res
+*.lib
++lib/*.lib
+*.exe
++bin\*.exe
+WinRel/

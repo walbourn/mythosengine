@@ -14,12 +14,6 @@
 //
 //컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
 //
-// This file and all associated files are subject to the terms of the
-// GNU Lesser General Public License version 2 as published by the
-// Free Software Foundation (http://www.gnu.org).   They remain the
-// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
-// See LICENSE.TXT in the distribution for a copy of this license.
-//
 // THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
 // OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
 // PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
@@ -217,7 +211,7 @@ VNGError VngoTexture::convert(XFBitmap *bm, VngoPal *pal)
                     }
 
                     byte *sptr = bm->data, *dptr = (byte*)tex;
-                    for(i=0; i < width*height; i++)
+                    for(int i=0; i < width*height; i++)
                     {
                         *(dptr++) = mypal[*(sptr++)];
                     }
@@ -539,7 +533,8 @@ VNGError VngoCTexture::init(VngoTexture *_tex)
         {
             return VNGO_MEMORY_ERROR;
         }
-        for (int j=0;j < height;j++)
+        int j=0;
+        for (j=0;j < height;j++)
         {
             if (j==0)
                 ytable[j] = 0;
@@ -615,7 +610,8 @@ VNGError VngoCTexture::init(VngoTexture *_tex)
         {
             return VNGO_MEMORY_ERROR;
         }
-        for (int j=0;j < height;j++)
+        int j=0;
+        for (j=0;j < height;j++)
         {
             if (j==0)
                 ytable[j] = 0;

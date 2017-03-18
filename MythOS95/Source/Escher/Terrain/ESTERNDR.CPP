@@ -14,12 +14,6 @@
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
 //
-// This file and all associated files are subject to the terms of the
-// GNU Lesser General Public License version 2 as published by the
-// Free Software Foundation (http://www.gnu.org).   They remain the
-// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
-// See LICENSE.TXT in the distribution for a copy of this license.
-//
 // THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
 // OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
 // PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
@@ -919,7 +913,7 @@ void EschTerrainEx::draw_terrain_trans_rect (VngoRect *rect, int dlevel,dword lf
 void EschTerrainEx::draw_terrain_trans_top (VngoRect *rect,
                                             EschPoint *orig,
                                             byte *dptr,
-                                            esch_surf_type *_sptr,
+                                            esch_surf_type *p_sptr,
                                             int dlevel,
                                             ulong _count,
                                             dword lflags)
@@ -965,7 +959,7 @@ void EschTerrainEx::draw_terrain_trans_top (VngoRect *rect,
     EschPoint       *cpt=&work_point;
     dword           *vflags;
     VngoPoint       *vA,*vB,*vC;
-    esch_surf_type  *sptr = _sptr;
+    esch_surf_type  *sptr = p_sptr;
     esch_surf_type  *rsptr = sptr;
     byte            *rptr = dptr;
     long            pstep = 1 << dlevel;
@@ -1090,7 +1084,7 @@ void EschTerrainEx::draw_terrain_trans_top (VngoRect *rect,
     cpt->y = orig->y + _dvec.j;
     cpt->z = orig->z + _dvec.k;
 
-    for (i=0; i< vert_count; i++)
+    for (ulong i=0; i< vert_count; i++)
     {
         float h = htable[*ptr];
         ((EschPoint *)vB)->x = cpt->x + (h * hvec.i);
@@ -1129,7 +1123,7 @@ void EschTerrainEx::draw_terrain_trans_top (VngoRect *rect,
     ptr = rptr + (width << dlevel);
     sptr = rsptr + ((width << dlevel) >> surfshift);
 
-    for (i = 0; i<vert_count; i++)
+    for (ulong i = 0; i<vert_count; i++)
     {
         float h = htable[*ptr];
         // build C
@@ -1159,7 +1153,7 @@ void EschTerrainEx::draw_terrain_trans_top (VngoRect *rect,
     vB = &vpt[rowb];
     vC = &vpt[rowc];
 
-    for (i=0; i<vert_count; i++)
+    for (ulong i=0; i<vert_count; i++)
     {
         point_average ((EschPoint *)vB, ((EschPoint *)vA), ((EschPoint *)vC));
         vA++;
@@ -1167,7 +1161,7 @@ void EschTerrainEx::draw_terrain_trans_top (VngoRect *rect,
         vC++;
     }
 
-    rsptr = _sptr;
+    rsptr = p_sptr;
     esch_surf_type  *lsptr;
     lsptr = rsptr;
 //    lsptr = &rsptr[-((width >> surfshift) << dlevel)];
@@ -1328,7 +1322,7 @@ void EschTerrainEx::draw_terrain_trans_top (VngoRect *rect,
 void EschTerrainEx::draw_terrain_trans_bottom (VngoRect *rect,
                                                EschPoint *orig,
                                                byte *dptr,
-                                               esch_surf_type *_sptr,
+                                               esch_surf_type *p_sptr,
                                                int dlevel,
                                                ulong _count,
                                                dword lflags)
@@ -1374,7 +1368,7 @@ void EschTerrainEx::draw_terrain_trans_bottom (VngoRect *rect,
     EschPoint       *cpt=&work_point;
     dword           *vflags;
     VngoPoint       *vA,*vB,*vC;
-    esch_surf_type  *sptr = _sptr;
+    esch_surf_type  *sptr = p_sptr;
     esch_surf_type  *rsptr = sptr;
     byte            *rptr = dptr;
     long            pstep = 1 << dlevel;
@@ -1498,7 +1492,7 @@ void EschTerrainEx::draw_terrain_trans_bottom (VngoRect *rect,
     cpt->y = orig->y + _dvec.j;
     cpt->z = orig->z + _dvec.k;
 
-    for (i=0; i< vert_count; i++)
+    for (ulong i=0; i< vert_count; i++)
     {
         float h = htable[*ptr];
         ((EschPoint *)vB)->x = cpt->x + (h * hvec.i);
@@ -1537,7 +1531,7 @@ void EschTerrainEx::draw_terrain_trans_bottom (VngoRect *rect,
     ptr = rptr + (width << dlevel);
     sptr = rsptr + ((width << dlevel) >> surfshift);
 
-    for (i = 0; i<vert_count; i++)
+    for (ulong i = 0; i<vert_count; i++)
     {
         float h = htable[*ptr];
         // build C
@@ -1567,6 +1561,7 @@ void EschTerrainEx::draw_terrain_trans_bottom (VngoRect *rect,
     vB = &vpt[rowb];
     vC = &vpt[rowc];
 
+    ulong i=0;
     for (i=0; i<vert_count; i++)
     {
         point_average ((EschPoint *)vB, ((EschPoint *)vA), ((EschPoint *)vC));
@@ -1575,7 +1570,7 @@ void EschTerrainEx::draw_terrain_trans_bottom (VngoRect *rect,
         vC++;
     }
 
-    rsptr = _sptr;
+    rsptr = p_sptr;
     esch_surf_type  *lsptr;
     lsptr = rsptr;
 //    lsptr = &rsptr[-((width >> surfshift) << dlevel)];
@@ -1648,7 +1643,8 @@ void EschTerrainEx::draw_terrain_trans_bottom (VngoRect *rect,
                     face[0].txt=lsptr->cind;
 
                     if (face[0].flags & ESCH_FACE_TEXTURED)
-                    {
+                    {   // Is this a bug?  I was completely out of scope and 
+                        // may be a bad value for this expression.
                         compute_texture_uv(u_left, u_right, v_top, v_bottom,
                                            tlflags, rect->x + (i << dlevel),
                                            rect->y + (i << dlevel),
@@ -1737,7 +1733,7 @@ void EschTerrainEx::draw_terrain_trans_bottom (VngoRect *rect,
 void EschTerrainEx::draw_terrain_trans_left (VngoRect *rect,
                                              EschPoint *orig,
                                              byte *dptr,
-                                             esch_surf_type *_sptr,
+                                             esch_surf_type *p_sptr,
                                              int dlevel,
                                              ulong _count,
                                              dword lflags)
@@ -1783,7 +1779,7 @@ void EschTerrainEx::draw_terrain_trans_left (VngoRect *rect,
     EschPoint       *cpt=&work_point;
     dword           *vflags;
     VngoPoint       *vA,*vB,*vC;
-    esch_surf_type  *sptr = _sptr;
+    esch_surf_type  *sptr = p_sptr;
     esch_surf_type  *rsptr = sptr;
     byte            *rptr = dptr;
     long            pstep = width << dlevel;
@@ -1911,7 +1907,7 @@ void EschTerrainEx::draw_terrain_trans_left (VngoRect *rect,
     cpt->y = orig->y + _wvec.j;
     cpt->z = orig->z + _wvec.k;
 
-    for (i=0; i< vert_count; i++)
+    for (ulong i=0; i< vert_count; i++)
     {
         // build B
         float h = htable[*ptr];
@@ -1951,7 +1947,7 @@ void EschTerrainEx::draw_terrain_trans_left (VngoRect *rect,
     ptr = rptr + (1 << dlevel);
     sptr = rsptr + ((1 << dlevel) >> surfshift);
 
-    for (i = 0; i<vert_count; i++)
+    for (ulong i = 0; i<vert_count; i++)
     {
         float h = htable[*ptr];
         // build C
@@ -1981,6 +1977,7 @@ void EschTerrainEx::draw_terrain_trans_left (VngoRect *rect,
     vB = &vpt[rowb];
     vC = &vpt[rowc];
 
+    ulong i=0;
     for (i=0; i<vert_count; i++)
     {
         // average B based on A-1,C+1 points
@@ -1990,7 +1987,7 @@ void EschTerrainEx::draw_terrain_trans_left (VngoRect *rect,
         vC++;
     }
 
-    rsptr = _sptr;
+    rsptr = p_sptr;
     esch_surf_type  *lsptr;
     lsptr = rsptr;
 //    lsptr = &rsptr[-((width >> surfshift) << dlevel)];
@@ -2062,7 +2059,8 @@ void EschTerrainEx::draw_terrain_trans_left (VngoRect *rect,
                     face[0].txt=lsptr->cind;
 
                     if (face[0].flags & ESCH_FACE_TEXTURED)
-                    {
+                    {   // This may be a bug.  I is out of scope here
+                        // and is really just vert_count-1;
                         compute_texture_uv(u_left, u_right, v_top, v_bottom,
                                            tlflags, rect->x + (i << dlevel),
                                            rect->y + (i << dlevel),
@@ -2151,7 +2149,7 @@ void EschTerrainEx::draw_terrain_trans_left (VngoRect *rect,
 void EschTerrainEx::draw_terrain_trans_right (VngoRect *rect,
                                               EschPoint *orig,
                                               byte *dptr,
-                                              esch_surf_type *_sptr,
+                                              esch_surf_type *p_sptr,
                                               int dlevel,
                                               ulong _count,
                                               dword lflags)
@@ -2197,7 +2195,7 @@ void EschTerrainEx::draw_terrain_trans_right (VngoRect *rect,
     EschPoint       *cpt=&work_point;
     dword           *vflags;
     VngoPoint       *vA,*vB,*vC;
-    esch_surf_type  *sptr = _sptr;
+    esch_surf_type  *sptr = p_sptr;
     esch_surf_type  *rsptr = sptr;
     byte            *rptr = dptr;
     long            pstep = width << dlevel;
@@ -2325,7 +2323,7 @@ void EschTerrainEx::draw_terrain_trans_right (VngoRect *rect,
     cpt->y = orig->y + _wvec.j;
     cpt->z = orig->z + _wvec.k;
 
-    for (i=0; i< vert_count; i++)
+    for (ulong i=0; i< vert_count; i++)
     {
         // build B
         float h = htable[*ptr];
@@ -2365,7 +2363,7 @@ void EschTerrainEx::draw_terrain_trans_right (VngoRect *rect,
     ptr = rptr + (1 << dlevel);
     sptr = rsptr + ((1 << dlevel) >> surfshift);
 
-    for (i = 0; i<vert_count; i++)
+    for (ulong i = 0; i<vert_count; i++)
     {
         float h = htable[*ptr];
         // build C
@@ -2395,6 +2393,7 @@ void EschTerrainEx::draw_terrain_trans_right (VngoRect *rect,
     vB = &vpt[rowb];
     vC = &vpt[rowc];
 
+    ulong i=0;
     for (i=0; i<vert_count; i++)
     {
         // average B based on A-1,C+1 points
@@ -2404,7 +2403,7 @@ void EschTerrainEx::draw_terrain_trans_right (VngoRect *rect,
         vC++;
     }
 
-    rsptr = _sptr;
+    rsptr = p_sptr;
     esch_surf_type  *lsptr;
     lsptr = &rsptr[-((width >> surfshift) << dlevel)];
     dword tlflags;
@@ -2475,7 +2474,8 @@ void EschTerrainEx::draw_terrain_trans_right (VngoRect *rect,
                     face[0].txt=lsptr->cind;
 
                     if (face[0].flags & ESCH_FACE_TEXTURED)
-                    {
+                    {   // This may be a bug.  I is out of scope and 
+                        // is currently vert_count-1.
                         compute_texture_uv(u_left, u_right, v_top, v_bottom,
                                            tlflags, rect->x + (i << dlevel),
                                            rect->y + (i << dlevel),

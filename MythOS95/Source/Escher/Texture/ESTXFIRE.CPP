@@ -14,12 +14,6 @@
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
 //
-// This file and all associated files are subject to the terms of the
-// GNU Lesser General Public License version 2 as published by the
-// Free Software Foundation (http://www.gnu.org).   They remain the
-// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
-// See LICENSE.TXT in the distribution for a copy of this license.
-//
 // THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
 // OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
 // PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
@@ -249,7 +243,7 @@ esch_error_codes EschFireTexture::init(ushort w, ushort h,
 //ִִִ  Finish init
     fb_control=0;
 
-    for (i=0; i < (txt.height << u_shift); i++)
+    for (int i=0; i < (txt.height << u_shift); i++)
     {
         ((byte*)txt.tex)[i] = 255;
     }
@@ -315,9 +309,9 @@ void EschFireTexture::generate()
         flame_bytes[t+2] = 255;
     }
 
-    for (i = 0; i < txt.width; i++)
+    for (int i = 0; i < txt.width; i++)
     {
-        x = flame_bytes[i];
+        int x = flame_bytes[i];
         if (x < MIN_FIRE)
         {
             if ( x > 10 )
@@ -337,7 +331,7 @@ void EschFireTexture::generate()
     }
 
     // Pour a little water on the edges to make it look good.
-    for (i = 0;i < (txt.width >> 3);i++)
+    for (int i = 0;i < (txt.width >> 3);i++)
     {
         flame_bytes[0] = 0;
         flame_bytes[txt.width - 1] = 0;
@@ -477,13 +471,13 @@ esch_error_codes EschFireTexture::setup_local_tables()
     // Spark the initial flame!   Always put it in the middle.
     {
         int t = txt.width >> 3;
-        i = (txt.width >> 1) - (t >> 1);
+        int i = (txt.width >> 1) - (t >> 1);
         for (int j = 0; j < t; j++)
         {
             flame_bytes[i+j] = 255;
         }
 
-        for (i = 0; i < txt.width; i++)
+        for (int i = 0; i < txt.width; i++)
         {
             int x = flame_bytes[i];
             if (x < MIN_FIRE)
@@ -504,10 +498,10 @@ esch_error_codes EschFireTexture::setup_local_tables()
             flame_bytes[i] = x;
         }
 
-        for (i = SMOOTH;i < txt.width-SMOOTH;i++)
+        for (int i = SMOOTH;i < txt.width-SMOOTH;i++)
         {
             int x = 0;
-            for (j=-SMOOTH; j <= SMOOTH; j++)
+            for (int j=-SMOOTH; j <= SMOOTH; j++)
             {
                 x += flame_bytes[i+j];
             }
@@ -533,6 +527,7 @@ void EschFireTexture::make_lut(VngoPal *vpal)
         pal[i].g = 0;
         pal[i].b = 0;
     }
+    int i=0;
     for (i = 0; i < MAX_COLOR; i++)
     {
         pal[i] = to_RGB( 4.6f - 1.5f*float(i) / float(MAX_COLOR),

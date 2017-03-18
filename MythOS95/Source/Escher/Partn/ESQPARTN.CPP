@@ -14,12 +14,6 @@
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
 //
-// This file and all associated files are subject to the terms of the
-// GNU Lesser General Public License version 2 as published by the
-// Free Software Foundation (http://www.gnu.org).   They remain the
-// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
-// See LICENSE.TXT in the distribution for a copy of this license.
-//
 // THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
 // OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
 // PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
@@ -522,7 +516,7 @@ esch_error_codes EschQuadTreePartition::walk_pick(EschQuadTreeNode *node,
         float dist = -1;
 
         int whichplane = 0;
-        for(i=0; i < 2; i++)
+        for(int i=0; i < 2; i++)
         {
             if (quad[i] != MIDDLE && dir[i] != 0)
             {
@@ -540,7 +534,7 @@ esch_error_codes EschQuadTreePartition::walk_pick(EschQuadTreeNode *node,
             return ESCH_ERR_NONE;
 
         float coord[2];
-        for (i=0; i < 2; i++)
+        for (int i=0; i < 2; i++)
         {
             if (whichplane != i)
             {
@@ -582,7 +576,7 @@ esch_error_codes EschQuadTreePartition::walk_pick(EschQuadTreeNode *node,
 
 //ִִִ Check child quadrants (we should be able to use results from ray/box
 //ִִִ test above to throw out impossible child quadrants...)
-    for(i=0; i < 4; i++)
+    for(int i=0; i < 4; i++)
     {
         if (node->q[i])
         {
@@ -1583,7 +1577,7 @@ esch_error_codes EschQuadTreePartition::walk_traverse_dir(EschQuadTreeNode *node
         float dist = -1;
 
         int whichplane = 0;
-        for(i=0; i < 2; i++)
+        for(int i=0; i < 2; i++)
         {
             if (quad[i] != MIDDLE && dir[i] != 0)
             {
@@ -1601,7 +1595,7 @@ esch_error_codes EschQuadTreePartition::walk_traverse_dir(EschQuadTreeNode *node
             return ESCH_ERR_NONE;
 
         float coord[2];
-        for (i=0; i < 2; i++)
+        for (int i=0; i < 2; i++)
         {
             if (whichplane != i)
             {
@@ -1642,7 +1636,7 @@ esch_error_codes EschQuadTreePartition::walk_traverse_dir(EschQuadTreeNode *node
 
 //ִִִ Traverse child quadrants (we should be able to use results from ray/box
 //ִִִ test above to throw out impossible child quadrants...
-    for(i=0; i < 4; i++)
+    for(int i=0; i < 4; i++)
     {
         if (node->q[i])
         {
@@ -1809,7 +1803,8 @@ esch_error_codes EschQuadTreePartition::update(EschDrawable *drw)
                             if (newquad)
                             {
                                 //ִִִ Remove from old node
-                                for(EschPartitionList *ptr = onode->draws;
+                                EschPartitionList *ptr=NULL;
+                                for(ptr = onode->draws;
                                     ptr != 0;
                                     ptr = ptr->next)
                                 {
@@ -1871,7 +1866,8 @@ esch_error_codes EschQuadTreePartition::update(EschDrawable *drw)
                         //ִִִ Move to new node in quadtree
 
                         //ִִִ Remove from old node
-                        for(EschPartitionList *ptr = onode->draws;
+                        EschPartitionList *ptr=NULL;
+                        for(ptr = onode->draws;
                             ptr != 0;
                             ptr = ptr->next)
                         {
@@ -1912,7 +1908,8 @@ esch_error_codes EschQuadTreePartition::update(EschDrawable *drw)
             //ִִִ We must not have fit into quad-tree so we are now global
 
             //ִִִ Remove from old location in node
-            for(EschPartitionList *ptr = onode->draws;
+            EschPartitionList *ptr=NULL;
+            for(ptr = onode->draws;
                 ptr != 0;
                 ptr = ptr->next)
             {

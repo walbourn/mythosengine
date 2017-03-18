@@ -48,20 +48,20 @@ call mk %1
 if ERRORLEVEL 1 goto error
 cd ..      
 rem ÄÄÄÄ Turner 95 ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-cd turner
-call mk %1
-if ERRORLEVEL 1 goto error
-cd ..
+rem cd turner
+rem call mk %1
+rem if ERRORLEVEL 1 goto error
+rem cd ..
 rem ÄÄÄÄ Newton 95 ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 cd newton
 call mk %1
 if ERRORLEVEL 1 goto error
 cd ..
 rem ÄÄÄÄ Bach 95 ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-cd bach
-call mk %1
-if ERRORLEVEL 1 goto error
-cd ..
+rem cd bach
+rem call mk %1
+rem if ERRORLEVEL 1 goto error
+rem cd ..
 rem ÄÄÄÄ Spielberg 95 ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 cd spielbrg
 call mk %1
@@ -78,10 +78,10 @@ call mk %1
 if ERRORLEVEL 1 goto error
 cd ..
 rem ÄÄÄÄ SimGine ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-cd simgine
-call mk %1
-if ERRORLEVEL 1 goto error
-cd ..
+rem cd simgine
+rem call mk %1
+rem if ERRORLEVEL 1 goto error
+rem cd ..
 goto exit
 rem *************************************************************************
 rem *************************** Tools ***************************************
@@ -177,11 +177,11 @@ call mk
 if ERRORLEVEL 1 goto error
 cd ..\..
 rem ÄÄÄÄ Turner 95 ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-cd turner\test
-call mk clean
-call mk
-if ERRORLEVEL 1 goto error
-cd ..\..
+rem cd turner\test
+rem call mk clean
+rem call mk
+rem if ERRORLEVEL 1 goto error
+rem cd ..\..
 rem ÄÄÄÄ Newton 95 ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
 cd newton\test
 call mk clean
@@ -207,11 +207,11 @@ call mk
 if ERRORLEVEL 1 goto error
 cd ..\..
 rem ÄÄÄÄ SimGine ÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄÄ
-cd simgine\test
-call mk clean
-call mk
-if ERRORLEVEL 1 goto error
-cd ..\..
+rem cd simgine\test
+rem call mk clean
+rem call mk
+rem if ERRORLEVEL 1 goto error
+rem cd ..\..
 goto exit
 rem *************************************************************************
 rem *************************** Examples ************************************

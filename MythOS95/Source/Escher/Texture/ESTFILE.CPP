@@ -14,12 +14,6 @@
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
 //
-// This file and all associated files are subject to the terms of the
-// GNU Lesser General Public License version 2 as published by the
-// Free Software Foundation (http://www.gnu.org).   They remain the
-// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
-// See LICENSE.TXT in the distribution for a copy of this license.
-//
 // THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
 // OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
 // PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
@@ -191,7 +185,8 @@ esch_error_codes EschTexture::file_register(const char *fname)
     }
 
 //ִִִ Find open slot
-    for(ulong i=0; i < EschSysInstance->tfile_hi; i++)
+    ulong i=0;
+    for(i=0; i < EschSysInstance->tfile_hi; i++)
     {
         if (!EschSysInstance->tfile[i].iff)
             break;
@@ -300,7 +295,8 @@ esch_error_codes EschTexture::file_register(const char *fname)
     //ִִִ Read names from EMTL/EMT1 chunks
     esch_error_codes err = ESCH_ERR_NONE;
 
-    for(ulong j=0; j < tf->count;)
+    ulong j=0;
+    for(j=0; j < tf->count;)
     {
         if (iff->next() != XF_ERR_NONE)
         {

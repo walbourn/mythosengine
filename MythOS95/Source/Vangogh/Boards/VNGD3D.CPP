@@ -14,12 +14,6 @@
 //
 //컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴컴�
 //
-// This file and all associated files are subject to the terms of the
-// GNU Lesser General Public License version 2 as published by the
-// Free Software Foundation (http://www.gnu.org).   They remain the
-// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
-// See LICENSE.TXT in the distribution for a copy of this license.
-//
 // THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
 // OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
 // PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
@@ -113,13 +107,13 @@ void VngoHazeInfoD3D::setup(VngoHazeInfo *info)
         float step1 = 0.5f / float(mid_index - start_index);
         float step2 = 0.5f / float(256-mid_index);
         float accumulator=0.f;
-        for (i=start_index;i < mid_index; i++)
+        for (int i=start_index;i < mid_index; i++)
         {
             fog_lut[i] = int((1.f - accumulator)*255);
             accumulator += step1;
         }
 
-        for (i=mid_index;i < 256; i++)
+        for (int i=mid_index;i < 256; i++)
         {
             fog_lut[i] = int((1.f - accumulator)*255);
             accumulator += step2;

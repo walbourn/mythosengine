@@ -14,12 +14,6 @@
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
 //
-// This file and all associated files are subject to the terms of the
-// GNU Lesser General Public License version 2 as published by the
-// Free Software Foundation (http://www.gnu.org).   They remain the
-// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
-// See LICENSE.TXT in the distribution for a copy of this license.
-//
 // THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
 // OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
 // PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
@@ -1350,7 +1344,8 @@ void MeshPropFacePage::DoDataExchange(CDataExchange* pDX)
             m_fList.AddString("Lock Failed!");
         else
         {
-            for(ulong i=0; i < nfaces; i++)
+            ulong i=0;
+            for(i=0; i < nfaces; i++)
             {
                 char buff[128];
                 sprintf(buff,
@@ -1615,7 +1610,8 @@ void MeshPropTexturePage::DoDataExchange(CDataExchange* pDX)
         m_txtList.ResetContent();
         if (txt)
         {
-            for(ulong i=0; i < tmax; i++)
+            ulong i=0;
+            for(i=0; i < tmax; i++)
             {
                 char buff[32];
                 wsprintf(buff,"[%03d]   %16s",i,(txt[i]) ? txt[i]->name : "?");

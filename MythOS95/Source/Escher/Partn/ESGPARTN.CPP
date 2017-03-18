@@ -14,12 +14,6 @@
 //ששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששששש
 //ִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִִ
 //
-// This file and all associated files are subject to the terms of the
-// GNU Lesser General Public License version 2 as published by the
-// Free Software Foundation (http://www.gnu.org).   They remain the
-// property of the authors: Dan Higdon, Tim Little, and Chuck Walbourn.
-// See LICENSE.TXT in the distribution for a copy of this license.
-//
 // THE AUTHORS MAKE NO WARRANTIES, EXPRESS OR IMPLIED, AS TO THE CORRECTNESS
 // OF THIS CODE OR ANY DERIVATIVE WORKS WHICH INCORPORATE IT.  THE AUTHORS
 // PROVIDE THE CODE ON AN "AS-IS" BASIS AND EXPLICITLY DISCLAIMS ANY
@@ -834,7 +828,8 @@ void EschGridPartition::remove(EschDrawable *drw)
 
     for(ulong i=0; i < nregions; i++)
     {
-        for(EschPartitionList *ptr=regions[i]; ptr != 0; ptr = ptr->next)
+        EschPartitionList *ptr=NULL;
+        for(ptr=regions[i]; ptr != 0; ptr = ptr->next)
         {
             if (ptr->item == drw)
             {
@@ -1414,7 +1409,8 @@ esch_error_codes EschGridPartition::update(EschDrawable *drw)
 
         //ִִִ First check 'new' region to see if it already in correct place
         assert(n < nregions);
-        for(EschPartitionList *optr = regions[n]; optr != 0; optr = optr->next)
+        EschPartitionList *optr=NULL;
+        for(optr = regions[n]; optr != 0; optr = optr->next)
         {
             if (optr->item == drw)
                 return ESCH_ERR_NONE;
@@ -1561,7 +1557,8 @@ esch_error_codes EschGridPartition::init(ushort w, ushort d, float s,
     {
         long msk = 0x1;
 
-        for(ulong i=0; i < 16; i++, msk <<= 1)
+        ulong i=0;
+        for(i=0; i < 16; i++, msk <<= 1)
         {
             if (msk == long(s))
             {
@@ -1636,7 +1633,8 @@ void EschGridPartition::draw_grid(dword clr) const
         for(long w = 0; w < width; w++, x += size)
         {
             //ִִִ For each of the eight points of the cell
-            for(int i=0; i < 8; i++)
+            int i=0;
+            for(i=0; i < 8; i++)
             {
                 switch (i)
                 {
